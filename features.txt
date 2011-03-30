@@ -1,0 +1,37 @@
+Serveur en C++ utilisant Qt
+Entièrement basé sur des plugins
+Une API complète, étendable par des extensions
+Base de données SQLite
+Transcodage de vidéos et de musiques à la volée (ffmpeg)
+Reconnaissance de fichiers (ffmpeg, imagemagick, libtag, ...)
+Multiplateforme (Windows, Linux, Mac)
+Multiprotocoles
+Plusieurs protocoles sur un même port
+Connexion sécurisée (SSL/TSL)
+Gestion des versions des fichiers (Git)
+Client web intégré (en plugin, codé en C++)
+Bindings vers d'autres languages pour les plugins
+Clients multilingue
+Système de logs avancé
+Connections TCP/UDP transparente
+Gestion du réseau asynchrone via une threadpool et une machine à états
+Possibilité de répartir la charge réseau sur plusieurs serveurs
+Accès à ses fichier de n'importe ou via n'importe quel terminal connecté à internet
+Mode hors ligne pour les clients
+Streaming des fichiers (vidéos, musique, images, documents)
+Conversion des fichiers dans des formats lisible par les terminaux cibles
+Fonctionnement en cycle privé (pas d'intervension de serveur tiers)
+Réseau social privé
+Partage de fichiers
+Echanges avec d'autres serveurs
+Gestion complète des droits, des utilisateurs, des groupes, et de leurs limites
+Stastiques détaillées
+Possibilité d'avoir un serveur dans le "cloud" (pour sauvegardes ou en remplacement du serveur à domicile)
+Clients et serveur gratuit, services supplémentaire payant (cloud, pond de connexion)
+Chat, VoIP, et vidéo conférence
+Client P2P
+Téléchargement des fichiers
+Envoi de fichiers
+Administration à distance
+notifications Push
+Simple, rapide, sécurisé, fléxible, ergonimique

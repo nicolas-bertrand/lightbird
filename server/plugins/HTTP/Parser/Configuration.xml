@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <installed>true</installed>
+  <name>Parser HTTP</name>
+  <brief>The HTTP parser.</brief>
+  <description>Converts the requests into a workable object, and convert the response objects into a string that can be sent through the network. It can be used to parse SiTP and HTTP requests.</description>
+  <autor>Streamit team</autor>
+  <site>http://www.streamit.fr</site>
+  <email>team@streamit.fr</email>
+  <version>1.0</version>
+  <licence>LGPL</licence>
+  <contexts>
+    <context>
+      <transport>TCP</transport>
+      <protocol>SiTP</protocol>
+      <protocol>HTTP</protocol>
+      <protocol>WebClient</protocol>
+    </context>
+  </contexts>
+  <!-- The maximum size of the header. After that, an error is sent to the client, and it is disconnected. -->
+  <maxHeaderSize>1000000</maxHeaderSize>
+  <!-- The maximum size send at a time to the client. -->
+  <maxPacketSize>10000000</maxPacketSize>
+  <!-- The maximum content size to store in the memory. Above that, it is stored in a temporary file. -->
+  <maxContentInMemory>1000000</maxContentInMemory>
+  <!-- The name of the methods that can have a content in the request. -->
+  <methodContent>
+    <PUT />
+    <POST />
+  </methodContent>
+</configuration>

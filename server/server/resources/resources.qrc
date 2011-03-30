@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="configuration">configurations/Configuration.xml</file>
+        <file alias="splashScreen">images/SplashScreen.png</file>
+        <file alias="database">databases/database.sqlite</file>
+        <file alias="queries">databases/queries.xml</file>
+    </qresource>
+    <qresource prefix="/languages">
+        <file alias="fr">languages/fr.qm</file>
+        <file alias="en">languages/en.qm</file>
+    </qresource>
+</RCC>

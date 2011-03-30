@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <installed>true</installed>
+  <name>Get</name>
+  <brief>Implements the GET HTTP method.</brief>
+  <description>Allows clients to download files from the server, and get data of its files.</description>
+  <autor>Streamit team</autor>
+  <site>http://www.streamit.fr</site>
+  <email>team@streamit.fr</email>
+  <version>1.0</version>
+  <licence>LGPL</licence>
+  <contexts>
+    <context>
+      <transport>TCP</transport>
+      <protocol>HTTP</protocol>
+      <method>GET</method>
+    </context>
+  </contexts>
+  <preview>
+    <!-- True if the cache is enabled -->
+    <cacheEnabled>true</cacheEnabled>
+    <!-- The path to the cache directory, where are stored the previews generated (from the plugin directory).
+       By default, they are stored in the "cache" directory of the plugin. -->
+    <cachePath>../../../cache</cachePath>
+    <!-- The maximum size of the cache directory in Mo. After that size, the oldest files are deleted.
+       If it is not defined, there is no cache size limit. -->
+    <cacheMaxSize>1000</cacheMaxSize>
+  </preview>
+</configuration>

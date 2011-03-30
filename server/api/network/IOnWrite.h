@@ -1,0 +1,25 @@
+#ifndef IONWRITE_H
+# define IONWRITE_H
+
+# include "IClient.h"
+
+namespace Streamit
+{
+    /// @brief Inheriting this interface allows to handle the response
+    /// before it is sent. Since a response can be sent in multiple parts,
+    /// IOnWrite is called before send each part.
+    class IOnWrite
+    {
+    public:
+        virtual ~IOnWrite() {}
+
+        /// @brief Called before sending the response.
+        /// @param client : The client to whom the response will be sent.
+        /// @param data : The data that will be sent.
+        virtual void    onWrite(Streamit::IClient &client, QByteArray &data) = 0;
+    };
+}
+
+Q_DECLARE_INTERFACE (Streamit::IOnWrite, "fr.streamit.IOnWrite");
+
+#endif // IONWRITE_H

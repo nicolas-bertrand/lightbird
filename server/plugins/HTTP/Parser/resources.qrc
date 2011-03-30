@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/HTTP/Parser">
+        <file alias="configuration">Configuration.xml</file>
+    </qresource>
+</RCC>
