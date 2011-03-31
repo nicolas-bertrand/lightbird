@@ -13,16 +13,14 @@ namespace Streamit
     public:
         virtual ~IDoSerializeHeader() {}
 
-        /**
-         * @brief This method serialize the header of the response.
-         * @param client : The client to whom the response will be send. The header of
-         * the response is stored in IResponse, that can be get with IClient::getResponse().
-         * @param data : The serialized header.
-         */
+        /// @brief This method serialize the header of the response.
+        /// @param client : The client to whom the response will be send. The header of
+        /// the response is stored in IResponse, that can be get with IClient::getResponse().
+        /// @param data : The serialized header.
         virtual void    doSerializeHeader(Streamit::IClient &client, QByteArray &data) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IDoSerializeHeader, "fr.streamit.IDoSerializeHeader");
+Q_DECLARE_INTERFACE(Streamit::IDoSerializeHeader, "cc.lightbird.IDoSerializeHeader");
 
 #endif // IDOSERIALIZEHEADER_H

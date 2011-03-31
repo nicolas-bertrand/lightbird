@@ -9,15 +9,13 @@
 
 # include "INetwork.h"
 
-/**
- * @brief Manage the network.
- *
- * This class is thread safe. All the publics methods of this class emit
- * a signal that allows to execute their operations in the main thread
- * of the server, not in the thread from which they are called.
- * Users can use the Future returned to wait until the operation is done,
- * and get its result.
- */
+/// @brief Manage the network.
+///
+/// This class is thread safe. All the publics methods of this class emit
+/// a signal that allows to execute their operations in the main thread
+/// of the server, not in the thread from which they are called.
+/// Users can use the Future returned to wait until the operation is done,
+/// and get its result.
 class Network : public QObject
 {
     Q_OBJECT
@@ -26,43 +24,35 @@ public:
     ///< Returns the instance of the network.
     static Network  *instance(QObject *parent = 0);
 
-    /**
-     * @brief Created a new port from which the server will listen.
-     * @param port : The port to listen.
-     * @param protocol : The protocol used by the server to communicate
-     * with the clients connected to this port.
-     * @param transport : The transport protocol used to route the data through
-     * the network via this port.
-     * @param maxClients : The maximum number of clients simultaneously connected.
-     * When the number of client reach this limit, new connections are waiting
-     * that a connected client disconnect.
-     * @return The future result of the action, e.g true if the port has been created.
-     */
+    /// @brief Created a new port from which the server will listen.
+    /// @param port : The port to listen.
+    /// @param protocol : The protocol used by the server to communicate
+    /// with the clients connected to this port.
+    /// @param transport : The transport protocol used to route the data through
+    /// the network via this port.
+    /// @param maxClients : The maximum number of clients simultaneously connected.
+    /// When the number of client reach this limit, new connections are waiting
+    /// that a connected client disconnect.
+    /// @return The future result of the action, e.g true if the port has been created.
     Future<bool>    addPort(unsigned short port, const QStringList &protocol = QStringList(),
                             Streamit::INetwork::Transports transport = Streamit::INetwork::TCP,
                             unsigned int maxClients = ~0);
-    /**
-     * @brief Remove a port. This may take some time since all the operations
-     * made on the removed port have to be finished and stopped.
-     * @param port : The port to remove.
-     * @return The future result of the action, e.g false if the port is not valid.
-     */
+    /// @brief Remove a port. This may take some time since all the operations
+    /// made on the removed port have to be finished and stopped.
+    /// @param port : The port to remove.
+    /// @return The future result of the action, e.g false if the port is not valid.
     Future<bool>    removePort(unsigned short port);
-    /**
-     * @brief Allows to get informations on an opened port.
-     * @param port : The port to get.
-     * @param protocol : The name of the protocol used by the port.
-     * @param transport : The transport protocol of the port.
-     * @param maxClients : The maximum number of clients simultaneously connected,
-     * allowed by the port.
-     * @return True if the port exists.
-     */
+    /// @brief Allows to get informations on an opened port.
+    /// @param port : The port to get.
+    /// @param protocol : The name of the protocol used by the port.
+    /// @param transport : The transport protocol of the port.
+    /// @param maxClients : The maximum number of clients simultaneously connected,
+    /// allowed by the port.
+    /// @return True if the port exists.
     bool            getPort(unsigned short port, QStringList &protocols, Streamit::INetwork::Transports &transport, unsigned int &maxClients);
-    /**
-     * @brief Returns the list of the open ports. Users can use getPort() to get
-     * more detailed informations about a specific port.
-     * @return The list of the opened ports on the server.
-     */
+    /// @brief Returns the list of the open ports. Users can use getPort() to get
+    /// more detailed informations about a specific port.
+    /// @return The list of the opened ports on the server.
     QList<unsigned short>   getPorts();
     /// @brief Allows to get the informations of a client.
     bool            getClient(const QString &id, Streamit::INetwork::Client &client);

@@ -10,16 +10,15 @@ namespace Streamit
     {
     public:
         virtual ~IOnExecution() {}
-        /**
-         * @brief Allows to consult the request and the response.
-         * @param client : The client that made the request.
-         * @return If at least one plugin called via this interface
-         * returns false, no response will be sent to the client.
-         */
+
+        /// @brief Allows to consult the request and the response.
+        /// @param client : The client that made the request.
+        /// @return If at least one plugin called via this interface or IDoExecution
+        /// returns false, no response will be sent to the client.
         virtual bool    onExecution(Streamit::IClient &client) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IOnExecution, "fr.streamit.IOnExecution");
+Q_DECLARE_INTERFACE(Streamit::IOnExecution, "cc.lightbird.IOnExecution");
 
 #endif // IONEXECUTION_H

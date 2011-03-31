@@ -7,7 +7,7 @@ namespace Streamit
 {
     /// @brief Inheriting this interface allows to handle the response
     /// before it is sent. Since a response can be sent in multiple parts,
-    /// IOnWrite is called before send each part.
+    /// IOnWrite is called before sending each part.
     class IOnWrite
     {
     public:
@@ -20,6 +20,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IOnWrite, "fr.streamit.IOnWrite");
+Q_DECLARE_INTERFACE(Streamit::IOnWrite, "cc.lightbird.IOnWrite");
 
 #endif // IONWRITE_H

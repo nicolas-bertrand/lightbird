@@ -23,6 +23,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IResources, "fr.streamit.IResources");
+Q_DECLARE_INTERFACE(Streamit::IResources, "cc.lightbird.IResources");
 
 #endif // IRESOURCES_H

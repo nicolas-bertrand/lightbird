@@ -38,6 +38,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableLimits, "fr.streamit.ITableLimits");
+Q_DECLARE_INTERFACE(Streamit::ITableLimits, "cc.lightbird.ITableLimits");
 
 #endif // ITABLELIMITS_H

@@ -59,6 +59,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableCollections, "fr.streamit.ITableCollections");
+Q_DECLARE_INTERFACE(Streamit::ITableCollections, "cc.lightbird.ITableCollections");
 
 #endif // ITABLECOLLECTIONS_H

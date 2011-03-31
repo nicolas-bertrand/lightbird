@@ -75,6 +75,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableEvents, "fr.streamit.ITableEvents");
+Q_DECLARE_INTERFACE(Streamit::ITableEvents, "cc.lightbird.ITableEvents");
 
 #endif // ITABLEEVENTS_H

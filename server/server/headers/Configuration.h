@@ -10,10 +10,8 @@
 
 # include "IConfiguration.h"
 
-/**
- * @brief Server implementation of the API's IConfiguration.
- * Manage an XML configuration file. This class is thread safe.
- */
+/// @brief Server implementation of the API's IConfiguration.
+/// Manage an XML configuration file. This class is thread safe.
 class Configuration : public QObject,
                       public Streamit::IConfiguration
 {
@@ -21,13 +19,11 @@ class Configuration : public QObject,
     Q_INTERFACES(Streamit::IConfiguration)
 
 public:
-    /**
-     * @param configurationPath : The path to the configuration file. If the file doesn't exists,
-     * it will be created using the file pointed by alternativePath (usualy a resource).
-     * @param alternativePath : The content of this file will be used to create the configuration
-     * if it doesn't exists. If this parameter is empty and configurationPath doesn't exists,
-     * Configuration will not try to creates the file.
-     */
+    /// @param configurationPath : The path to the configuration file. If the file doesn't exists,
+    /// it will be created using the file pointed by alternativePath (usualy a resource).
+    /// @param alternativePath : The content of this file will be used to create the configuration
+    /// if it doesn't exists. If this parameter is empty and configurationPath doesn't exists,
+    /// Configuration will not try to creates the file.
     Configuration(const QString &configurationPath, const QString &alternativePath = "", QObject *parent = 0);
     Configuration();
     ~Configuration();
@@ -60,11 +56,9 @@ public:
     bool                    unitTests();
 
 private:
-    /**
-     * @brief Load the xml configuration file.
-     * @param path : The path to the file.
-     * @return If the file has been correctly loaded.
-     */
+    /// @brief Load the xml configuration file.
+    /// @param path : The path to the file.
+    /// @return If the file has been correctly loaded.
     bool                    _load(const QString &configurationPath, const QString &alternativePath);
 
     QReadWriteLock          domLock;    ///< Make the configuration thread safe.

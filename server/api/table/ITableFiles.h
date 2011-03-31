@@ -96,6 +96,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableFiles, "fr.streamit.ITableFiles");
+Q_DECLARE_INTERFACE(Streamit::ITableFiles, "cc.lightbird.ITableFiles");
 
 #endif // ITABLEFILES_H

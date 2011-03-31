@@ -23,6 +23,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableAccessors, "fr.streamit.ITableAccessors");
+Q_DECLARE_INTERFACE(Streamit::ITableAccessors, "cc.lightbird.ITableAccessors");
 
 #endif // ITABLEACCESSORS_H

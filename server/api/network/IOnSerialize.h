@@ -23,17 +23,15 @@ namespace Streamit
             IDoSerializeFooter      ///< The footer is going to be serialized (called only if IDoSerializeFooter will be called)
         };
 
-        /**
-         * @brief Method called to handle the request before IDoSerialize Header,
-         * Content, or Footer.
-         * @param client : The client that has sent the request.
-         * @param type : Used to know which of the IDoSerialize interfaces is going
-         * to be called.
-         */
+        /// @brief Method called to handle the request before IDoSerialize Header,
+        /// Content, or Footer.
+        /// @param client : The client that has sent the request.
+        /// @param type : Used to know which of the IDoSerialize interfaces is going
+        /// to be called.
         virtual void    onSerialize(Streamit::IClient &client, Streamit::IOnSerialize::Serialize type) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IOnSerialize, "fr.streamit.IOnSerialize");
+Q_DECLARE_INTERFACE(Streamit::IOnSerialize, "cc.lightbird.IOnSerialize");
 
 #endif // IONSERIALIZE_H

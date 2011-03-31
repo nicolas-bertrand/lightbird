@@ -11,15 +11,16 @@ namespace Streamit
     {
     public:
         virtual ~IDoExecution() {}
-        /**
-         * @brief Allows to execute a request and generate its response.
-         * @param client : The client that made the request.
-         * @return True if a response is waited by the client, false otherwise.
-         */
+
+        /// @brief Allows to execute a request and generate its response.
+        /// @param client : The client that made the request.
+        /// @return True if a response is waited by the client.
+        /// If this interface or at least one plugin called via IOnExecution
+        /// returns false, no response will be sent to the client.
         virtual bool    doExecution(Streamit::IClient &client) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IDoExecution, "fr.streamit.IDoExecution");
+Q_DECLARE_INTERFACE(Streamit::IDoExecution, "cc.lightbird.IDoExecution");
 
 #endif // IDOEXECUTION_H

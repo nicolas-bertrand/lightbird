@@ -33,6 +33,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableTags, "fr.streamit.ITableTags");
+Q_DECLARE_INTERFACE(Streamit::ITableTags, "cc.lightbird.ITableTags");
 
 #endif // ITABLETAGS_H

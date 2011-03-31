@@ -40,6 +40,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableGroups, "fr.streamit.ITableGroups");
+Q_DECLARE_INTERFACE(Streamit::ITableGroups, "cc.lightbird.ITableGroups");
 
 #endif // ITABLEGROUPS_H

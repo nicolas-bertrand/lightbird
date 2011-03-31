@@ -5,7 +5,7 @@
 
 namespace Streamit
 {
-    /// @brief This class represents an accessor, which can be
+    /// @brief This class represents an object, which can be
     /// a file, a directory, or a collection.
     class ITableObjects : virtual public Streamit::ITable
     {
@@ -32,6 +32,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableObjects, "fr.streamit.ITableObjects");
+Q_DECLARE_INTERFACE(Streamit::ITableObjects, "cc.lightbird.ITableObjects");
 
 #endif // ITABLEOBJECTS_H

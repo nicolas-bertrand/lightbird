@@ -24,17 +24,15 @@ namespace Streamit
             IDoUnserialize          ///< The request has been completely unserialized (called only if one of the IDoUnserialize* has been called)
         };
 
-        /**
-         * @brief Method called to handle the request after IDoUnserialize Header,
-         * Content, or Footer.
-         * @param client : The client that has sent the request.
-         * @param type : Used to know which of the onUnserialize interfaces that has
-         * been called before.
-         */
+        /// @brief Method called to handle the request after IDoUnserialize Header,
+        /// Content, or Footer.
+        /// @param client : The client that has sent the request.
+        /// @param type : Used to know which of the onUnserialize interfaces that has
+        /// been called before.
         virtual void    onUnserialize(Streamit::IClient &client, Streamit::IOnUnserialize::Unserialize type) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IOnUnserialize, "fr.streamit.IOnUnserialize");
+Q_DECLARE_INTERFACE(Streamit::IOnUnserialize, "cc.lightbird.IOnUnserialize");
 
 #endif // IONUNSERIALIZE_H

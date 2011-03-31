@@ -99,20 +99,20 @@ void    Engine::_onRead(QByteArray &data)
 void        Engine::_onProtocol()
 {
     QString protocol;
-    bool    error;
+    bool    unknow;
     bool    result = false;
 
     QMap<QString, Streamit::IOnProtocol *> plugins = Plugins::instance()->getInstances<Streamit::IOnProtocol>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort());
     QMapIterator<QString, Streamit::IOnProtocol *> it(plugins);
     if (!it.hasNext())
-        Log::trace("No plugins implempents IOnProtocol for this context", Properties("id", this->client->getId()), "Engine", "_onProtocol");
+        Log::trace("No plugin implempents IOnProtocol for this context", Properties("id", this->client->getId()), "Engine", "_onProtocol");
     while (it.hasNext() && !result)
         if (!this->protocolUnknow.contains(it.next().key()))
         {
             protocol.clear();
-            error = false;
+            unknow = false;
             Log::trace("Calling IOnProtocol::onProtocol()", Properties("id", this->client->getId()).add("plugin", it.key()), "Engine", "_onProtocol");
-            result = it.value()->onProtocol(*this->client, this->data, protocol, error);
+            result = it.value()->onProtocol(*this->client, this->data, protocol, unknow);
             Plugins::instance()->release(it.key());
             // The protocol of the request has been found
             if (result)
@@ -128,11 +128,11 @@ void        Engine::_onProtocol()
                 else
                 {
                     Log::warning("Invalid protocol", Properties("id", this->client->getId()).add("plugin", it.key()).add("protocol", protocol), "Engine", "_onProtocol");
-                    error = true;
+                    unknow = true;
                 }
             }
             // The plugin doesn't know the protocol
-            if (error)
+            if (unknow)
                 this->protocolUnknow << it.key();
         }
         else
@@ -192,7 +192,7 @@ void    Engine::_doUnserializeHeader()
     // If no plugin matches, we go to the next step
     else
     {
-        Log::trace("No plugins implempents IDoUnserializeHeader for this context", Properties("id", this->client->getId()), "Engine", "_doUnserializeHeader");
+        Log::trace("No plugin implempents IDoUnserializeHeader for this context", Properties("id", this->client->getId()), "Engine", "_doUnserializeHeader");
         this->state = Engine::CONTENT;
     }
     // Go to the next step
@@ -240,7 +240,7 @@ void    Engine::_doUnserializeContent()
     // If no plugin matches, we go to the next step
     else
     {
-        Log::trace("No plugins implempents IDoUnserializeContent for this context", Properties("id", this->client->getId()), "Engine", "_doUnserializeContent");
+        Log::trace("No plugin implempents IDoUnserializeContent for this context", Properties("id", this->client->getId()), "Engine", "_doUnserializeContent");
         this->state = Engine::FOOTER;
     }
     // Go to the next step
@@ -288,7 +288,7 @@ void    Engine::_doUnserializeFooter()
     // If no plugin matches, we go to the next step
     else
     {
-        Log::trace("No plugins implempents IDoUnserializeFooter for this context", Properties("id", this->client->getId()), "Engine", "_doUnserializeFooter");
+        Log::trace("No plugin implempents IDoUnserializeFooter for this context", Properties("id", this->client->getId()), "Engine", "_doUnserializeFooter");
         this->state = Engine::HEADER;
     }
     // If the request has been unserialized
@@ -349,7 +349,7 @@ void        Engine::_doExecution()
         Plugins::instance()->release(instance.first);
     }
     else
-        Log::trace("No plugins implempents IDoExecution for this context", Properties("id", this->client->getId()), "Engine", "_doExecution");
+        Log::trace("No plugin implempents IDoExecution for this context", Properties("id", this->client->getId()), "Engine", "_doExecution");
     emit this->onExecution();
 }
 
@@ -413,7 +413,7 @@ void    Engine::_doSerializeHeader()
         }
     }
     else
-        Log::trace("No plugins implempents IDoSerializeHeader for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeHeader");
+        Log::trace("No plugin implempents IDoSerializeHeader for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeHeader");
     emit this->doSerializeContent();
 }
 
@@ -441,7 +441,7 @@ void    Engine::_doSerializeContent()
             result = true;
     }
     else
-        Log::trace("No plugins implempents IDoSerializeContent for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeContent");
+        Log::trace("No plugin implempents IDoSerializeContent for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeContent");
     // The content has been serialized
     if (result)
         emit this->doSerializeFooter();
@@ -469,7 +469,7 @@ void    Engine::_doSerializeFooter()
         }
     }
     else
-        Log::trace("No plugins implempents IDoSerializeFooter for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeFooter");
+        Log::trace("No plugin implempents IDoSerializeFooter for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeFooter");
     if (this->done)
         this->_onWrote();
     else

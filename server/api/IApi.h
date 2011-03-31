@@ -61,6 +61,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IApi, "fr.streamit.IApi");
+Q_DECLARE_INTERFACE(Streamit::IApi, "cc.lightbird.IApi");
 
 #endif // IAPI_H

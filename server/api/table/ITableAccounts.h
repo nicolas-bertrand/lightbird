@@ -104,6 +104,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableAccounts, "fr.streamit.ITableAccounts");
+Q_DECLARE_INTERFACE(Streamit::ITableAccounts, "cc.lightbird.ITableAccounts");
 
 #endif // ITABLEACCOUNTS_H

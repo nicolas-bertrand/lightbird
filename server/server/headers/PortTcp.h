@@ -5,14 +5,12 @@
 
 # include "Port.h"
 
-/**
- * @brief Manage a TCP port of the network. It is a specialization
- * of the abstract class Port, which don't care if the port is UDP or TCP.
- * The TCP implementation use the QTcpServer to detect new connection,
- * and accept them. One QTcpSocket is created by connection, and is attached
- * to a Client. The socket is destroyed with the Client.
- * @see Port
- */
+/// @brief Manage a TCP port of the network. It is a specialization
+/// of the abstract class Port, which don't care if the port is UDP or TCP.
+/// The TCP implementation use the QTcpServer to detect new connection,
+/// and accept them. One QTcpSocket is created by connection, and is attached
+/// to a Client. The socket is destroyed with the Client.
+/// @see Port
 class PortTcp : public Port
 {
     Q_OBJECT

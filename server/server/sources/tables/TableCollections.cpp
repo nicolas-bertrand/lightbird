@@ -197,7 +197,7 @@ bool                    TableCollections::unitTests()
     TablePermissions    p;
 
     Log::instance()->debug("Running unit tests...", "TableCollections", "unitTests");
-    query.prepare("DELETE FROM collections WHERE name IN('videos', 'images', 'egypte', 'epitech')");
+    query.prepare("DELETE FROM collections WHERE name IN('videos', 'images', 'egypte', 'spiders')");
     Database::instance()->query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
     Database::instance()->query(query);
@@ -224,7 +224,7 @@ bool                    TableCollections::unitTests()
         ASSERT(c2.add("bahrain", c1.getId()));
         ASSERT(c2.getIdCollection() == c1.getId());
         ASSERT(c2.add("france", c1.getId()));
-        ASSERT(c2.add("epitech", c2.getId()));
+        ASSERT(c2.add("spiders", c2.getId()));
         ASSERT(c2.add("egypte", c2.getIdCollection()));
         ASSERT(c2.getVirtualPath() == "images/france/egypte");
         ASSERT(c2.getVirtualPath(true, true) == "/images/france/egypte/");

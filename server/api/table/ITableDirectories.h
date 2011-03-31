@@ -59,6 +59,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITableDirectories, "fr.streamit.ITableDirectories");
+Q_DECLARE_INTERFACE(Streamit::ITableDirectories, "cc.lightbird.ITableDirectories");
 
 #endif // ITABLEDIRECTORIES_H

@@ -16,11 +16,9 @@ class Api : public QObject,
             public Streamit::IApi
 {
 public:
-    /**
-     * @param id : The id of the plugin.
-     * @param configuration : Its configuration.
-     * @param timers : If the timers has to be loaded.
-     */
+    /// @param id : The id of the plugin.
+    /// @param configuration : Its configuration.
+    /// @param timers : If the timers has to be loaded.
     Api(const QString &id, Configuration *configuration, bool timers = false, QObject *parent = 0);
     ~Api();
 

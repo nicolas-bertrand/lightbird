@@ -43,68 +43,55 @@ namespace Streamit
             QMap<QString, QVariant> informations;       ///< Information on the client.
         };
 
-        /**
-         * @brief Open a new port on the server. Since the port is opened in
-         * a separate thread, users should use the IFuture returned to be aware
-         * when the port is actualy listening.
-         * @param port : The port to open.
-         * @param protocol : The name of the protocol used to communicate with
-         * the clients that connect to this port.
-         * @param transport : The transport protocol used by this port.
-         * @param maxClients : The maximum number of clients simultaneously
-         * connected to this port. When the number of client reach this limit, new
-         * connections are waiting that a connected client disconnect.
-         * @return The future result of the action, e.g true if the port has been created.
-         */
+        /// @brief Open a new port on the server. Since the port is opened in
+        /// a separate thread, users should use the IFuture returned to be aware
+        /// when the port is actualy listening.
+        /// @param port : The port to open.
+        /// @param protocol : The name of the protocol used to communicate with
+        /// the clients that connect to this port.
+        /// @param transport : The transport protocol used by this port.
+        /// @param maxClients : The maximum number of clients simultaneously
+        /// connected to this port. When the number of client reach this limit, new
+        /// connections are waiting that a connected client disconnect.
+        /// @return The future result of the action, e.g true if the port has been created.
         virtual QSharedPointer<Streamit::IFuture<bool> >    addPort(unsigned short port, const QStringList &protocols = QStringList(),
                                                             Streamit::INetwork::Transports transport = Streamit::INetwork::TCP,
                                                             unsigned int maxClients = ~0) = 0;
-        /**
-         * @brief Removes a port. This may take some time since all the operations
-         * made on the removed port have to be finished.
-         * @param port : The port to remove.
-         * @return The future result of the action, e.g false if the port is not valid.
-         */
+        /// @brief Removes a port. This may take some time since all the operations
+        /// made on the removed port have to be finished.
+        /// @param port : The port to remove.
+        /// @return The future result of the action, e.g false if the port is not valid.
         virtual QSharedPointer<Streamit::IFuture<bool> >    removePort(unsigned short port) = 0;
-        /**
-         * @brief Allows to get informations on an opened port.
-         * @param port : The port to get.
-         * @param protocols : The name of the protocols used by the port.
-         * @param transport : The transport protocol of the port.
-         * @param maxClients : The maximum number of clients simultaneously connected,
-         * allowed by the port.
-         * @return True if the port exists.
-         */
+        /// @brief Allows to get informations on an opened port.
+        /// @param port : The port to get.
+        /// @param protocols : The name of the protocols used by the port.
+        /// @param transport : The transport protocol of the port.
+        /// @param maxClients : The maximum number of clients simultaneously connected,
+        /// allowed by the port.
+        /// @return True if the port exists.
         virtual bool    getPort(unsigned short port, QStringList &protocols, Streamit::INetwork::Transports &transport,
                                 unsigned int &maxClients) = 0;
-        /**
-         * @brief Returns the list of the open ports. Users can use getPort() to get
-         * more detailed informations about a specific port.
-         * @return The list of the opened ports on the server.
-         */
+        /// @brief Returns the list of the open ports. Users can use getPort() to get
+        /// more detailed informations about a specific port.
+        /// @return The list of the opened ports on the server.
         virtual QList<unsigned short>   getPorts() = 0;
-        /**
-         * @brief Returns the informations of a client.
-         * @param id : The id of the client.
-         * @param client : The informations of the client are stored in this structure.
-         * @return True if the client exists.
-         */
+        /// @brief Returns the informations of a client.
+        /// @param id : The id of the client.
+        /// @param client : The informations of the client are stored in this structure.
+        /// @return True if the client exists.
+        ///
         virtual bool    getClient(const QString &id, Streamit::INetwork::Client &client) = 0;
-        /**
-         * @brief Allows to get the id of the connected clients for a particular port.
-         * @param port : The port of the clients.
-         * @return The list of the id of the clients connected to the port.
-         */
+        /// @brief Allows to get the id of the connected clients for a particular port.
+        /// @param port : The port of the clients.
+        /// @return The list of the id of the clients connected to the port.
         virtual QStringList getClients(unsigned short port) = 0;
-        /**
-         * @brief Disconnects the client identified by the id in parameter.
-         * If a request is executing for this client, it is interrupted.
-         * The interface IOnDisconnect is called when the client has been
-         * disconnected.
-         * @param id : The id of the client to disconnect. Nothing appends
-         * if it is already disconnected.
-         * @return True if the client exists.
-         */
+        /// @brief Disconnects the client identified by the id in parameter.
+        /// If a request is executing for this client, it is interrupted.
+        /// The interface IOnDisconnect is called when the client has been
+        /// disconnected.
+        /// @param id : The id of the client to disconnect. Nothing appends
+        /// if it is already disconnected.
+        /// @return True if the client exists.
         virtual QSharedPointer<Streamit::IFuture<bool> >    disconnect(const QString &id) = 0;
     };
 }

@@ -8,10 +8,8 @@
 
 # include "IDatabase.h"
 
-/**
- * @brief Manage all the operations made on the database, by the
- * server and its plugins.
- */
+/// @brief Manage all the operations made on the database, by the
+/// server and its plugins.
 class Database : public QObject
 {
     Q_OBJECT
@@ -40,25 +38,19 @@ private:
     Database(const Database &);
     Database        *operator=(const Database &);
 
-    /**
-     * @brief Get the name of the database, and manage the database file if their is one (for example with SQLite).
-     * @param name : The name of the database, which can be the path to its file (with SQLite).
-     * @return If an error occured while managing the database file
-     */
+    /// @brief Get the name of the database, and manage the database file if their is one (for example with SQLite).
+    /// @param name : The name of the database, which can be the path to its file (with SQLite).
+    /// @return If an error occured while managing the database file
     bool            _name(QString &name);
-    /**
-     * @brief Etablished the connection between the server and the database.
-     * @return True if the connection to the database success
-     */
+    /// @brief Etablished the connection between the server and the database.
+    /// @return True if the connection to the database success
     bool            _connection();
     /// @brief Display the updates. For debug purpose only.
     void            _displayUpdates(Streamit::IDatabase::Updates &updates);
-    /**
-     * @brief Load a query file.
-     * @param id : The id of the plugin for which the quety will be loaded. If empty,
-     * the queries of the server are loaded.
-     * @return True if the file is loaded.
-     */
+    /// @brief Load a query file.
+    /// @param id : The id of the plugin for which the quety will be loaded. If empty,
+    /// the queries of the server are loaded.
+    /// @return True if the file is loaded.
     bool            _loadQueries(const QString &id);
     /// @brief Ensure that there is no NULL values in the bound values, and replace them by
     /// an empty string.

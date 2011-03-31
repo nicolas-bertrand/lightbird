@@ -10,12 +10,9 @@
 
 namespace Streamit
 {
-    /**
-     * @brief Represents a request. Contains informations about the it,
-     * whose depends on the protocol that transport it.
-     * Despite Request is protocol independant, its structure is designed for SiTP,
-     * which is itself based on HTTP.
-     */
+    /// @brief Represents a request. Contains informations about it,
+    /// whose depends on the protocol that transport it.
+    /// Despite Request is protocol independant, its structure is inspired of HTTP.
     class IRequest
     {
     public:
@@ -41,11 +38,9 @@ namespace Streamit
         virtual void            setType(const QString &type) = 0;
         /// @brief This method is used to store additionnals informations on the response
         virtual QVariantList    &getInformations() = 0;
-        /**
-         * @brief A header is a set of meta-information related to the request.
-         * This method allows one to access to the header and modified it.
-         * @return The header of the request.
-         */
+        /// @brief A header is a set of meta-information related to the request.
+        /// This method allows one to access to the header and modified it.
+        /// @return The header of the request.
         virtual QMap<QString, QString>  &getHeader() = 0;
         /// @brief The content of the request.
         virtual Streamit::IContent  &getContent() = 0;

@@ -17,25 +17,21 @@
 
 class Engine;
 
-/**
- * @brief Represents a connected client.
- * All its requests are processed from a thread based on this class.
- */
+/// @brief Represents a connected client.
+/// All its requests are processed from a thread based on this class.
 class Client : public QThread,
                public Streamit::IClient
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Stores the socket informations, and creates the client's thread.
-     * @param socket : The socket from which the client is connected.
-     * @param port : The local port from which the client is connected.
-     * @param socketDescriptor : The descriptor of the socket used by the client.
-     * @param peerAddress : The address of the client.
-     * @param peerPort : The port from which the client is connected in his host.
-     * @param peerName : The name of the client's host. May be empty.
-     */
+    /// @brief Stores the socket informations, and creates the client's thread.
+    /// @param socket : The socket from which the client is connected.
+    /// @param port : The local port from which the client is connected.
+    /// @param socketDescriptor : The descriptor of the socket used by the client.
+    /// @param peerAddress : The address of the client.
+    /// @param peerPort : The port from which the client is connected in his host.
+    /// @param peerName : The name of the client's host. May be empty.
     Client(QAbstractSocket *socket, Streamit::INetwork::Transports transport, const QStringList &protocol,
            unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
            unsigned short peerPort, const QString &peerName, IReadWrite *readWriteInterface, QObject *parent = 0);
@@ -102,7 +98,7 @@ private:
 
 public slots:
     /// @brief Calling this method tells the Client that new data are available to read.
-    /// It must be called in the thread of the client.
+    /// After being read, these data will ultimately feed the engine.
     void            read(QByteArray *data = NULL);
 
 private slots:

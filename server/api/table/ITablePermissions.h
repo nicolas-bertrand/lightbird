@@ -56,6 +56,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::ITablePermissions, "fr.streamit.ITablePermissions");
+Q_DECLARE_INTERFACE(Streamit::ITablePermissions, "cc.LightBird.ITablePermissions");
 
 #endif // ITABLEPERMISSIONS_H

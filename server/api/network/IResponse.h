@@ -10,12 +10,9 @@
 
 namespace Streamit
 {
-    /**
-     * @brief Represents a response. Contains informations about the it,
-     * whose depends on the protocol that transport it.
-     * Despite Response is protocol independant, its structure is designed for SiTP,
-     * which is itself based on HTTP.
-     */
+    /// @brief Represents a response. Contains informations about it,
+    /// whose depends on the protocol that transport it.
+    /// Despite Request is protocol independant, its structure is inspired of HTTP.
     class IResponse
     {
     public:
@@ -37,11 +34,9 @@ namespace Streamit
         virtual const QString   &getType() const = 0;
         /// @brief The type of the content of the response.
         virtual void            setType(const QString &type) = 0;
-        /**
-         * @brief A header is a set of meta-information related to the response.
-         * This method allows one to access to the header and modified it.
-         * @return The header of the response.
-         */
+        /// @brief A header is a set of meta-information related to the response.
+        /// This method allows one to access to the header and modified it.
+        /// @return The header of the response.
         virtual QMap<QString, QString>  &getHeader() = 0;
         /// @brief The content of the response.
         virtual Streamit::IContent  &getContent() = 0;

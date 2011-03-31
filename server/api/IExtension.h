@@ -29,6 +29,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IExtension, "fr.streamit.IExtension");
+Q_DECLARE_INTERFACE(Streamit::IExtension, "cc.lightbird.IExtension");
 
 #endif // IEXTENSION_H

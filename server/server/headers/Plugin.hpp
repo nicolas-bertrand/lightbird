@@ -16,19 +16,15 @@
 # include "Timer.h"
 # include "ITimer.h"
 
-/**
- * @brief Manage a plugin.
- */
+/// @brief Manage a plugin.
 class Plugin : public QObject
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Initialize the object. The plugin is not loaded until
-     * load() is called.
-     * @param id : The directory where the plugin is stored.
-     */
+    /// @brief Initialize the object. The plugin is not loaded until
+    /// load() is called.
+    /// @param id : The directory where the plugin is stored.
     Plugin(const QString &id, QObject *parent = 0);
     ~Plugin();
 
@@ -36,38 +32,16 @@ public:
     bool    unload(bool callOnUnload = true);
     bool    install();
     bool    uninstall();
-    /**
-     * @brief A templated method used to get an instance of a plugin.
-     * Users must call release() after using this method, and must not
-     * use the return pointer after that. Thus, one can be sure that the
-     * plugin will not be unloaded between the calls of get() and release().
-     * @return A pointer to an instance of the plugin of class T, or NULL
-     * if the plugin don't implements this interface.
-     */
+    /// @brief A templated method used to get an instance of a plugin.
+    /// Users must call release() after using this method, and must not
+    /// use the return pointer after that. Thus, one can be sure that the
+    /// plugin will not be unloaded between the calls of get() and release().
+    /// @return A pointer to an instance of the plugin of class T, or NULL
+    /// if the plugin don't implements this interface.
     template<class T>
-    T       *getInstance()
-    {
-        T   *instance = NULL;
-
-        if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
-        {
-            Log::error("Deadlock", "Plugin", "getInstance");
-            return (NULL);
-        }
-        if (this->state != Streamit::IPlugins::LOADED)
-        {
-            this->lockPlugin.unlock();
-            return (NULL);
-        }
-        if ((instance = qobject_cast<T *>(this->instanceObject)) != NULL)
-            this->used++;
-        this->lockPlugin.unlock();
-        return (instance);
-    }
-    /**
-     * @brief Decrements this->used, which was incremented by get(), and
-     * unload the plugin if necessary.
-     */
+    T       *getInstance();
+    /// @brief Decrements this->used, which was incremented by get(), and
+    /// unload the plugin if necessary.
     bool    release();
     /// @brief Check if the given context is valid compared to the contexts of the plugin.
     bool    checkContext(const QString &transport, const QStringList &protocols,
@@ -108,5 +82,26 @@ private:
 
     friend class Extensions;
 };
+
+template<class T>
+T       *Plugin::getInstance()
+{
+    T   *instance = NULL;
+
+    if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Plugin", "getInstance");
+        return (NULL);
+    }
+    if (this->state != Streamit::IPlugins::LOADED)
+    {
+        this->lockPlugin.unlock();
+        return (NULL);
+    }
+    if ((instance = qobject_cast<T *>(this->instanceObject)) != NULL)
+        this->used++;
+    this->lockPlugin.unlock();
+    return (instance);
+}
 
 #endif // PLUGIN_H

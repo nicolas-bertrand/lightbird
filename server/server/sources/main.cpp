@@ -35,12 +35,10 @@ int                     main(int argc, char *argv[])
     return (result);
 }
 
-/**
- * @brief Instanciate the main class of Qt. If the argument "-noGui" is defined
- * in the command line, QCoreApplication is created. Otherwise QApplication is
- * instanciates. QApplication allows the server to display GUIs feature. In contrast,
- * QCoreApplication run the server as a console application, without any GUIs.
- */
+/// @brief Instanciate the main class of Qt. If the argument "-noGui" is defined
+/// in the command line, QCoreApplication is created. Otherwise QApplication is
+/// instanciates. QApplication allows the server to display GUIs feature. In contrast,
+/// QCoreApplication run the server as a console application, without any GUIs.
 QCoreApplication        *createQApplication(int argc, char *argv[])
 {
     QCoreApplication    *app;

@@ -19,6 +19,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE (Streamit::IOnWrote, "fr.streamit.IOnWrote");
+Q_DECLARE_INTERFACE(Streamit::IOnWrote, "cc.lightbird.IOnWrote");
 
 #endif // IONWRITE_H

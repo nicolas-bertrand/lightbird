@@ -17,17 +17,11 @@ class ApiGuis : public QObject,
 public:
     static ApiGuis *instance(QObject *parent = 0);
 
-    /**
-     * @see Streamit::IGuis::show
-     */
+    /// @see Streamit::IGuis::show
     void    show(const QString &id = "");
-    /**
-     * @see Streamit::IGuis::hide
-     */
+    /// @see Streamit::IGuis::hide
     void    hide(const QString &id = "");
-    /**
-     * @see Streamit::IGuis::noGui
-     */
+    /// @see Streamit::IGuis::noGui
     bool    noGui();
 
 signals:

@@ -197,7 +197,7 @@ bool                    TableDirectories::unitTests()
     QStringList         l;
 
     Log::instance()->debug("Running unit tests...", "TableDirectories", "unitTests");
-    query.prepare("DELETE FROM directories WHERE name IN('videos', 'images', 'egypte', 'epitech')");
+    query.prepare("DELETE FROM directories WHERE name IN('videos', 'images', 'egypte', 'spiders')");
     Database::instance()->query(query);
     query.prepare("DELETE FROM files WHERE name IN('toto.png', 'titi.png')");
     Database::instance()->query(query);
@@ -224,7 +224,7 @@ bool                    TableDirectories::unitTests()
         ASSERT(d2.add("bahrain", d1.getId()));
         ASSERT(d2.getIdDirectory() == d1.getId());
         ASSERT(d2.add("france", d1.getId()));
-        ASSERT(d2.add("epitech", d2.getId()));
+        ASSERT(d2.add("spiders", d2.getId()));
         ASSERT(d2.add("egypte", d2.getIdDirectory()));
         ASSERT(d2.getVirtualPath() == "images/france/egypte");
         ASSERT(d2.getVirtualPath(true, true) == "/images/france/egypte/");
