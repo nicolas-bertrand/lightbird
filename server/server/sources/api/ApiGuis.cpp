@@ -46,14 +46,14 @@ bool    ApiGuis::noGui()
 
 void    ApiGuis::_show(const QString &id)
 {
-    Streamit::IGui  *instance;
+    LightBird::IGui *instance;
 
     if (id.isEmpty())
     {
         QStringListIterator it(Plugins::instance()->getLoadedPlugins());
         while (it.hasNext())
         {
-            if ((instance = Plugins::instance()->getInstance<Streamit::IGui>(it.peekNext())))
+            if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(it.peekNext())))
             {
                 instance->show();
                 Plugins::instance()->release(it.peekNext());
@@ -61,7 +61,7 @@ void    ApiGuis::_show(const QString &id)
             it.next();
         }
     }
-    else if ((instance = Plugins::instance()->getInstance<Streamit::IGui>(id)))
+    else if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(id)))
     {
         instance->show();
         Plugins::instance()->release(id);
@@ -70,14 +70,14 @@ void    ApiGuis::_show(const QString &id)
 
 void    ApiGuis::_hide(const QString &id)
 {
-    Streamit::IGui  *instance;
+    LightBird::IGui *instance;
 
     if (id.isEmpty())
     {
         QStringListIterator it(Plugins::instance()->getLoadedPlugins());
         while (it.hasNext())
         {
-            if ((instance = Plugins::instance()->getInstance<Streamit::IGui>(it.peekNext())))
+            if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(it.peekNext())))
             {
                 instance->hide();
                 Plugins::instance()->release(it.peekNext());
@@ -85,7 +85,7 @@ void    ApiGuis::_hide(const QString &id)
             it.next();
         }
     }
-    else if ((instance = Plugins::instance()->getInstance<Streamit::IGui>(id)))
+    else if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(id)))
     {
         instance->hide();
         Plugins::instance()->release(id);

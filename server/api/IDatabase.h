@@ -13,7 +13,7 @@
 
 #include "ITable.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Handle the access to the database.
     /// This interface is threade safe.
@@ -32,7 +32,7 @@ namespace Streamit
 
         /// List all the modifications of the database. The first dimension is the name of the table, the second
         /// is the state of the rows, the third are the rows, and the last is the field/value pairs.
-        typedef QMap<QString, QMap<Streamit::IDatabase::State, QList<QMap<QString, QVariant> > > > Updates;
+        typedef QMap<QString, QMap<LightBird::IDatabase::State, QList<QMap<QString, QVariant> > > > Updates;
 
         /// @brief Execute a SQL query. The QSqlQuery in parameter allows to secure
         /// the variables into the request by calling prepare() and bindValue(). This
@@ -56,12 +56,12 @@ namespace Streamit
         /// @param id : The id of the row to put by default in the table instance.
         ///
         /// @example This example shows how to cast ITable into ITableAccounts :
-        /// Streamit::ITableAccounts *account = getTable(Streamit::ITable::Accounts)->toTableAccounts();
+        /// LightBird::ITableAccounts *account = getTable(LightBird::ITable::Accounts)->toTableAccounts();
         /// delete account; // Do not forget to delete the instance.
         ///
         /// Users can also use a shared pointer, so that the instance is delete automatically when it goes out of scope :
-        /// QSharedPointer<Streamit::ITableAccounts> account(getTable(Streamit::ITable::Accounts)->toTableAccounts());
-        virtual Streamit::ITable    *getTable(Streamit::ITable::Tables table, const QString &id = "") = 0;
+        /// QSharedPointer<LightBird::ITableAccounts> account(getTable(LightBird::ITable::Accounts)->toTableAccounts());
+        virtual LightBird::ITable   *getTable(LightBird::ITable::Tables table, const QString &id = "") = 0;
         /// @brief This method helps to make the queries independent of the database type used. The
         /// SQL queries of the plugins are stored in a XML file named QtSqlDriverName.xml, instead of being
         /// hard-coded. Each query has a unique name in his group. getQuery() allows plugins to load a query.
@@ -77,10 +77,10 @@ namespace Streamit
         /// @param tables : The list of the tables for which the updates are checked. If empty, all
         /// the tables are taken.
         /// @return True if the database has been modified.
-        virtual bool    updates(Streamit::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList()) = 0;
+        virtual bool    updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList()) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDatabase, "cc.lightbird.IDatabase");
+Q_DECLARE_INTERFACE(LightBird::IDatabase, "cc.lightbird.IDatabase");
 
 #endif // IDATABASE_H

@@ -58,12 +58,12 @@ bool    Engine::isRunning()
     return (this->running);
 }
 
-Streamit::IRequest  &Engine::getRequest()
+LightBird::IRequest &Engine::getRequest()
 {
     return (this->request);
 }
 
-Streamit::IResponse &Engine::getResponse()
+LightBird::IResponse &Engine::getResponse()
 {
     return (this->response);
 }
@@ -80,7 +80,7 @@ void    Engine::clear()
 
 void    Engine::_onRead(QByteArray &data)
 {
-    QMapIterator<QString, Streamit::IOnRead *> it(Plugins::instance()->getInstances<Streamit::IOnRead>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
 
     while (it.hasNext())
     {
@@ -102,8 +102,8 @@ void        Engine::_onProtocol()
     bool    unknow;
     bool    result = false;
 
-    QMap<QString, Streamit::IOnProtocol *> plugins = Plugins::instance()->getInstances<Streamit::IOnProtocol>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort());
-    QMapIterator<QString, Streamit::IOnProtocol *> it(plugins);
+    QMap<QString, LightBird::IOnProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IOnProtocol>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort());
+    QMapIterator<QString, LightBird::IOnProtocol *> it(plugins);
     if (!it.hasNext())
         Log::trace("No plugin implempents IOnProtocol for this context", Properties("id", this->client->getId()), "Engine", "_onProtocol");
     while (it.hasNext() && !result)
@@ -159,10 +159,10 @@ void    Engine::_doUnserializeHeader()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, Streamit::IDoUnserializeHeader *> instance;
+    QPair<QString, LightBird::IDoUnserializeHeader *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoUnserializeHeader>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoUnserializeHeader>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
     {
         Log::trace("Calling IDoUnserializeHeader::doUnserializeHeader()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doUnserializeHeader");
         result = instance.second->doUnserializeHeader(*this->client, this->data, used);
@@ -179,7 +179,7 @@ void    Engine::_doUnserializeHeader()
             if (Log::instance()->isTrace())
                 Log::trace("Header complete", Properties("id", this->client->getId()).add("plugin", instance.first).add("used", used), "Engine", "_doUnserializeHeader");
             // Calls onUnserialize
-            this->_onUnserialize(Streamit::IOnUnserialize::IDoUnserializeHeader);
+            this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeHeader);
             this->state = Engine::CONTENT;
         }
         else
@@ -207,10 +207,10 @@ void    Engine::_doUnserializeContent()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, Streamit::IDoUnserializeContent *> instance;
+    QPair<QString, LightBird::IDoUnserializeContent *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoUnserializeContent>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoUnserializeContent>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
     {
         Log::trace("Calling IDoUnserializeContent::doUnserializeContent()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doUnserializeContent");
         result = instance.second->doUnserializeContent(*this->client, this->data, used);
@@ -232,7 +232,7 @@ void    Engine::_doUnserializeContent()
             // All the data has been used, but the content is not complete
             this->data.clear();
         // Calls onUnserialize
-        this->_onUnserialize(Streamit::IOnUnserialize::IDoUnserializeContent);
+        this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeContent);
         // If the data have been used
         if (!result || used)
             this->done = true;
@@ -255,10 +255,10 @@ void    Engine::_doUnserializeFooter()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, Streamit::IDoUnserializeFooter *> instance;
+    QPair<QString, LightBird::IDoUnserializeFooter *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoUnserializeFooter>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoUnserializeFooter>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
     {
         Log::trace("Calling IDoUnserializeFooter::doUnserializeFooter()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doUnserializeFooter");
         result = instance.second->doUnserializeFooter(*this->client, this->data, used);
@@ -275,7 +275,7 @@ void    Engine::_doUnserializeFooter()
             if (Log::instance()->isTrace())
                 Log::trace("Footer complete", Properties("id", this->client->getId()).add("plugin", instance.first).add("used", used), "Engine", "_doUnserializeFooter");
             // Calls onUnserialize
-            this->_onUnserialize(Streamit::IOnUnserialize::IDoUnserializeFooter);
+            this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeFooter);
             this->state = Engine::HEADER;
         }
         else
@@ -310,7 +310,7 @@ void    Engine::_doUnserializeFooter()
             if (Log::instance()->isDebug())
                 Log::debug("Request complete", Properties("id", this->client->getId()), "Engine", "_doUnserializeFooter");
             // Calls onUnserialize
-            this->_onUnserialize(Streamit::IOnUnserialize::IDoUnserialize);
+            this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserialize);
             // Execute the unserialized request if there is no error
             if (!this->request.isError())
                 emit this->doExecution();
@@ -325,9 +325,9 @@ void    Engine::_doUnserializeFooter()
         this->running = false;
 }
 
-void    Engine::_onUnserialize(Streamit::IOnUnserialize::Unserialize type)
+void    Engine::_onUnserialize(LightBird::IOnUnserialize::Unserialize type)
 {
-    QMapIterator<QString, Streamit::IOnUnserialize *> it(Plugins::instance()->getInstances<Streamit::IOnUnserialize>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnUnserialize *> it(Plugins::instance()->getInstances<LightBird::IOnUnserialize>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort()));
     while (it.hasNext())
     {
         Log::trace("Calling IOnUnserialize::onUnserialize()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()), "Engine", "_onUnserialize");
@@ -338,10 +338,10 @@ void    Engine::_onUnserialize(Streamit::IOnUnserialize::Unserialize type)
 
 void        Engine::_doExecution()
 {
-    QPair<QString, Streamit::IDoExecution *> instance;
+    QPair<QString, LightBird::IDoExecution *> instance;
 
     this->needResponse = true;
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoExecution>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort(), this->request.getMethod(), this->request.getType(), true)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort(), this->request.getMethod(), this->request.getType(), true)).second)
     {
         Log::trace("Calling IDoExecution::doExecution()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doExecution");
         if (!(this->needResponse = instance.second->doExecution(*this->client)))
@@ -355,7 +355,7 @@ void        Engine::_doExecution()
 
 void        Engine::_onExecution()
 {
-    QMapIterator<QString, Streamit::IOnExecution *> it(Plugins::instance()->getInstances<Streamit::IOnExecution>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnExecution *> it(Plugins::instance()->getInstances<LightBird::IOnExecution>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort()));
     while (it.hasNext())
     {
         Log::trace("Calling IOnExecution::onExecution()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()), "Engine", "_onExecution");
@@ -381,9 +381,9 @@ void        Engine::_onExecution()
     }
 }
 
-void    Engine::_onSerialize(Streamit::IOnSerialize::Serialize type)
+void    Engine::_onSerialize(LightBird::IOnSerialize::Serialize type)
 {
-    QMapIterator<QString, Streamit::IOnSerialize *> it(Plugins::instance()->getInstances<Streamit::IOnSerialize>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnSerialize *> it(Plugins::instance()->getInstances<LightBird::IOnSerialize>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort()));
     while (it.hasNext())
     {
         Log::trace("Calling IOnSerialize::onSerialize()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()), "Engine", "_onSerialize");
@@ -394,14 +394,14 @@ void    Engine::_onSerialize(Streamit::IOnSerialize::Serialize type)
 
 void    Engine::_doSerializeHeader()
 {
-    QPair<QString, Streamit::IDoSerializeHeader *> instance;
+    QPair<QString, LightBird::IDoSerializeHeader *> instance;
     QByteArray  data;
 
     this->done = false;
-    this->_onSerialize(Streamit::IOnSerialize::IDoSerialize);
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoSerializeHeader>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
+    this->_onSerialize(LightBird::IOnSerialize::IDoSerialize);
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeHeader>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
     {
-        this->_onSerialize(Streamit::IOnSerialize::IDoSerializeHeader);
+        this->_onSerialize(LightBird::IOnSerialize::IDoSerializeHeader);
         Log::trace("Calling IDoSerializeHeader::doSerializeHeader()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doSerializeHeader");
         instance.second->doSerializeHeader(*this->client, data);
         Plugins::instance()->release(instance.first);
@@ -419,13 +419,13 @@ void    Engine::_doSerializeHeader()
 
 void    Engine::_doSerializeContent()
 {
-    QPair<QString, Streamit::IDoSerializeContent *> instance;
+    QPair<QString, LightBird::IDoSerializeContent *> instance;
     QByteArray  data;
     bool        result = true;
 
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoSerializeContent>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeContent>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
     {
-        this->_onSerialize(Streamit::IOnSerialize::IDoSerializeContent);
+        this->_onSerialize(LightBird::IOnSerialize::IDoSerializeContent);
         Log::trace("Calling IDoSerializeContent::doSerializeContent()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doSerializeContent");
         if ((result = instance.second->doSerializeContent(*this->client, data)))
             Log::trace("Content serialized", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doSerializeContent");
@@ -452,12 +452,12 @@ void    Engine::_doSerializeContent()
 
 void    Engine::_doSerializeFooter()
 {
-    QPair<QString, Streamit::IDoSerializeFooter *> instance;
+    QPair<QString, LightBird::IDoSerializeFooter *> instance;
     QByteArray  data;
 
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoSerializeFooter>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeFooter>(this->client->getTransport(), this->request.getProtocol(), this->client->getPort())).second)
     {
-        this->_onSerialize(Streamit::IOnSerialize::IDoSerializeFooter);
+        this->_onSerialize(LightBird::IOnSerialize::IDoSerializeFooter);
         Log::trace("Calling IDoSerializeFooter::doSerializeFooter()", Properties("id", this->client->getId()).add("plugin", instance.first), "Engine", "_doSerializeFooter");
         instance.second->doSerializeFooter(*this->client, data);
         Plugins::instance()->release(instance.first);
@@ -485,7 +485,7 @@ void    Engine::_doSerializeFooter()
 
 void    Engine::_onWrite(QByteArray &data)
 {
-    QMapIterator<QString, Streamit::IOnWrite *> it(Plugins::instance()->getInstances<Streamit::IOnWrite>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnWrite *> it(Plugins::instance()->getInstances<LightBird::IOnWrite>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
     while (it.hasNext())
     {
         Log::trace("Calling IOnWrite::onWrite()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "Engine", "_onWrite");
@@ -496,7 +496,7 @@ void    Engine::_onWrite(QByteArray &data)
 
 void    Engine::_onWrote()
 {
-    QMapIterator<QString, Streamit::IOnWrote *> it(Plugins::instance()->getInstances<Streamit::IOnWrote>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnWrote *> it(Plugins::instance()->getInstances<LightBird::IOnWrote>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
     while (it.hasNext())
     {
         Log::trace("Calling IOnWrote::onWrote()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "Engine", "_onWrote");

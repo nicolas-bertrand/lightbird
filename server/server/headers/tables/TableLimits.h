@@ -6,7 +6,7 @@
 # include "Table.h"
 
 class TableLimits : virtual public Table,
-                    virtual public Streamit::ITableLimits
+                    virtual public LightBird::ITableLimits
 {
 public:
     TableLimits(const QString &id = "");

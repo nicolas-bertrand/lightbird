@@ -4,7 +4,7 @@
 # include <QByteArray>
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Interface uses to read on a socket.
     /// It replaces the default read made by the server. This interface is not called
@@ -19,10 +19,10 @@ namespace Streamit
         /// @param client : Informations about the client and its socket.
         /// @param data : The data that have been read.
         /// @return False if an error occured, true otherwise.
-        virtual bool    doRead(Streamit::IClient &client, QByteArray &data) = 0;
+        virtual bool    doRead(LightBird::IClient &client, QByteArray &data) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDoRead, "cc.lightbird.IDoRead");
+Q_DECLARE_INTERFACE(LightBird::IDoRead, "cc.lightbird.IDoRead");
 
 #endif // IDOREAD_H

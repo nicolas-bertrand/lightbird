@@ -11,7 +11,7 @@
 
 # include "IFuture.h"
 
-namespace Streamit
+namespace LightBird
 {
     class IClient;
 
@@ -54,14 +54,14 @@ namespace Streamit
         /// connected to this port. When the number of client reach this limit, new
         /// connections are waiting that a connected client disconnect.
         /// @return The future result of the action, e.g true if the port has been created.
-        virtual QSharedPointer<Streamit::IFuture<bool> >    addPort(unsigned short port, const QStringList &protocols = QStringList(),
-                                                            Streamit::INetwork::Transports transport = Streamit::INetwork::TCP,
+        virtual QSharedPointer<LightBird::IFuture<bool> >   addPort(unsigned short port, const QStringList &protocols = QStringList(),
+                                                            LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
                                                             unsigned int maxClients = ~0) = 0;
         /// @brief Removes a port. This may take some time since all the operations
         /// made on the removed port have to be finished.
         /// @param port : The port to remove.
         /// @return The future result of the action, e.g false if the port is not valid.
-        virtual QSharedPointer<Streamit::IFuture<bool> >    removePort(unsigned short port) = 0;
+        virtual QSharedPointer<LightBird::IFuture<bool> >   removePort(unsigned short port) = 0;
         /// @brief Allows to get informations on an opened port.
         /// @param port : The port to get.
         /// @param protocols : The name of the protocols used by the port.
@@ -69,7 +69,7 @@ namespace Streamit
         /// @param maxClients : The maximum number of clients simultaneously connected,
         /// allowed by the port.
         /// @return True if the port exists.
-        virtual bool    getPort(unsigned short port, QStringList &protocols, Streamit::INetwork::Transports &transport,
+        virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport,
                                 unsigned int &maxClients) = 0;
         /// @brief Returns the list of the open ports. Users can use getPort() to get
         /// more detailed informations about a specific port.
@@ -80,7 +80,7 @@ namespace Streamit
         /// @param client : The informations of the client are stored in this structure.
         /// @return True if the client exists.
         ///
-        virtual bool    getClient(const QString &id, Streamit::INetwork::Client &client) = 0;
+        virtual bool    getClient(const QString &id, LightBird::INetwork::Client &client) = 0;
         /// @brief Allows to get the id of the connected clients for a particular port.
         /// @param port : The port of the clients.
         /// @return The list of the id of the clients connected to the port.
@@ -92,7 +92,7 @@ namespace Streamit
         /// @param id : The id of the client to disconnect. Nothing appends
         /// if it is already disconnected.
         /// @return True if the client exists.
-        virtual QSharedPointer<Streamit::IFuture<bool> >    disconnect(const QString &id) = 0;
+        virtual QSharedPointer<LightBird::IFuture<bool> >   disconnect(const QString &id) = 0;
     };
 }
 

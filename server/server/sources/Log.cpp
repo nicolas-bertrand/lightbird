@@ -26,13 +26,13 @@ Log::Log(QObject *parent) : lockWrite(QMutex::Recursive)
                      Qt::QueuedConnection);
 
     // Map the names of the log levels
-    this->levels[Streamit::ILogs::FATAL] = "Fatal";
-    this->levels[Streamit::ILogs::ERROR] = "Error";
-    this->levels[Streamit::ILogs::WARNING] = "Warning";
-    this->levels[Streamit::ILogs::INFO] = "Info";
-    this->levels[Streamit::ILogs::DEBUG] = "Debug";
-    this->levels[Streamit::ILogs::TRACE] = "Trace";
-    this->logLevel = Streamit::ILogs::TRACE;
+    this->levels[LightBird::ILogs::FATAL] = "Fatal";
+    this->levels[LightBird::ILogs::ERROR] = "Error";
+    this->levels[LightBird::ILogs::WARNING] = "Warning";
+    this->levels[LightBird::ILogs::INFO] = "Info";
+    this->levels[LightBird::ILogs::DEBUG] = "Debug";
+    this->levels[LightBird::ILogs::TRACE] = "Trace";
+    this->logLevel = LightBird::ILogs::TRACE;
 }
 
 Log::~Log()
@@ -45,7 +45,7 @@ Log::~Log()
     Log::trace("Log destroyed!", "Log", "Log");
 }
 
-void    Log::write(Streamit::ILogs::level level, const QString &message, const QString &plugin,
+void    Log::write(LightBird::ILogs::level level, const QString &message, const QString &plugin,
         const Properties &properties, const QString &object, const QString &method)
 {
     if (this->mode == Log::PRINT && this->levels.contains(level) && this->logLevel <= level)
@@ -61,70 +61,70 @@ void    Log::write(Streamit::ILogs::level level, const QString &message, const Q
 
 void    Log::fatal(const QString &message, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::FATAL, message, "", Properties(), object, method);
+    Log::instance()->write(LightBird::ILogs::FATAL, message, "", Properties(), object, method);
 }
 
 void    Log::fatal(const QString &message, const Properties &properties, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::FATAL, message, "", properties, object ,method);
+    Log::instance()->write(LightBird::ILogs::FATAL, message, "", properties, object ,method);
 }
 
 void    Log::error(const QString &message, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::ERROR, message, "", Properties(), object, method);
+    Log::instance()->write(LightBird::ILogs::ERROR, message, "", Properties(), object, method);
 }
 
 void    Log::error(const QString &message, const Properties &properties, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::ERROR, message, "", properties, object, method);
+    Log::instance()->write(LightBird::ILogs::ERROR, message, "", properties, object, method);
 }
 
 void    Log::warning(const QString &message, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::WARNING, message, "", Properties(), object,method);
+    Log::instance()->write(LightBird::ILogs::WARNING, message, "", Properties(), object,method);
 }
 
 void    Log::warning(const QString &message, const Properties &properties, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::WARNING, message, "", properties, object, method);
+    Log::instance()->write(LightBird::ILogs::WARNING, message, "", properties, object, method);
 }
 
 void    Log::info(const QString &message, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::INFO, message, "", Properties(), object,method);
+    Log::instance()->write(LightBird::ILogs::INFO, message, "", Properties(), object,method);
 }
 
 void    Log::info(const QString &message, const Properties &properties, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::INFO, message, "", properties, object, method);
+    Log::instance()->write(LightBird::ILogs::INFO, message, "", properties, object, method);
 }
 
 void    Log::debug(const QString &message, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::DEBUG, message, "", Properties(), object,method);
+    Log::instance()->write(LightBird::ILogs::DEBUG, message, "", Properties(), object,method);
 }
 
 void    Log::debug(const QString &message, const Properties &properties, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::DEBUG, message, "", properties, object, method);
+    Log::instance()->write(LightBird::ILogs::DEBUG, message, "", properties, object, method);
 }
 
 void    Log::trace(const QString &message, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::TRACE, message, "", Properties(), object, method);
+    Log::instance()->write(LightBird::ILogs::TRACE, message, "", Properties(), object, method);
 }
 
 void    Log::trace(const QString &message, const Properties &properties, const QString &object, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::TRACE, message, "", properties, object,method);
+    Log::instance()->write(LightBird::ILogs::TRACE, message, "", properties, object,method);
 }
 
-Streamit::ILogs::level Log::getlevel()
+LightBird::ILogs::level Log::getlevel()
 {
     return (this->logLevel);
 }
 
-void    Log::setLevel(Streamit::ILogs::level level)
+void    Log::setLevel(LightBird::ILogs::level level)
 {
     if (this->levels.contains(level))
         this->logLevel = level;
@@ -132,35 +132,35 @@ void    Log::setLevel(Streamit::ILogs::level level)
 
 bool    Log::isError()
 {
-    if (this->logLevel <= Streamit::ILogs::ERROR)
+    if (this->logLevel <= LightBird::ILogs::ERROR)
         return (true);
     return (false);
 }
 
 bool    Log::isWarning()
 {
-    if (this->logLevel <= Streamit::ILogs::WARNING)
+    if (this->logLevel <= LightBird::ILogs::WARNING)
         return (true);
     return (false);
 }
 
 bool    Log::isInfo()
 {
-    if (this->logLevel <= Streamit::ILogs::INFO)
+    if (this->logLevel <= LightBird::ILogs::INFO)
         return (true);
     return (false);
 }
 
 bool    Log::isDebug()
 {
-    if (this->logLevel <= Streamit::ILogs::DEBUG)
+    if (this->logLevel <= LightBird::ILogs::DEBUG)
         return (true);
     return (false);
 }
 
 bool    Log::isTrace()
 {
-    if (this->logLevel <= Streamit::ILogs::TRACE)
+    if (this->logLevel <= LightBird::ILogs::TRACE)
         return (true);
     return (false);
 }
@@ -198,7 +198,7 @@ void    Log::_initializeWrite()
 
     // Load the current log level
     level = Configurations::instance()->get("log/level").toLower();
-    QMapIterator<Streamit::ILogs::level, QString> it(this->levels);
+    QMapIterator<LightBird::ILogs::level, QString> it(this->levels);
     while (it.hasNext())
     {
         it.next();
@@ -249,7 +249,7 @@ QString     Log::_mapToString(const QMap<QString, QString> &properties)
     return (result);
 }
 
-Log::LogInformations::LogInformations(Streamit::ILogs::level level, const QString &message, const Properties &properties, const QString &plugin,
+Log::LogInformations::LogInformations(LightBird::ILogs::level level, const QString &message, const Properties &properties, const QString &plugin,
                                       const QString &object, const QString &method, const QString &thread, const QDateTime &date)
 {
     this->level = level;
@@ -265,14 +265,14 @@ Log::LogInformations::LogInformations(Streamit::ILogs::level level, const QStrin
 void    Log::_write(char levelTmp, const QString &message, const QString &plugin, const Properties &properties,
                     const QString &object, const QString &method, const QString &thread, const QDateTime &date)
 {
-    Streamit::ILog          *instance;
-    Streamit::ILogs::level  level = (Streamit::ILogs::level)levelTmp;
+    LightBird::ILog         *instance;
+    LightBird::ILogs::level  level = (LightBird::ILogs::level)levelTmp;
 
     QStringListIterator it(Plugins::instance()->getLoadedPlugins());
     if (this->levels.contains(level) && this->logLevel <= level)
         while (it.hasNext())
         {
-            if ((instance = Plugins::instance()->getInstance<Streamit::ILog>(it.peekNext())))
+            if ((instance = Plugins::instance()->getInstance<LightBird::ILog>(it.peekNext())))
             {
                 this->lockWrite.lock();
                 instance->log(level, date, message, properties.toMap(), thread, plugin, object, method);
@@ -283,7 +283,7 @@ void    Log::_write(char levelTmp, const QString &message, const QString &plugin
         }
 }
 
-void        Log::_print(Streamit::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method, const QString &thread, const QDateTime &date)
+void        Log::_print(LightBird::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method, const QString &thread, const QDateTime &date)
 {
     QString buffer;
 

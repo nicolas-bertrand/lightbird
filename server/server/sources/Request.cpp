@@ -64,7 +64,7 @@ QMap<QString, QString>  &Request::getHeader()
     return (this->header);
 }
 
-Streamit::IContent      &Request::getContent()
+LightBird::IContent     &Request::getContent()
 {
     return (this->content);
 }

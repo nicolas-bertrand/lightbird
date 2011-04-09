@@ -6,7 +6,7 @@
 
 Content::Content(QObject *parent) : QObject(parent)
 {
-    this->storage = Streamit::IContent::BYTEARRAY;
+    this->storage = LightBird::IContent::BYTEARRAY;
     this->byteArray = new QByteArray();
     this->variant = NULL;
     this->file = NULL;
@@ -26,22 +26,22 @@ Content::~Content()
         delete this->temporaryFile;
 }
 
-Streamit::IContent::Storage Content::getStorage() const
+LightBird::IContent::Storage Content::getStorage() const
 {
     return (this->storage);
 }
 
-void    Content::setStorage(Streamit::IContent::Storage storage, const QString &fileName)
+void    Content::setStorage(LightBird::IContent::Storage storage, const QString &fileName)
 {
     this->clear();
     this->storage = storage;
-    if (this->storage == Streamit::IContent::BYTEARRAY && !this->byteArray)
+    if (this->storage == LightBird::IContent::BYTEARRAY && !this->byteArray)
         this->byteArray = new QByteArray();
-    else if (this->storage == Streamit::IContent::VARIANT && !this->variant)
+    else if (this->storage == LightBird::IContent::VARIANT && !this->variant)
         this->variant = new QVariant();
-    else if (this->storage == Streamit::IContent::FILE && !this->file)
+    else if (this->storage == LightBird::IContent::FILE && !this->file)
         this->file = new QFile(fileName);
-    else if (this->storage == Streamit::IContent::TEMPORARYFILE && !this->temporaryFile)
+    else if (this->storage == LightBird::IContent::TEMPORARYFILE && !this->temporaryFile)
     {
         QString filePath = Configurations::instance()->get("temporaryPath");
         if (filePath.isEmpty())
@@ -55,7 +55,7 @@ QByteArray  Content::getContent(quint64 size)
 {
     QByteArray  content;
 
-    if (this->storage == Streamit::IContent::BYTEARRAY)
+    if (this->storage == LightBird::IContent::BYTEARRAY)
     {
         if (size == 0)
             content = *this->byteArray;
@@ -65,7 +65,7 @@ QByteArray  Content::getContent(quint64 size)
             this->seek += content.size();
         }
     }
-    else if (this->storage == Streamit::IContent::FILE)
+    else if (this->storage == LightBird::IContent::FILE)
     {
         if (!this->file->open(QIODevice::ReadOnly))
             Log::warning("Unable to open the file", Properties("file", this->file->fileName()), "Content", "getContent");
@@ -85,7 +85,7 @@ QByteArray  Content::getContent(quint64 size)
             this->file->close();
         }
     }
-    else if (this->storage == Streamit::IContent::TEMPORARYFILE)
+    else if (this->storage == LightBird::IContent::TEMPORARYFILE)
     {
         if (size == 0)
         {
@@ -107,14 +107,14 @@ void    Content::setContent(const QByteArray &content, bool append)
 {
     int wrote;
 
-    if (this->storage == Streamit::IContent::BYTEARRAY)
+    if (this->storage == LightBird::IContent::BYTEARRAY)
     {
         if (append)
             this->byteArray->append(content);
         else
             *this->byteArray = content;
     }
-    else if (this->storage == Streamit::IContent::FILE)
+    else if (this->storage == LightBird::IContent::FILE)
     {
         if (append)
             this->file->open(QIODevice::WriteOnly | QIODevice::Append);
@@ -125,7 +125,7 @@ void    Content::setContent(const QByteArray &content, bool append)
                          .add("wrote", wrote).add("file", this->file->fileName()), "Content", "setContent");
         this->file->close();
     }
-    else if (this->storage == Streamit::IContent::TEMPORARYFILE)
+    else if (this->storage == LightBird::IContent::TEMPORARYFILE)
     {
         if (append)
             this->temporaryFile->seek(this->temporaryFile->size());
@@ -139,39 +139,39 @@ void    Content::setContent(const QByteArray &content, bool append)
 
 QByteArray      *Content::getByteArray()
 {
-    if (this->storage == Streamit::IContent::BYTEARRAY)
+    if (this->storage == LightBird::IContent::BYTEARRAY)
         return (this->byteArray);
     return (NULL);
 }
 
 QVariant        *Content::getVariant()
 {
-    if (this->storage == Streamit::IContent::VARIANT)
+    if (this->storage == LightBird::IContent::VARIANT)
         return (this->variant);
     return (NULL);
 }
 
 QFile           *Content::getFile()
 {
-    if (this->storage == Streamit::IContent::FILE)
+    if (this->storage == LightBird::IContent::FILE)
         return (this->file);
     return (NULL);
 }
 
 QTemporaryFile  *Content::getTemporaryFile()
 {
-    if (this->storage == Streamit::IContent::TEMPORARYFILE)
+    if (this->storage == LightBird::IContent::TEMPORARYFILE)
         return (this->temporaryFile);
     return (NULL);
 }
 
 qint64  Content::size() const
 {
-    if (this->storage == Streamit::IContent::BYTEARRAY)
+    if (this->storage == LightBird::IContent::BYTEARRAY)
         return (this->byteArray->size());
-    else if (this->storage == Streamit::IContent::FILE)
+    else if (this->storage == LightBird::IContent::FILE)
         return (this->file->size());
-    else if (this->storage == Streamit::IContent::TEMPORARYFILE)
+    else if (this->storage == LightBird::IContent::TEMPORARYFILE)
         return (this->temporaryFile->size());
     return (0);
 }
@@ -191,7 +191,7 @@ void    Content::setSeek(qint64 position)
 
 void    Content::clear()
 {
-    this->storage = Streamit::IContent::BYTEARRAY;
+    this->storage = LightBird::IContent::BYTEARRAY;
     if (this->byteArray)
         this->byteArray->clear();
     if (this->variant)

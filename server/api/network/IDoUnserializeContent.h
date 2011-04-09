@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Converts the data received by the network to the content of the
     /// request, so that it can be processed. The content is stored in IRequest
@@ -28,10 +28,10 @@ namespace Streamit
         /// this variable. Let zero if no data have to be used, i.e if there is no content.
         /// @return True if the content is complete. This method will be called while
         /// false is returned.
-        virtual bool    doUnserializeContent(Streamit::IClient &client, const QByteArray &data, quint64 &used) = 0;
+        virtual bool    doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDoUnserializeContent, "cc.lightbird.IDoUnserializeContent");
+Q_DECLARE_INTERFACE(LightBird::IDoUnserializeContent, "cc.lightbird.IDoUnserializeContent");
 
 #endif // IDOUNSERIALIZECONTENT_H

@@ -4,7 +4,7 @@
 # include <QString>
 
 /// @brief Get the MIME type of a file from its extension.
-namespace Streamit
+namespace LightBird
 {
     class IMime
     {

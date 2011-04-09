@@ -1,7 +1,7 @@
 #ifndef IGUI_H
 # define IGUI_H
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Allows plugins to provide a Graphical User Interface, using Qt.
     /// All the methods of this interface are guaranteed to be called in the GUI Thread, since
@@ -30,6 +30,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IGui, "cc.lightbird.IGui");
+Q_DECLARE_INTERFACE(LightBird::IGui, "cc.lightbird.IGui");
 
 #endif // IGUI_H

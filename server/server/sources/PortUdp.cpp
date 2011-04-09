@@ -4,7 +4,7 @@
 #include "PortUdp.h"
 
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients, QObject *parent) :
-                 Port(port, Streamit::INetwork::UDP, protocols, maxClients, parent)
+                 Port(port, LightBird::INetwork::UDP, protocols, maxClients, parent)
 {
     // When a client connected to the server, the slot _read is called
     QObject::connect(&this->socket, SIGNAL(readyRead()), this, SLOT(_readPendingDatagrams()), Qt::QueuedConnection);

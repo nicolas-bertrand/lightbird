@@ -5,7 +5,7 @@
 #include "Threads.h"
 #include "Configurations.h"
 
-Port::Port(unsigned short port, Streamit::INetwork::Transports transport, const QStringList &protocols,
+Port::Port(unsigned short port, LightBird::INetwork::Transports transport, const QStringList &protocols,
            unsigned int maxClients, QObject *object) : QObject(object)
 {
     this->port = port;
@@ -25,7 +25,7 @@ unsigned short  Port::getPort()
     return (this->port);
 }
 
-Streamit::INetwork::Transports  Port::getTransport()
+LightBird::INetwork::Transports Port::getTransport()
 {
     return (this->transport);
 }
@@ -58,7 +58,7 @@ void            Port::stopListening()
         emit this->allClientsRemoved(this->port);
 }
 
-bool            Port::getClient(const QString &id, Streamit::INetwork::Client *client, void *thread, Future<bool> *future)
+bool            Port::getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
 {
     QListIterator<Client *> it(this->clients);
 

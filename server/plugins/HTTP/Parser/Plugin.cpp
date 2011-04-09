@@ -13,7 +13,7 @@ Plugin::~Plugin()
 {
 }
 
-bool    Plugin::onLoad(Streamit::IApi *api)
+bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
     // Load the configuration
@@ -39,18 +39,18 @@ void    Plugin::onUnload()
 {
 }
 
-bool    Plugin::onInstall(Streamit::IApi *api)
+bool    Plugin::onInstall(LightBird::IApi *api)
 {
     this->api = api;
     return (true);
 }
 
-void    Plugin::onUninstall(Streamit::IApi *api)
+void    Plugin::onUninstall(LightBird::IApi *api)
 {
     this->api = api;
 }
 
-void    Plugin::getMetadata(Streamit::IMetadata &metadata) const
+void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "Parser HTTP";
     metadata.brief = "The HTTP parser.";
@@ -67,7 +67,7 @@ QString Plugin::getResourcesPath()
     return (":plugins/HTTP/Parser");
 }
 
-bool    Plugin::onConnect(Streamit::IClient &client)
+bool    Plugin::onConnect(LightBird::IClient &client)
 {
     this->mutex.lockForWrite();
     this->parsers.insert(client.getId(), Parser(&client));
@@ -75,39 +75,39 @@ bool    Plugin::onConnect(Streamit::IClient &client)
     return (true);
 }
 
-void    Plugin::onDisconnect(Streamit::IClient &client)
+void    Plugin::onDisconnect(LightBird::IClient &client)
 {
     this->mutex.lockForWrite();
     this->parsers.remove(client.getId());
     this->mutex.unlock();
 }
 
-bool    Plugin::onProtocol(Streamit::IClient &client, const QByteArray &data, QString &protocol, bool &error)
+bool    Plugin::onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error)
 {
     return (this->_getParser(client)->onProtocol(data, protocol, error));
 }
 
-bool    Plugin::doUnserializeHeader(Streamit::IClient &client, const QByteArray &data, quint64 &used)
+bool    Plugin::doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used)
 {
     return (this->_getParser(client)->doUnserializeHeader(data, used));
 }
 
-bool    Plugin::doUnserializeContent(Streamit::IClient &client, const QByteArray &data, quint64 &used)
+bool    Plugin::doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
 {
     return (this->_getParser(client)->doUnserializeContent(data, used));
 }
 
-void    Plugin::doSerializeHeader(Streamit::IClient &client, QByteArray &data)
+void    Plugin::doSerializeHeader(LightBird::IClient &client, QByteArray &data)
 {
     this->_getParser(client)->doSerializeHeader(data);
 }
 
-bool    Plugin::doSerializeContent(Streamit::IClient &client, QByteArray &data)
+bool    Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data)
 {
     return (this->_getParser(client)->doSerializeContent(data));
 }
 
-void    Plugin::onWrote(Streamit::IClient &client)
+void    Plugin::onWrote(LightBird::IClient &client)
 {
     if (client.getRequest().isError())
         this->api->network().disconnect(client.getId());
@@ -118,7 +118,7 @@ Plugin::Configuration   &Plugin::getConfiguration()
     return (Plugin::configuration);
 }
 
-Parser      *Plugin::_getParser(const Streamit::IClient &client)
+Parser      *Plugin::_getParser(const LightBird::IClient &client)
 {
     Parser  *parser;
     this->mutex.lockForRead();

@@ -8,32 +8,32 @@
 # include "IDoExecution.h"
 
 class Plugin : public QObject,
-               public Streamit::IPlugin,
-               public Streamit::IResources,
-               public Streamit::IDoExecution
+               public LightBird::IPlugin,
+               public LightBird::IResources,
+               public LightBird::IDoExecution
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::IPlugin Streamit::IResources Streamit::IDoExecution)
+    Q_INTERFACES(LightBird::IPlugin LightBird::IResources LightBird::IDoExecution)
 
 public:
     Plugin();
     ~Plugin();
 
     // IPlugin
-    bool    onLoad(Streamit::IApi *api);
+    bool    onLoad(LightBird::IApi *api);
     void    onUnload();
-    bool    onInstall(Streamit::IApi *api);
-    void    onUninstall(Streamit::IApi *api);
-    void    getMetadata(Streamit::IMetadata &metadata) const;
+    bool    onInstall(LightBird::IApi *api);
+    void    onUninstall(LightBird::IApi *api);
+    void    getMetadata(LightBird::IMetadata &metadata) const;
 
     // IResources
     QString getResourcesPath();
 
     // Execution
-    bool    doExecution(Streamit::IClient &client);
+    bool    doExecution(LightBird::IClient &client);
 
 private:
-    Streamit::IApi  *api;
+    LightBird::IApi *api;
 };
 
 #endif // PLUGIN_H

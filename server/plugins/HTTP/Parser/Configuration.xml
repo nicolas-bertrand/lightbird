@@ -4,9 +4,9 @@
   <name>Parser HTTP</name>
   <brief>The HTTP parser.</brief>
   <description>Converts the requests into a workable object, and convert the response objects into a string that can be sent through the network. It can be used to parse HTTP requests.</description>
-  <autor>Streamit team</autor>
-  <site>http://www.streamit.fr</site>
-  <email>team@streamit.fr</email>
+  <autor>LightBird team</autor>
+  <site>http://www.lightbird.fr</site>
+  <email>team@lightbird.cc</email>
   <version>1.0</version>
   <licence>LGPL</licence>
   <contexts>

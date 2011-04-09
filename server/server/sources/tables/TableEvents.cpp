@@ -9,7 +9,7 @@
 TableEvents::TableEvents(const QString &id)
 {
     this->tableName = "events";
-    this->tableId = Streamit::ITable::Events;
+    this->tableId = LightBird::ITable::Events;
     if (!id.isEmpty())
         Table::setId(id);
 }

@@ -3,7 +3,7 @@
 
 # include <QString>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Via this interface, the plugins can get pointers on extensions, and release them.
     class IExtensions
@@ -19,6 +19,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IExtensions, "cc.lightbird.IExtensions");
+Q_DECLARE_INTERFACE(LightBird::IExtensions, "cc.lightbird.IExtensions");
 
 #endif // IEXTENSIONS_H

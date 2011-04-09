@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Inheriting this interface allows to handle the response
     /// before it is sent. Since a response can be sent in multiple parts,
@@ -16,10 +16,10 @@ namespace Streamit
         /// @brief Called before sending the response.
         /// @param client : The client to whom the response will be sent.
         /// @param data : The data that will be sent.
-        virtual void    onWrite(Streamit::IClient &client, QByteArray &data) = 0;
+        virtual void    onWrite(LightBird::IClient &client, QByteArray &data) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IOnWrite, "cc.lightbird.IOnWrite");
+Q_DECLARE_INTERFACE(LightBird::IOnWrite, "cc.lightbird.IOnWrite");
 
 #endif // IONWRITE_H

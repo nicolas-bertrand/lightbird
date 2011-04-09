@@ -3,7 +3,7 @@
 
 # include <QString>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Allows plugins to manage the Gui of other plugins.
     /// This works only if the server had not been started with the "noGui" argument.
@@ -27,6 +27,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IGuis, "cc.lightbird.IGuis");
+Q_DECLARE_INTERFACE(LightBird::IGuis, "cc.lightbird.IGuis");
 
 #endif // IGUIS_H

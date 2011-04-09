@@ -12,10 +12,10 @@
 /// @brief This class is the server implementation of the ITimer interface
 /// that allows plugins to manage their timers.
 class ApiTimers : public QObject,
-                  public Streamit::ITimers
+                  public LightBird::ITimers
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::ITimers)
+    Q_INTERFACES(LightBird::ITimers)
 
 public:
     ApiTimers(const QString &id, QObject *parent = 0);

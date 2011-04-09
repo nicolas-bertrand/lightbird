@@ -6,7 +6,7 @@
 # include "IImage.h"
 
 /// @brief Allows plugins to get a preview image of a file.
-namespace Streamit
+namespace LightBird
 {
     class IPreview
     {
@@ -23,7 +23,7 @@ namespace Streamit
         /// @param height : The height of the preview. If it is 0, it will be proportional to the width.
         /// @return False if the extension doesn't know how to make a preview
         /// from the file. True is returned if the preview has been generated.
-        virtual bool    generate(const QString &source, QString &destination, Streamit::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0) = 0;
+        virtual bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0) = 0;
     };
 }
 

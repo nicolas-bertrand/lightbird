@@ -22,7 +22,7 @@ bool    ApiDatabase::query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &
     return (Database::instance()->query(query, result));
 }
 
-Streamit::ITable    *ApiDatabase::getTable(Streamit::ITable::Tables table, const QString &id)
+LightBird::ITable   *ApiDatabase::getTable(LightBird::ITable::Tables table, const QString &id)
 {
     return (Database::instance()->getTable(table, id));
 }
@@ -32,7 +32,7 @@ QString ApiDatabase::getQuery(const QString &group, const QString &name)
     return (Database::instance()->getQuery(group, name, this->id));
 }
 
-bool    ApiDatabase::updates(Streamit::IDatabase::Updates &updates, const QDateTime &date, const QStringList &tables)
+bool    ApiDatabase::updates(LightBird::IDatabase::Updates &updates, const QDateTime &date, const QStringList &tables)
 {
     return (Database::instance()->updates(updates, date, tables));
 }

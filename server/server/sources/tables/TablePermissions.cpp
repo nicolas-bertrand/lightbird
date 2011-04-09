@@ -14,7 +14,7 @@
 TablePermissions::TablePermissions(const QString &id)
 {
     this->tableName = "permissions";
-    this->tableId = Streamit::ITable::Permissions;
+    this->tableId = LightBird::ITable::Permissions;
     if (!id.isEmpty())
         Table::setId(id);
 }
@@ -171,10 +171,10 @@ bool    TablePermissions::isGranted(bool granted)
 
 bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &id_object, const QString &right)
 {
-    Streamit::ITableAccounts    *account = NULL;
-    Streamit::ITableFiles       *file = NULL;
-    Streamit::ITableDirectories *directory = NULL;
-    Streamit::ITableCollections *collection = NULL;
+    LightBird::ITableAccounts   *account = NULL;
+    LightBird::ITableFiles      *file = NULL;
+    LightBird::ITableDirectories *directory = NULL;
+    LightBird::ITableCollections *collection = NULL;
     bool                        inheritance = false;
     bool                        ownerInheritance = false;
     bool                        checked = false;
@@ -191,15 +191,15 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
         ownerInheritance = true;
     if (Configurations::instance()->get("permissions/inheritance") == "true")
         inheritance = true;
-    QSharedPointer<Streamit::ITableAccessors> accessor(dynamic_cast<Streamit::ITableAccessors *>(Database::instance()->getTable(Streamit::ITable::Accessor, id_accessor)));
+    QSharedPointer<LightBird::ITableAccessors> accessor(dynamic_cast<LightBird::ITableAccessors *>(Database::instance()->getTable(LightBird::ITable::Accessor, id_accessor)));
     if (accessor.isNull())
         return (false);
-    if (accessor->isTable(Streamit::ITable::Accounts))
-        account = dynamic_cast<Streamit::ITableAccounts *>(accessor.data());
+    if (accessor->isTable(LightBird::ITable::Accounts))
+        account = dynamic_cast<LightBird::ITableAccounts *>(accessor.data());
     // If the accessor is an account, and the account is administrator, he has all the rights on all the objects
     if (account && account->isAdministrator())
         return (true);
-    QSharedPointer<Streamit::ITableObjects> object(dynamic_cast<Streamit::ITableObjects *>(Database::instance()->getTable(Streamit::ITable::Object, id_object)));
+    QSharedPointer<LightBird::ITableObjects> object(dynamic_cast<LightBird::ITableObjects *>(Database::instance()->getTable(LightBird::ITable::Object, id_object)));
     if (object.isNull())
         return (false);
     // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
@@ -208,23 +208,23 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (account)
         accessors = account->getGroups();
     accessors.push_front(accessor->getId());
-    if (object->isTable(Streamit::ITable::Files))
+    if (object->isTable(LightBird::ITable::Files))
     {
-        file = dynamic_cast<Streamit::ITableFiles *>(object.data());
+        file = dynamic_cast<LightBird::ITableFiles *>(object.data());
         if (!granted)
             if ((granted = this->_checkPermission(accessors, file->getId(), right)) == 2)
                 return (true);
         id = file->getIdDirectory();
         checked = true;
     }
-    if (object->isTable(Streamit::ITable::Directories))
+    if (object->isTable(LightBird::ITable::Directories))
     {
-        directory = dynamic_cast<Streamit::ITableDirectories *>(object.data());
+        directory = dynamic_cast<LightBird::ITableDirectories *>(object.data());
         id = directory->getId();
     }
-    if (object->isTable(Streamit::ITable::Collections))
+    if (object->isTable(LightBird::ITable::Collections))
     {
-        collection = dynamic_cast<Streamit::ITableCollections *>(object.data());
+        collection = dynamic_cast<LightBird::ITableCollections *>(object.data());
         id = collection->getId();
     }
     // Run through the objects hierarchy to find the permissions
@@ -264,10 +264,10 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
 
 QStringList TablePermissions::getRights(const QString &id_accessor, const QString &id_object)
 {
-    Streamit::ITableAccounts            *account = NULL;
-    Streamit::ITableFiles               *file = NULL;
-    Streamit::ITableDirectories         *directory = NULL;
-    Streamit::ITableCollections         *collection = NULL;
+    LightBird::ITableAccounts           *account = NULL;
+    LightBird::ITableFiles              *file = NULL;
+    LightBird::ITableDirectories        *directory = NULL;
+    LightBird::ITableCollections        *collection = NULL;
     QString                             id;
     TableDirectories                    dir;
     TableCollections                    col;
@@ -278,27 +278,27 @@ QStringList TablePermissions::getRights(const QString &id_accessor, const QStrin
     int                                 i;
     int                                 s;
 
-    QSharedPointer<Streamit::ITableAccessors> accessor(dynamic_cast<Streamit::ITableAccessors *>(Database::instance()->getTable(Streamit::ITable::Accessor, id_accessor)));
+    QSharedPointer<LightBird::ITableAccessors> accessor(dynamic_cast<LightBird::ITableAccessors *>(Database::instance()->getTable(LightBird::ITable::Accessor, id_accessor)));
     if (accessor.isNull())
         return (allowed);
-    if (accessor->isTable(Streamit::ITable::Accounts))
-        account = dynamic_cast<Streamit::ITableAccounts *>(accessor.data());
-    QSharedPointer<Streamit::ITableObjects> object(dynamic_cast<Streamit::ITableObjects *>(Database::instance()->getTable(Streamit::ITable::Object, id_object)));
+    if (accessor->isTable(LightBird::ITable::Accounts))
+        account = dynamic_cast<LightBird::ITableAccounts *>(accessor.data());
+    QSharedPointer<LightBird::ITableObjects> object(dynamic_cast<LightBird::ITableObjects *>(Database::instance()->getTable(LightBird::ITable::Object, id_object)));
     if (object.isNull())
         return (allowed);
-    if (object->isTable(Streamit::ITable::Files))
+    if (object->isTable(LightBird::ITable::Files))
     {
-        file = dynamic_cast<Streamit::ITableFiles *>(object.data());
+        file = dynamic_cast<LightBird::ITableFiles *>(object.data());
         id = file->getId();
     }
-    if (object->isTable(Streamit::ITable::Directories))
+    if (object->isTable(LightBird::ITable::Directories))
     {
-        directory = dynamic_cast<Streamit::ITableDirectories *>(object.data());
+        directory = dynamic_cast<LightBird::ITableDirectories *>(object.data());
         id = directory->getId();
     }
-    if (object->isTable(Streamit::ITable::Collections))
+    if (object->isTable(LightBird::ITable::Collections))
     {
-        collection = dynamic_cast<Streamit::ITableCollections *>(object.data());
+        collection = dynamic_cast<LightBird::ITableCollections *>(object.data());
         id = collection->getId();
     }
     while (!id.isEmpty())

@@ -16,7 +16,7 @@ Plugin::~Plugin()
 {
     Log::trace("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
     // If the plugin is still loaded, we call onUnload before destroying it
-    if (this->state == Streamit::IPlugins::LOADED)
+    if (this->state == LightBird::IPlugins::LOADED)
         this->instance->onUnload();
     this->_clean();
     if (this->loader != NULL)
@@ -46,7 +46,7 @@ bool    Plugin::load(bool callOnLoad)
         this->lockPlugin.unlock();
         return (false);
     }
-    this->state = Streamit::IPlugins::LOADED;
+    this->state = LightBird::IPlugins::LOADED;
     Log::info("Plugin loaded", Properties("id", this->id), "Plugin", "load");
     this->lockPlugin.unlock();
     return (true);
@@ -60,14 +60,14 @@ bool    Plugin::unload(bool callOnUnload)
         return (false);
     }
     Log::debug("Unloading the plugin", Properties("id", this->id), "Plugin", "unload");
-    if (this->state == Streamit::IPlugins::UNLOADED)
+    if (this->state == LightBird::IPlugins::UNLOADED)
     {
         this->lockPlugin.unlock();
         return (false);
     }
-    if (this->state == Streamit::IPlugins::LOADED)
+    if (this->state == LightBird::IPlugins::LOADED)
     {
-        this->state = Streamit::IPlugins::UNLOADING;
+        this->state = LightBird::IPlugins::UNLOADING;
         if (callOnUnload)
             this->instance->onUnload();
     }
@@ -90,7 +90,7 @@ bool    Plugin::install()
         return (false);
     }
     Log::debug("Installing the plugin", Properties("id", this->id), "Plugin", "install");
-    if (this->state != Streamit::IPlugins::LOADED)
+    if (this->state != LightBird::IPlugins::LOADED)
     {
         Log::error("The plugin must be loaded to be installed", Properties("id", this->id), "Plugin", "install");
         this->lockPlugin.unlock();
@@ -128,7 +128,7 @@ bool    Plugin::uninstall()
         return (false);
     }
     Log::debug("Uninstalling the plugin", Properties("id", this->id), "Plugin", "uninstall");
-    if (this->state != Streamit::IPlugins::LOADED)
+    if (this->state != LightBird::IPlugins::LOADED)
     {
         Log::error("The plugin must be loaded to be uninstalled", Properties("id", this->id), "Plugin", "uninstall");
         this->lockPlugin.unlock();
@@ -160,7 +160,7 @@ bool    Plugin::release()
         Log::error("Deadlock", "Plugin", "release");
         return (false);
     }
-    if (this->state == Streamit::IPlugins::UNLOADED)
+    if (this->state == LightBird::IPlugins::UNLOADED)
     {
         Log::warning("The plugin is unloaded", Properties("id", this->id), "Plugin", "release");
         this->lockPlugin.unlock();
@@ -172,15 +172,15 @@ bool    Plugin::release()
         Log::warning("Used plugin is lesser than 0", Properties("id", this->id), "Plugin", "release");
         this->used = 0;
     }
-    if (this->used == 0 && this->state == Streamit::IPlugins::UNLOADING)
+    if (this->used == 0 && this->state == LightBird::IPlugins::UNLOADING)
         this->_unload();
     this->lockPlugin.unlock();
     return (true);
 }
 
-Streamit::IMetadata     Plugin::getMetadata() const
+LightBird::IMetadata     Plugin::getMetadata() const
 {
-    Streamit::IMetadata metadata;
+    LightBird::IMetadata metadata;
 
     if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
     {
@@ -220,14 +220,14 @@ bool    Plugin::checkContext(const QString &transport, const QStringList &protoc
     return (false);
 }
 
-Streamit::IPlugins::State       Plugin::getState()
+LightBird::IPlugins::State      Plugin::getState()
 {
-    Streamit::IPlugins::State   state;
+    LightBird::IPlugins::State  state;
 
     if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "getState");
-        return (Streamit::IPlugins::UNKNOW);
+        return (LightBird::IPlugins::UNKNOW);
     }
     state = this->state;
     this->lockPlugin.unlock();
@@ -241,7 +241,7 @@ const QString   &Plugin::getResourcePath() const
 
 void        Plugin::_initialize()
 {
-    this->state = Streamit::IPlugins::UNLOADED;
+    this->state = LightBird::IPlugins::UNLOADED;
     this->used = 0;
     this->configuration = NULL;
     this->instance = NULL;
@@ -261,7 +261,7 @@ void        Plugin::_initialize()
 bool                    Plugin::_loadLibrary()
 {
     QStringList         nameFilters;
-    Streamit::IPlugin   *instance;
+    LightBird::IPlugin  *instance;
 
     // List the possible extensions
     nameFilters << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle" << "*.sip";
@@ -275,7 +275,7 @@ bool                    Plugin::_loadLibrary()
             this->loader = new QPluginLoader(this->path + dir.peekNext());
             this->libraryName = dir.peekNext();
             // If the plugin implements IPlugin
-            if ((instance = qobject_cast<Streamit::IPlugin *>(loader->instance())) != NULL &&
+            if ((instance = qobject_cast<LightBird::IPlugin *>(loader->instance())) != NULL &&
                 loader->isLoaded() == true)
                 delete instance;
             else
@@ -297,10 +297,10 @@ bool                    Plugin::_loadLibrary()
 
 void                        Plugin::_getResourcesPath()
 {
-    Streamit::IResources    *instance;
+    LightBird::IResources   *instance;
 
     // Load the resources path if the plugin implements it
-    if ((instance = qobject_cast<Streamit::IResources *>(this->loader->instance())))
+    if ((instance = qobject_cast<LightBird::IResources *>(this->loader->instance())))
     {
         this->resourcesPath = instance->getResourcesPath();
         // Add the ":" that identified the resources
@@ -350,14 +350,14 @@ bool    Plugin::_load()
         return (false);
     }
     this->instanceObject = this->loader->instance();
-    if (!(this->instance = qobject_cast<Streamit::IPlugin *>(this->instanceObject)))
+    if (!(this->instance = qobject_cast<LightBird::IPlugin *>(this->instanceObject)))
     {
         Log::error("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
         return (false);
     }
     bool timers = false;
     // If the plugin implements ITimer, they are loaded
-    if (qobject_cast<Streamit::ITimer *>(this->instanceObject))
+    if (qobject_cast<LightBird::ITimer *>(this->instanceObject))
         timers = true;
     this->api = new Api(this->id, this->configuration, timers);
     this->_loadInformations();
@@ -468,7 +468,7 @@ void    Plugin::_loadResources()
 void    Plugin::_unload()
 {
     this->_clean();
-    this->state = Streamit::IPlugins::UNLOADED;
+    this->state = LightBird::IPlugins::UNLOADED;
 }
 
 void    Plugin::_clean()

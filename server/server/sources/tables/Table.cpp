@@ -110,7 +110,7 @@ const QString   &Table::getTableName()
     return (this->tableName);
 }
 
-Streamit::ITable::Tables Table::getTableId()
+LightBird::ITable::Tables Table::getTableId()
 {
     return (this->tableId);
 }
@@ -122,64 +122,64 @@ bool            Table::isTable(const QString &tableName)
     return (true);
 }
 
-bool            Table::isTable(Streamit::ITable::Tables tableId)
+bool            Table::isTable(LightBird::ITable::Tables tableId)
 {
     if (this->tableId != tableId)
         return (false);
     return (true);
 }
 
-Streamit::ITableAccessors   *Table::toTableAccessors()
+LightBird::ITableAccessors   *Table::toTableAccessors()
 {
-    return (dynamic_cast<Streamit::ITableAccessors *>(this));
+    return (dynamic_cast<LightBird::ITableAccessors *>(this));
 }
 
-Streamit::ITableAccounts    *Table::toTableAccounts()
+LightBird::ITableAccounts    *Table::toTableAccounts()
 {
-    return (dynamic_cast<Streamit::ITableAccounts *>(this));
+    return (dynamic_cast<LightBird::ITableAccounts *>(this));
 }
 
-Streamit::ITableCollections *Table::toTableCollections()
+LightBird::ITableCollections *Table::toTableCollections()
 {
-    return (dynamic_cast<Streamit::ITableCollections *>(this));
+    return (dynamic_cast<LightBird::ITableCollections *>(this));
 }
 
-Streamit::ITableDirectories *Table::toTableDirectories()
+LightBird::ITableDirectories *Table::toTableDirectories()
 {
-    return (dynamic_cast<Streamit::ITableDirectories *>(this));
+    return (dynamic_cast<LightBird::ITableDirectories *>(this));
 }
 
-Streamit::ITableEvents      *Table::toTableEvents()
+LightBird::ITableEvents      *Table::toTableEvents()
 {
-    return (dynamic_cast<Streamit::ITableEvents *>(this));
+    return (dynamic_cast<LightBird::ITableEvents *>(this));
 }
 
-Streamit::ITableFiles       *Table::toTableFiles()
+LightBird::ITableFiles       *Table::toTableFiles()
 {
-    return (dynamic_cast<Streamit::ITableFiles *>(this));
+    return (dynamic_cast<LightBird::ITableFiles *>(this));
 }
 
-Streamit::ITableGroups      *Table::toTableGroups()
+LightBird::ITableGroups      *Table::toTableGroups()
 {
-    return (dynamic_cast<Streamit::ITableGroups *>(this));
+    return (dynamic_cast<LightBird::ITableGroups *>(this));
 }
 
-Streamit::ITableLimits      *Table::toTableLimits()
+LightBird::ITableLimits      *Table::toTableLimits()
 {
-    return (dynamic_cast<Streamit::ITableLimits *>(this));
+    return (dynamic_cast<LightBird::ITableLimits *>(this));
 }
 
-Streamit::ITableObjects     *Table::toTableObjects()
+LightBird::ITableObjects     *Table::toTableObjects()
 {
-    return (dynamic_cast<Streamit::ITableObjects *>(this));
+    return (dynamic_cast<LightBird::ITableObjects *>(this));
 }
 
-Streamit::ITablePermissions *Table::toTablePermissions()
+LightBird::ITablePermissions *Table::toTablePermissions()
 {
-    return (dynamic_cast<Streamit::ITablePermissions *>(this));
+    return (dynamic_cast<LightBird::ITablePermissions *>(this));
 }
 
-Streamit::ITableTags        *Table::toTableTags()
+LightBird::ITableTags        *Table::toTableTags()
 {
-    return (dynamic_cast<Streamit::ITableTags *>(this));
+    return (dynamic_cast<LightBird::ITableTags *>(this));
 }

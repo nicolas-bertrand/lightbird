@@ -6,7 +6,7 @@
 # include "Table.h"
 
 class TableTags : virtual public Table,
-                  virtual public Streamit::ITableTags
+                  virtual public LightBird::ITableTags
 {
 public:
     TableTags(const QString &id = "");

@@ -12,9 +12,9 @@
 /// instance of the class is deleted (e.g when counter reach zero).
 /// When a thread calls getResult(), it is blocked until the result is defined using
 /// setResult().
-/// @see Streamit::IFuture
+/// @see LightBird::IFuture
 template <class T>
-class Future : public Streamit::IFuture<T>
+class Future : public LightBird::IFuture<T>
 {
 public:
     /// @see _initialize

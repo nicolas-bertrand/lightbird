@@ -6,7 +6,7 @@
 # include "TableAccessors.h"
 
 class TableAccounts : virtual public TableAccessors,
-                      virtual public Streamit::ITableAccounts
+                      virtual public LightBird::ITableAccounts
 {
 public:
     TableAccounts(const QString &id = "");

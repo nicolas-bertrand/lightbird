@@ -6,7 +6,7 @@
 # include <QVariant>
 
 /// @brief Allows plugins to get information on a file.
-namespace Streamit
+namespace LightBird
 {
     class IIdentify
     {
@@ -35,7 +35,7 @@ namespace Streamit
         /// @param information : If true is returned, this parameter is filled
         /// with the information on the file.
         /// @return True if the extension has been able to get information on the file.
-        virtual bool    identify(const QString &file, Streamit::IIdentify::Information &information) = 0;
+        virtual bool    identify(const QString &file, LightBird::IIdentify::Information &information) = 0;
     };
 }
 

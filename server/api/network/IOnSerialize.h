@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This interface is called before each calls of the IDoUnserialize*
     /// interfaces, for every plugins that implements it and has the correct context.
@@ -28,10 +28,10 @@ namespace Streamit
         /// @param client : The client that has sent the request.
         /// @param type : Used to know which of the IDoSerialize interfaces is going
         /// to be called.
-        virtual void    onSerialize(Streamit::IClient &client, Streamit::IOnSerialize::Serialize type) = 0;
+        virtual void    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IOnSerialize, "cc.lightbird.IOnSerialize");
+Q_DECLARE_INTERFACE(LightBird::IOnSerialize, "cc.lightbird.IOnSerialize");
 
 #endif // IONSERIALIZE_H

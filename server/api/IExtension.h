@@ -3,7 +3,7 @@
 
 # include <QStringList>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Plugins that implements this interface can be used as extensions
     /// by other plugins.
@@ -29,6 +29,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IExtension, "cc.lightbird.IExtension");
+Q_DECLARE_INTERFACE(LightBird::IExtension, "cc.lightbird.IExtension");
 
 #endif // IEXTENSION_H

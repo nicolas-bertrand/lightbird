@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief By inheriting this interface one can be aware of the
     /// disconnection of a client.
@@ -14,10 +14,10 @@ namespace Streamit
 
         /// @brief This method is called after the disconnection of a client.
         /// @param client : This object represents the client.
-        virtual void    onDisconnect(Streamit::IClient &client) = 0;
+        virtual void    onDisconnect(LightBird::IClient &client) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IOnDisconnect, "cc.lightbird.IOnDisconnect");
+Q_DECLARE_INTERFACE(LightBird::IOnDisconnect, "cc.lightbird.IOnDisconnect");
 
 # endif // IONDISCONNECT_H

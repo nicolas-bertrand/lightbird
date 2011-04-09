@@ -9,7 +9,7 @@
 TableTags::TableTags(const QString &id)
 {
     this->tableName = "tags";
-    this->tableId = Streamit::ITable::Tags;
+    this->tableId = LightBird::ITable::Tags;
     if (!id.isEmpty())
         this->setId(id);
 }

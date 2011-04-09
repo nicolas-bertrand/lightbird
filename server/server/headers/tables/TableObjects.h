@@ -6,7 +6,7 @@
 # include "Table.h"
 
 class TableObjects : virtual public Table,
-                     virtual public Streamit::ITableObjects
+                     virtual public LightBird::ITableObjects
 {
 public:
     QString     getIdAccount();

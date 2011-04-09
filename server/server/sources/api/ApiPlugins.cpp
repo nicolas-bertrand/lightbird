@@ -20,40 +20,40 @@ ApiPlugins::~ApiPlugins()
     Log::trace("ApiPlugins destroyed!", "ApiPlugins", "~ApiPlugins");
 }
 
-QSharedPointer<Streamit::IFuture<bool> > ApiPlugins::load(const QString &id)
+QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::load(const QString &id)
 {
-    Streamit::IPlugins::State   state;
+    LightBird::IPlugins::State  state;
 
     // If the plugin is not installed
     state = Plugins::instance()->getState(id);
-    if (state == Streamit::IPlugins::UNINSTALLED ||
-        state == Streamit::IPlugins::UNKNOW)
+    if (state == LightBird::IPlugins::UNINSTALLED ||
+        state == LightBird::IPlugins::UNKNOW)
         Plugins::instance()->install(id);
     // Creates a shared pointer that will automatically delete the Future
-    return (QSharedPointer<Streamit::IFuture<bool> >(new Future<bool>(Plugins::instance()->load(id))));
+    return (QSharedPointer<LightBird::IFuture<bool> >(new Future<bool>(Plugins::instance()->load(id))));
 }
 
-QSharedPointer<Streamit::IFuture<bool> > ApiPlugins::unload(const QString &id)
+QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::unload(const QString &id)
 {
-    return (QSharedPointer<Streamit::IFuture<bool> > (new Future<bool>(Plugins::instance()->unload(id))));
+    return (QSharedPointer<LightBird::IFuture<bool> > (new Future<bool>(Plugins::instance()->unload(id))));
 }
 
-QSharedPointer<Streamit::IFuture<bool> > ApiPlugins::install(const QString &id)
+QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::install(const QString &id)
 {
-    return (QSharedPointer<Streamit::IFuture<bool> > (new Future<bool>(Plugins::instance()->install(id))));
+    return (QSharedPointer<LightBird::IFuture<bool> > (new Future<bool>(Plugins::instance()->install(id))));
 }
 
-QSharedPointer<Streamit::IFuture<bool> > ApiPlugins::uninstall(const QString &id)
+QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::uninstall(const QString &id)
 {
-    return (QSharedPointer<Streamit::IFuture<bool> > (new Future<bool>(Plugins::instance()->uninstall(id))));
+    return (QSharedPointer<LightBird::IFuture<bool> > (new Future<bool>(Plugins::instance()->uninstall(id))));
 }
 
-Streamit::IMetadata ApiPlugins::getMetadata(const QString &id) const
+LightBird::IMetadata ApiPlugins::getMetadata(const QString &id) const
 {
     return (Plugins::instance()->getMetadata(id));
 }
 
-Streamit::IPlugins::State ApiPlugins::getState(const QString &id)
+LightBird::IPlugins::State ApiPlugins::getState(const QString &id)
 {
     return (Plugins::instance()->getState(id));
 }

@@ -9,12 +9,12 @@
 # include "ITableAccessors.h"
 # include "ITableGroups.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to an account.
     /// Each modifications done in this object is immediatly saved in the database.
     /// This can be seen as an implementation of the Active Record design pattern.
-    class ITableAccounts : virtual public Streamit::ITableAccessors
+    class ITableAccounts : virtual public LightBird::ITableAccessors
     {
     public:
         virtual ~ITableAccounts() {}
@@ -104,6 +104,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITableAccounts, "cc.lightbird.ITableAccounts");
+Q_DECLARE_INTERFACE(LightBird::ITableAccounts, "cc.lightbird.ITableAccounts");
 
 #endif // ITABLEACCOUNTS_H

@@ -5,10 +5,10 @@
 
 # include "IResponse.h"
 
-/// @brief Response is the server implementation of Streamit::IResponse,
+/// @brief Response is the server implementation of LightBird::IResponse,
 /// and represents a client's response.
 class Response : public QObject,
-                 public Streamit::IResponse
+                 public LightBird::IResponse
 {
     Q_OBJECT
 
@@ -27,7 +27,7 @@ public:
     void                    setType(const QString &type);
     QVariantList            &getInformations();
     QMap<QString, QString>  &getHeader();
-    Streamit::IContent      &getContent();
+    LightBird::IContent     &getContent();
     bool                    getError() const;
     void                    setError(bool error);
 

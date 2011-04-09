@@ -13,7 +13,7 @@
 #include "IDoWrite.h"
 #include "IOnDisconnect.h"
 
-Client::Client(QAbstractSocket *s, Streamit::INetwork::Transports t, const QStringList &pr,
+Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
                const QString &pn, IReadWrite *r, QObject *parent) :
                QThread(parent), transport(t), protocols(pr), port(p), socketDescriptor(sd),
@@ -47,8 +47,8 @@ void        Client::run()
     // Creates the engine of the client
     this->engine = new Engine(this, this);
     // Connect the getInformations signal
-    QObject::connect(this, SIGNAL(getInformationsSignal(Streamit::INetwork::Client*,Future<bool>*)),
-                     this, SLOT(_getInformations(Streamit::INetwork::Client*,Future<bool>*)));
+    QObject::connect(this, SIGNAL(getInformationsSignal(LightBird::INetwork::Client*,Future<bool>*)),
+                     this, SLOT(_getInformations(LightBird::INetwork::Client*,Future<bool>*)));
     if (this->socketDescriptor >= 0)
         socketDescriptor = QString::number(this->socketDescriptor);
     Log::info("Client connected", Properties("id", this->id).add("port", this->port)
@@ -162,8 +162,8 @@ bool        Client::_onConnect()
 {
     bool    accept = true;
 
-    // Get the instances of all connected plugins that implements Streamit::IOnConnect and corresponds to the context
-    QMapIterator<QString, Streamit::IOnConnect *> it(Plugins::instance()->getInstances<Streamit::IOnConnect>(this->transport, this->protocols, this->port));
+    // Get the instances of all connected plugins that implements LightBird::IOnConnect and corresponds to the context
+    QMapIterator<QString, LightBird::IOnConnect *> it(Plugins::instance()->getInstances<LightBird::IOnConnect>(this->transport, this->protocols, this->port));
     while (it.hasNext())
     {
         Log::trace("Calling IOnConnect::onConnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
@@ -182,11 +182,11 @@ bool        Client::_onConnect()
 
 bool        Client::doRead(QByteArray &data)
 {
-    QPair<QString, Streamit::IDoRead *> instance;
+    QPair<QString, LightBird::IDoRead *> instance;
 
     data.clear();
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoRead>(this->transport, this->protocols, this->port)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->transport, this->protocols, this->port)).second)
     {
         Log::trace("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
         if (!instance.second->doRead(*this, data))
@@ -199,10 +199,10 @@ bool        Client::doRead(QByteArray &data)
 
 bool        Client::doWrite(QByteArray &data)
 {
-    QPair<QString, Streamit::IDoWrite *> instance;
+    QPair<QString, LightBird::IDoWrite *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<Streamit::IDoWrite>(this->transport, this->protocols, this->port)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->transport, this->protocols, this->port)).second)
     {
         Log::trace("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
         if (!instance.second->doWrite(*this, data))
@@ -215,7 +215,7 @@ bool        Client::doWrite(QByteArray &data)
 
 void        Client::_onDisconnect()
 {
-    QMapIterator<QString, Streamit::IOnDisconnect *> it(Plugins::instance()->getInstances<Streamit::IOnDisconnect>(this->transport, this->protocols, this->port));
+    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->transport, this->protocols, this->port));
 
     while (it.hasNext())
     {
@@ -240,7 +240,7 @@ const QStringList   &Client::getProtocols() const
     return (this->protocols);
 }
 
-Streamit::INetwork::Transports  Client::getTransport() const
+LightBird::INetwork::Transports Client::getTransport() const
 {
     return (this->transport);
 }
@@ -280,22 +280,22 @@ QAbstractSocket &Client::getSocket() const
     return (*this->socket);
 }
 
-Streamit::ITableAccounts &Client::getAccount()
+LightBird::ITableAccounts &Client::getAccount()
 {
     return (this->account);
 }
 
-Streamit::IRequest      &Client::getRequest()
+LightBird::IRequest     &Client::getRequest()
 {
     return (this->engine->getRequest());
 }
 
-Streamit::IResponse     &Client::getResponse()
+LightBird::IResponse    &Client::getResponse()
 {
     return (this->engine->getResponse());
 }
 
-void    Client::getInformations(Streamit::INetwork::Client *client, void *thread, Future<bool> *future)
+void    Client::getInformations(LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
 {
     // If the thread that require the informations is the client, it is safe
     if (thread == this)
@@ -305,7 +305,7 @@ void    Client::getInformations(Streamit::INetwork::Client *client, void *thread
         emit this->getInformationsSignal(client, future);
 }
 
-void    Client::_getInformations(Streamit::INetwork::Client *client, Future<bool> *future)
+void    Client::_getInformations(LightBird::INetwork::Client *client, Future<bool> *future)
 {
     client->transport = this->transport;
     client->protocols = this->protocols;

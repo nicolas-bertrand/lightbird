@@ -4,7 +4,7 @@
 # include <QString>
 # include <QMap>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief The plugins can log informations from this interface. Notice that
     /// the log may not be immediatly written, since it use the Qt slot/signal facilities.
@@ -32,7 +32,7 @@ namespace Streamit
         /// @param properties : A map of properties that can give additional informations on the log entry.
         /// @param object : The name of the class from which the log is written.
         /// @param method : The name of the method from which the log is written.
-        virtual void        write(Streamit::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &object, const QString &method) = 0;
+        virtual void        write(LightBird::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &object, const QString &method) = 0;
         /// @brief Writes a fatal log level
         /// @see write
         virtual void        fatal(const QString &message, const QString &object = "", const QString &method = "") = 0;
@@ -72,10 +72,10 @@ namespace Streamit
         /// @brief The current log level. The logs below this level are not saved.
         /// For example, WARNING is below ERROR, and INFO is below WARNING...
         /// @return The current log level.
-        virtual Streamit::ILogs::level getlevel() = 0;
+        virtual LightBird::ILogs::level getlevel() = 0;
         /// @brief Modify the log level.
         /// @param level : The new log level.
-        virtual void        setLevel(Streamit::ILogs::level level) = 0;
+        virtual void        setLevel(LightBird::ILogs::level level) = 0;
         /// @return True if the error logs are saved.
         virtual bool        isError() = 0;
         /// @return True if the warning logs are saved.
@@ -89,6 +89,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ILogs, "cc.lightbird.ILogs");
+Q_DECLARE_INTERFACE(LightBird::ILogs, "cc.lightbird.ILogs");
 
 #endif // ILOGS_H

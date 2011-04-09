@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief By inheriting this interface, a plugin can define the name of the protocol
     /// used by a client in its request. It is called before IDoUnserializeHeader, while
@@ -29,10 +29,10 @@ namespace Streamit
         /// be called again for this request.
         /// @return False while the protocol of the request has not been found. True is
         /// returned when the protocol name has been filled in the protocol parameter.
-        virtual bool    onProtocol(Streamit::IClient &client, const QByteArray &data, QString &protocol, bool &unknow) = 0;
+        virtual bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &unknow) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IOnProtocol, "cc.lightbird.IOnProtocol");
+Q_DECLARE_INTERFACE(LightBird::IOnProtocol, "cc.lightbird.IOnProtocol");
 
 #endif // IONPROTOCOL_H

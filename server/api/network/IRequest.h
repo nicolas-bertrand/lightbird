@@ -8,7 +8,7 @@
 
 # include "IContent.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Represents a request. Contains informations about it,
     /// whose depends on the protocol that transport it.
@@ -41,9 +41,9 @@ namespace Streamit
         /// @brief A header is a set of meta-information related to the request.
         /// This method allows one to access to the header and modified it.
         /// @return The header of the request.
-        virtual QMap<QString, QString>  &getHeader() = 0;
+        virtual QMap<QString, QString> &getHeader() = 0;
         /// @brief The content of the request.
-        virtual Streamit::IContent  &getContent() = 0;
+        virtual LightBird::IContent &getContent() = 0;
         /// @brief If there is an error in the request (it will be not executed).
         virtual bool    isError() const = 0;
         /// @brief If there is an error in the request (it will be not executed).

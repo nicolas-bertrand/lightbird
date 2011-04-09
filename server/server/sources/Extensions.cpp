@@ -24,12 +24,12 @@ Extensions::~Extensions()
 
 void    Extensions::add(Plugin *plugin)
 {
-    Streamit::IExtension    *extension;
+    LightBird::IExtension   *extension;
     Properties              properties;
 
     this->mutex.lock();
     // Check that the plugin implements the IExtensions interface
-    if ((extension = qobject_cast<Streamit::IExtension *>(plugin->instanceObject)) == NULL)
+    if ((extension = qobject_cast<LightBird::IExtension *>(plugin->instanceObject)) == NULL)
         return (this->mutex.unlock());
     // If the plugin is already managed, an error occured
     if (this->plugins.contains(plugin->id))

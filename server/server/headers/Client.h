@@ -20,7 +20,7 @@ class Engine;
 /// @brief Represents a connected client.
 /// All its requests are processed from a thread based on this class.
 class Client : public QThread,
-               public Streamit::IClient
+               public LightBird::IClient
 {
     Q_OBJECT
 
@@ -32,7 +32,7 @@ public:
     /// @param peerAddress : The address of the client.
     /// @param peerPort : The port from which the client is connected in his host.
     /// @param peerName : The name of the client's host. May be empty.
-    Client(QAbstractSocket *socket, Streamit::INetwork::Transports transport, const QStringList &protocol,
+    Client(QAbstractSocket *socket, LightBird::INetwork::Transports transport, const QStringList &protocol,
            unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
            unsigned short peerPort, const QString &peerName, IReadWrite *readWriteInterface, QObject *parent = 0);
     ~Client();
@@ -50,7 +50,7 @@ public:
     const QString           &getId() const;
     unsigned short          getPort() const;
     const QStringList       &getProtocols() const;
-    Streamit::INetwork::Transports  getTransport() const;
+    LightBird::INetwork::Transports getTransport() const;
     int                     getSocketDescriptor() const;
     const QHostAddress      &getPeerAddress() const;
     unsigned short          getPeerPort() const;
@@ -58,9 +58,9 @@ public:
     const QDateTime         &getConnectionDate() const;
     QAbstractSocket         &getSocket() const;
     QVariantMap             &getInformations();
-    Streamit::ITableAccounts &getAccount();
-    Streamit::IRequest      &getRequest();
-    Streamit::IResponse     &getResponse();
+    LightBird::ITableAccounts &getAccount();
+    LightBird::IRequest     &getRequest();
+    LightBird::IResponse    &getResponse();
 
     /// @brief This method is used to get the informations of a client in a thread
     /// safe way. It emits the signal getInformationsSignal which will calls the slot
@@ -71,7 +71,7 @@ public:
     /// to avoid dead locks.
     /// @param future : Once the informations are filled, the future is set in order
     /// to unlock the thread that is waiting for the informations.
-    void    getInformations(Streamit::INetwork::Client *client, void *thread, Future<bool> *future);
+    void    getInformations(LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
 
 private:
     Client();
@@ -79,7 +79,7 @@ private:
     Client  *operator=(const Client &);
 
     QString                 id;                     ///< The id of the client.
-    Streamit::INetwork::Transports transport;       ///< The transport protocol used by the underlaying socket.
+    LightBird::INetwork::Transports transport;      ///< The transport protocol used by the underlaying socket.
     QStringList             protocols;              ///< The names of the protocols used to communicate with the client.
     unsigned short          port;                   ///< The local port through which the client is connected.
     int                     socketDescriptor;       ///< The descriptor of the socket.
@@ -104,13 +104,13 @@ public slots:
 private slots:
     bool            _onConnect();
     void            _onDisconnect();
-    void            _getInformations(Streamit::INetwork::Client *client, Future<bool> *future);
+    void            _getInformations(LightBird::INetwork::Client *client, Future<bool> *future);
     QByteArray      _simplified(QByteArray data);
 
 signals:
     /// @brief This signal ensure that data are read in the client thread.
     void            readSignal();
-    void            getInformationsSignal(Streamit::INetwork::Client *client, Future<bool> *future);
+    void            getInformationsSignal(LightBird::INetwork::Client *client, Future<bool> *future);
 };
 
 #endif // CLIENT_H

@@ -11,77 +11,77 @@ ApiLogs::~ApiLogs()
     Log::trace("ApiLogs destroyed!", Properties("id", this->id), "ApiLogs", "~ApiLogs");
 }
 
-void    ApiLogs::write(Streamit::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method)
+void    ApiLogs::write(LightBird::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
     Log::instance()->write(level, message, this->id, properties, className, method);
 }
 
 void    ApiLogs::fatal(const QString &message, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::FATAL, message, this->id, QMap<QString, QString>(), className,method);
+    Log::instance()->write(LightBird::ILogs::FATAL, message, this->id, QMap<QString, QString>(), className,method);
 }
 
 void    ApiLogs::fatal(const QString &message, QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::FATAL, message, this->id, properties, className,method);
+    Log::instance()->write(LightBird::ILogs::FATAL, message, this->id, properties, className,method);
 }
 
 void    ApiLogs::error(const QString &message, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::ERROR, message, this->id, QMap<QString, QString>(), className, method);
+    Log::instance()->write(LightBird::ILogs::ERROR, message, this->id, QMap<QString, QString>(), className, method);
 }
 
 void    ApiLogs::error(const QString &message, QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::ERROR, message, this->id, properties, className,method);
+    Log::instance()->write(LightBird::ILogs::ERROR, message, this->id, properties, className,method);
 }
 
 void    ApiLogs::warning(const QString &message, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::WARNING, message, this->id, QMap<QString, QString>(), className,method);
+    Log::instance()->write(LightBird::ILogs::WARNING, message, this->id, QMap<QString, QString>(), className,method);
 }
 
 void    ApiLogs::warning(const QString &message, QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::WARNING, message, this->id, properties, className,method);
+    Log::instance()->write(LightBird::ILogs::WARNING, message, this->id, properties, className,method);
 }
 
 void    ApiLogs::info(const QString &message, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::INFO, message, this->id, QMap<QString, QString>(), className,method);
+    Log::instance()->write(LightBird::ILogs::INFO, message, this->id, QMap<QString, QString>(), className,method);
 }
 
 void    ApiLogs::info(const QString &message, QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::INFO, message, this->id, properties, className,method);
+    Log::instance()->write(LightBird::ILogs::INFO, message, this->id, properties, className,method);
 }
 
 void    ApiLogs::debug(const QString &message, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::DEBUG, message, this->id, QMap<QString, QString>(), className,method);
+    Log::instance()->write(LightBird::ILogs::DEBUG, message, this->id, QMap<QString, QString>(), className,method);
 }
 
 void    ApiLogs::debug(const QString &message, QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::DEBUG, message, this->id, properties, className,method);
+    Log::instance()->write(LightBird::ILogs::DEBUG, message, this->id, properties, className,method);
 }
 
 void    ApiLogs::trace(const QString &message, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::TRACE, message, this->id, QMap<QString, QString>(), className, method);
+    Log::instance()->write(LightBird::ILogs::TRACE, message, this->id, QMap<QString, QString>(), className, method);
 }
 
 void    ApiLogs::trace(const QString &message, QMap<QString, QString> &properties, const QString &className, const QString &method)
 {
-    Log::instance()->write(Streamit::ILogs::TRACE, message, this->id, properties, className,method);
+    Log::instance()->write(LightBird::ILogs::TRACE, message, this->id, properties, className,method);
 }
 
-Streamit::ILogs::level ApiLogs::getlevel()
+LightBird::ILogs::level ApiLogs::getlevel()
 {
     return (Log::instance()->getlevel());
 }
 
-void    ApiLogs::setLevel(Streamit::ILogs::level level)
+void    ApiLogs::setLevel(LightBird::ILogs::level level)
 {
     Log::instance()->setLevel(level);
 }

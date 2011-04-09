@@ -9,7 +9,7 @@
 TableGroups::TableGroups(const QString &id)
 {
     this->tableName = "groups";
-    this->tableId = Streamit::ITable::Groups;
+    this->tableId = LightBird::ITable::Groups;
     if (!id.isEmpty())
         this->setId(id);
 }
@@ -128,7 +128,7 @@ bool                TableGroups::unitTests()
     {
         ASSERT(b1.add("b1"));
         ASSERT(!b1.add("b1", ""));
-        ASSERT(b1.getTableId() == Streamit::ITable::Groups);
+        ASSERT(b1.getTableId() == LightBird::ITable::Groups);
         ASSERT(b1.getTableName() == "groups");
         ASSERT(b1.isTable(b1.getTableId()));
         ASSERT(b1.isTable(b1.getTableName()));

@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief By inheriting this interface, the onConnect method will be called
     /// each time a new client connects to a port of the server.
@@ -16,10 +16,10 @@ namespace Streamit
         /// @brief This method is called when a new client is connected.
         /// @param client : This object represents the client.
         /// @return True if the client is accepted, false otherwise (the client will be disconnect).
-        virtual bool    onConnect(Streamit::IClient &client) = 0;
+        virtual bool    onConnect(LightBird::IClient &client) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IOnConnect, "cc.lightbird.IOnConnect");
+Q_DECLARE_INTERFACE(LightBird::IOnConnect, "cc.lightbird.IOnConnect");
 
 #endif // IONCONNECT_H

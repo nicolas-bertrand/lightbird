@@ -10,7 +10,7 @@
 TableAccounts::TableAccounts(const QString &id)
 {
     this->tableName = "accounts";
-    this->tableId = Streamit::ITable::Accounts;
+    this->tableId = LightBird::ITable::Accounts;
     if (!id.isEmpty())
         this->setId(id);
 }
@@ -379,7 +379,7 @@ bool                TableAccounts::unitTests()
     {
         ASSERT(a1.add("a1", "p1", true, true));
         ASSERT(!a1.add("a1", "p2"));
-        ASSERT(a1.getTableId() == Streamit::ITable::Accounts);
+        ASSERT(a1.getTableId() == LightBird::ITable::Accounts);
         ASSERT(a1.getTableName() == "accounts");
         ASSERT(a1.isTable(a1.getTableId()));
         ASSERT(a1.isTable(a1.getTableName()));

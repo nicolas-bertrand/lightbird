@@ -4,7 +4,7 @@
 # include <QString>
 # include <QDateTime>
 
-namespace Streamit
+namespace LightBird
 {
     class ITableAccessors;
     class ITableAccounts;
@@ -70,38 +70,38 @@ namespace Streamit
         /// @brief Returns the name of the table represented by the instance.
         virtual const QString   &getTableName() = 0;
         /// @brief Returns the id of the table represented by the instance.
-        virtual Streamit::ITable::Tables getTableId() = 0;
+        virtual LightBird::ITable::Tables getTableId() = 0;
         /// @brief Returns true if the table corresponds to the paramater.
         virtual bool            isTable(const QString &tableName) = 0;
         /// @brief Returns true if the table corresponds to the paramater.
-        virtual bool            isTable(Streamit::ITable::Tables tableId) = 0;
+        virtual bool            isTable(LightBird::ITable::Tables tableId) = 0;
 
         // Casts
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableAccessors   *toTableAccessors() = 0;
+        virtual LightBird::ITableAccessors   *toTableAccessors() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableAccounts    *toTableAccounts() = 0;
+        virtual LightBird::ITableAccounts    *toTableAccounts() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableCollections *toTableCollections() = 0;
+        virtual LightBird::ITableCollections *toTableCollections() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableDirectories *toTableDirectories() = 0;
+        virtual LightBird::ITableDirectories *toTableDirectories() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableEvents      *toTableEvents() = 0;
+        virtual LightBird::ITableEvents      *toTableEvents() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableFiles       *toTableFiles() = 0;
+        virtual LightBird::ITableFiles       *toTableFiles() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableGroups      *toTableGroups() = 0;
+        virtual LightBird::ITableGroups      *toTableGroups() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableLimits      *toTableLimits() = 0;
+        virtual LightBird::ITableLimits      *toTableLimits() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableObjects     *toTableObjects() = 0;
+        virtual LightBird::ITableObjects     *toTableObjects() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITablePermissions *toTablePermissions() = 0;
+        virtual LightBird::ITablePermissions *toTablePermissions() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual Streamit::ITableTags        *toTableTags() = 0;
+        virtual LightBird::ITableTags        *toTableTags() = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITable, "cc.lightbird.ITable");
+Q_DECLARE_INTERFACE(LightBird::ITable, "cc.lightbird.ITable");
 
 #endif // ITABLE_H

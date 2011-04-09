@@ -13,10 +13,10 @@
 /// @brief Server implementation of the API's IConfiguration.
 /// Manage an XML configuration file. This class is thread safe.
 class Configuration : public QObject,
-                      public Streamit::IConfiguration
+                      public LightBird::IConfiguration
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::IConfiguration)
+    Q_INTERFACES(LightBird::IConfiguration)
 
 public:
     /// @param configurationPath : The path to the configuration file. If the file doesn't exists,
@@ -32,23 +32,23 @@ public:
 
     /// @return If the configuration is loaded.
     bool                    isLoaded();
-    /// @see Streamit::IConfiguration::getPath
+    /// @see LightBird::IConfiguration::getPath
     QString                 getPath();
-    /// @see Streamit::IConfiguration::get
+    /// @see LightBird::IConfiguration::get
     QString                 get(const QString &nodeName);
-    /// @see Streamit::IConfiguration::count
+    /// @see LightBird::IConfiguration::count
     int                     count(const QString &nodeName);
-    /// @see Streamit::IConfiguration::set
+    /// @see LightBird::IConfiguration::set
     void                    set(const QString &nodeName, const QString &nodeValue);
-    /// @see Streamit::IConfiguration::remove
+    /// @see LightBird::IConfiguration::remove
     bool                    remove(const QString &nodeName);
-    /// @see Streamit::IConfiguration::readDom
+    /// @see LightBird::IConfiguration::readDom
     const QDomElement       &readDom();
-    /// @see Streamit::IConfiguration::writeDom
+    /// @see LightBird::IConfiguration::writeDom
     QDomElement             &writeDom();
-    /// @see Streamit::IConfiguration::release
+    /// @see LightBird::IConfiguration::release
     void                    release();
-    /// @see Streamit::IConfiguration::save
+    /// @see LightBird::IConfiguration::save
     bool                    save();
     /// @brief Set the parent of the object is his living thread (not in the current thread)
     void                    setParent(QObject *parent);

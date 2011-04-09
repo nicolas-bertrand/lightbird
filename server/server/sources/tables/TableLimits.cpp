@@ -9,7 +9,7 @@
 TableLimits::TableLimits(const QString &id)
 {
     this->tableName = "limits";
-    this->tableId = Streamit::ITable::Limits;
+    this->tableId = LightBird::ITable::Limits;
     if (!id.isEmpty())
         this->setId(id);
 }

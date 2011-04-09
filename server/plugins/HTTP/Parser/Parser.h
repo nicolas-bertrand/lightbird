@@ -10,7 +10,7 @@
 class Parser
 {
 public:
-    Parser(Streamit::IClient *client = NULL);
+    Parser(LightBird::IClient *client = NULL);
     ~Parser();
     Parser(const Parser &parser);
     Parser  &operator=(const Parser &parser);
@@ -37,11 +37,11 @@ private:
     /// @brief Send an error to the client.
     bool    _error(int code, const QString &message, const QByteArray &content = "");
 
-    Streamit::IClient   *client;
-    Streamit::IRequest  *request;
-    Streamit::IResponse *response;
-    QByteArray          header;
-    quint64             contentSent;
+    LightBird::IClient   *client;
+    LightBird::IRequest  *request;
+    LightBird::IResponse *response;
+    QByteArray           header;
+    quint64              contentSent;
 };
 
 #endif // PARSER_H

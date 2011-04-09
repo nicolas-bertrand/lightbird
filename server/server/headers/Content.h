@@ -10,7 +10,7 @@
 
 /// @brief Server's implementation of IContent.
 class Content : public QObject,
-                public Streamit::IContent
+                public LightBird::IContent
 {
     Q_OBJECT
 
@@ -18,8 +18,8 @@ public:
     Content(QObject *parent = 0);
     ~Content();
 
-    Streamit::IContent::Storage getStorage() const;
-    void            setStorage(Streamit::IContent::Storage storage, const QString &fileName = "");
+    LightBird::IContent::Storage getStorage() const;
+    void            setStorage(LightBird::IContent::Storage storage, const QString &fileName = "");
     QByteArray      getContent(quint64 size = 0);
     void            setContent(const QByteArray &content, bool append = true);
     QByteArray      *getByteArray();
@@ -35,12 +35,12 @@ private:
     Content(const Content &);
     Content &operator=(const Content &);
 
-    Streamit::IContent::Storage storage;
-    QByteArray                  *byteArray;
-    QVariant                    *variant;
-    QFile                       *file;
-    QTemporaryFile              *temporaryFile;
-    quint64                     seek;
+    LightBird::IContent::Storage storage;
+    QByteArray                   *byteArray;
+    QVariant                     *variant;
+    QFile                        *file;
+    QTemporaryFile               *temporaryFile;
+    quint64                      seek;
 };
 
 #endif // CONTENT_H

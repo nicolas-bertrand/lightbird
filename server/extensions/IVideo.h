@@ -10,7 +10,7 @@
 /// and the audio, in order to reduce its volume.
 /// If some of these settings are not defined, the default ones are used.
 /// Notice that the default quality settings are pretty high.
-namespace Streamit
+namespace LightBird
 {
     class IVideo
     {

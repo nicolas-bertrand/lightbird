@@ -8,7 +8,7 @@
 
 # include "IContent.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Represents a response. Contains informations about it,
     /// whose depends on the protocol that transport it.
@@ -37,9 +37,9 @@ namespace Streamit
         /// @brief A header is a set of meta-information related to the response.
         /// This method allows one to access to the header and modified it.
         /// @return The header of the response.
-        virtual QMap<QString, QString>  &getHeader() = 0;
+        virtual QMap<QString, QString> &getHeader() = 0;
         /// @brief The content of the response.
-        virtual Streamit::IContent  &getContent() = 0;
+        virtual LightBird::IContent &getContent() = 0;
         /// @brief This method is used to store additionnals informations on the response
         virtual QVariantList    &getInformations() = 0;
     };

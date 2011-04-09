@@ -3,11 +3,11 @@
 
 # include "ITable.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This class represents an object, which can be
     /// a file, a directory, or a collection.
-    class ITableObjects : virtual public Streamit::ITable
+    class ITableObjects : virtual public LightBird::ITable
     {
     public:
         virtual ~ITableObjects() {}
@@ -32,6 +32,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITableObjects, "cc.lightbird.ITableObjects");
+Q_DECLARE_INTERFACE(LightBird::ITableObjects, "cc.lightbird.ITableObjects");
 
 #endif // ITABLEOBJECTS_H

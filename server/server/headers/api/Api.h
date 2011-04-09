@@ -13,7 +13,7 @@
 # include "ApiTimers.h"
 
 class Api : public QObject,
-            public Streamit::IApi
+            public LightBird::IApi
 {
 public:
     /// @param id : The id of the plugin.
@@ -22,33 +22,33 @@ public:
     Api(const QString &id, Configuration *configuration, bool timers = false, QObject *parent = 0);
     ~Api();
 
-    /// @see Streamit::IApi::log
-    Streamit::ILogs             &log();
-    /// @see Streamit::IApi::database
-    Streamit::IDatabase         &database();
-    /// @see Streamit::IApi::configuration
-    Streamit::IConfiguration    &configuration(bool plugin = false);
-    /// @see Streamit::IApi::configuration
-    Streamit::IConfiguration    *configuration(const QString &path, const QString &alternative = "");
-    /// @see Streamit::IApi::plugins
-    Streamit::IPlugins          &plugins();
-    /// @see Streamit::IApi::network
-    Streamit::INetwork          &network();
-    /// @see Streamit::IApi::guis
-    Streamit::IGuis             &guis();
-    /// @see Streamit::IApi::extensions
-    Streamit::IExtensions       &extensions();
-    /// @see Streamit::IApi::timers
-    Streamit::ITimers           &timers();
-    /// @see Streamit::IApi::stop
+    /// @see LightBird::IApi::log
+    LightBird::ILogs            &log();
+    /// @see LightBird::IApi::database
+    LightBird::IDatabase        &database();
+    /// @see LightBird::IApi::configuration
+    LightBird::IConfiguration   &configuration(bool plugin = false);
+    /// @see LightBird::IApi::configuration
+    LightBird::IConfiguration   *configuration(const QString &path, const QString &alternative = "");
+    /// @see LightBird::IApi::plugins
+    LightBird::IPlugins         &plugins();
+    /// @see LightBird::IApi::network
+    LightBird::INetwork         &network();
+    /// @see LightBird::IApi::guis
+    LightBird::IGuis            &guis();
+    /// @see LightBird::IApi::extensions
+    LightBird::IExtensions      &extensions();
+    /// @see LightBird::IApi::timers
+    LightBird::ITimers          &timers();
+    /// @see LightBird::IApi::stop
     void                        stop();
-    /// @see Streamit::IApi::restart
+    /// @see LightBird::IApi::restart
     void                        restart();
-    /// @see Streamit::IApi::getId
+    /// @see LightBird::IApi::getId
     const QString               &getId();
-    /// @see Streamit::IApi::getServerVersion
+    /// @see LightBird::IApi::getServerVersion
     QString                     getServerVersion();
-    /// @see Streamit::IApi::getPluginPath
+    /// @see LightBird::IApi::getPluginPath
     const QString               &getPluginPath();
 
 private:

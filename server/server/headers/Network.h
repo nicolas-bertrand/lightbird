@@ -35,7 +35,7 @@ public:
     /// that a connected client disconnect.
     /// @return The future result of the action, e.g true if the port has been created.
     Future<bool>    addPort(unsigned short port, const QStringList &protocol = QStringList(),
-                            Streamit::INetwork::Transports transport = Streamit::INetwork::TCP,
+                            LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
                             unsigned int maxClients = ~0);
     /// @brief Remove a port. This may take some time since all the operations
     /// made on the removed port have to be finished and stopped.
@@ -49,13 +49,13 @@ public:
     /// @param maxClients : The maximum number of clients simultaneously connected,
     /// allowed by the port.
     /// @return True if the port exists.
-    bool            getPort(unsigned short port, QStringList &protocols, Streamit::INetwork::Transports &transport, unsigned int &maxClients);
+    bool            getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients);
     /// @brief Returns the list of the open ports. Users can use getPort() to get
     /// more detailed informations about a specific port.
     /// @return The list of the opened ports on the server.
     QList<unsigned short>   getPorts();
     /// @brief Allows to get the informations of a client.
-    bool            getClient(const QString &id, Streamit::INetwork::Client &client);
+    bool            getClient(const QString &id, LightBird::INetwork::Client &client);
     /// @brief Returns the list of the clients connected to a particular port.
     QStringList     getClients(unsigned short port);
     /// @brief Disconnects a client from the server.
@@ -75,10 +75,10 @@ private:
     // from the main thread of the server, not in the thread from which they are called.
 private slots:
     void            _addPort(unsigned short port, const QStringList &protocols,
-                             Streamit::INetwork::Transports transport,
+                             LightBird::INetwork::Transports transport,
                              unsigned int maxClients, Future<bool> *future);
     void            _removePort(unsigned short port, Future<bool> *future);
-    void            _getClient(const QString &id, Streamit::INetwork::Client *client, void *thread, Future<bool> *future);
+    void            _getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
     void            _getClients(unsigned short port, Future<QStringList> *future);
     void            _disconnect(const QString &id, Future<bool> *future);
     /// @brief Delete and remove a port from the ports list. The port must be close, and all the work made on it finished.
@@ -86,10 +86,10 @@ private slots:
 
 signals:
     void            addPortSignal(unsigned short port, const QStringList &protocols,
-                                  Streamit::INetwork::Transports transport,
+                                  LightBird::INetwork::Transports transport,
                                   unsigned int maxClients, Future<bool> *future);
     void            removePortSignal(unsigned short port, Future<bool> *future);
-    void            getClientSignal(const QString &id, Streamit::INetwork::Client *client, void *thread, Future<bool> *future);
+    void            getClientSignal(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
     void            getClientsSignal(unsigned short port, Future<QStringList> *future);
     void            disconnectSignal(const QString &id, Future<bool> *future);
 };

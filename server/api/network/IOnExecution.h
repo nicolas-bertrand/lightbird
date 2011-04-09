@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This interface is called after IDoExecution.
     class IOnExecution
@@ -15,10 +15,10 @@ namespace Streamit
         /// @param client : The client that made the request.
         /// @return If at least one plugin called via this interface or IDoExecution
         /// returns false, no response will be sent to the client.
-        virtual bool    onExecution(Streamit::IClient &client) = 0;
+        virtual bool    onExecution(LightBird::IClient &client) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IOnExecution, "cc.lightbird.IOnExecution");
+Q_DECLARE_INTERFACE(LightBird::IOnExecution, "cc.lightbird.IOnExecution");
 
 #endif // IONEXECUTION_H

@@ -30,7 +30,7 @@ public:
     /// @brief Returns the number of the port.
     unsigned short  getPort();
     /// @brief The transport protocol used by this port.
-    Streamit::INetwork::Transports getTransport();
+    LightBird::INetwork::Transports getTransport();
     /// @brief Returns the names of the protocols used to communicate with the
     /// clients connected to this port.
     const QStringList &getProtocols();
@@ -48,7 +48,7 @@ public:
     /// Used to avoid dead locks.
     /// @param future : Used to unlock the thread that is waiting the informations.
     /// @return True if the searched client is in the current port.
-    bool            getClient(const QString &id, Streamit::INetwork::Client *client, void *thread, Future<bool> *future);
+    bool            getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
     /// @brief Returns the list of the id of the clients connected to the current port.
     QStringList     getClients();
     /// @brief Disconnect a client from this port.
@@ -57,7 +57,7 @@ public:
     bool            disconnect(const QString &id);
 
 protected:
-    Port(unsigned short port, Streamit::INetwork::Transports transport, const QStringList &protocols = QStringList(),
+    Port(unsigned short port, LightBird::INetwork::Transports transport, const QStringList &protocols = QStringList(),
          unsigned int maxClients = ~0, QObject *object = 0);
 
     /// @brief Set if the port is listening the network.
@@ -91,7 +91,7 @@ private:
     Port(const Port &);
     Port    *operator=(const Port &);
 
-    Streamit::INetwork::Transports  transport;  ///< The transport protocol used by the port.
+    LightBird::INetwork::Transports transport;  ///< The transport protocol used by the port.
     QStringList                     protocols;  ///< The names of the protocols used to communicate with the clients connected to this port.
     bool                            listening;  ///< If the port is listening the network.
     unsigned short                  port;       ///< The number of the port.

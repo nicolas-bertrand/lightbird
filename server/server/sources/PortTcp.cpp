@@ -4,7 +4,7 @@
 #include "PortTcp.h"
 
 PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients, QObject *parent) :
-                 Port(port, Streamit::INetwork::TCP, protocols, maxClients, parent)
+                 Port(port, LightBird::INetwork::TCP, protocols, maxClients, parent)
 {
     // When a client connects to the server, the slot _newConnection is called
     QObject::connect(&this->tcpServer, SIGNAL(newConnection()), this, SLOT(_newConnection()), Qt::QueuedConnection);

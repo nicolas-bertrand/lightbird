@@ -4,9 +4,9 @@
   <name>Get</name>
   <brief>Implements the GET HTTP method.</brief>
   <description>Allows clients to download files from the server, and get data of its files.</description>
-  <autor>Streamit team</autor>
-  <site>http://www.streamit.fr</site>
-  <email>team@streamit.fr</email>
+  <autor>LightBird team</autor>
+  <site>http://www.lightbird.fr</site>
+  <email>team@lightbird.cc</email>
   <version>1.0</version>
   <licence>LGPL</licence>
   <contexts>

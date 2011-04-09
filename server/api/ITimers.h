@@ -5,7 +5,7 @@
 # include <QString>
 # include <QFuture>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief With this interface, the plugins can manage their timers.
     class ITimers
@@ -31,6 +31,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITimers, "cc.lightbird.ITimers");
+Q_DECLARE_INTERFACE(LightBird::ITimers, "cc.lightbird.ITimers");
 
 #endif // ITIMERS_H

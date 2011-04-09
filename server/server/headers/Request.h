@@ -5,10 +5,10 @@
 
 # include "IRequest.h"
 
-/// @brief Request is the server implementation of Streamit::IRequest,
+/// @brief Request is the server implementation of LightBird::IRequest,
 /// and represents a client's request.
 class Request : public QObject,
-                public Streamit::IRequest
+                public LightBird::IRequest
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ public:
     void                    setType(const QString &type);
     QVariantList            &getInformations();
     QMap<QString, QString>  &getHeader();
-    Streamit::IContent      &getContent();
+    LightBird::IContent     &getContent();
     bool                    isError() const;
     void                    setError(bool error = true);
 

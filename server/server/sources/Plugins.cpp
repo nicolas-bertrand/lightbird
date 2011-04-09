@@ -159,7 +159,7 @@ void                                Plugins::_load(const QString &identifier, Fu
         return ;
     }
     plugin = new Plugin(id, this);
-    if (this->_getState(id) != Streamit::IPlugins::UNLOADED)
+    if (this->_getState(id) != LightBird::IPlugins::UNLOADED)
     {
         Log::error("The plugin is not installed", Properties("id", id), "Plugins", "_load");
         delete plugin;
@@ -200,7 +200,7 @@ void                                Plugins::_unload(const QString &id, Future<b
         this->mutex.unlock();
         return ;
     }
-    if (this->plugins.value(id)->getState() != Streamit::IPlugins::LOADED)
+    if (this->plugins.value(id)->getState() != LightBird::IPlugins::LOADED)
     {
         Log::warning("The plugin is already unloading", Properties("id", id), "Plugins", "_unload");
         this->mutex.unlock();
@@ -213,7 +213,7 @@ void                                Plugins::_unload(const QString &id, Future<b
         this->mutex.unlock();
         return ;
     }
-    if (this->plugins.value(id)->getState() == Streamit::IPlugins::UNLOADED)
+    if (this->plugins.value(id)->getState() == LightBird::IPlugins::UNLOADED)
     {
         delete this->plugins.value(id);
         this->plugins.remove(id);
@@ -227,7 +227,7 @@ void                                Plugins::_unload(const QString &id, Future<b
 
 void                                Plugins::_install(const QString &id, Future<bool> *f)
 {
-    Streamit::IPlugins::State       state;
+    LightBird::IPlugins::State      state;
     QSharedPointer<Future<bool> >   future(f);
 
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
@@ -241,8 +241,8 @@ void                                Plugins::_install(const QString &id, Future<
         this->mutex.unlock();
         return ;
     }
-    if ((state = this->_getState(id)) != Streamit::IPlugins::UNINSTALLED &&
-        state != Streamit::IPlugins::UNKNOW)
+    if ((state = this->_getState(id)) != LightBird::IPlugins::UNINSTALLED &&
+        state != LightBird::IPlugins::UNKNOW)
     {
         Log::warning("The plugin is already installed", Properties("id", id).add("state", QString::number(state)), "Plugins", "_install");
         this->mutex.unlock();
@@ -272,7 +272,7 @@ void                                Plugins::_install(const QString &id, Future<
 
 void                                Plugins::_uninstall(const QString &id, Future<bool> *f)
 {
-    Streamit::IPlugins::State       state;
+    LightBird::IPlugins::State      state;
     QSharedPointer<Future<bool> >   future(f);
 
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
@@ -286,7 +286,7 @@ void                                Plugins::_uninstall(const QString &id, Futur
         this->mutex.unlock();
         return ;
     }
-    if ((state = this->_getState(id)) == Streamit::IPlugins::UNINSTALLED)
+    if ((state = this->_getState(id)) == LightBird::IPlugins::UNINSTALLED)
     {
         Log::warning("The plugin is already uninstalled", Properties("id", id), "Plugins", "_uninstall");
         this->mutex.unlock();
@@ -329,7 +329,7 @@ bool    Plugins::release(const QString &id)
         return (false);
     }
     this->plugins.value(id)->release();
-    if (this->plugins.value(id)->getState() == Streamit::IPlugins::UNLOADED)
+    if (this->plugins.value(id)->getState() == LightBird::IPlugins::UNLOADED)
     {
         this->plugins.value(id)->deleteLater();
         this->plugins.remove(id);
@@ -342,10 +342,10 @@ bool    Plugins::release(const QString &id)
     return (true);
 }
 
-Streamit::IMetadata     Plugins::getMetadata(const QString &id) const
+LightBird::IMetadata     Plugins::getMetadata(const QString &id) const
 {
-    Streamit::IMetadata metadata;
-    Plugin              *plugin;
+    LightBird::IMetadata metadata;
+    Plugin               *plugin;
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
@@ -372,14 +372,14 @@ Streamit::IMetadata     Plugins::getMetadata(const QString &id) const
     return (metadata);
 }
 
-Streamit::IPlugins::State Plugins::getState(const QString &id)
+LightBird::IPlugins::State Plugins::getState(const QString &id)
 {
-    Streamit::IPlugins::State   state;
+    LightBird::IPlugins::State  state;
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "getState");
-        return (Streamit::IPlugins::UNKNOW);
+        return (LightBird::IPlugins::UNKNOW);
     }
     state = this->_getState(id);
     this->mutex.unlock();
@@ -462,7 +462,7 @@ void                    Plugins::_findPlugins(const QString &pluginsPath, const 
     }
 }
 
-Streamit::IPlugins::State   Plugins::_getState(const QString &id)
+LightBird::IPlugins::State  Plugins::_getState(const QString &id)
 {
     Configuration           *configuration = NULL;
     QString                 path;
@@ -475,13 +475,13 @@ Streamit::IPlugins::State   Plugins::_getState(const QString &id)
         return (this->plugins.value(id)->getState());
     // The plugin was not found
     else if (!QFileInfo(path).isDir())
-        return (Streamit::IPlugins::UNKNOW);
+        return (LightBird::IPlugins::UNKNOW);
     // The plugin is installed but not loaded
     else if (configuration && configuration->get("installed") == "true")
-        return (Streamit::IPlugins::UNLOADED);
+        return (LightBird::IPlugins::UNLOADED);
     // The plugin is uninstalled
     else
-        return (Streamit::IPlugins::UNINSTALLED);
+        return (LightBird::IPlugins::UNINSTALLED);
 }
 
 QString Plugins::_checkId(const QString &identifier)

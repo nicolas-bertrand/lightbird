@@ -8,7 +8,7 @@
 # include "IFuture.h"
 # include "IMetadata.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Allows plugins to manage other plugins.
     /// The id of the plugin used bellow refered to the name
@@ -35,7 +35,7 @@ namespace Streamit
         /// @param id : The id of the plugin.
         /// @return The future result of the operation. True is returned if the plugin has been correctly
         /// loaded. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
-        virtual QSharedPointer<Streamit::IFuture<bool> > load(const QString &id) = 0;
+        virtual QSharedPointer<LightBird::IFuture<bool> > load(const QString &id) = 0;
         /// @brief Unload a plugin. It may not be unloaded immediatly if the plugin is being used.
         /// A plugin can unload itself. This operation is executed in a dedicated thread.
         /// Use getState() to get the current state of the plugin.
@@ -43,30 +43,30 @@ namespace Streamit
         /// @return The future result of the operation. True is returned if the plugin has been
         /// unloaded, or is unloading (because it is still in use). Thanks to the shared pointer,
         /// plugins don't have to delete themself the IFuture.
-        virtual QSharedPointer<Streamit::IFuture<bool> > unload(const QString &id) = 0;
+        virtual QSharedPointer<LightBird::IFuture<bool> > unload(const QString &id) = 0;
         /// @brief Use this method to install a plugin. This operation is executed in a
         /// dedicated thread. Use getState() to get the current state of the plugin.
         /// @param id : The Plugin id.
         /// @return The future result of the operation. True is returned if the plugin has been correctly
         /// installed. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
-        virtual QSharedPointer<Streamit::IFuture<bool> > install(const QString &id) = 0;
+        virtual QSharedPointer<LightBird::IFuture<bool> > install(const QString &id) = 0;
         /// @brief Try to uninstall a plugin. The plugin must be unloaded, or the uninstallation will
         /// fail. This operation is executed in a dedicated thread. Use getState() to get the current
         /// state of the plugin.
         /// @param id : The Plugin id.
         /// @return The future result of the operation. True is returned if the plugin has been correctly
         /// uninstalled. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
-        virtual QSharedPointer<Streamit::IFuture<bool> > uninstall(const QString &id) = 0;
+        virtual QSharedPointer<LightBird::IFuture<bool> > uninstall(const QString &id) = 0;
         /// @brief Returns the metadata of a plugin. This method can't be called from the methods defined
         /// in IPlugin.
         /// @param id : The Plugin id.
         /// @return The metadata of the plugin.
-        virtual Streamit::IMetadata getMetadata(const QString &id) const = 0;
+        virtual LightBird::IMetadata getMetadata(const QString &id) const = 0;
         /// @brief This method is used to get the current state of a plugin. It can't be called from
         /// the methods defined in IPlugin.
         /// @param id : The id of the plugin.
         /// @return The current state of the plugin.
-        virtual Streamit::IPlugins::State getState(const QString &id) = 0;
+        virtual LightBird::IPlugins::State getState(const QString &id) = 0;
         /// @brief Returns a list of the id of all the plugins available on the server.
         /// This method return a merged list of the methods getInstalledPlugins()
         /// and getUninstalledPlugins().
@@ -81,6 +81,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IPlugins, "cc.lightbird.IPlugins");
+Q_DECLARE_INTERFACE(LightBird::IPlugins, "cc.lightbird.IPlugins");
 
 #endif // IPLUGINS_H

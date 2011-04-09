@@ -7,7 +7,7 @@
 # include <QFile>
 # include <QTemporaryFile>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This object allows to store data through different ways, and read/write on them.
     class IContent
@@ -25,14 +25,14 @@ namespace Streamit
         };
 
         /// @brief Returns how the content is stored.
-        virtual Streamit::IContent::Storage getStorage() const = 0;
+        virtual LightBird::IContent::Storage getStorage() const = 0;
         /// @brief Set how the content is stored. Calling this method will clear all
         /// the stored contents (using clear()). Only one type of storage can be used
         /// at the same time.
         /// @param fileName : If the storage is FILE, this paramater defines the file name.
         /// If the storage is TEMPORARYFILE, this paramater defines the temporary file template.
         /// See QTemporaryFile for details.
-        virtual void            setStorage(Streamit::IContent::Storage storage, const QString &fileName = "") = 0;
+        virtual void            setStorage(LightBird::IContent::Storage storage, const QString &fileName = "") = 0;
         /// @brief Returns all or a part of the content, depending on the given size.
         /// The content is returned as a QByteArray of the given size, or less if all
         /// the data has been returned. The begin of the returned content depends on

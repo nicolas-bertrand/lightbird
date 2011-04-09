@@ -7,7 +7,7 @@
 # include "ITableEvents.h"
 
 class TableEvents : virtual public Table,
-                    virtual public Streamit::ITableEvents
+                    virtual public LightBird::ITableEvents
 {
 public:
     TableEvents(const QString &id = "");

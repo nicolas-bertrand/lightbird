@@ -28,7 +28,7 @@ Timer::~Timer()
 void    Timer::run()
 {
     // If the plugin dsoesn't implements ITimer
-    if (!Plugins::instance()->getInstance<Streamit::ITimer>(this->id) || this->stopped)
+    if (!Plugins::instance()->getInstance<LightBird::ITimer>(this->id) || this->stopped)
         return ;
     Plugins::instance()->release(this->id);
     QTimer::singleShot(this->timeout, this, SLOT(_timeout()));
@@ -56,10 +56,10 @@ void            Timer::stop()
 
 void                    Timer::_timeout()
 {
-    Streamit::ITimer    *instance;
+    LightBird::ITimer   *instance;
 
     Log::trace("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
-    if (this->stopped || !(instance = Plugins::instance()->getInstance<Streamit::ITimer>(this->id)))
+    if (this->stopped || !(instance = Plugins::instance()->getInstance<LightBird::ITimer>(this->id)))
         return ;
     instance->timer(this->name);
     if (!this->stopped)

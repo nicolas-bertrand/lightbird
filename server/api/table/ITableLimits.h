@@ -5,12 +5,12 @@
 
 # include "ITable.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to a limit.
     /// Each modifications done in this object is immediatly saved in the database.
     /// This can be seen as an implementation of the Active Record design pattern.
-    class ITableLimits : virtual public Streamit::ITable
+    class ITableLimits : virtual public LightBird::ITable
     {
     public:
         virtual ~ITableLimits() {}
@@ -38,6 +38,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITableLimits, "cc.lightbird.ITableLimits");
+Q_DECLARE_INTERFACE(LightBird::ITableLimits, "cc.lightbird.ITableLimits");
 
 #endif // ITABLELIMITS_H

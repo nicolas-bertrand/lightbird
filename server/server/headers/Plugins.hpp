@@ -54,7 +54,7 @@ public:
     /// @param all : If true, the parameters method and type are used to check the context.
     /// @return A map of the plugins that match the filters. The key is the id of the plugin.
     template<class T>
-    QMap<QString, T *>  getInstances(Streamit::INetwork::Transports transport, const QStringList &protocols,
+    QMap<QString, T *>  getInstances(LightBird::INetwork::Transports transport, const QStringList &protocols,
                                      unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
     /// @brief This method do the same job as getInstances, except that only the first
@@ -64,7 +64,7 @@ public:
     /// matches. The pair is empty if no plugin corresponds.
     /// @see getInstances
     template<class T>
-    QPair<QString, T *> getInstance(Streamit::INetwork::Transports transport, const QStringList &protocols,
+    QPair<QString, T *> getInstance(LightBird::INetwork::Transports transport, const QStringList &protocols,
                                     unsigned short port, const QString &method = "",
                                     const QString &type = "", bool all = false);
     /// @brief A templated method used to get an instance of a plugin.
@@ -79,13 +79,13 @@ public:
     /// @brief A convenance method for getInstances.
     /// @see getInstances
     template<class T>
-    QMap<QString, T *>  getInstances(Streamit::INetwork::Transports transport, const QString &protocol,
+    QMap<QString, T *>  getInstances(LightBird::INetwork::Transports transport, const QString &protocol,
                                      unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
     /// @brief A convenance method for getInstance.
     /// @see getInstance
     template<class T>
-    QPair<QString, T *> getInstance(Streamit::INetwork::Transports transport, const QString &protocol,
+    QPair<QString, T *> getInstance(LightBird::INetwork::Transports transport, const QString &protocol,
                                     unsigned short port, const QString &method = "",
                                     const QString &type = "", bool all = false);
     /// @brief Releases a plugin. Must be call after get().
@@ -95,20 +95,20 @@ public:
     bool                    release(const QString &id);
     /// @brief Returns the metadata of a plugin.
     /// @param id : The plugin id.
-    Streamit::IMetadata     getMetadata(const QString &id) const;
+    LightBird::IMetadata    getMetadata(const QString &id) const;
     /// @brief Returns the resources path of a plugin.
     /// @param id : The id of the plugin.
     QString                 getResourcesPath(const QString &id);
 
-    /// @see Streamit::IPlugins::getState
-    Streamit::IPlugins::State getState(const QString &id);
-    /// @see Streamit::IPlugins::getPlugins
+    /// @see LightBird::IPlugins::getState
+    LightBird::IPlugins::State getState(const QString &id);
+    /// @see LightBird::IPlugins::getPlugins
     QStringList             getPlugins();
-    /// @see Streamit::IPlugins::getLoadedPlugins
+    /// @see LightBird::IPlugins::getLoadedPlugins
     QStringList             getLoadedPlugins();
-    /// @see Streamit::IPlugins::getInstalledPlugins
+    /// @see LightBird::IPlugins::getInstalledPlugins
     QStringList             getInstalledPlugins();
-    /// @see Streamit::IPlugins::getUninstalledPlugins
+    /// @see LightBird::IPlugins::getUninstalledPlugins
     QStringList             getUninstalledPlugins();
 
 signals:
@@ -143,7 +143,7 @@ private:
     /// @param installed : If the method search for installed or uninstalled plugins
     void                    _findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins, bool installed = true);
     /// @see getState
-    Streamit::IPlugins::State _getState(const QString &id);
+    LightBird::IPlugins::State _getState(const QString &id);
     /// @brief Ensure that the case of the id in parameter match with the case
     /// of a plugin directory name. Otherwise, the case of the id will be modifier
     /// to match a directory name.
@@ -164,7 +164,7 @@ private:
 };
 
 template<class T>
-QMap<QString, T *>  Plugins::getInstances(Streamit::INetwork::Transports transport, const QStringList &protocols,
+QMap<QString, T *>  Plugins::getInstances(LightBird::INetwork::Transports transport, const QStringList &protocols,
                                           unsigned short port, const QString &method, const QString &type, bool all)
 {
     QMap<QString, T *>  instances;
@@ -172,7 +172,7 @@ QMap<QString, T *>  Plugins::getInstances(Streamit::INetwork::Transports transpo
     QString             transportText = "TCP";
     Plugin              *plugin;
 
-    if (transport == Streamit::INetwork::UDP)
+    if (transport == LightBird::INetwork::UDP)
         transportText = "UDP";
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
@@ -196,7 +196,7 @@ QMap<QString, T *>  Plugins::getInstances(Streamit::INetwork::Transports transpo
 }
 
 template<class T>
-QPair<QString, T *> Plugins::getInstance(Streamit::INetwork::Transports transport, const QStringList &protocols,
+QPair<QString, T *> Plugins::getInstance(LightBird::INetwork::Transports transport, const QStringList &protocols,
                                          unsigned short port, const QString &method, const QString &type, bool all)
 {
     T                   *instance;
@@ -204,7 +204,7 @@ QPair<QString, T *> Plugins::getInstance(Streamit::INetwork::Transports transpor
     QString             transportText = "TCP";
     Plugin              *plugin;
 
-    if (transport == Streamit::INetwork::UDP)
+    if (transport == LightBird::INetwork::UDP)
         transportText = "UDP";
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
@@ -247,14 +247,14 @@ T       *Plugins::getInstance(const QString &id)
 }
 
 template<class T>
-QMap<QString, T *>  Plugins::getInstances(Streamit::INetwork::Transports transport, const QString &protocol,
+QMap<QString, T *>  Plugins::getInstances(LightBird::INetwork::Transports transport, const QString &protocol,
                                           unsigned short port, const QString &method, const QString &type, bool all)
 {
     return (this->getInstances<T>(transport, QStringList(protocol), port, method, type, all));
 }
 
 template<class T>
-QPair<QString, T *> Plugins::getInstance(Streamit::INetwork::Transports transport, const QString &protocol,
+QPair<QString, T *> Plugins::getInstance(LightBird::INetwork::Transports transport, const QString &protocol,
                                          unsigned short port, const QString &method, const QString &type, bool all)
 {
     return (this->getInstance<T>(transport, QStringList(protocol), port, method, type, all));

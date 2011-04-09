@@ -17,18 +17,18 @@ class Database : public QObject
 public:
     static Database *instance(QObject *parent = 0);
 
-    /// @see Streamit::IDatabase::query
+    /// @see LightBird::IDatabase::query
     bool            query(QSqlQuery &query);
-    /// @see Streamit::IDatabase::query
+    /// @see LightBird::IDatabase::query
     bool            query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result);
-    /// @see Streamit::IDatabase::getTable
-    Streamit::ITable    *getTable(Streamit::ITable::Tables table, const QString &id = "");
-    /// @see Streamit::IDatabase::getQuery
+    /// @see LightBird::IDatabase::getTable
+    LightBird::ITable *getTable(LightBird::ITable::Tables table, const QString &id = "");
+    /// @see LightBird::IDatabase::getQuery
     QString         getQuery(const QString &group, const QString &name);
-    /// @see Streamit::IDatabase::getQuery
+    /// @see LightBird::IDatabase::getQuery
     QString         getQuery(const QString &group, const QString &name, const QString &id);
-    /// @see Streamit::IDatabase::updates
-    bool            updates(Streamit::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());
+    /// @see LightBird::IDatabase::updates
+    bool            updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());
     /// @brief Returns the names of the tables of the database.
     QStringList     getTableNames();
 
@@ -46,7 +46,7 @@ private:
     /// @return True if the connection to the database success
     bool            _connection();
     /// @brief Display the updates. For debug purpose only.
-    void            _displayUpdates(Streamit::IDatabase::Updates &updates);
+    void            _displayUpdates(LightBird::IDatabase::Updates &updates);
     /// @brief Load a query file.
     /// @param id : The id of the plugin for which the quety will be loaded. If empty,
     /// the queries of the server are loaded.

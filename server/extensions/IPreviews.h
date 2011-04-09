@@ -8,7 +8,7 @@
 /// @brief Calls all the plugins that implements IPreview in order to generate
 /// the preview of a file. A cache system should also be implemented in order
 /// to not generate a new preview at each calls.
-namespace Streamit
+namespace LightBird
 {
     class IPreviews
     {
@@ -24,7 +24,7 @@ namespace Streamit
         /// @param position : For a video, this parameter could be the time where the preview is captured.
         /// @return The path to the generated preview. This file should not been deleted (for cache purpose).
         /// If empty, no preview could have been generated for the source file.
-        virtual QString previews(const QString &fileId, Streamit::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0) = 0;
+        virtual QString previews(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0) = 0;
     };
 }
 

@@ -5,7 +5,7 @@
 
 class QString;
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This interface is called by the server to get the path of the resources of the
     /// plugins that implement it. This path must be unique to avoid conflicts with other resources.
@@ -23,6 +23,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IResources, "cc.lightbird.IResources");
+Q_DECLARE_INTERFACE(LightBird::IResources, "cc.lightbird.IResources");
 
 #endif // IRESOURCES_H

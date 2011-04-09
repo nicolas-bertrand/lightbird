@@ -13,7 +13,7 @@
 TableCollections::TableCollections(const QString &id)
 {
     this->tableName = "collections";
-    this->tableId = Streamit::ITable::Collections;
+    this->tableId = LightBird::ITable::Collections;
     if (!id.isEmpty())
         Table::setId(id);
 }

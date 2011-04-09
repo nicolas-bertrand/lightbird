@@ -101,7 +101,7 @@ bool                        Database::query(QSqlQuery &query, QVector<QMap<QStri
     return (error);
 }
 
-Streamit::ITable    *Database::getTable(Streamit::ITable::Tables table, const QString &id)
+LightBird::ITable   *Database::getTable(LightBird::ITable::Tables table, const QString &id)
 {
     QStringList                         tables;
     QString                             name;
@@ -109,12 +109,12 @@ Streamit::ITable    *Database::getTable(Streamit::ITable::Tables table, const QS
     QVector<QMap<QString, QVariant> >   result;
 
     // If the table is unknow, tries to find it using the id of the row
-    if (!id.isEmpty() && (table == Streamit::ITable::Unknow || table == Streamit::ITable::Accessor || table == Streamit::ITable::Object))
+    if (!id.isEmpty() && (table == LightBird::ITable::Unknow || table == LightBird::ITable::Accessor || table == LightBird::ITable::Object))
     {
         // Defines the names of the tables where the existance of the id will be checked
-        if (table == Streamit::ITable::Accessor)
+        if (table == LightBird::ITable::Accessor)
             tables << "accounts" << "groups";
-        else if (table == Streamit::ITable::Object)
+        else if (table == LightBird::ITable::Object)
             tables << "files" << "directories" << "collections";
         else
             tables = this->tablesNames;
@@ -135,23 +135,23 @@ Streamit::ITable    *Database::getTable(Streamit::ITable::Tables table, const QS
         if (name.isEmpty())
             return (NULL);
     }
-    if (table == Streamit::ITable::Accounts || name == "accounts")
+    if (table == LightBird::ITable::Accounts || name == "accounts")
         return (new TableAccounts(id));
-    if (table == Streamit::ITable::Collections || name == "collections")
+    if (table == LightBird::ITable::Collections || name == "collections")
         return (new TableCollections(id));
-    if (table == Streamit::ITable::Directories || name == "directories")
+    if (table == LightBird::ITable::Directories || name == "directories")
         return (new TableDirectories(id));
-    if (table == Streamit::ITable::Events || name == "events")
+    if (table == LightBird::ITable::Events || name == "events")
         return (new TableEvents(id));
-    if (table == Streamit::ITable::Files || name == "files")
+    if (table == LightBird::ITable::Files || name == "files")
         return (new TableFiles(id));
-    if (table == Streamit::ITable::Groups || name == "groups")
+    if (table == LightBird::ITable::Groups || name == "groups")
         return (new TableGroups(id));
-    if (table == Streamit::ITable::Limits || name == "limits")
+    if (table == LightBird::ITable::Limits || name == "limits")
         return (new TableLimits(id));
-    if (table == Streamit::ITable::Permissions || name == "permissions")
+    if (table == LightBird::ITable::Permissions || name == "permissions")
         return (new TablePermissions(id));
-    if (table == Streamit::ITable::Tags || name == "tags")
+    if (table == LightBird::ITable::Tags || name == "tags")
         return (new TableTags(id));
     return (NULL);
 }
@@ -186,10 +186,10 @@ QString         Database::getQuery(const QString &group, const QString &name, co
     return ("");
 }
 
-bool                                    Database::updates(Streamit::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
+bool                                    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
 {
     QVector<QMap<QString, QVariant> >   result;
-    Streamit::IDatabase::State          state;
+    LightBird::IDatabase::State         state;
     QString                             date;
     QSqlQuery                           query;
     QStringList                         tables;
@@ -220,9 +220,9 @@ bool                                    Database::updates(Streamit::IDatabase::U
         for (i = 0, s = result.size(); i < s; ++i)
         {
             if (result[i]["created"].toString() >= date || !d.isValid())
-                state = Streamit::IDatabase::ADDED;
+                state = LightBird::IDatabase::ADDED;
             else
-                state = Streamit::IDatabase::MODIFIED;
+                state = LightBird::IDatabase::MODIFIED;
             updates[it.peekNext()][state].push_back(result[i]);
         }
         result.clear();
@@ -237,7 +237,7 @@ bool                                    Database::updates(Streamit::IDatabase::U
         for (i = 0, s = result.size(); i < s; ++i)
         {
             table = result[i]["table"].toString();
-            state = Streamit::IDatabase::DELETED;
+            state = LightBird::IDatabase::DELETED;
             result[i].remove("table");
             updates[table][state].push_back(result[i]);
         }
@@ -418,22 +418,22 @@ bool        Database::_loadQueries(const QString &id)
     return (true);
 }
 
-void    Database::_displayUpdates(Streamit::IDatabase::Updates &updates)
+void    Database::_displayUpdates(LightBird::IDatabase::Updates &updates)
 {
-    QMapIterator<QString, QMap<Streamit::IDatabase::State, QList<QMap<QString, QVariant> > > > i1 (updates);
+    QMapIterator<QString, QMap<LightBird::IDatabase::State, QList<QMap<QString, QVariant> > > > i1 (updates);
     while (i1.hasNext())
     {
         i1.next();
         std::cout << "===== " << i1.key().toStdString() << " =====" << std::endl;
-        QMapIterator<Streamit::IDatabase::State, QList<QMap<QString, QVariant> > > i2(i1.value());
+        QMapIterator<LightBird::IDatabase::State, QList<QMap<QString, QVariant> > > i2(i1.value());
         while (i2.hasNext())
         {
             i2.next();
-            if (i2.key() == Streamit::IDatabase::ADDED)
+            if (i2.key() == LightBird::IDatabase::ADDED)
                 std::cout << "> ADDED" << std::endl;
-            else if (i2.key() == Streamit::IDatabase::MODIFIED)
+            else if (i2.key() == LightBird::IDatabase::MODIFIED)
                 std::cout << "> MODIFIED" << std::endl;
-            else if (i2.key() == Streamit::IDatabase::DELETED)
+            else if (i2.key() == LightBird::IDatabase::DELETED)
                 std::cout << "> DELETED" << std::endl;
             QListIterator<QMap<QString, QVariant> > i3(i2.value());
             while (i3.hasNext())

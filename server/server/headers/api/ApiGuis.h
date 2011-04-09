@@ -9,19 +9,19 @@
 /// Make the connection between IGuis and IGui, and guaranteed that the
 /// methods of IGui are calles from the GUI thread.
 class ApiGuis : public QObject,
-                public Streamit::IGuis
+                public LightBird::IGuis
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::IGuis)
+    Q_INTERFACES(LightBird::IGuis)
 
 public:
     static ApiGuis *instance(QObject *parent = 0);
 
-    /// @see Streamit::IGuis::show
+    /// @see LightBird::IGuis::show
     void    show(const QString &id = "");
-    /// @see Streamit::IGuis::hide
+    /// @see LightBird::IGuis::hide
     void    hide(const QString &id = "");
-    /// @see Streamit::IGuis::noGui
+    /// @see LightBird::IGuis::noGui
     bool    noGui();
 
 signals:

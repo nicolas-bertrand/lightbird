@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Converts the data received by the network to the header of the
     /// request, so that it can be processed. The header is stored in IRequest
@@ -28,10 +28,10 @@ namespace Streamit
         /// this variable. Let zero if no data have to be used, ie if there is no content.
         /// @return True if the header is complete. This method will be called while
         /// false is returned.
-        virtual bool    doUnserializeHeader(Streamit::IClient &client, const QByteArray &data, quint64 &used) = 0;
+        virtual bool    doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDoUnserializeHeader, "cc.lightbird.IDoUnserializeHeader");
+Q_DECLARE_INTERFACE(LightBird::IDoUnserializeHeader, "cc.lightbird.IDoUnserializeHeader");
 
 #endif // IDOUNSERIALIZEHEADER_H

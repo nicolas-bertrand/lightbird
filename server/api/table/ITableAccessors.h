@@ -3,10 +3,10 @@
 
 # include "ITable.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This class represents an accessor, which can be an account or a group.
-    class ITableAccessors : virtual public Streamit::ITable
+    class ITableAccessors : virtual public LightBird::ITable
     {
     public:
         virtual ~ITableAccessors() {}
@@ -23,6 +23,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITableAccessors, "cc.lightbird.ITableAccessors");
+Q_DECLARE_INTERFACE(LightBird::ITableAccessors, "cc.lightbird.ITableAccessors");
 
 #endif // ITABLEACCESSORS_H

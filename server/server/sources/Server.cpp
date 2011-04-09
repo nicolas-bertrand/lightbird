@@ -210,7 +210,7 @@ void                Server::_loadNetwork()
     QDomNodeList                    nodes;
     QMap<QString, QString>          port;
     QList<QMap<QString, QString> >  ports;
-    Streamit::INetwork::Transports  transport;
+    LightBird::INetwork::Transports transport;
     bool                            allCreated;
 
     // Get the information on the ports to load from the configuration
@@ -229,9 +229,9 @@ void                Server::_loadNetwork()
     QListIterator<QMap<QString, QString> >  it(ports);
     while (it.hasNext())
     {
-        transport = Streamit::INetwork::TCP;
+        transport = LightBird::INetwork::TCP;
         if (it.peekNext().value("transport").toUpper() == "UDP")
-            transport = Streamit::INetwork::UDP;
+            transport = LightBird::INetwork::UDP;
         if (!(Network::instance()->addPort(it.peekNext().value("port").toShort(),
                                            it.peekNext().value("protocols").simplified().split(' '),
                                            transport, it.peekNext().value("maxClients").toUInt()).getResult()))
@@ -283,7 +283,7 @@ void                Server::_loadPlugins()
 
 void                Server::_pluginLoaded(QString id)
 {
-    Streamit::IGui  *instance;
+    LightBird::IGui *instance;
     QString         path;
 
     // Load the translation of the plugin if possible
@@ -295,7 +295,7 @@ void                Server::_pluginLoaded(QString id)
         this->_loadTranslation(Plugins::instance()->getResourcesPath(id) + "/languages/", path);
     }
     // Calls the Gui method of the plugin if it implements it
-    if ((instance = Plugins::instance()->getInstance<Streamit::IGui>(id)))
+    if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(id)))
     {
         instance->gui();
         Plugins::instance()->release(id);

@@ -19,28 +19,28 @@
 # include "Parser.h"
 
 class Plugin : public QObject,
-               public Streamit::IPlugin,
-               public Streamit::IResources,
-               public Streamit::IOnConnect,
-               public Streamit::IOnProtocol,
-               public Streamit::IDoUnserializeHeader,
-               public Streamit::IDoUnserializeContent,
-               public Streamit::IDoSerializeHeader,
-               public Streamit::IDoSerializeContent,
-               public Streamit::IOnWrote,
-               public Streamit::IOnDisconnect
+               public LightBird::IPlugin,
+               public LightBird::IResources,
+               public LightBird::IOnConnect,
+               public LightBird::IOnProtocol,
+               public LightBird::IDoUnserializeHeader,
+               public LightBird::IDoUnserializeContent,
+               public LightBird::IDoSerializeHeader,
+               public LightBird::IDoSerializeContent,
+               public LightBird::IOnWrote,
+               public LightBird::IOnDisconnect
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::IPlugin
-                 Streamit::IResources
-                 Streamit::IOnConnect
-                 Streamit::IOnProtocol
-                 Streamit::IDoUnserializeHeader
-                 Streamit::IDoUnserializeContent
-                 Streamit::IDoSerializeHeader
-                 Streamit::IDoSerializeContent
-                 Streamit::IOnWrote
-                 Streamit::IOnDisconnect)
+    Q_INTERFACES(LightBird::IPlugin
+                 LightBird::IResources
+                 LightBird::IOnConnect
+                 LightBird::IOnProtocol
+                 LightBird::IDoUnserializeHeader
+                 LightBird::IDoUnserializeContent
+                 LightBird::IDoSerializeHeader
+                 LightBird::IDoSerializeContent
+                 LightBird::IOnWrote
+                 LightBird::IOnDisconnect)
 
 public:
     /// Stores the configuration of the plugin.
@@ -57,43 +57,43 @@ public:
     ~Plugin();
 
     // IPlugin
-    bool    onLoad(Streamit::IApi *api);
+    bool    onLoad(LightBird::IApi *api);
     void    onUnload();
-    bool    onInstall(Streamit::IApi *api);
-    void    onUninstall(Streamit::IApi *api);
-    void    getMetadata(Streamit::IMetadata &metadata) const;
+    bool    onInstall(LightBird::IApi *api);
+    void    onUninstall(LightBird::IApi *api);
+    void    getMetadata(LightBird::IMetadata &metadata) const;
 
     // IResources
     QString getResourcesPath();
 
     // Connect / Disconnect
-    bool    onConnect(Streamit::IClient &client);
-    void    onDisconnect(Streamit::IClient &client);
+    bool    onConnect(LightBird::IClient &client);
+    void    onDisconnect(LightBird::IClient &client);
 
     // Unserialize
-    bool    onProtocol(Streamit::IClient &client, const QByteArray &data, QString &protocol, bool &error);
-    bool    doUnserializeHeader(Streamit::IClient &client, const QByteArray &data, quint64 &used);
-    bool    doUnserializeContent(Streamit::IClient &client, const QByteArray &data, quint64 &used);
+    bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error);
+    bool    doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
+    bool    doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
 
     // Serialize
-    void    doSerializeHeader(Streamit::IClient &client, QByteArray &data);
-    bool    doSerializeContent(Streamit::IClient &client, QByteArray &data);
+    void    doSerializeHeader(LightBird::IClient &client, QByteArray &data);
+    bool    doSerializeContent(LightBird::IClient &client, QByteArray &data);
 
     // IOnWrote
     /// @brief Disconnect the client if there is an error in its request
-    void    onWrote(Streamit::IClient &client);
+    void    onWrote(LightBird::IClient &client);
 
     /// @brief Returns the configuration of the plugin
     static Configuration    &getConfiguration();
 
 private:
-    Streamit::IApi          *api;           ///< The Streamit's Api.
+    LightBird::IApi         *api;           ///< The LightBird's Api.
     QMap<QString, Parser>   parsers;        ///< Associates a parser to a client id.
     QReadWriteLock          mutex;          ///< Make parsers thread-safe.
     static Configuration    configuration;  ///< The configuration of the plugin.
 
     /// @brief Returns the parser that is in charge of the client, in thread safe way.
-    Parser  *_getParser(const Streamit::IClient &client);
+    Parser  *_getParser(const LightBird::IClient &client);
 };
 
 #endif // PLUGIN_H

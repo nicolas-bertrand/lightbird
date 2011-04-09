@@ -15,7 +15,7 @@ Plugin::~Plugin()
 {
 }
 
-bool    Plugin::onLoad(Streamit::IApi *api)
+bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
     api->plugins().getMetadata(api->getId());
@@ -26,18 +26,18 @@ void    Plugin::onUnload()
 {
 }
 
-bool    Plugin::onInstall(Streamit::IApi *api)
+bool    Plugin::onInstall(LightBird::IApi *api)
 {
     this->api = api;
     return (true);
 }
 
-void    Plugin::onUninstall(Streamit::IApi *api)
+void    Plugin::onUninstall(LightBird::IApi *api)
 {
     this->api = api;
 }
 
-void    Plugin::getMetadata(Streamit::IMetadata &metadata) const
+void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "HTTP Get";
     metadata.brief = "Implements the GET HTTP method.";
@@ -54,9 +54,9 @@ QString Plugin::getResourcesPath()
     return (":plugins/HTTP/Get");
 }
 
-bool    Plugin::doExecution(Streamit::IClient &client)
+bool    Plugin::doExecution(LightBird::IClient &client)
 {
-    Streamit::IMetadata metadata;
+    LightBird::IMetadata metadata;
 
     metadata = this->api->plugins().getMetadata(this->api->getId());
     QString s = metadata.name;

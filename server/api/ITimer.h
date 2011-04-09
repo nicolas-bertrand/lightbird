@@ -3,11 +3,11 @@
 
 # include <QString>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This method is called periodically. The delay between each calls
     /// is defined in the configuration file of the plugin that implements it.
-    /// It can also be modified at the runtime using Streamit::ITimers.
+    /// It can also be modified at the runtime using LightBird::ITimers.
     /// As this method is called in a dedicated thread, the timer is suspended
     /// until the thread ends, i.e, until the return of the method timer().
     class ITimer
@@ -21,6 +21,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITimer, "cc.lightbird.ITimer");
+Q_DECLARE_INTERFACE(LightBird::ITimer, "cc.lightbird.ITimer");
 
 #endif // ITIMER_H

@@ -24,17 +24,17 @@ Api::~Api()
     Log::trace("Api destroyed!", Properties("id", this->id), "Api", "~Api");
 }
 
-Streamit::ILogs             &Api::log()
+LightBird::ILogs            &Api::log()
 {
     return (*this->logsApi);
 }
 
-Streamit::IDatabase         &Api::database()
+LightBird::IDatabase        &Api::database()
 {
     return (*this->databaseApi);
 }
 
-Streamit::IConfiguration    &Api::configuration(bool plugin)
+LightBird::IConfiguration   &Api::configuration(bool plugin)
 {
     Configuration           *configuration;
 
@@ -45,32 +45,32 @@ Streamit::IConfiguration    &Api::configuration(bool plugin)
     return (*configuration);
 }
 
-Streamit::IConfiguration    *Api::configuration(const QString &path, const QString &alternative)
+LightBird::IConfiguration   *Api::configuration(const QString &path, const QString &alternative)
 {
     return (Configurations::instance(path, alternative));
 }
 
-Streamit::IPlugins          &Api::plugins()
+LightBird::IPlugins         &Api::plugins()
 {
     return (*ApiPlugins::instance());
 }
 
-Streamit::INetwork          &Api::network()
+LightBird::INetwork         &Api::network()
 {
     return (*this->networkApi);
 }
 
-Streamit::IGuis             &Api::guis()
+LightBird::IGuis            &Api::guis()
 {
     return (*ApiGuis::instance());
 }
 
-Streamit::IExtensions       &Api::extensions()
+LightBird::IExtensions      &Api::extensions()
 {
     return (*Extensions::instance());
 }
 
-Streamit::ITimers           &Api::timers()
+LightBird::ITimers          &Api::timers()
 {
     return (*this->timersApi);
 }

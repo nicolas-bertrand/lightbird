@@ -12,7 +12,7 @@
 TableFiles::TableFiles(const QString &id)
 {
     this->tableName = "files";
-    this->tableId = Streamit::ITable::Files;
+    this->tableId = LightBird::ITable::Files;
     if (!id.isEmpty())
         Table::setId(id);
 }

@@ -18,13 +18,13 @@ Network     *Network::instance(QObject *parent)
 
 Network::Network(QObject *parent) : QObject(parent)
 {
-    qRegisterMetaType<Streamit::INetwork::Transports>("Streamit::INetwork::Transports");
-    qRegisterMetaType<Streamit::INetwork::Client>("Streamit::INetwork::Client*");
-    QObject::connect(this, SIGNAL(addPortSignal(unsigned short,QStringList,Streamit::INetwork::Transports,unsigned int,Future<bool>*)),
-                     this, SLOT(_addPort(unsigned short,QStringList,Streamit::INetwork::Transports,unsigned int,Future<bool>*)));
+    qRegisterMetaType<LightBird::INetwork::Transports>("LightBird::INetwork::Transports");
+    qRegisterMetaType<LightBird::INetwork::Client>("LightBird::INetwork::Client*");
+    QObject::connect(this, SIGNAL(addPortSignal(unsigned short,QStringList,LightBird::INetwork::Transports,unsigned int,Future<bool>*)),
+                     this, SLOT(_addPort(unsigned short,QStringList,LightBird::INetwork::Transports,unsigned int,Future<bool>*)));
     QObject::connect(this, SIGNAL(removePortSignal(unsigned short,Future<bool>*)), this, SLOT(_removePort(unsigned short,Future<bool>*)));
-    QObject::connect(this, SIGNAL(getClientSignal(QString,Streamit::INetwork::Client*,void*,Future<bool>*)),
-                     this, SLOT(_getClient(QString,Streamit::INetwork::Client*,void*,Future<bool>*)));
+    QObject::connect(this, SIGNAL(getClientSignal(QString,LightBird::INetwork::Client*,void*,Future<bool>*)),
+                     this, SLOT(_getClient(QString,LightBird::INetwork::Client*,void*,Future<bool>*)));
     QObject::connect(this, SIGNAL(getClientsSignal(unsigned short,Future<QStringList>*)),
                      this, SLOT(_getClients(unsigned short,Future<QStringList>*)));
     QObject::connect(this, SIGNAL(disconnectSignal(QString,Future<bool>*)), this, SLOT(_disconnect(QString,Future<bool>*)));
@@ -35,7 +35,7 @@ Network::~Network()
     Log::trace("Network destroyed!", "Network", "~Network");
 }
 
-Future<bool>        Network::addPort(unsigned short port, const QStringList &protocols, Streamit::INetwork::Transports transport, unsigned int maxClients)
+Future<bool>        Network::addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transports transport, unsigned int maxClients)
 {
     Future<bool>    *future = new Future<bool>(false);
     Future<bool>    result(*future);
@@ -53,7 +53,7 @@ Future<bool>        Network::removePort(unsigned short port)
     return (result);
 }
 
-bool                Network::getPort(unsigned short port, QStringList &protocols, Streamit::INetwork::Transports &transport, unsigned int &maxClients)
+bool                Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients)
 {
     bool            result = false;
 
@@ -68,9 +68,9 @@ bool                Network::getPort(unsigned short port, QStringList &protocols
         // Stores its informations in the parameters
         protocols = this->ports[port]->getProtocols();
         maxClients = this->ports[port]->getMaxClients();
-        transport = Streamit::INetwork::TCP;
+        transport = LightBird::INetwork::TCP;
         if (qobject_cast<PortUdp *>(this->ports[port]))
-            transport = Streamit::INetwork::UDP;
+            transport = LightBird::INetwork::UDP;
         result = true;
     }
     this->lockPorts.unlock();
@@ -94,7 +94,7 @@ QList<unsigned short>   Network::getPorts()
     return (ports);
 }
 
-bool    Network::getClient(const QString &id, Streamit::INetwork::Client &client)
+bool    Network::getClient(const QString &id, LightBird::INetwork::Client &client)
 {
     Future<bool> *future = new Future<bool>(false);
     Future<bool> result(*future);
@@ -121,7 +121,7 @@ Future<bool>        Network::disconnect(const QString &id)
     return (result);
 }
 
-void    Network::_addPort(unsigned short port, const QStringList &protocols, Streamit::INetwork::Transports transport, unsigned int maxClients, Future<bool> *future)
+void    Network::_addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transports transport, unsigned int maxClients, Future<bool> *future)
 {
     Port                            *p;
     QSharedPointer<Future<bool> >   f(future);
@@ -134,12 +134,12 @@ void    Network::_addPort(unsigned short port, const QStringList &protocols, Str
     // If the port already exists, we can't add it
     if (this->ports.contains(port))
     {
-        Log::error("The port is already listening", Properties("port", port).add("protocols", protocols.join(" ")).add("transport", (transport == Streamit::INetwork::TCP ? "TCP" : "UDP")), "Network", "_addPort");
+        Log::error("The port is already listening", Properties("port", port).add("protocols", protocols.join(" ")).add("transport", (transport == LightBird::INetwork::TCP ? "TCP" : "UDP")), "Network", "_addPort");
         this->lockPorts.unlock();
         return ;
     }
     // Creates the port
-    if (transport == Streamit::INetwork::TCP)
+    if (transport == LightBird::INetwork::TCP)
         p = new PortTcp(port, protocols, maxClients, this);
     else
         p = new PortUdp(port, protocols, maxClients, this);
@@ -191,7 +191,7 @@ void    Network::_removePort(unsigned short port, Future<bool> *future)
     this->lockPorts.unlock();
 }
 
-void        Network::_getClient(const QString &id, Streamit::INetwork::Client *client, void *thread, Future<bool> *future)
+void        Network::_getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
 {
     bool    found = false;
 

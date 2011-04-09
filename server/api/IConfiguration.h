@@ -4,7 +4,7 @@
 class QString;
 class QDomElement;
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Interface with tools to access and edit the configuration of the
     /// server or the plugins.
@@ -61,6 +61,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IConfiguration, "cc.lightbird.IConfiguration");
+Q_DECLARE_INTERFACE(LightBird::IConfiguration, "cc.lightbird.IConfiguration");
 
 #endif // ICONFIGURATION_H

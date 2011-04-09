@@ -6,7 +6,7 @@
 # include "Table.h"
 
 class TablePermissions : virtual public Table,
-                         virtual public Streamit::ITablePermissions
+                         virtual public LightBird::ITablePermissions
 {
 public:
     TablePermissions(const QString &id = "");

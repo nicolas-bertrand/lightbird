@@ -13,7 +13,7 @@
 TableDirectories::TableDirectories(const QString &id)
 {
     this->tableName = "directories";
-    this->tableId = Streamit::ITable::Directories;
+    this->tableId = LightBird::ITable::Directories;
     if (!id.isEmpty())
         Table::setId(id);
 }

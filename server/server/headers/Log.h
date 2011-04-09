@@ -40,7 +40,7 @@ public:
     /// @param plugin : The name of the plugin from witch the log is written, or empty for the server.
     /// @param object : The name of the class from witch the log is written.
     /// @param method : The name of the method from witch the log is written.
-    void        write(Streamit::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method);
+    void        write(LightBird::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method);
     /// @brief Writes a fatal log level.
     /// @see write
     static void fatal(const QString &message, const QString &object = "", const QString &method = "");
@@ -77,19 +77,19 @@ public:
     /// @brief Writes a trace log level.
     /// @see write
     static void trace(const QString &message, const Properties &properties, const QString &object = "", const QString &method = "");
-    /// @see Streamit::ILogs::getlevel
-    Streamit::ILogs::level getlevel();
-    /// @see Streamit::ILogs::setLevel
-    void    setLevel(Streamit::ILogs::level level);
-    /// @see Streamit::ILogs::isError
+    /// @see LightBird::ILogs::getlevel
+    LightBird::ILogs::level getlevel();
+    /// @see LightBird::ILogs::setLevel
+    void    setLevel(LightBird::ILogs::level level);
+    /// @see LightBird::ILogs::isError
     bool    isError();
-    /// @see Streamit::ILogs::isWarning
+    /// @see LightBird::ILogs::isWarning
     bool    isWarning();
-    /// @see Streamit::ILogs::isInfo
+    /// @see LightBird::ILogs::isInfo
     bool    isInfo();
-    /// @see Streamit::ILogs::isDebug
+    /// @see LightBird::ILogs::isDebug
     bool    isDebug();
-    /// @see Streamit::ILogs::isTrace
+    /// @see LightBird::ILogs::isTrace
     bool    isTrace();
 
     /// @brief Set the mode of the log.
@@ -114,8 +114,8 @@ private:
     /// @see write
     struct LogInformations
     {
-        LogInformations(Streamit::ILogs::level level, const QString &message, const Properties &properties, const QString &plugin, const QString &object, const QString &method, const QString &thread, const QDateTime &date);
-        Streamit::ILogs::level  level;
+        LogInformations(LightBird::ILogs::level level, const QString &message, const Properties &properties, const QString &plugin, const QString &object, const QString &method, const QString &thread, const QDateTime &date);
+        LightBird::ILogs::level  level;
         QString                 message;
         Properties              properties;
         QString                 plugin;
@@ -133,11 +133,11 @@ private:
     /// @brief Print the log in parameter on the standard output. This is used when no loaded plugin handle
     /// the logs (i.e ILog is not implemented).
     /// @see write
-    void        _print(Streamit::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method, const QString &thread, const QDateTime &date);
+    void        _print(LightBird::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method, const QString &thread, const QDateTime &date);
 
-    Streamit::ILogs::level                  logLevel;   ///< The minimum level required to write a log.
+    LightBird::ILogs::level                 logLevel;   ///< The minimum level required to write a log.
     static Log                              *_instance; ///< The instance of the Singleton.
-    QMap<Streamit::ILogs::level, QString>   levels;     ///< Combines the levels and their names.
+    QMap<LightBird::ILogs::level, QString>  levels;     ///< Combines the levels and their names.
     QMutex                                  lockWrite;  ///< A mutex that ensures that only one log is written at the same time. This makes the Log class thread-safe.
     QList<LogInformations>                  buffer;     ///< A buffer that stores the logs that haven't been saved yet.
     Mode                                    mode;       ///< The current mode of the log.

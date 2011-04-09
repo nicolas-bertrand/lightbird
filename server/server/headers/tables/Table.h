@@ -6,10 +6,10 @@
 # include "ITable.h"
 
 class Table : public QObject,
-              virtual public Streamit::ITable
+              virtual public LightBird::ITable
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::ITable)
+    Q_INTERFACES(LightBird::ITable)
 
 public:
     const QString       &getId();
@@ -22,21 +22,21 @@ public:
     QDateTime           getCreated();
 
     const QString       &getTableName();
-    Streamit::ITable::Tables getTableId();
+    LightBird::ITable::Tables getTableId();
     bool                isTable(const QString &tableName);
-    bool                isTable(Streamit::ITable::Tables tableId);
+    bool                isTable(LightBird::ITable::Tables tableId);
 
-    Streamit::ITableAccessors   *toTableAccessors();
-    Streamit::ITableAccounts    *toTableAccounts();
-    Streamit::ITableCollections *toTableCollections();
-    Streamit::ITableDirectories *toTableDirectories();
-    Streamit::ITableEvents      *toTableEvents();
-    Streamit::ITableFiles       *toTableFiles();
-    Streamit::ITableGroups      *toTableGroups();
-    Streamit::ITableLimits      *toTableLimits();
-    Streamit::ITableObjects     *toTableObjects();
-    Streamit::ITablePermissions *toTablePermissions();
-    Streamit::ITableTags        *toTableTags();
+    LightBird::ITableAccessors   *toTableAccessors();
+    LightBird::ITableAccounts    *toTableAccounts();
+    LightBird::ITableCollections *toTableCollections();
+    LightBird::ITableDirectories *toTableDirectories();
+    LightBird::ITableEvents      *toTableEvents();
+    LightBird::ITableFiles       *toTableFiles();
+    LightBird::ITableGroups      *toTableGroups();
+    LightBird::ITableLimits      *toTableLimits();
+    LightBird::ITableObjects     *toTableObjects();
+    LightBird::ITablePermissions *toTablePermissions();
+    LightBird::ITableTags        *toTableTags();
 
     /// @brief This operator is virtual to allows subclasses to modify its behaviour.
     virtual Table       &operator=(const Table &t);
@@ -48,7 +48,7 @@ protected:
 
     QString             id;
     QString             tableName;
-    Streamit::ITable::Tables tableId;
+    LightBird::ITable::Tables tableId;
 };
 
 #endif // TABLE_H

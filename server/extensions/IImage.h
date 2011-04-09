@@ -4,7 +4,7 @@
 # include <QString>
 
 /// @brief Allows plugins to convert image files.
-namespace Streamit
+namespace LightBird
 {
     class IImage
     {
@@ -32,7 +32,7 @@ namespace Streamit
         /// @param width : The width of the new image. If it is 0, it will be proportional to the height.
         /// @param height : The height of the new image. If it is 0, it will be proportional to the width.
         /// @return True is returned if the image has been successfully converted.
-        virtual bool    convert(const QString &source, QString &destination, Streamit::IImage::Format format, unsigned int width = 0, unsigned int height = 0) = 0;
+        virtual bool    convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0) = 0;
     };
 }
 

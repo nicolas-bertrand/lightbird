@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This interface is called to serialize the content of a response, i.e convert
     /// it to a string that can be sent to the client through the network. doSerializeContent
@@ -19,10 +19,10 @@ namespace Streamit
         /// the response is stored in IResponse, that can be accessed via IClient::getResponse().
         /// @param data : The content serialized by the plugin.
         /// @return False while more data have to be serialized, true otherwise.
-        virtual bool    doSerializeContent(Streamit::IClient &client, QByteArray &data) = 0;
+        virtual bool    doSerializeContent(LightBird::IClient &client, QByteArray &data) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDoSerializeContent, "cc.lightbird.IDoSerializeContent");
+Q_DECLARE_INTERFACE(LightBird::IDoSerializeContent, "cc.lightbird.IDoSerializeContent");
 
 #endif // IDOSERIALIZECONTENT_H

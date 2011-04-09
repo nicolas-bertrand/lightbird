@@ -3,7 +3,7 @@
 #include "Plugin.h"
 #include "Parser.h"
 
-Parser::Parser(Streamit::IClient *c) : client(c), request(&c->getRequest()), response(&c->getResponse())
+Parser::Parser(LightBird::IClient *c) : client(c), request(&c->getRequest()), response(&c->getResponse())
 {
     this->contentSent = 0;
 }
@@ -48,7 +48,7 @@ bool    Parser::onProtocol(const QByteArray &data, QString &protocol, bool &erro
 
 bool    Parser::doUnserializeHeader(const QByteArray &data, quint64 &used)
 {
-    this->request->getContent().setStorage(Streamit::IContent::BYTEARRAY);
+    this->request->getContent().setStorage(LightBird::IContent::BYTEARRAY);
     this->contentSent = 0;
     this->header.append(data);
     // If the header contains the characteres END_OF_HEADER, this mean that all the header
@@ -88,7 +88,7 @@ bool        Parser::doUnserializeContent(const QByteArray &data, quint64 &used)
     {
         // The first time a content is received, we determine if it has to be stored in a temporary file or in the memory
         if (this->request->getContent().size() == 0 && contentLength > Plugin::getConfiguration().maxContentInMemory)
-            this->request->getContent().setStorage(Streamit::IContent::TEMPORARYFILE);
+            this->request->getContent().setStorage(LightBird::IContent::TEMPORARYFILE);
         // Calculates the size of the remaining content to receive
         rest = contentLength - this->request->getContent().size();
         // All the data has been used

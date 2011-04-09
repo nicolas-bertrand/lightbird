@@ -7,12 +7,12 @@
 # include "ITableDirectories.h"
 # include "ITableObjects.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to a file.
     /// Each modifications done in this object is immediatly saved in the database.
     /// This can be seen as an implementation of the Active Record design pattern.
-    class ITableFiles : virtual public Streamit::ITableObjects
+    class ITableFiles : virtual public LightBird::ITableObjects
     {
     public:
         virtual ~ITableFiles() {}
@@ -96,6 +96,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITableFiles, "cc.lightbird.ITableFiles");
+Q_DECLARE_INTERFACE(LightBird::ITableFiles, "cc.lightbird.ITableFiles");
 
 #endif // ITABLEFILES_H

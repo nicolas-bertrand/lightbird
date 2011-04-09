@@ -17,7 +17,7 @@ INSERT INTO "groups" VALUES('f2aa93f9-9239-11de-8a39-0800200c9a66','California',
 
 INSERT INTO "accounts_groups" VALUES('idAccountGroup', 'ab4bfbf0-9231-11de-8a39-0800200c9a66','f2aa93fa-9239-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'));
 
-INSERT INTO "accounts_informations" VALUES('idAccountInformation', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', 'Mail', "team@streamit.fr", STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'));
+INSERT INTO "accounts_informations" VALUES('idAccountInformation', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', 'Mail', "team@lightbird.fr", STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'));
 
 INSERT INTO "collections" VALUES('94dfdce0-9233-11de-8a39-0800200c9a66','Playlist -Chilili-','','ab4bfbf0-9231-11de-8a39-0800200c9a66',STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S','now', 'localtime'));
 

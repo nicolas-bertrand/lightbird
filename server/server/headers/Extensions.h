@@ -12,10 +12,10 @@ class Plugin;
 
 /// @brief Manage the extensions of the API, and allows plugins to use them.
 class Extensions : public QObject,
-                   public Streamit::IExtensions
+                   public LightBird::IExtensions
 {
     Q_OBJECT
-    Q_INTERFACES(Streamit::IExtensions)
+    Q_INTERFACES(LightBird::IExtensions)
 
 public:
     static Extensions   *instance(QObject *parent = 0);
@@ -24,9 +24,9 @@ public:
     void                add(Plugin *plugin);
     /// @brief Removes a plugin. It will be really removed when all its extensions will be released.
     void                remove(Plugin *plugin);
-    /// @see Streamit::IExtensions::get
+    /// @see LightBird::IExtensions::get
     QList<void *>       get(const QString &name);
-    /// @see Streamit::IExtensions::release
+    /// @see LightBird::IExtensions::release
     void                release(QList<void *> extensions);
 
 signals:
@@ -43,7 +43,7 @@ private:
     struct PluginInfo
     {
         Plugin                  *instance;   ///< The plugin class.
-        Streamit::IExtension    *extensions; ///< The IExtension interface of the plugin.
+        LightBird::IExtension   *extensions; ///< The IExtension interface of the plugin.
         bool                    loaded;      ///< If false, the plugin can't get more extensions and is going to be removed.
     };
 

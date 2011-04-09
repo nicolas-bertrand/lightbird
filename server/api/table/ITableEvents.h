@@ -7,12 +7,12 @@
 
 # include "ITable.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to an event.
     /// Each modifications done in this object is immediatly saved in the database.
     /// This can be seen as an implementation of the Active Record design pattern.
-    class ITableEvents : virtual public Streamit::ITable
+    class ITableEvents : virtual public LightBird::ITable
     {
     public:
         virtual ~ITableEvents() {}
@@ -75,6 +75,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITableEvents, "cc.lightbird.ITableEvents");
+Q_DECLARE_INTERFACE(LightBird::ITableEvents, "cc.lightbird.ITableEvents");
 
 #endif // ITABLEEVENTS_H

@@ -6,7 +6,7 @@
 # include "TableObjects.h"
 
 class TableDirectories : virtual public TableObjects,
-                         virtual public Streamit::ITableDirectories
+                         virtual public LightBird::ITableDirectories
 {
 public:
     TableDirectories(const QString &id = "");

@@ -6,7 +6,7 @@
 # include "Table.h"
 
 class TableAccessors : virtual public Table,
-                       virtual public Streamit::ITableAccessors
+                       virtual public LightBird::ITableAccessors
 {
 public:
     QString     getName();

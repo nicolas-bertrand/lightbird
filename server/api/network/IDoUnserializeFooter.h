@@ -3,7 +3,7 @@
 
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Converts the data received by the network to the footer of the
     /// request, so that it can be processed. The footer is stored in IRequest
@@ -29,10 +29,10 @@ namespace Streamit
         /// ie if there is no content.
         /// @return True if the footer is complete. This method will be called while
         /// false is returned.
-        virtual bool    doUnserializeFooter(Streamit::IClient &client, const QByteArray &data, quint64 &used) = 0;
+        virtual bool    doUnserializeFooter(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDoUnserializeFooter, "cc.lightbird.IDoUnserializeFooter");
+Q_DECLARE_INTERFACE(LightBird::IDoUnserializeFooter, "cc.lightbird.IDoUnserializeFooter");
 
 #endif // IDOUNSERIALIZEFOOTER_H

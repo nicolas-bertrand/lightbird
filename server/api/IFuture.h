@@ -3,7 +3,7 @@
 
 # include <QWaitCondition>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief This classe has the same behavior than QFuture, and is uses for the
     /// same purpose, which is to allow a thread to get the result of an asynchronous

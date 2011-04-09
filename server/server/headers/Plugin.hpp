@@ -44,12 +44,12 @@ public:
     /// unload the plugin if necessary.
     bool    release();
     /// @brief Returns the metadata of the plugin.
-    Streamit::IMetadata getMetadata() const;
+    LightBird::IMetadata getMetadata() const;
     /// @brief Check if the given context is valid compared to the contexts of the plugin.
     bool    checkContext(const QString &transport, const QStringList &protocols,
                          unsigned short port, const QString &method, const QString &type, bool all);
     /// @brief Returns the current state of the plugin.
-    Streamit::IPlugins::State   getState();
+    LightBird::IPlugins::State  getState();
     /// @brief Returns the retources path of the plugin.
     const QString               &getResourcePath() const;
 
@@ -72,15 +72,15 @@ private:
     QString             path;           ///< The path to the directory of the plugin.
     QString             libraryName;    ///< The name of the plugin library.
     Configuration       *configuration; ///< The configuration of the plugin.
-    Api                 *api;           ///< The Streamit API.
+    Api                 *api;           ///< The LightBird API.
     QPluginLoader       *loader;        ///< A pointer the the loaded plugin.
-    Streamit::IPlugin   *instance;      ///< An instance to the plugin.
+    LightBird::IPlugin  *instance;      ///< An instance to the plugin.
     QObject             *instanceObject;///< The QObject version of the instance of the plugin.
     int                 used;           ///< A counter of used plugin instances, for a basic garbage collection.
     QList<Context>      contexts;       ///< Contains the contexts of the plugin.
     QString             resourcesPath;  ///< The path of the resources of the plugin (can be empty).
     mutable QReadWriteLock lockPlugin;  ///< Ensure that the class is thread safe.
-    Streamit::IPlugins::State state;    ///< The current state of the plugin.
+    LightBird::IPlugins::State state;   ///< The current state of the plugin.
 
     friend class Extensions;
 };
@@ -95,7 +95,7 @@ T       *Plugin::getInstance()
         Log::error("Deadlock", "Plugin", "getInstance");
         return (NULL);
     }
-    if (this->state != Streamit::IPlugins::LOADED)
+    if (this->state != LightBird::IPlugins::LOADED)
     {
         this->lockPlugin.unlock();
         return (NULL);

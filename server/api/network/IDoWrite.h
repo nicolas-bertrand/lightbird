@@ -4,7 +4,7 @@
 # include <QByteArray>
 # include "IClient.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Interface used to write on a socket. If implemented, it allows
     /// to replace the default write made by the server.
@@ -17,10 +17,10 @@ namespace Streamit
         /// @param client : The client to whom the informations must be sent.
         /// @param data : The data to send through the network.
         /// @return False if an error occured, true otherwise.
-        virtual bool    doWrite(Streamit::IClient &client, QByteArray &data)  = 0;
+        virtual bool    doWrite(LightBird::IClient &client, QByteArray &data)  = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::IDoWrite, "cc.lightbird.IDoWrite");
+Q_DECLARE_INTERFACE(LightBird::IDoWrite, "cc.lightbird.IDoWrite");
 
 #endif // IDOWRITE_H

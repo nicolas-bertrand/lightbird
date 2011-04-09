@@ -5,12 +5,12 @@
 
 # include "ITable.h"
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to a permission.
     /// Each modifications done in this object is immediatly saved in the database.
     /// This can be seen as an implementation of the Active Record design pattern.
-    class ITablePermissions : virtual public Streamit::ITable
+    class ITablePermissions : virtual public LightBird::ITable
     {
     public:
         virtual ~ITablePermissions() {}
@@ -56,6 +56,6 @@ namespace Streamit
     };
 }
 
-Q_DECLARE_INTERFACE(Streamit::ITablePermissions, "cc.LightBird.ITablePermissions");
+Q_DECLARE_INTERFACE(LightBird::ITablePermissions, "cc.LightBird.ITablePermissions");
 
 #endif // ITABLEPERMISSIONS_H

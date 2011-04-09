@@ -5,7 +5,7 @@
 # include <QStringList>
 # include <QMap>
 
-namespace Streamit
+namespace LightBird
 {
     /// @brief Stores information about a plugin.
     struct                     IMetadata
