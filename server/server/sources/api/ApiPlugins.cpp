@@ -48,6 +48,11 @@ QSharedPointer<Streamit::IFuture<bool> > ApiPlugins::uninstall(const QString &id
     return (QSharedPointer<Streamit::IFuture<bool> > (new Future<bool>(Plugins::instance()->uninstall(id))));
 }
 
+Streamit::IMetadata ApiPlugins::getMetadata(const QString &id) const
+{
+    return (Plugins::instance()->getMetadata(id));
+}
+
 Streamit::IPlugins::State ApiPlugins::getState(const QString &id)
 {
     return (Plugins::instance()->getState(id));

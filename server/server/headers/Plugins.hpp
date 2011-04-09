@@ -93,6 +93,9 @@ public:
     /// @return True on success, false otherwise.
     /// @see get
     bool                    release(const QString &id);
+    /// @brief Returns the metadata of a plugin.
+    /// @param id : The plugin id.
+    Streamit::IMetadata     getMetadata(const QString &id) const;
     /// @brief Returns the resources path of a plugin.
     /// @param id : The id of the plugin.
     QString                 getResourcesPath(const QString &id);
@@ -151,7 +154,7 @@ private:
     static Plugins          *_instance;         ///< The only instance of the class.
     QMap<QString, Plugin *> plugins;            ///< The list of loaded plugins.
     QStringList             orderedPlugins;     ///< Contains the id of the loaded plugins, and keep the order of their loading.
-    QReadWriteLock          lock;               ///< Used to lock access to the plugins map when a thread use it.
+    mutable QReadWriteLock  mutex;              ///< Used to secure the access to the plugins map when a thread use it.
     QWaitCondition          wait;               ///< This condition is awakened when the thread is running for the first time, and when all plugin has been unloaded using unloadAll().
     bool                    awake;              ///< If the wait condition has been called.
     QObject                 *parent;            ///< The parent of the Plugins.
@@ -171,7 +174,7 @@ QMap<QString, T *>  Plugins::getInstances(Streamit::INetwork::Transports transpo
 
     if (transport == Streamit::INetwork::UDP)
         transportText = "UDP";
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "getInstances");
         return (instances);
@@ -188,7 +191,7 @@ QMap<QString, T *>  Plugins::getInstances(Streamit::INetwork::Transports transpo
                 plugin->release();
         }
     }
-    this->lock.unlock();
+    this->mutex.unlock();
     return (instances);
 }
 
@@ -203,7 +206,7 @@ QPair<QString, T *> Plugins::getInstance(Streamit::INetwork::Transports transpor
 
     if (transport == Streamit::INetwork::UDP)
         transportText = "UDP";
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "getInstance");
         return (pair);
@@ -223,7 +226,7 @@ QPair<QString, T *> Plugins::getInstance(Streamit::INetwork::Transports transpor
                 plugin->release();
         }
     }
-    this->lock.unlock();
+    this->mutex.unlock();
     return (pair);
 }
 
@@ -232,14 +235,14 @@ T       *Plugins::getInstance(const QString &id)
 {
     T   *instance = NULL;
 
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "getInstance");
         return (instance);
     }
     if (this->plugins.contains(id))
         instance = this->plugins.value(id)->getInstance<T>();
-    this->lock.unlock();
+    this->mutex.unlock();
     return (instance);
 }
 

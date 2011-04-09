@@ -3,7 +3,7 @@
   <installed>true</installed>
   <name>Parser HTTP</name>
   <brief>The HTTP parser.</brief>
-  <description>Converts the requests into a workable object, and convert the response objects into a string that can be sent through the network. It can be used to parse SiTP and HTTP requests.</description>
+  <description>Converts the requests into a workable object, and convert the response objects into a string that can be sent through the network. It can be used to parse HTTP requests.</description>
   <autor>Streamit team</autor>
   <site>http://www.streamit.fr</site>
   <email>team@streamit.fr</email>
@@ -12,7 +12,6 @@
   <contexts>
     <context>
       <transport>TCP</transport>
-      <protocol>SiTP</protocol>
       <protocol>HTTP</protocol>
       <protocol>WebClient</protocol>
     </context>

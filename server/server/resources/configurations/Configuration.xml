@@ -42,37 +42,10 @@
     <validityPeriod>30</validityPeriod>
   </log>
   <ports>
-    <port protocol="SiTP HTTP WebClient" transport="TCP" maxClients="300">4242</port>
+    <port protocol="HTTP WebClient" transport="TCP" maxClients="300">4242</port>
   </ports>
   <plugins>
-    <!-- The HTTP parser is used by SiTP, HTTP, and the WebClient -->
-    <plugin>HTTP/Authentication</plugin>
     <plugin>HTTP/Get</plugin>
     <plugin>HTTP/Parser</plugin>
-    <!-- SiTP -->
-    <plugin>SiTP/Database</plugin>
-    <plugin>SiTP/Get</plugin>
-    <plugin>SiTP/Identification</plugin>
-    <plugin>SiTP/Permission</plugin>
-    <plugin>SiTP/Plugin</plugin>
-    <plugin>SiTP/Preview</plugin>
-    <plugin>SiTP/Put</plugin>
-    <plugin>SiTP/Server</plugin>
-    <plugin>SiTP/Stream</plugin>
-    <!-- Content -->
-    <plugin>Content/Json</plugin>
-    <plugin>Content/Xml</plugin>
-    <!-- Extensions -->
-    <plugin>Extensions/FFmpeg</plugin>
-    <plugin>Extensions/Identifier</plugin>
-    <plugin>Extensions/ImageMagick</plugin>
-    <plugin>Extensions/Previews</plugin>
-    <!--plugin>Extensions/TagLib</plugin-->
-    <!-- ClientDesktop -->
-    <plugin>ClientDesktop</plugin>
-    <!-- WebClient -->
-    <plugin>WebClient</plugin>
-    <!-- Other -->
-    <plugin>Logs/logFile</plugin>
   </plugins>
 </configuration>

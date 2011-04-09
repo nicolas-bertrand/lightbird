@@ -24,6 +24,8 @@ public:
     QSharedPointer<Streamit::IFuture<bool> > install(const QString &id);
     /// @see Streamit::IPlugins::uninstall
     QSharedPointer<Streamit::IFuture<bool> > uninstall(const QString &id);
+    /// @see Streamit::IPlugins::getMetadata
+    Streamit::IMetadata getMetadata(const QString &id) const;
     /// @see Streamit::IPlugins::getState
     Streamit::IPlugins::State getState(const QString &id);
     /// @see Streamit::IPlugins::getPlugins

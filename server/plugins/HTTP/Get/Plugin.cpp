@@ -18,6 +18,7 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(Streamit::IApi *api)
 {
     this->api = api;
+    api->plugins().getMetadata(api->getId());
     return (true);
 }
 
@@ -36,6 +37,18 @@ void    Plugin::onUninstall(Streamit::IApi *api)
     this->api = api;
 }
 
+void    Plugin::getMetadata(Streamit::IMetadata &metadata) const
+{
+    metadata.name = "HTTP Get";
+    metadata.brief = "Implements the GET HTTP method.";
+    metadata.description = "Allows clients to download files from the server, and get data of its files.";
+    metadata.autor = "LightBird team";
+    metadata.site = "lightbird.cc";
+    metadata.email = "team@lightbird.cc";
+    metadata.version = "1.0";
+    metadata.licence = "LGPL";
+}
+
 QString Plugin::getResourcesPath()
 {
     return (":plugins/HTTP/Get");
@@ -43,7 +56,11 @@ QString Plugin::getResourcesPath()
 
 bool    Plugin::doExecution(Streamit::IClient &client)
 {
-    client.getResponse().getContent().setContent("Hello world!");
+    Streamit::IMetadata metadata;
+
+    metadata = this->api->plugins().getMetadata(this->api->getId());
+    QString s = metadata.name;
+    client.getResponse().getContent().setContent(s.toAscii());
     return (true);
 }
 

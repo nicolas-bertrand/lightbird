@@ -178,6 +178,20 @@ bool    Plugin::release()
     return (true);
 }
 
+Streamit::IMetadata     Plugin::getMetadata() const
+{
+    Streamit::IMetadata metadata;
+
+    if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Plugin", "getMetadata");
+        return (metadata);
+    }
+    this->instance->getMetadata(metadata);
+    this->lockPlugin.unlock();
+    return (metadata);
+}
+
 bool    Plugin::checkContext(const QString &transport, const QStringList &protocols,
                              unsigned short port, const QString &method, const QString &type, bool all)
 {

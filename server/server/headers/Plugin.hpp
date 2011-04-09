@@ -43,6 +43,8 @@ public:
     /// @brief Decrements this->used, which was incremented by get(), and
     /// unload the plugin if necessary.
     bool    release();
+    /// @brief Returns the metadata of the plugin.
+    Streamit::IMetadata getMetadata() const;
     /// @brief Check if the given context is valid compared to the contexts of the plugin.
     bool    checkContext(const QString &transport, const QStringList &protocols,
                          unsigned short port, const QString &method, const QString &type, bool all);
@@ -77,7 +79,7 @@ private:
     int                 used;           ///< A counter of used plugin instances, for a basic garbage collection.
     QList<Context>      contexts;       ///< Contains the contexts of the plugin.
     QString             resourcesPath;  ///< The path of the resources of the plugin (can be empty).
-    QReadWriteLock      lockPlugin;     ///< Ensure that the class is thread safe.
+    mutable QReadWriteLock lockPlugin;  ///< Ensure that the class is thread safe.
     Streamit::IPlugins::State state;    ///< The current state of the plugin.
 
     friend class Extensions;

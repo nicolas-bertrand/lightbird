@@ -17,7 +17,6 @@ bool    Plugin::onLoad(Streamit::IApi *api)
 {
     this->api = api;
     // Load the configuration
-    this->configuration.protocols.push_back("SiTP/1.0");
     this->configuration.protocols.push_back("HTTP/1.0");
     this->configuration.protocols.push_back("HTTP/1.1");
     if (!(this->configuration.maxHeaderSize = api->configuration(true).get("maxHeaderSize").toUInt()))
@@ -49,6 +48,18 @@ bool    Plugin::onInstall(Streamit::IApi *api)
 void    Plugin::onUninstall(Streamit::IApi *api)
 {
     this->api = api;
+}
+
+void    Plugin::getMetadata(Streamit::IMetadata &metadata) const
+{
+    metadata.name = "Parser HTTP";
+    metadata.brief = "The HTTP parser.";
+    metadata.description = "Converts the requests into a workable object, and convert the response objects into a string that can be sent through the network. It can be used to parse HTTP requests.";
+    metadata.autor = "LightBird team";
+    metadata.site = "lightbird.cc";
+    metadata.email = "team@lightbird.cc";
+    metadata.version = "1.0";
+    metadata.licence = "LGPL";
 }
 
 QString Plugin::getResourcesPath()

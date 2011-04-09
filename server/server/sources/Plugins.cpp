@@ -38,10 +38,10 @@ Plugins::Plugins(QObject *parent)
     this->moveToThread(this);
     Threads::instance()->newThread(this);
     // Wait that the thread is started
-    this->lock.lockForWrite();
+    this->mutex.lockForWrite();
     if (!this->awake)
-        this->wait.wait(&lock);
-    this->lock.unlock();
+        this->wait.wait(&mutex);
+    this->mutex.unlock();
 }
 
 Plugins::~Plugins()
@@ -57,10 +57,10 @@ void        Plugins::run()
     Extensions::instance(this);
     Log::debug("Plugins thread started", "Plugins", "run");
     // Tells to the thread that started the current thread that it is running
-    this->lock.lockForWrite();
+    this->mutex.lockForWrite();
     this->awake = true;
     this->wait.wakeAll();
-    this->lock.unlock();
+    this->mutex.unlock();
     // Execute the event loop
     this->exec();
     Log::debug("Plugins thread finished", "Plugins", "run");
@@ -108,18 +108,18 @@ Future<bool>        Plugins::uninstall(const QString &id)
 void    Plugins::unloadAll()
 {
     Log::error("Unloading all the plugins", "Plugins", "unloadAll");
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "unloadAll");
         return ;
     }
     this->unloadAllPlugins = true;
     QStringListIterator it(this->orderedPlugins);
-    this->lock.unlock();
+    this->mutex.unlock();
     // Try to unload all the plugins
     while (it.hasNext())
         this->unload(it.next()).getResult();
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "unloadAll");
         return ;
@@ -129,10 +129,10 @@ void    Plugins::unloadAll()
     if (this->plugins.size() > 0)
     {
         Log::info("Some plugins are still used. The server is waiting that all the plugins are unloaded...", "Plugins", "unloadAll");
-        this->wait.wait(&this->lock);
+        this->wait.wait(&this->mutex);
         Log::info("All plugins has been unloaded", "Plugins", "unloadAll");
     }
-    this->lock.unlock();
+    this->mutex.unlock();
 }
 
 void                                Plugins::_load(const QString &identifier, Future<bool> *f)
@@ -141,7 +141,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     QString                         id = this->_checkId(identifier);
     QSharedPointer<Future<bool> >   future(f);
 
-    if (!this->lock.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_load");
         return ;
@@ -149,13 +149,13 @@ void                                Plugins::_load(const QString &identifier, Fu
     if (this->unloadAllPlugins)
     {
         Log::warning("No plugins can be loaded, because all plugins are unloading.", Properties("id", id), "Plugins", "_load");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     if (this->plugins.contains(id))
     {
         Log::warning("The plugin is already loaded", Properties("id", id), "Plugins", "_load");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     plugin = new Plugin(id, this);
@@ -163,7 +163,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     {
         Log::error("The plugin is not installed", Properties("id", id), "Plugins", "_load");
         delete plugin;
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     this->lockResourcesPath.lock();
@@ -173,7 +173,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     {
         Log::error("Unable to load the plugin", Properties("id", id), "Plugins", "_load");
         delete plugin;
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     Extensions::instance()->add(plugin);
@@ -182,14 +182,14 @@ void                                Plugins::_load(const QString &identifier, Fu
     Log::debug("Plugin loaded", Properties("id", id), "Plugins", "_load");
     emit this->loaded(id);
     future->setResult(true);
-    this->lock.unlock();
+    this->mutex.unlock();
 }
 
 void                                Plugins::_unload(const QString &id, Future<bool> *f)
 {
     QSharedPointer<Future<bool> >   future(f);
 
-    if (!this->lock.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_unload");
         return ;
@@ -197,20 +197,20 @@ void                                Plugins::_unload(const QString &id, Future<b
     if (!this->plugins.contains(id))
     {
         Log::warning("The plugin is already unloaded", Properties("id", id), "Plugins", "_unload");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     if (this->plugins.value(id)->getState() != Streamit::IPlugins::LOADED)
     {
         Log::warning("The plugin is already unloading", Properties("id", id), "Plugins", "_unload");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     Extensions::instance()->remove(this->plugins.value(id));
     if (!this->plugins.value(id)->unload())
     {
         Log::error("Unable to unload the plugin", Properties("id", id), "Plugins", "_unload");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     if (this->plugins.value(id)->getState() == Streamit::IPlugins::UNLOADED)
@@ -221,7 +221,7 @@ void                                Plugins::_unload(const QString &id, Future<b
         Log::debug("Plugin unloaded", Properties("id", id), "Plugins", "_unload");
     }
     future->setResult(true);
-    this->lock.unlock();
+    this->mutex.unlock();
     return ;
 }
 
@@ -230,7 +230,7 @@ void                                Plugins::_install(const QString &id, Future<
     Streamit::IPlugins::State       state;
     QSharedPointer<Future<bool> >   future(f);
 
-    if (!this->lock.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_install");
         return ;
@@ -238,14 +238,14 @@ void                                Plugins::_install(const QString &id, Future<
     if (this->unloadAllPlugins)
     {
         Log::warning("No plugins can be installed, because all plugins are unloading.", Properties("id", id), "Plugins", "_install");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     if ((state = this->_getState(id)) != Streamit::IPlugins::UNINSTALLED &&
         state != Streamit::IPlugins::UNKNOW)
     {
         Log::warning("The plugin is already installed", Properties("id", id).add("state", QString::number(state)), "Plugins", "_install");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     Plugin plugin(id);
@@ -255,29 +255,27 @@ void                                Plugins::_install(const QString &id, Future<
     if (!plugin.load(false))
     {
         Log::warning("Unable to load the plugin in order to install it", Properties("id", id), "Plugins", "_install");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     if (!plugin.install())
     {
         Log::warning("Unable to install the plugin", Properties("id", id), "Plugins", "_install");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     Log::debug("Plugin installed", Properties("id", id), "Plugins", "_install");
     future->setResult(true);
-    this->lock.unlock();
+    this->mutex.unlock();
     return ;
 }
 
 void                                Plugins::_uninstall(const QString &id, Future<bool> *f)
 {
     Streamit::IPlugins::State       state;
-    Plugin                          *plugin;
-    bool                            loaded;
     QSharedPointer<Future<bool> >   future(f);
 
-    if (!this->lock.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_uninstall");
         return ;
@@ -285,69 +283,49 @@ void                                Plugins::_uninstall(const QString &id, Futur
     if (this->unloadAllPlugins)
     {
         Log::warning("No plugins can be uninstalled, because all plugins are unloading.", Properties("id", id), "Plugins", "_uninstall");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     if ((state = this->_getState(id)) == Streamit::IPlugins::UNINSTALLED)
     {
         Log::warning("The plugin is already uninstalled", Properties("id", id), "Plugins", "_uninstall");
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
-    plugin = this->plugins.value(id);
-    if (!(loaded = this->plugins.contains(id)))
+    if (this->plugins.contains(id))
     {
-        plugin = new Plugin(id, this);
-        if (!plugin->load(false))
-        {
-            Log::warning("Unable to load the plugin in order to uninstall it", Properties("id", id), "Plugins", "_uninstall");
-            delete plugin;
-            this->lock.unlock();
-            return ;
-        }
-    }
-    if (loaded && plugin->getState() != Streamit::IPlugins::LOADED)
-    {
-        Log::warning("The plugin can't be uninstalled because it is still unloading", Properties("id", id), "Plugins", "_uninstall");
-        if (!loaded)
-            delete plugin;
-        this->lock.unlock();
+        Log::warning("The plugin must be unloaded to be uninstalled", Properties("id", id), "Plugins", "_uninstall");
+        this->mutex.unlock();
         return ;
     }
-    if (!plugin->uninstall())
+    Plugin plugin(id);
+    if (!plugin.load(false))
+    {
+        Log::warning("Unable to load the plugin in order to uninstall it", Properties("id", id), "Plugins", "_uninstall");
+        this->mutex.unlock();
+        return ;
+    }
+    if (!plugin.uninstall())
     {
         Log::warning("Unable to uninstall the plugin", Properties("id", id), "Plugins", "_uninstall");
-        if (!loaded)
-            delete plugin;
-        this->lock.unlock();
+        this->mutex.unlock();
         return ;
     }
     Log::debug("Plugin uninstalled", Properties("id", id), "Plugins", "_uninstall");
-    if (!loaded)
-    {
-        delete plugin;
-        future->setResult(true);
-    }
-    this->lock.unlock();
-    if (loaded)
-    {
-        Future<bool> *futureUnload = new Future<bool>(false);
-        Future<bool> futureTmp(*futureUnload);
-        this->_unload(id, futureUnload);
-        future->setResult(futureTmp.getResult());
-    }
+    future->setResult(true);
+    this->mutex.unlock();
 }
 
 bool    Plugins::release(const QString &id)
 {
-    if (!this->lock.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "release");
         return (false);
     }
     if (!this->plugins.contains(id))
     {
-        this->lock.unlock();
+        this->mutex.unlock();
         return (false);
     }
     this->plugins.value(id)->release();
@@ -360,21 +338,51 @@ bool    Plugins::release(const QString &id)
         if (this->unloadAllPlugins && this->plugins.size() == 0)
             this->wait.wakeAll();
     }
-    this->lock.unlock();
+    this->mutex.unlock();
     return (true);
+}
+
+Streamit::IMetadata     Plugins::getMetadata(const QString &id) const
+{
+    Streamit::IMetadata metadata;
+    Plugin              *plugin;
+
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Plugins", "getMetadata");
+        return (metadata);
+    }
+    if (this->plugins.contains(id))
+        plugin = this->plugins.value(id);
+    else
+    {
+        plugin = new Plugin(id);
+        if (!plugin->load(false))
+        {
+            Log::warning("Unable to load the plugin in order to get its metadata", Properties("id", id), "Plugins", "getMetadata");
+            delete plugin;
+            this->mutex.unlock();
+            return (metadata);
+        }
+    }
+    metadata = plugin->getMetadata();
+    if (!this->plugins.contains(id))
+        delete plugin;
+    this->mutex.unlock();
+    return (metadata);
 }
 
 Streamit::IPlugins::State Plugins::getState(const QString &id)
 {
     Streamit::IPlugins::State   state;
 
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "getState");
         return (Streamit::IPlugins::UNKNOW);
     }
     state = this->_getState(id);
-    this->lock.unlock();
+    this->mutex.unlock();
     return (state);
 }
 
@@ -397,13 +405,13 @@ QStringList     Plugins::getLoadedPlugins()
 {
     QStringList list;
 
-    if (!this->lock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "getLoadedPlugins");
         return (list);
     }
     list = this->orderedPlugins;
-    this->lock.unlock();
+    this->mutex.unlock();
     return (list);
 }
 

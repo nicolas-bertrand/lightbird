@@ -3,14 +3,14 @@
 
 # include <QString>
 
-# include "ILogs.h"
-# include "IDatabase.h"
 # include "IConfiguration.h"
-# include "IPlugins.h"
-# include "INetwork.h"
+# include "IDatabase.h"
 # include "IGuis.h"
-# include "ITimers.h"
+# include "ILogs.h"
+# include "INetwork.h"
+# include "IPlugins.h"
 # include "IExtensions.h"
+# include "ITimers.h"
 
 namespace Streamit
 {

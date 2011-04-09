@@ -15,7 +15,7 @@ public:
     Parser(const Parser &parser);
     Parser  &operator=(const Parser &parser);
 
-    /// @brief Find the protocol of the client (SiTP, HTTP or WebClient).
+    /// @brief Find the protocol of the client (HTTP or WebClient).
     bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
     /// @brief Unserialize the header.
     bool    doUnserializeHeader(const QByteArray &data, quint64 &used);

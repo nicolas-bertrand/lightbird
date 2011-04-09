@@ -3,7 +3,6 @@
 #include "Log.h"
 
 #include <QCoreApplication>
-#include <iostream>
 
 Thread::Thread()
 {

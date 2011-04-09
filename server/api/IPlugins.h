@@ -6,6 +6,7 @@
 # include <QSharedPointer>
 
 # include "IFuture.h"
+# include "IMetadata.h"
 
 namespace Streamit
 {
@@ -43,32 +44,39 @@ namespace Streamit
         /// unloaded, or is unloading (because it is still in use). Thanks to the shared pointer,
         /// plugins don't have to delete themself the IFuture.
         virtual QSharedPointer<Streamit::IFuture<bool> > unload(const QString &id) = 0;
-        /// @brief To install a plugin, use this method. This operation is executed in a
+        /// @brief Use this method to install a plugin. This operation is executed in a
         /// dedicated thread. Use getState() to get the current state of the plugin.
         /// @param id : The Plugin id.
         /// @return The future result of the operation. True is returned if the plugin has been correctly
         /// installed. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
         virtual QSharedPointer<Streamit::IFuture<bool> > install(const QString &id) = 0;
-        /// @brief Try to uninstall a plugin. If it is loaded, the plugin will be automatically
-        /// unloaded before beeing uninstalled. A plugin can uninstall itself. This operation is
-        /// executed in a dedicated thread. Use getState() to get the current state of the plugin.
+        /// @brief Try to uninstall a plugin. The plugin must be unloaded, or the uninstallation will
+        /// fail. This operation is executed in a dedicated thread. Use getState() to get the current
+        /// state of the plugin.
         /// @param id : The Plugin id.
         /// @return The future result of the operation. True is returned if the plugin has been correctly
         /// uninstalled. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
         virtual QSharedPointer<Streamit::IFuture<bool> > uninstall(const QString &id) = 0;
-        /// @brief This method is used to get the current state of a plugin.
+        /// @brief Returns the metadata of a plugin. This method can't be called from the methods defined
+        /// in IPlugin.
+        /// @param id : The Plugin id.
+        /// @return The metadata of the plugin.
+        virtual Streamit::IMetadata getMetadata(const QString &id) const = 0;
+        /// @brief This method is used to get the current state of a plugin. It can't be called from
+        /// the methods defined in IPlugin.
         /// @param id : The id of the plugin.
         /// @return The current state of the plugin.
         virtual Streamit::IPlugins::State getState(const QString &id) = 0;
-        /// @return A list of the ids of all the plugins available on the server.
+        /// @brief Returns a list of the id of all the plugins available on the server.
         /// This method return a merged list of the methods getInstalledPlugins()
         /// and getUninstalledPlugins().
         virtual QStringList     getPlugins() = 0;
-        /// @return A list of the ids of the loaded plugins.
+        /// @brief Returns a list of the id of the loaded plugins. It can't be called from
+        /// the methods defined in IPlugin.
         virtual QStringList     getLoadedPlugins() = 0;
-        /// @return A list of the ids of the installed plugins.
+        /// @brief Returns a list of the id of the installed plugins.
         virtual QStringList     getInstalledPlugins() = 0;
-        /// @return A list of the ids of the uninstalled plugins.
+        /// @brief Returns a list of the id of the uninstalled plugins.
         virtual QStringList     getUninstalledPlugins() = 0;
     };
 }

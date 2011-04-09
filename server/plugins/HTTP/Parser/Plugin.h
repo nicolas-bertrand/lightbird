@@ -61,6 +61,7 @@ public:
     void    onUnload();
     bool    onInstall(Streamit::IApi *api);
     void    onUninstall(Streamit::IApi *api);
+    void    getMetadata(Streamit::IMetadata &metadata) const;
 
     // IResources
     QString getResourcesPath();

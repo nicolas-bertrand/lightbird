@@ -12,6 +12,7 @@ HEADERS         =   IApi.h \
                     IGuis.h \
                     ILog.h \
                     ILogs.h \
+                    IMetadata.h \
                     ITimer.h \
                     ITimers.h \
                     IPlugin.h \
