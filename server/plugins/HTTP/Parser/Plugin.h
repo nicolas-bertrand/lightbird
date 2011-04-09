@@ -6,7 +6,6 @@
 # include <QMap>
 
 # include "IPlugin.h"
-# include "IResources.h"
 # include "IOnConnect.h"
 # include "IOnProtocol.h"
 # include "IDoUnserializeHeader.h"
@@ -20,7 +19,6 @@
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
-               public LightBird::IResources,
                public LightBird::IOnConnect,
                public LightBird::IOnProtocol,
                public LightBird::IDoUnserializeHeader,
@@ -32,7 +30,6 @@ class Plugin : public QObject,
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin
-                 LightBird::IResources
                  LightBird::IOnConnect
                  LightBird::IOnProtocol
                  LightBird::IDoUnserializeHeader
@@ -62,9 +59,6 @@ public:
     bool    onInstall(LightBird::IApi *api);
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
-
-    // IResources
-    QString getResourcesPath();
 
     // Connect / Disconnect
     bool    onConnect(LightBird::IClient &client);

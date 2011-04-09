@@ -6,6 +6,7 @@
 # define VERSION                                "1.0"                   ///< The version of the server
 # define DATE_FORMAT                            "yyyy-MM-dd hh:mm:ss"   ///< The database date format, used through QDateTime.
 # define MAXTRYLOCK                             1000                    ///< Maximum time to wait in a tryLock in milliseconds. After that, an error should be returned.
+# define PLUGINS_RESOURCES_PATH                 ":plugins"              ///< The resources path of a plugin is this macro followed by its id.
 
 # define DEFAULT_CONFIGURATION_DIRECTORY        "configurations"        ///< The path to the configuration file of the server.
 # define DEFAULT_CONFIGURATION_FILE             "Configuration.xml"     ///< The default name of the XML configuration file.

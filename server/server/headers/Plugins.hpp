@@ -96,9 +96,11 @@ public:
     /// @brief Returns the metadata of a plugin.
     /// @param id : The plugin id.
     LightBird::IMetadata    getMetadata(const QString &id) const;
-    /// @brief Returns the resources path of a plugin.
+    /// @brief Returns the resources path of a plugin, which is a directory that
+    /// contains all the resources it uses. It is composed of PLUGINS_RESOURCES_PATH
+    /// followed by the plugin id.
     /// @param id : The id of the plugin.
-    QString                 getResourcesPath(const QString &id);
+    static QString          getResourcesPath(const QString &id);
 
     /// @see LightBird::IPlugins::getState
     LightBird::IPlugins::State getState(const QString &id);
@@ -159,8 +161,6 @@ private:
     bool                    awake;              ///< If the wait condition has been called.
     QObject                 *parent;            ///< The parent of the Plugins.
     bool                    unloadAllPlugins;   ///< If true, no more plugins will be loaded. or installed.
-    QMap<QString, QString>  resourcesPath;      ///< Stores the resources path of the plugins.
-    QMutex                  lockResourcesPath;  ///< Make resourcesPath thread safe.
 };
 
 template<class T>

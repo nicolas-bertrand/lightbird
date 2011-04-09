@@ -387,7 +387,7 @@ bool        Database::_loadQueries(const QString &id)
     // In the resources of the server
     else if (id.isEmpty() && QFileInfo(":queries").isFile())
         file.setFileName(":queries");
-    // In the resources the plugin
+    // In the resources of the plugin
     else if (!id.isEmpty() && !(resourcePath = Plugins::instance()->getResourcesPath(id)).isEmpty() && QFileInfo(resourcePath + "/" + type).isFile())
         file.setFileName(resourcePath + "/" + type);
     // In the default resources the plugin

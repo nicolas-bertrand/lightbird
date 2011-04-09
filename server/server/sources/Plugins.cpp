@@ -166,9 +166,6 @@ void                                Plugins::_load(const QString &identifier, Fu
         this->mutex.unlock();
         return ;
     }
-    this->lockResourcesPath.lock();
-    this->resourcesPath.insert(id, plugin->getResourcePath());
-    this->lockResourcesPath.unlock();
     if (!plugin->load())
     {
         Log::error("Unable to load the plugin", Properties("id", id), "Plugins", "_load");
@@ -249,9 +246,6 @@ void                                Plugins::_install(const QString &id, Future<
         return ;
     }
     Plugin plugin(id);
-    this->lockResourcesPath.lock();
-    this->resourcesPath.insert(id, plugin.getResourcePath());
-    this->lockResourcesPath.unlock();
     if (!plugin.load(false))
     {
         Log::warning("Unable to load the plugin in order to install it", Properties("id", id), "Plugins", "_install");
@@ -388,12 +382,7 @@ LightBird::IPlugins::State Plugins::getState(const QString &id)
 
 QString     Plugins::getResourcesPath(const QString &id)
 {
-    QString resourcesPath;
-
-    this->lockResourcesPath.lock();
-    resourcesPath = this->resourcesPath.value(id);
-    this->lockResourcesPath.unlock();
-    return (resourcesPath);
+    return (QString(PLUGINS_RESOURCES_PATH) + "/" + id);
 }
 
 QStringList Plugins::getPlugins()

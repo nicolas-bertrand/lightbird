@@ -50,8 +50,6 @@ public:
                          unsigned short port, const QString &method, const QString &type, bool all);
     /// @brief Returns the current state of the plugin.
     LightBird::IPlugins::State  getState();
-    /// @brief Returns the retources path of the plugin.
-    const QString               &getResourcePath() const;
 
 private:
     Plugin();
@@ -60,7 +58,6 @@ private:
 
     void                _initialize();
     bool                _loadLibrary();
-    void                _getResourcesPath();
     void                _createConfigurations();
     bool                _load();
     void                _loadInformations();
@@ -78,7 +75,6 @@ private:
     QObject             *instanceObject;///< The QObject version of the instance of the plugin.
     int                 used;           ///< A counter of used plugin instances, for a basic garbage collection.
     QList<Context>      contexts;       ///< Contains the contexts of the plugin.
-    QString             resourcesPath;  ///< The path of the resources of the plugin (can be empty).
     mutable QReadWriteLock lockPlugin;  ///< Ensure that the class is thread safe.
     LightBird::IPlugins::State state;   ///< The current state of the plugin.
 

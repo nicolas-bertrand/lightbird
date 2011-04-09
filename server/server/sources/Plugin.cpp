@@ -3,7 +3,7 @@
 #include "Configurations.h"
 #include "Log.h"
 #include "Plugin.hpp"
-#include "IResources.h"
+#include "Plugins.hpp"
 
 Plugin::Plugin(const QString &id, QObject *parent) : QObject(parent)
 {
@@ -234,11 +234,6 @@ LightBird::IPlugins::State      Plugin::getState()
     return (state);
 }
 
-const QString   &Plugin::getResourcePath() const
-{
-    return (this->resourcesPath);
-}
-
 void        Plugin::_initialize()
 {
     this->state = LightBird::IPlugins::UNLOADED;
@@ -252,7 +247,6 @@ void        Plugin::_initialize()
     this->path = Configurations::instance()->get("pluginsPath") + "/" + this->id + "/";
     if (!this->_loadLibrary())
         return ;
-    this->_getResourcesPath();
     QFileInfo file(this->path + "Configuration.xml");
     if (!file.isFile() || !file.size())
         this->_createConfigurations();
@@ -295,41 +289,22 @@ bool                    Plugin::_loadLibrary()
     return (true);
 }
 
-void                        Plugin::_getResourcesPath()
+void        Plugin::_createConfigurations()
 {
-    LightBird::IResources   *instance;
+    QString resourcesPath = Plugins::getResourcesPath(this->id);
 
-    // Load the resources path if the plugin implements it
-    if ((instance = qobject_cast<LightBird::IResources *>(this->loader->instance())))
+    // Destroy the file if it is empty
+    if (QFileInfo(this->path + "Configuration.xml").isFile() && !QFile::remove(this->path + "Configuration.xml"))
     {
-        this->resourcesPath = instance->getResourcesPath();
-        // Add the ":" that identified the resources
-        if (this->resourcesPath.isEmpty() || this->resourcesPath.at(0) != ':')
-            this->resourcesPath = ":" + this->resourcesPath;
-        Log::trace("Plugin resources path found", Properties("id", this->id).add("resourcesPath", this->resourcesPath), "Plugin", "_getResourcesPath");
-        delete instance;
+        Log::warning("Failed to remove the configuration file of the plugin", Properties("id", this->id), "Plugin", "_createConfigurations");
+        return ;
     }
-    if (this->resourcesPath.isEmpty())
-        Log::warning("The plugin doesn't declare its resources path", Properties("id", this->id), "Plugin", "_getResourcesPath");
-}
-
-void            Plugin::_createConfigurations()
-{
-    if (!this->resourcesPath.isEmpty())
-    {
-        // Destroy the file if it is empty
-        if (QFileInfo(this->path + "Configuration.xml").isFile() && !QFile::remove(this->path + "Configuration.xml"))
-        {
-            Log::warning("Failed to remove the configuration file of the plugin", Properties("id", this->id), "Plugin", "_createConfigurations");
-            return ;
-        }
-        Log::trace("Creating the configuration file of the plugin from its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
-        // Creates the configuration from the resource of the plugin
-        if (Configurations::instance(this->path + "Configuration.xml", this->resourcesPath + "/configuration"))
-            Log::debug("Plugin configuration created", Properties("id", this->id).add("file", this->resourcesPath + "/configuration"), "Plugin", "_createConfigurations");
-        else
-            Log::warning("Unable to create the configuration of the plugin", Properties("id", this->id).add("file", this->resourcesPath + "/configuration"), "Plugin", "_createConfigurations");
-    }
+    Log::trace("Creating the configuration file of the plugin from its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
+    // Creates the configuration from the resource of the plugin
+    if (Configurations::instance(this->path + "Configuration.xml", resourcesPath + "/configuration"))
+        Log::debug("Plugin configuration created", Properties("id", this->id).add("file", resourcesPath + "/configuration"), "Plugin", "_createConfigurations");
+    else
+        Log::warning("Unable to create the configuration of the plugin", Properties("id", this->id).add("file", resourcesPath + "/configuration"), "Plugin", "_createConfigurations");
 }
 
 bool    Plugin::_load()
@@ -433,35 +408,36 @@ void    Plugin::_loadResources()
     QString                 nodeName;
     QString                 nodeValue;
     QString                 path;
+    QString                 resourcesPath;
 
     // Creates the resources of the plugin that doesn't exists
+    resourcesPath = Plugins::getResourcesPath(this->id);
     read = this->configuration->readDom().firstChild();
     dom = read.parentNode().firstChildElement("resources").firstChild();
-    if (!this->resourcesPath.isEmpty())
-        while (!dom.isNull())
+    while (!dom.isNull())
+    {
+        if (dom.isElement() && dom.toElement().text().trimmed().size() > 0)
         {
-            if (dom.isElement() && dom.toElement().text().trimmed().size() > 0)
+            nodeName = dom.nodeName().toLower().trimmed();
+            nodeValue = dom.toElement().text().trimmed();
+            if (nodeName == "resource" && !QFileInfo(this->path + nodeValue).isFile())
             {
-                nodeName = dom.nodeName().toLower().trimmed();
-                nodeValue = dom.toElement().text().trimmed();
-                if (nodeName == "resource" && !QFileInfo(this->path + nodeValue).isFile())
-                {
-                    nodeValue = QDir::cleanPath(this->path + nodeValue);
-                    // Creates the directory of the resource if it doesn't exists
-                    path = nodeValue.left(nodeValue.lastIndexOf('/'));
-                    if (!QFileInfo(path).isDir())
-                        QDir().mkpath(path);
-                    // Copy the resource
-                    nodeName = this->resourcesPath + "/" + dom.toElement().attribute("alias");
-                    Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
-                               .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
-                    if (!Configurations::copy(nodeName, nodeValue))
-                        Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
-                                     .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
-                }
+                nodeValue = QDir::cleanPath(this->path + nodeValue);
+                // Creates the directory of the resource if it doesn't exists
+                path = nodeValue.left(nodeValue.lastIndexOf('/'));
+                if (!QFileInfo(path).isDir())
+                    QDir().mkpath(path);
+                // Copy the resource
+                nodeName = resourcesPath + "/" + dom.toElement().attribute("alias");
+                Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
+                           .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
+                if (!Configurations::copy(nodeName, nodeValue))
+                    Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
+                                 .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
             }
-            dom = dom.nextSibling();
         }
+        dom = dom.nextSibling();
+    }
     this->configuration->release();
 }
 

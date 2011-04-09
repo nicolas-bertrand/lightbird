@@ -62,11 +62,6 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "LGPL";
 }
 
-QString Plugin::getResourcesPath()
-{
-    return (":plugins/HTTP/Parser");
-}
-
 bool    Plugin::onConnect(LightBird::IClient &client)
 {
     this->mutex.lockForWrite();
