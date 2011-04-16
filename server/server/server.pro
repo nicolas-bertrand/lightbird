@@ -69,6 +69,7 @@ HEADERS += headers/Client.h \
     headers/Threads.h \
     headers/Timer.h \
     headers/api/Api.h \
+    headers/api/ApiConfiguration.h \
     headers/api/ApiDatabase.h \
     headers/api/ApiGuis.h \
     headers/api/ApiLogs.h \
@@ -112,6 +113,7 @@ SOURCES += sources/main.cpp \
     sources/Threads.cpp \
     sources/Timer.cpp \
     sources/api/Api.cpp \
+    sources/api/ApiConfiguration.cpp \
     sources/api/ApiDatabase.cpp \
     sources/api/ApiGuis.cpp \
     sources/api/ApiLogs.cpp \

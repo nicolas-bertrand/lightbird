@@ -6,8 +6,8 @@
 # include "IGuis.h"
 
 /// @brief The server implementation of the IGuis interface.
-/// Make the connection between IGuis and IGui, and guaranteed that the
-/// methods of IGui are calles from the GUI thread.
+/// Make the connection between IGuis and IGui, and guarantees that the
+/// methods of IGui are called from the GUI thread.
 class ApiGuis : public QObject,
                 public LightBird::IGuis
 {
@@ -17,11 +17,8 @@ class ApiGuis : public QObject,
 public:
     static ApiGuis *instance(QObject *parent = 0);
 
-    /// @see LightBird::IGuis::show
     void    show(const QString &id = "");
-    /// @see LightBird::IGuis::hide
     void    hide(const QString &id = "");
-    /// @see LightBird::IGuis::noGui
     bool    noGui();
 
 signals:
@@ -34,8 +31,8 @@ private:
     ApiGuis(const ApiGuis &);
     ApiGuis  *operator=(const ApiGuis &);
 
-    static ApiGuis  *_instance;
-    bool            isNoGui;
+    static ApiGuis  *_instance; ///< The instance of the singleton.
+    bool            isNoGui;    ///< True if the server is in noGui mode.
 
 private slots:
     void    _show(const QString &id);

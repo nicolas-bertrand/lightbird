@@ -12,8 +12,8 @@
 # include "Configuration.h"
 
 /// @brief Configurations is a ThreadSafe class that manage all the Configuration.
-/// The configurations loaded are cashed, and are deleted only when the server configuration
-/// is deleted.
+/// The configurations loaded are cashed, and are deleted only when the server
+/// configuration is deleted.
 class Configurations : public QObject
 {
     Q_OBJECT
@@ -32,7 +32,7 @@ public:
     /// the document is parsed and stored before beeing returned.
     /// @param path : The path to the XML configuration file. If empty, the server
     /// configuration will be returned. This path can also be the id of a plugin.
-    /// In this case, its configuration file will be automatically recovered.
+    /// In this case, its configuration will be automatically recovered.
     /// @param alternative : The path of an alternative configuration file.
     /// It is used in the case where the file defined by path doesn't exists. The
     /// configuration pointed by path will be created using the alternative file.
@@ -40,7 +40,6 @@ public:
     static Configuration    *instance(const QString &path = "", const QString &alternative = "");
     /// @brief LightBird's implementation of Qt::copy.
     static bool             copy(const QString &sourceName, const QString &destinationName);
-    /// @brief Allows to test the Configuration features get() set() and count().
 
 private:
     static QMap<QString, Configuration *>   instances;     ///< The instances of the loaded configurations.

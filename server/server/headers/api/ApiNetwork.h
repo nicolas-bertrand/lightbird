@@ -13,24 +13,17 @@ class ApiNetwork : public QObject,
     Q_OBJECT
 
 public:
-    ApiNetwork(const QString &id, QObject *parent = 0);
+    ApiNetwork(const QString &id);
     ~ApiNetwork();
 
-    /// @see LightBird::INetwork::addPort
     QSharedPointer<LightBird::IFuture<bool> >   addPort(unsigned short port, const QStringList &protocols = QStringList(),
                                                 LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
                                                 unsigned int maxClients = ~0);
-    /// @see LightBird::INetwork::removePort
     QSharedPointer<LightBird::IFuture<bool> >   removePort(unsigned short port);
-    /// @see LightBird::INetwork::getPort
     bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients);
-    /// @see LightBird::INetwork::getPorts
     QList<unsigned short>                       getPorts();
-    /// @see LightBird::INetwork::getClient
     bool                                        getClient(const QString &id, LightBird::INetwork::Client &client);
-    /// @see LightBird::INetwork::getClients
     QStringList                                 getClients(unsigned short port);
-    /// @see LightBird::INetwork::disconnect
     QSharedPointer<LightBird::IFuture<bool> >   disconnect(const QString &id);
 
 private:

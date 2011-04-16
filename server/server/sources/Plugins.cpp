@@ -1,11 +1,12 @@
 #include <QDir>
 
-#include "Log.h"
 #include "Plugins.hpp"
 #include "ApiPlugins.h"
-#include "Threads.h"
-#include "IGui.h"
+#include "Configurations.h"
 #include "Extensions.h"
+#include "IGui.h"
+#include "Log.h"
+#include "Threads.h"
 
 Plugins *Plugins::_instance = NULL;
 
@@ -138,7 +139,7 @@ void    Plugins::unloadAll()
 void                                Plugins::_load(const QString &identifier, Future<bool> *f)
 {
     Plugin                          *plugin;
-    QString                         id = this->_checkId(identifier);
+    QString                         id = Plugins::checkId(identifier);
     QSharedPointer<Future<bool> >   future(f);
 
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
@@ -158,14 +159,13 @@ void                                Plugins::_load(const QString &identifier, Fu
         this->mutex.unlock();
         return ;
     }
-    plugin = new Plugin(id, this);
     if (this->_getState(id) != LightBird::IPlugins::UNLOADED)
     {
         Log::error("The plugin is not installed", Properties("id", id), "Plugins", "_load");
-        delete plugin;
         this->mutex.unlock();
         return ;
     }
+    plugin = new Plugin(id, this);
     if (!plugin->load())
     {
         Log::error("Unable to load the plugin", Properties("id", id), "Plugins", "_load");
@@ -238,10 +238,10 @@ void                                Plugins::_install(const QString &id, Future<
         this->mutex.unlock();
         return ;
     }
-    if ((state = this->_getState(id)) != LightBird::IPlugins::UNINSTALLED &&
-        state != LightBird::IPlugins::UNKNOW)
+    if ((state = this->_getState(id)) != LightBird::IPlugins::UNINSTALLED)
     {
-        Log::warning("The plugin is already installed", Properties("id", id).add("state", QString::number(state)), "Plugins", "_install");
+        Log::warning(state != LightBird::IPlugins::UNKNOW ? "The plugin is already installed" : "The plugin is unknow",
+                     Properties("id", id).add("state", QString::number(state)), "Plugins", "_install");
         this->mutex.unlock();
         return ;
     }
@@ -366,118 +366,16 @@ LightBird::IMetadata     Plugins::getMetadata(const QString &id) const
     return (metadata);
 }
 
-LightBird::IPlugins::State Plugins::getState(const QString &id)
-{
-    LightBird::IPlugins::State  state;
-
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugins", "getState");
-        return (LightBird::IPlugins::UNKNOW);
-    }
-    state = this->_getState(id);
-    this->mutex.unlock();
-    return (state);
-}
-
 QString     Plugins::getResourcesPath(const QString &id)
 {
     return (QString(PLUGINS_RESOURCES_PATH) + "/" + id);
 }
 
-QStringList Plugins::getPlugins()
+QString     Plugins::checkId(const QString &identifier)
 {
-    return (this->getInstalledPlugins() + this->getUninstalledPlugins());
-}
-
-QStringList     Plugins::getLoadedPlugins()
-{
-    QStringList list;
-
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugins", "getLoadedPlugins");
-        return (list);
-    }
-    list = this->orderedPlugins;
-    this->mutex.unlock();
-    return (list);
-}
-
-QStringList     Plugins::getInstalledPlugins()
-{
-    QStringList plugins;
-
-    this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins, true);
-    return (plugins);
-}
-
-QStringList Plugins::getUninstalledPlugins()
-{
-    QStringList plugins;
-
-    this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins, false);
-    return (plugins);
-}
-
-void                    Plugins::_findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins, bool installed)
-{
-    Configuration       *c;
-    QString             d;
-    QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
-
-    while (it.hasNext())
-    {
-        if (!path.isEmpty())
-            d = path + "/" + it.peekNext();
-        else
-            d = it.peekNext();
-        // If the plugin is installed
-        if (installed && QFileInfo(pluginsPath + "/" + d + "/Configuration.xml").isFile() && (c = Configurations::instance(pluginsPath + "/" + d + "/Configuration.xml")) && c->get("installed") == "true")
-            plugins << d;
-        // If it is uninstalled
-        else if (!installed)
-        {
-            if (!QFileInfo(pluginsPath + "/" + d + "/Configuration.xml").isFile())
-            {
-                if (QDir(pluginsPath + "/" + d).entryList(QDir::Files | QDir::NoDotAndDotDot).size() > 0)
-                    plugins << d;
-            }
-            else if (!(c = Configurations::instance(pluginsPath + "/" + d + "/Configuration.xml")) || c->get("installed") != "true")
-                plugins << d;
-        }
-        this->_findPlugins(pluginsPath, d, plugins, installed);
-        it.next();
-    }
-}
-
-LightBird::IPlugins::State  Plugins::_getState(const QString &id)
-{
-    Configuration           *configuration = NULL;
-    QString                 path;
-
-    path = Configurations::instance()->get("pluginsPath") + "/" + id + "/";
-    if (QFileInfo(path + "Configuration.xml").isFile())
-        configuration = Configurations::instance(path);
-    // A loaded plugin can be LOADED, UNLOADING, or UNLOADED
-    if (this->plugins.contains(id))
-        return (this->plugins.value(id)->getState());
-    // The plugin was not found
-    else if (!QFileInfo(path).isDir())
-        return (LightBird::IPlugins::UNKNOW);
-    // The plugin is installed but not loaded
-    else if (configuration && configuration->get("installed") == "true")
-        return (LightBird::IPlugins::UNLOADED);
-    // The plugin is uninstalled
-    else
-        return (LightBird::IPlugins::UNINSTALLED);
-}
-
-QString Plugins::_checkId(const QString &identifier)
-{
-    QString         id;
-    QString         path;
-    QString         result;
+    QString id;
+    QString path;
+    QString result;
 
     path = Configurations::instance()->get("pluginsPath");
     QStringListIterator dir(QDir::cleanPath(identifier).split("/"));
@@ -505,4 +403,129 @@ QString Plugins::_checkId(const QString &identifier)
             result += "/";
     }
     return (result);
+}
+
+bool            Plugins::isInstalled(const QString &id)
+{
+    QDomElement element;
+
+    element = Configurations::instance()->readDom().firstChildElement("configurations");
+    for (element = element.firstChildElement("plugin"); !element.isNull() && element.attribute("id") != id; element = element.nextSiblingElement("plugin"))
+        ;
+    Configurations::instance()->release();
+    return (!element.isNull());
+}
+
+LightBird::IPlugins::State Plugins::getState(const QString &id)
+{
+    LightBird::IPlugins::State  state;
+
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Plugins", "getState");
+        return (LightBird::IPlugins::UNKNOW);
+    }
+    state = this->_getState(id);
+    this->mutex.unlock();
+    return (state);
+}
+
+QStringList     Plugins::getPlugins()
+{
+    QStringList plugins;
+
+    this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins);
+    return (plugins);
+}
+
+QStringList     Plugins::getLoadedPlugins()
+{
+    QStringList list;
+
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Plugins", "getLoadedPlugins");
+        return (list);
+    }
+    list = this->orderedPlugins;
+    this->mutex.unlock();
+    return (list);
+}
+
+QStringList     Plugins::getUnloadedPlugins()
+{
+    QStringList plugins;
+
+    // Get all the installed plugins
+    plugins = this->getInstalledPlugins();
+    // Removes the plugins loaded
+    QStringListIterator it(this->getLoadedPlugins());
+    while (it.hasNext())
+        plugins.removeAll(it.next());
+    return (plugins);
+}
+
+QStringList     Plugins::getInstalledPlugins()
+{
+    QStringList plugins;
+    QDomElement element;
+
+    element = Configurations::instance()->readDom().firstChildElement("configurations");
+    for (element = element.firstChildElement("plugin"); !element.isNull(); element = element.nextSiblingElement("plugin"))
+        if (element.hasAttribute("id"))
+            plugins << element.attribute("id");
+    Configurations::instance()->release();
+    return (plugins);
+}
+
+QStringList     Plugins::getUninstalledPlugins()
+{
+    QStringList plugins;
+
+    // Get all the plugins
+    this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins);
+    // Removes the plugins installed
+    QStringListIterator it(this->getInstalledPlugins());
+    while (it.hasNext())
+        plugins.removeAll(it.next());
+    return (plugins);
+}
+
+void                    Plugins::_findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins)
+{
+    QString             id;
+    QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
+    QStringList         nameFilters;
+
+    // List the possible extensions of a plugin library
+    nameFilters << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle";
+    // Run through all the directories of the current location to find the plugins
+    while (it.hasNext())
+    {
+        if (!path.isEmpty())
+            id = path + "/" + it.peekNext();
+        else
+            id = it.peekNext();
+        // If there is a library in the current directory, it is a plugin
+        if (!QDir(pluginsPath + "/" + id).entryList(nameFilters, QDir::Files).isEmpty())
+            plugins << id;
+        this->_findPlugins(pluginsPath, id, plugins);
+        it.next();
+    }
+}
+
+LightBird::IPlugins::State  Plugins::_getState(const QString &id)
+{
+    // A loaded plugin can be LOADED, UNLOADING, or UNLOADED
+    if (this->plugins.contains(id))
+        return (this->plugins.value(id)->getState());
+    // The plugin was not found
+    else if (!QFileInfo(Configurations::instance()->get("pluginsPath") + "/" + id).isDir())
+        return (LightBird::IPlugins::UNKNOW);
+    // The plugin is installed but not loaded
+    else if (Plugins::isInstalled(id))
+        return (LightBird::IPlugins::UNLOADED);
+    // The plugin is uninstalled
+    else
+        return (LightBird::IPlugins::UNINSTALLED);
 }

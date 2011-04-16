@@ -1,17 +1,18 @@
 #include <QCoreApplication>
-#include "Plugins.hpp"
 #include "Api.h"
-#include "Log.h"
-#include "Extensions.h"
 #include "ApiPlugins.h"
+#include "Configurations.h"
+#include "Extensions.h"
+#include "Log.h"
+#include "Plugins.hpp"
 
-Api::Api(const QString &id, Configuration *configuration, bool timers, QObject *parent) : QObject(parent)
+Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool timers, QObject *parent) : QObject(parent),
+                                                                                                      configurationApi(configuration),
+                                                                                                      databaseApi(id),
+                                                                                                      logsApi(id),
+                                                                                                      networkApi(id)
 {
     this->id = id;
-    this->logsApi = new ApiLogs(this->id, this);
-    this->databaseApi = new ApiDatabase(this->id, this);
-    this->configurationApi = configuration;
-    this->networkApi = new ApiNetwork(this->id, this);
     // If the timers has to be loaded
     if (timers)
         this->timersApi = new ApiTimers(this->id, this);
@@ -26,20 +27,20 @@ Api::~Api()
 
 LightBird::ILogs            &Api::log()
 {
-    return (*this->logsApi);
+    return (this->logsApi);
 }
 
 LightBird::IDatabase        &Api::database()
 {
-    return (*this->databaseApi);
+    return (this->databaseApi);
 }
 
 LightBird::IConfiguration   &Api::configuration(bool plugin)
 {
-    Configuration           *configuration;
+    LightBird::IConfiguration *configuration;
 
     if (plugin)
-        configuration = this->configurationApi;
+        configuration = &this->configurationApi;
     else
         configuration = Configurations::instance();
     return (*configuration);
@@ -57,7 +58,7 @@ LightBird::IPlugins         &Api::plugins()
 
 LightBird::INetwork         &Api::network()
 {
-    return (*this->networkApi);
+    return (this->networkApi);
 }
 
 LightBird::IGuis            &Api::guis()

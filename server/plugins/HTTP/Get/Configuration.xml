@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <installed>true</installed>
-  <name>Get</name>
-  <brief>Implements the GET HTTP method.</brief>
-  <description>Allows clients to download files from the server, and get data of its files.</description>
-  <autor>LightBird team</autor>
-  <site>http://www.lightbird.fr</site>
-  <email>team@lightbird.cc</email>
-  <version>1.0</version>
-  <licence>LGPL</licence>
   <contexts>
     <context>
       <transport>TCP</transport>

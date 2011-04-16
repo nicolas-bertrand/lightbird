@@ -15,16 +15,12 @@ Plugin::Plugin(const QString &id, QObject *parent) : QObject(parent)
 Plugin::~Plugin()
 {
     Log::trace("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
-    // If the plugin is still loaded, we call onUnload before destroying it
-    if (this->state == LightBird::IPlugins::LOADED)
-        this->instance->onUnload();
     this->_clean();
-    if (this->loader != NULL)
-        delete this->loader;
+    delete this->loader;
     this->loader = NULL;
 }
 
-bool    Plugin::load(bool callOnLoad)
+bool    Plugin::load(bool full)
 {
     if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
     {
@@ -39,7 +35,14 @@ bool    Plugin::load(bool callOnLoad)
         this->lockPlugin.unlock();
         return (false);
     }
-    if (callOnLoad && !this->instance->onLoad(this->api))
+    if (full && !this->configuration)
+    {
+        Log::error("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
+        this->_clean();
+        this->lockPlugin.unlock();
+        return (false);
+    }
+    if (full && !this->instance->onLoad(this->api))
     {
         Log::error("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
@@ -52,7 +55,7 @@ bool    Plugin::load(bool callOnLoad)
     return (true);
 }
 
-bool    Plugin::unload(bool callOnUnload)
+bool    Plugin::unload(bool full)
 {
     if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
     {
@@ -68,7 +71,7 @@ bool    Plugin::unload(bool callOnUnload)
     if (this->state == LightBird::IPlugins::LOADED)
     {
         this->state = LightBird::IPlugins::UNLOADING;
-        if (callOnUnload)
+        if (full)
             this->instance->onUnload();
     }
     if (this->used == 0)
@@ -96,22 +99,23 @@ bool    Plugin::install()
         this->lockPlugin.unlock();
         return (false);
     }
-    if (this->configuration->get("installed") == "true")
+    if (this->configuration)
     {
         Log::error("The plugin is already installed", Properties("id", this->id), "Plugin", "install");
         this->lockPlugin.unlock();
         return (false);
     }
-    if (this->instance->onInstall(this->api) == false)
+    if (!this->_createConfiguration())
     {
-        Log::error("The plugin returned false from IPlugin::onInstall(), so it will not be installed", Properties("id", this->id), "Plugin", "install");
+        Log::error("Unable to create the configuration of the plugin", Properties("id", this->id), "Plugin", "install");
         this->lockPlugin.unlock();
         return (false);
     }
-    this->configuration->set("installed", "true");
-    if (!this->configuration->save())
+    this->_loadApi();
+    if (this->instance->onInstall(this->api) == false)
     {
-        Log::error("Unable to save the configuration of the plugin in order to install it.", Properties("id", this->id), "Plugin", "install");
+        Log::error("The plugin returned false from IPlugin::onInstall(), so it will not be installed", Properties("id", this->id), "Plugin", "install");
+        this->_removeConfiguration();
         this->lockPlugin.unlock();
         return (false);
     }
@@ -134,20 +138,14 @@ bool    Plugin::uninstall()
         this->lockPlugin.unlock();
         return (false);
     }
-    if (this->configuration->get("installed") != "true")
+    if (!this->configuration)
     {
         Log::error("The plugin is already uninstalled", Properties("id", this->id), "Plugin", "uninstall");
         this->lockPlugin.unlock();
         return (false);
     }
     this->instance->onUninstall(this->api);
-    this->configuration->set("installed", "false");
-    if (!this->configuration->save())
-    {
-        Log::error("Unable to save the configuration of the plugin in order to uninstall it.", Properties("id", this->id), "Plugin", "uninstall");
-        this->lockPlugin.unlock();
-        return (false);
-    }
+    this->_removeConfiguration();
     Log::info("Plugin uninstalled", Properties("id", this->id), "Plugin", "uninstall");
     this->lockPlugin.unlock();
     return (true);
@@ -245,11 +243,8 @@ void        Plugin::_initialize()
     this->api = NULL;
     this->_clean();
     this->path = Configurations::instance()->get("pluginsPath") + "/" + this->id + "/";
-    if (!this->_loadLibrary())
-        return ;
-    QFileInfo file(this->path + "Configuration.xml");
-    if (!file.isFile() || !file.size())
-        this->_createConfigurations();
+    this->_loadLibrary();
+    Configurations::instance(this->id);
 }
 
 bool                    Plugin::_loadLibrary()
@@ -258,13 +253,13 @@ bool                    Plugin::_loadLibrary()
     LightBird::IPlugin  *instance;
 
     // List the possible extensions
-    nameFilters << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle" << "*.sip";
+    nameFilters << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle";
     QStringListIterator dir(QDir(this->path).entryList(nameFilters, QDir::Files));
     // Iterate over the files of the plugin directory
     while (dir.hasNext() && !this->loader)
     {
         // If the file name has the good extension
-        if (QLibrary::isLibrary(dir.peekNext()) || dir.peekNext().contains(".sip"))
+        if (QLibrary::isLibrary(dir.peekNext()))
         {
             this->loader = new QPluginLoader(this->path + dir.peekNext());
             this->libraryName = dir.peekNext();
@@ -289,39 +284,11 @@ bool                    Plugin::_loadLibrary()
     return (true);
 }
 
-void        Plugin::_createConfigurations()
-{
-    QString resourcesPath = Plugins::getResourcesPath(this->id);
-
-    // Destroy the file if it is empty
-    if (QFileInfo(this->path + "Configuration.xml").isFile() && !QFile::remove(this->path + "Configuration.xml"))
-    {
-        Log::warning("Failed to remove the configuration file of the plugin", Properties("id", this->id), "Plugin", "_createConfigurations");
-        return ;
-    }
-    Log::trace("Creating the configuration file of the plugin from its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
-    // Creates the configuration from the resource of the plugin
-    if (Configurations::instance(this->path + "Configuration.xml", resourcesPath + "/configuration"))
-        Log::debug("Plugin configuration created", Properties("id", this->id).add("file", resourcesPath + "/configuration"), "Plugin", "_createConfigurations");
-    else
-        Log::warning("Unable to create the configuration of the plugin", Properties("id", this->id).add("file", resourcesPath + "/configuration"), "Plugin", "_createConfigurations");
-}
-
 bool    Plugin::_load()
 {
     if (!this->loader)
     {
         Log::error("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
-        return (false);
-    }
-    if (!QFileInfo(this->path + "Configuration.xml").isFile())
-    {
-        Log::error("The configuration does not exists", Properties("id", this->id).add("file", this->path + "Configuration.xml"), "Plugin", "_load");
-        return (false);
-    }
-    if (!(this->configuration = Configurations::instance(this->path + "Configuration.xml")))
-    {
-        Log::error("Failed to load the configuration file", Properties("id", this->id).add("file", this->path + "Configuration.xml"), "Plugin", "_load");
         return (false);
     }
     this->instanceObject = this->loader->instance();
@@ -330,17 +297,28 @@ bool    Plugin::_load()
         Log::error("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
         return (false);
     }
-    bool timers = false;
-    // If the plugin implements ITimer, they are loaded
-    if (qobject_cast<LightBird::ITimer *>(this->instanceObject))
-        timers = true;
-    this->api = new Api(this->id, this->configuration, timers);
-    this->_loadInformations();
-    this->_loadResources();
+    if (Plugins::isInstalled(this->id))
+        this->configuration = Configurations::instance(this->id);
+    this->_loadApi();
     return (true);
 }
 
-void                        Plugin::_loadInformations()
+void    Plugin::_loadApi()
+{
+    // The api is loaded only if the configuration is available (the plugin is installed)
+    if (this->configuration)
+    {
+        bool timers = false;
+        // If the plugin implements ITimer, they are loaded
+        if (qobject_cast<LightBird::ITimer *>(this->instanceObject))
+            timers = true;
+        this->api = new Api(this->id, *this->configuration, timers);
+        this->_loadContexts();
+        this->_loadResources();
+    }
+}
+
+void                        Plugin::_loadContexts()
 {
     QDomNode                read;
     QDomNode                dom;
@@ -447,14 +425,80 @@ void    Plugin::_unload()
     this->state = LightBird::IPlugins::UNLOADED;
 }
 
+bool                Plugin::_createConfiguration()
+{
+    QDomDocument    doc;
+    QDomElement     element;
+    QString         errorMsg;
+    int             errorLine;
+    int             errorColumn;
+
+    // Create the plugin configuration from its resource if it doesn't exists
+    if (!this->configuration)
+    {
+        element = Configurations::instance()->writeDom().firstChildElement("configurations");
+        // Copy the default configuration in the resource of the plugin into the configuration of the server
+        QFile file(Plugins::getResourcesPath(this->id) + "/configuration");
+        if (file.exists())
+        {
+            // Try to parse the default XML configuration of the plugin, from its resources
+            if (!doc.setContent(&file, false, &errorMsg, &errorLine, &errorColumn))
+            {
+                Log::error("An error occured while parsing the configuration file of a plugin", Properties("message", errorMsg).add("file", file.fileName())
+                           .add("line", QString::number(errorLine)).add("column", errorColumn).add("id", this->id), "Plugin", "_createConfigurations");
+                Configurations::instance()->release();
+                return (false);
+            }
+            // Add its configuration into the configuration of the server
+            QDomElement plugin = element.ownerDocument().importNode(doc.documentElement(), true).toElement();
+            plugin.setTagName("plugin");
+            plugin.setAttribute("id", this->id);
+            element.appendChild(plugin);
+        }
+        // If the default configuration doesn't exists, just create the node of the plugin
+        else
+        {
+            Log::debug("The configuration of the plugin doesn't exists in its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
+            QDomElement plugin = element.ownerDocument().createElement("plugin");
+            plugin.setAttribute("id", this->id);
+            element.appendChild(plugin);
+        }
+        Configurations::instance()->release();
+        // Save the changes
+        Configurations::instance()->save();
+        this->configuration = Configurations::instance(this->id);
+    }
+    return (this->configuration != NULL);
+}
+
+void            Plugin::_removeConfiguration()
+{
+    QDomElement element;
+
+    // Search the configuration node of the plugin
+    element = Configurations::instance()->writeDom().firstChildElement("configurations");
+    for (element = element.firstChildElement("plugin"); element.attribute("id") != this->id; element = element.nextSiblingElement("plugin"))
+        ;
+    // Removes it
+    if (!element.isNull())
+    {
+        element.parentNode().removeChild(element);
+        Configurations::instance()->release();
+        Configurations::instance()->save();
+    }
+    else
+        Configurations::instance()->release();
+    this->configuration = NULL;
+    // The plugin is unloaded to avoid problems (the api needs a valid configuration)
+    this->_clean();
+}
+
 void    Plugin::_clean()
 {
     this->configuration = NULL;
-    if (this->instance != NULL)
-        delete this->instance;
+    delete this->instance;
     this->instance = NULL;
     this->instanceObject = NULL;
-    if (this->api != NULL)
-        delete this->api;
+    delete this->api;
     this->api = NULL;
 }

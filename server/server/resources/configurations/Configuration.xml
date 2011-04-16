@@ -48,4 +48,8 @@
     <plugin>HTTP/Get</plugin>
     <plugin>HTTP/Parser</plugin>
   </plugins>
+  <configurations>
+    <plugin id="HTTP/Get"/>
+    <plugin id="HTTP/Parser"/>
+  </configurations>
 </configuration>

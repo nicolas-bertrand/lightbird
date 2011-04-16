@@ -6,7 +6,7 @@ Transcodage de vidéos et de musiques à la volée (ffmpeg)
 Reconnaissance de fichiers (ffmpeg, imagemagick, libtag, ...)
 Multiplateforme (Windows, Linux, Mac)
 Multiprotocoles
-Plusieurs protocoles sur un même port
+Plusieurs protocoles sur un même port et une même connexion
 Connexion sécurisée (SSL/TSL)
 Gestion des versions des fichiers (Git)
 Client web intégré (en plugin, codé en C++)
@@ -14,7 +14,6 @@ Bindings vers d'autres languages pour les plugins
 Clients multilingue
 Système de logs avancé
 Connections TCP/UDP transparente
-Gestion du réseau asynchrone via une threadpool et une machine à états
 Possibilité de répartir la charge réseau sur plusieurs serveurs
 Accès à ses fichier de n'importe ou via n'importe quel terminal connecté à internet
 Mode hors ligne pour les clients
@@ -32,6 +31,9 @@ Chat, VoIP, et vidéo conférence
 Client P2P
 Téléchargement des fichiers
 Envoi de fichiers
+versionning des fichiers (git/mercurial)
 Administration à distance
-notifications Push
+Notifications Push
+Lien avec les réseau sociaux existant
+Calendrier, blog.
 Simple, rapide, sécurisé, fléxible, ergonimique

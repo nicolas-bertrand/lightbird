@@ -124,12 +124,7 @@ void            Parser::doSerializeHeader(QByteArray &data)
     if (!this->response->getVersion().isEmpty())
         version = this->response->getVersion().toAscii();
     else if (version.isEmpty())
-    {
-        if (this->request->getProtocol() == "SiTP")
-            version = "SiTP/1.0";
-        else
-            version = "HTTP/1.1";
-    }
+        version = "HTTP/1.1";
     if (this->response->getCode())
         code = QByteArray::number(this->response->getCode());
     if (!this->response->getMessage().isEmpty())

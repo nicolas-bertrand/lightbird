@@ -5,11 +5,11 @@
 
 # include "IConfiguration.h"
 # include "IDatabase.h"
+# include "IExtensions.h"
 # include "IGuis.h"
 # include "ILogs.h"
 # include "INetwork.h"
 # include "IPlugins.h"
-# include "IExtensions.h"
 # include "ITimers.h"
 
 namespace LightBird
@@ -24,15 +24,19 @@ namespace LightBird
         /// @param plugin : Whether the configuration of the plugin or the server will be returned.
         /// By default, the server configuration is returned.
         virtual LightBird::IConfiguration   &configuration(bool plugin = false) = 0;
-        /// @brief Returns an instance of a configuration from the file pointed by path.
-        /// @param path : The path of the XML configuration file to load.
+        /// @brief Returns an instance of a configuration from the file pointed by path, or the
+        /// configuration of a plugin. In the latter case, path is the id of the plugin.
+        /// @param path : The path of the XML configuration file to load, or the id of a plugin.
         /// @param alternative : The path of an alternative configuration file.
         /// It is used in the case where the file defined by path doesn't exists. The configuration
         /// pointed by path will be created using the alternative file.
         /// This is useful to create a XML file from the resources.
+        /// @return NULL if the configuration file can't be loaded.
         virtual LightBird::IConfiguration   *configuration(const QString &path, const QString &alternative = "") = 0;
         /// @brief Return the database Api.
         virtual LightBird::IDatabase        &database() = 0;
+        /// @brief Allows to use the extensions.
+        virtual LightBird::IExtensions      &extensions() = 0;
         /// @brief Allows to manage plugins GUIs.
         virtual LightBird::IGuis            &guis() = 0;
         /// @brief The log manager.
@@ -41,8 +45,6 @@ namespace LightBird
         virtual LightBird::INetwork         &network() = 0;
         /// @brief Allows plugins to manage other plugins.
         virtual LightBird::IPlugins         &plugins() = 0;
-        /// @brief Allows to use the extensions.
-        virtual LightBird::IExtensions      &extensions() = 0;
         /// @brief Manage the timers of the current plugin.
         virtual LightBird::ITimers          &timers() = 0;
         /// @brief Stop the server. The server will stop as soon as all its current tasks has been done.

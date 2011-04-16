@@ -101,6 +101,16 @@ public:
     /// followed by the plugin id.
     /// @param id : The id of the plugin.
     static QString          getResourcesPath(const QString &id);
+    /// @brief Ensure that the case of the id in parameter match with the case
+    /// of a plugin directory name. Otherwise, the case of the id will be modified
+    /// to match a directory name.
+    /// @param id : The id of a plugin. Its case may be wrong.
+    /// @return The new id, with the correct case.
+    static QString          checkId(const QString &id);
+    /// @brief Returns true if the plugin is installed, i.e if its configuration
+    /// is stored in the configuration of the server.
+    /// @param id : The id of the plugin.
+    static bool             isInstalled(const QString &id);
 
     /// @see LightBird::IPlugins::getState
     LightBird::IPlugins::State getState(const QString &id);
@@ -108,6 +118,8 @@ public:
     QStringList             getPlugins();
     /// @see LightBird::IPlugins::getLoadedPlugins
     QStringList             getLoadedPlugins();
+    /// @see LightBird::IPlugins::getUnloadedPlugins
+    QStringList             getUnloadedPlugins();
     /// @see LightBird::IPlugins::getInstalledPlugins
     QStringList             getInstalledPlugins();
     /// @see LightBird::IPlugins::getUninstalledPlugins
@@ -138,20 +150,13 @@ private slots:
 
 private:
     /// @brief This method run recursively through all the directories in the plugins path,
-    /// in order to find the installed and the uninstalled plugins.
+    /// in order to find all the plugins accessible by the server.
     /// @param pluginsPath : The root path of the plugins.
     /// @param path : The path of the current directory checked.
     /// @param plugins : The plugins found.
-    /// @param installed : If the method search for installed or uninstalled plugins
-    void                    _findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins, bool installed = true);
+    void                    _findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins);
     /// @see getState
     LightBird::IPlugins::State _getState(const QString &id);
-    /// @brief Ensure that the case of the id in parameter match with the case
-    /// of a plugin directory name. Otherwise, the case of the id will be modifier
-    /// to match a directory name.
-    /// @param id : The id of a plugin. Its case may be wrong.
-    /// @return The new id, with the correct case.
-    QString                 _checkId(const QString &id);
 
     static Plugins          *_instance;         ///< The only instance of the class.
     QMap<QString, Plugin *> plugins;            ///< The list of loaded plugins.

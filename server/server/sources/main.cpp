@@ -3,7 +3,6 @@
 
 #include "Server.h"
 #include "Log.h"
-#include "Plugin.hpp"
 
 QCoreApplication        *createQApplication(int argc, char *argv[]);
 

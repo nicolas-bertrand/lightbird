@@ -14,7 +14,7 @@ class ApiLogs : public QObject,
     Q_INTERFACES(LightBird::ILogs)
 
 public:
-    ApiLogs(const QString &id, QObject *parent = 0);
+    ApiLogs(const QString &id);
     ~ApiLogs();
 
     void    write(LightBird::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method);

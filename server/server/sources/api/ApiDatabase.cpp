@@ -2,7 +2,7 @@
 #include "Database.h"
 #include "ApiDatabase.h"
 
-ApiDatabase::ApiDatabase(const QString &id, QObject *parent) : QObject(parent)
+ApiDatabase::ApiDatabase(const QString &id)
 {
     this->id = id;
 }

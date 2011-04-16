@@ -18,7 +18,6 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
-    api->plugins().getMetadata(api->getId());
     return (true);
 }
 

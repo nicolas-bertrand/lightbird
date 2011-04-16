@@ -1,7 +1,7 @@
 #include "Log.h"
 #include "ApiLogs.h"
 
-ApiLogs::ApiLogs(const QString &id, QObject *parent) : QObject(parent)
+ApiLogs::ApiLogs(const QString &id)
 {
     this->id = id;
 }

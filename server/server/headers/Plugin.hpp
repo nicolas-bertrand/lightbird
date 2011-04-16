@@ -28,8 +28,12 @@ public:
     Plugin(const QString &id, QObject *parent = 0);
     ~Plugin();
 
-    bool    load(bool callOnLoad = true);
-    bool    unload(bool callOnUnload = true);
+    /// @param full : If true, the plugin will be completely loaded, i.e
+    /// onLoad is called, the api is created, ... The plugin must be
+    /// installed to be fully loaded.
+    bool    load(bool full = true);
+    /// @param full : If true, onUnload will be called.
+    bool    unload(bool full = true);
     bool    install();
     bool    uninstall();
     /// @brief A templated method used to get an instance of a plugin.
@@ -58,11 +62,13 @@ private:
 
     void                _initialize();
     bool                _loadLibrary();
-    void                _createConfigurations();
     bool                _load();
-    void                _loadInformations();
+    void                _loadApi();
+    void                _loadContexts();
     void                _loadResources();
     void                _unload();
+    bool                _createConfiguration();
+    void                _removeConfiguration();
     void                _clean();
 
     QString             id;             ///< The id of the plugin.

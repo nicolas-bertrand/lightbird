@@ -22,14 +22,6 @@ ApiPlugins::~ApiPlugins()
 
 QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::load(const QString &id)
 {
-    LightBird::IPlugins::State  state;
-
-    // If the plugin is not installed
-    state = Plugins::instance()->getState(id);
-    if (state == LightBird::IPlugins::UNINSTALLED ||
-        state == LightBird::IPlugins::UNKNOW)
-        Plugins::instance()->install(id);
-    // Creates a shared pointer that will automatically delete the Future
     return (QSharedPointer<LightBird::IFuture<bool> >(new Future<bool>(Plugins::instance()->load(id))));
 }
 
@@ -66,6 +58,11 @@ QStringList ApiPlugins::getPlugins()
 QStringList ApiPlugins::getLoadedPlugins()
 {
     return (Plugins::instance()->getLoadedPlugins());
+}
+
+QStringList ApiPlugins::getUnloadedPlugins()
+{
+    return (Plugins::instance()->getUnloadedPlugins());
 }
 
 QStringList ApiPlugins::getInstalledPlugins()

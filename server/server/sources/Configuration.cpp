@@ -13,6 +13,11 @@ Configuration::Configuration(const QString &configurationPath, const QString &al
     QObject::connect(this, SIGNAL(setParentSignal(QObject*)), this, SLOT(_setParent(QObject*)), Qt::QueuedConnection);
 }
 
+Configuration::Configuration()
+{
+    QObject::connect(this, SIGNAL(setParentSignal(QObject*)), this, SLOT(_setParent(QObject*)), Qt::QueuedConnection);
+}
+
 Configuration::~Configuration()
 {
     Log::trace("Configuration destroyed!", Properties("file", this->file.fileName()), "Configuration", "~Configuration");
@@ -92,20 +97,124 @@ bool        Configuration::_load(const QString &configurationPath, const QString
     return (true);
 }
 
-bool                        Configuration::isLoaded()
+Configuration::operator     bool()
 {
     return (this->loaded);
 }
 
-QString                     Configuration::getPath()
+QString Configuration::getPath()
 {
     return (this->file.fileName());
 }
 
-QString                     Configuration::get(const QString &nodeName)
+QString     Configuration::get(const QString &nodeName)
+{
+    QString result;
+
+    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Configuration", "get");
+        return ("");
+    }
+    result = this->_get(nodeName, this->dom);
+    this->domLock.unlock();
+    return (result);
+}
+
+unsigned        Configuration::count(const QString &nodeName)
+{
+    unsigned    result;
+
+    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Configuration", "count");
+        return (0);
+    }
+    result = this->_count(nodeName, this->dom);
+    this->domLock.unlock();
+    return (result);
+}
+
+void    Configuration::set(const QString &nodeName, const QString &nodeValue)
+{
+    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Configuration", "set");
+        return ;
+    }
+    this->_set(nodeName, nodeValue, this->dom);
+    this->domLock.unlock();
+}
+
+bool        Configuration::remove(const QString &nodeName)
+{
+    bool    result;
+
+    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Configuration", "remove");
+        return (false);
+    }
+    result = this->_remove(nodeName, this->dom);
+    this->domLock.unlock();
+    return (result);
+}
+
+QDomElement Configuration::readDom()
+{
+    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
+        Log::error("Deadlock", "Configuration", "readDom");
+    return (this->dom);
+}
+
+QDomElement Configuration::writeDom()
+{
+    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
+        Log::error("Deadlock", "Configuration", "writeDom");
+    return (this->dom);
+}
+
+void    Configuration::release()
+{
+    this->domLock.unlock();
+}
+
+bool            Configuration::save()
+{
+    QByteArray  data;
+    int         wrote;
+
+    if (this->loaded == false)
+        return (false);
+    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Configuration", "save");
+        return (false);
+    }
+    if (this->file.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
+    {
+        Log::error("Cannot open the configuration file in order to save the configuration", Properties("file",  this->file.fileName()), "Configuration", "save");
+        this->domLock.unlock();
+        return (false);
+    }
+    data = this->doc.toByteArray(2);
+    if ((wrote = this->file.write(data)) != data.size())
+    {
+        Log::error("Unable to write all the data in the configuration file", Properties("file",  this->file.fileName())
+                   .add("data", data).add("wrote", wrote), "Configuration", "save");
+        this->file.close();
+        this->domLock.unlock();
+        return (false);
+    }
+    this->file.close();
+    Log::debug("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");
+    this->domLock.unlock();
+    return (true);
+}
+
+QString                     Configuration::_get(const QString &nodeName, QDomElement element)
 {
     QString                 result = "";
-    QDomElement             element;
     QDomNode                node;
     QString                 name;
     QString                 attribut;
@@ -115,12 +224,6 @@ QString                     Configuration::get(const QString &nodeName)
 
     if (this->loaded == false)
         return ("");
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "get");
-        return ("");
-    }
-    element = this->dom.toElement();
     while (it.hasNext() == true && element.isNull() == false)
     {
         index = 0;
@@ -158,14 +261,12 @@ QString                     Configuration::get(const QString &nodeName)
             }
         }
     }
-    this->domLock.unlock();
     return (result);
 }
 
-int                         Configuration::count(const QString &nodeName)
+unsigned                    Configuration::_count(const QString &nodeName, QDomElement element)
 {
-    int                     result = 0;
-    QDomElement             element;
+    unsigned                result = 0;
     QString                 name;
     QString                 tmp;
     int                     index;
@@ -176,12 +277,6 @@ int                         Configuration::count(const QString &nodeName)
         return (0);
     if (nodeName.isEmpty())
         return (0);
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "count");
-        return (0);
-    }
-    element = this->dom.toElement();
     i = nodeName.count('/') + 1;
     while (it.hasNext() == true && element.isNull() == false)
     {
@@ -204,14 +299,12 @@ int                         Configuration::count(const QString &nodeName)
                 ;
         it.next();
     }
-    this->domLock.unlock();
     return (result);
 }
 
-void                        Configuration::set(const QString &nodeName, const QString &nodeValue)
+void                        Configuration::_set(const QString &nodeName, const QString &nodeValue, QDomElement element)
 {
     QDomText                text;
-    QDomElement             element;
     QDomElement             newElement;
     QDomNode                node;
     QString                 name;
@@ -220,14 +313,8 @@ void                        Configuration::set(const QString &nodeName, const QS
     int                     index;
     QStringListIterator     it(nodeName.split('/'));
 
-    if (this->loaded == false)
+    if (this->loaded == false || element.isNull())
         return ;
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "set");
-        return ;
-    }
-    element = this->dom.toElement();
     while (it.hasNext() == true)
     {
         index = 0;
@@ -293,13 +380,11 @@ void                        Configuration::set(const QString &nodeName, const QS
             }
         }
     }
-    this->domLock.unlock();
 }
 
-bool                        Configuration::remove(const QString &nodeName)
+bool                        Configuration::_remove(const QString &nodeName, QDomElement element)
 {
     bool                    result = false;
-    QDomElement             element;
     QString                 name;
     QString                 tmp;
     int                     index;
@@ -310,12 +395,6 @@ bool                        Configuration::remove(const QString &nodeName)
         return (false);
     if (nodeName.isEmpty())
         return (false);
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "remove");
-        return (false);
-    }
-    element = this->dom.toElement();
     i = nodeName.count('/') + 1;
     while (it.hasNext() == true && element.isNull() == false && !result)
     {
@@ -345,60 +424,7 @@ bool                        Configuration::remove(const QString &nodeName)
                 ;
         it.next();
     }
-    this->domLock.unlock();
     return (result);
-}
-
-const QDomElement   &Configuration::readDom()
-{
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
-        Log::error("Deadlock", "Configuration", "readDom");
-    return (this->dom);
-}
-
-QDomElement &Configuration::writeDom()
-{
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
-        Log::error("Deadlock", "Configuration", "writeDom");
-    return (this->dom);
-}
-
-void    Configuration::release()
-{
-    this->domLock.unlock();
-}
-
-bool            Configuration::save()
-{
-    QByteArray  data;
-    int         wrote;
-
-    if (this->loaded == false)
-        return (false);
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "save");
-        return (false);
-    }
-    if (this->file.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
-    {
-        Log::error("Cannot open the configuration file in order to save the configuration", Properties("file",  this->file.fileName()), "Configuration", "save");
-        this->domLock.unlock();
-        return (false);
-    }
-    data = this->doc.toByteArray(2);
-    if ((wrote = this->file.write(data)) != data.size())
-    {
-        Log::error("Unable to write all the data in the configuration file", Properties("file",  this->file.fileName())
-                   .add("data", data).add("wrote", wrote), "Configuration", "save");
-        this->file.close();
-        this->domLock.unlock();
-        return (false);
-    }
-    this->file.close();
-    Log::debug("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");
-    this->domLock.unlock();
-    return (true);
 }
 
 void        Configuration::setParent(QObject *parent)

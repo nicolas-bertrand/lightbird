@@ -2,7 +2,7 @@
 #include "Network.h"
 #include "ApiNetwork.h"
 
-ApiNetwork::ApiNetwork(const QString &id, QObject *parent) : QObject(parent)
+ApiNetwork::ApiNetwork(const QString &id)
 {
     this->id = id;
 }

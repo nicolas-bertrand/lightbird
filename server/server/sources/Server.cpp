@@ -244,12 +244,10 @@ void                Server::_loadNetwork()
         Log::trace("Network loaded", "Server", "_loadNetwork");
 }
 
-void                Server::_loadPlugins()
+void            Server::_loadPlugins()
 {
-    QDomElement     dom;
-    QDomNodeList    plugins;
-    QStringList     list;
-    int             i;
+    QDomElement plugin;
+    QStringList list;
 
     // Allows the server to know when a plugin is loaded (only in GUI mode)
     if (qobject_cast<QApplication *>(QCoreApplication::instance()))
@@ -264,10 +262,9 @@ void                Server::_loadPlugins()
     // Get the list of the plugins to load
     else
     {
-        dom = Configurations::instance()->readDom();
-        plugins = dom.elementsByTagName("plugin");
-        for (i = 0; i < plugins.size(); ++i)
-            list.push_back(plugins.item(i).toElement().text());
+        plugin = Configurations::instance()->readDom().firstChildElement("plugins");
+        for (plugin = plugin.firstChildElement("plugin"); !plugin.isNull(); plugin = plugin.nextSiblingElement("plugin"))
+            list.push_back(plugin.text());
         Configurations::instance()->release();
     }
     // Load the plugins in the list
@@ -288,8 +285,8 @@ void                Server::_pluginLoaded(QString id)
 
     // Load the translation of the plugin if possible
     path = Configurations::instance()->get("pluginsPath") + "/" + id + "/";
-    if (Configurations::instance(path + "Configuration.xml")->count("translation") &&
-        Configurations::instance(path + "Configuration.xml")->get("translation") == "true")
+    if (Configurations::instance(id)->count("translation") &&
+        Configurations::instance(id)->get("translation") == "true")
     {
         Log::debug("Loading the translation of the plugin", Properties("id", id), "_pluginLoaded", "Server");
         this->_loadTranslation(Plugins::instance()->getResourcesPath(id) + "/languages/", path);

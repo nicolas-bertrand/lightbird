@@ -19,7 +19,7 @@ ApiTimers::ApiTimers(const QString &id, QObject *parent) : QObject(parent)
     if (this->maxTimers < 0)
         this->maxTimers = 0;
     // Load the timers from the configuration of the plugin
-    configuration = Configurations::instance(Configurations::instance()->get("pluginsPath") + "/" + id + "/Configuration.xml");
+    configuration = Configurations::instance(id);
     dom = configuration->readDom();
     for (timer = dom.elementsByTagName("timers").at(0).firstChild(); timer.isNull() == false && this->timers.size() < this->maxTimers; timer = timer.nextSibling())
         if (timer.isElement() == true)

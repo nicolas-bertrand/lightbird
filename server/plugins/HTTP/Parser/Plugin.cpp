@@ -32,6 +32,7 @@ bool    Plugin::onLoad(LightBird::IApi *api)
             this->configuration.methodContent << node.nodeName();
         node = node.nextSibling();
     }
+    api->configuration(true).release();
     return (true);
 }
 
