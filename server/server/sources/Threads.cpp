@@ -145,7 +145,7 @@ void        Threads::_threadFinished()
             }
             // Removes the finished thread of the list
             it.remove();
-            break ;
+            break;
         }
     }
     this->lockThreads.unlock();
@@ -167,7 +167,7 @@ void        Threads::_threadDestroyed(QObject *object)
             // Remove the destroyed thread of the list
             it.remove();
             Log::trace("Thread destroyed", Properties("thread", QString::number((unsigned long int)object, 16)), "Threads", "_threadDestroyed");
-            break ;
+            break;
         }
     }
     this->lockThreads.unlock();

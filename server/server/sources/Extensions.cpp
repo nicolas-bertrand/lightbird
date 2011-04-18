@@ -123,7 +123,7 @@ void        Extensions::release(QList<void *> extensions)
                 it2.remove();
                 if (this->plugins[plugin].loaded == false)
                     this->_remove(plugin);
-                break ;
+                break;
             }
         }
         it1.next();

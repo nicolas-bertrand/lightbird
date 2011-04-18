@@ -60,15 +60,35 @@ private:
     Plugin(const Plugin &);
     Plugin &operator=(const Plugin &);
 
+    /// @brief Initialize the plugin.
     void                _initialize();
+    /// @brief Try to find and load a valid library that implements IPlugin, in
+    /// the directory of the plugin.
+    /// @return True if the valid library has been found.
     bool                _loadLibrary();
+    /// @brief Copy the default configuration of the plugin, if its configuration
+    /// is empty in the server configuration.
+    void                _loadDefaultConfiguration();
+    /// @brief Load the instance of the plugin, the api, the configuration,
+    /// the contexts...
+    /// @return True on success.
     bool                _load();
+    /// @brief Load the api of the plugin.
     void                _loadApi();
+    /// @brief Load its contexts using its configuration.
     void                _loadContexts();
+    /// @brief Copy the resources of the plugin into its directory.
     void                _loadResources();
+    /// @brief Unload the plugin.
     void                _unload();
+    /// @brief Creates the configuration of the plugin inside the configuration
+    /// of the server if it doesn't exists yet.
+    /// @return False if an error occured while creating the configuration.
     bool                _createConfiguration();
+    /// @brief Removes the configuration of the plugin in the configuration of
+    /// the server, and calls _clean().
     void                _removeConfiguration();
+    /// @brief Delete all the instances created when the plugin has been loaded.
     void                _clean();
 
     QString             id;             ///< The id of the plugin.

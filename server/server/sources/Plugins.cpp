@@ -390,7 +390,7 @@ QString     Plugins::checkId(const QString &identifier)
             if (it.peekNext() == dir.peekNext())
             {
                 id = it.peekNext();
-                break ;
+                break;
             }
             if (it.peekNext().toLower() == dir.peekNext().toLower())
                 id = it.peekNext();

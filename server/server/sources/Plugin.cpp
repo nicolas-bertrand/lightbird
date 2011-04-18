@@ -111,6 +111,7 @@ bool    Plugin::install()
         this->lockPlugin.unlock();
         return (false);
     }
+    this->configuration = Configurations::instance(this->id);
     this->_loadApi();
     if (this->instance->onInstall(this->api) == false)
     {
@@ -244,6 +245,7 @@ void        Plugin::_initialize()
     this->_clean();
     this->path = Configurations::instance()->get("pluginsPath") + "/" + this->id + "/";
     this->_loadLibrary();
+    this->_loadDefaultConfiguration();
     Configurations::instance(this->id);
 }
 
@@ -282,6 +284,31 @@ bool                    Plugin::_loadLibrary()
     }
     Log::trace("Plugin library found", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
     return (true);
+}
+
+void            Plugin::_loadDefaultConfiguration()
+{
+    QDomElement element;
+    bool        create = false;
+
+    element = Configurations::instance()->writeDom().firstChildElement("configurations");
+    for (element = element.firstChildElement("plugin"); !element.isNull(); element = element.nextSiblingElement("plugin"))
+        if (element.attribute("id") == this->id)
+        {
+            if (!element.hasChildNodes())
+            {
+                create = true;
+                element.parentNode().removeChild(element);
+            }
+            break;
+        }
+    Configurations::instance()->release();
+    if (create && !this->_createConfiguration())
+    {
+        element = Configurations::instance()->writeDom().firstChildElement("configurations");
+        element.appendChild(element.ownerDocument().createElement("plugin")).toElement().setAttribute("id", this->id);
+        Configurations::instance()->release();
+    }
 }
 
 bool    Plugin::_load()
@@ -434,7 +461,7 @@ bool                Plugin::_createConfiguration()
     int             errorColumn;
 
     // Create the plugin configuration from its resource if it doesn't exists
-    if (!this->configuration)
+    if (!Plugins::isInstalled(this->id))
     {
         element = Configurations::instance()->writeDom().firstChildElement("configurations");
         // Copy the default configuration in the resource of the plugin into the configuration of the server
@@ -466,9 +493,8 @@ bool                Plugin::_createConfiguration()
         Configurations::instance()->release();
         // Save the changes
         Configurations::instance()->save();
-        this->configuration = Configurations::instance(this->id);
     }
-    return (this->configuration != NULL);
+    return (true);
 }
 
 void            Plugin::_removeConfiguration()
@@ -477,7 +503,7 @@ void            Plugin::_removeConfiguration()
 
     // Search the configuration node of the plugin
     element = Configurations::instance()->writeDom().firstChildElement("configurations");
-    for (element = element.firstChildElement("plugin"); element.attribute("id") != this->id; element = element.nextSiblingElement("plugin"))
+    for (element = element.firstChildElement("plugin"); !element.isNull() && element.attribute("id") != this->id; element = element.nextSiblingElement("plugin"))
         ;
     // Removes it
     if (!element.isNull())
@@ -488,7 +514,6 @@ void            Plugin::_removeConfiguration()
     }
     else
         Configurations::instance()->release();
-    this->configuration = NULL;
     // The plugin is unloaded to avoid problems (the api needs a valid configuration)
     this->_clean();
 }

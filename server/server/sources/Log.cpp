@@ -205,7 +205,7 @@ void    Log::_initializeWrite()
         if (it.value().toLower() == level)
         {
             this->logLevel = it.key();
-            break ;
+            break;
         }
     }
     this->display = false;
