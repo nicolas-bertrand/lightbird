@@ -9,7 +9,6 @@ ApiNetwork::ApiNetwork(const QString &id)
 
 ApiNetwork::~ApiNetwork()
 {
-    Log::trace("ApiNetwork destroyed!", Properties("id", this->id), "ApiNetwork", "~ApiNetwork");
 }
 
 QSharedPointer<LightBird::IFuture<bool> >   ApiNetwork::addPort(unsigned short port, const QStringList &protocols,

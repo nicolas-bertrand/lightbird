@@ -64,8 +64,6 @@ HEADERS += headers/Client.h \
     headers/Request.h \
     headers/Response.h \
     headers/Server.h \
-    headers/Thread.h \
-    headers/ThreadPool.h \
     headers/Threads.h \
     headers/Timer.h \
     headers/api/Api.h \
@@ -108,8 +106,6 @@ SOURCES += sources/main.cpp \
     sources/Request.cpp \
     sources/Response.cpp \
     sources/Server.cpp \
-    sources/Thread.cpp \
-    sources/ThreadPool.cpp \
     sources/Threads.cpp \
     sources/Timer.cpp \
     sources/api/Api.cpp \

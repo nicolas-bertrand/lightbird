@@ -142,6 +142,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     QString                         id = Plugins::checkId(identifier);
     QSharedPointer<Future<bool> >   future(f);
 
+    Log::debug("Loading the plugin", Properties("id", id), "Plugins", "_load");
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_load");
@@ -176,7 +177,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     Extensions::instance()->add(plugin);
     this->plugins.insert(id, plugin);
     this->orderedPlugins.push_back(id);
-    Log::debug("Plugin loaded", Properties("id", id), "Plugins", "_load");
+    Log::info("Plugin loaded", Properties("id", id), "Plugins", "_load");
     emit this->loaded(id);
     future->setResult(true);
     this->mutex.unlock();
@@ -186,6 +187,7 @@ void                                Plugins::_unload(const QString &id, Future<b
 {
     QSharedPointer<Future<bool> >   future(f);
 
+    Log::debug("Unloading the plugin", Properties("id", id), "Plugins", "_unload");
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_unload");
@@ -193,7 +195,7 @@ void                                Plugins::_unload(const QString &id, Future<b
     }
     if (!this->plugins.contains(id))
     {
-        Log::warning("The plugin is already unloaded", Properties("id", id), "Plugins", "_unload");
+        Log::warning("The plugin is already unloaded or doesn't exists", Properties("id", id), "Plugins", "_unload");
         this->mutex.unlock();
         return ;
     }
@@ -215,7 +217,7 @@ void                                Plugins::_unload(const QString &id, Future<b
         delete this->plugins.value(id);
         this->plugins.remove(id);
         this->orderedPlugins.removeAll(id);
-        Log::debug("Plugin unloaded", Properties("id", id), "Plugins", "_unload");
+        Log::info("Plugin unloaded", Properties("id", id), "Plugins", "_unload");
     }
     future->setResult(true);
     this->mutex.unlock();
@@ -227,6 +229,7 @@ void                                Plugins::_install(const QString &id, Future<
     LightBird::IPlugins::State      state;
     QSharedPointer<Future<bool> >   future(f);
 
+    Log::debug("Installing the plugin", Properties("id", id), "Plugins", "_install");
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_install");
@@ -258,7 +261,7 @@ void                                Plugins::_install(const QString &id, Future<
         this->mutex.unlock();
         return ;
     }
-    Log::debug("Plugin installed", Properties("id", id), "Plugins", "_install");
+    Log::info("Plugin installed", Properties("id", id), "Plugins", "_install");
     future->setResult(true);
     this->mutex.unlock();
     return ;
@@ -269,6 +272,7 @@ void                                Plugins::_uninstall(const QString &id, Futur
     LightBird::IPlugins::State      state;
     QSharedPointer<Future<bool> >   future(f);
 
+    Log::debug("Uninstalling the plugin", Properties("id", id), "Plugins", "_uninstall");
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "_uninstall");
@@ -305,7 +309,7 @@ void                                Plugins::_uninstall(const QString &id, Futur
         this->mutex.unlock();
         return ;
     }
-    Log::debug("Plugin uninstalled", Properties("id", id), "Plugins", "_uninstall");
+    Log::info("Plugin uninstalled", Properties("id", id), "Plugins", "_uninstall");
     future->setResult(true);
     this->mutex.unlock();
 }
@@ -328,7 +332,7 @@ bool    Plugins::release(const QString &id)
         this->plugins.value(id)->deleteLater();
         this->plugins.remove(id);
         this->orderedPlugins.removeAll(id);
-        Log::debug("Plugin unloaded", Properties("id", id), "Plugins", "release");
+        Log::info("Plugin unloaded", Properties("id", id), "Plugins", "release");
         if (this->unloadAllPlugins && this->plugins.size() == 0)
             this->wait.wakeAll();
     }

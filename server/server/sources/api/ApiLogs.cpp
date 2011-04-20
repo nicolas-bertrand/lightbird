@@ -8,7 +8,6 @@ ApiLogs::ApiLogs(const QString &id)
 
 ApiLogs::~ApiLogs()
 {
-    Log::trace("ApiLogs destroyed!", Properties("id", this->id), "ApiLogs", "~ApiLogs");
 }
 
 void    ApiLogs::write(LightBird::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method)

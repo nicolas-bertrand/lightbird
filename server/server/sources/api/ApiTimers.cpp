@@ -36,7 +36,6 @@ ApiTimers::~ApiTimers()
         it.next().value()->quit();
     }
     this->timers.clear();
-    Log::trace("ApiTimers destroyed!", Properties("id", this->id), "ApiTimers", "~ApiTimers");
 }
 
 bool    ApiTimers::setTimer(const QString &name, unsigned int timeout)

@@ -9,7 +9,6 @@ ApiDatabase::ApiDatabase(const QString &id)
 
 ApiDatabase::~ApiDatabase()
 {
-    Log::trace("ApiDatabase destroyed!", Properties("id", this->id), "ApiDatabase", "~ApiDatabase");
 }
 
 bool    ApiDatabase::query(QSqlQuery &query)

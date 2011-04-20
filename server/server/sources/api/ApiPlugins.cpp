@@ -17,7 +17,6 @@ ApiPlugins::ApiPlugins(QObject *parent) : QObject(parent)
 
 ApiPlugins::~ApiPlugins()
 {
-    Log::trace("ApiPlugins destroyed!", "ApiPlugins", "~ApiPlugins");
 }
 
 QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::load(const QString &id)

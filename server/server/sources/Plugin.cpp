@@ -5,67 +5,64 @@
 #include "Plugin.hpp"
 #include "Plugins.hpp"
 
-Plugin::Plugin(const QString &id, QObject *parent) : QObject(parent)
+Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
+                                                             id(identifier)
 {
-    this->id = id;
+    Log::trace("Plugin created", Properties("id", this->id), "Plugin", "Plugin");
     this->_initialize();
-    Log::debug("Plugin created", Properties("id", this->id), "Plugin", "Plugin");
 }
 
 Plugin::~Plugin()
 {
-    Log::trace("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
     this->_clean();
     delete this->loader;
     this->loader = NULL;
+    Log::trace("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
 }
 
 bool    Plugin::load(bool full)
 {
-    if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "load");
         return (false);
     }
-    Log::debug("Loading the plugin", Properties("id", this->id), "Plugin", "load");
     if (!this->_load())
     {
         Log::error("Unable to load the plugin", Properties("id", this->id), "Plugin", "load");
         this->_clean();
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     if (full && !this->configuration)
     {
         Log::error("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     if (full && !this->instance->onLoad(this->api))
     {
         Log::error("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     this->state = LightBird::IPlugins::LOADED;
-    Log::info("Plugin loaded", Properties("id", this->id), "Plugin", "load");
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (true);
 }
 
 bool    Plugin::unload(bool full)
 {
-    if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "unload");
         return (false);
     }
-    Log::debug("Unloading the plugin", Properties("id", this->id), "Plugin", "unload");
     if (this->state == LightBird::IPlugins::UNLOADED)
     {
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     if (this->state == LightBird::IPlugins::LOADED)
@@ -75,40 +72,36 @@ bool    Plugin::unload(bool full)
             this->instance->onUnload();
     }
     if (this->used == 0)
-    {
         this->_unload();
-        Log::info("Plugin unloaded", Properties("id", this->id), "Plugin", "unload");
-    }
     else
         Log::debug("The plugin will be unloaded later because it is still used", Properties("id", this->id).add("used", QString::number(this->used)), "Plugins", "unload");
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (true);
 }
 
 bool    Plugin::install()
 {
-    if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "install");
         return (false);
     }
-    Log::debug("Installing the plugin", Properties("id", this->id), "Plugin", "install");
     if (this->state != LightBird::IPlugins::LOADED)
     {
         Log::error("The plugin must be loaded to be installed", Properties("id", this->id), "Plugin", "install");
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     if (this->configuration)
     {
         Log::error("The plugin is already installed", Properties("id", this->id), "Plugin", "install");
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     if (!this->_createConfiguration())
     {
         Log::error("Unable to create the configuration of the plugin", Properties("id", this->id), "Plugin", "install");
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     this->configuration = Configurations::instance(this->id);
@@ -117,52 +110,49 @@ bool    Plugin::install()
     {
         Log::error("The plugin returned false from IPlugin::onInstall(), so it will not be installed", Properties("id", this->id), "Plugin", "install");
         this->_removeConfiguration();
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
-    Log::info("Plugin installed", Properties("id", this->id), "Plugin", "install");
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (true);
 }
 
 bool    Plugin::uninstall()
 {
-    if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "uninstall");
         return (false);
     }
-    Log::debug("Uninstalling the plugin", Properties("id", this->id), "Plugin", "uninstall");
     if (this->state != LightBird::IPlugins::LOADED)
     {
         Log::error("The plugin must be loaded to be uninstalled", Properties("id", this->id), "Plugin", "uninstall");
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     if (!this->configuration)
     {
         Log::error("The plugin is already uninstalled", Properties("id", this->id), "Plugin", "uninstall");
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (false);
     }
     this->instance->onUninstall(this->api);
     this->_removeConfiguration();
-    Log::info("Plugin uninstalled", Properties("id", this->id), "Plugin", "uninstall");
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (true);
 }
 
 bool    Plugin::release()
 {
-    if (!this->lockPlugin.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "release");
         return (false);
     }
     if (this->state == LightBird::IPlugins::UNLOADED)
     {
-        Log::warning("The plugin is unloaded", Properties("id", this->id), "Plugin", "release");
-        this->lockPlugin.unlock();
+        Log::warning("The plugin is already unloaded", Properties("id", this->id), "Plugin", "release");
+        this->mutex.unlock();
         return (false);
     }
     this->used--;
@@ -173,7 +163,7 @@ bool    Plugin::release()
     }
     if (this->used == 0 && this->state == LightBird::IPlugins::UNLOADING)
         this->_unload();
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (true);
 }
 
@@ -181,13 +171,13 @@ LightBird::IMetadata     Plugin::getMetadata() const
 {
     LightBird::IMetadata metadata;
 
-    if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "getMetadata");
         return (metadata);
     }
     this->instance->getMetadata(metadata);
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (metadata);
 }
 
@@ -223,13 +213,13 @@ LightBird::IPlugins::State      Plugin::getState()
 {
     LightBird::IPlugins::State  state;
 
-    if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "getState");
         return (LightBird::IPlugins::UNKNOW);
     }
     state = this->state;
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (state);
 }
 

@@ -26,7 +26,6 @@ ApiConfiguration::ApiConfiguration(const QString &idPlugin) : id(Plugins::checkI
 
 ApiConfiguration::~ApiConfiguration()
 {
-    Log::trace("ApiConfiguration destroyed!", Properties("id", this->id), "ApiConfiguration", "~ApiConfiguration");
 }
 
 QString     ApiConfiguration::getPath()

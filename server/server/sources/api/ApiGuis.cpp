@@ -24,7 +24,6 @@ ApiGuis::ApiGuis(QObject *parent) : QObject(parent)
 
 ApiGuis::~ApiGuis()
 {
-    Log::trace("ApiGuis destroyed!", "ApiGuis", "~ApiGuis");
 }
 
 void    ApiGuis::show(const QString &id)

@@ -27,7 +27,11 @@ void    Extensions::add(Plugin *plugin)
     LightBird::IExtension   *extension;
     Properties              properties;
 
-    this->mutex.lock();
+    if (!this->mutex.tryLock(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Extensions", "add");
+        return ;
+    }
     // Check that the plugin implements the IExtensions interface
     if ((extension = qobject_cast<LightBird::IExtension *>(plugin->instanceObject)) == NULL)
         return (this->mutex.unlock());
@@ -57,13 +61,17 @@ void    Extensions::add(Plugin *plugin)
 
 void        Extensions::remove(Plugin *plugin)
 {
-    this->mutex.lock();
+    if (!this->mutex.tryLock(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Extensions", "remove");
+        return ;
+    }
     // Check that the plugin exists
     if (!this->plugins.contains(plugin->id))
         return (this->mutex.unlock());
     this->plugins[plugin->id].loaded = false;
-    Log::debug("Extensions plugin removed", Properties("pluginId", plugin->id), "Extensions", "remove");
     this->_remove(plugin->id);
+    Log::debug("Extensions plugin removed", Properties("pluginId", plugin->id), "Extensions", "remove");
     this->mutex.unlock();
 }
 
@@ -72,7 +80,11 @@ QList<void *>       Extensions::get(const QString &name)
     QList<void *>   result;
     Extension       extension;
 
-    this->mutex.lock();
+    if (!this->mutex.tryLock(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Extensions", "remove");
+        return (result);
+    }
     // Search all the plugins that implements the required extension
     QStringListIterator it(this->extensionsPlugins.values(name));
     while (it.hasNext())
@@ -103,7 +115,11 @@ void        Extensions::release(QList<void *> extensions)
 {
     QString plugin;
 
-    this->mutex.lock();
+    if (!this->mutex.tryLock(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Extensions", "remove");
+        return ;
+    }
     // For each extensions to release
     QListIterator<void *> it1(extensions);
     while (it1.hasNext())

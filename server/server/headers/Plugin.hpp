@@ -101,7 +101,7 @@ private:
     QObject             *instanceObject;///< The QObject version of the instance of the plugin.
     int                 used;           ///< A counter of used plugin instances, for a basic garbage collection.
     QList<Context>      contexts;       ///< Contains the contexts of the plugin.
-    mutable QReadWriteLock lockPlugin;  ///< Ensure that the class is thread safe.
+    mutable QReadWriteLock mutex;       ///< Ensure that the class is thread safe.
     LightBird::IPlugins::State state;   ///< The current state of the plugin.
 
     friend class Extensions;
@@ -112,19 +112,19 @@ T       *Plugin::getInstance()
 {
     T   *instance = NULL;
 
-    if (!this->lockPlugin.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "getInstance");
         return (NULL);
     }
     if (this->state != LightBird::IPlugins::LOADED)
     {
-        this->lockPlugin.unlock();
+        this->mutex.unlock();
         return (NULL);
     }
     if ((instance = qobject_cast<T *>(this->instanceObject)) != NULL)
         this->used++;
-    this->lockPlugin.unlock();
+    this->mutex.unlock();
     return (instance);
 }
 

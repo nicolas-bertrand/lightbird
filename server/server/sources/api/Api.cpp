@@ -22,7 +22,6 @@ Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool timer
 
 Api::~Api()
 {
-    Log::trace("Api destroyed!", Properties("id", this->id), "Api", "~Api");
 }
 
 LightBird::ILogs            &Api::log()
