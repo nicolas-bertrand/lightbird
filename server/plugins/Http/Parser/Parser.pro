@@ -6,10 +6,11 @@ RESOURCES   =   resources.qrc
 INCLUDEPATH +=  . \
                 ../../../api \
                 ../../../api/table \
-                ../../../api/network
+                ../../../api/network \
+                ../../../extensions
 
 TARGET      =   Parser
-DESTDIR     =   ../../../build/plugins/HTTP/Parser
+DESTDIR     =   ../../../build/plugins/Http/Parser
 
 HEADERS     =   Plugin.h \
                 Parser.h

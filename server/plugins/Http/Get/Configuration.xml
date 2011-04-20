@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <contexts>
+    <context>
+      <transport>TCP</transport>
+      <protocol>HTTP</protocol>
+      <method>GET</method>
+    </context>
+  </contexts>
+</configuration>

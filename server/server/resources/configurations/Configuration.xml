@@ -42,14 +42,16 @@
     <validityPeriod>30</validityPeriod>
   </log>
   <ports>
-    <port protocol="HTTP WebClient" transport="TCP" maxClients="300">4242</port>
+    <port protocol="HTTP WebClient" transport="TCP" maxClients="300">80</port>
   </ports>
   <plugins>
-    <plugin>HTTP/Get</plugin>
-    <plugin>HTTP/Parser</plugin>
+    <plugin>Http/Get</plugin>
+    <plugin>Http/Parser</plugin>
+    <plugin>Logs/Files</plugin>
   </plugins>
   <configurations>
-    <plugin id="HTTP/Get"/>
-    <plugin id="HTTP/Parser"/>
+    <plugin id="Http/Get"/>
+    <plugin id="Http/Parser"/>
+    <plugin id="Logs/Files"/>
   </configurations>
 </configuration>

@@ -9,11 +9,11 @@ INCLUDEPATH +=  . \
                 ../../../api/network \
                 ../../../extensions
 
-TARGET      =   Get
-DESTDIR     =   ../../../build/plugins/HTTP/Get
+TARGET      =   Files
+DESTDIR     =   ../../../build/plugins/Logs/Files
 
-HEADERS     =   Plugin.h
-SOURCES     =   Plugin.cpp
+HEADERS     =   Files.h
+SOURCES     =   Files.cpp
 OTHER_FILES =   Configuration.xml
 
 OBJECTS_DIR =   tmp

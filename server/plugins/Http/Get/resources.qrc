@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/HTTP/Parser">
+    <qresource prefix="/plugins/Http/Get">
         <file alias="configuration">Configuration.xml</file>
     </qresource>
 </RCC>
