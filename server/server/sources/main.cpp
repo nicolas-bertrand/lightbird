@@ -15,12 +15,10 @@ int                     main(int argc, char *argv[])
     // Instantiales Qt core class
     app = createQApplication(argc, argv);
     // Instanciates and initializes the server
-    server = new Server(argc, argv, app);
-    // Check if the server has been initialized
-    if (server->isInitialized() == false)
+    if (*(server = new Server(argc, argv, app)) == false)
     {
-        // If the initialization of the server failed
-        // Display the log on the standard output if the error occured before the logs was initialized
+        // If the initialization of the server failed displays the logs on the
+        // standard output, in case the error occured before the logs was initialized.
         Log::instance()->print();
         std::cerr << "An error occurred while initializing the server. Check the log entries for more information." << std::endl;
         delete server;

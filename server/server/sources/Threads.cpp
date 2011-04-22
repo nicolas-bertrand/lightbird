@@ -41,12 +41,12 @@ void    Threads::newThread(QThread *thread, bool remove)
         return ;
     }
     if (this->threads.contains(thread))
-        Log::warning("The thread is already handled", Properties("thread", QString::number((unsigned long int)thread, 16)), "Threads", "newThread");
+        Log::warning("The thread is already handled", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "newThread");
     else if (thread->isFinished())
-        Log::warning("This thread is already finished", Properties("thread", QString::number((unsigned long int)thread, 16)), "Threads", "newThread");
+        Log::warning("This thread is already finished", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "newThread");
     else
     {
-        Log::trace("New thread", Properties("thread", QString::number((unsigned long int)thread, 16)), "Threads", "newThread");
+        Log::trace("New thread", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "newThread");
         this->threads.insert(thread, remove);
         // When the thread will be finished, we will be notified.
         if (remove)
@@ -70,7 +70,7 @@ void    Threads::deleteThread(QThread *thread)
     }
     if (this->threads.contains(thread) == true)
     {
-        Log::trace("Deleting the thread", Properties("thread", QString::number((unsigned long int)thread, 16)), "Threads", "deleteThread");
+        Log::trace("Deleting the thread", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "deleteThread");
         // Quit the event loop of the thread
         thread->quit();
     }
@@ -134,7 +134,7 @@ void        Threads::_threadFinished()
         it.next();
         if (it.key()->isFinished())
         {
-            Log::trace("Thread finished", Properties("thread", QString::number((unsigned long int)it.key(), 16)).add("name", it.key()->objectName(), false), "Threads", "_threadFinished");
+            Log::trace("Thread finished", Properties("thread", QString::number((quint64)it.key(), 16)).add("name", it.key()->objectName(), false), "Threads", "_threadFinished");
             // Detele the object if it is orphan, and is not the log manager
             if (it.value() && it.key()->parent() == NULL && it.key() != Log::instance())
             {
@@ -166,7 +166,7 @@ void        Threads::_threadDestroyed(QObject *object)
         {
             // Remove the destroyed thread of the list
             it.remove();
-            Log::trace("Thread destroyed", Properties("thread", QString::number((unsigned long int)object, 16)), "Threads", "_threadDestroyed");
+            Log::trace("Thread destroyed", Properties("thread", QString::number((quint64)object, 16)), "Threads", "_threadDestroyed");
             break;
         }
     }

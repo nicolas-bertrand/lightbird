@@ -9,7 +9,6 @@
   <languagesPath>languages</languagesPath>
   <language>fr</language>
   <maxTimers>3</maxTimers>
-  <splashScreen>:splashScreen</splashScreen>
   <database>
     <name/>
     <file>server.db</file>

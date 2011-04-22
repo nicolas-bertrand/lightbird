@@ -37,10 +37,7 @@ Server::Server(int argc, char *argv[], QObject *parent) : QObject(parent)
 
 Server::~Server()
 {
-    // Delete the splash screen
-    if (this->splashScreen)
-        this->splashScreen->deleteLater();
-    // From now, the logs are printed directly on the standard output, and ILog will not be called anymore
+    // From now on, the logs are printed directly on the standard output, and ILog will not be called anymore
     Log::instance()->setMode(Log::PRINT);
     // Unload all the plugins (block until all plugins are unloaded)
     if (Plugins::isLoaded())
@@ -51,55 +48,36 @@ Server::~Server()
     Log::info("Server destroyed", "Server", "~Server");
 }
 
-bool    Server::isInitialized()
-{
-    return (this->initialized);
-}
-
 void    Server::_initialize()
 {
     this->initialized = false;
     Log::info("Initialazing the server", "Server", "_initialize");
-    this->splashScreen = NULL;
     // Seed the random number generator
     ::qsrand(QDateTime::currentDateTime().toTime_t());
     // Then the configuration is loaded
     Log::info("Loading the server configuration", "Server", "_initialize");
     if (!Configurations::server(this->configurationPath, this))
-    {
-        Log::fatal("Failed to load the server configuration", "Server", "_initialize");
-        return this->_splashScreen();
-    }
-    // This allows to display the splash screen
-    this->_splashScreen(Configurations::instance()->get("splashScreen"));
-#ifdef Q_WS_WIN
+        return Log::fatal("Failed to load the server configuration", "Server", "_initialize");
     // Tells Qt where are its plugins
     QCoreApplication::addLibraryPath(Configurations::instance()->get("QtPluginsPath"));
-#endif
     // The threads manager must be initialized just after the configuration
     Log::info("Loading the thread manager", "Server", "_initialize");
     Threads::instance(this);
     // Load the translator
     Log::info("Loading the translation", "Server", "_initialize");
-    if (!this->_loadTranslation(":languages/", Configurations::instance()->get("languagesPath") + "/"))
+    if (!this->_loadTranslation(Configurations::instance()->get("languagesPath") + "/", ":languages/"))
         Log::error("Unable to load the translation of the server", "Server", "_initialize");
     // Creates the file path if it doesn't exists
     QString filesPath = Configurations::instance()->get("filesPath");
     if (!QFileInfo(filesPath).isDir() && !QDir().mkpath(filesPath))
-    {
-        Log::fatal("Failed to create the files path", Properties("filesPath", filesPath), "Server", "_initialize");
-        return this->_splashScreen();
-    }
+        return Log::fatal("Failed to create the files path", Properties("filesPath", filesPath), "Server", "_initialize");
     // Creates the temporary directory
     if (!this->_temporaryDirectory())
-        return this->_splashScreen();
+        return Log::fatal("Failed to manage the temporary directory", "Server", "_initialize");
     // Load the database
     Log::info("Loading the database", "Server", "_initialize");
     if (!Database::instance(this))
-    {
-        Log::fatal("Failed to load the database", "Server", "_initialize");
-        return this->_splashScreen();
-    }
+        return Log::fatal("Failed to load the database", "Server", "_initialize");
     // Load the network
     Log::info("Loading the network", "Server", "_initialize");
     Network::instance(this);
@@ -111,37 +89,11 @@ void    Server::_initialize()
     // The log is then initialized which mean that previous logs are really write
     Log::info("Loading the logs", "Server", "_initialize");
     Log::instance()->setMode(Log::WRITE);
-    // Hide the splash screen, since the initialization is finished
-    this->_splashScreen();
     Log::info("Server initialized", "Server", "_initialize");
     this->initialized = true;
 }
 
-void    Server::_splashScreen(const QString &path)
-{
-    // If we are in noGui mode or there is no splash screen, the splash screen is not displayed
-    if (!qobject_cast<QApplication *>(QCoreApplication::instance()) || (path.isEmpty() && !this->splashScreen))
-        return ;
-    // Creates the splash screen
-    if (!this->splashScreen)
-    {
-        QPixmap pixmap(path);
-        if (pixmap.isNull())
-        {
-            if (path.isEmpty() == false)
-                Log::warning("Invalid splash screen", Properties("file", path), "Server", "_splashScreen");
-            return ;
-        }
-        this->splashScreen = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
-        this->splashScreen->setMask(QRegion(pixmap.mask()));
-        this->splashScreen->setWindowOpacity(0.9);
-    }
-    // Show or hide the splash screen
-    this->splashScreen->setVisible(!this->splashScreen->isVisible());
-    return ;
-}
-
-bool            Server::_loadTranslation(const QString &resource, const QString &file)
+bool            Server::_loadTranslation(const QString &file, const QString &resource)
 {
     QTranslator translator;
     QString     language;
@@ -195,7 +147,7 @@ bool    Server::_temporaryDirectory()
         {
             if (!directory.mkpath(path))
             {
-                Log::fatal("Unable to create the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
+                Log::error("Unable to create the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
                 return (false);
             }
             else
@@ -205,7 +157,7 @@ bool    Server::_temporaryDirectory()
     return (true);
 }
 
-void                Server::_loadNetwork()
+void    Server::_loadNetwork()
 {
     QDomNodeList                    nodes;
     QMap<QString, QString>          port;
@@ -289,7 +241,7 @@ void                Server::_pluginLoaded(QString id)
         Configurations::instance(id)->get("translation") == "true")
     {
         Log::debug("Loading the translation of the plugin", Properties("id", id), "_pluginLoaded", "Server");
-        this->_loadTranslation(Plugins::instance()->getResourcesPath(id) + "/languages/", path);
+        this->_loadTranslation(path, Plugins::instance()->getResourcesPath(id) + "/languages/");
     }
     // Calls the Gui method of the plugin if it implements it
     if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(id)))
@@ -297,6 +249,11 @@ void                Server::_pluginLoaded(QString id)
         instance->gui();
         Plugins::instance()->release(id);
     }
+}
+
+Server::operator bool()
+{
+    return (this->initialized);
 }
 
 #include "TableAccounts.h"

@@ -108,7 +108,7 @@ Future<bool>        Plugins::uninstall(const QString &id)
 
 void    Plugins::unloadAll()
 {
-    Log::error("Unloading all the plugins", "Plugins", "unloadAll");
+    Log::info("Unloading all the plugins", "Plugins", "unloadAll");
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "unloadAll");
