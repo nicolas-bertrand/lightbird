@@ -5,6 +5,8 @@
 # include <QString>
 # include <QStringList>
 
+# include "Arguments.h"
+
 /// @brief The main class, called to initialize the server database, configuration,
 /// plugins, etc. and which also cleans the server before it quits.
 class Server : public QObject
@@ -12,8 +14,8 @@ class Server : public QObject
     Q_OBJECT
 
 public:
-    /// @brief Initialize the server. Use isInitialized to see if an error occured.
-    Server(int argc, char *argv[], QObject *parent = 0);
+    /// @brief Initialize all the component of the server.
+    Server(Arguments &arguments, QObject *parent = 0);
     /// @brief Stop the server. This could take some time, since all the working
     /// thread has to be finished.
     ~Server();
@@ -29,9 +31,7 @@ private:
     Server(const Server &server);
     Server  &operator=(const Server &server);
 
-    /// @brief Called by the constructors, this method initialize the components
-    /// of the server. If the initialization is successful, the variable initialized
-    /// is set at true.
+    /// @brief Called by the constructor to initialize the server.
     void    _initialize();
     /// @brief Load the translatations of the texts of the server and the plugins
     /// in the local language.
@@ -51,9 +51,8 @@ private:
     /// the server, under the nodes <plugin>, childrens of the node <plugins>.
     void    _loadPlugins();
 
-    QStringList     arguments;          /// The list of the arguments of the program (from argc and argv).
-    QString         configurationPath;  /// The path to the XML configuration file of the server.
-    bool            initialized;        /// True if the server has been correctly initialized by _initialize().
+    Arguments   &arguments;     ///< Stores the arguments used to launch the server.
+    bool        initialized;    ///< True if the server has been correctly initialized by _initialize().
 
 private slots:
     /// @brief Calls the IGui::show() method of a plugin that has just been loaded,

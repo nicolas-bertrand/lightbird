@@ -1,21 +1,23 @@
 #include <iostream>
 #include <QApplication>
 
+#include "Arguments.h"
 #include "Server.h"
 #include "Log.h"
 
-QCoreApplication        *createQApplication(int argc, char *argv[]);
+QCoreApplication        *loadQt(Arguments &arguments);
 
-int                     main(int argc, char *argv[])
+int                     main(int argc, char **argv)
 {
-    QCoreApplication    *app;
+    Arguments           arguments(argc, argv);
+    QCoreApplication    *application;
     Server              *server;
     int                 result;
 
     // Instantiales Qt core class
-    app = createQApplication(argc, argv);
+    application = loadQt(arguments);
     // Instanciates and initializes the server
-    if (*(server = new Server(argc, argv, app)) == false)
+    if (*(server = new Server(arguments, application)) == false)
     {
         // If the initialization of the server failed displays the logs on the
         // standard output, in case the error occured before the logs was initialized.
@@ -25,10 +27,10 @@ int                     main(int argc, char *argv[])
         return (1);
     }
     Log::info("Executing the main event loop", "Server", "_initialize");
-    result = app->exec();
-    Log::info("The main event loop has finished", Properties("code", QString::number(result)), "Server", "_initialize");
+    result = application->exec();
+    Log::info("The main event loop has finished", Properties("code", QString::number(result)), "main.cpp", "main");
     delete server;
-    delete app;
+    delete application;
     return (result);
 }
 
@@ -36,18 +38,13 @@ int                     main(int argc, char *argv[])
 /// in the command line, QCoreApplication is created. Otherwise QApplication is
 /// instanciates. QApplication allows the server to display GUIs feature. In contrast,
 /// QCoreApplication run the server as a console application, without any GUIs.
-QCoreApplication        *createQApplication(int argc, char *argv[])
+QCoreApplication        *loadQt(Arguments &arguments)
 {
-    QCoreApplication    *app;
-    bool                gui;
+    QCoreApplication    *application;
 
-    gui = true;
-    for (int i = 1; i < argc && gui == true; ++i)
-        if (QString(argv[i]).toLower() == "-nogui")
-            gui = false;
-    if (gui)
-        app = new QApplication(argc, argv);
+    if (arguments.isGui())
+        application = new QApplication(arguments.getArgc(), arguments.getArgv());
     else
-        app = new QCoreApplication(argc, argv);
-    return (app);
+        application = new QCoreApplication(arguments.getArgc(), arguments.getArgv());
+    return (application);
 }

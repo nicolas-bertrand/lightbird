@@ -18,6 +18,16 @@ Port::Port(unsigned short port, LightBird::INetwork::Transports transport, const
 
 Port::~Port()
 {
+    // Delete all the remaining clients
+    QListIterator<Client *> it(this->clients);
+
+    while (it.hasNext())
+    {
+        it.peekNext()->quit();
+        it.peekNext()->wait();
+        delete it.peekNext();
+        it.next();
+    }
 }
 
 unsigned short  Port::getPort()

@@ -15,6 +15,7 @@ ApiGuis      *ApiGuis::instance(QObject *parent)
 
 ApiGuis::ApiGuis(QObject *parent) : QObject(parent)
 {
+    Log::trace("ApiGuis created", "ApiGuis", "~ApiGuis");
     QObject::connect(this, SIGNAL(showSignal(QString)), this, SLOT(_show(QString)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(hideSignal(QString)), this, SLOT(_hide(QString)), Qt::QueuedConnection);
     this->isNoGui = true;
@@ -24,6 +25,7 @@ ApiGuis::ApiGuis(QObject *parent) : QObject(parent)
 
 ApiGuis::~ApiGuis()
 {
+    Log::trace("ApiGuis destroyed!", "ApiGuis", "~ApiGuis");
 }
 
 void    ApiGuis::show(const QString &id)

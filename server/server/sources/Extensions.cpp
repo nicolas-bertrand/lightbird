@@ -14,6 +14,7 @@ Extensions  *Extensions::instance(QObject *parent)
 
 Extensions::Extensions(QObject *parent) : QObject(parent)
 {
+    Log::trace("Extensions created", "Extensions", "~Extensions");
     QObject::connect(this, SIGNAL(releaseSignal(QString)), this, SLOT(_release(QString)), Qt::QueuedConnection);
 }
 

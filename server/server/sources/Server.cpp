@@ -18,45 +18,22 @@
 #include "ITimer.h"
 #include "ApiGuis.h"
 
-Server::Server(int argc, char *argv[], QObject *parent) : QObject(parent)
+Server::Server(Arguments &args, QObject *parent) : QObject(parent),
+                                                   arguments(args),
+                                                   initialized(false)
 {
-    // Parse the arguments of the program
-    for (int i = 0; i < argc; ++i)
-        this->arguments << argv[i];
-    Log::info("Server starting", Properties("command line", arguments.join(", ").prepend('"').append('"')), "Server", "Server");
-    QStringListIterator it(this->arguments);
-    while (it.hasNext())
-    {
-        it.next();
-        // If the configuration is found
-        if (it.peekPrevious() == "-c" && it.hasNext())
-            this->configurationPath = it.peekNext();
-    }
+    Log::info("Server starting", Properties("command line", this->arguments.toString()), "Server", "Server");
     this->_initialize();
-}
-
-Server::~Server()
-{
-    // From now on, the logs are printed directly on the standard output, and ILog will not be called anymore
-    Log::instance()->setMode(Log::PRINT);
-    // Unload all the plugins (block until all plugins are unloaded)
-    if (Plugins::isLoaded())
-        Plugins::instance()->unloadAll();
-    // Finish all the threads (only once all the plugins are unloaded)
-    if (Threads::isLoaded())
-        Threads::instance()->deleteAll();
-    Log::info("Server stopped", "Server", "~Server");
 }
 
 void    Server::_initialize()
 {
-    this->initialized = false;
     Log::info("Initialazing the server", "Server", "_initialize");
     // Seed the random number generator
-    ::qsrand(QDateTime::currentDateTime().toTime_t());
+    ::qsrand((unsigned)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
     // Then the configuration is loaded
     Log::info("Loading the server configuration", "Server", "_initialize");
-    if (!Configurations::server(this->configurationPath, this))
+    if (!Configurations::server(this->arguments.getConfiguration(), this))
         return Log::fatal("Failed to load the server configuration", "Server", "_initialize");
     // Tells Qt where are its plugins
     QCoreApplication::addLibraryPath(Configurations::instance()->get("QtPluginsPath"));
@@ -91,6 +68,20 @@ void    Server::_initialize()
     Log::instance()->setMode(Log::WRITE);
     Log::info("Server initialized", "Server", "_initialize");
     this->initialized = true;
+}
+
+Server::~Server()
+{
+    Log::info("Server shutdown", "Server", "~Server");
+    // From now on, the logs are printed directly on the standard output, and ILog will not be called anymore
+    Log::instance()->setMode(Log::PRINT);
+    // Unload all the plugins (block until all plugins are unloaded)
+    if (Plugins::isLoaded())
+        Plugins::instance()->unloadAll();
+    // Finish all the threads (only once all the plugins are unloaded)
+    if (Threads::isLoaded())
+        Threads::instance()->deleteAll();
+    Log::info("Server stopped", "Server", "~Server");
 }
 
 bool            Server::_loadTranslation(const QString &file, const QString &resource)

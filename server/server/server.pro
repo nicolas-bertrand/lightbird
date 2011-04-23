@@ -42,7 +42,8 @@ RCC_DIR = tmp
 MOC_DIR = tmp
 
 # Headers and sources files
-HEADERS += headers/Client.h \
+HEADERS += headers/Arguments.h \
+    headers/Client.h \
     headers/Configuration.h \
     headers/Configurations.h \
     headers/Content.h \
@@ -87,6 +88,7 @@ HEADERS += headers/Client.h \
     headers/tables/TablePermissions.h \
     headers/tables/TableTags.h
 SOURCES += sources/main.cpp \
+    sources/Arguments.cpp \
     sources/Client.cpp \
     sources/Configuration.cpp \
     sources/Configurations.cpp \
