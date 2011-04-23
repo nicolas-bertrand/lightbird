@@ -1,7 +1,9 @@
 #ifndef PARSER_H
 # define PARSER_H
 
+# include <QString>
 # include <QByteArray>
+
 # include "IClient.h"
 
 # define END_OF_LINE            "\r\n"      // End of line characters.

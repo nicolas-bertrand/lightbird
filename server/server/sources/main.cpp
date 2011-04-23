@@ -15,7 +15,7 @@ int                     main(int argc, char **argv)
     int                 result;
 
     // Instantiales Qt core class
-    application = loadQt(arguments);
+    application = ::loadQt(arguments);
     // Instanciates and initializes the server
     if (*(server = new Server(arguments, application)) == false)
     {

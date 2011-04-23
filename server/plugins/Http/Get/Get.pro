@@ -12,8 +12,8 @@ INCLUDEPATH +=  . \
 TARGET      =   Get
 DESTDIR     =   ../../../build/plugins/Http/Get
 
-HEADERS     =   Plugin.h
-SOURCES     =   Plugin.cpp
+HEADERS     =   Get.h
+SOURCES     =   Get.cpp
 OTHER_FILES =   Configuration.xml
 
 OBJECTS_DIR =   tmp

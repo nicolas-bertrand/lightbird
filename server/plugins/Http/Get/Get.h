@@ -1,22 +1,22 @@
-#ifndef PLUGIN_H
-# define PLUGIN_H
+#ifndef GET_H
+# define GET_H
 
 # include <QObject>
 
 # include "IPlugin.h"
 # include "IDoExecution.h"
 
-class Plugin : public QObject,
-               public LightBird::IPlugin,
-               public LightBird::IDoExecution
+class Get : public QObject,
+            public LightBird::IPlugin,
+            public LightBird::IDoExecution
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IDoExecution)
 
 public:
-    Plugin();
-    ~Plugin();
+    Get();
+    ~Get();
 
     // IPlugin
     bool    onLoad(LightBird::IApi *api);
@@ -32,4 +32,4 @@ private:
     LightBird::IApi *api;
 };
 
-#endif // PLUGIN_H
+#endif // GET_H

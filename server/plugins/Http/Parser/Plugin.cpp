@@ -123,4 +123,4 @@ Parser      *Plugin::_getParser(const LightBird::IClient &client)
     return (parser);
 }
 
-Q_EXPORT_PLUGIN2(plugin, Plugin)
+Q_EXPORT_PLUGIN2(Plugin, Plugin)

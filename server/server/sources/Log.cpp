@@ -271,9 +271,7 @@ void    Log::_write(LightBird::ILogs::level level, const QDateTime &date, const 
         {
             if ((instance = Plugins::instance()->getInstance<LightBird::ILog>(it.peekNext())))
             {
-                this->mutex.lock();
                 instance->log(level, date, message, properties.toMap(), thread, plugin, object, method);
-                this->mutex.unlock();
                 Plugins::instance()->release(it.peekNext());
             }
             it.next();
@@ -287,7 +285,6 @@ void        Log::_print(LightBird::ILogs::level level, const QDateTime &date, co
 
     if (!this->display)
         return ;
-    this->mutex.lock();
     buffer += date.toString("[hh:mm:ss:zzz]");
     if (this->levels.contains(level))
         buffer += " [" + this->levels[level] + "]";
@@ -302,6 +299,7 @@ void        Log::_print(LightBird::ILogs::level level, const QDateTime &date, co
     if (properties.toMap().size())
         buffer += " [" + this->_mapToString(properties.toMap()) + "]";
     buffer += " : " + message;
+    this->mutex.lock();
     std::cout << buffer.toStdString() << std::endl;
     this->mutex.unlock();
 }

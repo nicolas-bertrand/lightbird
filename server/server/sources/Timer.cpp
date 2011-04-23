@@ -58,7 +58,7 @@ void                    Timer::_timeout()
 {
     LightBird::ITimer   *instance;
 
-    Log::trace("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
+    //Log::trace("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
     if (this->stopped || !(instance = Plugins::instance()->getInstance<LightBird::ITimer>(this->id)))
         return ;
     instance->timer(this->name);

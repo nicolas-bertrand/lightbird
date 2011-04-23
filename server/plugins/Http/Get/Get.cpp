@@ -1,42 +1,37 @@
 #include <QtPlugin>
-#include <QFileInfo>
-#include <QDir>
-#include <QDomNode>
 
-#include "ITableFiles.h"
-#include "IMime.h"
-#include "Plugin.h"
+#include "Get.h"
 
-Plugin::Plugin()
+Get::Get()
 {
 }
 
-Plugin::~Plugin()
+Get::~Get()
 {
 }
 
-bool    Plugin::onLoad(LightBird::IApi *api)
+bool    Get::onLoad(LightBird::IApi *api)
 {
     this->api = api;
     return (true);
 }
 
-void    Plugin::onUnload()
+void    Get::onUnload()
 {
 }
 
-bool    Plugin::onInstall(LightBird::IApi *api)
+bool    Get::onInstall(LightBird::IApi *api)
 {
     this->api = api;
     return (true);
 }
 
-void    Plugin::onUninstall(LightBird::IApi *api)
+void    Get::onUninstall(LightBird::IApi *api)
 {
     this->api = api;
 }
 
-void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
+void    Get::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "HTTP Get";
     metadata.brief = "Implements the GET HTTP method.";
@@ -48,7 +43,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "LGPL";
 }
 
-bool    Plugin::doExecution(LightBird::IClient &client)
+bool    Get::doExecution(LightBird::IClient &client)
 {
     LightBird::IMetadata metadata;
 
@@ -58,4 +53,4 @@ bool    Plugin::doExecution(LightBird::IClient &client)
     return (true);
 }
 
-Q_EXPORT_PLUGIN2(plugin, Plugin)
+Q_EXPORT_PLUGIN2(Get, Get)

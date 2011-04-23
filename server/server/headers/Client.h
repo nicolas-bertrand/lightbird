@@ -34,7 +34,7 @@ public:
     /// @param peerName : The name of the client's host. May be empty.
     Client(QAbstractSocket *socket, LightBird::INetwork::Transports transport, const QStringList &protocol,
            unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
-           unsigned short peerPort, const QString &peerName, IReadWrite *readWriteInterface, QObject *parent = 0);
+           unsigned short peerPort, const QString &peerName, IReadWrite *readWriteInterface);
     ~Client();
 
     /// @brief The main method of the Client's thread.

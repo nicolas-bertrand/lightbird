@@ -15,9 +15,9 @@
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
-               const QString &pn, IReadWrite *r, QObject *parent) :
-               QThread(parent), transport(t), protocols(pr), port(p), socketDescriptor(sd),
-               peerAddress(pa), peerPort(pp), peerName(pn), readWriteInterface(r), socket(s)
+               const QString &pn, IReadWrite *r) :
+               transport(t), protocols(pr), port(p), socketDescriptor(sd), peerAddress(pa),
+               peerPort(pp), peerName(pn), readWriteInterface(r), socket(s)
 {
     // Generates the uuid of the client
     this->id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
@@ -29,8 +29,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStr
     // Start the client thread
     this->moveToThread(this);
     Threads::instance()->newThread(this, false);
-    if (!this->socket->parent())
-        this->socket->moveToThread(this);
+    this->socket->moveToThread(this);
 }
 
 Client::~Client()

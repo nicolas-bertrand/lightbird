@@ -38,7 +38,7 @@
     <path>logs</path>
     <maxNbOfFile>10</maxNbOfFile>
     <maxSize>1M</maxSize>
-    <validityPeriod>30</validityPeriod>
+    <expires>30</expires>
   </log>
   <ports>
     <port protocol="HTTP WebClient" transport="TCP" maxClients="300">80</port>

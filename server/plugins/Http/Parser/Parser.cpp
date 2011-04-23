@@ -1,5 +1,3 @@
-#include <QtGui>
-
 #include "Plugin.h"
 #include "Parser.h"
 
