@@ -209,6 +209,7 @@ void    Log::_initializeWrite()
     // Put the first letter in upper case, to match the values of the map
     level = level.left(1).toUpper() + level.right(level.size() - 1);
     this->level = this->levels.key(level, LightBird::ILogs::INFO);
+    this->display = false;
     if (Configurations::instance()->get("log/display") == "true")
         this->display = true;
     // Write the buffered logs

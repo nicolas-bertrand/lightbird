@@ -14,7 +14,8 @@ class Server : public QObject
 public:
     /// @brief Initialize the server. Use isInitialized to see if an error occured.
     Server(int argc, char *argv[], QObject *parent = 0);
-    /// @brief Stop the server. This could take some time, since all the working thread has to be finished.
+    /// @brief Stop the server. This could take some time, since all the working
+    /// thread has to be finished.
     ~Server();
 
     /// @return True if the server is correctly initialized.
@@ -28,23 +29,26 @@ private:
     Server(const Server &server);
     Server  &operator=(const Server &server);
 
-    /// @brief Called by the constructors, this method initialize the components of the server.
-    /// If the initialization is successful, the variable initialized is set at true.
+    /// @brief Called by the constructors, this method initialize the components
+    /// of the server. If the initialization is successful, the variable initialized
+    /// is set at true.
     void    _initialize();
-    /// @brief Load the translatations of the texts of the server, in the local language.
+    /// @brief Load the translatations of the texts of the server and the plugins
+    /// in the local language.
     /// @param file : The path of the language file on the file system.
-    /// @param resource : The path of the language file in the resources. Used only if
-    /// the file has not been found using the first parameter.
+    /// @param resource : The path of the language file in the resources. Used only
+    /// if the file has not been found using the first parameter.
     /// @return True if the translation has been loaded.
     bool    _loadTranslation(const QString &file, const QString &resource);
-    /// @brief Manage the temporary directory. Creates it if it doesn't exists, or removes its files.
+    /// @brief Manage the temporary directory. Creates it if it doesn't exists, or
+    /// removes its files.
     /// @return True if no error occured.
     bool    _temporaryDirectory();
-    /// @brief Load each ports mentionned in the configuration file of the server, under the nodes
-    /// <port>, childrens of the node <ports>.
+    /// @brief Load each ports mentionned in the configuration file of the server,
+    /// under the nodes <port>, childrens of the node <ports>.
     void    _loadNetwork();
-    /// @brief Attemps to load each plugin mentionned in the configuration file of the server,
-    /// under the nodes <plugin>, childrens of the node <plugins>.
+    /// @brief Attemps to load each plugin mentionned in the configuration file of
+    /// the server, under the nodes <plugin>, childrens of the node <plugins>.
     void    _loadPlugins();
 
     QStringList     arguments;          /// The list of the arguments of the program (from argc and argv).

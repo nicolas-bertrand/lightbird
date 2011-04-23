@@ -45,7 +45,7 @@ Server::~Server()
     // Finish all the threads (only once all the plugins are unloaded)
     if (Threads::isLoaded())
         Threads::instance()->deleteAll();
-    Log::info("Server destroyed", "Server", "~Server");
+    Log::info("Server stopped", "Server", "~Server");
 }
 
 void    Server::_initialize()
@@ -121,16 +121,13 @@ bool    Server::_temporaryDirectory()
 {
     QString path;
     QDir    directory;
-    bool    clean = false;
 
     path = directory.cleanPath(Configurations::instance()->get("temporaryPath"));
     // If the temporary directory is not the working directory
     if (!path.isEmpty() && path != ".")
     {
         // Removes all the files in the temporary directory if needed
-        if (directory.cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true")
-            clean = true;
-        if (clean && QFileInfo(path).isDir())
+        if (directory.cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true" && QFileInfo(path).isDir())
         {
             Log::debug("Cleaning the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
             directory.setPath(path);
@@ -159,47 +156,47 @@ bool    Server::_temporaryDirectory()
 
 void    Server::_loadNetwork()
 {
-    QDomNodeList                    nodes;
+    QDomElement                     node;
     QMap<QString, QString>          port;
     QList<QMap<QString, QString> >  ports;
     LightBird::INetwork::Transports transport;
-    bool                            allCreated;
+    bool                            loaded = false;
 
     // Get the information on the ports to load from the configuration
-    nodes = Configurations::instance()->readDom().firstChildElement("ports").elementsByTagName("port");
-    for (int i = 0; i < nodes.size(); ++i)
+    node = Configurations::instance()->readDom().firstChildElement("ports");
+    for (node = node.firstChildElement("port"); !node.isNull(); node = node.nextSiblingElement("port"))
     {
-        port["port"] = nodes.item(i).toElement().text();
-        port["protocols"] = nodes.item(i).toElement().attribute("protocol");
-        port["transport"] = nodes.item(i).toElement().attribute("transport");
-        port["maxClients"] = nodes.item(i).toElement().attribute("maxClients");
+        port["port"] = node.text();
+        port["protocols"] = node.attribute("protocol");
+        port["transport"] = node.attribute("transport");
+        port["maxClients"] = node.attribute("maxClients");
         ports.push_back(port);
     }
     Configurations::instance()->release();
-    // Creates the ports in the list
-    allCreated = true;
+    // Opens the ports in the list
     QListIterator<QMap<QString, QString> >  it(ports);
     while (it.hasNext())
     {
         transport = LightBird::INetwork::TCP;
         if (it.peekNext().value("transport").toUpper() == "UDP")
             transport = LightBird::INetwork::UDP;
-        if (!(Network::instance()->addPort(it.peekNext().value("port").toShort(),
-                                           it.peekNext().value("protocols").simplified().split(' '),
-                                           transport, it.peekNext().value("maxClients").toUInt()).getResult()))
-            allCreated = false;
+        if (Network::instance()->addPort(it.peekNext().value("port").toShort(),
+                                         it.peekNext().value("protocols").simplified().split(' '),
+                                         transport, it.peekNext().value("maxClients").toUInt()).getResult())
+            loaded = true;
         it.next();
     }
-    if (nodes.size() == 0)
-        Log::warning("No plugin to load", "Server", "_loadNetwork");
+    if (loaded)
+        Log::debug("Network loaded", "Server", "_loadNetwork");
     else
-        Log::trace("Network loaded", "Server", "_loadNetwork");
+        Log::warning("No network port opened", "Server", "_loadNetwork");
 }
 
 void            Server::_loadPlugins()
 {
     QDomElement plugin;
     QStringList list;
+    bool        loaded = false;
 
     // Allows the server to know when a plugin is loaded (only in GUI mode)
     if (qobject_cast<QApplication *>(QCoreApplication::instance()))
@@ -223,11 +220,12 @@ void            Server::_loadPlugins()
     QStringListIterator it(list);
     while (it.hasNext())
         // The getResult allows to wait until the plugin is actually loaded (or not)
-        Plugins::instance()->load(it.next()).getResult();;
-    if (list.size() == 0)
-        Log::warning("No plugin to load", "Server", "_loadPlugins");
+        if (Plugins::instance()->load(it.next()).getResult())
+            loaded = true;
+    if (loaded)
+        Log::debug("Plugins loaded", "Server", "_loadPlugins");
     else
-        Log::trace("Plugins loaded", "Server", "_loadPlugins");
+        Log::warning("No plugin loaded", "Server", "_loadPlugins");
 }
 
 void                Server::_pluginLoaded(QString id)
