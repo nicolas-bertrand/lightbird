@@ -40,7 +40,7 @@ public:
 
     // ITimer
     /// @brief Writes the logs in the file periodically.
-    void        timer(const QString &name);
+    bool        timer(const QString &name);
 
 private:
     /// @brief Return the value of the node in parameter from the configuration
@@ -70,7 +70,6 @@ private:
     int                 expires;                    ///< The maximum number of days during witch the archives of the log file are kept.
     int                 maxNbOfFile;                ///< The maximum number of files in the log directory.
     bool                display;                    ///< If the logs have to be displayed on the standard output
-    unsigned            delay;                      ///< The time between each call to the timer.
     QDir                directory;                  ///< The log directory.
     QFile               file;                       ///< The log file.
     QString             lastError;                  ///< Date of the last error (to avoid repetitions).

@@ -31,10 +31,10 @@ private:
     ApiTimers(const ApiTimers &);
     ApiTimers* operator=(const ApiTimers &);
 
-    QString                 id;         ///< The id of the plugin for which the object has been created.
+    QString                 id;         ///< The id of the plugin for which the timers are managed.
     int                     maxTimers;  ///< The maximum number of timers autorized at the same time for a plugin.
     QMap<QString, Timer *>  timers;     ///< The list of the timers of the plugin.
-    QReadWriteLock          lockTimers; ///< Ensure that the access to the timers is thread safe.
+    QReadWriteLock          mutex;      ///< Ensure that the access to the timers is thread safe.
 };
 
 #endif // APITIMERS_H

@@ -1,19 +1,19 @@
 #include <QCoreApplication>
 #include <QTimer>
 
-#include "Timer.h"
+#include "ApiTimers.h"
 #include "Plugins.hpp"
 #include "ITimer.h"
 #include "Log.h"
 #include "Threads.h"
+#include "Timer.h"
 
-Timer::Timer(QString id, QString name, unsigned int timeout, QObject *parent)
+Timer::Timer(QString i, QString n, unsigned int t, ApiTimers &timers) : id(i),
+                                                                        name(n),
+                                                                        timeout(t),
+                                                                        apiTimers(timers),
+                                                                        stopped(false)
 {
-    this->parent = parent;
-    this->id = id;
-    this->name = name;
-    this->timeout = timeout;
-    this->stopped = false;
     Log::debug("Loading the timer", Properties("name", this->name).add("id", this->id).add("timeout", QString::number(this->timeout)), "Timer", "Timer");
     // Start the Timer thread
     this->moveToThread(this);
@@ -35,7 +35,7 @@ void    Timer::run()
     Log::trace("Timer thread started", Properties("id", this->id).add("name", this->name), "Timer", "run");
     this->exec();
     Log::trace("Timer thread finished", Properties("id", this->id).add("name", this->name), "Timer", "run");
-    // The thread where lives the Timer is changed to the thread of its parent
+    // The thread where lives the Timer is changed to the thread main
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
@@ -57,12 +57,16 @@ void            Timer::stop()
 void                    Timer::_timeout()
 {
     LightBird::ITimer   *instance;
+    bool                result;
 
     //Log::trace("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
     if (this->stopped || !(instance = Plugins::instance()->getInstance<LightBird::ITimer>(this->id)))
         return ;
-    instance->timer(this->name);
-    if (!this->stopped)
+    result = instance->timer(this->name);
+    if (!this->stopped && result)
         QTimer::singleShot(this->timeout, this, SLOT(_timeout()));
     Plugins::instance()->release(this->id);
+    // Removes the timer if the plugin returned false
+    if (!result)
+        this->apiTimers.removeTimer(this->name);
 }

@@ -32,8 +32,6 @@ bool    Files::onLoad(LightBird::IApi *api)
     this->display = true;
     if (this->_getNodeValue("display") == "false")
         this->display = false;
-    if ((this->delay = this->_getNodeValue("delay").toInt()) < 1)
-        this->delay = 1;
 
     // Display the configuration of the plugin
     properties["path"] = this->path;
@@ -54,8 +52,9 @@ bool    Files::onLoad(LightBird::IApi *api)
     this->levels[LightBird::ILogs::DEBUG] = "Debug";
     this->levels[LightBird::ILogs::TRACE] = "Trace";
 
-    // Creates the log timer
-    this->api->timers().setTimer("writeLog", this->delay * 1000);
+    // Creates the log timer if it doesn't exists
+    if (!this->api->timers().getTimer("writeLog"))
+        this->api->timers().setTimer("writeLog", 1000);
 
     // Create the log file
     return (this->_createLogFile());
@@ -112,7 +111,7 @@ void        Files::log(LightBird::ILogs::level level, const QDateTime &date, con
     this->mutex.unlock();
 }
 
-void            Files::timer(const QString &name)
+bool            Files::timer(const QString &name)
 {
     QByteArray  log;
 
@@ -124,7 +123,7 @@ void            Files::timer(const QString &name)
         {
             std::cerr << "Unable to open the log file (from the plugin Files::log)." << std::endl;
             this->mutex.lock();
-            return ;
+            return (true);
         }
         QStringListIterator it(this->buffer);
         while (it.hasNext())
@@ -134,7 +133,10 @@ void            Files::timer(const QString &name)
                 this->file.write(log);
                 log.clear();
                 if (!this->_manageFiles())
-                    return this->mutex.unlock();
+                {
+                    this->mutex.unlock();
+                    return (true);
+                }
             }
             log += it.next();
         }
@@ -143,6 +145,7 @@ void            Files::timer(const QString &name)
         this->buffer.clear();
         this->mutex.unlock();
     }
+    return (true);
 }
 
 QString Files::_getNodeValue(const QString &nodeName)

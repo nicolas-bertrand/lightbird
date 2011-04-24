@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- The time in second between each call to the timer that write the logs in the file. -->
-    <delay>1</delay>
+    <timers>
+        <!-- This timer writes the logs in the file. -->
+        <writeLog>1000</writeLog>
+    </timers>
 </configuration>
