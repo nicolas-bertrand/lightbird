@@ -46,11 +46,11 @@
   <plugins>
     <plugin>Http/Get</plugin>
     <plugin>Http/Parser</plugin>
-    <plugin>Logs/Files</plugin>
+    <plugin>Log/File</plugin>
   </plugins>
   <configurations>
     <plugin id="Http/Get"/>
     <plugin id="Http/Parser"/>
-    <plugin id="Logs/Files"/>
+    <plugin id="Log/File"/>
   </configurations>
 </configuration>

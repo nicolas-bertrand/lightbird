@@ -1,5 +1,5 @@
-#ifndef FILES_H
-# define FILES_H
+#ifndef FILE_H
+# define FILE_H
 
 # include <QObject>
 # include <QFile>
@@ -10,10 +10,10 @@
 # include "ILog.h"
 # include "ITimer.h"
 
-class Files : public QObject,
-              public LightBird::IPlugin,
-              public LightBird::ILog,
-              public LightBird::ITimer
+class File : public QObject,
+             public LightBird::IPlugin,
+             public LightBird::ILog,
+             public LightBird::ITimer
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin
@@ -21,8 +21,8 @@ class Files : public QObject,
                  LightBird::ITimer)
 
 public:
-    Files();
-    ~Files();
+    File();
+    ~File();
 
     // IPlugin
     bool        onLoad(LightBird::IApi *api);
@@ -78,4 +78,4 @@ private:
     QMap<LightBird::ILogs::level, QString> levels;  ///< Combines the levels and their names.
 };
 
-#endif // FILES_H
+#endif // FILE_H

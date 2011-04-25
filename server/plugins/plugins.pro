@@ -1,4 +1,5 @@
 TEMPLATE    =   subdirs
 
-SUBDIRS     =   Http \
-                Logs
+SUBDIRS     =   Example \
+                Http \
+                Log

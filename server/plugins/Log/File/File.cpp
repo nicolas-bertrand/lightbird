@@ -1,17 +1,17 @@
 #include <iostream>
 #include <QtPlugin>
 
-#include "Files.h"
+#include "File.h"
 
-Files::Files()
+File::File()
 {
 }
 
-Files::~Files()
+File::~File()
 {
 }
 
-bool    Files::onLoad(LightBird::IApi *api)
+bool    File::onLoad(LightBird::IApi *api)
 {
     QMap<QString, QString>  properties;
 
@@ -26,7 +26,7 @@ bool    Files::onLoad(LightBird::IApi *api)
         this->expires = 30;
     if ((this->maxNbOfFile = this->_getNodeValue("maxNbOfFile").toInt()) < 1)
     {
-        this->api->log().warning("Invalid maxNbOfFile (" + QString::number(this->maxNbOfFile) + "). It should be greater than 0.", "Files", "onLoad");
+        this->api->log().warning("Invalid maxNbOfFile (" + QString::number(this->maxNbOfFile) + "). It should be greater than 0.", "File", "onLoad");
         this->maxNbOfFile = 10;
     }
     this->display = true;
@@ -42,7 +42,7 @@ bool    Files::onLoad(LightBird::IApi *api)
     properties["display"] = "false";
     if (this->display == true)
         properties["display"] = "true";
-    this->api->log().debug("Loading Files", properties, "Files", "onLoad");
+    this->api->log().debug("Loading Log/File", properties, "File", "onLoad");
 
     // Map the names of the log levels
     this->levels[LightBird::ILogs::FATAL] = "Fatal";
@@ -60,24 +60,24 @@ bool    Files::onLoad(LightBird::IApi *api)
     return (this->_createLogFile());
 }
 
-void    Files::onUnload()
+void    File::onUnload()
 {
     // Write the remaining logs
     this->timer("writeLog");
 }
 
-bool    Files::onInstall(LightBird::IApi *)
+bool    File::onInstall(LightBird::IApi *)
 {
     return (true);
 }
 
-void    Files::onUninstall(LightBird::IApi *)
+void    File::onUninstall(LightBird::IApi *)
 {
 }
 
-void    Files::getMetadata(LightBird::IMetadata &metadata) const
+void    File::getMetadata(LightBird::IMetadata &metadata) const
 {
-    metadata.name = "Logs Files";
+    metadata.name = "Log File";
     metadata.brief = "Write the logs entries into files.";
     metadata.description = "Saves the logs entries into files, and manage them.";
     metadata.autor = "LightBird team";
@@ -87,9 +87,9 @@ void    Files::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "LGPL";
 }
 
-void        Files::log(LightBird::ILogs::level level, const QDateTime &date, const QString &message,
-                       const QMap<QString, QString> &properties, const QString &thread,
-                       const QString &plugin, const QString &object, const QString &method)
+void        File::log(LightBird::ILogs::level level, const QDateTime &date, const QString &message,
+                      const QMap<QString, QString> &properties, const QString &thread,
+                      const QString &plugin, const QString &object, const QString &method)
 {
     QString log;
 
@@ -111,7 +111,7 @@ void        Files::log(LightBird::ILogs::level level, const QDateTime &date, con
     this->mutex.unlock();
 }
 
-bool            Files::timer(const QString &name)
+bool            File::timer(const QString &name)
 {
     QByteArray  log;
 
@@ -121,7 +121,7 @@ bool            Files::timer(const QString &name)
         this->mutex.lock();
         if(!this->file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
         {
-            std::cerr << "Unable to open the log file (from the plugin Files::log)." << std::endl;
+            std::cerr << "Unable to open the log file (from the plugin Log/File)." << std::endl;
             this->mutex.lock();
             return (true);
         }
@@ -148,7 +148,7 @@ bool            Files::timer(const QString &name)
     return (true);
 }
 
-QString Files::_getNodeValue(const QString &nodeName)
+QString File::_getNodeValue(const QString &nodeName)
 {
     // Return the node of the configuration of the server if it exists
     if (this->api->configuration(false).count("log/" + nodeName))
@@ -157,7 +157,7 @@ QString Files::_getNodeValue(const QString &nodeName)
     return (this->api->configuration(true).get(nodeName));
 }
 
-unsigned        Files::_toBytes(const QString &str)
+unsigned        File::_toBytes(const QString &str)
 {
     char        type;
     unsigned    bytes;
@@ -183,26 +183,26 @@ unsigned        Files::_toBytes(const QString &str)
     return (bytes);
 }
 
-bool        Files::_createLogFile()
+bool        File::_createLogFile()
 {
     QDir    directory;
 
     if (!this->directory.exists() && !this->directory.mkpath(this->path))
     {
-        std::cerr << "Unable to create the log directory (from the plugin Files::_createLogFile)." << std::endl;
+        std::cerr << "Unable to create the log directory (from the plugin Log/File)." << std::endl;
         return (false);
     }
     this->file.setFileName(this->path + this->name);
     if(!(this->file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)))
     {
-        std::cerr << "Unable to create the log file (from the plugin Files::_createLogFile)." << std::endl;
+        std::cerr << "Unable to create the log file (from the plugin Log/File)." << std::endl;
         return (false);
     }
     this->file.close();
     return (true);
 }
 
-bool                            Files::_manageFiles()
+bool                            File::_manageFiles()
 {
     QDateTime                   date;
     QString                     name;
@@ -227,19 +227,19 @@ bool                            Files::_manageFiles()
         if (date.toString("yyyy-MM-dd hh-mm-ss") != lastError)
         {
             lastError = date.toString("yyyy-MM-dd hh-mm-ss");
-            this->api->log().warning("Cannot rename the log file to archive it", properties, "Files", "_manageFiles");
+            this->api->log().warning("Cannot rename the log file to archive it", properties, "File", "_manageFiles");
         }
     }
     else
     {
         properties["archive"] = this->file.fileName();
-        this->api->log().trace("Log archive file created", properties, "Files", "_manageFiles");
+        this->api->log().trace("Log archive file created", properties, "File", "_manageFiles");
     }
     this->file.close();
     this->_createLogFile();
     if(!this->file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
     {
-        std::cerr << "Unable to open the log file (from the plugin Files::_manageFiles)." << std::endl;
+        std::cerr << "Unable to open the log file (from the plugin Log/File)." << std::endl;
         return (false);
     }
 
@@ -259,9 +259,9 @@ bool                            Files::_manageFiles()
     {
         properties["file"] = this->path + files.begin().value();
         if (!QFile::remove(this->path + files.begin().value()))
-            this->api->log().warning("Can't remove the log archive file", properties, "Files", "_manageFiles");
+            this->api->log().warning("Can't remove the log archive file", properties, "File", "_manageFiles");
         else
-            this->api->log().trace("Log archive file removed", properties, "Files", "_manageFiles");
+            this->api->log().trace("Log archive file removed", properties, "File", "_manageFiles");
         files.erase(files.begin());
     }
 
@@ -275,9 +275,9 @@ bool                            Files::_manageFiles()
         {
             properties["file"] = this->path + files.begin().value();
             if (!QFile::remove(this->path + files.begin().value()))
-                this->api->log().warning("Can't remove the expired log archive file", properties, "Files", "_manageFiles");
+                this->api->log().warning("Can't remove the expired log archive file", properties, "File", "_manageFiles");
             else
-                this->api->log().trace("Expired log archive file removed", properties, "Files", "_manageFiles");
+                this->api->log().trace("Expired log archive file removed", properties, "File", "_manageFiles");
             flag = true;
         }
         files.erase(files.begin());
@@ -285,7 +285,7 @@ bool                            Files::_manageFiles()
     return (true);
 }
 
-QString Files::_mapToString(const QMap<QString, QString> &properties)
+QString File::_mapToString(const QMap<QString, QString> &properties)
 {
     QMapIterator<QString, QString>  it(properties);
     QString                         result;
@@ -300,4 +300,4 @@ QString Files::_mapToString(const QMap<QString, QString> &properties)
     return (result);
 }
 
-Q_EXPORT_PLUGIN2(Files, Files)
+Q_EXPORT_PLUGIN2(File, File)
