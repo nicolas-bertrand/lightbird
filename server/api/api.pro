@@ -32,12 +32,12 @@ HEADERS         =   IApi.h \
                     network/IOnConnect.h \
                     network/IOnDisconnect.h \
                     network/IOnExecution.h \
+                    network/IOnFinish.h \
                     network/IOnProtocol.h \
                     network/IOnRead.h \
                     network/IOnSerialize.h \
                     network/IOnUnserialize.h \
                     network/IOnWrite.h \
-                    network/IOnWrote.h \
                     network/IRequest.h \
                     network/IResponse.h \
                     table/ITable.h \

@@ -103,7 +103,7 @@ bool    Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data)
     return (this->_getParser(client)->doSerializeContent(data));
 }
 
-void    Plugin::onWrote(LightBird::IClient &client)
+void    Plugin::onFinish(LightBird::IClient &client)
 {
     if (client.getRequest().isError())
         this->api->network().disconnect(client.getId());

@@ -87,7 +87,7 @@ private slots:
     void    _doSerializeContent();
     void    _doSerializeFooter();
     void    _onWrite(QByteArray &data);
-    void    _onWrote();
+    void    _onFinish();
 };
 
 #endif // ENGINE_H

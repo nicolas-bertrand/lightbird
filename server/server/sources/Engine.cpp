@@ -9,7 +9,7 @@
 #include "IDoSerializeContent.h"
 #include "IDoSerializeFooter.h"
 #include "IOnWrite.h"
-#include "IOnWrote.h"
+#include "IOnFinish.h"
 
 #include "Plugins.hpp"
 #include "Engine.h"
@@ -371,6 +371,7 @@ void        Engine::_onExecution()
         emit this->doSerializeHeader();
     else
     {
+        this->_onFinish();
         this->clear();
         // If there are pending data, they are processed
         if (this->data.size())
@@ -471,7 +472,7 @@ void    Engine::_doSerializeFooter()
     else
         Log::trace("No plugin implempents IDoSerializeFooter for this context", Properties("id", this->client->getId()), "Engine", "_doSerializeFooter");
     if (this->done)
-        this->_onWrote();
+        this->_onFinish();
     else
         Log::debug("The data has not been serialized because no plugin implements IDoSerialize* for this context.", Properties("id", this->client->getId()), "Engine", "_doSerializeFooter");
     this->clear();
@@ -494,13 +495,13 @@ void    Engine::_onWrite(QByteArray &data)
     }
 }
 
-void    Engine::_onWrote()
+void    Engine::_onFinish()
 {
-    QMapIterator<QString, LightBird::IOnWrote *> it(Plugins::instance()->getInstances<LightBird::IOnWrote>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
+    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client->getTransport(), this->client->getProtocols(), this->client->getPort()));
     while (it.hasNext())
     {
-        Log::trace("Calling IOnWrote::onWrote()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "Engine", "_onWrote");
-        it.peekNext().value()->onWrote(*this->client);
+        Log::trace("Calling IOnFinish::onFinish()", Properties("id", this->client->getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "Engine", "_onFinish");
+        it.peekNext().value()->onFinish(*this->client);
         Plugins::instance()->release(it.next().key());
     }
 }

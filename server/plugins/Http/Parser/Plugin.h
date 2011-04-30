@@ -12,7 +12,7 @@
 # include "IDoUnserializeContent.h"
 # include "IDoSerializeHeader.h"
 # include "IDoSerializeContent.h"
-# include "IOnWrote.h"
+# include "IOnFinish.h"
 # include "IOnDisconnect.h"
 
 # include "Parser.h"
@@ -25,7 +25,7 @@ class Plugin : public QObject,
                public LightBird::IDoUnserializeContent,
                public LightBird::IDoSerializeHeader,
                public LightBird::IDoSerializeContent,
-               public LightBird::IOnWrote,
+               public LightBird::IOnFinish,
                public LightBird::IOnDisconnect
 {
     Q_OBJECT
@@ -36,7 +36,7 @@ class Plugin : public QObject,
                  LightBird::IDoUnserializeContent
                  LightBird::IDoSerializeHeader
                  LightBird::IDoSerializeContent
-                 LightBird::IOnWrote
+                 LightBird::IOnFinish
                  LightBird::IOnDisconnect)
 
 public:
@@ -73,9 +73,9 @@ public:
     void    doSerializeHeader(LightBird::IClient &client, QByteArray &data);
     bool    doSerializeContent(LightBird::IClient &client, QByteArray &data);
 
-    // IOnWrote
+    // IOnFinish
     /// @brief Disconnect the client if there is an error in its request
-    void    onWrote(LightBird::IClient &client);
+    void    onFinish(LightBird::IClient &client);
 
     /// @brief Returns the configuration of the plugin
     static Configuration    &getConfiguration();
