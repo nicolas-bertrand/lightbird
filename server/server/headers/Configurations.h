@@ -38,8 +38,6 @@ public:
     /// configuration pointed by path will be created using the alternative file.
     /// This is useful to use a default configuration from the resources.
     static Configuration    *instance(const QString &path = "", const QString &alternative = "");
-    /// @brief LightBird's implementation of Qt::copy.
-    static bool             copy(const QString &sourceName, const QString &destinationName);
 
 private:
     static QMap<QString, Configuration *>   instances;     ///< The instances of the loaded configurations.

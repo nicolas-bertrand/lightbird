@@ -8,8 +8,7 @@
 
 # include "IDatabase.h"
 
-/// @brief Manage all the operations made on the database, by the
-/// server and its plugins.
+/// @brief Manage all the operations made on the database by the server and its plugins.
 class Database : public QObject
 {
     Q_OBJECT
@@ -40,13 +39,11 @@ private:
 
     /// @brief Get the name of the database, and manage the database file if their is one (for example with SQLite).
     /// @param name : The name of the database, which can be the path to its file (with SQLite).
-    /// @return If an error occured while managing the database file
+    /// @return If an error occured while managing the database file.
     bool            _name(QString &name);
-    /// @brief Etablished the connection between the server and the database.
+    /// @brief Etablish the connection between the server and the database.
     /// @return True if the connection to the database success
     bool            _connection();
-    /// @brief Display the updates. For debug purpose only.
-    void            _displayUpdates(LightBird::IDatabase::Updates &updates);
     /// @brief Load a query file.
     /// @param id : The id of the plugin for which the quety will be loaded. If empty,
     /// the queries of the server are loaded.
@@ -56,11 +53,13 @@ private:
     /// an empty string.
     /// @param query : The query to check.
     void            _checkBoundValues(QSqlQuery &query);
+    /// @brief Display the updates. For debug purpose only.
+    void            _displayUpdates(LightBird::IDatabase::Updates &updates);
 
     static Database             *_instance;     ///< The instance of the singleton that manage the database.
     bool                        loaded;         ///< If the database has been correctly loaded.
     QMap<QString, QDomDocument> queries;        ///< Contains the doms representations of the queries.
-    QMutex                      lockQueries;    ///< Ensure that the queries are modified by one thread at a time.
+    QMutex                      mutex;          ///< Ensure that the queries are modified by one thread at a time.
     QStringList                 tablesNames;    ///< Contains the names of the tables of the database.
 };
 

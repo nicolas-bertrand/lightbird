@@ -15,7 +15,7 @@
 
 namespace LightBird
 {
-    /// @brief Handle the access to the database.
+    /// @brief Manages the access to the database.
     /// This interface is threade safe.
     class IDatabase
     {
@@ -49,7 +49,7 @@ namespace LightBird
         /// row 1 exists.
         /// @return False if an error occured, true otherwise.
         virtual bool    query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result) = 0;
-        /// @brief Returns an instance of the table gived in parameter. Users MUST delete themself the
+        /// @brief Returns an instance of the table requested in parameter. Users MUST delete themself the
         /// instance returned, or a memory leak will occure.
         /// @param table : The table to get. If the table is unknow, this
         /// method will search in the database the table of the id.
@@ -59,7 +59,7 @@ namespace LightBird
         /// LightBird::ITableAccounts *account = getTable(LightBird::ITable::Accounts)->toTableAccounts();
         /// delete account; // Do not forget to delete the instance.
         ///
-        /// Users can also use a shared pointer, so that the instance is delete automatically when it goes out of scope :
+        /// Users can also use a shared pointer, so that the instance is deleted automatically when it goes out of scope :
         /// QSharedPointer<LightBird::ITableAccounts> account(getTable(LightBird::ITable::Accounts)->toTableAccounts());
         virtual LightBird::ITable   *getTable(LightBird::ITable::Tables table, const QString &id = "") = 0;
         /// @brief This method helps to make the queries independent of the database type used. The
@@ -72,7 +72,7 @@ namespace LightBird
         /// @brief Check if the database has been updated since the date in parameter, and returns the
         /// list of the modifications.
         /// @param updates : Contains all the modification made on the database that match the filters.
-        /// modified rows. The delete state only stores the id of the row.
+        /// The delete state only stores the id of the row.
         /// @param date : The date from which to check the updates. If null, all the rows are listed as ADDED.
         /// @param tables : The list of the tables for which the updates are checked. If empty, all
         /// the tables are taken.

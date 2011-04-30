@@ -4,6 +4,7 @@
 
 #include "Defines.h"
 #include "Log.h"
+#include "Tools.h"
 #include "Configurations.h"
 #include "Table.h"
 #include "Plugins.hpp"
@@ -122,9 +123,9 @@ LightBird::ITable   *Database::getTable(LightBird::ITable::Tables table, const Q
         QStringListIterator it(tables);
         while (it.hasNext() && name.isEmpty())
         {
-            query.prepare(Database::instance()->getQuery("Table", "getTable").replace(":table", it.peekNext()));
+            query.prepare(this->getQuery("Table", "getTable").replace(":table", it.peekNext()));
             query.bindValue(":id", id);
-            if (!Database::instance()->query(query, result))
+            if (!this->query(query, result))
                 return (NULL);
             // The table has been found
             if (result.size() > 0)
@@ -165,7 +166,7 @@ QString         Database::getQuery(const QString &group, const QString &name, co
 {
     QString     result;
 
-    if (!this->lockQueries.tryLock(MAXTRYLOCK))
+    if (!this->mutex.tryLock(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Database", "getQuery");
         return ("");
@@ -173,16 +174,16 @@ QString         Database::getQuery(const QString &group, const QString &name, co
     if (!this->queries.contains(id))
         if (!this->_loadQueries(id))
         {
-            lockQueries.unlock();
+            mutex.unlock();
             return ("");
         }
     if (!(result = this->queries[id].firstChildElement().firstChildElement(group).firstChildElement(name).text()).isEmpty())
     {
-        this->lockQueries.unlock();
+        this->mutex.unlock();
         return (result);
     }
     Log::warning("Query not found", Properties("group", group).add("name", name).add("id", id), "Database", "getQuery");
-    this->lockQueries.unlock();
+    this->mutex.unlock();
     return ("");
 }
 
@@ -289,16 +290,13 @@ bool                Database::_connection()
     Log::debug("Database connected", Properties("name", database.databaseName()).add("type", Configurations::instance()->get("database/type"))
                .add("port", QString::number(database.port())).add("user", database.userName()).add("host", database.hostName()).add("options", options), "Database", "_connection");
     // Execute pragmas
-    e = Configurations::instance()->readDom().firstChildElement("database").firstChildElement("pragmas").firstChildElement();
+    e = Configurations::instance()->readDom().firstChildElement("database").firstChildElement("pragmas").firstChildElement("pragma");
     while (!e.isNull())
     {
-        if (e.tagName() == "pragma")
-        {
-            QSqlQuery query;
-            query.prepare(e.text());
-            this->query(query);
-        }
-        e = e.nextSiblingElement();
+        QSqlQuery query;
+        query.prepare(e.text());
+        this->query(query);
+        e = e.nextSiblingElement("pragma");
     }
     Configurations::instance()->release();
     database.setConnectOptions(options);
@@ -346,7 +344,7 @@ bool        Database::_name(QString &name)
             return (false);
         }
         // Copy the resource file to the database file
-        if (Configurations::copy(databaseResource, file) == false)
+        if (Tools::copy(databaseResource, file) == false)
         {
             Log::error("Cannot creates the database file from the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_name");
             return (false);
@@ -400,7 +398,7 @@ bool        Database::_loadQueries(const QString &id)
         return (false);
     }
 
-    // Open the queties file
+    // Open the queries file
     if (!file.open(QIODevice::ReadOnly))
     {
         Log::error("Unable to load the file" + file.fileName(), "Database", "_loadQueries");
@@ -411,11 +409,24 @@ bool        Database::_loadQueries(const QString &id)
     {
         Log::error("An error occured while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
                    .add("line", QString::number(errorLine)).add("column", QString::number(errorColumn)), "Configuration", "_load");
+        this->queries.remove(id);
         return (false);
     }
     Log::debug("Queries loaded", Properties("file", file.fileName()), "Database", "_loadQueries");
     file.close();
     return (true);
+}
+
+void    Database::_checkBoundValues(QSqlQuery &query)
+{
+    QMapIterator<QString, QVariant> it(query.boundValues());
+
+    while (it.hasNext())
+    {
+        it.next();
+        if (it.value().isNull())
+            query.bindValue(it.key(), "");
+    }
 }
 
 void    Database::_displayUpdates(LightBird::IDatabase::Updates &updates)
@@ -449,17 +460,5 @@ void    Database::_displayUpdates(LightBird::IDatabase::Updates &updates)
             }
         }
         std::cout << "==========" << std::endl << std::endl;
-    }
-}
-
-void    Database::_checkBoundValues(QSqlQuery &query)
-{
-    QMapIterator<QString, QVariant> it(query.boundValues());
-
-    while (it.hasNext())
-    {
-        it.next();
-        if (it.value().isNull())
-            query.bindValue(it.key(), "");
     }
 }

@@ -2,6 +2,7 @@
 #include <QFile>
 #include "Configurations.h"
 #include "Log.h"
+#include "Tools.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
 
@@ -426,7 +427,7 @@ void    Plugin::_loadResources()
                 nodeName = resourcesPath + "/" + dom.toElement().attribute("alias");
                 Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
                            .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
-                if (!Configurations::copy(nodeName, nodeValue))
+                if (!Tools::copy(nodeName, nodeValue))
                     Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
                                  .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
             }
