@@ -57,6 +57,7 @@ BEGIN
     DELETE FROM tags WHERE id_object = old.id;
     DELETE FROM permissions WHERE id_object = old.id;
     DELETE FROM events WHERE id_object = old.id;
+    DELETE FROM limits WHERE id_object = old.id;
     DELETE FROM collections WHERE id_collection = old.id;
 END;
 
@@ -82,6 +83,7 @@ BEGIN
     DELETE FROM tags WHERE id_object = old.id;
     DELETE FROM permissions WHERE id_object = old.id;
     DELETE FROM events WHERE id_object = old.id;
+    DELETE FROM limits WHERE id_object = old.id;
     DELETE FROM directories WHERE id_directory = old.id;
 END;
 
@@ -155,8 +157,9 @@ BEGIN
     DELETE FROM files_informations WHERE id_file = old.id;
     DELETE FROM files_collections WHERE id_file = old.id;
     DELETE FROM tags WHERE id_object = old.id;
-    DELETE FROM permissions	WHERE id_object = old.id;
+    DELETE FROM permissions WHERE id_object = old.id;
     DELETE FROM events WHERE id_object = old.id;
+    DELETE FROM limits WHERE id_object = old.id;
 END;
 
 CREATE TRIGGER "fk_insert_files" BEFORE INSERT ON files
@@ -234,6 +237,11 @@ BEGIN
         NEW."id_accessor" != "" AND
         (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_accessor") IS NULL AND
         (SELECT "id" FROM "groups" WHERE "id" = NEW."id_accessor") IS NULL;
+    SELECT RAISE(ROLLBACK, 'insert | limits | id_object') WHERE
+        NEW."id_object" != "" AND
+        (SELECT "id" FROM "files" WHERE "id" = NEW."id_object") IS NULL AND
+        (SELECT "id" FROM "directories" WHERE "id" = NEW."id_object") IS NULL AND
+        (SELECT "id" FROM "collections" WHERE "id" = NEW."id_object") IS NULL;
 END;
 
 CREATE TRIGGER "fk_update_limits" BEFORE UPDATE ON limits
@@ -243,6 +251,11 @@ BEGIN
         NEW."id_accessor" != "" AND
         (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_accessor") IS NULL AND
         (SELECT "id" FROM "groups" WHERE "id" = NEW."id_accessor") IS NULL;
+    SELECT RAISE(ROLLBACK, 'update | limits | id_object') WHERE
+        NEW."id_object" != "" AND
+        (SELECT "id" FROM "files" WHERE "id" = NEW."id_object") IS NULL AND
+        (SELECT "id" FROM "directories" WHERE "id" = NEW."id_object") IS NULL AND
+        (SELECT "id" FROM "collections" WHERE "id" = NEW."id_object") IS NULL;
 END;
 
 -----------------------------

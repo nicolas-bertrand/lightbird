@@ -5,6 +5,7 @@
 #include "Database.h"
 #include "TableGroups.h"
 #include "TableLimits.h"
+#include "TableDirectories.h"
 
 TableLimits::TableLimits(const QString &id)
 {
@@ -34,7 +35,7 @@ TableLimits &TableLimits::operator=(const TableLimits &t)
     return (*this);
 }
 
-bool    TableLimits::add(const QString &name, const QString &value, const QString &id_accessor)
+bool    TableLimits::add(const QString &name, const QString &value, const QString &id_accessor, const QString &id_object)
 {
     QSqlQuery   query;
     QString     id;
@@ -45,6 +46,7 @@ bool    TableLimits::add(const QString &name, const QString &value, const QStrin
     query.bindValue(":name", name);
     query.bindValue(":value", value);
     query.bindValue(":id_accessor", id_accessor);
+    query.bindValue(":id_object", id_object);
     if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
         return (false);
     this->id = id;
@@ -117,23 +119,49 @@ bool    TableLimits::setIdAccessor(const QString &id_accessor)
     return (Database::instance()->query(query));
 }
 
-bool            TableLimits::unitTests()
+QString TableLimits::getIdObject()
 {
-    TableLimits l;
-    TableGroups g1;
-    TableGroups g2;
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+
+    query.prepare(Database::instance()->getQuery("TableLimits", "getIdObject"));
+    query.bindValue(":id", this->id);
+    if (Database::instance()->query(query, result) && result.size() > 0)
+        return (result[0]["id_object"].toString());
+    return ("");
+}
+
+bool    TableLimits::setIdObject(const QString &id_object)
+{
     QSqlQuery   query;
+
+    query.prepare(Database::instance()->getQuery("TableLimits", "setIdObject"));
+    query.bindValue(":id", this->id);
+    query.bindValue(":id_object", id_object);
+    return (Database::instance()->query(query));
+}
+
+bool                    TableLimits::unitTests()
+{
+    TableLimits         l;
+    TableGroups         g1;
+    TableGroups         g2;
+    TableDirectories    d1;
+    QSqlQuery           query;
 
     Log::instance()->debug("Running unit tests...", "TableLimits", "unitTests");
     query.prepare("DELETE FROM limits WHERE name IN('l1', 'l2')");
     Database::instance()->query(query);
     query.prepare("DELETE FROM groups WHERE name IN('g1', 'g2')");
     Database::instance()->query(query);
+    query.prepare("DELETE FROM directories WHERE name IN('d1')");
+    Database::instance()->query(query);
     try
     {
         ASSERT(g1.add("g1"));
         ASSERT(g2.add("g2"));
-        ASSERT(l.add("l1", "v1", g2.getId()));
+        ASSERT(d1.add("d1"));
+        ASSERT(l.add("l1", "v1", g2.getId(), d1.getId()));
         ASSERT(g2.getLimits().size() == 1);
         ASSERT(g2.getLimits().contains(l.getId()));
         ASSERT(l.getName() == "l1");
@@ -151,10 +179,16 @@ bool            TableLimits::unitTests()
         ASSERT(l.getIdAccessor().isEmpty());
         ASSERT(l.setIdAccessor(g1.getId()));
         ASSERT(l.getIdAccessor() == g1.getId());
+        ASSERT(l.getIdObject() == d1.getId());
+        ASSERT(l.setIdObject(""));
+        ASSERT(l.getIdObject().isEmpty());
+        ASSERT(l.setIdObject(d1.getId()));
+        ASSERT(l.getIdObject() == d1.getId());
         ASSERT(g2.remove());
         ASSERT(l.exists());
         ASSERT(g1.remove());
         ASSERT(!l.exists());
+        ASSERT(d1.remove());
     }
     catch (Properties properties)
     {

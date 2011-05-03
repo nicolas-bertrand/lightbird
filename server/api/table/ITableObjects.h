@@ -29,6 +29,8 @@ namespace LightBird
         virtual QStringList getRights(const QString &id_accessor) = 0;
         /// @brief Returns the id of the tags of the object.
         virtual QStringList getTags() = 0;
+        /// @brief Returns the limits of the object.
+        virtual QStringList getLimits() = 0;
     };
 }
 

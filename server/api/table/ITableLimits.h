@@ -20,7 +20,7 @@ namespace LightBird
         /// @param value : The value of the limit.
         /// @param id_accessor : The id of the accessor for which the limit is created.
         /// @return If the limit has been correctly created.
-        virtual bool    add(const QString &name, const QString &value, const QString &id_accessor = "") = 0;
+        virtual bool    add(const QString &name, const QString &value, const QString &id_accessor = "", const QString &id_object = "") = 0;
 
         // Fields
         /// @brief Returns the name of the limit.
@@ -35,6 +35,10 @@ namespace LightBird
         virtual QString getIdAccessor() = 0;
         /// @brief Change the accessor on which the limit is applied.
         virtual bool    setIdAccessor(const QString &id_accessor = "") = 0;
+        /// @brief Returns the id of the object on which the limit is applied.
+        virtual QString getIdObject() = 0;
+        /// @brief Change the object on which the limit is applied.
+        virtual bool    setIdObject(const QString &id_object = "") = 0;
     };
 }
 

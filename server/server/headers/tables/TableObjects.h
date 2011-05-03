@@ -17,6 +17,7 @@ public:
     bool        isAllowed(const QString &id_accessor, const QString &right);
     QStringList getRights(const QString &id_accessor);
     QStringList getTags();
+    QStringList getLimits();
 
     virtual TableObjects &operator=(const TableObjects &t);
 

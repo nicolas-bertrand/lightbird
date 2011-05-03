@@ -95,3 +95,19 @@ QStringList TableObjects::getTags()
         tags << result[i]["id"].toString();
     return (tags);
 }
+
+QStringList TableObjects::getLimits()
+{
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+    QStringList                         limits;
+    int                                 i;
+    int                                 s;
+
+    query.prepare(Database::instance()->getQuery("TableObjects", "getLimits"));
+    query.bindValue(":id_object", this->id);
+    Database::instance()->query(query, result);
+    for (i = 0, s = result.size(); i < s; ++i)
+        limits << result[i]["id"].toString();
+    return (limits);
+}
