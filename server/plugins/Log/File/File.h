@@ -34,7 +34,7 @@ public:
     // ILog
     /// @brief The logs are buffered when this method is called. Then they are
     /// wrote in the file in the timer.
-    void        log(LightBird::ILogs::level level, const QDateTime &date, const QString &message,
+    void        log(LightBird::ILogs::Level level, const QDateTime &date, const QString &message,
                     const QMap<QString, QString> &properties, const QString &thread,
                     const QString &plugin, const QString &object, const QString &method);
 
@@ -75,7 +75,7 @@ private:
     QString             lastError;                  ///< Date of the last error (to avoid repetitions).
     QMutex              mutex;                      ///< Ensure that the log buffer is thread safe.
     QStringList         buffer;                     ///< Buffered the logs to write in the timer.
-    QMap<LightBird::ILogs::level, QString> levels;  ///< Combines the levels and their names.
+    QMap<LightBird::ILogs::Level, QString> levels;  ///< Combines the levels and their names.
 };
 
 #endif // FILE_H

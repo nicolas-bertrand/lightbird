@@ -22,7 +22,7 @@ namespace LightBird
         /// @param plugin : The id of the plugin from which the log is written (empty for the server).
         /// @param object : The name of the class from which the log is written.
         /// @param method : The name of the method from which the log is written.
-        virtual void    log(LightBird::ILogs::level level, const QDateTime &date, const QString &message,
+        virtual void    log(LightBird::ILogs::Level level, const QDateTime &date, const QString &message,
                             const QMap<QString, QString> &properties, const QString &thread,
                             const QString &plugin, const QString &object, const QString &method) = 0;
     };

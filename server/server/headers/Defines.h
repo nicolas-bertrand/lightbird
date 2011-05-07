@@ -14,7 +14,7 @@
 
 # define DEFAULT_DATABASE_TYPE                  "QSQLITE"               ///< The default Qt SQL driver type.
 # define DEFAULT_DATABASE_PATH                  "databases"             ///< The name of the default directory where the database is stored.
-# define DEFAULT_DATABASE_FILE                  "server.db"             ///< The default file name of the database.
+# define DEFAULT_DATABASE_FILE                  "database.sqlite"       ///< The default file name of the database.
 # define DEFAULT_DATABASE_RESOURCE              ":database"             ///< Nom de la base de données dans les ressources du serveur.
 
 # define DEFAULT_PERMISSIONS_ACTIVATE           "false"                 ///< If the permissions system is activated.

@@ -88,7 +88,7 @@ void    File::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "LGPL";
 }
 
-void        File::log(LightBird::ILogs::level level, const QDateTime &date, const QString &message,
+void        File::log(LightBird::ILogs::Level level, const QDateTime &date, const QString &message,
                       const QMap<QString, QString> &properties, const QString &thread,
                       const QString &plugin, const QString &object, const QString &method)
 {

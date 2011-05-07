@@ -17,7 +17,7 @@ public:
     ApiLogs(const QString &id);
     ~ApiLogs();
 
-    void    write(LightBird::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method);
+    void    write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method);
     void    fatal(const QString &message, const QString &className = "", const QString &method = "");
     void    fatal(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
     void    error(const QString &message, const QString &className = "", const QString &method = "");
@@ -30,8 +30,8 @@ public:
     void    debug(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
     void    trace(const QString &message, const QString &className = "", const QString &method = "");
     void    trace(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    LightBird::ILogs::level getlevel();
-    void    setLevel(LightBird::ILogs::level level);
+    LightBird::ILogs::Level getlevel();
+    void    setLevel(LightBird::ILogs::Level level);
     bool    isError();
     bool    isWarning();
     bool    isInfo();

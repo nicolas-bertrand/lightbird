@@ -16,7 +16,7 @@ namespace LightBird
         virtual ~ILogs() {}
 
         /// @brief List of available log levels.
-        enum level
+        enum Level
         {
             FATAL = 5,   ///< Severe errors that cause premature termination.
             ERROR = 4,   ///< Other runtime errors or unexpected conditions.
@@ -32,7 +32,7 @@ namespace LightBird
         /// @param properties : A map of properties that can give additional informations on the log entry.
         /// @param object : The name of the class from which the log is written.
         /// @param method : The name of the method from which the log is written.
-        virtual void        write(LightBird::ILogs::level level, const QString &message, const QMap<QString, QString> &properties, const QString &object, const QString &method) = 0;
+        virtual void        write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &object, const QString &method) = 0;
         /// @brief Writes a fatal log level
         /// @see write
         virtual void        fatal(const QString &message, const QString &object = "", const QString &method = "") = 0;
@@ -72,10 +72,10 @@ namespace LightBird
         /// @brief The current log level. The logs below this level are not saved.
         /// For example, WARNING is below ERROR, and INFO is below WARNING...
         /// @return The current log level.
-        virtual LightBird::ILogs::level getlevel() = 0;
+        virtual LightBird::ILogs::Level getlevel() = 0;
         /// @brief Modify the log level.
         /// @param level : The new log level.
-        virtual void        setLevel(LightBird::ILogs::level level) = 0;
+        virtual void        setLevel(LightBird::ILogs::Level level) = 0;
         /// @return True if the error logs are saved.
         virtual bool        isError() = 0;
         /// @return True if the warning logs are saved.

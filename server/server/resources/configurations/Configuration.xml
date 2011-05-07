@@ -11,7 +11,7 @@
   <maxTimers>3</maxTimers>
   <database>
     <name/>
-    <file>server.db</file>
+    <file>database.sqlite</file>
     <path>databases</path>
     <resource>:database</resource>
     <type>QSQLITE</type>

@@ -41,7 +41,7 @@ public:
     /// @param plugin : The name of the plugin from witch the log is written, or empty for the server.
     /// @param object : The name of the class from witch the log is written.
     /// @param method : The name of the method from witch the log is written.
-    void        write(LightBird::ILogs::level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method);
+    void        write(LightBird::ILogs::Level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method);
     /// @brief Writes a fatal log.
     static void fatal(const QString &message, const QString &object = "", const QString &method = "");
     /// @brief Writes a fatal log.
@@ -67,9 +67,9 @@ public:
     /// @brief Writes a trace log.
     static void trace(const QString &message, const Properties &properties, const QString &object = "", const QString &method = "");
     /// @see LightBird::ILogs::getlevel
-    LightBird::ILogs::level getlevel();
+    LightBird::ILogs::Level getlevel();
     /// @see LightBird::ILogs::setLevel
-    void    setLevel(LightBird::ILogs::level level);
+    void    setLevel(LightBird::ILogs::Level level);
     /// @see LightBird::ILogs::isError
     bool    isError();
     /// @see LightBird::ILogs::isWarning
@@ -97,8 +97,8 @@ private:
     /// @brief Store all the informations used in a log entry.
     struct LogInformations
     {
-        LogInformations(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
-        LightBird::ILogs::level level;
+        LogInformations(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+        LightBird::ILogs::Level level;
         QString                 message;
         Properties              properties;
         QString                 plugin;
@@ -115,11 +115,11 @@ private:
     QString     _mapToString(const QMap<QString, QString> &properties);
     /// @brief Print the log in parameter on the standard output.
     /// @see write
-    void        _print(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+    void        _print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 
-    LightBird::ILogs::level                 level;      ///< The minimum level required to write a log.
+    LightBird::ILogs::Level                 level;      ///< The minimum level required to write a log.
     static Log                              *_instance; ///< The instance of the Singleton.
-    QMap<LightBird::ILogs::level, QString>  levels;     ///< Combines the levels and their names.
+    QMap<LightBird::ILogs::Level, QString>  levels;     ///< Combines the levels and their names.
     QMutex                                  mutex;      ///< A mutex that ensures that only one log is written at the same time. This makes the Log class thread-safe.
     QList<LogInformations>                  buffer;     ///< A buffer that stores the logs that haven't been saved yet.
     Mode                                    mode;       ///< The current mode of the log.
@@ -131,11 +131,11 @@ private:
 
 private slots:
     /// @brief Write a log to the plugins that implements ILog.
-    void        _write(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+    void        _write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 
 signals:
     /// @brief This signal is emited to write a log.
-    void        writeLog(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+    void        writeLog(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 };
 
 #endif // LOG_H

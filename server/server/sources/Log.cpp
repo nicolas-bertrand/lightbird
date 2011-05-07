@@ -21,9 +21,9 @@ Log::Log(QObject *parent) : mutex(QMutex::Recursive)
     this->display = false;
     this->mode = Log::BUFFER;
     qRegisterMetaType<Properties>("Properties");
-    qRegisterMetaType<LightBird::ILogs::level>("LightBird::ILogs::level");
-    QObject::connect(this, SIGNAL(writeLog(LightBird::ILogs::level,QDateTime,QString,Properties,QString,QString,QString,QString)),
-                     this, SLOT(_write(LightBird::ILogs::level,QDateTime,QString,Properties,QString,QString,QString,QString)),
+    qRegisterMetaType<LightBird::ILogs::Level>("LightBird::ILogs::Level");
+    QObject::connect(this, SIGNAL(writeLog(LightBird::ILogs::Level,QDateTime,QString,Properties,QString,QString,QString,QString)),
+                     this, SLOT(_write(LightBird::ILogs::Level,QDateTime,QString,Properties,QString,QString,QString,QString)),
                      Qt::QueuedConnection);
 
     // Map the names of the log levels
@@ -46,7 +46,7 @@ Log::~Log()
     Log::trace("Log destroyed!", "Log", "Log");
 }
 
-void    Log::write(LightBird::ILogs::level level, const QString &message, const QString &plugin,
+void    Log::write(LightBird::ILogs::Level level, const QString &message, const QString &plugin,
         const Properties &properties, const QString &object, const QString &method)
 {
     switch (this->mode)
@@ -127,12 +127,12 @@ void    Log::trace(const QString &message, const Properties &properties, const Q
     Log::instance()->write(LightBird::ILogs::TRACE, message, "", properties, object,method);
 }
 
-LightBird::ILogs::level Log::getlevel()
+LightBird::ILogs::Level Log::getlevel()
 {
     return (this->level);
 }
 
-void    Log::setLevel(LightBird::ILogs::level level)
+void    Log::setLevel(LightBird::ILogs::Level level)
 {
     if (this->levels.contains(level))
         this->level = level;
@@ -247,7 +247,7 @@ QString     Log::_mapToString(const QMap<QString, QString> &properties)
     return (result);
 }
 
-Log::LogInformations::LogInformations(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties,
+Log::LogInformations::LogInformations(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
                                       const QString &thread, const QString &plugin, const QString &object, const QString &method)
 {
     this->level = level;
@@ -260,7 +260,7 @@ Log::LogInformations::LogInformations(LightBird::ILogs::level level, const QDate
     this->date = date;
 }
 
-void    Log::_write(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties,
+void    Log::_write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
                     const QString &thread, const QString &plugin, const QString &object, const QString &method)
 {
     LightBird::ILog *instance;
@@ -278,7 +278,7 @@ void    Log::_write(LightBird::ILogs::level level, const QDateTime &date, const 
         }
 }
 
-void        Log::_print(LightBird::ILogs::level level, const QDateTime &date, const QString &message, const Properties &properties,
+void        Log::_print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
                         const QString &thread, const QString &plugin, const QString &object, const QString &method)
 {
     QString buffer;
