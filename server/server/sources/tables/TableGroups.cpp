@@ -34,6 +34,22 @@ TableGroups &TableGroups::operator=(const TableGroups &t)
     return (*this);
 }
 
+QStringList     TableGroups::getIdFromName(const QString &name)
+{
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+    QStringList                         groups;
+    int                                 i;
+    int                                 s;
+
+    query.prepare(Database::instance()->getQuery("TableGroups", "getId"));
+    query.bindValue(":name", name);
+    if (Database::instance()->query(query, result))
+        for (i = 0, s = result.size(); i < s; ++i)
+            groups << result[i]["id"].toString();
+    return (groups);
+}
+
 bool            TableGroups::add(const QString &name, const QString &id_group)
 {
     QSqlQuery   query;

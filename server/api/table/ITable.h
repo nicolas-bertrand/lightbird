@@ -57,7 +57,8 @@ namespace LightBird
         virtual bool            exists(const QString &id = "") = 0;
         /// @brief Clear the id of the instance.
         virtual void            clear() = 0;
-        /// @brief Removes the current row if the parameter is empty, or the row pointed by the id.
+        /// @brief Removes the current row if the parameter is empty, or the
+        /// row pointed by the id.
         virtual bool            remove(const QString &id = "") = 0;
 
         // Dates

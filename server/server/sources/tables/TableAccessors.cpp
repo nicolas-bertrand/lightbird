@@ -1,4 +1,5 @@
 #include "Database.h"
+#include "TablePermissions.h"
 #include "TableAccessors.h"
 
 TableAccessors::TableAccessors()
@@ -45,6 +46,16 @@ bool            TableAccessors::setName(const QString &name)
     query.bindValue(":id", this->id);
     query.bindValue(":name", name);
     return (Database::instance()->query(query));
+}
+
+bool        TableAccessors::isAllowed(const QString &id_object, const QString &right)
+{
+    return (TablePermissions().isAllowed(this->id, id_object, right));
+}
+
+QStringList TableAccessors::getRights(const QString &id_object)
+{
+    return (TablePermissions().getRights(this->id, id_object));
 }
 
 QStringList TableAccessors::getLimits()

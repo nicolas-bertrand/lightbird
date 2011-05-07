@@ -23,9 +23,9 @@ namespace LightBird
         virtual bool        setName(const QString &name) = 0;
 
         // Other
-        /// @brief Returns true if the accessor has the right on the current directory.
+        /// @brief Returns true if the accessor has the right on the object.
         virtual bool        isAllowed(const QString &id_accessor, const QString &right) = 0;
-        /// @brief Returns the list of the rights that the accessor has on the current directory.
+        /// @brief Returns the list of the rights that the accessor has on the object.
         virtual QStringList getRights(const QString &id_accessor) = 0;
         /// @brief Returns the id of the tags of the object.
         virtual QStringList getTags() = 0;

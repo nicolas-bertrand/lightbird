@@ -19,6 +19,7 @@ bool    File::onLoad(LightBird::IApi *api)
     this->path = this->_getNodeValue("path") + "/";
     if (this->path.size() == 1)
         this->path = "./";
+    this->directory.setPath(this->path);
     if ((this->name = this->_getNodeValue("file")).isEmpty())
         this->name = "server.log";
     this->maxSize = this->_toBytes(this->_getNodeValue("maxSize"));
@@ -122,7 +123,9 @@ bool            File::timer(const QString &name)
         if(!this->file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
         {
             std::cerr << "Unable to open the log file (from the plugin Log/File)." << std::endl;
-            this->mutex.lock();
+            this->_createLogFile();
+            this->buffer.clear();
+            this->mutex.unlock();
             return (true);
         }
         QStringListIterator it(this->buffer);
@@ -134,6 +137,7 @@ bool            File::timer(const QString &name)
                 log.clear();
                 if (!this->_manageFiles())
                 {
+                    this->buffer.clear();
                     this->mutex.unlock();
                     return (true);
                 }
@@ -187,7 +191,7 @@ bool        File::_createLogFile()
 {
     QDir    directory;
 
-    if (!this->directory.exists() && !this->directory.mkpath(this->path))
+    if (!this->directory.exists() && !directory.mkpath(this->path))
     {
         std::cerr << "Unable to create the log directory (from the plugin Log/File)." << std::endl;
         return (false);

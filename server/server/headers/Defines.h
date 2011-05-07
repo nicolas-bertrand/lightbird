@@ -21,6 +21,7 @@
 # define DEFAULT_PERMISSIONS_DEFAULT            "false"                 ///< The default permissions.
 # define DEFAULT_PERMISSIONS_INHERITANCE        "true"                  ///< If the inheritance of the rights is activated.
 # define DEFAULT_PERMISSIONS_OWNERINHERITANCE   "true"                  ///< If the inheritance of the owner rights is activated.
+# define DEFAULT_PERMISSIONS_GROUPINHERITANCE   "true"                  ///< If the inheritance of the owner rights is activated.
 
 # define DEFAULT_PLUGINS_PATH                   "plugins"               ///< The name of the default plugins directory.
 # define DEFAULT_FILES_PATH                     "files"                 ///< The name of the default directory of the files.

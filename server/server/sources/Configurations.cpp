@@ -71,6 +71,8 @@ Configuration       *Configurations::server(const QString &configurationPath, QO
         instance->set("permissions/inheritance", DEFAULT_PERMISSIONS_INHERITANCE);
     if (instance->get("permissions/ownerInheritance").isEmpty())
         instance->set("permissions/ownerInheritance", DEFAULT_PERMISSIONS_OWNERINHERITANCE);
+    if (instance->get("permissions/groupInheritance").isEmpty())
+        instance->set("permissions/groupInheritance", DEFAULT_PERMISSIONS_GROUPINHERITANCE);
     Configurations::lockInstances.unlock();
     return (instance);
 }

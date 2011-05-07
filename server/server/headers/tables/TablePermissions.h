@@ -35,7 +35,9 @@ public:
     static bool unitTests();
 
 private:
-    int         _checkPermission(const QStringList &accessors, const QString &idObject, const QString &right);
+    /// @brief Check if the accessors has the right on the object.
+    /// @return 2 if the permission is granted, 1 if it is not, and 0 if the answer is unknow.
+    int         _checkPermission(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, const QString &right);
 };
 
 #endif // TABLEPERMISSIONS_H

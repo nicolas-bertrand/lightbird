@@ -14,6 +14,7 @@ public:
     ~TableGroups();
     TableGroups &operator=(const TableGroups &t);
 
+    QStringList getIdFromName(const QString &name);
     bool        add(const QString &name, const QString &id_group = "");
 
     QString     getIdGroup();

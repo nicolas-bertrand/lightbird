@@ -12,6 +12,8 @@ public:
     QString     getName();
     bool        setName(const QString &name);
 
+    bool        isAllowed(const QString &id_object, const QString &right);
+    QStringList getRights(const QString &id_object);
     QStringList getLimits();
 
     virtual TableAccessors &operator=(const TableAccessors &t);

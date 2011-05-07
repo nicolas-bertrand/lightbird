@@ -91,6 +91,7 @@
         <removeCollection>DELETE FROM files_collections where id_file=:id_file AND id_collection=:id_collection</removeCollection>
     </TableFiles>
     <TableGroups>
+        <getId>SELECT id FROM groups WHERE name=:name</getId>
         <add>INSERT INTO groups (id, name, id_group) VALUES (:id, :name, :id_group)</add>
         <getIdGroup>SELECT id_group FROM groups WHERE id=:id</getIdGroup>
         <setIdGroup>UPDATE groups SET id_group=:id_group WHERE id=:id</setIdGroup>

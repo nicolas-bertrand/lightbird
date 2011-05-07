@@ -30,6 +30,7 @@
     <default>false</default>
     <inheritance>true</inheritance>
     <ownerInheritance>true</ownerInheritance>
+    <groupInheritance>true</groupInheritance>
   </permissions>
   <log>
     <level>Trace</level>

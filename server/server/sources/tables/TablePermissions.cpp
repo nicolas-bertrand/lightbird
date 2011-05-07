@@ -175,6 +175,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     LightBird::ITableFiles      *file = NULL;
     LightBird::ITableDirectories *directory = NULL;
     LightBird::ITableCollections *collection = NULL;
+    TableGroups                 group;
     bool                        inheritance = false;
     bool                        ownerInheritance = false;
     bool                        checked = false;
@@ -183,6 +184,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     TableDirectories            dir;
     TableCollections            col;
     QStringList                 accessors;
+    QList<QStringList>          groups;
 
     // If the permissions system is not activated, we don't need to check the rights
     if (Configurations::instance()->get("permissions/activate") != "true")
@@ -205,14 +207,47 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
     if (account && account->getId() == object->getIdAccount())
         return (true);
+    // Get all the accessors concerned by the permission
     if (account)
         accessors = account->getGroups();
+    else if (group.setId(accessor->getId()) && !(id = group.getIdGroup()).isEmpty())
+        accessors.push_back(id);
+    // Get all the parent groups of the accessor
+    if (!accessors.isEmpty())
+    {
+        groups.push_back(accessors);
+        while (true)
+        {
+            QStringListIterator it(groups.back());
+            QStringList parents;
+            while (it.hasNext())
+            {
+                // A parent has been found
+                if (group.setId(it.peekNext()) && !(id = group.getIdGroup()).isEmpty())
+                {
+                    parents.push_back(id);
+                    if (!accessors.contains(id))
+                        accessors.push_back(id);
+                }
+                it.next();
+            }
+            // No parent remaining. We are at the root of the tree.
+            if (parents.isEmpty())
+                break;
+            groups.push_back(parents);
+        }
+        // If groupInheritance is disables, we don't need to keep the groups hierarchy
+        if (Configurations::instance()->get("permissions/groupInheritance") != "true")
+            groups.clear();
+    }
     accessors.push_front(accessor->getId());
+    id.clear();
+    // Check the permission directly on the object
     if (object->isTable(LightBird::ITable::Files))
     {
         file = dynamic_cast<LightBird::ITableFiles *>(object.data());
         if (!granted)
-            if ((granted = this->_checkPermission(accessors, file->getId(), right)) == 2)
+            if ((granted = this->_checkPermission(accessors, groups, file->getId(), right)) == 2)
                 return (true);
         id = file->getIdDirectory();
         checked = true;
@@ -231,7 +266,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (file || directory)
         while (!id.isEmpty())
         {
-            if (!granted && (inheritance || !checked) && (granted = this->_checkPermission(accessors, id, right)) == 2)
+            if (!granted && (inheritance || !checked) && (granted = this->_checkPermission(accessors, groups, id, right)) == 2)
                 return (true);
             dir.setId(id);
             if (account && ownerInheritance && account->getId() == dir.getIdAccount())
@@ -242,7 +277,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     else if (collection)
         while (!id.isEmpty())
         {
-            if (!granted && (inheritance || !checked) && (granted = this->_checkPermission(accessors, id, right)) == 2)
+            if (!granted && (inheritance || !checked) && (granted = this->_checkPermission(accessors, groups, id, right)) == 2)
                 return (true);
             col.setId(id);
             if (account && ownerInheritance && account->getId() == col.getIdAccount())
@@ -254,7 +289,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (granted == 2)
         return (true);
     // Check if there is a permission at the root of the server
-    if (!granted && inheritance && (granted = this->_checkPermission(accessors, "", right)) == 2)
+    if (!granted && inheritance && (granted = this->_checkPermission(accessors, groups, "", right)) == 2)
         return (true);
     // If there no permissions for the accessor on the object, the default is used
     if (granted == 0 && Configurations::instance()->get("permissions/default") == "true")
@@ -331,7 +366,7 @@ QStringList TablePermissions::getRights(const QString &id_accessor, const QStrin
     return (allowed);
 }
 
-int     TablePermissions::_checkPermission(const QStringList &accessors, const QString &idObject, const QString &right)
+int     TablePermissions::_checkPermission(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, const QString &right)
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -349,7 +384,8 @@ int     TablePermissions::_checkPermission(const QStringList &accessors, const Q
     if (rights.contains("modify"))
         rights.push_back("delete");
     query.prepare(Database::instance()->getQuery("TablePermissions", "_checkPermission")
-                  .replace(":accessors", "'" + accessors.join("','") + "'").replace(":rights", "'" + rights.join("','") + "'"));
+                  .replace(":accessors", "'" + accessors.join("','") + "'")
+                  .replace(":rights", "'" + rights.join("','") + "'"));
     query.bindValue(":id_object", idObject);
     if (!Database::instance()->query(query, result) || result.size() <= 0)
         return (0);
@@ -396,10 +432,26 @@ int     TablePermissions::_checkPermission(const QStringList &accessors, const Q
     for (i = 0, s = result.size(); i < s; ++i)
         if (result[i]["id_accessor"] == accessors.front())
             return (result[i]["granted"].toBool() + 1);
-    for (i = 0, s = result.size(); i < s && granted != 2; ++i)
-        if (!result[i]["id_accessor"].toString().isEmpty())
-            granted = result[i]["granted"].toBool() + 1;
-    if (granted == 0)
+    // If the permission is allowed by at least one group, it is granted
+    if (groups.isEmpty())
+    {
+        for (i = 0, s = result.size(); i < s && granted != 2; ++i)
+            if (!result[i]["id_accessor"].toString().isEmpty())
+                granted = result[i]["granted"].toBool() + 1;
+    }
+    // Check the group inheritance
+    else
+    {
+        QListIterator<QStringList> it(groups);
+        while (it.hasNext() && !granted)
+        {
+            for (i = 0, s = result.size(); i < s && granted != 2; ++i)
+                if (it.peekNext().contains(result[i]["id_accessor"].toString()))
+                    granted = result[i]["granted"].toBool() + 1;
+            it.next();
+        }
+    }
+    if (!granted)
         for (i = 0, s = result.size(); i < s && granted != 2; ++i)
             if (result[i]["id_accessor"].toString().isEmpty())
                 granted = result[i]["granted"].toBool() + 1;
@@ -422,7 +474,7 @@ bool                    TablePermissions::unitTests()
     QString             id_object;
 
     Log::instance()->debug("Running unit tests...", "TablePermissions", "unitTests");
-    query.prepare("DELETE FROM directories WHERE name IN('d', 'Dossier1', 'Dossier6', 'Dossier7')");
+    query.prepare("DELETE FROM directories WHERE name IN('d', 'Directory1', 'Directory6', 'Directory7')");
     Database::instance()->query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
     Database::instance()->query(query);
@@ -432,6 +484,7 @@ bool                    TablePermissions::unitTests()
     Configurations::instance()->set("permissions/default", "false");
     Configurations::instance()->set("permissions/inheritance", "true");
     Configurations::instance()->set("permissions/ownerInheritance", "true");
+    Configurations::instance()->set("permissions/groupInheritance", "true");
     try
     {
         ASSERT(d1.add("d"));
@@ -462,46 +515,46 @@ bool                    TablePermissions::unitTests()
         ASSERT(!p.exists());
         ASSERT(a.add("a"));
         id = a.getId();
-        ASSERT(d1.add("Dossier6"));
+        ASSERT(d1.add("Directory6"));
         ASSERT(p.add(id, d1.getId(), "read", true));
-        ASSERT(f.add("Fichier7", "Fichier7", "", d1.getId()));
-        ASSERT(d1.add("Dossier7"));
-        ASSERT(f.add("Fichier9", "Fichier9", "", d1.getId()));
-        ASSERT(d1.add("Dossier8", d1.getId()));
+        ASSERT(f.add("File7", "File7", "", d1.getId()));
+        ASSERT(d1.add("Directory7"));
+        ASSERT(f.add("File9", "File9", "", d1.getId()));
+        ASSERT(d1.add("Directory8", d1.getId()));
         ASSERT(p.add(id, d1.getId(), "read", true));
-        ASSERT(f.add("Fichier8", "Fichier8", "", d1.getId()));
-        ASSERT(d1.add("Dossier1"));
-        ASSERT(d2.add("Dossier5", d1.getId()));
-        ASSERT(d2.add("Dossier2", d1.getId()));
+        ASSERT(f.add("File8", "File8", "", d1.getId()));
+        ASSERT(d1.add("Directory1"));
+        ASSERT(d2.add("Directory5", d1.getId()));
+        ASSERT(d2.add("Directory2", d1.getId()));
         ASSERT(p.add(id, d2.getId(), "read", true));
-        ASSERT(f.add("Fichier5", "Fichier5", "", d1.getId()));
-        ASSERT(f.add("Fichier6", "Fichier6", "", d1.getId()));
+        ASSERT(f.add("File5", "File5", "", d1.getId()));
+        ASSERT(f.add("File6", "File6", "", d1.getId()));
         ASSERT(p.add(id, f.getId(), "read", true));
-        ASSERT(d1.add("Dossier3", d2.getId()));
+        ASSERT(d1.add("Directory3", d2.getId()));
         ASSERT(p.add(id, d1.getId(), "read", false));
-        ASSERT(f.add("Fichier1", "Fichier1", "", d1.getId()));
-        ASSERT(f.add("Fichier2", "Fichier2", "", d1.getId()));
+        ASSERT(f.add("File1", "File1", "", d1.getId()));
+        ASSERT(f.add("File2", "File2", "", d1.getId()));
         ASSERT(p.add(id, f.getId(), "read", false));
-        ASSERT(d1.add("Dossier4", d2.getId()));
-        ASSERT(f.add("Fichier3", "Fichier3", "", d1.getId()));
+        ASSERT(d1.add("Directory4", d2.getId()));
+        ASSERT(f.add("File3", "File3", "", d1.getId()));
         ASSERT(p.add(id, f.getId(), "read", false));
-        ASSERT(f.add("Fichier4", "Fichier4", "", d2.getId()));
-        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1"), "read"));
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier2"), "read"));
-        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3"), "read"));
-        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3/Fichier1"), "read"));
-        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3/Fichier2"), "read"));
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier2/Dossier4"), "read"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Dossier2/Fichier4"), "read"));
-        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier5"), "read"));
-        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Fichier5"), "read"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Fichier6"), "read"));
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier6"), "read"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier6/Fichier7"), "read"));
-        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Dossier7"), "read"));
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier7/Dossier8"), "read"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier7/Dossier8/Fichier8"), "read"));
-        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Dossier7/Fichier9"), "read"));
+        ASSERT(f.add("File4", "File4", "", d2.getId()));
+        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Directory1"), "read"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "read"));
+        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "read"));
+        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File1"), "read"));
+        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File2"), "read"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory4"), "read"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/File4"), "read"));
+        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory5"), "read"));
+        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Directory1/File5"), "read"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/File6"), "read"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory6"), "read"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory6/File7"), "read"));
+        ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Directory7"), "read"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory7/Directory8"), "read"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory7/Directory8/File8"), "read"));
+        ASSERT(!p.isAllowed(id, f.getIdFromVirtualPath("Directory7/File9"), "read"));
         ASSERT(c.add("Collection1"));
         ASSERT(!p.isAllowed(id, c.getId(), "read"));
         ASSERT(p.add(id, c.getId(), "read"));
@@ -514,57 +567,57 @@ bool                    TablePermissions::unitTests()
         ASSERT(!p.isAllowed(id, c.getId(), "read"));
         ASSERT(c.setIdAccount(id));
         ASSERT(p.isAllowed(id, c.getId(), "read"));
-        id_object = f.getIdFromVirtualPath("Dossier1/Dossier2/Fichier4");
+        id_object = f.getIdFromVirtualPath("Directory1/Directory2/File4");
         ASSERT(p.getRights(id, id_object).contains("read"));
         ASSERT(p.add(id, id_object, "write"));
         ASSERT((rights = p.getRights(id, id_object)).size() == 2);
         ASSERT(rights.contains("read"));
         ASSERT(rights.contains("write"));
-        ASSERT(!p.getRights(id, d1.getIdFromVirtualPath("Dossier1/Dossier5")).size());
-        ASSERT(p.getRights(id, d1.getIdFromVirtualPath("Dossier7/Dossier8")).contains("read"));
-        id_object = f.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3/Fichier2");
+        ASSERT(!p.getRights(id, d1.getIdFromVirtualPath("Directory1/Directory5")).size());
+        ASSERT(p.getRights(id, d1.getIdFromVirtualPath("Directory7/Directory8")).contains("read"));
+        id_object = f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File2");
         ASSERT(!p.getRights(id, id_object).size());
-        ASSERT(p.add(id, d1.getIdFromVirtualPath("Dossier1/Dossier2"), "add"));
+        ASSERT(p.add(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "add"));
         ASSERT(p.getRights(id, id_object).contains("add"));
-        ASSERT(p.add(id, d1.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3"), "add", false));
+        ASSERT(p.add(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "add", false));
         ASSERT(!p.getRights(id, id_object).size());
-        ASSERT(p.add(id, d1.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3"), "write", true));
+        ASSERT(p.add(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "write", true));
         ASSERT(p.getRights(id, id_object).contains("write"));
         ASSERT(p.add(id, c.getId(), "read"));
         ASSERT(p.getRights(id, c.getId()).contains("read"));
         // Advanced tests on permissions
         Configurations::instance()->set("permissions/activate", "false");
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier2"), "read"));
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3"), "read"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3/Fichier1"), "read"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Dossier2/Dossier3/Fichier2"), "read"));
-        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Dossier1/Dossier2/Dossier4"), "modify"));
-        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Dossier1/Dossier2/Fichier4"), "delete"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "read"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "read"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File1"), "read"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File2"), "read"));
+        ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory4"), "modify"));
+        ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/File4"), "delete"));
         Configurations::instance()->set("permissions/activate", "true");
-        ASSERT(f.setIdFromVirtualPath("Dossier1/Dossier2/Dossier3/Fichier2"));
+        ASSERT(f.setIdFromVirtualPath("Directory1/Directory2/Directory3/File2"));
         ASSERT(!f.isAllowed(a.getId(), "read"));
         ASSERT(f.setIdAccount(a.getId()));
         ASSERT(f.isAllowed(a.getId(), "read"));
         ASSERT(f.setIdAccount());
         ASSERT(!f.isAllowed(a.getId(), "read"));
-        ASSERT(d1.setIdFromVirtualPath("Dossier1/Dossier2/Dossier3"));
+        ASSERT(d1.setIdFromVirtualPath("Directory1/Directory2/Directory3"));
         ASSERT(d1.setIdAccount(a.getId()));
         ASSERT(f.isAllowed(a.getId(), "read"));
         Configurations::instance()->set("permissions/ownerInheritance", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
         Configurations::instance()->set("permissions/ownerInheritance", "true");
         ASSERT(d1.setIdAccount());
-        ASSERT(f.setIdFromVirtualPath("Dossier1/Dossier2/Fichier4"));
-        ASSERT(d2.setIdFromVirtualPath("Dossier1/Dossier2/Dossier4"));
-        ASSERT(d1.setIdFromVirtualPath("Dossier1/Dossier2"));
+        ASSERT(f.setIdFromVirtualPath("Directory1/Directory2/File4"));
+        ASSERT(d2.setIdFromVirtualPath("Directory1/Directory2/Directory4"));
+        ASSERT(d1.setIdFromVirtualPath("Directory1/Directory2"));
         ASSERT(f.isAllowed(a.getId(), "read"));
         ASSERT(d2.isAllowed(a.getId(), "read"));
         Configurations::instance()->set("permissions/inheritance", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
         ASSERT(!d2.isAllowed(a.getId(), "read"));
         ASSERT(d1.isAllowed(a.getId(), "read"));
-        ASSERT(d1.setIdFromVirtualPath("Dossier1"));
-        ASSERT(d2.setIdFromVirtualPath("Dossier6"));
+        ASSERT(d1.setIdFromVirtualPath("Directory1"));
+        ASSERT(d2.setIdFromVirtualPath("Directory6"));
         ASSERT(!d1.isAllowed(a.getId(), "read"));
         ASSERT(d2.isAllowed(a.getId(), "read"));
         Configurations::instance()->set("permissions/default", "true");
@@ -573,7 +626,7 @@ bool                    TablePermissions::unitTests()
         ASSERT(p.setId(a.getId(), d2.getId(), "read"));
         ASSERT(p.isGranted(false));
         ASSERT(!d2.isAllowed(a.getId(), "read"));
-        ASSERT(f.setIdFromVirtualPath("Dossier7/Fichier9"));
+        ASSERT(f.setIdFromVirtualPath("Directory7/File9"));
         ASSERT(f.isAllowed(a.getId(), "read"));
         Configurations::instance()->set("permissions/default", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
@@ -582,8 +635,8 @@ bool                    TablePermissions::unitTests()
         ASSERT(!d1.isAllowed(a.getId(), "read"));
         ASSERT(p.isGranted(true));
         ASSERT(d1.isAllowed(a.getId(), "read"));
-        ASSERT(f.setIdFromVirtualPath("Dossier7/Dossier8/Fichier8"));
-        ASSERT(d1.setIdFromVirtualPath("Dossier7/Dossier8"));
+        ASSERT(f.setIdFromVirtualPath("Directory7/Directory8/File8"));
+        ASSERT(d1.setIdFromVirtualPath("Directory7/Directory8"));
         ASSERT(p.setId(a.getId(), d1.getId(), "read"));
         ASSERT(p.setRight("modify"));
         Configurations::instance()->set("permissions/inheritance", "false");
@@ -616,7 +669,7 @@ bool                    TablePermissions::unitTests()
         ASSERT(g2.add("g2", g1.getId()));
         ASSERT(a.addGroup(g1.getId()));
         ASSERT(a.addGroup(g2.getId()));
-        ASSERT(f.setIdFromVirtualPath("Dossier1/Fichier5"));
+        ASSERT(f.setIdFromVirtualPath("Directory1/File5"));
         ASSERT(f.isAllowed(a.getId(), "read"));
         ASSERT(p.remove(p.getId(a.getId(), "", "read")));
         ASSERT(!f.isAllowed(a.getId(), "read"));
@@ -636,9 +689,42 @@ bool                    TablePermissions::unitTests()
         ASSERT(!f.isAllowed(a.getId(), "read"));
         ASSERT(p.remove(p.getId(g1.getId(), f.getId(), "read")));
         ASSERT(f.isAllowed(a.getId(), "read"));
-        ASSERT(d1.remove(d1.getIdFromVirtualPath("Dossier1")));
-        ASSERT(d1.remove(d1.getIdFromVirtualPath("Dossier6")));
-        ASSERT(d1.remove(d1.getIdFromVirtualPath("Dossier7")));
+        ASSERT(p.remove(p.getId("", f.getId(), "read")));
+        // Check the permissions on the groups hierarchy
+        ASSERT(g2.setIdGroup(""));
+        ASSERT(g2.add("g3", g2.getIdFromName("g1").first()));
+        ASSERT(g2.add("g4", g2.getIdFromName("g3").first()));
+        ASSERT(g2.add("g5", g2.getIdFromName("g1").first()));
+        ASSERT(g2.add("g6", g2.getIdFromName("g5").first()));
+        ASSERT(g2.add("g7", g2.getIdFromName("g5").first()));
+        ASSERT(g2.add("g8", g2.getIdFromName("g1").first()));
+        ASSERT(g2.add("g9", g2.getIdFromName("g2").first()));
+        ASSERT(g1.removeAccount(a.getId()));
+        ASSERT(g2.setId(g2.getIdFromName("g2").first()));
+        ASSERT(g2.removeAccount(a.getId()));
+        ASSERT(!a.isAllowed(f.getId(), "read"));
+        ASSERT(g2.setId(g2.getIdFromName("g6").first()));
+        ASSERT(a.addGroup(g2.getIdFromName("g5").first()));
+        ASSERT(a.addGroup(g2.getId()));
+        ASSERT(p.add(g1.getId(), f.getId(), "read", true));
+        ASSERT(a.isAllowed(f.getId(), "read"));
+        ASSERT(p.add(g2.getId(), f.getId(), "read", false));
+        ASSERT(!a.isAllowed(f.getId(), "read"));
+        ASSERT(g1.isAllowed(f.getId(), "read"));
+        ASSERT(g1.setId(g1.getIdFromName("g4").first()));
+        ASSERT(g1.isAllowed(f.getId(), "read"));
+        ASSERT(p.add(g1.getIdFromName("g3").first(), f.getId(), "read", false));
+        ASSERT(!g1.isAllowed(f.getId(), "read"));
+        ASSERT(g2.setId(g2.getIdFromName("g9").first()));
+        ASSERT(!g2.isAllowed(f.getId(), "read"));
+        Configurations::instance()->set("permissions/default", "true");
+        ASSERT(g2.isAllowed(f.getId(), "read"));
+        Configurations::instance()->set("permissions/groupInheritance", "false");
+        ASSERT(a.isAllowed(f.getId(), "read"));
+        ASSERT(g1.isAllowed(f.getId(), "read"));
+        ASSERT(d1.remove(d1.getIdFromVirtualPath("Directory1")));
+        ASSERT(d1.remove(d1.getIdFromVirtualPath("Directory6")));
+        ASSERT(d1.remove(d1.getIdFromVirtualPath("Directory7")));
         ASSERT(a.remove());
         ASSERT(g1.remove());
     }
