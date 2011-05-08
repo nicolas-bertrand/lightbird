@@ -1,5 +1,4 @@
 #include <QTime>
-#include <QThreadPool>
 
 #include "Defines.h"
 #include "Threads.h"

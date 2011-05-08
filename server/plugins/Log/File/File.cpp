@@ -17,8 +17,8 @@ bool    File::onLoad(LightBird::IApi *api)
 
     this->api = api;
     this->path = this->_getNodeValue("path") + "/";
-    if (this->path.size() == 1)
-        this->path = "./";
+    if (this->path == "/")
+        this->path = "logs/";
     this->directory.setPath(this->path);
     if ((this->name = this->_getNodeValue("file")).isEmpty())
         this->name = "server.log";
@@ -168,7 +168,7 @@ unsigned        File::_toBytes(const QString &str)
     QString     string = str;
 
     if (string.remove(' ').isEmpty())
-        return (1024);
+        return (1024 * 1024);
     if (string.at(string.size() - 1).isLetter())
     {
         bytes = string.left(string.size() - 1).toInt();
@@ -182,8 +182,8 @@ unsigned        File::_toBytes(const QString &str)
     }
     else
         bytes = string.toInt();
-    if (bytes <= 1024)
-        bytes = 1024;
+    if (bytes < 1024)
+        bytes = 1024 * 1024;
     return (bytes);
 }
 

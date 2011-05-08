@@ -49,10 +49,14 @@ Configuration       *Configurations::server(const QString &configurationPath, QO
     //  Defines the default values
     if (instance->get("pluginsPath").isEmpty())
         instance->set("pluginsPath", DEFAULT_PLUGINS_PATH);
+    if (instance->get("QtPluginsPath").isEmpty())
+        instance->set("QtPluginsPath", DEFAULT_QT_PLUGINS_PATH);
     if (instance->get("filesPath").isEmpty())
         instance->set("filesPath", DEFAULT_FILES_PATH);
     if (instance->get("temporaryPath").isEmpty())
         instance->set("temporaryPath", DEFAULT_TEMPORARY_PATH);
+    if (instance->get("cleanTemporaryPath").isEmpty())
+        instance->set("cleanTemporaryPath", DEFAULT_CLEAN_TEMPORARY_PATH);
     if (instance->get("languagesPath").isEmpty())
         instance->set("languagesPath", DEFAULT_LANGUAGES_PATH);
     if (instance->get("database/type").isEmpty())
