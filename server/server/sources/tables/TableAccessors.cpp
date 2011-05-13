@@ -53,9 +53,9 @@ bool        TableAccessors::isAllowed(const QString &id_object, const QString &r
     return (TablePermissions().isAllowed(this->id, id_object, right));
 }
 
-QStringList TableAccessors::getRights(const QString &id_object)
+bool        TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied)
 {
-    return (TablePermissions().getRights(this->id, id_object));
+    return (TablePermissions().getRights(this->id, id_object, allowed, denied));
 }
 
 QStringList TableAccessors::getLimits()

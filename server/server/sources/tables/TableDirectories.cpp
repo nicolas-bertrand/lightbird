@@ -195,6 +195,7 @@ bool                    TableDirectories::unitTests()
     TableAccounts       a;
     TablePermissions    p;
     QStringList         l;
+    QStringList         m;
 
     Log::instance()->debug("Running unit tests...", "TableDirectories", "unitTests");
     query.prepare("DELETE FROM directories WHERE name IN('videos', 'images', 'egypte', 'spiders')");
@@ -253,8 +254,9 @@ bool                    TableDirectories::unitTests()
         ASSERT(d1.getDirectories(a.getId(), "read").size() == 3);
         ASSERT(d1.getFiles(a.getId(), "read").size() == 2);
         ASSERT(d1.isAllowed(a.getId(), "read"));
-        ASSERT((l = d1.getRights(a.getId())).size() == 1);
+        ASSERT(d1.getRights(a.getId(), l, m));
         ASSERT(l.contains("read"));
+        ASSERT(m.contains(""));
         ASSERT(p.add(a.getId(), d1.getIdFromVirtualPath("images/france"), "read", false));
         ASSERT((l = d1.getDirectories(a.getId(), "read")).size() == 2);
         ASSERT(!l.contains(d1.getIdFromVirtualPath("images/france")));

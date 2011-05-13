@@ -15,7 +15,7 @@ public:
     bool        setName(const QString &name);
 
     bool        isAllowed(const QString &id_accessor, const QString &right);
-    QStringList getRights(const QString &id_accessor);
+    bool        getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied);
     QStringList getTags();
     QStringList getLimits();
 

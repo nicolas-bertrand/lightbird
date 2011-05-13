@@ -75,9 +75,9 @@ bool    TableObjects::isAllowed(const QString &id_accessor, const QString &right
     return (TablePermissions().isAllowed(id_accessor, this->id, right));
 }
 
-QStringList TableObjects::getRights(const QString &id_accessor)
+bool    TableObjects::getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied)
 {
-    return (TablePermissions().getRights(id_accessor, this->id));
+    return (TablePermissions().getRights(id_accessor, this->id, allowed, denied));
 }
 
 QStringList TableObjects::getTags()

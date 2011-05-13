@@ -25,8 +25,8 @@ namespace LightBird
         // Other
         /// @brief Returns true if the accessor has the right on the object.
         virtual bool        isAllowed(const QString &id_accessor, const QString &right) = 0;
-        /// @brief Returns the list of the rights that the accessor has on the object.
-        virtual QStringList getRights(const QString &id_accessor) = 0;
+        /// @brief Allows to get the list of the rights that the accessor has on the object.
+        virtual bool        getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied) = 0;
         /// @brief Returns the id of the tags of the object.
         virtual QStringList getTags() = 0;
         /// @brief Returns the limits of the object.

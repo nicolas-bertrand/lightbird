@@ -226,29 +226,29 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
                 if (group.setId(it.peekNext()) && !(id = group.getIdGroup()).isEmpty())
                 {
                     parents.push_back(id);
-                    if (!accessors.contains(id))
-                        accessors.push_back(id);
+                    accessors.push_back(id);
                 }
                 it.next();
             }
             // No parent remaining. We are at the root of the tree.
             if (parents.isEmpty())
                 break;
+            parents.removeDuplicates();
             groups.push_back(parents);
         }
+        accessors.removeDuplicates();
         // If groupInheritance is disables, we don't need to keep the groups hierarchy
         if (Configurations::instance()->get("permissions/groupInheritance") != "true")
             groups.clear();
     }
     accessors.push_front(accessor->getId());
-    id.clear();
-    // Check the permission directly on the object
+    // Get the id of the first object in the hierarchy
     if (object->isTable(LightBird::ITable::Files))
     {
+        // Check the permission of the file
         file = dynamic_cast<LightBird::ITableFiles *>(object.data());
-        if (!granted)
-            if ((granted = this->_checkPermission(accessors, groups, file->getId(), right)) == 2)
-                return (true);
+        if ((granted = this->_idAllowed(accessors, groups, file->getId(), right)) == 2)
+            return (true);
         id = file->getIdDirectory();
         checked = true;
     }
@@ -266,7 +266,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (file || directory)
         while (!id.isEmpty())
         {
-            if (!granted && (inheritance || !checked) && (granted = this->_checkPermission(accessors, groups, id, right)) == 2)
+            if (!granted && (inheritance || !checked) && (granted = this->_idAllowed(accessors, groups, id, right)) == 2)
                 return (true);
             dir.setId(id);
             if (account && ownerInheritance && account->getId() == dir.getIdAccount())
@@ -277,7 +277,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     else if (collection)
         while (!id.isEmpty())
         {
-            if (!granted && (inheritance || !checked) && (granted = this->_checkPermission(accessors, groups, id, right)) == 2)
+            if (!granted && (inheritance || !checked) && (granted = this->_idAllowed(accessors, groups, id, right)) == 2)
                 return (true);
             col.setId(id);
             if (account && ownerInheritance && account->getId() == col.getIdAccount())
@@ -289,42 +289,104 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (granted == 2)
         return (true);
     // Check if there is a permission at the root of the server
-    if (!granted && inheritance && (granted = this->_checkPermission(accessors, groups, "", right)) == 2)
+    if (!granted && inheritance && (granted = this->_idAllowed(accessors, groups, "", right)) == 2)
         return (true);
-    // If there no permissions for the accessor on the object, the default is used
-    if (granted == 0 && Configurations::instance()->get("permissions/default") == "true")
+    // If there is no permissions for the accessor on the object, the default is applied
+    if (!granted && Configurations::instance()->get("permissions/default") == "true")
         return (true);
     return (false);
 }
 
-QStringList TablePermissions::getRights(const QString &id_accessor, const QString &id_object)
+bool    TablePermissions::getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied)
 {
-    LightBird::ITableAccounts           *account = NULL;
-    LightBird::ITableFiles              *file = NULL;
-    LightBird::ITableDirectories        *directory = NULL;
-    LightBird::ITableCollections        *collection = NULL;
-    QString                             id;
-    TableDirectories                    dir;
-    TableCollections                    col;
-    QStringList                         allowed;
-    QStringList                         denied;
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    int                                 i;
-    int                                 s;
+    LightBird::ITableAccounts   *account = NULL;
+    LightBird::ITableFiles      *file = NULL;
+    LightBird::ITableDirectories *directory = NULL;
+    LightBird::ITableCollections *collection = NULL;
+    TableGroups                 group;
+    bool                        inheritance = false;
+    bool                        ownerInheritance = false;
+    bool                        checked = false;
+    QString                     id;
+    TableDirectories            dir;
+    TableCollections            col;
+    QStringList                 accessors;
+    QList<QStringList>          groups;
 
+    allowed.clear();
+    denied.clear();
+    // If the permissions system is not activated, all the rights are granted
+    if (Configurations::instance()->get("permissions/activate") != "true")
+    {
+        allowed.push_back("");
+        return (true);
+    }
+    if (Configurations::instance()->get("permissions/ownerInheritance") == "true")
+        ownerInheritance = true;
+    if (Configurations::instance()->get("permissions/inheritance") == "true")
+        inheritance = true;
     QSharedPointer<LightBird::ITableAccessors> accessor(dynamic_cast<LightBird::ITableAccessors *>(Database::instance()->getTable(LightBird::ITable::Accessor, id_accessor)));
     if (accessor.isNull())
-        return (allowed);
+        return (false);
     if (accessor->isTable(LightBird::ITable::Accounts))
         account = dynamic_cast<LightBird::ITableAccounts *>(accessor.data());
+    // If the accessor is an account, and the account is administrator, he has all the rights on all the objects
+    if (account && account->isAdministrator())
+    {
+        allowed.push_back("");
+        return (true);
+    }
     QSharedPointer<LightBird::ITableObjects> object(dynamic_cast<LightBird::ITableObjects *>(Database::instance()->getTable(LightBird::ITable::Object, id_object)));
     if (object.isNull())
-        return (allowed);
+        return (false);
+    // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
+    if (account && account->getId() == object->getIdAccount())
+    {
+        allowed.push_back("");
+        return (true);
+    }
+    // Get all the accessors concerned by the permission
+    if (account)
+        accessors = account->getGroups();
+    else if (group.setId(accessor->getId()) && !(id = group.getIdGroup()).isEmpty())
+        accessors.push_back(id);
+    // Get all the parent groups of the accessor
+    if (!accessors.isEmpty())
+    {
+        groups.push_back(accessors);
+        while (true)
+        {
+            QStringListIterator it(groups.back());
+            QStringList parents;
+            while (it.hasNext())
+            {
+                // A parent has been found
+                if (group.setId(it.peekNext()) && !(id = group.getIdGroup()).isEmpty())
+                {
+                    parents.push_back(id);
+                    accessors.push_back(id);
+                }
+                it.next();
+            }
+            // No parent remaining. We are at the root of the tree.
+            if (parents.isEmpty())
+                break;
+            parents.removeDuplicates();
+            groups.push_back(parents);
+        }
+        accessors.removeDuplicates();
+        // If groupInheritance is disables, we don't need to keep the groups hierarchy
+        if (Configurations::instance()->get("permissions/groupInheritance") != "true")
+            groups.clear();
+    }
+    accessors.push_front(accessor->getId());
+    // Get the id of the first object in the hierarchy
     if (object->isTable(LightBird::ITable::Files))
     {
         file = dynamic_cast<LightBird::ITableFiles *>(object.data());
-        id = file->getId();
+        id = file->getIdDirectory();
+        this->_getRights(accessors, groups, file->getId(), allowed, denied);
+        checked = true;
     }
     if (object->isTable(LightBird::ITable::Directories))
     {
@@ -336,45 +398,65 @@ QStringList TablePermissions::getRights(const QString &id_accessor, const QStrin
         collection = dynamic_cast<LightBird::ITableCollections *>(object.data());
         id = collection->getId();
     }
-    while (!id.isEmpty())
-    {
-        query.prepare(Database::instance()->getQuery("TablePermissions", "getRights"));
-        query.bindValue(":id_accessor", id_accessor);
-        query.bindValue(":id_object", id);
-        if (Database::instance()->query(query, result))
-            for (i = 0, s = result.size(); i < s; ++i)
-                if (result[i]["granted"].toBool() && !denied.contains(result[i]["right"].toString()))
-                    allowed << result[i]["right"].toString();
-                else if (!result[i]["granted"].toBool())
-                {
-                    denied << result[i]["right"].toString();
-                    allowed.removeAll(result[i]["right"].toString());
-                }
-        if (file || directory)
+    // Run through the objects hierarchy to find the permissions
+    if (file || directory)
+        while (!id.isEmpty())
         {
-            if (!dir.setId(id) && file)
-                id = file->getIdDirectory();
-            else
-                id = dir.getIdDirectory();
+            if (inheritance || !checked)
+                this->_getRights(accessors, groups, id, allowed, denied);
+            dir.setId(id);
+            if (account && ownerInheritance && account->getId() == dir.getIdAccount())
+            {
+                allowed.clear();
+                denied.clear();
+                allowed.push_back("");
+                return (true);
+            }
+            id = dir.getIdDirectory();
+            checked = true;
+        }
+    else if (collection)
+        while (!id.isEmpty())
+        {
+            if (inheritance || !checked)
+                this->_getRights(accessors, groups, id, allowed, denied);
+            col.setId(id);
+            if (account && ownerInheritance && account->getId() == col.getIdAccount())
+            {
+                allowed.clear();
+                denied.clear();
+                allowed.push_back("");
+                return (true);
+            }
+            id = col.getIdCollection();
+            checked = true;
+        }
+    // Check if there is a permission at the root of the server
+    if (inheritance)
+        this->_getRights(accessors, groups, "", allowed, denied);
+    // If there is no global permission, the default is applied
+    if (!allowed.contains("") && !denied.contains(""))
+    {
+        if (Configurations::instance()->get("permissions/default") == "true")
+        {
+            allowed.clear();
+            allowed.push_back("");
         }
         else
         {
-            col.setId(id);
-            id = col.getIdCollection();
+            denied.clear();
+            denied.push_back("");
         }
     }
-    return (allowed);
+    return (true);
 }
 
-int     TablePermissions::_checkPermission(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, const QString &right)
+unsigned    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, const QString &right)
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
     QStringList                         rights;
-    int                                 granted = 0;
-    bool                                sorted = false;
-    int                                 i;
-    int                                 s;
+    unsigned                            granted;
 
     rights.push_back(right);
     // Someone who can modify can read
@@ -383,79 +465,216 @@ int     TablePermissions::_checkPermission(const QStringList &accessors, const Q
     // Someone who can delete can modify
     if (rights.contains("modify"))
         rights.push_back("delete");
-    query.prepare(Database::instance()->getQuery("TablePermissions", "_checkPermission")
+    query.prepare(Database::instance()->getQuery("TablePermissions", "_idAllowed")
                   .replace(":accessors", "'" + accessors.join("','") + "'")
                   .replace(":rights", "'" + rights.join("','") + "'"));
     query.bindValue(":id_object", idObject);
     if (!Database::instance()->query(query, result) || result.size() <= 0)
         return (0);
-    // Removes the useless rights
-    for (i = 0, s = result.size(); i < s && !sorted; ++i)
-        if (result[i]["right"] == right)
-        {
-            QMutableVectorIterator<QMap<QString, QVariant> > it(result);
-            while (it.hasNext())
-                if (it.next().value("right") != right)
-                    it.remove();
-            sorted = true;
-        }
-    if (right == "read")
-        for (i = 0, s = result.size(); i < s && !sorted; ++i)
-            if (result[i]["right"] == "modify")
-            {
-                QMutableVectorIterator<QMap<QString, QVariant> > it(result);
-                while (it.hasNext())
-                    if (it.next().value("right") != "modify")
-                        it.remove();
-                sorted = true;
-            }
-    if (right == "read" || right == "modify")
-        for (i = 0, s = result.size(); i < s && !sorted; ++i)
-            if (result[i]["right"] == "delete")
-            {
-                QMutableVectorIterator<QMap<QString, QVariant> > it(result);
-                while (it.hasNext())
-                    if (it.next().value("right") != "delete")
-                        it.remove();
-                sorted = true;
-            }
-    for (i = 0, s = result.size(); i < s && !sorted; ++i)
-        if (!result[i]["right"].toString().isEmpty())
-        {
-            QMutableVectorIterator<QMap<QString, QVariant> > it(result);
-            while (it.hasNext())
-                if (it.next().value("right").toString().isEmpty())
-                    it.remove();
-            sorted = true;
-        }
     // Check the right of the accessor
-    for (i = 0, s = result.size(); i < s; ++i)
-        if (result[i]["id_accessor"] == accessors.front())
-            return (result[i]["granted"].toBool() + 1);
+    if ((granted = this->_checkRights(result, QStringList() << accessors.front(), right)))
+        return (granted);
     // If the permission is allowed by at least one group, it is granted
-    if (groups.isEmpty())
-    {
-        for (i = 0, s = result.size(); i < s && granted != 2; ++i)
-            if (!result[i]["id_accessor"].toString().isEmpty())
-                granted = result[i]["granted"].toBool() + 1;
-    }
+    if (groups.isEmpty() && (granted = this->_checkRights(result, accessors, right)))
+        return (granted);
     // Check the group inheritance
     else
     {
         QListIterator<QStringList> it(groups);
         while (it.hasNext() && !granted)
         {
-            for (i = 0, s = result.size(); i < s && granted != 2; ++i)
-                if (it.peekNext().contains(result[i]["id_accessor"].toString()))
-                    granted = result[i]["granted"].toBool() + 1;
+            if ((granted = this->_checkRights(result, it.peekNext(), right)))
+                return (granted);
             it.next();
         }
     }
-    if (!granted)
-        for (i = 0, s = result.size(); i < s && granted != 2; ++i)
-            if (result[i]["id_accessor"].toString().isEmpty())
-                granted = result[i]["granted"].toBool() + 1;
+    return (this->_checkRights(result, QStringList() << "", right));
+}
+
+unsigned        TablePermissions::_checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right)
+{
+    int         i;
+    int         s;
+    unsigned    granted = 0;
+    QList<int>  index;
+
+    // Get the indexes of the accessors we are interested in
+    for (i = 0, s = rights.size(); i < s; ++i)
+        if (accessors.contains(rights[i]["id_accessor"].toString()))
+            index.push_back(i);
+    // Check the right directly
+    QListIterator<int> it(index);
+    while (it.hasNext())
+    {
+        if (rights[it.peekNext()]["right"] == right
+            && (granted = (rights[it.peekNext()]["granted"].toBool() + 1)) == 2)
+            return (granted);
+        it.next();
+    }
+    if (granted)
+        return (granted);
+    it.toFront();
+    // Check the read and modify cases
+    if (right == "read" || right == "modify")
+    {
+        while (it.hasNext())
+        {
+            if ((rights[it.peekNext()]["right"] == "delete" || rights[it.peekNext()]["right"] == "modify")
+                && (granted = (rights[it.peekNext()]["granted"].toBool() + 1)) == 2)
+                return (granted);
+            it.next();
+        }
+        if (granted)
+            return (granted);
+        it.toFront();
+    }
+    // Check the global right
+    while (it.hasNext())
+    {
+        if (rights[it.peekNext()]["right"].toString().isEmpty()
+            && (granted = (rights[it.peekNext()]["granted"].toBool() + 1)) == 2)
+            return (granted);
+        it.next();
+    }
     return (granted);
+}
+
+void    TablePermissions::_getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, QStringList &allowed, QStringList &denied)
+{
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+    int                                 i;
+    int                                 s;
+    QStringList                         allowedTmp;
+    QStringList                         deniedTmp;
+    QString                             right;
+
+    query.prepare(Database::instance()->getQuery("TablePermissions", "_getRights")
+                  .replace(":accessors", "'" + accessors.join("','") + "'"));
+    query.bindValue(":id_object", idObject);
+    if (!Database::instance()->query(query, result) || result.size() <= 0)
+        return ;
+    // Check the right of the accessor
+    for (i = 0, s = result.size(); i < s; ++i)
+        if (result[i]["id_accessor"] == accessors.front())
+        {
+            if (result[i]["granted"].toBool())
+                allowedTmp.push_back(result[i]["right"].toString());
+            else
+                deniedTmp.push_back(result[i]["right"].toString());
+        }
+    this->_mergeRights(allowedTmp, deniedTmp, allowed, denied);
+    // Get the right of the groups of the accessor, if goupInheritance is disabled
+    if (groups.isEmpty())
+    {
+        for (i = 0, s = result.size(); i < s; ++i)
+            if (!result[i]["id_accessor"].toString().isEmpty())
+            {
+                right = result[i]["right"].toString();
+                // If at least one group allowed the right, it is granted
+                if (result[i]["granted"].toBool())
+                {
+                    if (deniedTmp.contains(right))
+                        deniedTmp.removeAll(right);
+                    if (!allowedTmp.contains(right))
+                        allowedTmp.push_back(right);
+                }
+                else if (!allowedTmp.contains(right) && !deniedTmp.contains(right))
+                    deniedTmp.push_back(right);
+            }
+        this->_mergeRights(allowedTmp, deniedTmp, allowed, denied);
+    }
+    // Get the rights using the group inheritance
+    else
+    {
+        // Run through the hierarchy
+        QListIterator<QStringList> it(groups);
+        while (it.hasNext())
+        {
+            for (i = 0, s = result.size(); i < s; ++i)
+            {
+                // The right is in the current hierarchy level
+                if (it.peekNext().contains(result[i]["id_accessor"].toString()))
+                {
+                    right = result[i]["right"].toString();
+                    // If at least one group allowed the right in the current level, it is granted
+                    if (result[i]["granted"].toBool())
+                    {
+                        if (deniedTmp.contains(right))
+                            deniedTmp.removeAll(right);
+                        if (!allowedTmp.contains(right))
+                            allowedTmp.push_back(right);
+                    }
+                    else if (!allowedTmp.contains(right) && !deniedTmp.contains(right))
+                        deniedTmp.push_back(right);
+                }
+            }
+            this->_mergeRights(allowedTmp, deniedTmp, allowed, denied);
+            it.next();
+        }
+    }
+    // Get the rights of all the accessors
+    for (i = 0, s = result.size(); i < s; ++i)
+        if (result[i]["id_accessor"].toString().isEmpty())
+        {
+            right = result[i]["right"].toString();
+            if (!allowedTmp.contains(right) && !deniedTmp.contains(right))
+            {
+                if (result[i]["granted"].toBool())
+                    allowed.push_back(right);
+                else
+                    denied.push_back(right);
+            }
+        }
+}
+
+void    TablePermissions::_mergeRights(QStringList &allowedSrc, QStringList &deniedSrc, QStringList &allowedDest, QStringList &deniedDest)
+{
+    // Add the new rights to the allowed list
+    if (!allowedDest.contains("") && !deniedDest.contains(""))
+    {
+        QStringListIterator it(allowedSrc);
+        while (it.hasNext())
+        {
+            if (!allowedDest.contains(it.peekNext()) && !deniedDest.contains(it.peekNext()))
+                allowedDest.push_back(it.peekNext());
+            it.next();
+        }
+        // All the rights has been allowed
+        if (allowedDest.contains(""))
+        {
+            allowedDest.clear();
+            allowedDest.push_back("");
+        }
+    }
+    // Add the new rights to the denied list
+    if (!allowedDest.contains("") && !deniedDest.contains(""))
+    {
+        QStringListIterator it(deniedSrc);
+        while (it.hasNext())
+        {
+            if (!allowedDest.contains(it.peekNext()) && !deniedDest.contains(it.peekNext()))
+                deniedDest.push_back(it.peekNext());
+            it.next();
+        }
+        // All the rights has been denied
+        if (deniedDest.contains(""))
+        {
+            deniedDest.clear();
+            deniedDest.push_back("");
+        }
+    }
+    // A delete right implies a modify, and a modify implies a read
+    if (allowedDest.contains("delete") && !allowedDest.contains("modify") && !deniedDest.contains("modify") && !deniedDest.contains(""))
+        allowedDest.push_back("modify");
+    if (allowedDest.contains("modify") && !allowedDest.contains("read") && !deniedDest.contains("read") && !deniedDest.contains(""))
+        allowedDest.push_back("read");
+    if (deniedDest.contains("delete") && !deniedDest.contains("modify") && !allowedDest.contains("modify") && !allowedDest.contains(""))
+        deniedDest.push_back("modify");
+    if (deniedDest.contains("modify") && !deniedDest.contains("read") && !allowedDest.contains("read") && !allowedDest.contains(""))
+        deniedDest.push_back("read");
+    allowedSrc.clear();
+    deniedSrc.clear();
 }
 
 bool                    TablePermissions::unitTests()
@@ -470,8 +689,9 @@ bool                    TablePermissions::unitTests()
     TableFiles          f;
     QSqlQuery           query;
     QString             id;
-    QStringList         rights;
     QString             id_object;
+    QStringList         allowed;
+    QStringList         denied;
 
     Log::instance()->debug("Running unit tests...", "TablePermissions", "unitTests");
     query.prepare("DELETE FROM directories WHERE name IN('d', 'Directory1', 'Directory6', 'Directory7')");
@@ -479,6 +699,8 @@ bool                    TablePermissions::unitTests()
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
     Database::instance()->query(query);
     query.prepare("DELETE FROM groups WHERE name IN('g1', 'g2')");
+    Database::instance()->query(query);
+    query.prepare("DELETE FROM permissions WHERE id_accessor='' AND id_object=''");
     Database::instance()->query(query);
     Configurations::instance()->set("permissions/activate", "true");
     Configurations::instance()->set("permissions/default", "false");
@@ -515,6 +737,7 @@ bool                    TablePermissions::unitTests()
         ASSERT(!p.exists());
         ASSERT(a.add("a"));
         id = a.getId();
+        // Create a file/directory hierarchy
         ASSERT(d1.add("Directory6"));
         ASSERT(p.add(id, d1.getId(), "read", true));
         ASSERT(f.add("File7", "File7", "", d1.getId()));
@@ -539,6 +762,7 @@ bool                    TablePermissions::unitTests()
         ASSERT(f.add("File3", "File3", "", d1.getId()));
         ASSERT(p.add(id, f.getId(), "read", false));
         ASSERT(f.add("File4", "File4", "", d2.getId()));
+        // Some simple tests
         ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Directory1"), "read"));
         ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "read"));
         ASSERT(!p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "read"));
@@ -568,23 +792,29 @@ bool                    TablePermissions::unitTests()
         ASSERT(c.setIdAccount(id));
         ASSERT(p.isAllowed(id, c.getId(), "read"));
         id_object = f.getIdFromVirtualPath("Directory1/Directory2/File4");
-        ASSERT(p.getRights(id, id_object).contains("read"));
+        // Test getRights
+        ASSERT(!p.getRights("", id_object, allowed, denied));
+        ASSERT(!p.getRights(id, "", allowed, denied));
+        ASSERT(!p.getRights("42", id_object, allowed, denied));
+        ASSERT(p.getRights(id, id_object, allowed, denied) && allowed.contains("read"));
+        ASSERT(denied.contains(""));
         ASSERT(p.add(id, id_object, "write"));
-        ASSERT((rights = p.getRights(id, id_object)).size() == 2);
-        ASSERT(rights.contains("read"));
-        ASSERT(rights.contains("write"));
-        ASSERT(!p.getRights(id, d1.getIdFromVirtualPath("Directory1/Directory5")).size());
-        ASSERT(p.getRights(id, d1.getIdFromVirtualPath("Directory7/Directory8")).contains("read"));
+        ASSERT(p.getRights(id, id_object, allowed, denied));
+        ASSERT(allowed.contains("read"));
+        ASSERT(allowed.contains("write"));
+        ASSERT(denied.contains(""));
+        ASSERT(p.getRights(id, d1.getIdFromVirtualPath("Directory1/Directory5"), allowed, denied) && allowed.isEmpty() && denied.contains(""));
+        ASSERT(p.getRights(id, d1.getIdFromVirtualPath("Directory7/Directory8"), allowed, denied) && allowed.contains("read"));
         id_object = f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File2");
-        ASSERT(!p.getRights(id, id_object).size());
+        ASSERT(p.getRights(id, id_object, allowed, denied) && allowed.isEmpty() && denied.contains(""));
         ASSERT(p.add(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "add"));
-        ASSERT(p.getRights(id, id_object).contains("add"));
+        ASSERT(p.getRights(id, id_object, allowed, denied) && allowed.contains("add"));
         ASSERT(p.add(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "add", false));
-        ASSERT(!p.getRights(id, id_object).size());
+        ASSERT(p.getRights(id, id_object, allowed, denied) && allowed.isEmpty());
         ASSERT(p.add(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "write", true));
-        ASSERT(p.getRights(id, id_object).contains("write"));
+        ASSERT(p.getRights(id, id_object, allowed, denied) && allowed.contains("write"));
         ASSERT(p.add(id, c.getId(), "read"));
-        ASSERT(p.getRights(id, c.getId()).contains("read"));
+        ASSERT(p.getRights(id, c.getId(), allowed, denied) && allowed.contains("") && denied.isEmpty());
         // Advanced tests on permissions
         Configurations::instance()->set("permissions/activate", "false");
         ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "read"));
@@ -690,6 +920,67 @@ bool                    TablePermissions::unitTests()
         ASSERT(p.remove(p.getId(g1.getId(), f.getId(), "read")));
         ASSERT(f.isAllowed(a.getId(), "read"));
         ASSERT(p.remove(p.getId("", f.getId(), "read")));
+        // Check the rights conflict
+        ASSERT(!f.isAllowed(a.getId(), "read"));
+        ASSERT(p.add(a.getId(), f.getId(), "modify", true));
+        ASSERT(f.isAllowed(a.getId(), "read"));
+        ASSERT(p.add(a.getId(), f.getId(), "delete", false));
+        ASSERT(f.isAllowed(a.getId(), "read"));
+        ASSERT(!f.isAllowed(a.getId(), "delete"));
+        ASSERT(f.isAllowed(a.getId(), "modify"));
+        ASSERT(p.setId(a.getId(), f.getId(), "modify"));
+        ASSERT(p.isGranted(false));
+        ASSERT(!f.isAllowed(a.getId(), "modify"));
+        ASSERT(!f.isAllowed(a.getId(), "read"));
+        ASSERT(!f.isAllowed(a.getId(), "add"));
+        ASSERT(p.add(a.getId(), f.getId(), "", true));
+        ASSERT(f.isAllowed(a.getId(), "add"));
+        ASSERT(p.add(a.getId(), f.getId(), "add", true));
+        ASSERT(!f.isAllowed(a.getId(), "read"));
+        ASSERT(f.isAllowed(a.getId(), "add"));
+        ASSERT(p.setId(a.getId(), f.getId(), "add"));
+        ASSERT(p.isGranted(false));
+        ASSERT(!f.isAllowed(a.getId(), "add"));
+        ASSERT(p.remove());
+        ASSERT(f.isAllowed(a.getId(), "add"));
+        ASSERT(p.setId(a.getId(), f.getId(), "delete"));
+        ASSERT(p.isGranted(true));
+        ASSERT(f.isAllowed(a.getId(), "delete"));
+        ASSERT(f.isAllowed(a.getId(), "read"));
+        ASSERT(p.remove(p.getId(a.getId(), f.getId(), "delete")));
+        ASSERT(!f.isAllowed(a.getId(), "read"));
+        ASSERT(p.remove(p.getId(a.getId(), f.getId(), "modify")));
+        ASSERT(f.isAllowed(a.getId(), "read"));
+        ASSERT(p.remove(p.getId(a.getId(), f.getId(), "")));
+        ASSERT(!f.isAllowed(a.getId(), "read"));
+        // Advanced tests on getRights
+        ASSERT(a.getRights(f.getId(), allowed, denied));
+        ASSERT(allowed.isEmpty() && denied.contains(""));
+        ASSERT(p.add(a.getId(), f.getId(), "read", true));
+        ASSERT(a.getRights(f.getId(), allowed, denied));
+        ASSERT(allowed.contains("read") && denied.contains("") && allowed.size() == 1 && denied.size() == 1);
+        ASSERT(d1.setIdFromVirtualPath("Directory1"));
+        ASSERT(p.add(a.getId(), d1.getId(), "delete", true));
+        ASSERT(f.isAllowed(a.getId(), "modify"));
+        ASSERT(a.getRights(f.getId(), allowed, denied));
+        ASSERT(allowed.contains("read") && allowed.contains("modify") && allowed.contains("delete") && denied.contains("") && allowed.size() == 3);
+        Configurations::instance()->set("permissions/inheritance", "false");
+        ASSERT(a.getRights(f.getId(), allowed, denied));
+        ASSERT(allowed.contains("read") && denied.contains("") && allowed.size() == 1 && denied.size() == 1);
+        Configurations::instance()->set("permissions/inheritance", "true");
+        ASSERT(a.isAllowed(f.getId(), "delete"));
+        ASSERT(p.add(a.getId(), f.getId(), "", false));
+        ASSERT(!a.isAllowed(f.getId(), "delete"));
+        ASSERT(a.getRights(f.getId(), allowed, denied));
+        ASSERT(allowed.contains("read") && denied.contains("") && allowed.size() == 1 && denied.size() == 1);
+        ASSERT(p.add("", "", "add", true));
+        ASSERT(a.getRights(f.getId(), allowed, denied));
+        ASSERT(allowed.contains("add") && allowed.contains("read") && denied.contains("") && allowed.size() == 2);
+        ASSERT(p.remove(p.getId(a.getId(), d1.getId(), "delete")));
+        ASSERT(p.remove(p.getId(a.getId(), f.getId(), "read")));
+        ASSERT(p.remove(p.getId(a.getId(), f.getId(), "")));
+        ASSERT(p.remove(p.getId("", "", "add")));
+        Configurations::instance()->set("permissions/default", "false");
         // Check the permissions on the groups hierarchy
         ASSERT(g2.setIdGroup(""));
         ASSERT(g2.add("g3", g2.getIdFromName("g1").first()));

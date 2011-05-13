@@ -129,8 +129,8 @@
         <setRight>UPDATE permissions SET right=:right WHERE id=:id</setRight>
         <getGranted>SELECT granted FROM permissions WHERE id=:id</getGranted>
         <setGranted>UPDATE permissions SET granted=:granted WHERE id=:id</setGranted>
-        <getRights>SELECT right, granted FROM permissions WHERE id_accessor=:id_accessor AND id_object=:id_object</getRights>
-        <_checkPermission>SELECT id_accessor, right, granted FROM permissions WHERE (id_accessor IN(:accessors) OR id_accessor='') AND id_object=:id_object AND (right IN(:rights) OR right='')</_checkPermission>
+        <_idAllowed>SELECT id_accessor, right, granted FROM permissions WHERE (id_accessor IN(:accessors) OR id_accessor='') AND id_object=:id_object AND (right IN(:rights) OR right='')</_idAllowed>
+        <_getRights>SELECT id_accessor, right, granted FROM permissions WHERE (id_accessor IN(:accessors) OR id_accessor='') AND id_object=:id_object</_getRights>
     </TablePermissions>
     <TableTags>
         <add>INSERT INTO tags (id, id_object, name) VALUES (:id, :id_object, :name)</add>

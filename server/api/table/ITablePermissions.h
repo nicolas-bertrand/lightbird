@@ -49,10 +49,15 @@ namespace LightBird
         /// @brief Returns true if the accessor possesses the right on the object.
         /// Read the database documentation to learn how the permissions works.
         virtual bool    isAllowed(const QString &id_accessor, const QString &id_object, const QString &right) = 0;
-        /// @brief Returns the list of the rights that an accessor had on an object.
-        /// This method is not up to date yet.
-        /// @deprecated
-        virtual QStringList getRights(const QString &id_accessor, const QString &id_object) = 0;
+        /// @brief Allows to get all the rights of an accessor on an object.
+        /// @param allowed : The list of the allowed rights. If it is empty,
+        /// no rights are allowed. If it has an empty element, all the rights
+        /// are allowed except the rights in denied.
+        /// @param denied : The list of the denied rights. If it is empty,
+        /// no rights are denied. If it has an empty element, all the rights
+        /// are denied except the rights in allowed.
+        /// @return False if either the accessor or the object doesn't exists.
+        virtual bool    getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied) = 0;
     };
 }
 
