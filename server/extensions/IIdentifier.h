@@ -7,13 +7,13 @@
 
 # include "IIdentify.h"
 
-/// @brief Allows plugins to get information on a file.
-///
-/// This extension is implemented by a plugin that will calls the IIdentify interface
-/// of each plugins that implements it. Then it will try to mix all the data gathered,
-/// in order to return the final list of information on the file, and its type.
 namespace LightBird
 {
+    /// @brief Allows plugins to get information on a file.
+    ///
+    /// This extension is implemented by a plugin that will calls the IIdentify interface
+    /// of each plugins that implements it. Then it will try to mix all the data gathered,
+    /// in order to return the final list of information on the file, and its type.
     class IIdentifier
     {
     public:

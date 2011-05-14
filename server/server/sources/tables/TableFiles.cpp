@@ -15,6 +15,7 @@ TableFiles::TableFiles(const QString &id)
     this->tableId = LightBird::ITable::Files;
     if (!id.isEmpty())
         Table::setId(id);
+    this->types << "image" << "audio" << "video" << "document";
 }
 
 TableFiles::~TableFiles()
@@ -33,6 +34,7 @@ TableFiles &TableFiles::operator=(const TableFiles &t)
         this->id = t.id;
         this->tableId = t.tableId;
         this->tableName = t.tableName;
+        this->types = t.types;
     }
     return (*this);
 }
@@ -144,7 +146,7 @@ QString TableFiles::getType()
     query.prepare(Database::instance()->getQuery("TableFiles", "getType"));
     query.bindValue(":id", this->id);
     if (Database::instance()->query(query, result) && result.size() > 0)
-        return (result[0]["type"].toString());
+        return (this->types.contains(result[0]["type"].toString()) ? result[0]["type"].toString() : "other");
     return ("");
 }
 
@@ -154,7 +156,10 @@ bool    TableFiles::setType(const QString &type)
 
     query.prepare(Database::instance()->getQuery("TableFiles", "setType"));
     query.bindValue(":id", this->id);
-    query.bindValue(":type", type);
+    if (this->types.contains(type))
+        query.bindValue(":type", type);
+    else
+        query.bindValue(":type", "other");
     return (Database::instance()->query(query));
 }
 
@@ -193,6 +198,22 @@ QVariant TableFiles::getInformation(const QString &name)
     return ("");
 }
 
+QMap<QString, QVariant> TableFiles::getInformations()
+{
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+    QMap<QString, QVariant>             informations;
+    int                                 i;
+    int                                 s;
+
+    query.prepare(Database::instance()->getQuery("TableFiles", "getInformations"));
+    query.bindValue(":id_file", this->id);
+    Database::instance()->query(query, result);
+    for (i = 0, s = result.size(); i < s; ++i)
+        informations[result[i]["name"].toString()] = result[i]["value"];
+    return (informations);
+}
+
 bool    TableFiles::setInformation(const QString &name, const QVariant &value)
 {
     QVector<QMap<QString, QVariant> >   result;
@@ -219,22 +240,6 @@ bool    TableFiles::setInformation(const QString &name, const QVariant &value)
         query.bindValue(":name", name);
     }
     return (Database::instance()->query(query));
-}
-
-QMap<QString, QVariant> TableFiles::getInformations()
-{
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QMap<QString, QVariant>             informations;
-    int                                 i;
-    int                                 s;
-
-    query.prepare(Database::instance()->getQuery("TableFiles", "getInformations"));
-    query.bindValue(":id_file", this->id);
-    Database::instance()->query(query, result);
-    for (i = 0, s = result.size(); i < s; ++i)
-        informations[result[i]["name"].toString()] = result[i]["value"];
-    return (informations);
 }
 
 bool    TableFiles::setInformations(const QMap<QString, QVariant> &informations)
@@ -365,7 +370,7 @@ bool                    TableFiles::unitTests()
         ASSERT(d1.add("d1"));
         ASSERT(a1.add("a1"));
         ASSERT(f1.add("f3", "/"));
-        ASSERT(f2.add("f8", "f2.xml", "xml", d1.getId(), a1.getId()));
+        ASSERT(f2.add("f8", "f2.xml", "document", d1.getId(), a1.getId()));
         ASSERT(f2.getIdAccount() == a1.getId());
         ASSERT(f2.setIdAccount());
         ASSERT(f2.getIdAccount().isEmpty());
@@ -392,12 +397,12 @@ bool                    TableFiles::unitTests()
         ASSERT(f2.setPath("f1"));
         ASSERT(f2.getPath() == "f1");
         ASSERT(f2.setName("f2"));
-        ASSERT(f1.getType().isEmpty());
-        ASSERT(f2.getType() == "xml");
-        ASSERT(f1.setType("xml"));
-        ASSERT(f1.getType() == "xml");
-        ASSERT(f2.setType(""));
-        ASSERT(f2.getType().isEmpty());
+        ASSERT(f1.getType() == "other");
+        ASSERT(f2.getType() == "document");
+        ASSERT(f1.setType("image"));
+        ASSERT(f1.getType() == "image");
+        ASSERT(f2.setType("test"));
+        ASSERT(f2.getType() == "other");
         ASSERT(f2.getIdDirectory() == d1.getId());
         ASSERT(f2.setIdDirectory());
         ASSERT(f2.getIdDirectory().isEmpty());

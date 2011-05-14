@@ -5,9 +5,9 @@
 
 # include "IImage.h"
 
-/// @brief Allows plugins to get a preview image of a file.
 namespace LightBird
 {
+    /// @brief Allows plugins to get a preview image of a file.
     class IPreview
     {
     public:

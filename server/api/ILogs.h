@@ -73,7 +73,7 @@ namespace LightBird
         /// For example, WARNING is below ERROR, and INFO is below WARNING...
         /// @return The current log level.
         virtual LightBird::ILogs::Level getlevel() = 0;
-        /// @brief Modify the log level.
+        /// @brief Modifies the log level.
         /// @param level : The new log level.
         virtual void        setLevel(LightBird::ILogs::Level level) = 0;
         /// @return True if the error logs are saved.

@@ -16,6 +16,7 @@ public:
 
     // Main
     bool            setId(const QString &id);
+    QString         getIdFromName(const QString &name);
     bool            setIdFromName(const QString &name);
     QString         getIdFromNameAndPassword(const QString &name, const QString &password = "");
     bool            setIdFromNameAndPassword(const QString &name, const QString &password = "");
@@ -27,7 +28,7 @@ public:
 
     // Fields
     QString         getPassword();
-    bool            setPassword(const QString &password);
+    bool            setPassword(const QString &password = "");
     bool            isAdministrator();
     bool            isAdministrator(bool administrator);
     bool            isActive();
@@ -35,8 +36,8 @@ public:
 
     // Informations
     QVariant        getInformation(const QString &name);
-    bool            setInformation(const QString &name, const QVariant &value);
     QMap<QString, QVariant> getInformations();
+    bool            setInformation(const QString &name, const QVariant &value);
     bool            setInformations(const QMap<QString, QVariant> &informations);
     bool            removeInformation(const QString &name);
     bool            removeInformations(const QStringList &informations);
@@ -46,6 +47,7 @@ public:
     QStringList     getGroups();
     bool            addGroup(const QString &id_group);
     bool            removeGroup(const QString &id_group);
+    QString         passwordHash(const QString &password, const QString &id = "");
 
     /// @brief Allows to test the TableAccounts features.
     /// @return If the tests were successful.

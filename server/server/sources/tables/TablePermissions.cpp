@@ -451,7 +451,7 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     return (true);
 }
 
-unsigned    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, const QString &right)
+unsigned    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right)
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -468,7 +468,7 @@ unsigned    TablePermissions::_idAllowed(const QStringList &accessors, const QLi
     query.prepare(Database::instance()->getQuery("TablePermissions", "_idAllowed")
                   .replace(":accessors", "'" + accessors.join("','") + "'")
                   .replace(":rights", "'" + rights.join("','") + "'"));
-    query.bindValue(":id_object", idObject);
+    query.bindValue(":id_object", id_object);
     if (!Database::instance()->query(query, result) || result.size() <= 0)
         return (0);
     // Check the right of the accessor
@@ -539,7 +539,7 @@ unsigned        TablePermissions::_checkRights(const QVector<QMap<QString, QVari
     return (granted);
 }
 
-void    TablePermissions::_getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, QStringList &allowed, QStringList &denied)
+void    TablePermissions::_getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied)
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -551,7 +551,7 @@ void    TablePermissions::_getRights(const QStringList &accessors, const QList<Q
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "_getRights")
                   .replace(":accessors", "'" + accessors.join("','") + "'"));
-    query.bindValue(":id_object", idObject);
+    query.bindValue(":id_object", id_object);
     if (!Database::instance()->query(query, result) || result.size() <= 0)
         return ;
     // Check the right of the accessor

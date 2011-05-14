@@ -54,8 +54,8 @@ namespace LightBird
         /// @param table : The table to get. If the table is unknow, this
         /// method will search in the database the table of the id.
         /// @param id : The id of the row to put by default in the table instance.
-        ///
-        /// @example This example shows how to cast ITable into ITableAccounts :
+        /// @example getTable
+        /// This example shows how to cast ITable into ITableAccounts :
         /// LightBird::ITableAccounts *account = getTable(LightBird::ITable::Accounts)->toTableAccounts();
         /// delete account; // Do not forget to delete the instance.
         ///

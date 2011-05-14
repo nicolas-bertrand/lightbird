@@ -11,25 +11,24 @@ namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to a group.
     /// Each modifications done in this object is immediatly saved in the database.
-    /// This can be seen as an implementation of the Active Record design pattern.
     class ITableGroups : virtual public LightBird::ITableAccessors
     {
     public:
         virtual ~ITableGroups() {}
 
-        /// @brief Returns the id of a groups with this name.
+        /// @brief Returns the id of the groups with this name.
         virtual QStringList getIdFromName(const QString &name) = 0;
-        /// @brief Creates a new group, using the given parameter.
+        /// @brief Creates a new group.
         /// @param name : The name of the new account. It must be unique.
         /// @param id_group : The id of the parent group.
-        /// @return If the group has been correctly created.
+        /// @return True if the group has been created.
         virtual bool        add(const QString &name, const QString &id_group = "") = 0;
 
         // Fields
         /// @brief Returns the id of the parent of the group, or empty if
-        /// the group is at the root.
+        /// it is at the root.
         virtual QString     getIdGroup() = 0;
-        /// @brief Modify the the id of the parent of the group.
+        /// @brief Modifies the id of the parent of the group.
         virtual bool        setIdGroup(const QString &id_group = "") = 0;
 
         // Accounts

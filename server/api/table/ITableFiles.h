@@ -11,7 +11,6 @@ namespace LightBird
 {
     /// @brief Handle the transactions with the database relating to a file.
     /// Each modifications done in this object is immediatly saved in the database.
-    /// This can be seen as an implementation of the Active Record design pattern.
     class ITableFiles : virtual public LightBird::ITableObjects
     {
     public:
@@ -39,42 +38,46 @@ namespace LightBird
         // Fields
         /// @brief Returns the path of the file.
         virtual QString     getPath() = 0;
-        /// @brief If the path is relative, getPath returns the path from the
+        /// @brief If the path is relative, getPath() returns the path from the
         /// filesPath directory, which is not the working directory of the server.
-        /// The path returned by getFullPath contains the filesPath if it is relative,
-        /// or just the path if it is absolute. Nothing is returned if the file has not
-        /// been found.
+        /// The path returned by getFullPath() contains the filesPath if it is
+        /// relative, or just the path if it is absolute. Nothing is returned
+        /// if the file has not been found.
         virtual QString     getFullPath() = 0;
-        /// @brief Modify the path of the file.
+        /// @brief Modifies the path of the file.
         virtual bool        setPath(const QString &path) = 0;
-        /// @brief Returns the type of the file.
+        /// @brief Returns the type of the file, which can be image, audio, video,
+        /// document, or other.
         virtual QString     getType() = 0;
-        /// @brief Modify the type of the file.
-        virtual bool        setType(const QString &type) = 0;
+        /// @brief Modifies the type of the file.
+        virtual bool        setType(const QString &type = "") = 0;
         /// @brief Returns the id of the directory of the file.
         virtual QString     getIdDirectory() = 0;
-        /// @brief Modify the id of the directory of the file.
+        /// @brief Modifies the id of the directory of the file.
         virtual bool        setIdDirectory(const QString &id_directory = "") = 0;
 
         // Informations
         /// @brief Returns the value of an information of the file.
         /// @param name : The name of the information to return.
         virtual QVariant    getInformation(const QString &name) = 0;
-        /// @brief Modify the value of an information of the file, or create it if it doesn't exists.
-        /// @param name : The name of the information to create of modify.
-        /// @brief value : The new value of the information.
-        virtual bool        setInformation(const QString &name, const QVariant &value) = 0;
         /// @brief Returns all the informations of the file.
         virtual QMap<QString, QVariant> getInformations() = 0;
+        /// @brief Modify the value of an information of the file, or create it
+        /// if it doesn't exists.
+        /// @param name : The name of the information to create or modify.
+        /// @brief value : The new value of the information.
+        virtual bool        setInformation(const QString &name, const QVariant &value) = 0;
         /// @brief Modifies or creates multiple informations for the file.
-        /// @param informations : The infotmations to modify or create. The keys of the map are the
-        /// keys of the informations, and the values of the map are the values of the informations.
+        /// @param informations : The informations to modify or create.
+        /// The keys of the map are the keys of the informations, and
+        /// the values of the map are the values of the informations.
         virtual bool        setInformations(const QMap<QString, QVariant> &informations) = 0;
         /// @brief Removes an information of the file.
         /// @param name : The name of the information to remove.
         virtual bool        removeInformation(const QString &name) = 0;
         /// @brief Removes multiple informations of the file.
-        /// @param informations : This list contains the name of each informations to remove.
+        /// @param informations : This list contains the name of each
+        /// informations to remove.
         virtual bool        removeInformations(const QStringList &informations) = 0;
 
         // Directories

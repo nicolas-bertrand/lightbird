@@ -3,9 +3,9 @@
 
 # include <QString>
 
-/// @brief Allows plugins to convert image files.
 namespace LightBird
 {
+    /// @brief Allows plugins to convert image files.
     class IImage
     {
     public:

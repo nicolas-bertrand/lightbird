@@ -4,14 +4,14 @@
 # include <QMap>
 # include <QString>
 
-/// @brief Allows plugins to transcode videos.
-///
-/// Many settings can be defined to change the size and quality of the video
-/// and the audio, in order to reduce its volume.
-/// If some of these settings are not defined, the default ones are used.
-/// Notice that the default quality settings are pretty high.
 namespace LightBird
 {
+    /// @brief Allows plugins to transcode videos.
+    ///
+    /// Many settings can be defined to change the size and quality of the video
+    /// and the audio, in order to reduce its volume.
+    /// If some of these settings are not defined, the default ones are used.
+    /// Notice that the default quality settings are pretty high.
     class IVideo
     {
     public:

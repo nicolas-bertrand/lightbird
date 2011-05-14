@@ -15,6 +15,7 @@ public:
     ~TableEvents();
     TableEvents   &operator=(const TableEvents &e);
 
+    QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime());
     bool        add(const QString &name, const QMap<QString, QVariant> &informations,
                     const QString &id_accessor = "", const QString &id_object = "");
     bool        add(const QString &name, const QString &id_accessor = "", const QString &id_object = "");
@@ -22,18 +23,16 @@ public:
     QString     getName();
     bool        setName(const QString &name);
     QString     getIdAccessor();
-    bool        setIdAccessor(const QString &idAccessor = "");
+    bool        setIdAccessor(const QString &id_accessor = "");
     QString     getIdObject();
-    bool        setIdObject(const QString &idObject = "");
+    bool        setIdObject(const QString &id_object = "");
 
     QVariant    getInformation(const QString &name);
-    bool        setInformation(const QString &name, const QVariant &value);
     QMap<QString, QVariant> getInformations();
+    bool        setInformation(const QString &name, const QVariant &value);
     bool        setInformations(const QMap<QString, QVariant> &informations);
     bool        removeInformation(const QString &name);
     bool        removeInformations(const QStringList &informations);
-
-    QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime());
 
     /// @brief Allows to test the TableEvents features.
     /// @return If the tests were successful.

@@ -53,50 +53,6 @@ bool    TableLimits::add(const QString &name, const QString &value, const QStrin
     return (true);
 }
 
-QString TableLimits::getName()
-{
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-
-    query.prepare(Database::instance()->getQuery("TableLimits", "getName"));
-    query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
-        return (result[0]["name"].toString());
-    return ("");
-}
-
-bool    TableLimits::setName(const QString &name)
-{
-    QSqlQuery   query;
-
-    query.prepare(Database::instance()->getQuery("TableLimits", "setName"));
-    query.bindValue(":id", this->id);
-    query.bindValue(":name", name);
-    return (Database::instance()->query(query));
-}
-
-QString TableLimits::getValue()
-{
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-
-    query.prepare(Database::instance()->getQuery("TableLimits", "getValue"));
-    query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
-        return (result[0]["value"].toString());
-    return ("");
-}
-
-bool    TableLimits::setValue(const QString &value)
-{
-    QSqlQuery   query;
-
-    query.prepare(Database::instance()->getQuery("TableLimits", "setValue"));
-    query.bindValue(":id", this->id);
-    query.bindValue(":value", value);
-    return (Database::instance()->query(query));
-}
-
 QString TableLimits::getIdAccessor()
 {
     QSqlQuery                           query;
@@ -138,6 +94,50 @@ bool    TableLimits::setIdObject(const QString &id_object)
     query.prepare(Database::instance()->getQuery("TableLimits", "setIdObject"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_object", id_object);
+    return (Database::instance()->query(query));
+}
+
+QString TableLimits::getName()
+{
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+
+    query.prepare(Database::instance()->getQuery("TableLimits", "getName"));
+    query.bindValue(":id", this->id);
+    if (Database::instance()->query(query, result) && result.size() > 0)
+        return (result[0]["name"].toString());
+    return ("");
+}
+
+bool    TableLimits::setName(const QString &name)
+{
+    QSqlQuery   query;
+
+    query.prepare(Database::instance()->getQuery("TableLimits", "setName"));
+    query.bindValue(":id", this->id);
+    query.bindValue(":name", name);
+    return (Database::instance()->query(query));
+}
+
+QString TableLimits::getValue()
+{
+    QSqlQuery                           query;
+    QVector<QMap<QString, QVariant> >   result;
+
+    query.prepare(Database::instance()->getQuery("TableLimits", "getValue"));
+    query.bindValue(":id", this->id);
+    if (Database::instance()->query(query, result) && result.size() > 0)
+        return (result[0]["value"].toString());
+    return ("");
+}
+
+bool    TableLimits::setValue(const QString &value)
+{
+    QSqlQuery   query;
+
+    query.prepare(Database::instance()->getQuery("TableLimits", "setValue"));
+    query.bindValue(":id", this->id);
+    query.bindValue(":value", value);
     return (Database::instance()->query(query));
 }
 

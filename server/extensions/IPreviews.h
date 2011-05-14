@@ -5,11 +5,11 @@
 
 # include "IImage.h"
 
-/// @brief Calls all the plugins that implements IPreview in order to generate
-/// the preview of a file. A cache system should also be implemented in order
-/// to not generate a new preview at each calls.
 namespace LightBird
 {
+    /// @brief Calls all the plugins that implements IPreview in order to generate
+    /// the preview of a file. A cache system should also be implemented in order
+    /// to not generate a new preview at each calls.
     class IPreviews
     {
     public:

@@ -12,6 +12,7 @@
 # include "IPlugins.h"
 # include "ITimers.h"
 
+/// @brief Contains all the LightBird's API.
 namespace LightBird
 {
     /// @brief This interface includes all the APIs of the server for the plugins.
@@ -47,7 +48,7 @@ namespace LightBird
         virtual LightBird::IPlugins         &plugins() = 0;
         /// @brief Manage the timers of the current plugin.
         virtual LightBird::ITimers          &timers() = 0;
-        /// @brief Stop the server. The server will stop as soon as all its current tasks has been done.
+        /// @brief Stop the server. The server will stop as soon as all its current tasks are finished.
         virtual void                        stop() = 0;
         /// @brief Restart the server. The server will stop as soon as all its current tasks has been done.
         /// THIS METHOD DOESN'T WORK YET !!! The server will stop, but not restart.

@@ -3,9 +3,9 @@
 
 # include <QString>
 
-/// @brief Get the MIME type of a file from its extension.
 namespace LightBird
 {
+    /// @brief Get the MIME type of a file from its extension.
     class IMime
     {
     public:

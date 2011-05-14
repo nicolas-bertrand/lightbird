@@ -5,9 +5,9 @@
 # include <QString>
 # include <QVariant>
 
-/// @brief Allows plugins to get information on a file.
 namespace LightBird
 {
+    /// @brief Allows plugins to get information on a file.
     class IIdentify
     {
     public:

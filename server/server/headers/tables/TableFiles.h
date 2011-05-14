@@ -25,7 +25,7 @@ public:
     QString     getFullPath();
     bool        setPath(const QString &path);
     QString     getType();
-    bool        setType(const QString &type);
+    bool        setType(const QString &type = "");
     QString     getIdDirectory();
     bool        setIdDirectory(const QString &id_directory = "");
 
@@ -33,8 +33,8 @@ public:
     bool        setVirtualPath(const QString &virtualPath);
 
     QVariant    getInformation(const QString &name);
-    bool        setInformation(const QString &name, const QVariant &value);
     QMap<QString, QVariant> getInformations();
+    bool        setInformation(const QString &name, const QVariant &value);
     bool        setInformations(const QMap<QString, QVariant> &informations);
     bool        removeInformation(const QString &name);
     bool        removeInformations(const QStringList &informations);
@@ -46,6 +46,9 @@ public:
     /// @brief Allows to test the TableFiles features.
     /// @return If the tests were successful.
     static bool unitTests();
+
+private:
+    QStringList types;  ///< The list of the possible types.
 };
 
 #endif // TABLEFILES_H

@@ -44,41 +44,36 @@ bool        TableAccounts::setId(const QString &id)
     return (true);
 }
 
-bool        TableAccounts::setIdFromName(const QString &name)
+QString     TableAccounts::getIdFromName(const QString &name)
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "setIdFromName"));
+    query.prepare(Database::instance()->getQuery("TableAccounts", "getIdFromName"));
     query.bindValue(":name", name);
-    if (Database::instance()->query(query, result) && result.size() != 1)
+    if (!Database::instance()->query(query, result) || result.size() != 1)
+        return ("");
+    return (result[0]["id"].toString());
+}
+
+bool        TableAccounts::setIdFromName(const QString &name)
+{
+    QString id;
+
+    if ((id = this->getIdFromName(name)).isEmpty())
         return (false);
-    this->id = result[0]["id"].toString();
+    this->id = id;
     this->connectionDate = QDateTime::currentDateTime();
     return (true);
 }
 
 QString     TableAccounts::getIdFromNameAndPassword(const QString &name, const QString &password)
 {
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
-    QString                             hash = "";
+    TableAccounts   account;
 
-    // Convert the password into a sha1 hash if it not empty
-    if (!password.isEmpty())
-        hash = QCryptographicHash::hash(password.toAscii(), QCryptographicHash::Sha1).toHex();
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getIdFromNameAndPassword"));
-    query.bindValue(":name", name);
-    query.bindValue(":password", hash);
-    // If there are only one result, the name and the password match
-    if (Database::instance()->query(query, result) && result.size() == 1)
-    {
-        Log::debug("Account connected", Properties("id", result[0]["id"]).add("name", name), "TableAccounts", "connect");
-        return (result[0]["id"].toString());
-    }
-    else
-        Log::debug("Failed to connect an account", Properties("name", name).add("passwordHash", hash), "TableAccounts", "connect");
-    return ("");
+    if (!account.setIdFromName(name) || this->passwordHash(password, account.getId()) != account.getPassword())
+        return ("");
+    return (account.getId());
 }
 
 bool        TableAccounts::setIdFromNameAndPassword(const QString &name, const QString &password)
@@ -103,15 +98,9 @@ QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifian
     if (Database::instance()->query(query, result))
         // Check the identifiant of all the account
         for (i = 0, s = result.size(); i < s; ++i)
-        {
             // If the identifiant of the account match, it is connected
             if (identifiant == QCryptographicHash::hash(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii(), QCryptographicHash::Sha1).toHex())
-            {
-                Log::debug("Account connected", Properties("id", result[i]["id"]).add("identifiant", identifiant).add("salt", salt), "TableAccounts", "connect");
                 return (result[i]["id"].toString());
-            }
-        }
-    Log::debug("Failed to connect an account", Properties("identifiant", identifiant).add("salt", salt), "TableAccounts", "connect");
     return ("");
 }
 
@@ -131,15 +120,12 @@ bool            TableAccounts::add(const QString &name, const QMap<QString, QVar
 {
     QSqlQuery   query;
     QString     id;
-    QString     hash = "";
 
     id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
-    if (!password.isEmpty())
-        hash = QCryptographicHash::hash(password.toAscii(), QCryptographicHash::Sha1).toHex();
     query.prepare(Database::instance()->getQuery("TableAccounts", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
-    query.bindValue(":password", hash);
+    query.bindValue(":password", this->passwordHash(password, id));
     query.bindValue(":administrator", QString::number(administrator));
     query.bindValue(":active", QString::number(active));
     if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
@@ -170,12 +156,9 @@ QString         TableAccounts::getPassword()
 bool            TableAccounts::setPassword(const QString &password)
 {
     QSqlQuery   query;
-    QString     hash = "";
 
-    if (!password.isEmpty())
-        hash = QCryptographicHash::hash(password.toAscii(), QCryptographicHash::Sha1).toHex();
     query.prepare(Database::instance()->getQuery("TableAccounts", "setPassword"));
-    query.bindValue(":password", hash);
+    query.bindValue(":password", this->passwordHash(password, this->id));
     query.bindValue(":id", this->id);
     return (Database::instance()->query(query));
 }
@@ -237,6 +220,22 @@ QVariant        TableAccounts::getInformation(const QString &name)
     return ("");
 }
 
+QMap<QString, QVariant> TableAccounts::getInformations()
+{
+    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery                           query;
+    QMap<QString, QVariant>             informations;
+    int                                 i;
+    int                                 s;
+
+    query.prepare(Database::instance()->getQuery("TableAccounts", "getInformations"));
+    query.bindValue(":id_account", this->id);
+    if (Database::instance()->query(query, result))
+        for (i = 0, s = result.size(); i < s; ++i)
+            informations.insert(result[i]["name"].toString(), result[i]["value"]);
+    return (informations);
+}
+
 bool            TableAccounts::setInformation(const QString &name, const QVariant &value)
 {
     QVector<QMap<QString, QVariant> >   result;
@@ -262,22 +261,6 @@ bool            TableAccounts::setInformation(const QString &name, const QVarian
         query.bindValue(":value", value);
     }
     return (Database::instance()->query(query));
-}
-
-QMap<QString, QVariant> TableAccounts::getInformations()
-{
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
-    QMap<QString, QVariant>             informations;
-    int                                 i;
-    int                                 s;
-
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getInformations"));
-    query.bindValue(":id_account", this->id);
-    if (Database::instance()->query(query, result))
-        for (i = 0, s = result.size(); i < s; ++i)
-            informations.insert(result[i]["name"].toString(), result[i]["value"]);
-    return (informations);
 }
 
 bool            TableAccounts::setInformations(const QMap<QString, QVariant> &informations)
@@ -362,6 +345,15 @@ bool            TableAccounts::removeGroup(const QString &id_group)
     return (Database::instance()->query(query) && query.numRowsAffected() > 0);
 }
 
+QString         TableAccounts::passwordHash(const QString &password, const QString &id)
+{
+    if (password.isEmpty())
+        return ("");
+    if (id.isEmpty())
+        return (QCryptographicHash::hash(password.toAscii(), QCryptographicHash::Sha1).toHex());
+    return (QCryptographicHash::hash(password.toAscii() + id.left(8).toAscii(), QCryptographicHash::Sha1).toHex());
+}
+
 bool                TableAccounts::unitTests()
 {
     TableAccounts   a1;
@@ -392,6 +384,7 @@ bool                TableAccounts::unitTests()
         ASSERT(a2.add("a2", ""));
         id2 = a2.getId();
         ASSERT(a2.add("a3", ""));
+        ASSERT(a2.getIdFromName("a3") == a2.getId());
         id1 = a1.getId();
         a1 = a2;
         ASSERT(a2.remove());
@@ -417,14 +410,14 @@ bool                TableAccounts::unitTests()
         ASSERT(a2.setIdFromNameAndPassword("a3", "p1"));
         ASSERT(a2.getId() == a1.getId());
         ASSERT(a2.setIdFromNameAndPassword("a2", ""));
-        ASSERT(a2.setIdFromIdentifiantAndSalt(QCryptographicHash::hash("a3" + QCryptographicHash::hash("p1", QCryptographicHash::Sha1).toHex() + "salt", QCryptographicHash::Sha1).toHex().data(), "salt"));
+        ASSERT(a2.setIdFromIdentifiantAndSalt(QCryptographicHash::hash("a3" + QCryptographicHash::hash("p1" + a2.getIdFromName("a3").left(8).toAscii(), QCryptographicHash::Sha1).toHex() + "salt", QCryptographicHash::Sha1).toHex().data(), "salt"));
         ASSERT(a2.setIdFromIdentifiantAndSalt(QCryptographicHash::hash(QByteArray("a3") + a1.getPassword().toAscii() + "salt", QCryptographicHash::Sha1).toHex().data(), "salt"));
         ASSERT(a2.setIdFromIdentifiantAndSalt(QCryptographicHash::hash(QByteArray("a2") + "salt", QCryptographicHash::Sha1).toHex().data(), "salt"));
-        ASSERT(a1.getPassword() == QCryptographicHash::hash("p1", QCryptographicHash::Sha1).toHex());
+        ASSERT(a1.getPassword() == QCryptographicHash::hash("p1" + a2.getIdFromName("a3").left(8).toAscii(), QCryptographicHash::Sha1).toHex());
         ASSERT(a1.setPassword(""));
         ASSERT(a1.getPassword().isEmpty());
         ASSERT(a1.setPassword("p2"));
-        ASSERT(a1.getPassword() == QCryptographicHash::hash("p2", QCryptographicHash::Sha1).toHex());
+        ASSERT(a1.getPassword() == QCryptographicHash::hash("p2" + a2.getIdFromName("a3").left(8).toAscii(), QCryptographicHash::Sha1).toHex());
         ASSERT(a1.isActive());
         ASSERT(a1.isActive(false));
         ASSERT(!a1.isActive());

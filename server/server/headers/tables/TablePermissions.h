@@ -25,11 +25,11 @@ public:
     bool        add(const QString &id_accessor, const QString &id_object, const QString &right, bool granted = true);
 
     QString     getIdAccessor();
-    bool        setIdAccessor(const QString &id_accessor);
+    bool        setIdAccessor(const QString &id_accessor = "");
     QString     getIdObject();
-    bool        setIdObject(const QString &id_object);
+    bool        setIdObject(const QString &id_object = "");
     QString     getRight();
-    bool        setRight(const QString &right);
+    bool        setRight(const QString &right = "");
     bool        isGranted();
     bool        isGranted(bool granted);
 
@@ -43,12 +43,12 @@ public:
 private:
     /// @brief Check if the accessors has the right on the object.
     /// @return 2 if the permission is granted, 1 if it is not, and 0 if the answer is unknow.
-    unsigned    _idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, const QString &right);
+    unsigned    _idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right);
     /// @brief Check the rights of the accessors in the database.
     /// @return The same values as _isAllowed.
     unsigned    _checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right);
     /// @brief Fills the lists allowed and denied with the rights of the accessors of the object.
-    void        _getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &idObject, QStringList &allowed, QStringList &denied);
+    void        _getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied);
     /// @brief Merges the source rights to the destination rights.
     void        _mergeRights(QStringList &allowedSrc, QStringList &deniedSrc, QStringList &allowedDest, QStringList &deniedDest);
 };

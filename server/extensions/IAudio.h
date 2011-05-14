@@ -3,14 +3,14 @@
 
 # include <QString>
 
-/// @brief Allows plugins to convert audio files.
-///
-/// Many settings can be defined to change the size and quality of the audio
-/// to reduce its volume.
-/// If some of these settings are not defined, the default ones are used.
-/// Notice that the default quality settings are pretty high.
 namespace LightBird
 {
+    /// @brief Allows plugins to convert audio files.
+    ///
+    /// Many settings can be defined to change the size and quality of the audio
+    /// to reduce its volume.
+    /// If some of these settings are not defined, the default ones are used.
+    /// Notice that the default quality settings are pretty high.
     class IAudio
     {
     public:

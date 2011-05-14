@@ -120,13 +120,13 @@ QString     TableEvents::getIdAccessor()
     return ("");
 }
 
-bool        TableEvents::setIdAccessor(const QString &idAccessor)
+bool        TableEvents::setIdAccessor(const QString &id_accessor)
 {
     QSqlQuery   query;
 
     query.prepare(Database::instance()->getQuery("TableEvents", "setIdAccessor"));
     query.bindValue(":id", this->id);
-    query.bindValue(":id_accessor", idAccessor);
+    query.bindValue(":id_accessor", id_accessor);
     return (Database::instance()->query(query));
 }
 
@@ -142,13 +142,13 @@ QString     TableEvents::getIdObject()
     return ("");
 }
 
-bool        TableEvents::setIdObject(const QString &idObject)
+bool        TableEvents::setIdObject(const QString &id_object)
 {
     QSqlQuery   query;
 
     query.prepare(Database::instance()->getQuery("TableEvents", "setIdObject"));
     query.bindValue(":id", this->id);
-    query.bindValue(":id_object", idObject);
+    query.bindValue(":id_object", id_object);
     return (Database::instance()->query(query));
 }
 
@@ -163,6 +163,22 @@ QVariant    TableEvents::getInformation(const QString &name)
     if (Database::instance()->query(query, result) && result.size() > 0)
         return (result.value(0).value("value").toString());
     return ("");
+}
+
+QMap<QString, QVariant> TableEvents::getInformations()
+{
+    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery                           query;
+    QMap<QString, QVariant>             informations;
+    int                                 i;
+    int                                 s;
+
+    query.prepare(Database::instance()->getQuery("TableEvents", "getInformations"));
+    query.bindValue(":id_event", this->id);
+    if (Database::instance()->query(query, result))
+        for (i = 0, s = result.size(); i < s; ++i)
+            informations.insert(result[i]["name"].toString(), result[i]["value"]);
+    return (informations);
 }
 
 bool        TableEvents::setInformation(const QString &name, const QVariant &value)
@@ -190,22 +206,6 @@ bool        TableEvents::setInformation(const QString &name, const QVariant &val
         query.bindValue(":value", value);
     }
     return (Database::instance()->query(query));
-}
-
-QMap<QString, QVariant> TableEvents::getInformations()
-{
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
-    QMap<QString, QVariant>             informations;
-    int                                 i;
-    int                                 s;
-
-    query.prepare(Database::instance()->getQuery("TableEvents", "getInformations"));
-    query.bindValue(":id_event", this->id);
-    if (Database::instance()->query(query, result))
-        for (i = 0, s = result.size(); i < s; ++i)
-            informations.insert(result[i]["name"].toString(), result[i]["value"]);
-    return (informations);
 }
 
 bool        TableEvents::setInformations(const QMap<QString, QVariant> &informations)
