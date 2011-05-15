@@ -60,7 +60,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
-    metadata.licence = "LGPL";
+    metadata.licence = "CC BY-NC-SA 3.0";
 }
 
 bool    Plugin::onConnect(LightBird::IClient &client)

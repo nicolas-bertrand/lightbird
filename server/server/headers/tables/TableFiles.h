@@ -43,10 +43,6 @@ public:
     bool        addCollection(const QString &id_collection);
     bool        removeCollection(const QString &id_collection);
 
-    /// @brief Allows to test the TableFiles features.
-    /// @return If the tests were successful.
-    static bool unitTests();
-
 private:
     QStringList types;  ///< The list of the possible types.
 };

@@ -2,4 +2,5 @@ TEMPLATE    =   subdirs
 
 SUBDIRS     =   Example \
                 Http \
-                Log
+                Log \
+                Test

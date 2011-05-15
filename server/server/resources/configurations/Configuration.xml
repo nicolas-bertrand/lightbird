@@ -53,5 +53,6 @@
     <plugin id="Http/Get"/>
     <plugin id="Http/Parser"/>
     <plugin id="Log/File"/>
+    <plugin id="Test"/>
   </configurations>
 </configuration>

@@ -20,10 +20,6 @@ public:
     bool    setIdObject(const QString &id_object);
     QString getName();
     bool    setName(const QString &name);
-
-    /// @brief Allows to test the ITableTags features.
-    /// @return If the tests were successful.
-    static bool unitTests();
 };
 
 #endif // TABLETAGS_H

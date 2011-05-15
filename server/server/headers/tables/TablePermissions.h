@@ -36,10 +36,6 @@ public:
     bool        isAllowed(const QString &id_accessor, const QString &id_object, const QString &right);
     bool        getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied);
 
-    /// @brief Allows to test the ITablePermissions features.
-    /// @return If the tests were successful.
-    static bool unitTests();
-
 private:
     /// @brief Check if the accessors has the right on the object.
     /// @return 2 if the permission is granted, 1 if it is not, and 0 if the answer is unknow.

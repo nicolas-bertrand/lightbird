@@ -25,10 +25,6 @@ public:
     bool        setVirtualPath(const QString &virtualPath);
     QStringList getCollections(const QString &id_accessor = "", const QString &right = "");
     QStringList getFiles(const QString &id_accessor = "", const QString &right = "");
-
-    /// @brief Allows to test the TableCollections features.
-    /// @return If the tests were successful.
-    static bool unitTests();
 };
 
 #endif // TABLECOLLECTIONS_H

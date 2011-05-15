@@ -23,10 +23,6 @@ public:
     bool        addAccount(const QString &id_account);
     bool        removeAccount(const QString &id_account);
     QStringList getAccounts();
-
-    /// @brief Allows to test the ITableTags features.
-    /// @return If the tests were successful.
-    static bool unitTests();
 };
 
 #endif // TABLEGROUPS_H

@@ -49,10 +49,6 @@ public:
     bool            removeGroup(const QString &id_group);
     QString         passwordHash(const QString &password, const QString &id = "");
 
-    /// @brief Allows to test the TableAccounts features.
-    /// @return If the tests were successful.
-    static bool     unitTests();
-
 private:
     QDateTime       connectionDate; ///< The date of the connection of the client.
 };

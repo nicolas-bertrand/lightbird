@@ -31,6 +31,4 @@
 # define DEFAULT_LANGUAGES_PATH                 "languages"             ///< The name of the default languages directory.
 # define DEFAULT_MAX_TIMERS                     3                       ///< The default maximum number of timers autorized at the same time for a plugin.
 
-# define ASSERT(a) if (!(a)) throw Properties("line", __LINE__);        ///< Used for the unit tests.
-
 #endif // DEFINES_H

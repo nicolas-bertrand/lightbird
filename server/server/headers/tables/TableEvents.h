@@ -33,10 +33,6 @@ public:
     bool        setInformations(const QMap<QString, QVariant> &informations);
     bool        removeInformation(const QString &name);
     bool        removeInformations(const QStringList &informations);
-
-    /// @brief Allows to test the TableEvents features.
-    /// @return If the tests were successful.
-    static bool unitTests();
 };
 
 #endif // TABLEEVENTS_H

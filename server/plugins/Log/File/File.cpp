@@ -85,7 +85,7 @@ void    File::getMetadata(LightBird::IMetadata &metadata) const
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
-    metadata.licence = "LGPL";
+    metadata.licence = "CC BY-NC-SA 3.0";
 }
 
 void        File::log(LightBird::ILogs::Level level, const QDateTime &date, const QString &message,

@@ -3,12 +3,11 @@
 
 # include <QObject>
 # include <QString>
-# include <QStringList>
 
 # include "Arguments.h"
 
 /// @brief The main class, called to initialize the server database, configuration,
-/// plugins, etc. and which also cleans the server before it quits.
+/// plugins... and which also cleans the server before it quits.
 class Server : public QObject
 {
     Q_OBJECT
@@ -22,9 +21,6 @@ public:
 
     /// @return True if the server is correctly initialized.
     operator bool();
-    /// @brief Runs all the unit tests of the server.
-    /// @return False is at least one test failed.
-    bool    unitTests();
 
 private:
     Server();
@@ -52,7 +48,7 @@ private:
     void    _loadPlugins();
 
     Arguments   &arguments;     ///< Stores the arguments used to launch the server.
-    bool        initialized;    ///< True if the server has been correctly initialized by _initialize().
+    bool        initialized;    ///< True if the server has been correctly initialized.
 
 private slots:
     /// @brief Calls the IGui::show() method of a plugin that has just been loaded,

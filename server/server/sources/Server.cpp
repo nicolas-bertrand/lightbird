@@ -1,22 +1,16 @@
 #include <QApplication>
 #include <QTranslator>
-#include <QString>
-#include <QPixmap>
-#include <QBitmap>
 #include <QFileInfo>
 #include <QDir>
 
+#include "Configurations.h"
 #include "Database.h"
+#include "IGui.h"
+#include "Log.h"
+#include "Network.h"
+#include "Plugins.hpp"
 #include "Threads.h"
 #include "Server.h"
-#include "Network.h"
-#include "Configurations.h"
-#include "Plugins.hpp"
-#include "Log.h"
-#include "IGui.h"
-#include "Timer.h"
-#include "ITimer.h"
-#include "ApiGuis.h"
 
 Server::Server(Arguments &args, QObject *parent) : QObject(parent),
                                                    arguments(args),
@@ -243,46 +237,4 @@ void                Server::_pluginLoaded(QString id)
 Server::operator bool()
 {
     return (this->initialized);
-}
-
-#include "TableAccounts.h"
-#include "TableCollections.h"
-#include "TableDirectories.h"
-#include "TableEvents.h"
-#include "TableFiles.h"
-#include "TableGroups.h"
-#include "TableLimits.h"
-#include "TablePermissions.h"
-#include "TableTags.h"
-
-bool        Server::unitTests()
-{
-    bool    result = true;
-
-    Log::info("Runing the unit tests of the whole server", "Server", "unitTests");
-    if (!Configurations::instance()->unitTests())
-        result = false;
-    else if (!TableAccounts::unitTests())
-        result = false;
-    else if (!TableCollections::unitTests())
-        result = false;
-    else if (!TableDirectories::unitTests())
-        result = false;
-    else if (!TableEvents::unitTests())
-        result = false;
-    else if (!TableFiles::unitTests())
-        result = false;
-    else if (!TableGroups::unitTests())
-        result = false;
-    else if (!TableLimits::unitTests())
-        result = false;
-    else if (!TablePermissions::unitTests())
-        result = false;
-    else if (!TableTags::unitTests())
-        result = false;
-    if (result)
-        Log::info("All the unit tests were successful!", "Server", "unitTests");
-    else
-        Log::info("At least one unit test failed!", "Server", "unitTests");
-    return (result);
 }

@@ -1,5 +1,6 @@
 #include <QtPlugin>
 
+#include "UnitTests.h"
 #include "Plugin.h"
 
 Plugin::Plugin()
@@ -33,14 +34,22 @@ void    Plugin::onUninstall(LightBird::IApi *api)
 
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
-    metadata.name = "Basic example";
-    metadata.brief = "An example of what a basic plugin looks like.";
-    metadata.description = "This is a basic plugin example that can be used as a base to create any kind of plugin. It does nothing except beeing properly loaded.";
+    metadata.name = "Test";
+    metadata.brief = "Run various tests on the server API.";
+    metadata.description = "Allows to test the server API, the network, and the database.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
     metadata.licence = "CC BY-NC-SA 3.0";
+}
+
+bool    Plugin::timer(const QString &name)
+{
+    // Launch the unit tests
+    if (name == "unitTests")
+        UnitTests(*this->api);
+    return (false);
 }
 
 Q_EXPORT_PLUGIN2(Plugin, Plugin)

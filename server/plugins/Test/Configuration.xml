@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <timers>
+    <!-- Launch the unit tests one second after the loading of the plugin -->
+    <unitTests>1000</unitTests>
+  </timers>
+</configuration>

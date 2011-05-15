@@ -14,7 +14,7 @@ int                     main(int argc, char **argv)
     Server              *server;
     int                 result;
 
-    // Instantiales Qt core class
+    // Instanciates Qt core class
     application = ::loadQt(arguments);
     // Instanciates and initializes the server
     if (*(server = new Server(arguments, application)) == false)
@@ -38,7 +38,7 @@ int                     main(int argc, char **argv)
     return (result);
 }
 
-/// @brief Instanciate the main class of Qt. If the argument "-noGui" is defined
+/// @brief Instanciates the main class of Qt. If the argument "-noGui" is defined
 /// in the command line, QCoreApplication is created. Otherwise QApplication is
 /// instanciates. QApplication allows the server to display GUIs feature. In contrast,
 /// QCoreApplication run the server as a console application, without any GUIs.

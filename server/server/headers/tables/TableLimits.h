@@ -24,10 +24,6 @@ public:
     bool    setName(const QString &name);
     QString getValue();
     bool    setValue(const QString &value);
-
-    /// @brief Allows to test the ITableLimits features.
-    /// @return If the tests were successful.
-    static bool unitTests();
 };
 
 #endif // TABLELIMITS_H

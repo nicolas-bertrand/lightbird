@@ -51,8 +51,6 @@ public:
     virtual bool        save();
     /// @brief Set the parent of the object is his living thread (not in the current thread)
     void                setParent(QObject *parent);
-    /// @brief Allows to test the Configuration features get() set() and count().
-    bool                unitTests();
 
 protected:
     Configuration();
