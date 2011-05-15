@@ -26,17 +26,17 @@ public:
     bool                isTable(const QString &tableName);
     bool                isTable(LightBird::ITable::Tables tableId);
 
-    LightBird::ITableAccessors   *toTableAccessors();
-    LightBird::ITableAccounts    *toTableAccounts();
-    LightBird::ITableCollections *toTableCollections();
-    LightBird::ITableDirectories *toTableDirectories();
-    LightBird::ITableEvents      *toTableEvents();
-    LightBird::ITableFiles       *toTableFiles();
-    LightBird::ITableGroups      *toTableGroups();
-    LightBird::ITableLimits      *toTableLimits();
-    LightBird::ITableObjects     *toTableObjects();
-    LightBird::ITablePermissions *toTablePermissions();
-    LightBird::ITableTags        *toTableTags();
+    LightBird::ITableAccessors   *toAccessors();
+    LightBird::ITableAccounts    *toAccounts();
+    LightBird::ITableCollections *toCollections();
+    LightBird::ITableDirectories *toDirectories();
+    LightBird::ITableEvents      *toEvents();
+    LightBird::ITableFiles       *toFiles();
+    LightBird::ITableGroups      *toGroups();
+    LightBird::ITableLimits      *toLimits();
+    LightBird::ITableObjects     *toObjects();
+    LightBird::ITablePermissions *toPermissions();
+    LightBird::ITableTags        *toTags();
 
     /// @brief This operator is virtual to allows subclasses to modify its behaviour.
     virtual Table       &operator=(const Table &t);

@@ -2,6 +2,18 @@
 #include "Database.h"
 #include "ApiDatabase.h"
 
+#include "ITableAccessors.h"
+#include "ITableAccounts.h"
+#include "ITableCollections.h"
+#include "ITableDirectories.h"
+#include "ITableEvents.h"
+#include "ITableFiles.h"
+#include "ITableGroups.h"
+#include "ITableLimits.h"
+#include "ITableObjects.h"
+#include "ITablePermissions.h"
+#include "ITableTags.h"
+
 ApiDatabase::ApiDatabase(const QString &id)
 {
     this->id = id;
@@ -34,4 +46,49 @@ QString ApiDatabase::getQuery(const QString &group, const QString &name)
 bool    ApiDatabase::updates(LightBird::IDatabase::Updates &updates, const QDateTime &date, const QStringList &tables)
 {
     return (Database::instance()->updates(updates, date, tables));
+}
+
+QSharedPointer<LightBird::ITableAccounts>    ApiDatabase::getAccounts(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableAccounts>(Database::instance()->getTable(LightBird::ITable::Accounts, id)->toAccounts()));
+}
+
+QSharedPointer<LightBird::ITableCollections> ApiDatabase::getCollections(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableCollections>(Database::instance()->getTable(LightBird::ITable::Collections, id)->toCollections()));
+}
+
+QSharedPointer<LightBird::ITableDirectories> ApiDatabase::getDirectories(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableDirectories>(Database::instance()->getTable(LightBird::ITable::Directories, id)->toDirectories()));
+}
+
+QSharedPointer<LightBird::ITableEvents>      ApiDatabase::getEvents(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableEvents>(Database::instance()->getTable(LightBird::ITable::Events, id)->toEvents()));
+}
+
+QSharedPointer<LightBird::ITableFiles>       ApiDatabase::getFiles(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableFiles>(Database::instance()->getTable(LightBird::ITable::Files, id)->toFiles()));
+}
+
+QSharedPointer<LightBird::ITableGroups>      ApiDatabase::getGroups(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableGroups>(Database::instance()->getTable(LightBird::ITable::Groups, id)->toGroups()));
+}
+
+QSharedPointer<LightBird::ITableLimits>      ApiDatabase::getLimits(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableLimits>(Database::instance()->getTable(LightBird::ITable::Limits, id)->toLimits()));
+}
+
+QSharedPointer<LightBird::ITablePermissions> ApiDatabase::getPermissions(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITablePermissions>(Database::instance()->getTable(LightBird::ITable::Permissions, id)->toPermissions()));
+}
+
+QSharedPointer<LightBird::ITableTags>        ApiDatabase::getTags(const QString &id)
+{
+    return (QSharedPointer<LightBird::ITableTags>(Database::instance()->getTable(LightBird::ITable::Tags, id)->toTags()));
 }

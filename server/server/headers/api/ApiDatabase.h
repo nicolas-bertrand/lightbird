@@ -21,6 +21,16 @@ public:
     QString             getQuery(const QString &group, const QString &name, const QString &id);
     bool                updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());
 
+    QSharedPointer<LightBird::ITableAccounts>    getAccounts(const QString &id = "");
+    QSharedPointer<LightBird::ITableCollections> getCollections(const QString &id = "");
+    QSharedPointer<LightBird::ITableDirectories> getDirectories(const QString &id = "");
+    QSharedPointer<LightBird::ITableEvents>      getEvents(const QString &id = "");
+    QSharedPointer<LightBird::ITableFiles>       getFiles(const QString &id = "");
+    QSharedPointer<LightBird::ITableGroups>      getGroups(const QString &id = "");
+    QSharedPointer<LightBird::ITableLimits>      getLimits(const QString &id = "");
+    QSharedPointer<LightBird::ITablePermissions> getPermissions(const QString &id = "");
+    QSharedPointer<LightBird::ITableTags>        getTags(const QString &id = "");
+
 private:
     ApiDatabase();
     ApiDatabase(const ApiDatabase &);

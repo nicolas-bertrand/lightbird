@@ -79,27 +79,27 @@ namespace LightBird
 
         // Casts
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableAccessors   *toTableAccessors() = 0;
+        virtual LightBird::ITableAccessors   *toAccessors() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableAccounts    *toTableAccounts() = 0;
+        virtual LightBird::ITableAccounts    *toAccounts() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableCollections *toTableCollections() = 0;
+        virtual LightBird::ITableCollections *toCollections() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableDirectories *toTableDirectories() = 0;
+        virtual LightBird::ITableDirectories *toDirectories() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableEvents      *toTableEvents() = 0;
+        virtual LightBird::ITableEvents      *toEvents() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableFiles       *toTableFiles() = 0;
+        virtual LightBird::ITableFiles       *toFiles() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableGroups      *toTableGroups() = 0;
+        virtual LightBird::ITableGroups      *toGroups() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableLimits      *toTableLimits() = 0;
+        virtual LightBird::ITableLimits      *toLimits() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableObjects     *toTableObjects() = 0;
+        virtual LightBird::ITableObjects     *toObjects() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITablePermissions *toTablePermissions() = 0;
+        virtual LightBird::ITablePermissions *toPermissions() = 0;
         /// @brief Cast the table if possible. Returns NULL otherwise.
-        virtual LightBird::ITableTags        *toTableTags() = 0;
+        virtual LightBird::ITableTags        *toTags() = 0;
     };
 }
 

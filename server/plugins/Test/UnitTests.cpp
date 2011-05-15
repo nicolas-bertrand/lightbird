@@ -125,9 +125,9 @@ bool    UnitTests::_configuration()
 
 bool            UnitTests::_accounts()
 {
-    QSharedPointer<LightBird::ITableAccounts> a1(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
-    QSharedPointer<LightBird::ITableAccounts> a2(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
-    QSharedPointer<LightBird::ITableGroups> g(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
+    QSharedPointer<LightBird::ITableAccounts> a1(this->database.getAccounts());
+    QSharedPointer<LightBird::ITableAccounts> a2(this->database.getAccounts());
+    QSharedPointer<LightBird::ITableGroups> g(this->database.getGroups());
     QSqlQuery   query;
     QString     id1;
     QString     id2;
@@ -172,7 +172,7 @@ bool            UnitTests::_accounts()
         ASSERT(a1->setName("a3"));
         ASSERT(a1->getName() == "a3");
         ASSERT(a1->setName("a3"));
-        QSharedPointer<LightBird::ITableAccounts> a3(this->database.getTable(LightBird::ITable::Accounts, a1->getId())->toTableAccounts());
+        QSharedPointer<LightBird::ITableAccounts> a3(this->database.getAccounts(a1->getId()));
         ASSERT(a3->getName() == "a3");
         ASSERT(a2->add("a2"));
         ASSERT(!a2->setName("a3"));
@@ -241,11 +241,11 @@ bool            UnitTests::_accounts()
 
 bool            UnitTests::_collections()
 {
-    QSharedPointer<LightBird::ITableCollections> c1(this->database.getTable(LightBird::ITable::Collections)->toTableCollections());
-    QSharedPointer<LightBird::ITableCollections> c2(this->database.getTable(LightBird::ITable::Collections)->toTableCollections());
-    QSharedPointer<LightBird::ITableAccounts> a(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
-    QSharedPointer<LightBird::ITableFiles> f(this->database.getTable(LightBird::ITable::Files)->toTableFiles());
-    QSharedPointer<LightBird::ITablePermissions> p(this->database.getTable(LightBird::ITable::Permissions)->toTablePermissions());
+    QSharedPointer<LightBird::ITableCollections> c1(this->database.getCollections());
+    QSharedPointer<LightBird::ITableCollections> c2(this->database.getCollections());
+    QSharedPointer<LightBird::ITableAccounts> a(this->database.getAccounts());
+    QSharedPointer<LightBird::ITableFiles> f(this->database.getFiles());
+    QSharedPointer<LightBird::ITablePermissions> p(this->database.getPermissions());
     QSqlQuery   query;
     QStringList l;
 
@@ -331,11 +331,11 @@ bool            UnitTests::_collections()
 
 bool            UnitTests::_directories()
 {
-    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
-    QSharedPointer<LightBird::ITableDirectories> d2(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
-    QSharedPointer<LightBird::ITableFiles> f(this->database.getTable(LightBird::ITable::Files)->toTableFiles());
-    QSharedPointer<LightBird::ITableAccounts> a(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
-    QSharedPointer<LightBird::ITablePermissions> p(this->database.getTable(LightBird::ITable::Permissions)->toTablePermissions());
+    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getDirectories());
+    QSharedPointer<LightBird::ITableDirectories> d2(this->database.getDirectories());
+    QSharedPointer<LightBird::ITableFiles> f(this->database.getFiles());
+    QSharedPointer<LightBird::ITableAccounts> a(this->database.getAccounts());
+    QSharedPointer<LightBird::ITablePermissions> p(this->database.getPermissions());
     QSqlQuery   query;
     QStringList l;
     QStringList m;
@@ -423,8 +423,8 @@ bool            UnitTests::_directories()
 
 bool                        UnitTests::_events()
 {
-    QSharedPointer<LightBird::ITableEvents> e1(this->database.getTable(LightBird::ITable::Events)->toTableEvents());
-    QSharedPointer<LightBird::ITableEvents> e2(this->database.getTable(LightBird::ITable::Events)->toTableEvents());
+    QSharedPointer<LightBird::ITableEvents> e1(this->database.getEvents());
+    QSharedPointer<LightBird::ITableEvents> e2(this->database.getEvents());
     QMap<QString, QVariant> informations;
     QSqlQuery               query;
     QStringList             events;
@@ -486,10 +486,10 @@ bool                        UnitTests::_events()
 
 bool            UnitTests::_files()
 {
-    QSharedPointer<LightBird::ITableFiles> f1(this->database.getTable(LightBird::ITable::Files)->toTableFiles());
-    QSharedPointer<LightBird::ITableFiles> f2(this->database.getTable(LightBird::ITable::Files)->toTableFiles());
-    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
-    QSharedPointer<LightBird::ITableAccounts> a1(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
+    QSharedPointer<LightBird::ITableFiles> f1(this->database.getFiles());
+    QSharedPointer<LightBird::ITableFiles> f2(this->database.getFiles());
+    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getDirectories());
+    QSharedPointer<LightBird::ITableAccounts> a1(this->database.getAccounts());
     QSqlQuery   query;
 
     this->log.debug("Running unit tests of the files...", "UnitTests", "_files");
@@ -582,9 +582,9 @@ bool            UnitTests::_files()
 
 bool            UnitTests::_groups()
 {
-    QSharedPointer<LightBird::ITableGroups> g1(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
-    QSharedPointer<LightBird::ITableGroups> g2(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
-    QSharedPointer<LightBird::ITableAccounts> a(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
+    QSharedPointer<LightBird::ITableGroups> g1(this->database.getGroups());
+    QSharedPointer<LightBird::ITableGroups> g2(this->database.getGroups());
+    QSharedPointer<LightBird::ITableAccounts> a(this->database.getAccounts());
     QSqlQuery   query;
     QString     id1;
     QString     id2;
@@ -664,10 +664,10 @@ bool            UnitTests::_groups()
 
 bool            UnitTests::_limits()
 {
-    QSharedPointer<LightBird::ITableLimits> l(this->database.getTable(LightBird::ITable::Limits)->toTableLimits());
-    QSharedPointer<LightBird::ITableGroups> g1(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
-    QSharedPointer<LightBird::ITableGroups> g2(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
-    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
+    QSharedPointer<LightBird::ITableLimits> l(this->database.getLimits());
+    QSharedPointer<LightBird::ITableGroups> g1(this->database.getGroups());
+    QSharedPointer<LightBird::ITableGroups> g2(this->database.getGroups());
+    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getDirectories());
     QSqlQuery   query;
 
     this->log.debug("Running unit tests of the limits...", "UnitTests", "_limits");
@@ -722,14 +722,14 @@ bool            UnitTests::_limits()
 
 bool            UnitTests::_permissions()
 {
-    QSharedPointer<LightBird::ITablePermissions> p(this->database.getTable(LightBird::ITable::Permissions)->toTablePermissions());
-    QSharedPointer<LightBird::ITableAccounts> a(this->database.getTable(LightBird::ITable::Accounts)->toTableAccounts());
-    QSharedPointer<LightBird::ITableGroups> g1(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
-    QSharedPointer<LightBird::ITableGroups> g2(this->database.getTable(LightBird::ITable::Groups)->toTableGroups());
-    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
-    QSharedPointer<LightBird::ITableDirectories> d2(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
-    QSharedPointer<LightBird::ITableCollections> c(this->database.getTable(LightBird::ITable::Collections)->toTableCollections());
-    QSharedPointer<LightBird::ITableFiles> f(this->database.getTable(LightBird::ITable::Files)->toTableFiles());
+    QSharedPointer<LightBird::ITablePermissions> p(this->database.getPermissions());
+    QSharedPointer<LightBird::ITableAccounts> a(this->database.getAccounts());
+    QSharedPointer<LightBird::ITableGroups> g1(this->database.getGroups());
+    QSharedPointer<LightBird::ITableGroups> g2(this->database.getGroups());
+    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getDirectories());
+    QSharedPointer<LightBird::ITableDirectories> d2(this->database.getDirectories());
+    QSharedPointer<LightBird::ITableCollections> c(this->database.getCollections());
+    QSharedPointer<LightBird::ITableFiles> f(this->database.getFiles());
     QSqlQuery   query;
     QString     id;
     QString     id_object;
@@ -1074,9 +1074,9 @@ bool            UnitTests::_permissions()
 
 bool            UnitTests::_tags()
 {
-    QSharedPointer<LightBird::ITableTags> t(this->database.getTable(LightBird::ITable::Tags)->toTableTags());
-    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
-    QSharedPointer<LightBird::ITableDirectories> d2(this->database.getTable(LightBird::ITable::Directories)->toTableDirectories());
+    QSharedPointer<LightBird::ITableTags> t(this->database.getTags());
+    QSharedPointer<LightBird::ITableDirectories> d1(this->database.getDirectories());
+    QSharedPointer<LightBird::ITableDirectories> d2(this->database.getDirectories());
     QSqlQuery   query;
 
     this->log.debug("Running unit tests of the tags...", "UnitTests", "_tags");

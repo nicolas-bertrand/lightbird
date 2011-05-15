@@ -54,6 +54,7 @@ namespace LightBird
         /// @param table : The table to get. If the table is unknow, this
         /// method will search in the database the table of the id.
         /// @param id : The id of the row to put by default in the table instance.
+        /// @return NULL if the table has not been found.
         /// @example getTable
         /// This example shows how to cast ITable into ITableAccounts :
         /// LightBird::ITableAccounts *account = getTable(LightBird::ITable::Accounts)->toTableAccounts();
@@ -78,6 +79,43 @@ namespace LightBird
         /// the tables are taken.
         /// @return True if the database has been modified.
         virtual bool    updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList()) = 0;
+
+        /// @brief Returns an instance of the table accounts.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableAccounts>    getAccounts(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table collections.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableCollections> getCollections(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table directories.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableDirectories> getDirectories(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table events.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableEvents>      getEvents(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table files.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableFiles>       getFiles(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table groups.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableGroups>      getGroups(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table limits.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableLimits>      getLimits(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table permissions.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITablePermissions> getPermissions(const QString &id = "") = 0;
+        /// @brief Returns an instance of the table tags.
+        /// @param id : The id of the row to put by default in the table instance.
+        /// If the id doesn't exists or is empty, the table is initialized with no row.
+        virtual QSharedPointer<LightBird::ITableTags>        getTags(const QString &id = "") = 0;
     };
 }
 

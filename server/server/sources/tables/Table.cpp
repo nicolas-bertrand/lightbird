@@ -129,57 +129,57 @@ bool            Table::isTable(LightBird::ITable::Tables tableId)
     return (true);
 }
 
-LightBird::ITableAccessors   *Table::toTableAccessors()
+LightBird::ITableAccessors   *Table::toAccessors()
 {
     return (dynamic_cast<LightBird::ITableAccessors *>(this));
 }
 
-LightBird::ITableAccounts    *Table::toTableAccounts()
+LightBird::ITableAccounts    *Table::toAccounts()
 {
     return (dynamic_cast<LightBird::ITableAccounts *>(this));
 }
 
-LightBird::ITableCollections *Table::toTableCollections()
+LightBird::ITableCollections *Table::toCollections()
 {
     return (dynamic_cast<LightBird::ITableCollections *>(this));
 }
 
-LightBird::ITableDirectories *Table::toTableDirectories()
+LightBird::ITableDirectories *Table::toDirectories()
 {
     return (dynamic_cast<LightBird::ITableDirectories *>(this));
 }
 
-LightBird::ITableEvents      *Table::toTableEvents()
+LightBird::ITableEvents      *Table::toEvents()
 {
     return (dynamic_cast<LightBird::ITableEvents *>(this));
 }
 
-LightBird::ITableFiles       *Table::toTableFiles()
+LightBird::ITableFiles       *Table::toFiles()
 {
     return (dynamic_cast<LightBird::ITableFiles *>(this));
 }
 
-LightBird::ITableGroups      *Table::toTableGroups()
+LightBird::ITableGroups      *Table::toGroups()
 {
     return (dynamic_cast<LightBird::ITableGroups *>(this));
 }
 
-LightBird::ITableLimits      *Table::toTableLimits()
+LightBird::ITableLimits      *Table::toLimits()
 {
     return (dynamic_cast<LightBird::ITableLimits *>(this));
 }
 
-LightBird::ITableObjects     *Table::toTableObjects()
+LightBird::ITableObjects     *Table::toObjects()
 {
     return (dynamic_cast<LightBird::ITableObjects *>(this));
 }
 
-LightBird::ITablePermissions *Table::toTablePermissions()
+LightBird::ITablePermissions *Table::toPermissions()
 {
     return (dynamic_cast<LightBird::ITablePermissions *>(this));
 }
 
-LightBird::ITableTags        *Table::toTableTags()
+LightBird::ITableTags        *Table::toTags()
 {
     return (dynamic_cast<LightBird::ITableTags *>(this));
 }
