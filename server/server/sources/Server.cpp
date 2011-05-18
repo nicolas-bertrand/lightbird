@@ -5,6 +5,7 @@
 
 #include "Configurations.h"
 #include "Database.h"
+#include "Events.h"
 #include "IGui.h"
 #include "Log.h"
 #include "Network.h"
@@ -61,6 +62,7 @@ void    Server::_initialize()
     Log::info("Loading the logs", "Server", "_initialize");
     Log::instance()->setMode(Log::WRITE);
     Log::info("Server initialized", "Server", "_initialize");
+    Events::instance()->send("server_started");
     this->initialized = true;
 }
 

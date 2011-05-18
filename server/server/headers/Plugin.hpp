@@ -12,9 +12,6 @@
 # include "Extensions.h"
 # include "IPlugin.h"
 # include "IPlugins.h"
-# include "IConfiguration.h"
-# include "Timer.h"
-# include "ITimer.h"
 
 /// @brief Manage a plugin.
 class Plugin : public QObject

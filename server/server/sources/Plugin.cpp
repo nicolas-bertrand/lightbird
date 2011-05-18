@@ -1,5 +1,7 @@
 #include <QDir>
 #include <QFile>
+#include "ITimer.h"
+#include "IEvent.h"
 #include "Configurations.h"
 #include "Log.h"
 #include "Tools.h"
@@ -323,14 +325,12 @@ bool    Plugin::_load()
 
 void    Plugin::_loadApi()
 {
-    // The api is loaded only if the configuration is available (the plugin is installed)
+    // The api is loaded only if the configuration is available (i.e if the plugin is installed)
     if (this->configuration)
     {
-        bool timers = false;
-        // If the plugin implements ITimer, they are loaded
-        if (qobject_cast<LightBird::ITimer *>(this->instanceObject))
-            timers = true;
-        this->api = new Api(this->id, *this->configuration, timers);
+        bool event = qobject_cast<LightBird::IEvent *>(this->instanceObject) != NULL;
+        bool timers = qobject_cast<LightBird::ITimer *>(this->instanceObject) != NULL;
+        this->api = new Api(this->id, *this->configuration, event, timers);
         this->_loadContexts();
         this->_loadResources();
     }

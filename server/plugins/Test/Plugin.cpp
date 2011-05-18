@@ -14,6 +14,7 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
+    this->api->events().subscribe(QStringList() << "server_started");
     return (true);
 }
 
@@ -44,12 +45,11 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "CC BY-NC-SA 3.0";
 }
 
-bool    Plugin::timer(const QString &name)
+void    Plugin::event(const QString &event, const QVariant &)
 {
     // Launch the unit tests
-    if (name == "unitTests")
+    if (event == "server_started")
         UnitTests(*this->api);
-    return (false);
 }
 
 Q_EXPORT_PLUGIN2(Plugin, Plugin)

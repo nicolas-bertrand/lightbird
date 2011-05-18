@@ -4,15 +4,15 @@
 # include <QObject>
 
 # include "IPlugin.h"
-# include "ITimer.h"
+# include "IEvent.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
-               public LightBird::ITimer
+               public LightBird::IEvent
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin
-                 LightBird::ITimer)
+                 LightBird::IEvent)
 
 public:
     Plugin();
@@ -25,8 +25,8 @@ public:
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
 
-    // LightBird::ITimer
-    bool    timer(const QString &name);
+    // LightBird::IEvent
+    void    event(const QString &event, const QVariant &property = QVariant());
 
 private:
     LightBird::IApi *api;

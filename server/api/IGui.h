@@ -4,11 +4,12 @@
 namespace LightBird
 {
     /// @brief Allows plugins to provide a Graphical User Interface, using Qt.
-    /// All the methods of this interface are guaranteed to be called in the GUI Thread, since
-    /// Qt doesn't supports GUI operations in other threads than the main thread.
-    /// The method gui() is called one time per plugin instance, just after IPlugin::onLoad.
-    /// Notice that this interface is never called if the server has been started with the argument
-    /// "noGui". To check that, use IGuis from IApi.
+    /// All the methods of this interface are guaranteed to be called in the GUI
+    /// Thread, since Qt doesn't supports GUI operations in other threads than
+    /// the main thread. The method gui() is called one time per plugin instance,
+    /// just after IPlugin::onLoad. Notice that this interface is never called
+    /// if the server has been started with the argument "noGui". To check
+    /// that, use IGuis from IApi.
     class IGui
     {
     public:

@@ -51,6 +51,7 @@ HEADERS += headers/Arguments.h \
     headers/Database.h \
     headers/Defines.h \
     headers/Engine.h \
+    headers/Events.h \
     headers/Extensions.h \
     headers/Future.hpp \
     headers/IReadWrite.h \
@@ -71,6 +72,7 @@ HEADERS += headers/Arguments.h \
     headers/api/Api.h \
     headers/api/ApiConfiguration.h \
     headers/api/ApiDatabase.h \
+    headers/api/ApiEvents.h \
     headers/api/ApiGuis.h \
     headers/api/ApiLogs.h \
     headers/api/ApiNetwork.h \
@@ -97,6 +99,7 @@ SOURCES += sources/main.cpp \
     sources/Context.cpp \
     sources/Database.cpp \
     sources/Engine.cpp \
+    sources/Events.cpp \
     sources/Extensions.cpp \
     sources/Log.cpp \
     sources/Network.cpp \
@@ -115,6 +118,7 @@ SOURCES += sources/main.cpp \
     sources/api/Api.cpp \
     sources/api/ApiConfiguration.cpp \
     sources/api/ApiDatabase.cpp \
+    sources/api/ApiEvents.cpp \
     sources/api/ApiGuis.cpp \
     sources/api/ApiLogs.cpp \
     sources/api/ApiNetwork.cpp \

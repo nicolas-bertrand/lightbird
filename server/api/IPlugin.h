@@ -17,14 +17,14 @@ namespace LightBird
         /// @param api : The LightBird APIs. Allows plugins to access to the server APIs. This pointer
         /// should be kept by the plugins to be used later. The address of the API is valid during
         /// all the time where the plugin is loaded, so it can be safely stored.
-        /// @return True if the plugin have been correclty loaded. If false, it will be unloaded.
+        /// @return True if the plugin have been correclty loaded.
         virtual bool    onLoad(LightBird::IApi *api) = 0;
-        /// @brief Called when the plugin is unloading. The plugins must stop all its jobs as soon as possible, or
-        /// it can be killed.
+        /// @brief Called when the plugin is unloading. The plugins must stop all its jobs as soon as
+        /// possible, or it can be killed.
         virtual void    onUnload() = 0;
         /// @brief Called when the plugin is installing.
         /// @param api : The LightBird APIs.
-        /// @return True if the plugin have been correctly installed. If false, it will not be installed.
+        /// @return True if the plugin have been correctly installed.
         virtual bool    onInstall(LightBird::IApi *api) = 0;
         /// @brief Called when the plugin is uninstalling. Plugins must clean all the data that they have
         /// modified or created. For example, they have to DROP their own tables in the database.

@@ -5,6 +5,7 @@
 
 # include "IConfiguration.h"
 # include "IDatabase.h"
+# include "IEvents.h"
 # include "IExtensions.h"
 # include "IGuis.h"
 # include "ILogs.h"
@@ -36,6 +37,8 @@ namespace LightBird
         virtual LightBird::IConfiguration   *configuration(const QString &path, const QString &alternative = "") = 0;
         /// @brief Return the database Api.
         virtual LightBird::IDatabase        &database() = 0;
+        /// @brief Allowed to access to the events system.
+        virtual LightBird::IEvents          &events() = 0;
         /// @brief Allows to use the extensions.
         virtual LightBird::IExtensions      &extensions() = 0;
         /// @brief Allows to manage plugins GUIs.

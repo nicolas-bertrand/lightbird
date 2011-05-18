@@ -4,9 +4,9 @@
 #include "IGui.h"
 #include "ApiGuis.h"
 
-ApiGuis      *ApiGuis::_instance = NULL;
+ApiGuis *ApiGuis::_instance = NULL;
 
-ApiGuis      *ApiGuis::instance(QObject *parent)
+ApiGuis *ApiGuis::instance(QObject *parent)
 {
     if (ApiGuis::_instance == NULL)
         ApiGuis::_instance = new ApiGuis(parent);

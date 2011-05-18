@@ -5,6 +5,8 @@ INCLUDEPATH     +=  .
 HEADERS         =   IApi.h \
                     IConfiguration.h \
                     IDatabase.h \
+                    IEvent.h \
+                    IEvents.h \
                     IExtension.h \
                     IExtensions.h \
                     IFuture.h \

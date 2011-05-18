@@ -3,6 +3,7 @@
 #include "Plugins.hpp"
 #include "ApiPlugins.h"
 #include "Configurations.h"
+#include "Events.h"
 #include "Extensions.h"
 #include "IGui.h"
 #include "Log.h"
@@ -54,6 +55,8 @@ void        Plugins::run()
 {
     // Initialize the plugins API
     ApiPlugins::instance(this);
+    // Initialize the events system
+    Events::instance(this);
     // Initialize the extension manager
     Extensions::instance(this);
     Log::debug("Plugins thread started", "Plugins", "run");
@@ -177,6 +180,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     Extensions::instance()->add(plugin);
     this->plugins.insert(id, plugin);
     this->orderedPlugins.push_back(id);
+    Events::instance()->send("plugin_loaded", id);
     Log::info("Plugin loaded", Properties("id", id), "Plugins", "_load");
     emit this->loaded(id);
     future->setResult(true);
@@ -217,6 +221,7 @@ void                                Plugins::_unload(const QString &id, Future<b
         delete this->plugins.value(id);
         this->plugins.remove(id);
         this->orderedPlugins.removeAll(id);
+        Events::instance()->send("plugin_unloaded", id);
         Log::info("Plugin unloaded", Properties("id", id), "Plugins", "_unload");
     }
     future->setResult(true);
@@ -261,6 +266,7 @@ void                                Plugins::_install(const QString &id, Future<
         this->mutex.unlock();
         return ;
     }
+    Events::instance()->send("plugin_installed", id);
     Log::info("Plugin installed", Properties("id", id), "Plugins", "_install");
     future->setResult(true);
     this->mutex.unlock();
@@ -309,6 +315,7 @@ void                                Plugins::_uninstall(const QString &id, Futur
         this->mutex.unlock();
         return ;
     }
+    Events::instance()->send("plugin_uninstalled", id);
     Log::info("Plugin uninstalled", Properties("id", id), "Plugins", "_uninstall");
     future->setResult(true);
     this->mutex.unlock();
@@ -332,6 +339,7 @@ bool    Plugins::release(const QString &id)
         this->plugins.value(id)->deleteLater();
         this->plugins.remove(id);
         this->orderedPlugins.removeAll(id);
+        Events::instance()->send("plugin_unloaded", id);
         Log::info("Plugin unloaded", Properties("id", id), "Plugins", "release");
         if (this->unloadAllPlugins && this->plugins.size() == 0)
             this->wait.wakeAll();

@@ -13,7 +13,7 @@ ApiPlugins      *ApiPlugins::instance(QObject *parent)
 
 ApiPlugins::ApiPlugins(QObject *parent) : QObject(parent)
 {
-    Log::trace("ApiPlugins created", "ApiPlugins", "~ApiPlugins");
+    Log::trace("ApiPlugins created", "ApiPlugins", "ApiPlugins");
 }
 
 ApiPlugins::~ApiPlugins()
