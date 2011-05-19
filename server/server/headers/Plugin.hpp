@@ -109,7 +109,7 @@ T       *Plugin::getInstance()
 {
     T   *instance = NULL;
 
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugin", "getInstance");
         return (NULL);
