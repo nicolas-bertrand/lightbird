@@ -112,7 +112,7 @@ Future<bool>        Plugins::uninstall(const QString &id)
 void    Plugins::unloadAll()
 {
     Log::info("Unloading all the plugins", "Plugins", "unloadAll");
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "unloadAll");
         return ;
@@ -123,7 +123,7 @@ void    Plugins::unloadAll()
     // Try to unload all the plugins
     while (it.hasNext())
         this->unload(it.next()).getResult();
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Plugins", "unloadAll");
         return ;

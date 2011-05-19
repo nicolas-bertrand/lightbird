@@ -187,7 +187,7 @@ bool            Configuration::save()
 
     if (this->loaded == false)
         return (false);
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
+    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Configuration", "save");
         return (false);

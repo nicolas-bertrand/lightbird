@@ -5,17 +5,17 @@
 
 # include "Request.h"
 # include "Response.h"
-
 # include "Client.h"
+
 # include "IOnUnserialize.h"
 # include "IOnSerialize.h"
 
 /// @brief The role of the Engine is to execute a request sent by a client,
 /// by calling the interfaces of the Api that are implemented by the plugins.
-/// The Engine uses massively the signals/slots feature of Qt. This way, the
+/// The Engine uses massively the signals/slots features of Qt. This way, the
 /// execution of a request can be stopped at any time, if the client is disconnected.
-/// The final goal of the engine is to generates a response that can be sent to the
-/// client.
+/// The final goal of the engine is to generates a response that can be sent to
+/// the client.
 class Engine : public QObject
 {
     Q_OBJECT

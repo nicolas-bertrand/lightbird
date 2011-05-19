@@ -86,11 +86,8 @@ QList<unsigned short>   Network::getPorts()
         Log::error("Deadlock", "Network", "getPorts");
         return (ports);
     }
-    QMapIterator<unsigned short, Port *> it(this->ports);
+    ports = this->ports.keys();
     this->lockPorts.unlock();
-    // Stores the list of the opened ports
-    while (it.hasNext())
-        ports.push_back(it.next().key());
     return (ports);
 }
 
