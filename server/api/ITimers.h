@@ -19,9 +19,7 @@ namespace LightBird
         /// @brief Add a new timer. If the timer already exists, its timeout is modified.
         /// @param name : The name of the timer.
         /// @param timeout : The time between each calls in milliseconds.
-        /// @return False if the plugin has already more than the maximum number of
-        /// timers allowed (see maxTimers the configuration of the server).
-        virtual bool                            setTimer(const QString &name, unsigned int timeout) = 0;
+        virtual void                            setTimer(const QString &name, unsigned int timeout) = 0;
         /// @brief Returns the timeout of a timer, or zero if it doesn't exists.
         /// @param name : The name of the timer.
         virtual unsigned int                    getTimer(const QString &name) = 0;

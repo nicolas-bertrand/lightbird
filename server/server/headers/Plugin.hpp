@@ -101,6 +101,7 @@ private:
     mutable QReadWriteLock mutex;       ///< Ensure that the class is thread safe.
     LightBird::IPlugins::State state;   ///< The current state of the plugin.
 
+    // Allows Extensions to increment this->used
     friend class Extensions;
 };
 

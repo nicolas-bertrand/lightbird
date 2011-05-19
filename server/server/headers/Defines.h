@@ -29,6 +29,5 @@
 # define DEFAULT_TEMPORARY_PATH                 "tmp"                   ///< The name of the default temporary directory.
 # define DEFAULT_CLEAN_TEMPORARY_PATH           "true"                  ///< Defines if the temporary directory must be emptied every time the server is started.
 # define DEFAULT_LANGUAGES_PATH                 "languages"             ///< The name of the default languages directory.
-# define DEFAULT_MAX_TIMERS                     3                       ///< The default maximum number of timers autorized at the same time for a plugin.
 
 #endif // DEFINES_H

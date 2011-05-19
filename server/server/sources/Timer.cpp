@@ -63,9 +63,9 @@ void                    Timer::_timeout()
     if (this->stopped || !(instance = Plugins::instance()->getInstance<LightBird::ITimer>(this->id)))
         return ;
     result = instance->timer(this->name);
+    Plugins::instance()->release(this->id);
     if (!this->stopped && result)
         QTimer::singleShot(this->timeout, this, SLOT(_timeout()));
-    Plugins::instance()->release(this->id);
     // Removes the timer if the plugin returned false
     if (!result)
         this->apiTimers.removeTimer(this->name);

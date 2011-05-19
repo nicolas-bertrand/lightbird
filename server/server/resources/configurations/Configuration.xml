@@ -8,7 +8,6 @@
   <cleanTemporaryPath>true</cleanTemporaryPath>
   <languagesPath>languages</languagesPath>
   <language>fr</language>
-  <maxTimers>3</maxTimers>
   <database>
     <name/>
     <file>database.sqlite</file>

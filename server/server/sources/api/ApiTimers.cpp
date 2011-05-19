@@ -7,23 +7,16 @@
 
 ApiTimers::ApiTimers(const QString &id, QObject *parent) : QObject(parent)
 {
-    QDomElement     dom;
-    QDomNode        timer;
     Configuration   *configuration;
+    QDomNode        timer;
 
     this->id = id;
-    // Get the maximum number of timers autorized from the configuration
-    this->maxTimers = DEFAULT_MAX_TIMERS;
-    if (Configurations::instance()->count("maxTimers"))
-        this->maxTimers = Configurations::instance()->get("maxTimers").toInt();
-    if (this->maxTimers < 0)
-        this->maxTimers = 0;
     // Load the timers from the configuration of the plugin
     configuration = Configurations::instance(id);
-    dom = configuration->readDom();
-    for (timer = dom.elementsByTagName("timers").at(0).firstChild(); timer.isNull() == false && this->timers.size() < this->maxTimers; timer = timer.nextSibling())
-        if (timer.isElement() == true)
-            this->timers.insert(timer.toElement().nodeName(), new Timer(this->id, timer.toElement().nodeName(), timer.toElement().text().toInt(), *this));
+    timer = configuration->readDom().firstChildElement("timers");
+    for (timer = timer.firstChild(); !timer.isNull(); timer = timer.nextSibling())
+        if (timer.isElement())
+            this->setTimer(timer.toElement().nodeName(), timer.toElement().text().toInt());
     configuration->release();
 }
 
@@ -38,30 +31,25 @@ ApiTimers::~ApiTimers()
     this->timers.clear();
 }
 
-bool    ApiTimers::setTimer(const QString &name, unsigned int timeout)
+void    ApiTimers::setTimer(const QString &name, unsigned int timeout)
 {
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
         Log::error("Deadlock", "ApiTimers", "setTimer");
-        return (false);
+        return ;
     }
     if (this->timers.contains(name))
     {
         Log::trace("Timer modified", Properties("id", this->id).add("name", name).add("timeout", QString::number(timeout)), "ApiTimers", "setTimer");
         this->timers.value(name)->setTimeout(timeout);
         this->mutex.unlock();
-        return (true);
     }
-    if (this->timers.size() >= this->maxTimers)
+    else
     {
-        Log::warning("Unable to create a new timer. The maximum number of timers for this plugin has already been reached.", Properties("id", this->id).add("timerName", name).add("maxTimers", this->maxTimers), "ApiTimers", "setTimer");
+        Log::trace("Timer created", Properties("id", this->id).add("name", name).add("timeout", QString::number(timeout)), "ApiTimers", "setTimer");
+        this->timers.insert(name, new Timer(this->id, name, timeout, *this));
         this->mutex.unlock();
-        return (false);
     }
-    Log::trace("Timer created", Properties("id", this->id).add("name", name).add("timeout", QString::number(timeout)), "ApiTimers", "setTimer");
-    this->timers.insert(name, new Timer(this->id, name, timeout, *this));
-    this->mutex.unlock();
-    return (true);
 }
 
 unsigned int        ApiTimers::getTimer(const QString &name)

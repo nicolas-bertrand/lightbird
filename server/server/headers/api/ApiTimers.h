@@ -21,7 +21,7 @@ public:
     ApiTimers(const QString &id, QObject *parent = 0);
     ~ApiTimers();
 
-    bool                        setTimer(const QString &name, unsigned int timeout);
+    void                        setTimer(const QString &name, unsigned int timeout);
     unsigned int                getTimer(const QString &name);
     QMap<QString, unsigned int> getTimers();
     bool                        removeTimer(const QString &name);
@@ -31,10 +31,9 @@ private:
     ApiTimers(const ApiTimers &);
     ApiTimers* operator=(const ApiTimers &);
 
-    QString                 id;         ///< The id of the plugin for which the timers are managed.
-    int                     maxTimers;  ///< The maximum number of timers autorized at the same time for a plugin.
-    QMap<QString, Timer *>  timers;     ///< The list of the timers of the plugin.
-    QReadWriteLock          mutex;      ///< Ensure that the access to the timers is thread safe.
+    QString                 id;     ///< The id of the plugin for which the timers are managed.
+    QMap<QString, Timer *>  timers; ///< The list of the timers of the plugin.
+    QReadWriteLock          mutex;  ///< Ensure that the access to the timers is thread safe.
 };
 
 #endif // APITIMERS_H

@@ -102,7 +102,7 @@ QList<void *>       Extensions::get(const QString &name)
                 this->extensions.insertMulti(name, extension);
                 result.push_back(extension.instance);
                 Log::trace("Extension instance created", Properties("pluginId", it.peekNext()).add("extensionName", name), "Extensions", "get");
-                // increments the used variable of plugins, so that it will not be unloaded until the extension is released
+                // Increments the used variable of plugins, so that it will not be unloaded until the extension is released
                 this->plugins[it.peekNext()].instance->used++;
             }
         }
