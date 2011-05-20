@@ -1,7 +1,7 @@
 #include <QApplication>
-#include <QTranslator>
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
+#include <QTranslator>
 
 #include "Configurations.h"
 #include "Database.h"
@@ -10,8 +10,9 @@
 #include "Log.h"
 #include "Network.h"
 #include "Plugins.hpp"
-#include "Threads.h"
 #include "Server.h"
+#include "Threads.h"
+#include "Tools.h"
 
 Server::Server(Arguments &args, QObject *parent) : QObject(parent),
                                                    arguments(args),
@@ -109,12 +110,12 @@ bool    Server::_temporaryDirectory()
     QString path;
     QDir    directory;
 
-    path = directory.cleanPath(Configurations::instance()->get("temporaryPath"));
+    path = Tools::cleanPath(Configurations::instance()->get("temporaryPath"));
     // If the temporary directory is not the working directory
     if (!path.isEmpty() && path != ".")
     {
         // Removes all the files in the temporary directory if needed
-        if (directory.cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true" && QFileInfo(path).isDir())
+        if (Tools::cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true" && QFileInfo(path).isDir())
         {
             Log::debug("Cleaning the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
             directory.setPath(path);

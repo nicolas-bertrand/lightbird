@@ -1,12 +1,12 @@
+#include <QFileInfo>
 #include <QString>
-#include <QReadWriteLock>
-#include <QDir>
 
-#include "Defines.h"
-#include "Configurations.h"
 #include "ApiConfiguration.h"
+#include "Configurations.h"
+#include "Defines.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "Tools.h"
 
 QMap<QString, Configuration *>  Configurations::instances;
 QMutex                          Configurations::lockInstances(QMutex::Recursive);
@@ -114,7 +114,7 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     // Otherwise it can be the id of a plugin
     else if (QFileInfo(Configurations::instances[""]->get("pluginsPath") + "/" + cleaned).isDir())
     {
-        path = Plugins::checkId(QDir::cleanPath(cleaned));
+        path = Plugins::checkId(Tools::cleanPath(cleaned));
         // Creates the configuration of the plugin if it doesn't exists
         if (!Configurations::instances.contains(path) && !*(instance = new ApiConfiguration(path)))
         {
@@ -126,7 +126,7 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     }
     // Cleans the path
     if (path.isEmpty())
-        path = QDir::cleanPath(cleaned);
+        path = Tools::cleanPath(cleaned);
     // Creates the configuration if it doesn't exists
     if (instance == NULL && !Configurations::instances.contains(path) &&
         !*(instance = new Configuration(path, alternative)))

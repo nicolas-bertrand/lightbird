@@ -1,13 +1,14 @@
 #include <QDir>
 
-#include "Plugins.hpp"
 #include "ApiPlugins.h"
 #include "Configurations.h"
 #include "Events.h"
 #include "Extensions.h"
 #include "IGui.h"
 #include "Log.h"
+#include "Plugins.hpp"
 #include "Threads.h"
+#include "Tools.h"
 
 Plugins *Plugins::_instance = NULL;
 
@@ -390,7 +391,7 @@ QString     Plugins::checkId(const QString &identifier)
     QString result;
 
     path = Configurations::instance()->get("pluginsPath");
-    QStringListIterator dir(QDir::cleanPath(identifier).split("/"));
+    QStringListIterator dir(Tools::cleanPath(identifier).split("/"));
     // Iterates over each directory of the id of the plugin
     while (dir.hasNext())
     {

@@ -1,12 +1,14 @@
 #include <QDir>
 #include <QFile>
+
 #include "ITimer.h"
 #include "IEvent.h"
+
 #include "Configurations.h"
 #include "Log.h"
-#include "Tools.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
+#include "Tools.h"
 
 Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
                                                              id(identifier)
@@ -418,7 +420,7 @@ void    Plugin::_loadResources()
             nodeValue = dom.toElement().text().trimmed();
             if (nodeName == "resource" && !QFileInfo(this->path + nodeValue).isFile())
             {
-                nodeValue = QDir::cleanPath(this->path + nodeValue);
+                nodeValue = Tools::cleanPath(this->path + nodeValue);
                 // Creates the directory of the resource if it doesn't exists
                 path = nodeValue.left(nodeValue.lastIndexOf('/'));
                 if (!QFileInfo(path).isDir())

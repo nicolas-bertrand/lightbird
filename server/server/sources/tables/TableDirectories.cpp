@@ -1,14 +1,14 @@
 #include <QUuid>
-#include <QDir>
 
 #include "Configurations.h"
 #include "Database.h"
 #include "Defines.h"
 #include "Log.h"
 #include "TableAccounts.h"
+#include "TableDirectories.h"
 #include "TableFiles.h"
 #include "TablePermissions.h"
-#include "TableDirectories.h"
+#include "Tools.h"
 
 TableDirectories::TableDirectories(const QString &id)
 {
@@ -45,7 +45,7 @@ QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath)
     QString                             path;
     QString                             id_directory = "";
 
-    path = QDir::cleanPath(virtualPath);
+    path = Tools::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
     while (it.hasNext())
     {
@@ -143,7 +143,7 @@ bool        TableDirectories::setVirtualPath(const QString &virtualPath)
     QString id_directory;
     QString path;
 
-    path = QDir::cleanPath(virtualPath);
+    path = Tools::cleanPath(virtualPath);
     if (path.count('/') == path.size())
         return (this->setIdDirectory(""));
     if ((id_directory = TableDirectories().getIdFromVirtualPath(path)).isEmpty())

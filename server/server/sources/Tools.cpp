@@ -1,3 +1,4 @@
+#include <QDir>
 #include <QFile>
 
 #include "Log.h"
@@ -26,4 +27,9 @@ bool        Tools::copy(const QString &sourceName, const QString &destinationNam
     source.close();
     destination.close();
     return (true);
+}
+
+QString Tools::cleanPath(const QString &path)
+{
+    return (QDir::cleanPath(QString(path).replace('\\', '/')));
 }

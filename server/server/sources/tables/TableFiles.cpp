@@ -1,13 +1,14 @@
 #include <QUuid>
-#include <QDir>
+#include <QFileInfo>
 
 #include "Configurations.h"
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
 #include "TableAccounts.h"
-#include "TableDirectories.h"
 #include "TableFiles.h"
+#include "TableDirectories.h"
+#include "Tools.h"
 
 TableFiles::TableFiles(const QString &id)
 {
@@ -47,7 +48,7 @@ QString TableFiles::getIdFromVirtualPath(const QString &virtualPath)
     QString                             path;
     QString                             id_directory = "";
 
-    path = QDir::cleanPath(virtualPath);
+    path = Tools::cleanPath(virtualPath);
     name = path;
     // If the virtual path has directories, get the id of the parent directory
     if (name.contains('/'))
@@ -303,7 +304,7 @@ bool    TableFiles::setVirtualPath(const QString &virtualPath)
     QString id_directory;
     QString path;
 
-    path = QDir::cleanPath(virtualPath);
+    path = Tools::cleanPath(virtualPath);
     // The file is an the root of the virtual path
     if (path.count('/') == path.size())
         return (this->setIdDirectory(""));

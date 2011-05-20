@@ -1,14 +1,14 @@
 #include <QUuid>
-#include <QDir>
 
 #include "Configurations.h"
 #include "Database.h"
 #include "Defines.h"
 #include "Log.h"
 #include "TableAccounts.h"
+#include "TableCollections.h"
 #include "TableFiles.h"
 #include "TablePermissions.h"
-#include "TableCollections.h"
+#include "Tools.h"
 
 TableCollections::TableCollections(const QString &id)
 {
@@ -45,7 +45,7 @@ QString TableCollections::getIdFromVirtualPath(const QString &virtualPath)
     QString                             path;
     QString                             id_collection = "";
 
-    path = QDir::cleanPath(virtualPath);
+    path = Tools::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
     while (it.hasNext())
     {
@@ -143,7 +143,7 @@ bool    TableCollections::setVirtualPath(const QString &virtualPath)
     QString id_collection;
     QString path;
 
-    path = QDir::cleanPath(virtualPath);
+    path = Tools::cleanPath(virtualPath);
     if (path.count('/') == path.size())
         return (this->setIdCollection(""));
     if ((id_collection = TableCollections().getIdFromVirtualPath(path)).isEmpty())
