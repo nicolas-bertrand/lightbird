@@ -1,9 +1,8 @@
 #ifndef ITIMERS_H
 # define ITIMERS_H
 
-# include <QList>
+# include <QMap>
 # include <QString>
-# include <QFuture>
 
 namespace LightBird
 {

@@ -1,6 +1,8 @@
 #ifndef APIDATABASE_H
 # define APIDATABASE_H
 
+# include <QObject>
+
 # include "IDatabase.h"
 
 /// @brief The server implementation of the IDatabase interface.

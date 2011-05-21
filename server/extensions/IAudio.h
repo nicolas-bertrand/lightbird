@@ -1,6 +1,7 @@
 #ifndef IAUDIO_H
 # define IAUDIO_H
 
+# include <QByteArray>
 # include <QString>
 
 namespace LightBird

@@ -2,6 +2,7 @@
 # define RESPONSE_H
 
 # include "Content.h"
+# include "QObject.h"
 
 # include "IResponse.h"
 
@@ -16,7 +17,7 @@ public:
     Response(QObject *parent = 0);
     ~Response();
 
-    // IResponse
+    // LightBird::IResponse
     const QString           &getVersion() const;
     void                    setVersion(const QString &version);
     int                     getCode() const;
@@ -32,7 +33,7 @@ public:
     void                    setError(bool error);
 
     // Other
-    /// @brief Clean all the member of the instance.
+    /// @brief Cleans all the member of the instance.
     void                    clear();
 
 private:

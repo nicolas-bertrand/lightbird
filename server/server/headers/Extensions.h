@@ -1,9 +1,9 @@
 #ifndef EXTENSIONS_H
 # define EXTENSIONS_H
 
-# include <QObject>
-# include <QMutex>
 # include <QMap>
+# include <QMutex>
+# include <QObject>
 
 # include "IExtension.h"
 # include "IExtensions.h"

@@ -1,9 +1,12 @@
+#include <QCoreApplication>
+
 #include "IEvent.h"
+
+#include "ApiEvents.h"
 #include "Events.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Threads.h"
-#include "ApiEvents.h"
 
 ApiEvents::ApiEvents(const QString &id, bool event)
 {
@@ -14,7 +17,7 @@ ApiEvents::ApiEvents(const QString &id, bool event)
     {
         // Starting the events thread
         this->moveToThread(this);
-        Threads::instance()->newThread(this, false);
+        Threads::instance()->newThread(this);
         this->connect(this, SIGNAL(newEvent()), SLOT(_newEvent()), Qt::QueuedConnection);
         // Wait that the thread is started
         this->mutex.lock();
@@ -41,6 +44,8 @@ void    ApiEvents::run()
     // Execute the event loop
     this->exec();
     Log::trace("ApiEvents thread finished", Properties("id", this->id), "ApiEvents", "run");
+    // The thread where lives the Timer is changed to the thread main
+    this->moveToThread(QCoreApplication::instance()->thread());
 }
 
 void    ApiEvents::post(const QString &event, const QVariant &property)

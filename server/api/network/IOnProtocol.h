@@ -1,6 +1,9 @@
 #ifndef IONPROTOCOL_H
 # define IONPROTOCOL_H
 
+# include <QByteArray>
+# include <QString>
+
 # include "IClient.h"
 
 namespace LightBird

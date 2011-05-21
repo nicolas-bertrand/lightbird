@@ -3,8 +3,11 @@
 
 # include <QAbstractSocket>
 # include <QDateTime>
-# include <QString>
 # include <QHostAddress>
+# include <QMap>
+# include <QString>
+# include <QStringList>
+# include <QVariant>
 
 # include "INetwork.h"
 # include "ITableAccounts.h"

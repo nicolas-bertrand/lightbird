@@ -1,7 +1,8 @@
 #ifndef ITABLEDIRECTORIES_H
 # define ITABLEDIRECTORIES_H
 
-# include <QMap>
+# include <QString>
+# include <QStringList>
 
 # include "ITableObjects.h"
 

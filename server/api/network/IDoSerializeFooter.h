@@ -1,6 +1,8 @@
 #ifndef IDOSERIALIZEFOOTER_H
 # define IDOSERIALIZEFOOTER_H
 
+# include <QByteArray>
+
 # include "IClient.h"
 
 namespace LightBird

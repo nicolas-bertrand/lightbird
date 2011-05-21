@@ -1,9 +1,9 @@
 #ifndef CONTEXT_H
 # define CONTEXT_H
 
-# include <QObject>
 # include <QList>
 # include <QMap>
+# include <QObject>
 # include <QString>
 # include <QStringList>
 

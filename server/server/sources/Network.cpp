@@ -1,5 +1,4 @@
 #include <QSharedPointer>
-#include <QStringListIterator>
 
 #include "Defines.h"
 #include "Log.h"

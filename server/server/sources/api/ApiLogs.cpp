@@ -1,5 +1,5 @@
-#include "Log.h"
 #include "ApiLogs.h"
+#include "Log.h"
 
 ApiLogs::ApiLogs(const QString &id)
 {

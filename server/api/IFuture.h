@@ -1,7 +1,7 @@
 #ifndef IFUTURE_H
 # define IFUTURE_H
 
-# include <QWaitCondition>
+# include <limits.h>
 
 namespace LightBird
 {

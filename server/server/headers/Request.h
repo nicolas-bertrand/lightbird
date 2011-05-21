@@ -2,6 +2,7 @@
 # define REQUEST_H
 
 # include "Content.h"
+# include "QObject.h"
 
 # include "IRequest.h"
 
@@ -16,7 +17,7 @@ public:
     Request(QObject *parent = 0);
     ~Request();
 
-    // IRequest
+    // LightBird::IRequest
     const QString           &getProtocol() const;
     const QString           &getMethod() const;
     void                    setMethod(const QString &method);
@@ -33,7 +34,7 @@ public:
     void                    setError(bool error = true);
 
     // Other
-    /// @brief Clean all the member of the instance.
+    /// @brief Cleans all the member of the instance.
     void                    clear();
     /// @brief Set the protocol of the request.
     void                    setProtocol(const QString &protocol);

@@ -3,9 +3,7 @@
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
-#include "TableGroups.h"
 #include "TableLimits.h"
-#include "TableDirectories.h"
 
 TableLimits::TableLimits(const QString &id)
 {

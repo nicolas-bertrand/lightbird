@@ -2,13 +2,12 @@
 # define API_H
 
 # include <QObject>
+# include <QString>
 
 # include "IApi.h"
 
-# include "ApiConfiguration.h"
 # include "ApiDatabase.h"
 # include "ApiEvents.h"
-# include "ApiGuis.h"
 # include "ApiLogs.h"
 # include "ApiNetwork.h"
 # include "ApiTimers.h"
@@ -50,7 +49,7 @@ private:
     QString                     pluginPath;         ///< The path to the plugin that own this object.
     LightBird::IConfiguration   &configurationApi;  ///< The instance of the configuration api.
     ApiDatabase                 databaseApi;        ///< The instance of the database api.
-    ApiEvents                   eventsApi;          ///< The instance of the events api.
+    ApiEvents                   *eventsApi;         ///< The instance of the events api.
     ApiLogs                     logsApi;            ///< The instance of the logs api.
     ApiNetwork                  networkApi;         ///< The instance of the network api.
     ApiTimers                   *timersApi;         ///< The instance of the timer api.

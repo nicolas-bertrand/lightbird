@@ -1,6 +1,6 @@
 #include "Database.h"
-#include "TablePermissions.h"
 #include "TableAccessors.h"
+#include "TablePermissions.h"
 
 TableAccessors::TableAccessors()
 {

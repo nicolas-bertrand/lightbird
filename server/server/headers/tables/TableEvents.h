@@ -1,10 +1,9 @@
 #ifndef TABLEEVENTS_H
 # define TABLEEVENTS_H
 
-# include <QMutex>
+# include "ITableEvents.h"
 
 # include "Table.h"
-# include "ITableEvents.h"
 
 class TableEvents : virtual public Table,
                     virtual public LightBird::ITableEvents

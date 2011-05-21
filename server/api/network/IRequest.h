@@ -1,10 +1,10 @@
 #ifndef IREQUEST_H
 # define IREQUEST_H
 
-# include <QString>
-# include <QByteArray>
 # include <QMap>
+# include <QString>
 # include <QUrl>
+# include <QVariantList>
 
 # include "IContent.h"
 

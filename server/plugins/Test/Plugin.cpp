@@ -1,7 +1,8 @@
+#include <QStringList>
 #include <QtPlugin>
 
-#include "UnitTests.h"
 #include "Plugin.h"
+#include "UnitTests.h"
 
 Plugin::Plugin()
 {

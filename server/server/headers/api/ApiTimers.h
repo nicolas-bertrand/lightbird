@@ -6,8 +6,8 @@
 
 # include "ITimers.h"
 
-# include "Timer.h"
 # include "Configuration.h"
+# include "Timer.h"
 
 /// @brief This class is the server implementation of the ITimer interface
 /// that allows plugins to manage their timers.

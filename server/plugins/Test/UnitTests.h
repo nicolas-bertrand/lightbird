@@ -1,7 +1,10 @@
 #ifndef UNITTESTS_H
 # define UNITTESTS_H
 
-#include "Plugin.h"
+# include <QMap>
+# include <QString>
+
+# include "Plugin.h"
 
 class UnitTests
 {

@@ -1,14 +1,16 @@
 #ifndef ENGINE_H
 # define ENGINE_H
 
+# include <QByteArray>
 # include <QObject>
+# include <QStringList>
 
+# include "Client.h"
 # include "Request.h"
 # include "Response.h"
-# include "Client.h"
 
-# include "IOnUnserialize.h"
 # include "IOnSerialize.h"
+# include "IOnUnserialize.h"
 
 /// @brief The role of the Engine is to execute a request sent by a client,
 /// by calling the interfaces of the Api that are implemented by the plugins.

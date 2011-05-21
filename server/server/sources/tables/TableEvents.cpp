@@ -1,4 +1,3 @@
-#include <QCryptographicHash>
 #include <QUuid>
 
 #include "Defines.h"

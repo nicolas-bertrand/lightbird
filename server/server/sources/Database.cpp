@@ -1,13 +1,14 @@
-#include <QDir>
-#include <QSqlRecord>
 #include <iostream>
+#include <QDir>
+#include <QSqlError>
+#include <QSqlRecord>
 
+#include "Configurations.h"
+#include "Database.h"
 #include "Defines.h"
 #include "Log.h"
-#include "Tools.h"
-#include "Configurations.h"
-#include "Table.h"
 #include "Plugins.hpp"
+#include "Table.h"
 #include "TableAccounts.h"
 #include "TableCollections.h"
 #include "TableDirectories.h"
@@ -17,7 +18,7 @@
 #include "TableLimits.h"
 #include "TablePermissions.h"
 #include "TableTags.h"
-#include "Database.h"
+#include "Tools.h"
 
 Database    *Database::_instance = NULL;
 

@@ -1,11 +1,11 @@
 #ifndef EVENTS_H
 # define EVENTS_H
 
-# include <QObject>
 # include <QList>
+# include <QMutex>
+# include <QObject>
 # include <QString>
 # include <QVariant>
-# include <QMutex>
 
 # include "ApiEvents.h"
 

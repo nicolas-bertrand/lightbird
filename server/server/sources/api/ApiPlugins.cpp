@@ -1,6 +1,6 @@
+#include "ApiPlugins.h"
 #include "Log.h"
 #include "Plugins.hpp"
-#include "ApiPlugins.h"
 
 ApiPlugins      *ApiPlugins::_instance = NULL;
 

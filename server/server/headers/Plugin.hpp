@@ -1,17 +1,22 @@
 #ifndef PLUGIN_H
 # define PLUGIN_H
 
+# include <QList>
+# include <QObject>
 # include <QPluginLoader>
-
-# include "Api.h"
-# include "Log.h"
-# include "Context.h"
-# include "Defines.h"
+# include <QString>
+# include <QStringList>
+# include <QReadWriteLock>
 
 # include "IApi.h"
-# include "Extensions.h"
 # include "IPlugin.h"
 # include "IPlugins.h"
+
+# include "Api.h"
+# include "Context.h"
+# include "Defines.h"
+# include "Extensions.h"
+# include "Log.h"
 
 /// @brief Manage a plugin.
 class Plugin : public QObject

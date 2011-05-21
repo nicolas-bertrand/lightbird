@@ -2,8 +2,11 @@
 # define PORT_H
 
 # include <QAbstractSocket>
+# include <QObject>
 # include <QString>
+# include <QStringList>
 
+# include "INetwork.h"
 # include "IReadWrite.h"
 
 # include "Client.h"
@@ -77,8 +80,8 @@ protected:
     void            _removeClient(Client *client);
 
 
-    virtual bool    read(QByteArray &data, QObject *caller) = 0;
-    virtual bool    write(QByteArray &data, QObject *caller) = 0;
+    virtual bool    read(QByteArray &data, Client *client) = 0;
+    virtual bool    write(QByteArray &data, Client *client) = 0;
 
     QList<Client *> clients;    ///< Contains the list of all the connected clients on the current port.
 

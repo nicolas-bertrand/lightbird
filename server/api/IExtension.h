@@ -1,6 +1,7 @@
 #ifndef IEXTENSION_H
 # define IEXTENSION_H
 
+# include <QString>
 # include <QStringList>
 
 namespace LightBird

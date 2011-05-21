@@ -2,6 +2,7 @@
 # define IDOWRITE_H
 
 # include <QByteArray>
+
 # include "IClient.h"
 
 namespace LightBird

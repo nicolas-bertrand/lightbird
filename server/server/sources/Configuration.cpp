@@ -1,5 +1,3 @@
-#include <QString>
-#include <QReadWriteLock>
 #include <QDir>
 
 #include "Defines.h"

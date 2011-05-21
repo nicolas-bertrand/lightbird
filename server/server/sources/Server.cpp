@@ -3,10 +3,12 @@
 #include <QFileInfo>
 #include <QTranslator>
 
+#include "IGui.h"
+
+#include "ApiGuis.h"
 #include "Configurations.h"
 #include "Database.h"
 #include "Events.h"
-#include "IGui.h"
 #include "Log.h"
 #include "Network.h"
 #include "Plugins.hpp"
@@ -55,6 +57,8 @@ void    Server::_initialize()
     Log::info("Loading the network", "Server", "_initialize");
     Network::instance(this);
     this->_loadNetwork();
+    // Load the events system
+    Events::instance(this);
     // The plugins are loaded
     Log::info("Loading the plugins", "Server", "_initialize");
     Plugins::instance(this);

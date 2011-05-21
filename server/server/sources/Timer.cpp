@@ -1,9 +1,10 @@
 #include <QCoreApplication>
 #include <QTimer>
 
+#include "ITimer.h"
+
 #include "ApiTimers.h"
 #include "Plugins.hpp"
-#include "ITimer.h"
 #include "Log.h"
 #include "Threads.h"
 #include "Timer.h"

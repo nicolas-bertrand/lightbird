@@ -3,8 +3,8 @@
 
 # include <QObject>
 
-# include "IPlugin.h"
 # include "IDoExecution.h"
+# include "IPlugin.h"
 
 class Get : public QObject,
             public LightBird::IPlugin,

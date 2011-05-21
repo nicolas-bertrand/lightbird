@@ -54,7 +54,7 @@ namespace LightBird
         /// @brief Stop the server. The server will stop as soon as all its current tasks are finished.
         virtual void                        stop() = 0;
         /// @brief Restart the server. The server will stop as soon as all its current tasks has been done.
-        /// THIS METHOD DOESN'T WORK YET !!! The server will stop, but not restart.
+        /// @deprecated THIS METHOD DOESN'T WORK YET !!! The server will stop, but not restart.
         virtual void                        restart() = 0;
         /// @brief The id of the plugin. This id refered to the name of the directory
         /// where the plugin is stored. It may or not be the real name of the plugin.

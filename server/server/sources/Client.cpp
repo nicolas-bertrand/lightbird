@@ -1,17 +1,17 @@
-#include <QUuid>
-#include <QHostAddress>
 #include <QCoreApplication>
-
-#include "Log.h"
-#include "Client.h"
-#include "Threads.h"
-#include "Plugins.hpp"
-#include "Engine.h"
+#include <QHostAddress>
+#include <QUuid>
 
 #include "IOnConnect.h"
 #include "IDoRead.h"
 #include "IDoWrite.h"
 #include "IOnDisconnect.h"
+
+#include "Client.h"
+#include "Engine.h"
+#include "Log.h"
+#include "Plugins.hpp"
+#include "Threads.h"
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,

@@ -15,7 +15,7 @@
 # define DEFAULT_DATABASE_TYPE                  "QSQLITE"               ///< The default Qt SQL driver type.
 # define DEFAULT_DATABASE_PATH                  "databases"             ///< The name of the default directory where the database is stored.
 # define DEFAULT_DATABASE_FILE                  "database.sqlite"       ///< The default file name of the database.
-# define DEFAULT_DATABASE_RESOURCE              ":database"             ///< Nom de la base de données dans les ressources du serveur.
+# define DEFAULT_DATABASE_RESOURCE              ":database"             ///< The name of the database file in the resources of the server.
 
 # define DEFAULT_PERMISSIONS_ACTIVATE           "false"                 ///< If the permissions system is activated.
 # define DEFAULT_PERMISSIONS_DEFAULT            "false"                 ///< The default permissions.
@@ -24,7 +24,7 @@
 # define DEFAULT_PERMISSIONS_GROUPINHERITANCE   "true"                  ///< If the inheritance of the owner rights is activated.
 
 # define DEFAULT_PLUGINS_PATH                   "plugins"               ///< The name of the default plugins directory.
-# define DEFAULT_QT_PLUGINS_PATH                "plugins"               ///< The default path to the plugins of Qt. Used to distrubute the server.
+# define DEFAULT_QT_PLUGINS_PATH                "QtPlugins"             ///< The default path to the plugins of Qt. Used to distrubute the server.
 # define DEFAULT_FILES_PATH                     "files"                 ///< The name of the default directory of the files.
 # define DEFAULT_TEMPORARY_PATH                 "tmp"                   ///< The name of the default temporary directory.
 # define DEFAULT_CLEAN_TEMPORARY_PATH           "true"                  ///< Defines if the temporary directory must be emptied every time the server is started.

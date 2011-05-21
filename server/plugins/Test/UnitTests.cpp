@@ -1,16 +1,8 @@
 #include <QCryptographicHash>
+#include <QSharedPointer>
+#include <QSqlQuery>
+#include <QStringList>
 
-#include "ITableAccessors.h"
-#include "ITableAccounts.h"
-#include "ITableCollections.h"
-#include "ITableDirectories.h"
-#include "ITableEvents.h"
-#include "ITableFiles.h"
-#include "ITableGroups.h"
-#include "ITableLimits.h"
-#include "ITableObjects.h"
-#include "ITablePermissions.h"
-#include "ITableTags.h"
 #include "UnitTests.h"
 
 UnitTests::UnitTests(LightBird::IApi &a) : api(a),

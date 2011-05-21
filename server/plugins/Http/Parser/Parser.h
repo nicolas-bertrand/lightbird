@@ -1,8 +1,8 @@
 #ifndef PARSER_H
 # define PARSER_H
 
-# include <QString>
 # include <QByteArray>
+# include <QString>
 
 # include "IClient.h"
 

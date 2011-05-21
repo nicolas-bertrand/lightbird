@@ -2,6 +2,7 @@
 # define ITABLEPERMISSIONS_H
 
 # include <QString>
+# include <QStringList>
 
 # include "ITable.h"
 

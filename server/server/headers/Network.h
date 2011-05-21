@@ -1,15 +1,18 @@
 #ifndef NETWORK_H
 # define NETWORK_H
 
+# include <QList>
 # include <QObject>
 # include <QReadWriteLock>
-
-# include "Port.h"
-# include "Future.hpp"
+# include <QString>
+# include <QStringList>
 
 # include "INetwork.h"
 
-/// @brief Manage the network.
+# include "Future.hpp"
+# include "Port.h"
+
+/// @brief Manages the network.
 ///
 /// This class is thread safe. All the publics methods of this class emit
 /// a signal that allows to execute their operations in the main thread
@@ -21,7 +24,7 @@ class Network : public QObject
     Q_OBJECT
 
 public:
-    ///< Returns the instance of the network.
+    /// @brief Returns the instance of the network.
     static Network  *instance(QObject *parent = 0);
 
     /// @brief Created a new port from which the server will listen.

@@ -4,9 +4,7 @@
 #include "Database.h"
 #include "Defines.h"
 #include "Log.h"
-#include "TableAccounts.h"
 #include "TableDirectories.h"
-#include "TableFiles.h"
 #include "TablePermissions.h"
 #include "Tools.h"
 

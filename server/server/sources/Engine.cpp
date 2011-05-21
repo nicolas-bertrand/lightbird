@@ -11,8 +11,8 @@
 #include "IOnWrite.h"
 #include "IOnFinish.h"
 
-#include "Plugins.hpp"
 #include "Engine.h"
+#include "Plugins.hpp"
 
 Engine::Engine(Client *c, QObject *parent) : QObject(parent), client(c)
 {

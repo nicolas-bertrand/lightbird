@@ -1,7 +1,7 @@
+#include "Extensions.h"
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
-#include "Extensions.h"
 
 Extensions  *Extensions::_instance = NULL;
 

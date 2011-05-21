@@ -1,9 +1,9 @@
 #ifndef IPLUGINS_H
 # define IPLUGINS_H
 
-# include <QList>
-# include <QString>
 # include <QSharedPointer>
+# include <QString>
+# include <QStringList>
 
 # include "IFuture.h"
 # include "IMetadata.h"

@@ -1,6 +1,7 @@
 #ifndef TIMER_H
 # define TIMER_H
 
+# include <QString>
 # include <QThread>
 
 class ApiTimers;

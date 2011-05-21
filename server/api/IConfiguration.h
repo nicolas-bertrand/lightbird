@@ -1,8 +1,8 @@
 #ifndef ICONFIGURATION_H
 # define ICONFIGURATION_H
 
-class QString;
-class QDomElement;
+# include <QDomElement>
+# include <QString>
 
 namespace LightBird
 {

@@ -1,9 +1,9 @@
-#include <QFileInfo>
 #include <QFile>
+#include <QFileInfo>
 
-#include "Log.h"
-#include "Configurations.h"
 #include "ApiConfiguration.h"
+#include "Configurations.h"
+#include "Log.h"
 #include "Plugins.hpp"
 
 ApiConfiguration::ApiConfiguration(const QString &idPlugin) : id(Plugins::checkId(idPlugin)),

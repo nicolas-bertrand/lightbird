@@ -1,8 +1,8 @@
 #ifndef ITABLE_H
 # define ITABLE_H
 
-# include <QString>
 # include <QDateTime>
+# include <QString>
 
 namespace LightBird
 {

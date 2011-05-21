@@ -1,10 +1,7 @@
 #ifndef CONTENT_H
 # define CONTENT_H
 
-# include <QByteArray>
-# include <QVariant>
-# include <QFile>
-# include <QTemporaryFile>
+# include <QObject>
 
 # include "IContent.h"
 

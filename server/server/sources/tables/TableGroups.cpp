@@ -3,7 +3,6 @@
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
-#include "TableAccounts.h"
 #include "TableGroups.h"
 
 TableGroups::TableGroups(const QString &id)

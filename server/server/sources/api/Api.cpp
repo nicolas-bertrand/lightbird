@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include "Api.h"
+#include "ApiGuis.h"
 #include "ApiPlugins.h"
 #include "Configurations.h"
 #include "Extensions.h"
@@ -10,11 +11,11 @@ Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event
          QObject(parent),
          configurationApi(configuration),
          databaseApi(id),
-         eventsApi(id, event),
          logsApi(id),
          networkApi(id)
 {
     this->id = id;
+    this->eventsApi = new ApiEvents(this->id, event);
     // If the timers has to be loaded
     if (timers)
         this->timersApi = new ApiTimers(this->id, this);
@@ -24,6 +25,12 @@ Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event
 
 Api::~Api()
 {
+    // If the thread has not been started we can delete it safely
+    if (!this->eventsApi->isRunning() && !this->eventsApi->isFinished())
+        delete this->eventsApi;
+    // Otherwise we rely on the Threads manager to delete it
+    else
+        this->eventsApi->quit();
 }
 
 LightBird::IConfiguration   &Api::configuration(bool plugin)
@@ -49,7 +56,7 @@ LightBird::IDatabase        &Api::database()
 
 LightBird::IEvents          &Api::events()
 {
-    return (this->eventsApi);
+    return (*this->eventsApi);
 }
 
 LightBird::IExtensions      &Api::extensions()

@@ -1,9 +1,11 @@
 #ifndef IEVENTS_H
 # define IEVENTS_H
 
+# include <QList>
+# include <QPair>
 # include <QString>
+# include <QStringList>
 # include <QVariant>
-# include <QMap>
 
 namespace LightBird
 {

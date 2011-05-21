@@ -1,15 +1,19 @@
 #ifndef PLUGINS_H
 # define PLUGINS_H
 
-# include <QPair>
-# include <QWaitCondition>
 # include <QMutex>
+# include <QObject>
+# include <QPair>
+# include <QString>
+# include <QStringList>
+# include <QThread>
+# include <QWaitCondition>
+
+# include "INetwork.h"
 
 # include "Defines.h"
 # include "Plugin.hpp"
 # include "Future.hpp"
-
-# include "INetwork.h"
 
 /// @brief A class class used by the server to manipulate plugins.
 /// This class is a thread-safe singleton.

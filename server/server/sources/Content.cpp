@@ -1,8 +1,6 @@
-#include <QDir>
-
 #include "Configurations.h"
-#include "Log.h"
 #include "Content.h"
+#include "Log.h"
 
 Content::Content(QObject *parent) : QObject(parent)
 {

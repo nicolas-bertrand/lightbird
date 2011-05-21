@@ -2,9 +2,10 @@
 # define ITABLEFILES_H
 
 # include <QMap>
+# include <QString>
+# include <QStringList>
+# include <QVariant>
 
-# include "ITableCollections.h"
-# include "ITableDirectories.h"
 # include "ITableObjects.h"
 
 namespace LightBird

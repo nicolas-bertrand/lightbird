@@ -1,18 +1,9 @@
-#include "Log.h"
-#include "Database.h"
 #include "ApiDatabase.h"
+#include "Database.h"
+#include "Log.h"
 
 #include "ITableAccessors.h"
-#include "ITableAccounts.h"
-#include "ITableCollections.h"
-#include "ITableDirectories.h"
-#include "ITableEvents.h"
-#include "ITableFiles.h"
-#include "ITableGroups.h"
-#include "ITableLimits.h"
 #include "ITableObjects.h"
-#include "ITablePermissions.h"
-#include "ITableTags.h"
 
 ApiDatabase::ApiDatabase(const QString &id)
 {

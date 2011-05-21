@@ -41,31 +41,24 @@ void    PortTcp::stopListening()
     Port::stopListening();
 }
 
-bool        PortTcp::read(QByteArray &data, QObject *caller)
+bool    PortTcp::read(QByteArray &data, Client *client)
 {
-    Client  *client;
-
     data.clear();
-    // If the caller is a client, read the data from the socket
-    if ((client = qobject_cast<Client *>(caller))
-        // Calls the IDoRead interface of the plugins
-        && !client->doRead(data))
-            //If no plugins implements it, the server read the data itself
-            data = client->getSocket().readAll();
+    // Calls the IDoRead interface of the plugins
+    if (!client->doRead(data))
+        //If no plugins implements it, the server read the data itself
+        data = client->getSocket().readAll();
     if (data.size() > 0)
         return (true);
     return (false);
 }
 
-bool        PortTcp::write(QByteArray &data, QObject *caller)
+bool    PortTcp::write(QByteArray &data, Client *client)
 {
-    Client  *client;
-    int     wrote;
+    int wrote;
 
-    // If the caller is a client, write the data on the socket
-    if ((client = qobject_cast<Client *>(caller))
-        // Calls the IDoWrite interface of the plugins
-        && !client->doWrite(data))
+    // Calls the IDoWrite interface of the plugins
+    if (!client->doWrite(data))
     {
         //If no plugins implements it, the server write the data itself
         if ((wrote = client->getSocket().write(data)) != data.size())

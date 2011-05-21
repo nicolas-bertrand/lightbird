@@ -3,7 +3,6 @@
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
-#include "TableDirectories.h"
 #include "TableTags.h"
 
 TableTags::TableTags(const QString &id)

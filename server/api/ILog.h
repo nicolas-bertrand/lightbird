@@ -1,9 +1,10 @@
 #ifndef ILOG_H
 # define ILOG_H
 
-# include <QString>
-# include <QMap>
 # include <QDateTime>
+# include <QMap>
+# include <QString>
+
 # include "ILogs.h"
 
 namespace LightBird

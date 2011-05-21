@@ -24,8 +24,8 @@ public:
     bool    isListening();
     /// @brief Close the UDP socket. No new connections will be accepted after this call.
     void    stopListening();
-    bool    read(QByteArray &data, QObject *caller);
-    bool    write(QByteArray &data, QObject *caller);
+    bool    read(QByteArray &data, Client *client);
+    bool    write(QByteArray &data, Client *client);
 
 private:
     PortUdp(const PortUdp &);

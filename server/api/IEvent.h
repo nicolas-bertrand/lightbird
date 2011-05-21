@@ -1,7 +1,7 @@
 #ifndef IEVENT_H
 # define IEVENT_H
 
-# include <QStringList>
+# include <QString>
 # include <QVariant>
 
 namespace LightBird

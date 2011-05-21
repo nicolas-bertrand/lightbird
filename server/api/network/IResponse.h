@@ -1,10 +1,10 @@
 #ifndef IRESPONSE_H
 # define IRESPONSE_H
 
-# include <QString>
-# include <QByteArray>
 # include <QMap>
+# include <QString>
 # include <QUrl>
+# include <QVariantList>
 
 # include "IContent.h"
 

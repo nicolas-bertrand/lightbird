@@ -1,17 +1,25 @@
 #ifndef IDATABASE_H
 # define IDATABASE_H
 
-# include <QVector>
+# include <QDateTime>
 # include <QMap>
+# include <QSharedPointer>
+# include <QSqlQuery>
 # include <QString>
 # include <QStringList>
 # include <QVariant>
-# include <QSqlError>
-# include <QSqlQuery>
-# include <QDateTime>
-# include <QSharedPointer>
+# include <QVector>
 
-#include "ITable.h"
+# include "ITable.h"
+# include "ITableAccounts.h"
+# include "ITableCollections.h"
+# include "ITableDirectories.h"
+# include "ITableEvents.h"
+# include "ITableFiles.h"
+# include "ITableGroups.h"
+# include "ITableLimits.h"
+# include "ITablePermissions.h"
+# include "ITableTags.h"
 
 namespace LightBird
 {

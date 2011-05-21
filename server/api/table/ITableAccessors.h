@@ -1,6 +1,9 @@
 #ifndef ITABLEACCESSORS_H
 # define ITABLEACCESSORS_H
 
+# include <QString>
+# include <QStringList>
+
 # include "ITable.h"
 
 namespace LightBird

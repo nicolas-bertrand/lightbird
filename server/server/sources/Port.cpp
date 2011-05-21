@@ -1,9 +1,7 @@
-#include <QStringList>
-
+#include "Configurations.h"
 #include "Log.h"
 #include "Port.h"
 #include "Threads.h"
-#include "Configurations.h"
 
 Port::Port(unsigned short port, LightBird::INetwork::Transports transport, const QStringList &protocols,
            unsigned int maxClients, QObject *object) : QObject(object)

@@ -1,6 +1,8 @@
 #ifndef IONREAD_H
 # define IONREAD_H
 
+# include <QByteArray>
+
 # include "IClient.h"
 
 namespace LightBird

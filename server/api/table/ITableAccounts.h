@@ -1,13 +1,13 @@
 #ifndef ITABLEACCOUNTS_H
 # define ITABLEACCOUNTS_H
 
-# include <QString>
 # include <QDateTime>
 # include <QMap>
+# include <QString>
+# include <QStringList>
 # include <QVariant>
 
 # include "ITableAccessors.h"
-# include "ITableGroups.h"
 
 namespace LightBird
 {

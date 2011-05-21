@@ -3,8 +3,8 @@
 
 # include <QObject>
 
-# include "IPlugin.h"
 # include "IEvent.h"
+# include "IPlugin.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,

@@ -1,11 +1,10 @@
 #include <QCryptographicHash>
 #include <QUuid>
 
+#include "Database.h"
 #include "Defines.h"
 #include "Log.h"
-#include "Database.h"
 #include "TableAccounts.h"
-#include "TableGroups.h"
 
 TableAccounts::TableAccounts(const QString &id)
 {

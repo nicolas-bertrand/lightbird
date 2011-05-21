@@ -1,8 +1,10 @@
 #include <QApplication>
+
+#include "IGui.h"
+
+#include "ApiGuis.h"
 #include "Log.h"
 #include "Plugins.hpp"
-#include "IGui.h"
-#include "ApiGuis.h"
 
 ApiGuis *ApiGuis::_instance = NULL;
 

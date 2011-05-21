@@ -1,10 +1,11 @@
 #include <iostream>
 
-#include "Configurations.h"
-#include "Plugins.hpp"
-#include "Log.h"
-#include "Threads.h"
 #include "ILog.h"
+
+#include "Configurations.h"
+#include "Log.h"
+#include "Plugins.hpp"
+#include "Threads.h"
 
 Log     *Log::_instance = NULL;
 

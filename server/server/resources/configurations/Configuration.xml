@@ -2,7 +2,7 @@
 <configuration>
   <name></name>
   <pluginsPath>plugins</pluginsPath>
-  <QtPluginsPath>./QtPlugins</QtPluginsPath>
+  <QtPluginsPath>QtPlugins</QtPluginsPath>
   <filesPath>files</filesPath>
   <temporaryPath>tmp</temporaryPath>
   <cleanTemporaryPath>true</cleanTemporaryPath>

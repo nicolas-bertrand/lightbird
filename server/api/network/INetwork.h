@@ -2,12 +2,13 @@
 # define INetwork_H
 
 # include <QDateTime>
-# include <QStringList>
-# include <QString>
-# include <QByteArray>
 # include <QHostAddress>
-# include <QSharedPointer>
 # include <QList>
+# include <QMap>
+# include <QSharedPointer>
+# include <QString>
+# include <QStringList>
+# include <QVariant>
 
 # include "IFuture.h"
 

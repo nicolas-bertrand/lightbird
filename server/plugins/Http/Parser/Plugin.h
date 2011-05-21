@@ -1,19 +1,21 @@
 #ifndef PLUGIN_H
 # define PLUGIN_H
 
+# include <QMap>
 # include <QObject>
 # include <QReadWriteLock>
-# include <QMap>
+# include <QString>
+# include <QStringList>
 
-# include "IPlugin.h"
-# include "IOnConnect.h"
-# include "IOnProtocol.h"
-# include "IDoUnserializeHeader.h"
-# include "IDoUnserializeContent.h"
-# include "IDoSerializeHeader.h"
 # include "IDoSerializeContent.h"
-# include "IOnFinish.h"
+# include "IDoSerializeHeader.h"
+# include "IDoUnserializeContent.h"
+# include "IDoUnserializeHeader.h"
+# include "IOnConnect.h"
 # include "IOnDisconnect.h"
+# include "IOnFinish.h"
+# include "IOnProtocol.h"
+# include "IPlugin.h"
 
 # include "Parser.h"
 

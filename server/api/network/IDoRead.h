@@ -2,6 +2,7 @@
 # define IDOREAD_H
 
 # include <QByteArray>
+
 # include "IClient.h"
 
 namespace LightBird

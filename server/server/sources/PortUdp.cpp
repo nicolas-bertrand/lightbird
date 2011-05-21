@@ -1,5 +1,3 @@
-#include <QTimer>
-
 #include "Log.h"
 #include "PortUdp.h"
 
@@ -42,24 +40,22 @@ void    PortUdp::stopListening()
     Port::stopListening();
 }
 
-bool    PortUdp::read(QByteArray &data, QObject *)
+bool    PortUdp::read(QByteArray &data, Client *)
 {
     data.clear();
     return (false);
 }
 
-bool    PortUdp::write(QByteArray &data, QObject *caller)
+bool    PortUdp::write(QByteArray &data, Client *client)
 {
-    Client  *client;
-    int     wrote;
+    int wrote;
 
-    // If the caller is a client, write the data on the socket
-    if ((client = qobject_cast<Client *>(caller)))
-        if ((wrote = this->socket.writeDatagram(data, client->getPeerAddress(), client->getPeerPort())) != data.size())
-        {
-            Log::debug("All data has not been written", Properties("wrote", wrote).add("toWrite", data.size()).add("id", client->getId()), "PortUdp", "write");
-            return (false);
-        }
+    // Write the data on the socket
+    if ((wrote = this->socket.writeDatagram(data, client->getPeerAddress(), client->getPeerPort())) != data.size())
+    {
+        Log::debug("All data has not been written", Properties("wrote", wrote).add("toWrite", data.size()).add("id", client->getId()), "PortUdp", "write");
+        return (false);
+    }
     return (true);
 }
 

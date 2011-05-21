@@ -1,13 +1,14 @@
 #ifndef	LOG_H
 # define LOG_H
 
-# include <QMutex>
-# include <QWaitCondition>
-# include <QThread>
 # include <QDateTime>
+# include <QMutex>
+# include <QThread>
+# include <QWaitCondition>
+
+# include "ILogs.h"
 
 # include "Properties.h"
-# include "ILogs.h"
 
 /// @brief Writes log entries.
 ///

@@ -1,6 +1,6 @@
+#include "ApiNetwork.h"
 #include "Log.h"
 #include "Network.h"
-#include "ApiNetwork.h"
 
 ApiNetwork::ApiNetwork(const QString &id)
 {

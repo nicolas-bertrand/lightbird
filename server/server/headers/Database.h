@@ -1,10 +1,15 @@
 #ifndef DATABASE_H
 # define DATABASE_H
 
+# include <QDateTime>
 # include <QDomDocument>
-# include <QSqlDatabase>
-# include <QSqlError>
+# include <QMap>
 # include <QMutex>
+# include <QObject>
+# include <QString>
+# include <QStringList>
+# include <QVariant>
+# include <QVector>
 
 # include "IDatabase.h"
 

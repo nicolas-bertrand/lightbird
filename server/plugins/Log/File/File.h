@@ -1,13 +1,17 @@
 #ifndef FILE_H
 # define FILE_H
 
-# include <QObject>
-# include <QFile>
 # include <QDir>
+# include <QFile>
+# include <QMap>
+# include <QMutex>
+# include <QObject>
+# include <QString>
 # include <QStringList>
 
-# include "IPlugin.h"
 # include "ILog.h"
+# include "ILogs.h"
+# include "IPlugin.h"
 # include "ITimer.h"
 
 class File : public QObject,

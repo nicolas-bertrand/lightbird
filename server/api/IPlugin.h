@@ -2,7 +2,6 @@
 # define IPLUGIN_H
 
 # include "IApi.h"
-# include "IConfiguration.h"
 # include "IMetadata.h"
 
 namespace LightBird

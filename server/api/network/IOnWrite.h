@@ -1,6 +1,8 @@
 #ifndef IONWRITE_H
 # define IONWRITE_H
 
+# include <QByteArray>
+
 # include "IClient.h"
 
 namespace LightBird

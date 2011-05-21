@@ -1,9 +1,6 @@
-#include <QTime>
-
 #include "Defines.h"
-#include "Threads.h"
 #include "Log.h"
-#include "Configurations.h"
+#include "Threads.h"
 
 Threads *Threads::_instance = NULL;
 

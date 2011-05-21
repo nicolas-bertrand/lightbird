@@ -1,9 +1,8 @@
 #ifndef	APIEVENTS_H
 # define APIEVENTS_H
 
-# include <QThread>
 # include <QMutex>
-# include <QStringList>
+# include <QThread>
 # include <QWaitCondition>
 
 # include "IEvents.h"

@@ -2,10 +2,8 @@
 # define CONFIGURATION_H
 
 # include <QFile>
-# include <QMap>
-# include <QMutex>
+# include <QObject>
 # include <QDomDocument>
-# include <QDomElement>
 # include <QReadWriteLock>
 
 # include "IConfiguration.h"

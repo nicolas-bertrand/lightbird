@@ -4,7 +4,6 @@
 #include "Configurations.h"
 #include "Events.h"
 #include "Extensions.h"
-#include "IGui.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Threads.h"
@@ -56,8 +55,6 @@ void        Plugins::run()
 {
     // Initialize the plugins API
     ApiPlugins::instance(this);
-    // Initialize the events system
-    Events::instance(this);
     // Initialize the extension manager
     Extensions::instance(this);
     Log::debug("Plugins thread started", "Plugins", "run");

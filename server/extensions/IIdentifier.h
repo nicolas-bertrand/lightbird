@@ -1,9 +1,7 @@
 #ifndef IIDENTIFIER_H
 # define IIDENTIFIER_H
 
-# include <QMap>
 # include <QString>
-# include <QVariant>
 
 # include "IIdentify.h"
 

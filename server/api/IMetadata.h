@@ -1,9 +1,8 @@
 #ifndef IMETADATA_H
 # define IMETADATA_H
 
-# include <QString>
-# include <QStringList>
 # include <QMap>
+# include <QString>
 
 namespace LightBird
 {

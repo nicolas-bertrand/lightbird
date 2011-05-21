@@ -1,6 +1,8 @@
 #ifndef IDOUNSERIALIZECONTENT_H
 # define IDOUNSERIALIZECONTENT_H
 
+# include <QByteArray>
+
 # include "IClient.h"
 
 namespace LightBird

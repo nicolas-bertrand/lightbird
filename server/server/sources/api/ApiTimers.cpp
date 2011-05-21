@@ -1,9 +1,9 @@
-#include <QDomElement>
+#include <QDomNode>
 
-#include "Defines.h"
-#include "Log.h"
 #include "ApiTimers.h"
 #include "Configurations.h"
+#include "Defines.h"
+#include "Log.h"
 
 ApiTimers::ApiTimers(const QString &id, QObject *parent) : QObject(parent)
 {

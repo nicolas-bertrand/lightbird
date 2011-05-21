@@ -1,8 +1,10 @@
 #include <QDir>
+#include <QDomElement>
 #include <QFile>
+#include <QFileInfo>
 
-#include "ITimer.h"
 #include "IEvent.h"
+#include "ITimer.h"
 
 #include "Configurations.h"
 #include "Log.h"

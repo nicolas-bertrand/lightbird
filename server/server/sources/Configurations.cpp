@@ -1,5 +1,4 @@
 #include <QFileInfo>
-#include <QString>
 
 #include "ApiConfiguration.h"
 #include "Configurations.h"

@@ -1,9 +1,11 @@
 #ifndef ITABLEEVENTS_H
 # define ITABLEEVENTS_H
 
-# include <QString>
-# include <QMap>
 # include <QDateTime>
+# include <QMap>
+# include <QString>
+# include <QStringList>
+# include <QVariant>
 
 # include "ITable.h"
 

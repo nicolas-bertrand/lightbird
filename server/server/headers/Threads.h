@@ -1,9 +1,10 @@
 #ifndef THREADS_H
 # define THREADS_H
 
-# include <QThread>
-# include <QMutex>
 # include <QMap>
+# include <QMutex>
+# include <QObject>
+# include <QThread>
 
 /// @brief Manage the threads of the server. Ensure that thread are correctly
 /// deleted and cleaned, in a safe way.

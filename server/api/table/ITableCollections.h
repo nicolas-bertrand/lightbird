@@ -1,7 +1,8 @@
 #ifndef ITABLECOLLECTIONS_H
 # define ITABLECOLLECTIONS_H
 
-# include <QMap>
+# include <QString>
+# include <QStringList>
 
 # include "ITableObjects.h"
 

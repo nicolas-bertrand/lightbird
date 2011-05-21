@@ -1,14 +1,13 @@
 #ifndef CONFIGURATIONS_H
 # define CONFIGURATIONS_H
 
-# include <QFile>
 # include <QMap>
 # include <QMutex>
-# include <QDomDocument>
-# include <QDomElement>
-# include <QReadWriteLock>
+# include <QObject>
+# include <QString>
 
 # include "IConfiguration.h"
+
 # include "Configuration.h"
 
 /// @brief Configurations is a ThreadSafe class that manage all the Configuration.

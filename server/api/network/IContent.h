@@ -2,10 +2,9 @@
 # define ICONTENT_H
 
 # include <QByteArray>
-# include <QList>
-# include <QVariant>
 # include <QFile>
 # include <QTemporaryFile>
+# include <QVariant>
 
 namespace LightBird
 {

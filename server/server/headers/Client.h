@@ -1,12 +1,8 @@
 #ifndef CLIENT_H
 # define CLIENT_H
 
-# include <QThread>
-# include <QAbstractSocket>
-# include <QString>
-# include <QHostAddress>
-# include <QDateTime>
 # include <QMutex>
+# include <QThread>
 
 # include "IClient.h"
 # include "INetwork.h"

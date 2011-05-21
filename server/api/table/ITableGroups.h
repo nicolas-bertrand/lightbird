@@ -2,8 +2,7 @@
 # define ITABLEGROUPS_H
 
 # include <QString>
-# include <QDateTime>
-# include <QMap>
+# include <QStringList>
 
 # include "ITableAccessors.h"
 
