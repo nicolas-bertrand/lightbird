@@ -128,7 +128,7 @@ void    Log::trace(const QString &message, const Properties &properties, const Q
     Log::instance()->write(LightBird::ILogs::TRACE, message, "", properties, object,method);
 }
 
-LightBird::ILogs::Level Log::getlevel()
+LightBird::ILogs::Level Log::getLevel()
 {
     return (this->level);
 }
@@ -137,6 +137,16 @@ void    Log::setLevel(LightBird::ILogs::Level level)
 {
     if (this->levels.contains(level))
         this->level = level;
+}
+
+bool    Log::isDisplay()
+{
+    return (this->display);
+}
+
+void    Log::isDisplay(bool display)
+{
+    this->display = display;
 }
 
 bool    Log::isError()

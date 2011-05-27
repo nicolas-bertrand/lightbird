@@ -67,19 +67,14 @@ public:
     static void trace(const QString &message, const QString &object = "", const QString &method = "");
     /// @brief Writes a trace log.
     static void trace(const QString &message, const Properties &properties, const QString &object = "", const QString &method = "");
-    /// @see LightBird::ILogs::getlevel
-    LightBird::ILogs::Level getlevel();
-    /// @see LightBird::ILogs::setLevel
+    LightBird::ILogs::Level getLevel();
     void    setLevel(LightBird::ILogs::Level level);
-    /// @see LightBird::ILogs::isError
+    bool    isDisplay();
+    void    isDisplay(bool display);
     bool    isError();
-    /// @see LightBird::ILogs::isWarning
     bool    isWarning();
-    /// @see LightBird::ILogs::isInfo
     bool    isInfo();
-    /// @see LightBird::ILogs::isDebug
     bool    isDebug();
-    /// @see LightBird::ILogs::isTrace
     bool    isTrace();
 
     /// @brief Set the mode of the log.

@@ -30,8 +30,10 @@ public:
     void    debug(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
     void    trace(const QString &message, const QString &className = "", const QString &method = "");
     void    trace(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    LightBird::ILogs::Level getlevel();
+    LightBird::ILogs::Level getLevel();
     void    setLevel(LightBird::ILogs::Level level);
+    bool    isDisplay();
+    void    isDisplay(bool display);
     bool    isError();
     bool    isWarning();
     bool    isInfo();

@@ -38,7 +38,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "Test";
     metadata.brief = "Run various tests on the server API.";
-    metadata.description = "Allows to test the server API, the network, and the database.";
+    metadata.description = "Allows to test the server API the network and the database.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
