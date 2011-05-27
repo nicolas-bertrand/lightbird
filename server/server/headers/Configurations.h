@@ -40,7 +40,7 @@ public:
 
 private:
     static QMap<QString, Configuration *>   instances;     ///< The instances of the loaded configurations.
-    static QMutex                           lockInstances; ///< Ensure that instances is thread safe
+    static QMutex                           lockInstances; ///< Ensure that instances is thread safe.
 };
 
 #endif // CONFIGURATIONS_H

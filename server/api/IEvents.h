@@ -28,7 +28,7 @@ namespace LightBird
         /// @param property : An optional property that the event may require.
         virtual void    send(const QString &event, const QVariant &property = QVariant()) = 0;
         /// @brief Allows plugins to receive events without implementing IEvent.
-        /// All the events are removed from the queue after a call to this method.
+        /// All the events are removed of the queue after a call to this method.
         /// @return The list of all the events in the queue.
         /// @see LightBird::IEvent
         virtual QList<QPair<QString, QVariant> > receive() = 0;

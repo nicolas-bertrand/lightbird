@@ -56,6 +56,8 @@ namespace LightBird
         /// @see writeDom
         virtual void        release() = 0;
         /// @brief Saves the modifications made to the configuration into the file.
+        /// If the instance represents the configuration of the server, the event
+        /// configuration_saved is sent.
         /// @return If the configuration has been saved.
         virtual bool        save() = 0;
     };

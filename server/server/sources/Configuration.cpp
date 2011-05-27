@@ -1,8 +1,9 @@
 #include <QDir>
 
-#include "Defines.h"
 #include "Configuration.h"
 #include "Configurations.h"
+#include "Defines.h"
+#include "Events.h"
 #include "Log.h"
 #include "Tools.h"
 
@@ -206,6 +207,9 @@ bool            Configuration::save()
         return (false);
     }
     this->file.close();
+    // If the configuration of the server has been saved, an event occured
+    if (Configurations::instance() == this)
+        Events::instance()->send("configuration_saved");
     Log::debug("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");
     this->domLock.unlock();
     return (true);
