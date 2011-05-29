@@ -163,7 +163,10 @@ void                                Plugins::_load(const QString &identifier, Fu
     }
     if (this->_getState(id) != LightBird::IPlugins::UNLOADED)
     {
-        Log::error("The plugin is not installed", Properties("id", id), "Plugins", "_load");
+        if (this->_getState(id) == LightBird::IPlugins::UNKNOW)
+            Log::error("The plugin has not been found", Properties("id", id), "Plugins", "_load");
+        else
+            Log::error("The plugin is not installed", Properties("id", id), "Plugins", "_load");
         this->mutex.unlock();
         return ;
     }

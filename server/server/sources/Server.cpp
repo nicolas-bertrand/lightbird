@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QProcess>
 #include <QTranslator>
 
 #include "IGui.h"
@@ -16,6 +17,8 @@
 #include "Threads.h"
 #include "Tools.h"
 
+bool    Server::restart = false;
+
 Server::Server(Arguments &args, QObject *parent) : QObject(parent),
                                                    arguments(args),
                                                    initialized(false)
@@ -27,6 +30,8 @@ Server::Server(Arguments &args, QObject *parent) : QObject(parent),
 void    Server::_initialize()
 {
     Log::info("Initialazing the server", "Server", "_initialize");
+    // Set the current path of the application to the path of the executable
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
     // Seed the random number generator
     ::qsrand((unsigned)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
     // Then the configuration is loaded
@@ -83,6 +88,9 @@ Server::~Server()
     if (Threads::isLoaded())
         Threads::instance()->deleteAll();
     Log::info("Server stopped", "Server", "~Server");
+    // Restart the server if necessary
+    if (Server::restart)
+        QProcess::startDetached(QCoreApplication::instance()->applicationFilePath(), this->arguments.toStringList(), QDir::currentPath());
 }
 
 bool            Server::_loadTranslation(const QString &file, const QString &resource)

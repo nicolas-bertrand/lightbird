@@ -21,6 +21,8 @@ public:
 
     /// @return True if the server is correctly initialized.
     operator bool();
+    /// @brief If true the server will be restarted after its destruction.
+    static bool restart;
 
 private:
     Server();

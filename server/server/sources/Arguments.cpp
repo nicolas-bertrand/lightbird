@@ -48,3 +48,11 @@ QString Arguments::toString()
 {
     return (this->raw.join(", ").prepend('"').append('"'));
 }
+
+QStringList     Arguments::toStringList()
+{
+    QStringList result = this->raw;
+
+    result.removeFirst();
+    return (result);
+}

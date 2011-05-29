@@ -20,7 +20,8 @@ Configuration::Configuration()
 
 Configuration::~Configuration()
 {
-    Log::trace("Configuration destroyed!", Properties("file", this->file.fileName()), "Configuration", "~Configuration");
+    if (!this->file.fileName().isEmpty())
+        Log::trace("Configuration destroyed!", Properties("file", this->file.fileName()), "Configuration", "~Configuration");
 }
 
 bool        Configuration::_load(const QString &configurationPath, const QString &alternativePath)

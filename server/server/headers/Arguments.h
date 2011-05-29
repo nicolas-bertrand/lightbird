@@ -14,15 +14,17 @@ public:
     ~Arguments();
 
     /// @brief Returns the configuration path of the server.
-    QString getConfiguration();
+    QString     getConfiguration();
     /// @brief Returns true if the server can display GUIs.
-    bool    isGui();
+    bool        isGui();
     /// @brief Returns argc.
-    int     &getArgc();
+    int         &getArgc();
     /// @brief Returns argv.
-    char    **getArgv();
+    char        **getArgv();
     /// @brief Returns a string that contains all the arguments of the server.
-    QString toString();
+    QString     toString();
+    /// @brief Returns a string list that contains all the arguments except the server executable.
+    QStringList toStringList();
 
 private:
     Arguments();

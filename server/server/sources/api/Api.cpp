@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+
 #include "Api.h"
 #include "ApiGuis.h"
 #include "ApiPlugins.h"
@@ -6,6 +7,7 @@
 #include "Extensions.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "Server.h"
 
 Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent) :
          QObject(parent),
@@ -96,6 +98,7 @@ void                        Api::stop()
 
 void                        Api::restart()
 {
+    Server::restart = true;
     QCoreApplication::quit();
 }
 
