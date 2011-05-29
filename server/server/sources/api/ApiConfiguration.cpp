@@ -15,8 +15,8 @@ ApiConfiguration::ApiConfiguration(const QString &idPlugin) : id(Plugins::checkI
         Log::warning("The plugin doesn't exists", Properties("id", this->id), "ApiConfiguration", "ApiConfiguration");
         return ;
     }
-    QDomElement element = this->configuration.readDom();
     // Creates the plugin configurations parent node if it doesn't exists
+    QDomElement element = this->configuration.writeDom();
     if (element.firstChildElement("configurations").isNull())
         element.appendChild(element.toDocument().createElement("configurations"));
     element = element.firstChildElement("configurations").firstChildElement("plugin");

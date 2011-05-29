@@ -4,10 +4,14 @@
 #include "Log.h"
 #include "Tools.h"
 
-bool        Tools::copy(const QString &sourceName, const QString &destinationName)
+// The maximum size of data copied each time
+#define READ_WRITE_SIZE 1048576
+
+bool            Tools::copy(const QString &sourceName, const QString &destinationName)
 {
-    QFile   source(sourceName);
-    QFile   destination(destinationName);
+    QFile       source(sourceName);
+    QFile       destination(destinationName);
+    QByteArray  data;
 
     if (source.open(QIODevice::ReadOnly) == false)
     {
@@ -19,13 +23,12 @@ bool        Tools::copy(const QString &sourceName, const QString &destinationNam
         Log::error("Cannot open the destination file", Properties("source", sourceName).add("destination", destinationName), "Configurations", "copy");
         return (false);
     }
-    if (destination.write(source.readAll()) < 0)
-    {
-        Log::error("Cannot write on the destination file", Properties("source", sourceName).add("destination", destinationName), "Configurations", "copy");
-        return (false);
-    }
-    source.close();
-    destination.close();
+    while ((data = source.read(READ_WRITE_SIZE)).isEmpty() == false)
+        if (destination.write(data) < 0)
+        {
+            Log::error("Cannot write on the destination file", Properties("source", sourceName).add("destination", destinationName), "Configurations", "copy");
+            return (false);
+        }
     return (true);
 }
 
