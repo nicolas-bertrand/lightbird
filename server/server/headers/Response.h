@@ -1,8 +1,9 @@
 #ifndef RESPONSE_H
 # define RESPONSE_H
 
+# include <QObject>
+
 # include "Content.h"
-# include "QObject.h"
 
 # include "IResponse.h"
 

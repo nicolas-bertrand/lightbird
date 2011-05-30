@@ -105,6 +105,7 @@ bool    UnitTests::_configuration()
         ASSERT(c.count("") == 0);
         ASSERT(c.count("gesgsho") == 0);
         ASSERT(c.count("unitTests/gsegesi") == 0);
+        c.remove("unitTests");
     }
     catch (QMap<QString, QString> properties)
     {

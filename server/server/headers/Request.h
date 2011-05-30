@@ -1,8 +1,9 @@
 #ifndef REQUEST_H
 # define REQUEST_H
 
+# include <QObject>
+
 # include "Content.h"
-# include "QObject.h"
 
 # include "IRequest.h"
 

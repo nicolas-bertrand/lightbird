@@ -80,7 +80,6 @@ namespace LightBird
         /// @param id : The id of the client.
         /// @param client : The informations of the client are stored in this structure.
         /// @return True if the client exists.
-        ///
         virtual bool    getClient(const QString &id, LightBird::INetwork::Client &client) = 0;
         /// @brief Allows to get the id of the connected clients for a particular port.
         /// @param port : The port of the clients.
