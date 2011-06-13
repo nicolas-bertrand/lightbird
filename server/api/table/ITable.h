@@ -25,7 +25,7 @@ namespace LightBird
         virtual ~ITable() {}
 
          /// @brief List all the available tables.
-        enum Tables
+        enum Table
         {
             Accessor,       ///< The table is an unknow accessor.
             Accounts,
@@ -71,11 +71,11 @@ namespace LightBird
         /// @brief Returns the name of the table represented by the instance.
         virtual const QString   &getTableName() = 0;
         /// @brief Returns the id of the table represented by the instance.
-        virtual LightBird::ITable::Tables getTableId() = 0;
+        virtual LightBird::ITable::Table getTableId() = 0;
         /// @brief Returns true if the table corresponds to the paramater.
         virtual bool            isTable(const QString &tableName) = 0;
         /// @brief Returns true if the table corresponds to the paramater.
-        virtual bool            isTable(LightBird::ITable::Tables tableId) = 0;
+        virtual bool            isTable(LightBird::ITable::Table tableId) = 0;
 
         // Casts
         /// @brief Cast the table if possible. Returns NULL otherwise.

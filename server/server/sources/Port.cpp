@@ -3,7 +3,7 @@
 #include "Port.h"
 #include "Threads.h"
 
-Port::Port(unsigned short port, LightBird::INetwork::Transports transport, const QStringList &protocols,
+Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols,
            unsigned int maxClients, QObject *object) : QObject(object)
 {
     this->port = port;
@@ -33,7 +33,7 @@ unsigned short  Port::getPort()
     return (this->port);
 }
 
-LightBird::INetwork::Transports Port::getTransport()
+LightBird::INetwork::Transport Port::getTransport()
 {
     return (this->transport);
 }

@@ -39,7 +39,7 @@ public:
     /// that a connected client disconnect.
     /// @return The future result of the action, e.g true if the port has been created.
     Future<bool>    addPort(unsigned short port, const QStringList &protocols = QStringList(),
-                            LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
+                            LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                             unsigned int maxClients = ~0);
     /// @brief Remove a port. This may take some time since all the operations
     /// made on the removed port have to be finished and stopped.
@@ -53,7 +53,7 @@ public:
     /// @param maxClients : The maximum number of clients simultaneously connected,
     /// allowed by the port.
     /// @return True if the port exists.
-    bool            getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients);
+    bool            getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients);
     /// @brief Returns the list of the open ports. Users can use getPort() to get
     /// more detailed informations about a specific port.
     /// @return The list of the opened ports on the server.
@@ -67,7 +67,7 @@ public:
     /// @see LightBird::INetwork::connect
     Future<QString> connect(const QHostAddress &address, quint16 port,
                             const QStringList &protocols = QStringList(),
-                            LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
+                            LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                             int wait = -1);
     /// @brief Disconnects a client from the server.
     Future<bool>    disconnect(const QString &id);
@@ -90,26 +90,26 @@ private:
     // from the main thread of the server, not in the thread from which they are called.
 private slots:
     void            _addPort(unsigned short port, const QStringList &protocols,
-                             LightBird::INetwork::Transports transport,
+                             LightBird::INetwork::Transport transport,
                              unsigned int maxClients, Future<bool> *future);
     void            _removePort(unsigned short port, Future<bool> *future);
     void            _getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
     void            _getClients(int port, Future<QStringList> *future);
     void            _connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                             LightBird::INetwork::Transports transport, int wait, Future<QString> *future);
+                             LightBird::INetwork::Transport transport, int wait, Future<QString> *future);
     void            _disconnect(const QString &id, Future<bool> *future);
     /// @brief Delete and remove a port from the ports list. The port must be close, and all the work made on it finished.
     void            _destroyPort(unsigned short port);
 
 signals:
     void            addPortSignal(unsigned short port, const QStringList &protocols,
-                                  LightBird::INetwork::Transports transport,
+                                  LightBird::INetwork::Transport transport,
                                   unsigned int maxClients, Future<bool> *future);
     void            removePortSignal(unsigned short port, Future<bool> *future);
     void            getClientSignal(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
     void            getClientsSignal(int port, Future<QStringList> *future);
     void            connectSignal(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                                  LightBird::INetwork::Transports transport, int wait, Future<QString> *future);
+                                  LightBird::INetwork::Transport transport, int wait, Future<QString> *future);
     void            disconnectSignal(const QString &id, Future<bool> *future);
 };
 

@@ -23,7 +23,7 @@ namespace LightBird
         virtual ~INetwork() {}
 
         /// List the available transports protocols.
-        enum Transports
+        enum Transport
         {
             TCP,
             UDP
@@ -32,7 +32,7 @@ namespace LightBird
         /// Stores the informations on a client.
         struct Client
         {
-            Transports              transport;          ///< The transport protocol used by the underlaying socket.
+            Transport               transport;          ///< The transport protocol used by the underlaying socket.
             QStringList             protocols;          ///< The names of the protocols used to communicate with the client.
             unsigned short          port;               ///< The local port through which the client is connected.
             int                     socketDescriptor;   ///< The descriptor of the socket.
@@ -57,7 +57,7 @@ namespace LightBird
         /// @return The future result of the action, e.g true if the port has been created.
         virtual QSharedPointer<LightBird::IFuture<bool> >   addPort(unsigned short port,
                                                                     const QStringList &protocols = QStringList(),
-                                                                    LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
+                                                                    LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                                                                     unsigned int maxClients = ~0) = 0;
         /// @brief Removes a port. This may take some time since all the operations
         /// made on the removed port have to be finished.
@@ -71,7 +71,7 @@ namespace LightBird
         /// @param maxClients : The maximum number of clients simultaneously connected,
         /// allowed by the port.
         /// @return True if the port exists.
-        virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients) = 0;
+        virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) = 0;
         /// @brief Returns the list of the open ports. Users can use getPort() to get
         /// more detailed informations about a specific port.
         /// @return The list of the opened ports on the server.
@@ -111,7 +111,7 @@ namespace LightBird
         virtual QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address,
                                                                      quint16 port,
                                                                      const QStringList &protocols = QStringList(),
-                                                                     LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
+                                                                     LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                                                                      int wait = 30000) = 0;
         /// @brief Disconnects the client identified by the id in parameter.
         /// If a request is executing for this client, it is interrupted.

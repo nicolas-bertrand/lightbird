@@ -14,7 +14,7 @@
 #include "Plugins.hpp"
 #include "Threads.h"
 
-Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStringList &pr,
+Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
                const QString &pn, LightBird::IClient::Mode m, IReadWrite *r) :
                transport(t), protocols(pr), port(p), socketDescriptor(sd), peerAddress(pa),
@@ -274,7 +274,7 @@ const QStringList   &Client::getProtocols() const
     return (this->protocols);
 }
 
-LightBird::INetwork::Transports Client::getTransport() const
+LightBird::INetwork::Transport Client::getTransport() const
 {
     return (this->transport);
 }

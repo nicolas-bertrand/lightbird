@@ -110,7 +110,7 @@ const QString   &Table::getTableName()
     return (this->tableName);
 }
 
-LightBird::ITable::Tables Table::getTableId()
+LightBird::ITable::Table Table::getTableId()
 {
     return (this->tableId);
 }
@@ -122,7 +122,7 @@ bool            Table::isTable(const QString &tableName)
     return (true);
 }
 
-bool            Table::isTable(LightBird::ITable::Tables tableId)
+bool            Table::isTable(LightBird::ITable::Table tableId)
 {
     if (this->tableId != tableId)
         return (false);

@@ -31,7 +31,7 @@ public:
     /// @param peerPort : The port from which the client is connected in his host.
     /// @param peerName : The name of the client's host. May be empty.
     /// @param mode : The connection mode of the client.
-    Client(QAbstractSocket *socket, LightBird::INetwork::Transports transport, const QStringList &protocols,
+    Client(QAbstractSocket *socket, LightBird::INetwork::Transport transport, const QStringList &protocols,
            unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
            unsigned short peerPort, const QString &peerName, LightBird::IClient::Mode mode,
            IReadWrite *readWriteInterface);
@@ -54,7 +54,7 @@ public:
     const QString           &getId() const;
     unsigned short          getPort() const;
     const QStringList       &getProtocols() const;
-    LightBird::INetwork::Transports getTransport() const;
+    LightBird::INetwork::Transport getTransport() const;
     int                     getSocketDescriptor() const;
     const QHostAddress      &getPeerAddress() const;
     unsigned short          getPeerPort() const;
@@ -84,7 +84,7 @@ private:
     Client  *operator=(const Client &);
 
     QString                  id;                    ///< The id of the client.
-    LightBird::INetwork::Transports transport;      ///< The transport protocol used by the underlaying socket.
+    LightBird::INetwork::Transport transport;       ///< The transport protocol used by the underlaying socket.
     QStringList              protocols;             ///< The names of the protocols used to communicate with the client.
     unsigned short           port;                  ///< The local port through which the client is connected.
     int                      socketDescriptor;      ///< The descriptor of the socket.

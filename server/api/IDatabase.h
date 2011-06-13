@@ -70,7 +70,7 @@ namespace LightBird
         ///
         /// Users can also use a shared pointer, so that the instance is deleted automatically when it goes out of scope :
         /// QSharedPointer<LightBird::ITableAccounts> account(getTable(LightBird::ITable::Accounts)->toTableAccounts());
-        virtual LightBird::ITable   *getTable(LightBird::ITable::Tables table, const QString &id = "") = 0;
+        virtual LightBird::ITable   *getTable(LightBird::ITable::Table table, const QString &id = "") = 0;
         /// @brief This method helps to make the queries independent of the database type used. The
         /// SQL queries of the plugins are stored in a XML file named QtSqlDriverName.xml, instead of being
         /// hard-coded. Each query has a unique name in his group. getQuery() allows plugins to load a query.

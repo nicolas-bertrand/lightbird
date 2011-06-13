@@ -159,7 +159,7 @@ void    Server::_loadNetwork()
     QDomElement                     node;
     QMap<QString, QString>          port;
     QList<QMap<QString, QString> >  ports;
-    LightBird::INetwork::Transports transport;
+    LightBird::INetwork::Transport  transport;
     bool                            loaded = false;
 
     // Get the information on the ports to load from the configuration

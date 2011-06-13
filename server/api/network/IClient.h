@@ -45,7 +45,7 @@ namespace LightBird
         /// @brief The names of the protocols used to communicate with the client.
         virtual const QStringList    &getProtocols() const = 0;
         /// @brief The transport protocol used by the connection.
-        virtual LightBird::INetwork::Transports getTransport() const = 0;
+        virtual LightBird::INetwork::Transport getTransport() const = 0;
         /// @brief The address of the client.
         virtual const QHostAddress   &getPeerAddress() const = 0;
         /// @brief The port of the host of the client.

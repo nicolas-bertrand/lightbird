@@ -26,7 +26,7 @@ public:
     /// @see LightBird::IDatabase::query
     bool            query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result);
     /// @see LightBird::IDatabase::getTable
-    LightBird::ITable *getTable(LightBird::ITable::Tables table, const QString &id = "");
+    LightBird::ITable *getTable(LightBird::ITable::Table table, const QString &id = "");
     /// @see LightBird::IDatabase::getQuery
     QString         getQuery(const QString &group, const QString &name);
     /// @see LightBird::IDatabase::getQuery

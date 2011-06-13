@@ -59,7 +59,7 @@ public:
     /// @param all : If true, the parameters method and type are used to check the context.
     /// @return A map of the plugins that match the filters. The key is the id of the plugin.
     template<class T>
-    QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+    QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                      const QStringList &protocols, unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
     /// @brief This method do the same job as getInstances, except that only the first
@@ -69,7 +69,7 @@ public:
     /// matches. The pair is empty if no plugin corresponds.
     /// @see getInstances
     template<class T>
-    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                     const QStringList &protocols, unsigned short port, const QString &method = "",
                                     const QString &type = "", bool all = false);
     /// @brief A templated method used to get an instance of a plugin.
@@ -84,13 +84,13 @@ public:
     /// @brief A convenance method for getInstances.
     /// @see getInstances
     template<class T>
-    QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+    QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                      const QString &protocol, unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
     /// @brief A convenance method for getInstance.
     /// @see getInstance
     template<class T>
-    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                     const QString &protocol, unsigned short port, const QString &method = "",
                                     const QString &type = "", bool all = false);
     /// @brief Releases a plugin. Must be call after get().
@@ -174,7 +174,7 @@ private:
 };
 
 template<class T>
-QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                           const QStringList &protocols, unsigned short port,
                                           const QString &method, const QString &type, bool all)
 {
@@ -210,7 +210,7 @@ QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBi
 }
 
 template<class T>
-QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                          const QStringList &protocols, unsigned short port,
                                          const QString &method, const QString &type, bool all)
 {
@@ -265,7 +265,7 @@ T       *Plugins::getInstance(const QString &id)
 }
 
 template<class T>
-QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                           const QString &protocol, unsigned short port,
                                           const QString &method, const QString &type, bool all)
 {
@@ -273,7 +273,7 @@ QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBi
 }
 
 template<class T>
-QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transports transport,
+QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                          const QString &protocol, unsigned short port,
                                          const QString &method, const QString &type, bool all)
 {

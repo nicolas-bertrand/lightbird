@@ -22,9 +22,9 @@ public:
     QDateTime           getCreated();
 
     const QString       &getTableName();
-    LightBird::ITable::Tables getTableId();
+    LightBird::ITable::Table getTableId();
     bool                isTable(const QString &tableName);
-    bool                isTable(LightBird::ITable::Tables tableId);
+    bool                isTable(LightBird::ITable::Table tableId);
 
     LightBird::ITableAccessors   *toAccessors();
     LightBird::ITableAccounts    *toAccounts();
@@ -48,7 +48,7 @@ protected:
 
     QString             id;
     QString             tableName;
-    LightBird::ITable::Tables tableId;
+    LightBird::ITable::Table tableId;
 };
 
 #endif // TABLE_H

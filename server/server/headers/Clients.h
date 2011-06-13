@@ -26,7 +26,7 @@ public:
 
     /// @brief Creates a new Client and tries to connect to it.
     void        connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                        LightBird::INetwork::Transports transport, int wait, Future<QString> *future);
+                        LightBird::INetwork::Transport transport, int wait, Future<QString> *future);
     /// @brief Asks the engine of a client to generate a new request.
     bool        send(const QString &idClient, const QString &idPlugin, const QString &protocol);
     /// @brief Allows to get the informations of a client.

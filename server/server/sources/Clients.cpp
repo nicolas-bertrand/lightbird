@@ -19,7 +19,7 @@ Clients::~Clients()
 }
 
 void            Clients::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                                 LightBird::INetwork::Transports transport, int wait, Future<QString> *future)
+                                 LightBird::INetwork::Transport transport, int wait, Future<QString> *future)
 {
     SmartMutex  mutex(this->mutex);
 

@@ -24,7 +24,7 @@ bool    ApiDatabase::query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &
     return (Database::instance()->query(query, result));
 }
 
-LightBird::ITable   *ApiDatabase::getTable(LightBird::ITable::Tables table, const QString &id)
+LightBird::ITable   *ApiDatabase::getTable(LightBird::ITable::Table table, const QString &id)
 {
     return (Database::instance()->getTable(table, id));
 }

@@ -13,7 +13,7 @@ ApiNetwork::~ApiNetwork()
 
 QSharedPointer<LightBird::IFuture<bool> >   ApiNetwork::addPort(unsigned short port,
                                                                 const QStringList &protocols,
-                                                                LightBird::INetwork::Transports transport,
+                                                                LightBird::INetwork::Transport transport,
                                                                 unsigned int maxClients)
 {
     return (QSharedPointer<LightBird::IFuture<bool> >(new Future<bool>(Network::instance()->addPort(port, protocols, transport, maxClients))));
@@ -24,7 +24,7 @@ QSharedPointer<LightBird::IFuture<bool> >   ApiNetwork::removePort(unsigned shor
     return (QSharedPointer<LightBird::IFuture<bool> >(new Future<bool>(Network::instance()->removePort(port))));
 }
 
-bool                                        ApiNetwork::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients)
+bool                                        ApiNetwork::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients)
 {
     return (Network::instance()->getPort(port, protocols, transport, maxClients));
 }
@@ -52,7 +52,7 @@ QStringList                                 ApiNetwork::getClients(unsigned shor
 QSharedPointer<LightBird::IFuture<QString> > ApiNetwork::connect(const QHostAddress &address,
                                                                  quint16 port,
                                                                  const QStringList &p,
-                                                                 LightBird::INetwork::Transports transport,
+                                                                 LightBird::INetwork::Transport transport,
                                                                  int wait)
 {
     QStringList protocols = p;

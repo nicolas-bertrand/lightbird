@@ -103,7 +103,7 @@ bool                        Database::query(QSqlQuery &query, QVector<QMap<QStri
     return (error);
 }
 
-LightBird::ITable   *Database::getTable(LightBird::ITable::Tables table, const QString &id)
+LightBird::ITable   *Database::getTable(LightBird::ITable::Table table, const QString &id)
 {
     QStringList                         tables;
     QString                             name;

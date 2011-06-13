@@ -33,7 +33,7 @@ public:
     /// @brief Returns the number of the port.
     unsigned short  getPort();
     /// @brief The transport protocol used by this port.
-    LightBird::INetwork::Transports getTransport();
+    LightBird::INetwork::Transport getTransport();
     /// @brief Returns the names of the protocols used to communicate with the
     /// clients connected to this port.
     const QStringList &getProtocols();
@@ -60,7 +60,7 @@ public:
     bool            disconnect(const QString &id);
 
 protected:
-    Port(unsigned short port, LightBird::INetwork::Transports transport, const QStringList &protocols = QStringList(),
+    Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols = QStringList(),
          unsigned int maxClients = ~0, QObject *object = 0);
 
     /// @brief Set if the port is listening the network.
@@ -94,7 +94,7 @@ private:
     Port(const Port &);
     Port    *operator=(const Port &);
 
-    LightBird::INetwork::Transports transport;  ///< The transport protocol used by the port.
+    LightBird::INetwork::Transport  transport;  ///< The transport protocol used by the port.
     QStringList                     protocols;  ///< The names of the protocols used to communicate with the clients connected to this port.
     bool                            listening;  ///< If the port is listening the network.
     unsigned short                  port;       ///< The number of the port.

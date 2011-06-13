@@ -18,17 +18,17 @@ Network     *Network::instance(QObject *parent)
 Network::Network(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<QHostAddress>("QHostAddress");
-    qRegisterMetaType<LightBird::INetwork::Transports>("LightBird::INetwork::Transports");
+    qRegisterMetaType<LightBird::INetwork::Transport>("LightBird::INetwork::Transport");
     qRegisterMetaType<LightBird::INetwork::Client>("LightBird::INetwork::Client*");
-    QObject::connect(this, SIGNAL(addPortSignal(unsigned short,QStringList,LightBird::INetwork::Transports,unsigned int,Future<bool>*)),
-                     this, SLOT(_addPort(unsigned short,QStringList,LightBird::INetwork::Transports,unsigned int,Future<bool>*)));
+    QObject::connect(this, SIGNAL(addPortSignal(unsigned short,QStringList,LightBird::INetwork::Transport,unsigned int,Future<bool>*)),
+                     this, SLOT(_addPort(unsigned short,QStringList,LightBird::INetwork::Transport,unsigned int,Future<bool>*)));
     QObject::connect(this, SIGNAL(removePortSignal(unsigned short,Future<bool>*)), this, SLOT(_removePort(unsigned short,Future<bool>*)));
     QObject::connect(this, SIGNAL(getClientSignal(QString,LightBird::INetwork::Client*,void*,Future<bool>*)),
                      this, SLOT(_getClient(QString,LightBird::INetwork::Client*,void*,Future<bool>*)));
     QObject::connect(this, SIGNAL(getClientsSignal(int,Future<QStringList>*)),
                      this, SLOT(_getClients(int,Future<QStringList>*)));
-    QObject::connect(this, SIGNAL(connectSignal(QHostAddress,quint16,QStringList,LightBird::INetwork::Transports,int,Future<QString>*)),
-                     this, SLOT(_connect(QHostAddress,quint16,QStringList,LightBird::INetwork::Transports,int,Future<QString>*)));
+    QObject::connect(this, SIGNAL(connectSignal(QHostAddress,quint16,QStringList,LightBird::INetwork::Transport,int,Future<QString>*)),
+                     this, SLOT(_connect(QHostAddress,quint16,QStringList,LightBird::INetwork::Transport,int,Future<QString>*)));
     QObject::connect(this, SIGNAL(disconnectSignal(QString,Future<bool>*)), this, SLOT(_disconnect(QString,Future<bool>*)));
 }
 
@@ -37,7 +37,7 @@ Network::~Network()
     Log::trace("Network destroyed!", "Network", "~Network");
 }
 
-Future<bool>        Network::addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transports transport, unsigned int maxClients)
+Future<bool>        Network::addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients)
 {
     Future<bool>    *future = new Future<bool>(false);
     Future<bool>    result(*future);
@@ -55,7 +55,7 @@ Future<bool>        Network::removePort(unsigned short port)
     return (result);
 }
 
-bool                Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transports &transport, unsigned int &maxClients)
+bool                Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients)
 {
     bool            result = false;
 
@@ -112,7 +112,7 @@ QStringList             Network::getClients(int port)
 }
 
 Future<QString>     Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                                     LightBird::INetwork::Transports transport, int wait)
+                                     LightBird::INetwork::Transport transport, int wait)
 {
     Future<QString> *future = new Future<QString>();
     Future<QString> result(*future);
@@ -144,7 +144,7 @@ bool        Network::send(const QString &idClient, const QString &idPlugin, cons
     return (result);
 }
 
-void    Network::_addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transports transport, unsigned int maxClients, Future<bool> *future)
+void    Network::_addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients, Future<bool> *future)
 {
     Port                            *p;
     QSharedPointer<Future<bool> >   f(future);
@@ -253,7 +253,7 @@ void        Network::_getClients(int port, Future<QStringList> *future)
 }
 
 void        Network::_connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                              LightBird::INetwork::Transports transport, int wait, Future<QString> *future)
+                              LightBird::INetwork::Transport transport, int wait, Future<QString> *future)
 {
     if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
     {
