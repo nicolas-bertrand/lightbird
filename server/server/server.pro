@@ -44,6 +44,7 @@ MOC_DIR = tmp
 # Headers and sources files
 HEADERS += headers/Arguments.h \
     headers/Client.h \
+    headers/Clients.h \
     headers/Configuration.h \
     headers/Configurations.h \
     headers/Content.h \
@@ -51,6 +52,8 @@ HEADERS += headers/Arguments.h \
     headers/Database.h \
     headers/Defines.h \
     headers/Engine.h \
+    headers/EngineClient.h \
+    headers/EngineServer.h \
     headers/Events.h \
     headers/Extensions.h \
     headers/Future.hpp \
@@ -94,12 +97,15 @@ HEADERS += headers/Arguments.h \
 SOURCES += sources/main.cpp \
     sources/Arguments.cpp \
     sources/Client.cpp \
+    sources/Clients.cpp \
     sources/Configuration.cpp \
     sources/Configurations.cpp \
     sources/Content.cpp \
     sources/Context.cpp \
     sources/Database.cpp \
     sources/Engine.cpp \
+    sources/EngineClient.cpp \
+    sources/EngineServer.cpp \
     sources/Events.cpp \
     sources/Extensions.cpp \
     sources/Log.cpp \

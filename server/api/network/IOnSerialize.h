@@ -5,7 +5,7 @@
 
 namespace LightBird
 {
-    /// @brief This interface is called before each calls of the IDoUnserialize*
+    /// @brief This interface is called before each calls of the IDoSerialize*
     /// interfaces, for every plugins that implements it and has the correct context.
     /// Notice that this interface is called only if the IDoSerialize interface called
     /// after has been implemented by a plugin.
@@ -28,7 +28,10 @@ namespace LightBird
         /// @param client : The client that has sent the request.
         /// @param type : Used to know which of the IDoSerialize interfaces is going
         /// to be called.
-        virtual void    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type) = 0;
+        /// @return In CLIENT mode, false is returned if the request doesn't needs
+        /// a response, for Serialize::IDoSerialize. In SERVER mode the returned
+        /// value is ignored.
+        virtual bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type) = 0;
     };
 }
 

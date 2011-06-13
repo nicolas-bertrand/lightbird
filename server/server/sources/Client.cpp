@@ -8,16 +8,17 @@
 #include "IOnDisconnect.h"
 
 #include "Client.h"
-#include "Engine.h"
+#include "EngineClient.h"
+#include "EngineServer.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Threads.h"
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
-               const QString &pn, IReadWrite *r) :
+               const QString &pn, LightBird::IClient::Mode m, IReadWrite *r) :
                transport(t), protocols(pr), port(p), socketDescriptor(sd), peerAddress(pa),
-               peerPort(pp), peerName(pn), readWriteInterface(r), socket(s)
+               peerPort(pp), peerName(pn), mode(m), readWriteInterface(r), socket(s)
 {
     // Generates the uuid of the client
     this->id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
@@ -26,6 +27,8 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transports t, const QStr
     this->connectionDate = QDateTime::currentDateTime();
     // This signal ensure that data are read in the client thread
     QObject::connect(this, SIGNAL(readSignal()), this, SLOT(read()));
+    // Called when a new request is going to be sent in CLIENT mode
+    QObject::connect(this, SIGNAL(sendSignal(QString,QString)), this, SLOT(_send(QString,QString)), Qt::QueuedConnection);
     // Start the client thread
     this->moveToThread(this);
     Threads::instance()->newThread(this, false);
@@ -43,8 +46,14 @@ void        Client::run()
 {
     QString socketDescriptor;
 
+    // Tries to connect the server to the client
+    if (!this->_connectToHost())
+        return ;
     // Creates the engine of the client
-    this->engine = new Engine(this, this);
+    if (this->mode == LightBird::IClient::SERVER)
+        this->engine = new EngineServer(*this, this);
+    else
+        this->engine = new EngineClient(*this, this);
     // Connect the getInformations signal
     QObject::connect(this, SIGNAL(getInformationsSignal(LightBird::INetwork::Client*,Future<bool>*)),
                      this, SLOT(_getInformations(LightBird::INetwork::Client*,Future<bool>*)));
@@ -79,7 +88,7 @@ void            Client::read(QByteArray *newData)
     QByteArray  *data = NULL;
     bool        emitReadSignal = true;
 
-    // If the parameter d is not NULL, it contains new data that are added to this->data
+    // If the parameter is not NULL, it contains new data that are added to this->data
     if (newData)
     {
         if (!this->lockData.tryLock(MAXTRYLOCK))
@@ -87,7 +96,7 @@ void            Client::read(QByteArray *newData)
             Log::error("Deadlock", "Client", "read");
             return ;
         }
-        // If data is not NULL, the new data are append
+        // If data is not NULL, the new data are appended
         if (this->data)
         {
             this->data->append(*newData);
@@ -150,11 +159,70 @@ void            Client::write(QByteArray &data)
         if (Log::instance()->isTrace())
             Log::trace("Data written", Properties("id", this->id).add("data", this->_simplified(data)).add("size", data.size()), "Client", "write");
         else if (Log::instance()->isDebug())
-            Log::trace("Data written", Properties("id", this->id).add("size", data.size()), "Client", "write");
+            Log::debug("Data written", Properties("id", this->id).add("size", data.size()), "Client", "write");
     }
     // If an error occured
     else
         Log::warning("An error occured while writing data", Properties("id", this->id).add("size", data.size()), "Client", "read");
+}
+
+bool        Client::doRead(QByteArray &data)
+{
+    QPair<QString, LightBird::IDoRead *> instance;
+
+    data.clear();
+    // If a plugin matches
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->mode, this->transport, this->protocols, this->port)).second)
+    {
+        Log::trace("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
+        if (!instance.second->doRead(*this, data))
+            Log::debug("IDoRead::doRead() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doRead");
+        Plugins::instance()->release(instance.first);
+        return (true);
+    }
+    return (false);
+}
+
+bool        Client::doWrite(QByteArray &data)
+{
+    QPair<QString, LightBird::IDoWrite *> instance;
+
+    // If a plugin matches
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->mode, this->transport, this->protocols, this->port)).second)
+    {
+        Log::trace("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
+        if (!instance.second->doWrite(*this, data))
+            Log::debug("IDoWrite::doWrite() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doWrite");
+        Plugins::instance()->release(instance.first);
+        return (true);
+    }
+    return (false);
+}
+
+void        Client::send(const QString &id, const QString &protocol)
+{
+    if (this->mode == LightBird::IClient::CLIENT)
+        emit this->sendSignal(id, protocol);
+}
+
+void                Client::_send(const QString &id, const QString &protocol)
+{
+    EngineClient    *engine;
+
+    if ((engine = dynamic_cast<EngineClient *>(this->engine)))
+        engine->send(id, protocol);
+}
+
+bool        Client::_connectToHost()
+{
+    // Tries to connect to the client
+    if (this->readWriteInterface->connect(this))
+        return (true);
+    // The connection failed so the client is destroyed
+    delete this->socket;
+    this->disconnect(SIGNAL(readSignal()));
+    this->moveToThread(QCoreApplication::instance()->thread());
+    return (false);
 }
 
 bool        Client::_onConnect()
@@ -162,7 +230,7 @@ bool        Client::_onConnect()
     bool    accept = true;
 
     // Get the instances of all connected plugins that implements LightBird::IOnConnect and corresponds to the context
-    QMapIterator<QString, LightBird::IOnConnect *> it(Plugins::instance()->getInstances<LightBird::IOnConnect>(this->transport, this->protocols, this->port));
+    QMapIterator<QString, LightBird::IOnConnect *> it(Plugins::instance()->getInstances<LightBird::IOnConnect>(this->mode, this->transport, this->protocols, this->port));
     while (it.hasNext())
     {
         Log::trace("Calling IOnConnect::onConnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
@@ -179,42 +247,9 @@ bool        Client::_onConnect()
     return (accept);
 }
 
-bool        Client::doRead(QByteArray &data)
-{
-    QPair<QString, LightBird::IDoRead *> instance;
-
-    data.clear();
-    // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->transport, this->protocols, this->port)).second)
-    {
-        Log::trace("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
-        if (!instance.second->doRead(*this, data))
-            Log::debug("IDoRead::doRead() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doRead");
-        Plugins::instance()->release(instance.first);
-        return (true);
-    }
-    return (false);
-}
-
-bool        Client::doWrite(QByteArray &data)
-{
-    QPair<QString, LightBird::IDoWrite *> instance;
-
-    // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->transport, this->protocols, this->port)).second)
-    {
-        Log::trace("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
-        if (!instance.second->doWrite(*this, data))
-            Log::debug("IDoWrite::doWrite() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doWrite");
-        Plugins::instance()->release(instance.first);
-        return (true);
-    }
-    return (false);
-}
-
 void        Client::_onDisconnect()
 {
-    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->transport, this->protocols, this->port));
+    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->mode, this->transport, this->protocols, this->port));
 
     while (it.hasNext())
     {
@@ -267,6 +302,11 @@ const QString   &Client::getPeerName() const
 const QDateTime &Client::getConnectionDate() const
 {
     return (this->connectionDate);
+}
+
+LightBird::IClient::Mode Client::getMode() const
+{
+    return (this->mode);
 }
 
 QVariantMap     &Client::getInformations()

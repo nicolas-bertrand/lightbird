@@ -12,7 +12,7 @@ namespace LightBird
 {
     /// @brief Represents a request. Contains informations about it,
     /// whose depends on the protocol that transport it.
-    /// Despite Request is protocol independant, its structure is inspired of HTTP.
+    /// Despite Request is protocol independent, its structure is inspired of HTTP.
     class IRequest
     {
     public:

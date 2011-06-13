@@ -12,7 +12,7 @@ namespace LightBird
 {
     /// @brief Represents a response. Contains informations about it,
     /// whose depends on the protocol that transport it.
-    /// Despite Request is protocol independant, its structure is inspired of HTTP.
+    /// Despite Response is protocol independent, its structure is inspired of HTTP.
     class IResponse
     {
     public:
@@ -42,6 +42,10 @@ namespace LightBird
         virtual LightBird::IContent &getContent() = 0;
         /// @brief This method is used to store additionnals informations on the response
         virtual QVariantList    &getInformations() = 0;
+        /// @brief If there is an error in the response.
+        virtual bool    isError() const = 0;
+        /// @brief If there is an error in the response.
+        virtual void    setError(bool error = true) = 0;
     };
 }
 

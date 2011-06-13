@@ -23,6 +23,7 @@ HEADERS         =   IApi.h \
                     network/IContent.h \
                     network/IDoExecution.h \
                     network/IDoRead.h \
+                    network/IDoSend.h \
                     network/IDoSerializeContent.h \
                     network/IDoSerializeFooter.h \
                     network/IDoSerializeHeader.h \
@@ -37,6 +38,7 @@ HEADERS         =   IApi.h \
                     network/IOnFinish.h \
                     network/IOnProtocol.h \
                     network/IOnRead.h \
+                    network/IOnSend.h \
                     network/IOnSerialize.h \
                     network/IOnUnserialize.h \
                     network/IOnWrite.h \

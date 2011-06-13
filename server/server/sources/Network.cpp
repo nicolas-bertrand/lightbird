@@ -17,6 +17,7 @@ Network     *Network::instance(QObject *parent)
 
 Network::Network(QObject *parent) : QObject(parent)
 {
+    qRegisterMetaType<QHostAddress>("QHostAddress");
     qRegisterMetaType<LightBird::INetwork::Transports>("LightBird::INetwork::Transports");
     qRegisterMetaType<LightBird::INetwork::Client>("LightBird::INetwork::Client*");
     QObject::connect(this, SIGNAL(addPortSignal(unsigned short,QStringList,LightBird::INetwork::Transports,unsigned int,Future<bool>*)),
@@ -24,8 +25,10 @@ Network::Network(QObject *parent) : QObject(parent)
     QObject::connect(this, SIGNAL(removePortSignal(unsigned short,Future<bool>*)), this, SLOT(_removePort(unsigned short,Future<bool>*)));
     QObject::connect(this, SIGNAL(getClientSignal(QString,LightBird::INetwork::Client*,void*,Future<bool>*)),
                      this, SLOT(_getClient(QString,LightBird::INetwork::Client*,void*,Future<bool>*)));
-    QObject::connect(this, SIGNAL(getClientsSignal(unsigned short,Future<QStringList>*)),
-                     this, SLOT(_getClients(unsigned short,Future<QStringList>*)));
+    QObject::connect(this, SIGNAL(getClientsSignal(int,Future<QStringList>*)),
+                     this, SLOT(_getClients(int,Future<QStringList>*)));
+    QObject::connect(this, SIGNAL(connectSignal(QHostAddress,quint16,QStringList,LightBird::INetwork::Transports,int,Future<QString>*)),
+                     this, SLOT(_connect(QHostAddress,quint16,QStringList,LightBird::INetwork::Transports,int,Future<QString>*)));
     QObject::connect(this, SIGNAL(disconnectSignal(QString,Future<bool>*)), this, SLOT(_disconnect(QString,Future<bool>*)));
 }
 
@@ -61,7 +64,7 @@ bool                Network::getPort(unsigned short port, QStringList &protocols
         Log::error("Deadlock", "Network", "getPort");
         return (false);
     }
-    // If the asked port exists
+    // If the port exists
     if (this->ports.contains(port))
     {
         // Stores its informations in the parameters
@@ -99,7 +102,7 @@ bool    Network::getClient(const QString &id, LightBird::INetwork::Client &clien
     return (result.getResult());
 }
 
-QStringList             Network::getClients(unsigned short port)
+QStringList             Network::getClients(int port)
 {
     Future<QStringList> *future = new Future<QStringList>();
     Future<QStringList> result(*future);
@@ -108,12 +111,36 @@ QStringList             Network::getClients(unsigned short port)
     return (result.getResult());
 }
 
+Future<QString>     Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
+                                     LightBird::INetwork::Transports transport, int wait)
+{
+    Future<QString> *future = new Future<QString>();
+    Future<QString> result(*future);
+
+    emit connectSignal(address, port, protocols, transport, wait, future);
+    return (result);
+}
+
 Future<bool>        Network::disconnect(const QString &id)
 {
     Future<bool>    *future = new Future<bool>(false);
     Future<bool>    result(*future);
 
     emit disconnectSignal(id, future);
+    return (result);
+}
+
+bool        Network::send(const QString &idClient, const QString &idPlugin, const QString &protocol)
+{
+    bool    result;
+
+    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Network", "send");
+        return (false);
+    }
+    result = this->clients.send(idClient, idPlugin, protocol);
+    this->lockPorts.unlock();
     return (result);
 }
 
@@ -200,12 +227,14 @@ void        Network::_getClient(const QString &id, LightBird::INetwork::Client *
     while (it.hasNext())
         if (it.next().value()->getClient(id, client, thread, future))
             found = true;
+    if (!found)
+        found = this->clients.getClient(id, client, thread, future);
     this->lockPorts.unlock();
     if (!found)
         delete future;
 }
 
-void        Network::_getClients(unsigned short port, Future<QStringList> *future)
+void        Network::_getClients(int port, Future<QStringList> *future)
 {
     QSharedPointer<Future<QStringList> >    f(future);
 
@@ -214,14 +243,31 @@ void        Network::_getClients(unsigned short port, Future<QStringList> *futur
         Log::error("Deadlock", "Network", "_getClients");
         return ;
     }
-    if (this->ports.contains(port))
+    // Gets the clients in CLIENT mode
+    if (port < 0)
+        future->setResult(this->clients.getClients());
+    // Gets the clients of the port
+    else if (this->ports.contains(port))
         future->setResult(this->ports[port]->getClients());
+    this->lockPorts.unlock();
+}
+
+void        Network::_connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
+                              LightBird::INetwork::Transports transport, int wait, Future<QString> *future)
+{
+    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Network", "_connect");
+        return ;
+    }
+    this->clients.connect(address, port, protocols, transport, wait, future);
     this->lockPorts.unlock();
 }
 
 void        Network::_disconnect(const QString &id, Future<bool> *future)
 {
     QSharedPointer<Future<bool> >   f(future);
+    bool                            found = false;
 
     if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
     {
@@ -229,13 +275,13 @@ void        Network::_disconnect(const QString &id, Future<bool> *future)
         return ;
     }
     QMapIterator<unsigned short, Port *> it(this->ports);
-    // Find the port that manage the client, and disconnect it
-    while (it.hasNext())
+    // Searches the port that manages the client, and disconnect it
+    while (it.hasNext() && !found)
         if (it.next().value()->disconnect(id))
-        {
-            f->setResult(true);
-            break;
-        }
+            found = true;
+    if (!found)
+        found = this->clients.disconnect(id);
+    f->setResult(found);
     this->lockPorts.unlock();
 }
 

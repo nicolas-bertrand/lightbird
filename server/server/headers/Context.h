@@ -20,6 +20,8 @@ public:
     Context &operator=(const Context &context);
     bool    operator==(const Context &context);
 
+    /// @brief Add a mode to the context.
+    void    setMode(const QString &mode);
     /// @brief Add a transport to the context.
     void    setTransport(const QString &transport);
     /// @brief Add a protocol to the context.
@@ -32,13 +34,14 @@ public:
     void    setType(const QString &type);
 
     /// @brief Check that the context given in parameter is valid under this context.
-    bool    isValid(const QString &transport, const QStringList &protocols, unsigned short port) const;
+    bool    isValid(const QString &mode, const QString &transport, const QStringList &protocols, unsigned short port) const;
     /// @see isValid
-    bool    isValid(const QString &transport, const QStringList &protocols, unsigned short port, const QString &method, const QString &type) const;
+    bool    isValid(const QString &mode, const QString &transport, const QStringList &protocols, unsigned short port, const QString &method, const QString &type) const;
     /// @brief Converts the context into a QMap
     QMap<QString, QString>  toMap() const;
 
 private:
+    QString                 mode;       ///< The connection mode of the client ("client" or "server").
     QString                 transport;  ///< The transport protocol to use ("TCP" or "UDP").
     QStringList             protocols;  ///< The list of communication protocols known by the plugin ("HTTP", "UPnP").
     QList<unsigned short>   ports;      ///< The list of ports listenned by the plugin.

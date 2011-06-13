@@ -19,7 +19,7 @@
 /// port, a new thread is created (by the Client object). When the port receives data,
 /// they are transmited to the client thread, which will process the request, and
 /// genrerates its response. The request is then sent by Port to the client.
-/// Actually, the class Port is abstract, and is independant of TCP/UDP considerations.
+/// Actually, the class Port is abstract, and is independent of TCP/UDP considerations.
 /// All the transport specific operations are done in the classes that inherits Port,
 /// e.g PortTcp and PortUdp.
 class Port : public QObject,

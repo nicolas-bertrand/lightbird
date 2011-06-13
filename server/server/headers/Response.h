@@ -30,8 +30,8 @@ public:
     QVariantList            &getInformations();
     QMap<QString, QString>  &getHeader();
     LightBird::IContent     &getContent();
-    bool                    getError() const;
-    void                    setError(bool error);
+    bool                    isError() const;
+    void                    setError(bool error = true);
 
     // Other
     /// @brief Cleans all the member of the instance.

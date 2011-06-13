@@ -36,7 +36,7 @@ private:
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the tcpServer.
     void    _newConnection();
-    /// @brief Called when a QTcpSocket is disconnected, to removes its client.
+    /// @brief Called when a QTcpSocket is disconnected, to remove its client.
     void    _disconnected();
     /// @brief Called when a Client's thread is finished. Used to destroy its QTcpSocket.
     Client  *_finished();

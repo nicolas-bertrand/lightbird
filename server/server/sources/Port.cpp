@@ -91,7 +91,7 @@ QStringList     Port::getClients()
     return (result);
 }
 
-bool            Port:: disconnect(const QString &id)
+bool            Port::disconnect(const QString &id)
 {
     QListIterator<Client *> it(this->clients);
 
@@ -115,10 +115,12 @@ Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &p
     Client      *client;
 
     // Creates the client
-    client = new Client(socket, this->transport, this->protocols, this->port, socket->socketDescriptor(), peerAddress, peerPort, socket->peerName(), this);
+    client = new Client(socket, this->transport, this->protocols, this->port,
+                        socket->socketDescriptor(), peerAddress, peerPort,
+                        socket->peerName(), LightBird::IClient::SERVER, this);
     // Add the client
     this->clients.push_back(client);
-    // When the client is destroyed, Port::_destroyed() is called
+    // When the client thread is finished, _finished is called
     QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
     return (client);
 }
@@ -140,12 +142,9 @@ Client          *Port::_finished()
     while (it.hasNext() && !client)
         if (it.next()->isFinished())
             client = it.peekPrevious();
-    // If client has been found
-    if (client)
-    {
-        this->clients.removeAll(client);
-        delete client;
-    }
+    // Delete the client
+    this->clients.removeAll(client);
+    delete client;
     // If there are no more connected client and the server is no longer listening, the signal allClientsRemoved is emited
     if (this->clients.size() == 0 && !this->isListening())
         emit this->allClientsRemoved(this->port);

@@ -129,6 +129,8 @@ Client      *PortTcp::_finished()
         // the destroyed client (if maxNumberOfclient has been reached)
         if (this->isListening() && this->tcpServer.hasPendingConnections())
             this->_newConnection();
+        // This method is called while there is a finished client to ensure that they have all been deleted
+        this->_finished();
     }
     return (NULL);
 }

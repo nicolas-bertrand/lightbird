@@ -188,7 +188,7 @@ LightBird::IMetadata     Plugin::getMetadata() const
     return (metadata);
 }
 
-bool    Plugin::checkContext(const QString &transport, const QStringList &protocols,
+bool    Plugin::checkContext(const QString &mode, const QString &transport, const QStringList &protocols,
                              unsigned short port, const QString &method, const QString &type, bool all)
 {
     QListIterator<Context>  it(this->contexts);
@@ -197,19 +197,21 @@ bool    Plugin::checkContext(const QString &transport, const QStringList &protoc
     while (it.hasNext())
     {
         // If at least one context is valid, true is returned
-        if ((!all && it.next().isValid(transport, protocols, port)) ||
-            (all && it.next().isValid(transport, protocols, port, method, type)))
+        if ((!all && it.next().isValid(mode, transport, protocols, port)) ||
+            (all && it.next().isValid(mode, transport, protocols, port, method, type)))
         {
             /*if (Log::instance()->isTrace())
                 Log::trace("Context valid", Properties(it.peekPrevious().toMap()).add("id", this->id)
-                           .add("requiredTransport", transport).add("requiredProtocols", protocols.join(" "))
+                           .add("requiredmode", mode).add("requiredTransport", transport)
+                           .add("requiredProtocols", protocols.join(" "))
                            .add("requiredPort", port).add("requiredMethod", method, false)
                            .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
             return (true);
         }
         /*else if (Log::instance()->isTrace())
             Log::trace("Context invalid", Properties(it.peekPrevious().toMap()).add("id", this->id)
-                       .add("requiredTransport", transport).add("requiredProtocols", protocols.join(" "))
+                       .add("requiredmode", mode).add("requiredTransport", transport)
+                       .add("requiredProtocols", protocols.join(" "))
                        .add("requiredPort", port).add("requiredMethod", method, false)
                        .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
     }
@@ -365,6 +367,12 @@ void                        Plugin::_loadContexts()
                 {
                     nodeName = contextNode.nodeName().toLower().trimmed();
                     nodeValue = contextNode.toElement().text().toLower().trimmed();
+                    if (nodeName == "mode")
+                    {
+                        if (nodeValue != "client" && nodeValue != "server")
+                            nodeValue.clear();
+                        context.setMode(nodeValue);
+                    }
                     if (nodeName == "transport")
                     {
                         nodeValue = nodeValue.toUpper();

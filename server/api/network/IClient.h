@@ -23,6 +23,19 @@ namespace LightBird
     public:
         virtual ~IClient() {}
 
+        /// @brief The mode defines how a client connects to the server.
+        /// In the SERVER mode, clients connect to the server via an opened port.
+        /// This is the default mode since LightBird is a server before everything else.
+        /// In the CLIENT mode, the server initiates the connection to the clients.
+        /// It can be used to exchange data with other servers.
+        /// These two modes use different Engines to communicate with the client.
+        /// @see LightBird::INetwork::connect
+        enum Mode
+        {
+            CLIENT,
+            SERVER
+        };
+
         /// @brief Returns the client id. Each clients has a unique id.
         virtual const QString        &getId() const = 0;
         /// @brief The socket through which the client is connected.
@@ -41,6 +54,8 @@ namespace LightBird
         virtual const QString        &getPeerName() const = 0;
         /// @brief The date of the connection of the client.
         virtual const QDateTime      &getConnectionDate() const = 0;
+        /// @brief The connection mode of the client.
+        virtual LightBird::IClient::Mode getMode() const = 0;
         /// @brief Allows to store informations on the client.
         virtual QMap<QString, QVariant> &getInformations() = 0;
         /// @brief This account is used to identified the client.

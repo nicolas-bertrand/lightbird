@@ -23,14 +23,18 @@ class Client : public QThread,
 public:
     /// @brief Stores the socket informations, and creates the client's thread.
     /// @param socket : The socket from which the client is connected.
+    /// @param protocols : The protocols used to communicate with the client.
+    /// @param transport : The transport protocol used by this client.
     /// @param port : The local port from which the client is connected.
     /// @param socketDescriptor : The descriptor of the socket used by the client.
     /// @param peerAddress : The address of the client.
     /// @param peerPort : The port from which the client is connected in his host.
     /// @param peerName : The name of the client's host. May be empty.
-    Client(QAbstractSocket *socket, LightBird::INetwork::Transports transport, const QStringList &protocol,
+    /// @param mode : The connection mode of the client.
+    Client(QAbstractSocket *socket, LightBird::INetwork::Transports transport, const QStringList &protocols,
            unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
-           unsigned short peerPort, const QString &peerName, IReadWrite *readWriteInterface);
+           unsigned short peerPort, const QString &peerName, LightBird::IClient::Mode mode,
+           IReadWrite *readWriteInterface);
     ~Client();
 
     /// @brief The main method of the Client's thread.
@@ -42,6 +46,10 @@ public:
     bool                    doRead(QByteArray &data);
     /// @brief Calls the IDoWrite interface of the plugins.
     bool                    doWrite(QByteArray &data);
+    /// @brief Asks the engine to call IDoSend in order to generate a request
+    /// that will be send to a client.
+    /// @param id : The id of the plugin that will be called by IDoSend.
+    void                    send(const QString &id, const QString &protocol);
 
     const QString           &getId() const;
     unsigned short          getPort() const;
@@ -52,6 +60,7 @@ public:
     unsigned short          getPeerPort() const;
     const QString           &getPeerName() const;
     const QDateTime         &getConnectionDate() const;
+    LightBird::IClient::Mode getMode() const;
     QAbstractSocket         &getSocket() const;
     QVariantMap             &getInformations();
     LightBird::ITableAccounts &getAccount();
@@ -74,22 +83,28 @@ private:
     Client(const Client &);
     Client  *operator=(const Client &);
 
-    QString                 id;                     ///< The id of the client.
+    QString                  id;                    ///< The id of the client.
     LightBird::INetwork::Transports transport;      ///< The transport protocol used by the underlaying socket.
-    QStringList             protocols;              ///< The names of the protocols used to communicate with the client.
-    unsigned short          port;                   ///< The local port through which the client is connected.
-    int                     socketDescriptor;       ///< The descriptor of the socket.
-    QHostAddress            peerAddress;            ///< The address of the client.
-    unsigned short          peerPort;               ///< The peer port through which the client id connected.
-    QString                 peerName;               ///< The name of the client's host (usually empty).
-    IReadWrite              *readWriteInterface;    ///< This interface is used to read and write data on network.
-    QDateTime               connectionDate;         ///< The date of the creation of this object.
-    QVariantMap             informations;           ///< Contains information on the client.
-    QAbstractSocket         *socket;                ///< An abstract representation of the socket of the client.
-    TableAccounts           account;                ///< Allows the client to be identified as a know account.
-    QByteArray              *data;                  ///< May contains data read from the network.
-    QMutex                  lockData;               ///< Secure the access to the data member.
-    Engine                  *engine;                ///< Used to process the requests, and generates the responses.
+    QStringList              protocols;             ///< The names of the protocols used to communicate with the client.
+    unsigned short           port;                  ///< The local port through which the client is connected.
+    int                      socketDescriptor;      ///< The descriptor of the socket.
+    QHostAddress             peerAddress;           ///< The address of the client.
+    unsigned short           peerPort;              ///< The peer port through which the client id connected.
+    QString                  peerName;              ///< The name of the client's host (usually empty).
+    LightBird::IClient::Mode mode;                  ///< The connection mode of the client.
+    IReadWrite               *readWriteInterface;   ///< This interface is used to read and write data on network.
+    QDateTime                connectionDate;        ///< The date of the creation of this object.
+    QVariantMap              informations;          ///< Contains information on the client.
+    QAbstractSocket          *socket;               ///< An abstract representation of the socket of the client.
+    TableAccounts            account;               ///< Allows the client to be identified as a know account.
+    QByteArray               *data;                 ///< May contains data read from the network.
+    QMutex                   lockData;              ///< Secure the access to the data member.
+    Engine                   *engine;               ///< Used to process the requests, and generates the responses.
+
+    bool            _connectToHost();
+    bool            _onConnect();
+    void            _onDisconnect();
+    QByteArray      _simplified(QByteArray data);
 
 
 public slots:
@@ -98,14 +113,13 @@ public slots:
     void            read(QByteArray *data = NULL);
 
 private slots:
-    bool            _onConnect();
-    void            _onDisconnect();
+    void            _send(const QString &id, const QString &protocol);
     void            _getInformations(LightBird::INetwork::Client *client, Future<bool> *future);
-    QByteArray      _simplified(QByteArray data);
 
 signals:
     /// @brief This signal ensure that data are read in the client thread.
     void            readSignal();
+    void            sendSignal(const QString &id, const QString &protocol);
     void            getInformationsSignal(LightBird::INetwork::Client *client, Future<bool> *future);
 };
 

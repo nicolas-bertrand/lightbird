@@ -64,7 +64,7 @@ LightBird::IContent     &Response::getContent()
     return (this->content);
 }
 
-bool                    Response::getError() const
+bool                    Response::isError() const
 {
     return (this->error);
 }

@@ -12,36 +12,24 @@
 class Parser
 {
 public:
-    Parser(LightBird::IClient *client = NULL);
-    ~Parser();
-    Parser(const Parser &parser);
-    Parser  &operator=(const Parser &parser);
+    Parser(LightBird::IClient &client);
+    virtual ~Parser();
 
     /// @brief Find the protocol of the client (HTTP or WebClient).
-    bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
+    virtual bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
     /// @brief Unserialize the header.
-    bool    doUnserializeHeader(const QByteArray &data, quint64 &used);
+    virtual bool    doUnserializeHeader(const QByteArray &data, quint64 &used) = 0;
     /// @brief Unserialize the content.
-    bool    doUnserializeContent(const QByteArray &data, quint64 &used);
+    virtual bool    doUnserializeContent(const QByteArray &data, quint64 &used) = 0;
     /// @brief Serialize the header.
-    void    doSerializeHeader(QByteArray &data);
+    virtual void    doSerializeHeader(QByteArray &data) = 0;
     /// @brief Serialize the content.
-    bool    doSerializeContent(QByteArray &data);
+    virtual bool    doSerializeContent(QByteArray &data) = 0;
 
-private:
-    // Unserialize Header
-    /// @brief Check that the characters are correct.
-    bool    _checkHeaderCharacters();
-    /// @brief Check that the first line is correct, and unserialize its data.
-    bool    _parseHeaderFirstLine();
-    /// @brief Check that the properties are correct.
-    bool    _parseHeaderProperties();
-    /// @brief Send an error to the client.
-    bool    _error(int code, const QString &message, const QByteArray &content = "");
-
-    LightBird::IClient   *client;
-    LightBird::IRequest  *request;
-    LightBird::IResponse *response;
+protected:
+    LightBird::IClient   &client;
+    LightBird::IRequest  &request;
+    LightBird::IResponse &response;
     QByteArray           header;
     quint64              contentSent;
 };

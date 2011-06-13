@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <timers>
-        <!-- This timer writes the logs in the file. -->
-        <writeLog>1000</writeLog>
-    </timers>
+  <timers>
+    <!-- This timer writes the logs in the file. -->
+    <writeLog>1000</writeLog>
+  </timers>
 </configuration>

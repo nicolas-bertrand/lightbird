@@ -84,7 +84,7 @@ public:
 
 private:
     LightBird::IApi         *api;           ///< The LightBird's Api.
-    QMap<QString, Parser>   parsers;        ///< Associates a parser to a client id.
+    QMap<QString, Parser *> parsers;        ///< Associates a parser to a client id.
     QReadWriteLock          mutex;          ///< Make parsers thread-safe.
     static Configuration    configuration;  ///< The configuration of the plugin.
 

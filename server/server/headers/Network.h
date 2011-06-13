@@ -9,6 +9,7 @@
 
 # include "INetwork.h"
 
+# include "Clients.h"
 # include "Future.hpp"
 # include "Port.h"
 
@@ -29,7 +30,7 @@ public:
 
     /// @brief Created a new port from which the server will listen.
     /// @param port : The port to listen.
-    /// @param protocol : The protocol used by the server to communicate
+    /// @param protocols : The protocols used by the server to communicate
     /// with the clients connected to this port.
     /// @param transport : The transport protocol used to route the data through
     /// the network via this port.
@@ -37,7 +38,7 @@ public:
     /// When the number of client reach this limit, new connections are waiting
     /// that a connected client disconnect.
     /// @return The future result of the action, e.g true if the port has been created.
-    Future<bool>    addPort(unsigned short port, const QStringList &protocol = QStringList(),
+    Future<bool>    addPort(unsigned short port, const QStringList &protocols = QStringList(),
                             LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
                             unsigned int maxClients = ~0);
     /// @brief Remove a port. This may take some time since all the operations
@@ -47,7 +48,7 @@ public:
     Future<bool>    removePort(unsigned short port);
     /// @brief Allows to get informations on an opened port.
     /// @param port : The port to get.
-    /// @param protocol : The name of the protocol used by the port.
+    /// @param protocols : The names of the protocols used by the port.
     /// @param transport : The transport protocol of the port.
     /// @param maxClients : The maximum number of clients simultaneously connected,
     /// allowed by the port.
@@ -60,9 +61,19 @@ public:
     /// @brief Allows to get the informations of a client.
     bool            getClient(const QString &id, LightBird::INetwork::Client &client);
     /// @brief Returns the list of the clients connected to a particular port.
-    QStringList     getClients(unsigned short port);
+    /// A negative number returns the clients in CLIENT mode.
+    QStringList     getClients(int port = -1);
+    /// @brief Connects the server to a new client.
+    /// @see LightBird::INetwork::connect
+    Future<QString> connect(const QHostAddress &address, quint16 port,
+                            const QStringList &protocols = QStringList(),
+                            LightBird::INetwork::Transports transport = LightBird::INetwork::TCP,
+                            int wait = -1);
     /// @brief Disconnects a client from the server.
     Future<bool>    disconnect(const QString &id);
+    /// @brief Asks the engine to call IDoSend in order to generate a request
+    /// that will be send to a client.
+    bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "");
 
 private:
     Network(QObject *parent = 0);
@@ -72,6 +83,7 @@ private:
 
     QMap<unsigned short, Port *>    ports;      ///< The list of the listening ports
     QReadWriteLock                  lockPorts;  ///< Serure the ports.
+    Clients                         clients;    ///< Manages the clients in CLIENT mode.
     static Network                  *_instance; ///< The instance of the singleton that manage the network.
 
     // These signals and slots are used to execute the actions on the network
@@ -82,7 +94,9 @@ private slots:
                              unsigned int maxClients, Future<bool> *future);
     void            _removePort(unsigned short port, Future<bool> *future);
     void            _getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
-    void            _getClients(unsigned short port, Future<QStringList> *future);
+    void            _getClients(int port, Future<QStringList> *future);
+    void            _connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
+                             LightBird::INetwork::Transports transport, int wait, Future<QString> *future);
     void            _disconnect(const QString &id, Future<bool> *future);
     /// @brief Delete and remove a port from the ports list. The port must be close, and all the work made on it finished.
     void            _destroyPort(unsigned short port);
@@ -93,7 +107,9 @@ signals:
                                   unsigned int maxClients, Future<bool> *future);
     void            removePortSignal(unsigned short port, Future<bool> *future);
     void            getClientSignal(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
-    void            getClientsSignal(unsigned short port, Future<QStringList> *future);
+    void            getClientsSignal(int port, Future<QStringList> *future);
+    void            connectSignal(const QHostAddress &address, quint16 port, const QStringList &protocols,
+                                  LightBird::INetwork::Transports transport, int wait, Future<QString> *future);
     void            disconnectSignal(const QString &id, Future<bool> *future);
 };
 

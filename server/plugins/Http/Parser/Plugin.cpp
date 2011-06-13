@@ -1,6 +1,8 @@
 #include <QtPlugin>
 #include <QDomNode>
 
+#include "ParserClient.h"
+#include "ParserServer.h"
 #include "Plugin.h"
 
 Plugin::Configuration   Plugin::configuration;
@@ -55,7 +57,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "Parser HTTP";
     metadata.brief = "The HTTP parser.";
-    metadata.description = "Converts the requests into a workable object, and convert the response objects into a string that can be sent through the network. It can be used to parse HTTP requests.";
+    metadata.description = "Parse HTTP requests. Unserialize the request/response and serialize the request/response, depending on the mode of the client.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
@@ -66,7 +68,10 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 bool    Plugin::onConnect(LightBird::IClient &client)
 {
     this->mutex.lockForWrite();
-    this->parsers.insert(client.getId(), Parser(&client));
+    if (client.getMode() == LightBird::IClient::CLIENT)
+        this->parsers.insert(client.getId(), new ParserClient(client));
+    else
+        this->parsers.insert(client.getId(), new ParserServer(client));
     this->mutex.unlock();
     return (true);
 }
@@ -74,6 +79,7 @@ bool    Plugin::onConnect(LightBird::IClient &client)
 void    Plugin::onDisconnect(LightBird::IClient &client)
 {
     this->mutex.lockForWrite();
+    delete this->parsers.value(client.getId());
     this->parsers.remove(client.getId());
     this->mutex.unlock();
 }
@@ -105,7 +111,7 @@ bool    Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data)
 
 void    Plugin::onFinish(LightBird::IClient &client)
 {
-    if (client.getRequest().isError())
+    if (client.getRequest().isError() || client.getResponse().isError())
         this->api->network().disconnect(client.getId());
 }
 
@@ -118,7 +124,7 @@ Parser      *Plugin::_getParser(const LightBird::IClient &client)
 {
     Parser  *parser;
     this->mutex.lockForRead();
-    parser = &this->parsers[client.getId()];
+    parser = this->parsers[client.getId()];
     this->mutex.unlock();
     return (parser);
 }

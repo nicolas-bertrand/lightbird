@@ -17,6 +17,7 @@ Context &Context::operator=(const Context &context)
 {
     if (this != &context)
     {
+        this->mode = context.mode;
         this->transport = context.transport;
         this->protocols = context.protocols;
         this->ports = context.ports;
@@ -30,13 +31,19 @@ bool    Context::operator==(const Context &context)
 {
     if (this == &context)
         return (true);
-    if (this->transport == context.transport &&
+    if (this->mode == context.mode &&
+        this->transport == context.transport &&
         this->protocols == context.protocols &&
         this->ports == context.ports &&
         this->methods == context.methods &&
         this->types == context.types)
         return (true);
     return (false);
+}
+
+void    Context::setMode(const QString &mode)
+{
+    this->mode = mode;
 }
 
 void    Context::setTransport(const QString &transport)
@@ -68,8 +75,11 @@ void    Context::setType(const QString &type)
         this->types.push_back(type);
 }
 
-bool    Context::isValid(const QString &transport, const QStringList &protocols, unsigned short port) const
+bool    Context::isValid(const QString &mode, const QString &transport, const QStringList &protocols, unsigned short port) const
 {
+    // If the mode mismatch and is not empty, the context is not valid
+    if (this->mode != mode && !this->mode.isEmpty())
+        return (false);
     // If the transport protocol mismatch and is not empty, the context is not valid (because empty means that all the transports are supported)
     if (this->transport != transport && !this->transport.isEmpty())
         return (false);
@@ -95,10 +105,10 @@ bool    Context::isValid(const QString &transport, const QStringList &protocols,
     return (true);
 }
 
-bool    Context::isValid(const QString &transport, const QStringList &protocols, unsigned short port, const QString &method, const QString &type) const
+bool    Context::isValid(const QString &mode, const QString &transport, const QStringList &protocols, unsigned short port, const QString &method, const QString &type) const
 {
-    // Check if the transport, the port, and the protocol are valid
-    if (!this->isValid(transport, protocols, port))
+    // Checks if the mode, the transport, the port and the protocol are valid
+    if (!this->isValid(mode, transport, protocols, port))
         return (false);
     // An empty method means that all the methods are supported
     if (!method.isEmpty() && !this->methods.contains(method.toLower()) && this->methods.size() > 0)
@@ -113,6 +123,8 @@ QMap<QString, QString>  Context::toMap() const
 {
     QMap<QString, QString>  context;
 
+    if (!this->mode.isEmpty())
+        context["mode"] = this->mode;
     if (!this->transport.isEmpty())
         context["transport"] = this->transport;
     QStringListIterator itProtocols(this->protocols);

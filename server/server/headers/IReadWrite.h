@@ -18,6 +18,12 @@ public:
     virtual bool    read(QByteArray &data, Client *client) = 0;
     /// @brief Write the data on the stream.
     virtual bool    write(QByteArray &data, Client *client) = 0;
+    /// @brief This method can be reimplemented in order to connect the
+    /// server to a client.
+    virtual bool    connect(Client *)
+    {
+        return (true);
+    }
 };
 
 #endif // IREADWRITE_H

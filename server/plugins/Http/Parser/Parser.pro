@@ -13,9 +13,13 @@ TARGET = Parser
 DESTDIR = ../../../build/plugins/Http/Parser
 
 HEADERS = Plugin.h \
-    Parser.h
+    Parser.h \
+    ParserClient.h \
+    ParserServer.h
 SOURCES = Plugin.cpp \
-    Parser.cpp
+    Parser.cpp \
+    ParserClient.cpp \
+    ParserServer.cpp
 OTHER_FILES = Configuration.xml
 
 OBJECTS_DIR = tmp
