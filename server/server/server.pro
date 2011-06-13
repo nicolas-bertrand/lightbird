@@ -66,6 +66,7 @@ HEADERS += headers/Arguments.h \
     headers/Request.h \
     headers/Response.h \
     headers/Server.h \
+    headers/SmartMutex.h \
     headers/Threads.h \
     headers/Timer.h \
     headers/Tools.h \
@@ -112,6 +113,7 @@ SOURCES += sources/main.cpp \
     sources/Request.cpp \
     sources/Response.cpp \
     sources/Server.cpp \
+    sources/SmartMutex.cpp \
     sources/Threads.cpp \
     sources/Timer.cpp \
     sources/Tools.cpp \
