@@ -1,9 +1,8 @@
-#include <QUuid>
-
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
 #include "TableLimits.h"
+#include "Tools.h"
 
 TableLimits::TableLimits(const QString &id)
 {
@@ -38,7 +37,7 @@ bool    TableLimits::add(const QString &name, const QString &value, const QStrin
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableLimits", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);

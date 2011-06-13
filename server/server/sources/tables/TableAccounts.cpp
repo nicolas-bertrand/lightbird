@@ -1,10 +1,10 @@
 #include <QCryptographicHash>
-#include <QUuid>
 
 #include "Database.h"
 #include "Defines.h"
 #include "Log.h"
 #include "TableAccounts.h"
+#include "Tools.h"
 
 TableAccounts::TableAccounts(const QString &id)
 {
@@ -120,7 +120,7 @@ bool            TableAccounts::add(const QString &name, const QMap<QString, QVar
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableAccounts", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -254,7 +254,7 @@ bool            TableAccounts::setInformation(const QString &name, const QVarian
     else
     {
         query.prepare(Database::instance()->getQuery("TableAccounts", "setInformation_insert"));
-        query.bindValue(":id", QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
+        query.bindValue(":id", Tools::createUuid());
         query.bindValue(":id_account", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);
@@ -326,7 +326,7 @@ bool            TableAccounts::addGroup(const QString &id_group)
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableAccounts", "addGroup"));
     query.bindValue(":id", id);
     query.bindValue(":id_account", this->id);

@@ -1,5 +1,3 @@
-#include <QUuid>
-
 #include "Configurations.h"
 #include "Database.h"
 #include "Defines.h"
@@ -78,7 +76,7 @@ bool    TableDirectories::add(const QString &name, const QString &id_directory, 
     QVector<QMap<QString, QVariant> >   result;
     QString                             id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableDirectories", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);

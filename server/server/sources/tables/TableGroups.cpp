@@ -1,9 +1,8 @@
-#include <QUuid>
-
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
 #include "TableGroups.h"
+#include "Tools.h"
 
 TableGroups::TableGroups(const QString &id)
 {
@@ -54,7 +53,7 @@ bool            TableGroups::add(const QString &name, const QString &id_group)
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableGroups", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -92,7 +91,7 @@ bool            TableGroups::addAccount(const QString &id_account)
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableGroups", "addAccount"));
     query.bindValue(":id", id);
     query.bindValue(":id_group", this->id);

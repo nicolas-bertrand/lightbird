@@ -1,9 +1,8 @@
-#include <QUuid>
-
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
 #include "TableEvents.h"
+#include "Tools.h"
 
 TableEvents::TableEvents(const QString &id)
 {
@@ -64,7 +63,7 @@ bool            TableEvents::add(const QString &name, const QMap<QString, QVaria
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableEvents", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -199,7 +198,7 @@ bool        TableEvents::setInformation(const QString &name, const QVariant &val
     else
     {
         query.prepare(Database::instance()->getQuery("TableEvents", "setInformation_insert"));
-        query.bindValue(":id", QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
+        query.bindValue(":id", Tools::createUuid());
         query.bindValue(":id_event", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);

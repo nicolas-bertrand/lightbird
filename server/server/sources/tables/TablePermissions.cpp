@@ -1,5 +1,3 @@
-#include <QUuid>
-
 #include "Configurations.h"
 #include "Database.h"
 #include "Defines.h"
@@ -10,6 +8,7 @@
 #include "TableDirectories.h"
 #include "TableFiles.h"
 #include "TablePermissions.h"
+#include "Tools.h"
 
 TablePermissions::TablePermissions(const QString &id)
 {
@@ -68,7 +67,7 @@ bool    TablePermissions::add(const QString &id_accessor, const QString &id_obje
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TablePermissions", "add"));
     query.bindValue(":id", id);
     query.bindValue(":id_accessor", id_accessor);

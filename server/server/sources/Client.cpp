@@ -1,6 +1,5 @@
 #include <QCoreApplication>
 #include <QHostAddress>
-#include <QUuid>
 
 #include "IOnConnect.h"
 #include "IDoRead.h"
@@ -13,6 +12,7 @@
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Threads.h"
+#include "Tools.h"
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
@@ -21,7 +21,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
                peerPort(pp), peerName(pn), mode(m), readWriteInterface(r), socket(s)
 {
     // Generates the uuid of the client
-    this->id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    this->id = Tools::createUuid();
     this->data = NULL;
     // Set the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();

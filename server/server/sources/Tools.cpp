@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QFile>
+#include <QUuid>
 
 #include "Log.h"
 #include "Tools.h"
@@ -35,4 +36,9 @@ bool            Tools::copy(const QString &sourceName, const QString &destinatio
 QString Tools::cleanPath(const QString &path)
 {
     return (QDir::cleanPath(QString(path).replace('\\', '/')));
+}
+
+QString Tools::createUuid()
+{
+    return (QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
 }

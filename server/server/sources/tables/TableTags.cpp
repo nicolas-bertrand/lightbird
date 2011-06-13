@@ -1,9 +1,8 @@
-#include <QUuid>
-
 #include "Defines.h"
 #include "Log.h"
 #include "Database.h"
 #include "TableTags.h"
+#include "Tools.h"
 
 TableTags::TableTags(const QString &id)
 {
@@ -38,7 +37,7 @@ bool    TableTags::add(const QString &id_object, const QString &name)
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableTags", "add"));
     query.bindValue(":id", id);
     query.bindValue(":id_object", id_object);

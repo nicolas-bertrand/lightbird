@@ -1,4 +1,3 @@
-#include <QUuid>
 #include <QFileInfo>
 
 #include "Configurations.h"
@@ -81,7 +80,7 @@ bool    TableFiles::add(const QString &name, const QString &path, const QMap<QSt
     QSqlQuery   query;
     QString     id;
 
-    id = QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
+    id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableFiles", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -227,7 +226,7 @@ bool    TableFiles::setInformation(const QString &name, const QVariant &value)
     if (result.size() < 1)
     {
         query.prepare(Database::instance()->getQuery("TableFiles", "setInformation_insert"));
-        query.bindValue(":id", QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
+        query.bindValue(":id", Tools::createUuid());
         query.bindValue(":id_file", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);
@@ -334,7 +333,7 @@ bool            TableFiles::addCollection(const QString &id_collection)
     QSqlQuery   query;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "addCollection"));
-    query.bindValue(":id", QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
+    query.bindValue(":id", Tools::createUuid());
     query.bindValue(":id_file", this->id);
     query.bindValue(":id_collection", id_collection);
     return (Database::instance()->query(query));
