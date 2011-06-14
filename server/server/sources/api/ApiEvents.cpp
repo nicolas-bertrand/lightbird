@@ -6,6 +6,7 @@
 #include "Events.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "SmartMutex.h"
 #include "Threads.h"
 
 ApiEvents::ApiEvents(const QString &id, bool event)
@@ -48,24 +49,26 @@ void    ApiEvents::run()
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
-void    ApiEvents::post(const QString &event, const QVariant &property)
+void            ApiEvents::post(const QString &event, const QVariant &property)
 {
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-        return Log::error("Deadlock", "ApiEvents", "post");
+    SmartMutex  mutex(this->mutex, "ApiEvents", "post");
+
+    if (!mutex)
+        return ;
     if (this->subscribed.contains(event))
     {
         this->events.push_back(QPair<QString, QVariant>(event, property));
         emit this->newEvent();
     }
-    this->mutex.unlock();
 }
 
-void    ApiEvents::subscribe(const QStringList &events)
+void            ApiEvents::subscribe(const QStringList &events)
 {
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-        return Log::error("Deadlock", "ApiEvents", "subscribe");
+    SmartMutex  mutex(this->mutex, "ApiEvents", "subscribe");
+
+    if (!mutex)
+        return ;
     this->subscribed = events;
-    this->mutex.unlock();
 }
 
 void    ApiEvents::send(const QString &event, const QVariant &property)
@@ -75,51 +78,41 @@ void    ApiEvents::send(const QString &event, const QVariant &property)
 
 QList<QPair<QString, QVariant> > ApiEvents::receive()
 {
+    SmartMutex  mutex(this->mutex, "ApiEvents", "receive");
     QList<QPair<QString, QVariant> > result;
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "ApiEvents", "send");
+    if (!mutex)
         return (result);
-    }
     result = this->events;
     this->events.clear();
-    this->mutex.unlock();
     return (result);
 }
 
-bool        ApiEvents::isAvailable()
+bool            ApiEvents::isAvailable()
 {
-    bool    result;
+    SmartMutex  mutex(this->mutex, "ApiEvents", "isAvailable");
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "ApiEvents", "isAvailable");
+    if (!mutex)
         return (false);
-    }
-    result = !this->events.isEmpty();
-    this->mutex.unlock();
-    return (result);
+    return (!this->events.isEmpty());
 }
 
-void        ApiEvents::_newEvent()
+void                    ApiEvents::_newEvent()
 {
-    LightBird::IEvent *plugin;
+    SmartMutex          mutex(this->mutex, "ApiEvents", "_newEvent");
+    LightBird::IEvent   *plugin;
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-        return Log::error("Deadlock", "ApiEvents", "_newEvent");
+    if (!mutex)
+        return ;
     if (!this->events.isEmpty())
     {
         QPair<QString, QVariant> event = this->events.front();
         this->events.pop_front();
+        mutex.unlock();
         if ((plugin = Plugins::instance()->getInstance<LightBird::IEvent>(this->id)))
         {
-            this->mutex.unlock();
             plugin->event(event.first, event.second);
             Plugins::instance()->release(this->id);
-            if (!this->mutex.tryLock(MAXTRYLOCK))
-                return Log::error("Deadlock", "ApiEvents", "_newEvent");
         }
     }
-    this->mutex.unlock();
 }

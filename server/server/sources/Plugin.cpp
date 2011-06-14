@@ -10,6 +10,7 @@
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
+#include "SmartMutex.h"
 #include "Tools.h"
 
 Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
@@ -27,51 +28,42 @@ Plugin::~Plugin()
     Log::trace("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
 }
 
-bool    Plugin::load(bool full)
+bool            Plugin::load(bool full)
 {
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "load");
+    SmartMutex  mutex(this->mutex, "Plugin", "load");
+
+    if (!mutex)
         return (false);
-    }
     if (!this->_load())
     {
         Log::error("Unable to load the plugin", Properties("id", this->id), "Plugin", "load");
         this->_clean();
-        this->mutex.unlock();
         return (false);
     }
     if (full && !this->configuration)
     {
         Log::error("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
-        this->mutex.unlock();
         return (false);
     }
     if (full && !this->instance->onLoad(this->api))
     {
         Log::error("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
-        this->mutex.unlock();
         return (false);
     }
     this->state = LightBird::IPlugins::LOADED;
-    this->mutex.unlock();
     return (true);
 }
 
-bool    Plugin::unload(bool full)
+bool            Plugin::unload(bool full)
 {
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "unload");
+    SmartMutex  mutex(this->mutex, "Plugin", "unload");
+
+    if (!mutex)
         return (false);
-    }
     if (this->state == LightBird::IPlugins::UNLOADED)
-    {
-        this->mutex.unlock();
         return (false);
-    }
     if (this->state == LightBird::IPlugins::LOADED)
     {
         this->state = LightBird::IPlugins::UNLOADING;
@@ -82,33 +74,28 @@ bool    Plugin::unload(bool full)
         this->_unload();
     else
         Log::debug("The plugin will be unloaded later because it is still used", Properties("id", this->id).add("used", QString::number(this->used)), "Plugins", "unload");
-    this->mutex.unlock();
     return (true);
 }
 
-bool    Plugin::install()
+bool            Plugin::install()
 {
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "install");
+    SmartMutex  mutex(this->mutex, "Plugin", "install");
+
+    if (!mutex)
         return (false);
-    }
     if (this->state != LightBird::IPlugins::LOADED)
     {
         Log::error("The plugin must be loaded to be installed", Properties("id", this->id), "Plugin", "install");
-        this->mutex.unlock();
         return (false);
     }
     if (this->configuration)
     {
         Log::error("The plugin is already installed", Properties("id", this->id), "Plugin", "install");
-        this->mutex.unlock();
         return (false);
     }
     if (!this->_createConfiguration())
     {
         Log::error("Unable to create the configuration of the plugin", Properties("id", this->id), "Plugin", "install");
-        this->mutex.unlock();
         return (false);
     }
     this->configuration = Configurations::instance(this->id);
@@ -117,49 +104,41 @@ bool    Plugin::install()
     {
         Log::error("The plugin returned false from IPlugin::onInstall(), so it will not be installed", Properties("id", this->id), "Plugin", "install");
         this->_removeConfiguration();
-        this->mutex.unlock();
         return (false);
     }
-    this->mutex.unlock();
     return (true);
 }
 
-bool    Plugin::uninstall()
+bool            Plugin::uninstall()
 {
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "uninstall");
+    SmartMutex  mutex(this->mutex, "Plugin", "uninstall");
+
+    if (!mutex)
         return (false);
-    }
     if (this->state != LightBird::IPlugins::LOADED)
     {
         Log::error("The plugin must be loaded to be uninstalled", Properties("id", this->id), "Plugin", "uninstall");
-        this->mutex.unlock();
         return (false);
     }
     if (!this->configuration)
     {
         Log::error("The plugin is already uninstalled", Properties("id", this->id), "Plugin", "uninstall");
-        this->mutex.unlock();
         return (false);
     }
     this->instance->onUninstall(this->api);
     this->_removeConfiguration();
-    this->mutex.unlock();
     return (true);
 }
 
-bool    Plugin::release()
+bool            Plugin::release()
 {
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "release");
+    SmartMutex  mutex(this->mutex, "Plugin", "release");
+
+    if (!mutex)
         return (false);
-    }
     if (this->state == LightBird::IPlugins::UNLOADED)
     {
         Log::warning("The plugin is already unloaded", Properties("id", this->id), "Plugin", "release");
-        this->mutex.unlock();
         return (false);
     }
     this->used--;
@@ -170,21 +149,17 @@ bool    Plugin::release()
     }
     if (this->used == 0 && this->state == LightBird::IPlugins::UNLOADING)
         this->_unload();
-    this->mutex.unlock();
     return (true);
 }
 
 LightBird::IMetadata     Plugin::getMetadata() const
 {
     LightBird::IMetadata metadata;
+    SmartMutex           mutex(this->mutex, SmartMutex::READ, "Plugin", "getMetadata");
 
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "getMetadata");
+    if (!mutex)
         return (metadata);
-    }
     this->instance->getMetadata(metadata);
-    this->mutex.unlock();
     return (metadata);
 }
 
@@ -221,14 +196,11 @@ bool    Plugin::checkContext(const QString &mode, const QString &transport, cons
 LightBird::IPlugins::State      Plugin::getState()
 {
     LightBird::IPlugins::State  state;
+    SmartMutex                  mutex(this->mutex, SmartMutex::READ, "Plugin", "getState");
 
-    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugin", "getState");
+    if (!mutex)
         return (LightBird::IPlugins::UNKNOW);
-    }
     state = this->state;
-    this->mutex.unlock();
     return (state);
 }
 

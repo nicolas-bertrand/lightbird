@@ -82,7 +82,7 @@ private:
     Network         *operator=(const Network &);
 
     QMap<unsigned short, Port *>    ports;      ///< The list of the listening ports
-    QReadWriteLock                  lockPorts;  ///< Serure the ports.
+    QReadWriteLock                  mutex;      ///< Serure the ports.
     Clients                         clients;    ///< Manages the clients in CLIENT mode.
     static Network                  *_instance; ///< The instance of the singleton that manage the network.
 

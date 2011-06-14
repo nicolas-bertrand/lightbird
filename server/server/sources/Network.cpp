@@ -5,6 +5,7 @@
 #include "Network.h"
 #include "PortTcp.h"
 #include "PortUdp.h"
+#include "SmartMutex.h"
 
 Network     *Network::_instance = NULL;
 
@@ -55,42 +56,30 @@ Future<bool>        Network::removePort(unsigned short port)
     return (result);
 }
 
-bool                Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients)
+bool            Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients)
 {
-    bool            result = false;
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "getPort");
 
-    if (!this->lockPorts.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "getPort");
+    if (!mutex)
         return (false);
-    }
-    // If the port exists
-    if (this->ports.contains(port))
-    {
-        // Stores its informations in the parameters
-        protocols = this->ports[port]->getProtocols();
-        maxClients = this->ports[port]->getMaxClients();
-        transport = LightBird::INetwork::TCP;
-        if (qobject_cast<PortUdp *>(this->ports[port]))
-            transport = LightBird::INetwork::UDP;
-        result = true;
-    }
-    this->lockPorts.unlock();
-    return (result);
+    if (!this->ports.contains(port))
+        return (false);
+    // Stores its informations in the parameters
+    protocols = this->ports[port]->getProtocols();
+    maxClients = this->ports[port]->getMaxClients();
+    transport = LightBird::INetwork::TCP;
+    if (qobject_cast<PortUdp *>(this->ports[port]))
+        transport = LightBird::INetwork::UDP;
+    return (true);
 }
 
 QList<unsigned short>   Network::getPorts()
 {
-    QList<unsigned short>                   ports;
+    SmartMutex          mutex(this->mutex, SmartMutex::READ, "Network", "getPorts");
 
-    if (!this->lockPorts.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "getPorts");
-        return (ports);
-    }
-    ports = this->ports.keys();
-    this->lockPorts.unlock();
-    return (ports);
+    if (mutex)
+        return (this->ports.keys());
+    return (QList<unsigned short>());
 }
 
 bool    Network::getClient(const QString &id, LightBird::INetwork::Client &client)
@@ -130,35 +119,27 @@ Future<bool>        Network::disconnect(const QString &id)
     return (result);
 }
 
-bool        Network::send(const QString &idClient, const QString &idPlugin, const QString &protocol)
+bool            Network::send(const QString &idClient, const QString &idPlugin, const QString &protocol)
 {
-    bool    result;
+    SmartMutex  mutex(this->mutex, "Network", "send");
 
-    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "send");
+    if (!mutex)
         return (false);
-    }
-    result = this->clients.send(idClient, idPlugin, protocol);
-    this->lockPorts.unlock();
-    return (result);
+    return (this->clients.send(idClient, idPlugin, protocol));
 }
 
-void    Network::_addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients, Future<bool> *future)
+void            Network::_addPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients, Future<bool> *future)
 {
-    Port                            *p;
+    SmartMutex                      mutex(this->mutex, "Network", "_addPort");
     QSharedPointer<Future<bool> >   f(future);
+    Port                            *p;
 
-    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_addPort");
+    if (!mutex)
         return ;
-    }
     // If the port already exists, we can't add it
     if (this->ports.contains(port))
     {
         Log::error("The port is already listening", Properties("port", port).add("protocols", protocols.join(" ")).add("transport", (transport == LightBird::INetwork::TCP ? "TCP" : "UDP")), "Network", "_addPort");
-        this->lockPorts.unlock();
         return ;
     }
     // Creates the port
@@ -170,37 +151,31 @@ void    Network::_addPort(unsigned short port, const QStringList &protocols, Lig
     if (!p->isListening())
     {
         delete p;
-        this->lockPorts.unlock();
         return ;
     }
     // Otherwise, the port is listening the network, and we add it to the port list
     this->ports[port] = p;
     f->setResult(true);
-    this->lockPorts.unlock();
 }
 
-void    Network::_removePort(unsigned short port, Future<bool> *future)
+void            Network::_removePort(unsigned short port, Future<bool> *future)
 {
-    Port                            *p;
+    SmartMutex                      mutex(this->mutex, "Network", "_removePort");
     QSharedPointer<Future<bool> >   f(future);
+    Port                            *p;
 
-    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_removePort");
+    if (!mutex)
         return ;
-    }
     // If the port doesn't exists
     if (!this->ports.contains(port))
     {
         Log::warning("The port doen't exists", Properties("port", port), "Network", "_removePort");
-        this->lockPorts.unlock();
         return ;
     }
     // If the port is already removing
     if (!this->ports[port]->isListening())
     {
         Log::warning("The port is already removing", Properties("port", port), "Network", "_removePort");
-        this->lockPorts.unlock();
         return ;
     }
     p = this->ports[port];
@@ -211,69 +186,57 @@ void    Network::_removePort(unsigned short port, Future<bool> *future)
     // Forbid new connections to this port and removes all the remaining connected clients on the port
     p->stopListening();
     f->setResult(true);
-    this->lockPorts.unlock();
 }
 
-void        Network::_getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
+void            Network::_getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
 {
-    bool    found = false;
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "_getClient");
+    bool        found = false;
 
-    if (!this->lockPorts.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_getClient");
+    if (!mutex)
         return ;
-    }
     QMapIterator<unsigned short, Port *> it(this->ports);
     while (it.hasNext())
         if (it.next().value()->getClient(id, client, thread, future))
             found = true;
     if (!found)
         found = this->clients.getClient(id, client, thread, future);
-    this->lockPorts.unlock();
     if (!found)
         delete future;
 }
 
-void        Network::_getClients(int port, Future<QStringList> *future)
+void            Network::_getClients(int port, Future<QStringList> *future)
 {
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "_getClients");
     QSharedPointer<Future<QStringList> >    f(future);
 
-    if (!this->lockPorts.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_getClients");
+    if (!mutex)
         return ;
-    }
     // Gets the clients in CLIENT mode
     if (port < 0)
         future->setResult(this->clients.getClients());
     // Gets the clients of the port
     else if (this->ports.contains(port))
         future->setResult(this->ports[port]->getClients());
-    this->lockPorts.unlock();
 }
 
-void        Network::_connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                              LightBird::INetwork::Transport transport, int wait, Future<QString> *future)
+void            Network::_connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
+                                  LightBird::INetwork::Transport transport, int wait, Future<QString> *future)
 {
-    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_connect");
-        return ;
-    }
-    this->clients.connect(address, port, protocols, transport, wait, future);
-    this->lockPorts.unlock();
+    SmartMutex  mutex(this->mutex, "Network", "_connect");
+
+    if (mutex)
+        this->clients.connect(address, port, protocols, transport, wait, future);
 }
 
-void        Network::_disconnect(const QString &id, Future<bool> *future)
+void            Network::_disconnect(const QString &id, Future<bool> *future)
 {
+    SmartMutex                      mutex(this->mutex, "Network", "_disconnect");
     QSharedPointer<Future<bool> >   f(future);
     bool                            found = false;
 
-    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_disconnect");
+    if (!mutex)
         return ;
-    }
     QMapIterator<unsigned short, Port *> it(this->ports);
     // Searches the port that manages the client, and disconnect it
     while (it.hasNext() && !found)
@@ -282,18 +245,15 @@ void        Network::_disconnect(const QString &id, Future<bool> *future)
     if (!found)
         found = this->clients.disconnect(id);
     f->setResult(found);
-    this->lockPorts.unlock();
 }
 
-void        Network::_destroyPort(unsigned short port)
+void            Network::_destroyPort(unsigned short port)
 {
-    Port    *p;
+    SmartMutex  mutex(this->mutex, "Network", "_destroyPort");
+    Port        *p;
 
-    if (!this->lockPorts.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Network", "_destroyPort");
+    if (!mutex)
         return ;
-    }
     // If the port exists and is not listening on the network
     if (this->ports.contains(port) && !(p = this->ports[port])->isListening())
     {
@@ -302,5 +262,4 @@ void        Network::_destroyPort(unsigned short port)
         // And delete it later
         p->deleteLater();
     }
-    this->lockPorts.unlock();
 }

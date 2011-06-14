@@ -5,6 +5,7 @@
 #include "Defines.h"
 #include "Events.h"
 #include "Log.h"
+#include "SmartMutex.h"
 #include "Tools.h"
 
 Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent) : QObject(parent)
@@ -108,94 +109,73 @@ QString Configuration::getPath()
     return (this->file.fileName());
 }
 
-QString     Configuration::get(const QString &nodeName)
+QString         Configuration::get(const QString &nodeName)
 {
-    QString result;
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "get");
 
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "get");
+    if (!mutex)
         return ("");
-    }
-    result = this->_get(nodeName, this->dom);
-    this->domLock.unlock();
-    return (result);
+    return (this->_get(nodeName, this->dom));
 }
 
 unsigned        Configuration::count(const QString &nodeName)
 {
-    unsigned    result;
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "count");
 
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "count");
+    if (!mutex)
         return (0);
-    }
-    result = this->_count(nodeName, this->dom);
-    this->domLock.unlock();
-    return (result);
+    return (this->_count(nodeName, this->dom));
 }
 
-void    Configuration::set(const QString &nodeName, const QString &nodeValue)
+void            Configuration::set(const QString &nodeName, const QString &nodeValue)
 {
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "set");
-        return ;
-    }
-    this->_set(nodeName, nodeValue, this->dom);
-    this->domLock.unlock();
+    SmartMutex  mutex(this->mutex, "Configuration", "set");
+
+    if (mutex)
+        this->_set(nodeName, nodeValue, this->dom);
 }
 
-bool        Configuration::remove(const QString &nodeName)
+bool            Configuration::remove(const QString &nodeName)
 {
-    bool    result;
+    SmartMutex  mutex(this->mutex, "Configuration", "remove");
 
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "remove");
+    if (!mutex)
         return (false);
-    }
-    result = this->_remove(nodeName, this->dom);
-    this->domLock.unlock();
-    return (result);
+    return (this->_remove(nodeName, this->dom));
 }
 
 QDomElement Configuration::readDom()
 {
-    if (!this->domLock.tryLockForRead(MAXTRYLOCK))
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
         Log::error("Deadlock", "Configuration", "readDom");
     return (this->dom);
 }
 
 QDomElement Configuration::writeDom()
 {
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
+    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
         Log::error("Deadlock", "Configuration", "writeDom");
     return (this->dom);
 }
 
 void    Configuration::release()
 {
-    this->domLock.unlock();
+    this->mutex.unlock();
 }
 
 bool            Configuration::save()
 {
+    SmartMutex  mutex(this->mutex, "Configuration", "save");
     QByteArray  data;
     int         wrote;
 
+    if (!mutex)
+        return (false);
     if (this->loaded == false)
         return (false);
-    if (!this->domLock.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configuration", "save");
-        return (false);
-    }
     if (this->file.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
     {
         Log::error("Cannot open the configuration file in order to save the configuration", Properties("file",  this->file.fileName()), "Configuration", "save");
-        this->domLock.unlock();
         return (false);
     }
     data = this->doc.toByteArray(2);
@@ -204,7 +184,6 @@ bool            Configuration::save()
         Log::error("Unable to write all the data in the configuration file", Properties("file",  this->file.fileName())
                    .add("data", data).add("wrote", wrote), "Configuration", "save");
         this->file.close();
-        this->domLock.unlock();
         return (false);
     }
     this->file.close();
@@ -212,7 +191,6 @@ bool            Configuration::save()
     if (Configurations::instance() == this)
         Events::instance()->send("configuration_saved");
     Log::debug("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");
-    this->domLock.unlock();
     return (true);
 }
 

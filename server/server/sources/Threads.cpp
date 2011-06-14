@@ -1,5 +1,6 @@
 #include "Defines.h"
 #include "Log.h"
+#include "SmartMutex.h"
 #include "Threads.h"
 
 Threads *Threads::_instance = NULL;
@@ -29,13 +30,12 @@ Threads *Threads::instance(QObject *parent)
     return (_instance);
 }
 
-void    Threads::newThread(QThread *thread, bool remove)
+void            Threads::newThread(QThread *thread, bool remove)
 {
-    if (!this->lockThreads.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Threads", "newThread");
+    SmartMutex  mutex(this->mutex, "Threads", "newThread");
+
+    if (!mutex)
         return ;
-    }
     if (this->threads.contains(thread))
         Log::warning("The thread is already handled", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "newThread");
     else if (thread->isFinished())
@@ -54,38 +54,31 @@ void    Threads::newThread(QThread *thread, bool remove)
         if (thread->isRunning() == false)
             thread->start();
     }
-    this->lockThreads.unlock();
 }
 
-void    Threads::deleteThread(QThread *thread)
+void            Threads::deleteThread(QThread *thread)
 {
-    if (!this->lockThreads.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Threads", "deleteThread");
+    SmartMutex  mutex(this->mutex, "Threads", "deleteThread");
+
+    if (!mutex)
         return ;
-    }
     if (this->threads.contains(thread) == true)
     {
         Log::trace("Deleting the thread", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "deleteThread");
         // Quit the event loop of the thread
         thread->quit();
     }
-    this->lockThreads.unlock();
 }
 
-void        Threads::deleteAll()
+void            Threads::deleteAll()
 {
-    if (!this->lockThreads.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Threads", "deleteAll");
+    SmartMutex  mutex(this->mutex, "Threads", "deleteAll");
+
+    if (!mutex)
         return ;
-    }
     // If all the threads are already deleted
     if (this->threads.isEmpty())
-    {
-        this->lockThreads.unlock();
         return ;
-    }
     Log::info("Deleting all the threads", "Threads", "deleteAll");
     QMutableMapIterator<QThread *, bool> it(this->threads);
     // Quit the event loop of all the threads
@@ -114,16 +107,14 @@ void        Threads::deleteAll()
         }
     }
     this->threads.clear();
-    this->lockThreads.unlock();
 }
 
-void        Threads::_threadFinished()
+void            Threads::_threadFinished()
 {
-    if (!this->lockThreads.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Threads", "_threadFinished");
+    SmartMutex  mutex(this->mutex, "Threads", "_threadFinished");
+
+    if (!mutex)
         return ;
-    }
     QMutableMapIterator<QThread *, bool> it(this->threads);
     while (it.hasNext())
     {
@@ -144,16 +135,14 @@ void        Threads::_threadFinished()
             break;
         }
     }
-    this->lockThreads.unlock();
 }
 
-void        Threads::_threadDestroyed(QObject *object)
+void            Threads::_threadDestroyed(QThread *object)
 {
-    if (!this->lockThreads.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Threads", "_threadDestroyed");
+    SmartMutex  mutex(this->mutex, "Threads", "_threadDestroyed");
+
+    if (!mutex)
         return ;
-    }
     QMutableMapIterator<QThread *, bool> it(this->threads);
     while (it.hasNext())
     {
@@ -166,5 +155,4 @@ void        Threads::_threadDestroyed(QObject *object)
             break;
         }
     }
-    this->lockThreads.unlock();
 }

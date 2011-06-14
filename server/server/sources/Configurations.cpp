@@ -5,27 +5,24 @@
 #include "Defines.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "SmartMutex.h"
 #include "Tools.h"
 
 QMap<QString, Configuration *>  Configurations::instances;
-QMutex                          Configurations::lockInstances(QMutex::Recursive);
+QMutex                          Configurations::mutex(QMutex::Recursive);
 
 Configuration       *Configurations::server(const QString &configurationPath, QObject *parent)
 {
     QString         path = configurationPath;
     Configuration   *instance;
+    SmartMutex      mutex(Configurations::mutex, "Configurations", "server");
 
-    if (!Configurations::lockInstances.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configurations", "server");
+    if (!mutex)
         return (NULL);
-    }
-
     // Return the instance if it exists
     if (Configurations::instances.contains(path))
     {
         instance = Configurations::instances[""];
-        Configurations::lockInstances.unlock();
         return (instance);
     }
 
@@ -40,7 +37,6 @@ Configuration       *Configurations::server(const QString &configurationPath, QO
         Log::error("Failed to load the configuration", "Configurations", "instance");
         delete Configurations::instances[""];
         Configurations::instances.remove("");
-        Configurations::lockInstances.unlock();
         return (NULL);
     }
     instance = Configurations::instances[""];
@@ -76,7 +72,6 @@ Configuration       *Configurations::server(const QString &configurationPath, QO
         instance->set("permissions/ownerInheritance", DEFAULT_PERMISSIONS_OWNERINHERITANCE);
     if (instance->get("permissions/groupInheritance").isEmpty())
         instance->set("permissions/groupInheritance", DEFAULT_PERMISSIONS_GROUPINHERITANCE);
-    Configurations::lockInstances.unlock();
     return (instance);
 }
 
@@ -85,24 +80,20 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     QString         cleaned;
     QString         path;
     Configuration   *instance = NULL;
+    SmartMutex      mutex(Configurations::mutex, "Configurations", "instance");
 
-    if (!Configurations::lockInstances.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Configurations", "instance");
+    if (!mutex)
         return (NULL);
-    }
     // If the path is empty, the server configuration is returned
     if (configuration.isEmpty())
     {
         instance = Configurations::instances.value("");
-        Configurations::lockInstances.unlock();
         return (instance);
     }
     // If the server configuration is not loaded
     if (!Configurations::instances.contains(""))
     {
         Log::error("The configuration of the server must be initialized first", Properties("path", configuration).add("alternative", alternative), "Configurations", "instance");
-        Configurations::lockInstances.unlock();
         return (NULL);
     }
     cleaned = configuration;
@@ -119,7 +110,6 @@ Configuration       *Configurations::instance(const QString &configuration, cons
         {
             Log::error("Failed to load the configuration of the plugin", Properties("id", path), "Configurations", "instance");
             delete instance;
-            Configurations::lockInstances.unlock();
             return (NULL);
         }
     }
@@ -132,7 +122,6 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     {
         Log::error("Failed to load the configuration", Properties("path", path).add("alternative", alternative), "Configurations", "instance");
         delete instance;
-        Configurations::lockInstances.unlock();
         return (NULL);
     }
     // If a new instance has been created previously
@@ -148,6 +137,5 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     // Otherwise get the configuration
     else
         instance = Configurations::instances.value(path);
-    Configurations::lockInstances.unlock();
     return (instance);
 }

@@ -91,7 +91,7 @@ void            Client::read(QByteArray *newData)
     // If the parameter is not NULL, it contains new data that are added to this->data
     if (newData)
     {
-        if (!this->lockData.tryLock(MAXTRYLOCK))
+        if (!this->mutex.tryLock(MAXTRYLOCK))
         {
             Log::error("Deadlock", "Client", "read");
             return ;
@@ -106,7 +106,7 @@ void            Client::read(QByteArray *newData)
         }
         else
             this->data = newData;
-        this->lockData.unlock();
+        this->mutex.unlock();
     }
     // If the current thread is not the thread of the client, the thread is changed using readSignal
     if (this->currentThread() != this)
@@ -116,7 +116,7 @@ void            Client::read(QByteArray *newData)
         return ;
     }
     // If there are pending data, we use it
-    if (!this->lockData.tryLock(MAXTRYLOCK))
+    if (!this->mutex.tryLock(MAXTRYLOCK))
     {
         Log::error("Deadlock", "Client", "read");
         return ;
@@ -126,7 +126,7 @@ void            Client::read(QByteArray *newData)
         data = this->data;
         this->data = NULL;
     }
-    this->lockData.unlock();
+    this->mutex.unlock();
     // If data is NULL and the engine is not running, the data are read using readWriteInterface
     if (data == NULL)
     {

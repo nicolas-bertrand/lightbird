@@ -23,10 +23,13 @@ public:
     /// @brief Tries to lock the mutex. The parameters object and function are
     /// used to log a message if the lock fail after the time out.
     SmartMutex(QMutex &mutex, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
+    /// @brief Tries to lock the mutex for write. The parameters object and
+    /// function are used to log a message if the lock fail after the time out.
+    SmartMutex(QReadWriteLock &readWriteLock, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
     /// @brief Tries to lock the mutex. The parameters object and function are
     /// used to log a message if the lock fail after the time out.
     /// @param lock : If the mutex have to be lock for read or for write.
-    SmartMutex(QReadWriteLock &readWriteLock, SmartMutex::ReadWriteLock lock = SmartMutex::WRITE, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
+    SmartMutex(QReadWriteLock &readWriteLock, SmartMutex::ReadWriteLock lock, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
     /// @brief Unlock the mutex if it is locked.
     ~SmartMutex();
 

@@ -8,6 +8,7 @@
 #include "Defines.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "SmartMutex.h"
 #include "Table.h"
 #include "TableAccounts.h"
 #include "TableCollections.h"
@@ -165,26 +166,17 @@ QString Database::getQuery(const QString &group, const QString &name)
 
 QString         Database::getQuery(const QString &group, const QString &name, const QString &id)
 {
+    SmartMutex  mutex(this->mutex, "Database", "getQuery");
     QString     result;
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Database", "getQuery");
+    if (!mutex)
         return ("");
-    }
     if (!this->queries.contains(id))
         if (!this->_loadQueries(id))
-        {
-            mutex.unlock();
             return ("");
-        }
     if (!(result = this->queries[id].firstChildElement().firstChildElement(group).firstChildElement(name).text()).isEmpty())
-    {
-        this->mutex.unlock();
         return (result);
-    }
     Log::warning("Query not found", Properties("group", group).add("name", name).add("id", id), "Database", "getQuery");
-    this->mutex.unlock();
     return ("");
 }
 

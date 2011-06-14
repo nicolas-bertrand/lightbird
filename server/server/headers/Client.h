@@ -98,7 +98,7 @@ private:
     QAbstractSocket          *socket;               ///< An abstract representation of the socket of the client.
     TableAccounts            account;               ///< Allows the client to be identified as a know account.
     QByteArray               *data;                 ///< May contains data read from the network.
-    QMutex                   lockData;              ///< Secure the access to the data member.
+    QMutex                   mutex;                 ///< Secure the access to the data member.
     Engine                   *engine;               ///< Used to process the requests, and generates the responses.
 
     bool            _connectToHost();

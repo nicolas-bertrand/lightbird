@@ -36,15 +36,15 @@ private:
     Threads &operator=(const Threads &);
     ~Threads();
 
-    QMap<QThread *, bool>   threads;        ///< The list of the managed threads. The value tells if the object has to be deleted when the thread is finished.
-    QMutex                  lockThreads;    ///< Lock the member threads.
-    static Threads          *_instance;     ///< The instance of the singleton
+    QMap<QThread *, bool>   threads;    ///< The list of the managed threads. The value tells if the object has to be deleted when the thread is finished.
+    QMutex                  mutex;      ///< Lock the member threads.
+    static Threads          *_instance; ///< The instance of the singleton
 
 private slots:
     /// @brief Clean a thread that has finished.
     void                _threadFinished();
     /// @brief Clean a thread that has been destroyed.
-    void                _threadDestroyed(QObject *object);
+    void                _threadDestroyed(QThread *object);
 };
 
 #endif // THREADS_H

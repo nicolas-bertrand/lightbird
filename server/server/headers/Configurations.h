@@ -39,8 +39,8 @@ public:
     static Configuration    *instance(const QString &path = "", const QString &alternative = "");
 
 private:
-    static QMap<QString, Configuration *>   instances;     ///< The instances of the loaded configurations.
-    static QMutex                           lockInstances; ///< Ensure that instances is thread safe.
+    static QMap<QString, Configuration *>   instances;  ///< The instances of the loaded configurations.
+    static QMutex                           mutex;      ///< Ensure that instances is thread safe.
 };
 
 #endif // CONFIGURATIONS_H

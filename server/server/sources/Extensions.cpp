@@ -2,6 +2,7 @@
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
+#include "SmartMutex.h"
 
 Extensions  *Extensions::_instance = NULL;
 
@@ -23,30 +24,28 @@ Extensions::~Extensions()
     Log::trace("Extensions destroyed!", "Extensions", "~Extensions");
 }
 
-void    Extensions::add(Plugin *plugin)
+void                        Extensions::add(Plugin *plugin)
 {
+    SmartMutex              mutex(this->mutex, "Extensions", "add");
     LightBird::IExtension   *extension;
     Properties              properties;
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Extensions", "add");
+    if (!mutex)
         return ;
-    }
     // Check that the plugin implements the IExtensions interface
     if ((extension = qobject_cast<LightBird::IExtension *>(plugin->instanceObject)) == NULL)
-        return (this->mutex.unlock());
+        return ;
     // If the plugin is already managed, an error occured
     if (this->plugins.contains(plugin->id))
     {
         Log::error("The plugin is already managed", "Extensions", "add");
-        return (this->mutex.unlock());
+        return ;
     }
     // Get the names of the extensions that the plugin implements
     QStringListIterator it(extension->getExtensionsNames());
     // If the plugin doesn't implements any extensions, it is not added
     if (!it.hasNext())
-        return (this->mutex.unlock());
+        return ;
     while (it.hasNext())
     {
         properties.add("extensionName", it.peekNext());
@@ -57,35 +56,28 @@ void    Extensions::add(Plugin *plugin)
     this->plugins[plugin->id].extensions = extension;
     this->plugins[plugin->id].loaded = true;
     Log::debug("Extensions plugin added", properties.add("pluginId", plugin->id), "Extensions", "add");
-    this->mutex.unlock();
 }
 
-void        Extensions::remove(Plugin *plugin)
+void            Extensions::remove(Plugin *plugin)
 {
-    if (!this->mutex.tryLock(MAXTRYLOCK))
+    SmartMutex  mutex(this->mutex, "Extensions", "remove");
+
+    if (mutex && this->plugins.contains(plugin->id))
     {
-        Log::error("Deadlock", "Extensions", "remove");
-        return ;
+        this->plugins[plugin->id].loaded = false;
+        this->_remove(plugin->id);
+        Log::debug("Extensions plugin removed", Properties("pluginId", plugin->id), "Extensions", "remove");
     }
-    // Check that the plugin exists
-    if (!this->plugins.contains(plugin->id))
-        return (this->mutex.unlock());
-    this->plugins[plugin->id].loaded = false;
-    this->_remove(plugin->id);
-    Log::debug("Extensions plugin removed", Properties("pluginId", plugin->id), "Extensions", "remove");
-    this->mutex.unlock();
 }
 
 QList<void *>       Extensions::get(const QString &name)
 {
+    SmartMutex      mutex(this->mutex, "Extensions", "get");
     QList<void *>   result;
     Extension       extension;
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Extensions", "remove");
+    if (!mutex)
         return (result);
-    }
     // Search all the plugins that implements the required extension
     QStringListIterator it(this->extensionsPlugins.values(name));
     while (it.hasNext())
@@ -108,19 +100,16 @@ QList<void *>       Extensions::get(const QString &name)
         }
         it.next();
     }
-    this->mutex.unlock();
     return (result);
 }
 
-void        Extensions::release(QList<void *> extensions)
+void            Extensions::release(QList<void *> extensions)
 {
-    QString plugin;
+    SmartMutex  mutex(this->mutex, "Extensions", "release");
+    QString     plugin;
 
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Extensions", "remove");
+    if (!mutex)
         return ;
-    }
     // For each extensions to release
     QListIterator<void *> it1(extensions);
     while (it1.hasNext())
@@ -145,7 +134,6 @@ void        Extensions::release(QList<void *> extensions)
         }
         it1.next();
     }
-    this->mutex.unlock();
 }
 
 void        Extensions::_remove(const QString &plugin)

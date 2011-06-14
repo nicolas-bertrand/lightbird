@@ -10,6 +10,15 @@ SmartMutex::SmartMutex(QMutex &m, const QString &o, const QString &f, int wait) 
     this->lock(wait);
 }
 
+SmartMutex::SmartMutex(QReadWriteLock &m, const QString &o, const QString &f, int wait) : mutex(NULL),
+                                                                                          readWriteLock(&m),
+                                                                                          isLock(false),
+                                                                                          object(o),
+                                                                                          function(f)
+{
+    this->lockForWrite(wait);
+}
+
 SmartMutex::SmartMutex(QReadWriteLock &m, SmartMutex::ReadWriteLock lock,
                        const QString &o, const QString &f, int wait) : mutex(NULL),
                                                                        readWriteLock(&m),

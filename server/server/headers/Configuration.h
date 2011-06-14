@@ -65,11 +65,11 @@ protected:
     /// @param root : The root element of the nodeName.
     virtual bool        _remove(const QString &nodeName, QDomElement root);
 
-    QReadWriteLock      domLock;    ///< Make the configuration thread safe.
-    QDomDocument        doc;        ///< The in-memory DOM representation of the XML document.
-    QDomElement         dom;        ///< The root of the XML document.
-    QFile               file;       ///< The XML configuration file.
-    bool                loaded;     ///< If a configuration is loaded.
+    QReadWriteLock      mutex;  ///< Make the configuration thread safe.
+    QDomDocument        doc;    ///< The in-memory DOM representation of the XML document.
+    QDomElement         dom;    ///< The root of the XML document.
+    QFile               file;   ///< The XML configuration file.
+    bool                loaded; ///< If a configuration is loaded.
 
 private slots:
     /// @brief Set the parent of the configuration in his living thread (because this can't be done in an other thread)
