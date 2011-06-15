@@ -4,6 +4,7 @@
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients, QObject *parent) :
                  Port(port, LightBird::INetwork::UDP, protocols, maxClients, parent)
 {
+    this->socket.setParent(this);
     // When a client connected to the server, the slot _read is called
     QObject::connect(&this->socket, SIGNAL(readyRead()), this, SLOT(_readPendingDatagrams()), Qt::QueuedConnection);
     // Listen on the given port

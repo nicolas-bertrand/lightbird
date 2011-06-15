@@ -93,7 +93,7 @@ void    EngineClient::_onRead(QByteArray &data)
 void        EngineClient::_doSend()
 {
     bool    found = false;
-    bool    result;
+    bool    result = false;
 
     // Checks if the engine is ready to process a new request
     if (this->state != Engine::READY || this->running || this->requests.isEmpty())

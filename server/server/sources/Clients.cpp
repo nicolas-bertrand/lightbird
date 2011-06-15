@@ -1,4 +1,5 @@
 #include <QTcpSocket>
+#include <QUdpSocket>
 
 #include "Clients.h"
 #include "Log.h"
@@ -26,7 +27,7 @@ void            Clients::connect(const QHostAddress &address, quint16 port, cons
     if (transport == LightBird::INetwork::TCP)
     {
         // Creates the socket. The connection is made il the client thread, via IReadWrite
-        QTcpSocket *socket = new QTcpSocket();
+        QTcpSocket *socket = new QTcpSocket(NULL);
         // Creates the client
         Client *client = new Client(socket, transport, protocols, socket->localPort(), socket->socketDescriptor(),
                                     address, port, socket->peerName(), LightBird::IClient::CLIENT, this);
@@ -39,9 +40,30 @@ void            Clients::connect(const QHostAddress &address, quint16 port, cons
         QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(_disconnected()), Qt::QueuedConnection);
         // Keeps the future in order to set its result in IReadWrite::connect
         this->futures.insert(client->getId(), QPair<Future<QString> *, int>(future, wait));
+        client->start();
     }
     else
     {
+        QSharedPointer<Future<QString> > f(future);
+        QListIterator<Client *> it(this->clients);
+
+        // Ensure that the client is not already connected
+        while (it.hasNext())
+        {
+            if (it.peekNext()->getPeerAddress() == address && it.peekNext()->getPeerPort() == port)
+                return future->setResult(it.peekNext()->getId());
+            it.next();
+        }
+        // Creates the socket and connects it virtually to the peer
+        QUdpSocket *socket = new QUdpSocket(this);
+        socket->connectToHost(address, port);
+        // Creates the client
+        Client *client = new Client(socket, transport, protocols, socket->localPort(), socket->socketDescriptor(),
+                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this);
+        this->clients.push_back(client);
+        // When the client thread is finished, _finished is called
+        QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
+        client->start();
     }
 }
 
@@ -160,7 +182,8 @@ bool            Clients::connect(Client *client)
 {
     SmartMutex  mutex(this->mutex);
 
-    if (client->getMode() == LightBird::IClient::CLIENT)
+    if (client->getMode() == LightBird::IClient::CLIENT &&
+        client->getTransport() == LightBird::INetwork::TCP)
     {
         // Gets the future that is waiting for the connection
         QSharedPointer<Future<QString> > future(this->futures.value(client->getId()).first);

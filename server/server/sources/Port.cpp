@@ -122,6 +122,7 @@ Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &p
     this->clients.push_back(client);
     // When the client thread is finished, _finished is called
     QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
+    client->start();
     return (client);
 }
 

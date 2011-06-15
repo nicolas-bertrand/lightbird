@@ -31,8 +31,9 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     QObject::connect(this, SIGNAL(sendSignal(QString,QString)), this, SLOT(_send(QString,QString)), Qt::QueuedConnection);
     // Start the client thread
     this->moveToThread(this);
-    Threads::instance()->newThread(this, false);
-    this->socket->moveToThread(this);
+    // If the socket has no parent the Client takes its ownership
+    if (!this->socket->parent())
+        this->socket->moveToThread(this);
 }
 
 Client::~Client()
@@ -40,6 +41,11 @@ Client::~Client()
     if (this->data)
         delete this->data;
     Log::trace("Client destroyed!", Properties("id", this->id), "Client", "~Client");
+}
+
+void        Client::start()
+{
+    Threads::instance()->newThread(this, false);
 }
 
 void        Client::run()
@@ -74,7 +80,8 @@ void        Client::run()
     Log::info("Client disconnected", Properties("id", this->id).add("port", this->port)
               .add("socket", socketDescriptor, false).add("peerAddress", this->peerAddress.toString())
               .add("peerName", this->peerName, false).add("peerPort", this->peerPort), "Client", "run");
-    delete this->socket;
+    if (!this->socket->parent())
+        delete this->socket;
     // Destroy the engine
     delete this->engine;
     // Nothing must be read from the client after its disconnection
@@ -219,7 +226,8 @@ bool        Client::_connectToHost()
     if (this->readWriteInterface->connect(this))
         return (true);
     // The connection failed so the client is destroyed
-    delete this->socket;
+    if (!this->socket->parent())
+        delete this->socket;
     this->disconnect(SIGNAL(readSignal()));
     this->moveToThread(QCoreApplication::instance()->thread());
     return (false);

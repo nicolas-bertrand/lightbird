@@ -235,7 +235,7 @@ void    Log::_initializeWrite()
     // Start the log thread
     this->moveToThread(this);
     this->awake = false;
-    Threads::instance()->newThread(this);
+    Threads::instance()->newThread(this, false);
     // Wait that the thread is started
     this->waitMutex.lock();
     if (!this->awake)

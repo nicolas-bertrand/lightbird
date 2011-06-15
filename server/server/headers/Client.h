@@ -37,6 +37,8 @@ public:
            IReadWrite *readWriteInterface);
     ~Client();
 
+    /// @brief Starts the Client thread.
+    void                    start();
     /// @brief The main method of the Client's thread.
     /// Contains the thread event loop.
     void                    run();
