@@ -32,7 +32,7 @@ private:
     Events(const Events &);
     Events *operator=(const Events &);
 
-    QMutex              mutex;      ///< Ensure that the class is thread safe.
+    QMutex              mutex;      ///< Makes this class thread safe.
     QList<ApiEvents *>  events;     ///< The list of the plugins that can send and receive events.
     static Events       *_instance; ///< The instance of the singleton.
 };

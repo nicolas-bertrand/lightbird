@@ -116,7 +116,7 @@ private:
     LightBird::ILogs::Level                 level;      ///< The minimum level required to write a log.
     static Log                              *_instance; ///< The instance of the Singleton.
     QMap<LightBird::ILogs::Level, QString>  levels;     ///< Combines the levels and their names.
-    QMutex                                  mutex;      ///< A mutex that ensures that only one log is written at the same time. This makes the Log class thread-safe.
+    QMutex                                  mutex;      ///< Ensures that only one log is written at the same time.
     QList<LogInformations>                  buffer;     ///< A buffer that stores the logs that haven't been saved yet.
     Mode                                    mode;       ///< The current mode of the log.
     bool                                    display;    ///< If the logs have to be displayed in the standard output.

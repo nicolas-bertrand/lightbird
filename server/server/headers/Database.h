@@ -64,7 +64,7 @@ private:
     static Database             *_instance;     ///< The instance of the singleton that manage the database.
     bool                        loaded;         ///< If the database has been correctly loaded.
     QMap<QString, QDomDocument> queries;        ///< Contains the doms representations of the queries.
-    QMutex                      mutex;          ///< Ensure that the queries are modified by one thread at a time.
+    QMutex                      mutex;          ///< Makes this class thread safe.
     QStringList                 tablesNames;    ///< Contains the names of the tables of the database.
 };
 

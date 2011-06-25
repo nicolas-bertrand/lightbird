@@ -39,7 +39,7 @@ private:
     ApiEvents* operator=(const ApiEvents &);
 
     QString         id;         ///< The id of the plugin for which the object has been created.
-    QMutex          mutex;      ///< Ensure that the class is thread safe.
+    QMutex          mutex;      ///< Makes this class thread safe.
     QWaitCondition  wait;       ///< Allows to wait that the thread is started before return from the constructor.
     bool            awake;      ///< If the wait condition has been called.
     QStringList     subscribed; ///< List the events to which the plugin has subscribed.

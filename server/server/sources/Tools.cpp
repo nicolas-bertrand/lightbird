@@ -6,7 +6,7 @@
 #include "Tools.h"
 
 // The maximum size of data copied each time
-#define READ_WRITE_SIZE 1048576
+static const unsigned READ_WRITE_SIZE = 1048576;
 
 bool            Tools::copy(const QString &sourceName, const QString &destinationName)
 {
@@ -41,4 +41,15 @@ QString Tools::cleanPath(const QString &path)
 QString Tools::createUuid()
 {
     return (QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
+}
+
+QByteArray Tools::simplify(QByteArray data, char replace, quint64 maxSize)
+{
+    if (maxSize)
+        data = data.left(maxSize);
+    int s = data.size();
+    for (int i = 0; i < s; ++i)
+        if (data.data()[i] < 32 || data.data()[i] > 126)
+            data.data()[i] = replace;
+    return (data);
 }

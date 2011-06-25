@@ -77,7 +77,7 @@ private:
     QDir                directory;                  ///< The log directory.
     QFile               file;                       ///< The log file.
     QString             lastError;                  ///< Date of the last error (to avoid repetitions).
-    QMutex              mutex;                      ///< Ensure that the log buffer is thread safe.
+    QMutex              mutex;                      ///< Makes this class thread safe.
     QStringList         buffer;                     ///< Buffered the logs to write in the timer.
     QMap<LightBird::ILogs::Level, QString> levels;  ///< Combines the levels and their names.
 };

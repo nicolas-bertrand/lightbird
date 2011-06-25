@@ -42,7 +42,7 @@ private:
     /// removes its files.
     /// @return True if no error occured.
     bool    _temporaryDirectory();
-    /// @brief Load each ports mentionned in the configuration file of the server,
+    /// @brief Opens each ports mentionned in the configuration file of the server,
     /// under the nodes <port>, childrens of the node <ports>.
     void    _loadNetwork();
     /// @brief Attemps to load each plugin mentionned in the configuration file of

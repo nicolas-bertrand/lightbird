@@ -33,7 +33,7 @@ private:
 
     QString                 id;     ///< The id of the plugin for which the timers are managed.
     QMap<QString, Timer *>  timers; ///< The list of the timers of the plugin.
-    QReadWriteLock          mutex;  ///< Ensure that the access to the timers is thread safe.
+    QReadWriteLock          mutex;  ///< Makes this class thread safe.
 };
 
 #endif // APITIMERS_H
