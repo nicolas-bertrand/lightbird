@@ -54,6 +54,8 @@ Configuration       *Configurations::server(const QString &configurationPath, QO
         instance->set("cleanTemporaryPath", DEFAULT_CLEAN_TEMPORARY_PATH);
     if (instance->get("languagesPath").isEmpty())
         instance->set("languagesPath", DEFAULT_LANGUAGES_PATH);
+    if (instance->get("threadsNumber").isEmpty())
+        instance->set("threadsNumber", QString::number(DEFAULT_THREADS_NUMBER));
     if (instance->get("database/type").isEmpty())
         instance->set("database/type", DEFAULT_DATABASE_TYPE);
     if (instance->get("database/path").isEmpty())

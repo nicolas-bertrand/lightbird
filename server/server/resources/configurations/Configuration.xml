@@ -8,6 +8,7 @@
   <cleanTemporaryPath>true</cleanTemporaryPath>
   <languagesPath>languages</languagesPath>
   <language>fr</language>
+  <threadsNumber>10</threadsNumber>
   <database>
     <name/>
     <file>database.sqlite</file>
