@@ -137,7 +137,7 @@ void            Threads::_threadFinished()
     }
 }
 
-void            Threads::_threadDestroyed(QThread *object)
+void            Threads::_threadDestroyed(QObject *object)
 {
     SmartMutex  mutex(this->mutex, "Threads", "_threadDestroyed");
 

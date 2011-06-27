@@ -44,7 +44,7 @@ private slots:
     /// @brief Clean a thread that has finished.
     void                _threadFinished();
     /// @brief Clean a thread that has been destroyed.
-    void                _threadDestroyed(QThread *object);
+    void                _threadDestroyed(QObject *object);
 };
 
 #endif // THREADS_H
