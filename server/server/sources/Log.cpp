@@ -228,7 +228,8 @@ void    Log::_initializeWrite()
     while (log.hasNext())
     {
         emit writeLog(log.peekNext().level, log.peekNext().date, log.peekNext().message, log.peekNext().properties, log.peekNext().thread, log.peekNext().plugin, log.peekNext().object, log.peekNext().method);
-        this->_print(log.peekNext().level, log.peekNext().date, log.peekNext().message, log.peekNext().properties, log.peekNext().thread, log.peekNext().plugin, log.peekNext().object, log.peekNext().method);
+        if (this->level <= log.peekNext().level)
+            this->_print(log.peekNext().level, log.peekNext().date, log.peekNext().message, log.peekNext().properties, log.peekNext().thread, log.peekNext().plugin, log.peekNext().object, log.peekNext().method);
         log.next();
     }
     this->buffer.clear();
