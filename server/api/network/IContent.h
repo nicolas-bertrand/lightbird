@@ -17,15 +17,15 @@ namespace LightBird
         /// @brief List the available storages types.
         enum Storage
         {
-            BYTEARRAY,      ///< The content is stored in the memory as a QByteArray. Recommended for short contents.
-            VARIANT,        ///< The content is stored in the memory as a QVariant. Useful for representing structured data. Be careful to not stores too large data.
-            FILE,           ///< The content is stored in a file that must not be removed. Recommended to stores large amount of persistant data.
-            TEMPORARYFILE   ///< The content is stored in a temporary file that is removed with this object. Recommended to stores large amount of temporary data.
+            BYTEARRAY,    ///< The content is stored in the memory as a QByteArray. Recommended for short contents.
+            VARIANT,      ///< The content is stored in the memory as a QVariant. Useful for representing structured data. Be careful to not store too large data.
+            FILE,         ///< The content is stored in a file that must not be removed. Recommended to store a large amount of persistant data.
+            TEMPORARYFILE ///< The content is stored in a temporary file that is removed with this object. Recommended to store a large amount of temporary data.
         };
 
         /// @brief Returns how the content is stored.
         virtual LightBird::IContent::Storage getStorage() const = 0;
-        /// @brief Set how the content is stored. Calling this method will clear all
+        /// @brief Sets how the content is stored. Calling this method will clear all
         /// the stored contents (using clear()). Only one type of storage can be used
         /// at the same time.
         /// @param fileName : If the storage is FILE, this paramater defines the file name.
@@ -35,7 +35,7 @@ namespace LightBird
         /// @brief Returns all or a part of the content, depending on the given size.
         /// The content is returned as a QByteArray of the given size, or less if all
         /// the data has been returned. The begin of the returned content depends on
-        /// the position of the read pointer. To get the content of a VARIANT, you must
+        /// the position of the read pointer. To get the content of a VARIANT, one must
         /// call getVariant() instead of this method.
         /// @param size : The size of the content to return. Zero will return all the content.
         virtual QByteArray      getContent(quint64 size = 0) = 0;

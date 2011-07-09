@@ -101,3 +101,8 @@ void    ThreadPool::_executeTask()
         if (!this->available.isEmpty())
             this->available.dequeue()->taskAvailable(this->tasks.dequeue());
 }
+
+QThread *ThreadPool::ITask::getThread()
+{
+    return (this->thread);
+}

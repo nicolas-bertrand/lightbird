@@ -29,6 +29,8 @@ void    Thread::taskAvailable(ThreadPool::ITask *task)
 
 void    Thread::_taskAvailable(ThreadPool::ITask *task)
 {
+    task->thread = this;
     task->run();
+    task->thread = NULL;
     ThreadPool::instance()->_threadAvailable(this);
 }

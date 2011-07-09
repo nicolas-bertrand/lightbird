@@ -56,6 +56,14 @@ public:
     public:
         /// @brief Run the task.
         virtual void    run() = 0;
+        /// @brief Returns the thread in which the task is running, or NULL
+        /// if it is not running.
+        QThread         *getThread();
+
+    private:
+        QThread         *thread; ///< The current thread of the task.
+        /// Allows the class Thread to update the current thread of the task.
+        friend class    Thread;
     };
 };
 
