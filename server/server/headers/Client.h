@@ -1,8 +1,8 @@
 #ifndef CLIENT_H
 # define CLIENT_H
 
+# include <QMap>
 # include <QMutex>
-# include <QThread>
 
 # include "IClient.h"
 # include "INetwork.h"
@@ -10,18 +10,20 @@
 
 # include "Future.hpp"
 # include "TableAccounts.h"
+# include "ThreadPool.h"
 
 class Engine;
 
-/// @brief Represents a connected client.
-/// All its requests are processed from a thread based on this class.
-class Client : public QThread,
+/// @brief Manages a client connected to the server. The actions of the client
+/// are executed in a thread of the ThreadPool to allow any number of client
+/// to run simultaneously.
+class Client : public QObject,
+               public ThreadPool::ITask,
                public LightBird::IClient
 {
     Q_OBJECT
 
 public:
-    /// @brief Stores the socket informations, and creates the client's thread.
     /// @param socket : The socket from which the client is connected.
     /// @param protocols : The protocols used to communicate with the client.
     /// @param transport : The transport protocol used by this client.
@@ -31,28 +33,40 @@ public:
     /// @param peerPort : The port from which the client is connected in his host.
     /// @param peerName : The name of the client's host. May be empty.
     /// @param mode : The connection mode of the client.
+    /// @param readWriteInterface : Allows the client to read and write on the network.
     Client(QAbstractSocket *socket, LightBird::INetwork::Transport transport, const QStringList &protocols,
            unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
            unsigned short peerPort, const QString &peerName, LightBird::IClient::Mode mode,
            IReadWrite *readWriteInterface);
     ~Client();
 
-    /// @brief Starts the Client thread.
-    void                    start();
-    /// @brief The main method of the Client's thread.
-    /// Contains the thread event loop.
+    /// @brief Performs the actions of the client in a thread of the ThreadPool.
     void                    run();
-    /// @brief Write the given data to the client.
-    void                    write(QByteArray &data);
-    /// @brief Calls the IDoRead interface of the plugins.
-    bool                    doRead(QByteArray &data);
-    /// @brief Calls the IDoWrite interface of the plugins.
-    bool                    doWrite(QByteArray &data);
+    /// @brief Write the data to the client. This method takes ownership of the data.
+    void                    write(QByteArray *data);
     /// @brief Asks the engine to call IDoSend in order to generate a request
     /// that will be send to a client.
     /// @param id : The id of the plugin that will be called by IDoSend.
     void                    send(const QString &id, const QString &protocol);
+    /// @brief Disconnect the client
+    void                    disconnect();
+    /// @brief Calls the IDoRead interface of the plugins.
+    bool                    doRead(QByteArray &data);
+    /// @brief Calls the IDoWrite interface of the plugins.
+    bool                    doWrite(QByteArray &data);
+    /// @brief Returns true if the client is finished and can be safely destroyed.
+    bool                    isFinished();
+    /// @brief Changes the port member of the client (doesn't affect the real port).
+    void                    setPort(unsigned short port);
+    /// @brief This method is used to get the informations of a client in a thread
+    /// safe way. It stores the information request in a map (this->informationsRequests), which
+    /// will be used in the client's ThreadPool to fill the informations and unlock the future.
+    /// @param client : The informations of the client are stored in this parameter.
+    /// @param future : Once the informations are filled, the future is set in order
+    /// to unlock the thread that is waiting for the informations.
+    void    getInformations(LightBird::INetwork::Client &client, Future<bool> *future);
 
+    // LightBird::IClient
     const QString           &getId() const;
     unsigned short          getPort() const;
     const QStringList       &getProtocols() const;
@@ -69,60 +83,84 @@ public:
     LightBird::IRequest     &getRequest();
     LightBird::IResponse    &getResponse();
 
-    /// @brief This method is used to get the informations of a client in a thread
-    /// safe way. It emits the signal getInformationsSignal which will calls the slot
-    /// _getInformations in the client's thread. Then the informations of the client
-    /// are filled, and the future is unlocked.
-    /// @param client : The informations of the client are stored in this parameter.
-    /// @param thread : The address of the thread that require the informations. Used
-    /// to avoid dead locks.
-    /// @param future : Once the informations are filled, the future is set in order
-    /// to unlock the thread that is waiting for the informations.
-    void    getInformations(LightBird::INetwork::Client *client, void *thread, Future<bool> *future);
+public slots:
+    /// @brief Calling this method tells the Client that new data are available to read.
+    /// After being read, these data will ultimately feed the engine. The client takes
+    /// ownership of the data.
+    void                    read(QByteArray *data = NULL);
 
 private:
     Client();
     Client(const Client &);
     Client  *operator=(const Client &);
 
-    QString                  id;                    ///< The id of the client.
-    LightBird::INetwork::Transport transport;       ///< The transport protocol used by the underlaying socket.
-    QStringList              protocols;             ///< The names of the protocols used to communicate with the client.
-    unsigned short           port;                  ///< The local port through which the client is connected.
-    int                      socketDescriptor;      ///< The descriptor of the socket.
-    QHostAddress             peerAddress;           ///< The address of the client.
-    unsigned short           peerPort;              ///< The peer port through which the client id connected.
-    QString                  peerName;              ///< The name of the client's host (usually empty).
-    LightBird::IClient::Mode mode;                  ///< The connection mode of the client.
-    IReadWrite               *readWriteInterface;   ///< This interface is used to read and write data on network.
-    QDateTime                connectionDate;        ///< The date of the creation of this object.
-    QVariantMap              informations;          ///< Contains information on the client.
-    QAbstractSocket          *socket;               ///< An abstract representation of the socket of the client.
-    TableAccounts            account;               ///< Allows the client to be identified as a know account.
-    QByteArray               *data;                 ///< May contains data read from the network.
-    QMutex                   mutex;                 ///< Secure the access to the data member.
-    Engine                   *engine;               ///< Used to process the requests, and generates the responses.
+    /// @brief The possible states of the client.
+    enum State
+    {
+        CONNECT,    ///< The client is still connecting.
+        READ,       ///< Data should be available to read on the network.
+        SEND,       ///< Data have to be sent to the client.
+        RUN,        ///< The engine is running.
+        DISCONNECT, ///< The client is going to be disconnected.
+        NONE        ///< The client is idle.
+    };
 
-    bool            _connectToHost();
-    bool            _onConnect();
-    void            _onDisconnect();
-    QByteArray      _simplified(QByteArray data);
+    /// @brief Run a new task in the threadpool and modify the state of the client
+    /// if the parameter is different from NONE. This method returns immediatly, and
+    /// the task will be executed in the ThreaPool.
+    void    _newTask(Client::State state = Client::NONE);
+    /// @brief Get the data read by the method read() and feed the Engine.
+    /// @return True if there is some data waiting to be processed.
+    bool    _read();
+    /// @brief Asks the Engine to generate a new request.
+    /// @return True if the Engine is generating the request.
+    bool    _send();
+    /// @brief Calls IOnConnect.
+    bool    _onConnect();
+    /// @brief Calls IOnDisconnect.
+    void    _onDisconnect();
+    /// @brief Calls _getInformations for each elements in this->informationsRequests.
+    void    _getInformations();
+    /// @brief Fills the informations of the client in the client struct, and unlock the future.
+    void    _getInformations(LightBird::INetwork::Client &client, Future<bool> *future);
+    /// @brief Emit the finished signal and set disconnected to true.
+    void    _finish();
 
-
-public slots:
-    /// @brief Calling this method tells the Client that new data are available to read.
-    /// After being read, these data will ultimately feed the engine.
-    void            read(QByteArray *data = NULL);
-
-private slots:
-    void            _send(const QString &id, const QString &protocol);
-    void            _getInformations(LightBird::INetwork::Client *client, Future<bool> *future);
+    QString                  id;                  ///< The id of the client.
+    LightBird::INetwork::Transport transport;     ///< The transport protocol used by the underlaying socket.
+    QStringList              protocols;           ///< The names of the protocols used to communicate with the client.
+    unsigned short           port;                ///< The local port through which the client is connected.
+    int                      socketDescriptor;    ///< The descriptor of the socket.
+    QHostAddress             peerAddress;         ///< The address of the client.
+    unsigned short           peerPort;            ///< The peer port through which the client is connected.
+    QString                  peerName;            ///< The name of the client's host (usually empty).
+    LightBird::IClient::Mode mode;                ///< The connection mode of the client.
+    IReadWrite               *readWriteInterface; ///< This interface is used to read and write data on network.
+    QDateTime                connectionDate;      ///< The date of the connection.
+    QVariantMap              informations;        ///< Contains information on the client.
+    QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
+    TableAccounts            account;             ///< Allows the client to be identified as a know account.
+    QByteArray               *data;               ///< May contains data read from the network.
+    Engine                   *engine;             ///< Used to process the requests and the responses.
+    State                    state;               ///< The state of the client.
+    bool                     running;             ///< A task is running in a thread of the threadpool.
+    bool                     readyRead;           ///< Data are available on the network.
+    bool                     finish;              ///< If true, the client is going to be disconnected.
+    bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.
+    QMutex                   mutex;               ///< Makes this class thread safe.
+    QList<QPair<QString, QString> > sendRequests; ///< Stores the idPlugin and the protocol of the requests that are going to be sent.
+    QMap<Future<bool> *, LightBird::INetwork::Client *> informationsRequests; ///< Used by getInformations to keep track of the informations requests.
 
 signals:
-    /// @brief This signal ensure that data are read in the client thread.
-    void            readSignal();
-    void            sendSignal(const QString &id, const QString &protocol);
-    void            getInformationsSignal(LightBird::INetwork::Client *client, Future<bool> *future);
+    /// @brief The client has been disconnected and can be safely destroyed.
+    void            finished();
 };
+
+inline void Client::_newTask(Client::State state)
+{
+    this->state = state;
+    this->running = true;
+    ThreadPool::instance()->addTask(this);
+}
 
 #endif // CLIENT_H

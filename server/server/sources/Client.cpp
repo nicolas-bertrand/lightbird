@@ -11,6 +11,7 @@
 #include "EngineServer.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "SmartMutex.h"
 #include "Threads.h"
 #include "Tools.h"
 
@@ -23,154 +24,228 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     // Generates the uuid of the client
     this->id = Tools::createUuid();
     this->data = NULL;
+    this->readyRead = false;
+    this->running = false;
+    this->finish = false;
+    this->disconnected = false;
+    this->state = Client::NONE;
     // Set the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
-    // This signal ensure that data are read in the client thread
-    QObject::connect(this, SIGNAL(readSignal()), this, SLOT(read()));
-    // Called when a new request is going to be sent in CLIENT mode
-    QObject::connect(this, SIGNAL(sendSignal(QString,QString)), this, SLOT(_send(QString,QString)), Qt::QueuedConnection);
-    // Start the client thread
-    this->moveToThread(this);
-    // If the socket has no parent the Client takes its ownership
-    if (!this->socket->parent())
-        this->socket->moveToThread(this);
+    // Creates the engine
+    if (this->mode == LightBird::IClient::SERVER)
+        this->engine = new EngineServer(*this);
+    else
+        this->engine = new EngineClient(*this);
+    // Add a task to call the _onConnect method
+    this->_newTask(Client::CONNECT);
 }
 
 Client::~Client()
 {
-    if (this->data)
-        delete this->data;
+    // Ensure that all the informations requests has been processed
+    this->_getInformations();
+    delete this->data;
+    delete this->engine;
     Log::trace("Client destroyed!", Properties("id", this->id), "Client", "~Client");
-}
-
-void        Client::start()
-{
-    Threads::instance()->newThread(this, false);
 }
 
 void        Client::run()
 {
-    QString socketDescriptor;
+    State   newTask = Client::NONE;
 
-    // Tries to connect the server to the client
-    if (!this->_connectToHost())
-        return ;
-    // Creates the engine of the client
-    if (this->mode == LightBird::IClient::SERVER)
-        this->engine = new EngineServer(*this, this);
-    else
-        this->engine = new EngineClient(*this, this);
-    // Connect the getInformations signal
-    QObject::connect(this, SIGNAL(getInformationsSignal(LightBird::INetwork::Client*,Future<bool>*)),
-                     this, SLOT(_getInformations(LightBird::INetwork::Client*,Future<bool>*)));
-    if (this->socketDescriptor >= 0)
-        socketDescriptor = QString::number(this->socketDescriptor);
-    Log::info("Client connected", Properties("id", this->id).add("port", this->port)
-              .add("socket", socketDescriptor, false).add("peerAddress", this->peerAddress.toString())
-              .add("peerName", this->peerName, false).add("peerPort", this->peerPort), "Client", "run");
-    // Enter in the Client event loop, if onConnect returns true. Otherwise, the client is disconnected
-    if (this->_onConnect())
+    // Performs different actions depending on the client's state
+    switch (this->state)
     {
-        // Check if there is something to read
-        this->read();
-        // Enter in the event loop
-        this->exec();
+        case Client::CONNECT :
+            // Tries to connect to the client
+            if (!this->readWriteInterface->connect(this))
+                return this->_finish();
+            Log::info("Client connected", Properties("id", this->id).add("port", this->port)
+                      .add("socket", ((this->socketDescriptor >= 0) ? QString::number(this->socketDescriptor) : ""), false)
+                      .add("peerAddress", this->peerAddress.toString()).add("peerName", this->peerName, false)
+                      .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server")
+                      .add("peerPort", this->peerPort), "Client", "run");
+            // If the client is not allowed to connect, it is disconnected
+            if (!this->_onConnect())
+                newTask = Client::DISCONNECT;
+            break;
+
+        case Client::READ :
+            // If data are available, we try to execute them
+            if (this->_read())
+                newTask = Client::RUN;
+            break;
+
+        case Client::SEND :
+            // Some data have to be sent to the client
+            if (this->_send())
+                newTask = Client::RUN;
+            break;
+
+        case Client::RUN :
+            // While run() returns true, the engine continues to run
+            if (this->engine->run())
+                newTask = Client::RUN;
+            // Otherwise we try to get more data
+            else
+                this->readyRead = true;
+            break;
+
+        case Client::DISCONNECT :
+            this->_onDisconnect();
+            Log::info("Client disconnected", Properties("id", this->id), "Client", "run");
+            return this->_finish();
+
+        default:
+            break;
     }
-    this->_onDisconnect();
-    Log::info("Client disconnected", Properties("id", this->id).add("port", this->port)
-              .add("socket", socketDescriptor, false).add("peerAddress", this->peerAddress.toString())
-              .add("peerName", this->peerName, false).add("peerPort", this->peerPort), "Client", "run");
-    if (!this->socket->parent())
-        delete this->socket;
-    // Destroy the engine
-    delete this->engine;
-    // Nothing must be read from the client after its disconnection
-    this->disconnect(SIGNAL(readSignal()));
-    // Move the object to the main thread, so that it can be deleted after beeing finished
-    this->moveToThread(QCoreApplication::instance()->thread());
+
+    SmartMutex mutex(this->mutex, "Client", "run");
+    if (!mutex)
+        return ;
+    // Fills the pending informations requests
+    if (!this->informationsRequests.isEmpty())
+        this->_getInformations();
+    // The client must be disconnected
+    if (this->finish)
+        this->_newTask(Client::DISCONNECT);
+    // A new task has been assigned
+    else if (newTask != Client::NONE)
+        this->_newTask(newTask);
+    // Some data have to be sent to the client
+    else if (!this->sendRequests.isEmpty())
+        this->_newTask(Client::SEND);
+    // Some data are available to be read on the network
+    else if (this->readyRead)
+        this->_newTask(Client::READ);
+    // All the tasks of the client has been completed
+    else
+        this->running = false;
 }
 
-void            Client::read(QByteArray *newData)
+void        Client::read(QByteArray *data)
 {
-    QByteArray  *data = NULL;
-    bool        emitReadSignal = true;
+    // If data is NULL they are read using readWriteInterface
+    if (data == NULL)
+    {
+        data = new QByteArray();
+        this->readWriteInterface->read(*data, this);
+    }
+    SmartMutex mutex(this->mutex, "Client", "read");
+    // Nothing has been read
+    if (!mutex || data->isEmpty())
+    {
+        delete data;
+        return ;
+    }
+    // Stores the new data
+    if (this->data)
+    {
+        this->data->append(*data);
+        delete data;
+    }
+    else
+        this->data = data;
+    this->readyRead = true;
+    // If the client is not running, a new task can be created for read the data.
+    // Otherwise the data will be read after the current task of the client is completed.
+    if (!this->running)
+        this->_newTask(Client::READ);
+}
 
-    // If the parameter is not NULL, it contains new data that are added to this->data
-    if (newData)
-    {
-        if (!this->mutex.tryLock(MAXTRYLOCK))
-        {
-            Log::error("Deadlock", "Client", "read");
-            return ;
-        }
-        // If data is not NULL, the new data are appended
-        if (this->data)
-        {
-            this->data->append(*newData);
-            delete newData;
-            // A signal has already been emited to process this->data...
-            emitReadSignal = false;
-        }
-        else
-            this->data = newData;
-        this->mutex.unlock();
-    }
-    // If the current thread is not the thread of the client, the thread is changed using readSignal
-    if (this->currentThread() != this)
-    {
-        if (emitReadSignal)
-            emit readSignal();
-        return ;
-    }
+bool            Client::_read()
+{
+    SmartMutex  mutex(this->mutex, "Client", "_read");
+    QByteArray  *data = NULL;
+
+    if (!mutex)
+        return (false);
     // If there are pending data, we use it
-    if (!this->mutex.tryLock(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Client", "read");
-        return ;
-    }
     if (this->data)
     {
         data = this->data;
         this->data = NULL;
     }
-    this->mutex.unlock();
-    // If data is NULL and the engine is not running, the data are read using readWriteInterface
-    if (data == NULL)
-    {
-        data = new QByteArray();
-        if (!this->engine->isRunning())
-            this->readWriteInterface->read(*data, this);
-    }
+    mutex.unlock();
     // If there is no data, no processing are needed
-    if (data->isEmpty())
+    if (!data || data->isEmpty())
     {
         if (Log::instance()->isTrace())
             Log::trace("No data read", Properties("id", this->id), "Client", "read");
         delete data;
-        return ;
+        mutex.lock();
+        this->readyRead = false;
+        return (false);
     }
     if (Log::instance()->isTrace())
-        Log::trace("Data received", Properties("id", this->id).add("data", this->_simplified(*data)).add("size", data->size()), "Client", "read");
+        Log::trace("Data received", Properties("id", this->id).add("data", Tools::simplify(*data)).add("size", data->size()), "Client", "read");
     else if (Log::instance()->isDebug())
         Log::debug("Data received", Properties("id", this->id).add("size", data->size()), "Client", "read");
-    // Execution of the request
+    // Feed the engine
     this->engine->read(*data);
     delete data;
+    return (true);
 }
 
-void            Client::write(QByteArray &data)
+void        Client::write(QByteArray *data)
 {
+    if (Log::instance()->isTrace())
+        Log::trace("Writing data", Properties("id", this->id).add("data", Tools::simplify(*data)).add("size", data->size()), "Client", "write");
+    else if (Log::instance()->isDebug())
+        Log::debug("Writing data", Properties("id", this->id).add("size", data->size()), "Client", "write");
     // Writes the data
-    if (this->readWriteInterface->write(data, this))
+    this->readWriteInterface->write(data, this);
+}
+
+void            Client::send(const QString &id, const QString &protocol)
+{
+    SmartMutex  mutex(this->mutex, "Client", "send");
+
+    if (!mutex)
+        return ;
+    if (this->mode == LightBird::IClient::CLIENT)
     {
-        if (Log::instance()->isTrace())
-            Log::trace("Data written", Properties("id", this->id).add("data", this->_simplified(data)).add("size", data.size()), "Client", "write");
-        else if (Log::instance()->isDebug())
-            Log::debug("Data written", Properties("id", this->id).add("size", data.size()), "Client", "write");
+        this->sendRequests.push_back(QPair<QString, QString>(id, protocol));
+        if (!this->running)
+            this->_newTask(Client::SEND);
     }
-    // If an error occured
-    else
-        Log::warning("An error occured while writing data", Properties("id", this->id).add("size", data.size()), "Client", "read");
+}
+
+bool                Client::_send()
+{
+    SmartMutex      mutex(this->mutex, "Client", "_send");
+    EngineClient    *engine;
+    bool            run = false;
+
+    if (!mutex)
+        return (false);
+    if ((engine = dynamic_cast<EngineClient *>(this->engine)))
+    {
+        // Sets the send requests to the engine
+        QListIterator<QPair<QString, QString> > it(this->sendRequests);
+        while (it.hasNext())
+        {
+            // If Engine::send returned true at least once, the engine needs to run
+            if (engine->send(it.peekNext().first, it.peekNext().second))
+                run = true;
+            it.next();
+        }
+    }
+    this->sendRequests.clear();
+    return (run);
+}
+
+void            Client::disconnect()
+{
+    SmartMutex  mutex(this->mutex, "Client", "disconnect");
+
+    if (!mutex)
+        return ;
+    // If the client is not running, a new task can be created to disconnect it.
+    // Otherwise it will be disconnected after the current task is completed.
+    this->finish = true;
+    if (!this->running)
+        this->_newTask(Client::DISCONNECT);
 }
 
 bool        Client::doRead(QByteArray &data)
@@ -178,7 +253,6 @@ bool        Client::doRead(QByteArray &data)
     QPair<QString, LightBird::IDoRead *> instance;
 
     data.clear();
-    // If a plugin matches
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->mode, this->transport, this->protocols, this->port)).second)
     {
         Log::trace("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
@@ -194,7 +268,6 @@ bool        Client::doWrite(QByteArray &data)
 {
     QPair<QString, LightBird::IDoWrite *> instance;
 
-    // If a plugin matches
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->mode, this->transport, this->protocols, this->port)).second)
     {
         Log::trace("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
@@ -203,33 +276,6 @@ bool        Client::doWrite(QByteArray &data)
         Plugins::instance()->release(instance.first);
         return (true);
     }
-    return (false);
-}
-
-void        Client::send(const QString &id, const QString &protocol)
-{
-    if (this->mode == LightBird::IClient::CLIENT)
-        emit this->sendSignal(id, protocol);
-}
-
-void                Client::_send(const QString &id, const QString &protocol)
-{
-    EngineClient    *engine;
-
-    if ((engine = dynamic_cast<EngineClient *>(this->engine)))
-        engine->send(id, protocol);
-}
-
-bool        Client::_connectToHost()
-{
-    // Tries to connect to the client
-    if (this->readWriteInterface->connect(this))
-        return (true);
-    // The connection failed so the client is destroyed
-    if (!this->socket->parent())
-        delete this->socket;
-    this->disconnect(SIGNAL(readSignal()));
-    this->moveToThread(QCoreApplication::instance()->thread());
     return (false);
 }
 
@@ -265,6 +311,11 @@ void        Client::_onDisconnect()
         it.peekNext().value()->onDisconnect(*this);
         Plugins::instance()->release(it.next().key());
     }
+}
+
+bool        Client::isFinished()
+{
+    return (this->disconnected);
 }
 
 const QString   &Client::getId() const
@@ -342,38 +393,60 @@ LightBird::IResponse    &Client::getResponse()
     return (this->engine->getResponse());
 }
 
-void    Client::getInformations(LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
+void    Client::setPort(unsigned short port)
 {
-    // If the thread that require the informations is the client, it is safe
-    if (thread == this)
-        this->_getInformations(client, future);
-    // Otherwise, use the signal to get the informations in the client thread
-    else
-        emit this->getInformationsSignal(client, future);
+    this->port = port;
 }
 
-void    Client::_getInformations(LightBird::INetwork::Client *client, Future<bool> *future)
+void            Client::getInformations(LightBird::INetwork::Client &client, Future<bool> *future)
 {
-    client->transport = this->transport;
-    client->protocols = this->protocols;
-    client->port = this->port;
-    client->socketDescriptor = this->socketDescriptor;
-    client->peerAddress = this->peerAddress;
-    client->peerPort = this->peerPort;
-    client->peerName = this->peerName;
-    client->connectionDate = this->connectionDate;
-    client->idAccount = this->account.getId();
-    client->informations = this->getInformations();
+    SmartMutex  mutex(this->mutex, "Client", "getInformations");
+
+    if (!mutex)
+        return ;
+    // If the client is not running or is running in the thread that requested the informations,
+    // it is safe to get the informations directly
+    if (!this->running || this->getThread() == QThread::currentThread())
+        this->_getInformations(client, future);
+    // Otherwise, the client will returns the informations as soon as possible
+    else
+        this->informationsRequests.insert(future, &client);
+}
+
+void    Client::_getInformations()
+{
+    QMapIterator<Future<bool> *, LightBird::INetwork::Client *> it(this->informationsRequests);
+
+    while (it.hasNext())
+    {
+        it.next();
+        this->_getInformations(*it.value(), it.key());
+    }
+    this->informationsRequests.clear();
+}
+
+void    Client::_getInformations(LightBird::INetwork::Client &client, Future<bool> *future)
+{
+    client.transport = this->transport;
+    client.protocols = this->protocols;
+    client.port = this->port;
+    client.socketDescriptor = this->socketDescriptor;
+    client.peerAddress = this->peerAddress;
+    client.peerPort = this->peerPort;
+    client.peerName = this->peerName;
+    client.connectionDate = this->connectionDate;
+    client.idAccount = this->account.getId();
+    client.informations = this->getInformations();
     future->setResult(true);
     delete future;
 }
 
-QByteArray Client::_simplified(QByteArray data)
+void            Client::_finish()
 {
-    data = data.left(2000);
-    int s = data.size();
-    for (int i = 0; i < s; ++i)
-        if (data.data()[i] < 32 || data.data()[i] > 126)
-            data.data()[i] = '.';
-    return (data);
+    SmartMutex  mutex(this->mutex, "Client", "_finish");
+
+    if (!mutex)
+        return ;
+    this->disconnected = true;
+    emit this->finished();
 }

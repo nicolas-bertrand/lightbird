@@ -3,64 +3,53 @@
 
 # include "Engine.h"
 
-# include "IOnSerialize.h"
-# include "IOnUnserialize.h"
-
-/// @brief The role of this Engine is to send a request to a client ans execute,
-/// its response by calling the interfaces of the Api that are implemented by the
-/// plugins. The Engine uses massively the signals/slots features of Qt. This way,
-/// the execution of a request can be stopped at any time, if the client is disconnected.
+/// @brief The role of the client Engine is to generate a request and execute
+/// the response of the client, by calling the interfaces of the Api that are
+/// implemented by the plugins. The operations of the Engine are divided into
+/// multiple tasks that are executed by the ThreadPool. This way, the processing
+/// can be stopped at any time, and hundreds of engines can run together.
 class EngineClient : public Engine
 {
     Q_OBJECT
 
 public:
-    EngineClient(Client &client, QObject *parent = 0);
+    EngineClient(Client &client);
     ~EngineClient();
 
-    void    read(QByteArray &data);
-    void    send(const QString &id, const QString &protocol);
-    bool    isRunning();
-    LightBird::IRequest  &getRequest();
-    LightBird::IResponse &getResponse();
+    bool    run();
+    /// @brief Adds a new request to send.
+    /// @param id : The id of the plugin that wants to send the request.
+    /// @return True if the engine is ready to run and send a new request.
+    bool    send(const QString &id, const QString &protocol);
+    void    clear();
 
 private:
     EngineClient(const EngineClient &context);
     EngineClient &operator=(const EngineClient &context);
 
+    /// @brief A simple pointer to method.
+    /// @return True while the engine has enough data to run.
+    typedef bool (EngineClient::*Method) ();
+
+    ///< A pointer to method to the next step of the processing of the data.
+    Method  state;
     /// Stores the list of the requests that the plugins want to send.
     QList<QPair<QString, QString> > requests;
 
-signals:
-    // Each signals represents a step of the data flow
-    void    doSend();
-    void    doSerializeHeader();
-    void    doSerializeContent();
-    void    doSerializeFooter();
-    void    doUnserializeHeader();
-    void    doUnserializeContent();
-    void    doUnserializeFooter();
-    void    doExecution();
-    void    onExecution();
-
 private slots:
-    // This methods calls the interfaces implemented by the plugin,
+    // This methods calls the interfaces implemented by the plugins,
     // in order to generate a request and execute the response.
-    void    _onRead(QByteArray &data);
-    void    _doSend();
+    bool    _doSend();
     bool    _onSend();
-    void    _doSerializeHeader();
-    void    _doSerializeContent();
-    void    _doSerializeFooter();
-    bool    _onSerialize(LightBird::IOnSerialize::Serialize type);
-    void    _onWrite(QByteArray &data);
-    void    _doUnserializeHeader();
-    void    _doUnserializeContent();
-    void    _doUnserializeFooter();
-    void    _onUnserialize(LightBird::IOnUnserialize::Unserialize type);
-    void    _doExecution();
-    void    _onExecution();
-    void    _onFinish();
+    bool    _doSerializeHeader();
+    bool    _doSerializeContent();
+    bool    _doSerializeFooter();
+    bool    _doUnserializeHeader();
+    bool    _doUnserializeContent();
+    bool    _doUnserializeFooter();
+    bool    _doExecution();
+    bool    _onExecution();
+    bool    _onFinish();
 };
 
 #endif // ENGINECLIENT_H

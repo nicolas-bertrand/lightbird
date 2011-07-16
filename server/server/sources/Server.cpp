@@ -14,6 +14,7 @@
 #include "Network.h"
 #include "Plugins.hpp"
 #include "Server.h"
+#include "ThreadPool.h"
 #include "Threads.h"
 #include "Tools.h"
 
@@ -43,6 +44,9 @@ void    Server::_initialize()
     // The threads manager must be initialized just after the configuration
     Log::info("Loading the thread manager", "Server", "_initialize");
     Threads::instance(this);
+    // Load the thread pool
+    Log::info("Loading the thread pool", "Server", "_initialize");
+    ThreadPool::instance(this);
     // Load the translator
     Log::info("Loading the translation", "Server", "_initialize");
     if (!this->_loadTranslation(Configurations::instance()->get("languagesPath") + "/", ":languages/"))
@@ -180,9 +184,9 @@ void    Server::_loadNetwork()
         transport = LightBird::INetwork::TCP;
         if (it.peekNext().value("transport").toUpper() == "UDP")
             transport = LightBird::INetwork::UDP;
-        if (Network::instance()->addPort(it.peekNext().value("port").toShort(),
+        if (Network::instance()->openPort(it.peekNext().value("port").toShort(),
                                          it.peekNext().value("protocols").simplified().split(' '),
-                                         transport, it.peekNext().value("maxClients").toUInt()).getResult())
+                                         transport, it.peekNext().value("maxClients").toUInt()))
             loaded = true;
         it.next();
     }

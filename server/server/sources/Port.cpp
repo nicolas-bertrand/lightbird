@@ -1,10 +1,10 @@
 #include "Configurations.h"
 #include "Log.h"
 #include "Port.h"
+#include "SmartMutex.h"
 #include "Threads.h"
 
-Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols,
-           unsigned int maxClients, QObject *object) : QObject(object)
+Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols, unsigned int maxClients)
 {
     this->port = port;
     this->transport = transport;
@@ -21,11 +21,115 @@ Port::~Port()
 
     while (it.hasNext())
     {
-        it.peekNext()->quit();
-        it.peekNext()->wait();
         delete it.peekNext();
         it.next();
     }
+}
+
+Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found)
+{
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "getClient");
+
+    found = false;
+    if (!mutex)
+        return (false);
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext())
+        if (it.next()->getId() == id)
+        {
+            Future<bool> *future = new Future<bool>(false);
+            Future<bool> result(*future);
+            it.peekPrevious()->getInformations(client, future);
+            found = true;
+            return (result);
+        }
+    return (Future<bool>(false));
+}
+
+QStringList     Port::getClients()
+{
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "getClients");
+    QStringList result;
+
+    if (!mutex)
+        return (result);
+    QListIterator<Client *> it(this->clients);
+    // Stores the id of the clients in the string list
+    while (it.hasNext())
+        result << it.next()->getId();
+    return (result);
+}
+
+bool            Port::disconnect(const QString &id)
+{
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "disconnect");
+
+    if (!mutex)
+        return (false);
+    QListIterator<Client *> it(this->clients);
+    // Searches the client that has the given id and disconnects it
+    while (it.hasNext())
+        if (it.next()->getId() == id)
+        {
+            it.peekPrevious()->disconnect();
+            return (true);
+        }
+    return (false);
+}
+
+void            Port::close()
+{
+    QListIterator<Client *> it(this->clients);
+
+    this->listening = false;
+    // Disconnects all the clients in the map
+    if (this->clients.size() > 0)
+        while (it.hasNext())
+            this->_removeClient(it.next());
+    // Or quit the thread if there is already no remaining clients
+    else
+        this->quit();
+}
+
+Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
+{
+    Client      *client;
+
+    // Creates the client
+    client = new Client(socket, this->transport, this->protocols, this->port,
+                        socket->socketDescriptor(), peerAddress, peerPort,
+                        socket->peerName(), LightBird::IClient::SERVER, this);
+    // Add the client
+    this->clients.push_back(client);
+    // When the client thread is finished, _finished is called
+    QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
+    return (client);
+}
+
+void            Port::_removeClient(Client *client)
+{
+    // Check if the client is in the clients list
+    if (this->clients.contains(client))
+        // Disconnect the client
+        client->disconnect();
+}
+
+Client          *Port::_finished()
+{
+    Client      *client = NULL;
+
+    // Search the client that has been finished
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext() && !client)
+        if (it.next()->isFinished())
+            client = it.peekPrevious();
+    // Delete the client
+    this->clients.removeAll(client);
+    delete client;
+    // If there are no more connected client and the server is no longer listening, the thread is quit
+    if (this->clients.size() == 0 && !this->_isListening())
+        this->quit();
+    return (client);
 }
 
 unsigned short  Port::getPort()
@@ -50,104 +154,17 @@ unsigned int    Port::getMaxClients()
 
 bool            Port::isListening()
 {
-    return (this->listening);
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "isListening");
+
+    return (mutex && this->_isListening());
 }
 
-void            Port::stopListening()
+bool            Port::_isListening()
 {
-    QListIterator<Client *> it(this->clients);
-
-    // Removes all the clients in the map
-    if (this->clients.size() > 0)
-        while (it.hasNext())
-            this->_removeClient(it.next());
-    // Or emit a signal if there is already no remaining clients
-    else
-        emit this->allClientsRemoved(this->port);
-}
-
-bool            Port::getClient(const QString &id, LightBird::INetwork::Client *client, void *thread, Future<bool> *future)
-{
-    QListIterator<Client *> it(this->clients);
-
-    // Search the client
-    while (it.hasNext())
-        if (it.next()->getId() == id)
-        {
-            it.peekPrevious()->getInformations(client, thread, future);
-            return (true);
-        }
-    return (false);
-}
-
-QStringList     Port::getClients()
-{
-    QStringList             result;
-    QListIterator<Client *> it(this->clients);
-
-    // Stores the id of the clients in a string list
-    while (it.hasNext())
-        result << it.next()->getId();
-    return (result);
-}
-
-bool            Port::disconnect(const QString &id)
-{
-    QListIterator<Client *> it(this->clients);
-
-    // Search the client that has the given id and disconnect it
-    while (it.hasNext())
-        if (it.next()->getId() == id)
-        {
-            it.peekPrevious()->quit();
-            return (true);
-        }
-    return (false);
+    return (this->listening && this->isRunning());
 }
 
 void            Port::_isListening(bool listening)
 {
     this->listening = listening;
-}
-
-Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
-{
-    Client      *client;
-
-    // Creates the client
-    client = new Client(socket, this->transport, this->protocols, this->port,
-                        socket->socketDescriptor(), peerAddress, peerPort,
-                        socket->peerName(), LightBird::IClient::SERVER, this);
-    // Add the client
-    this->clients.push_back(client);
-    // When the client thread is finished, _finished is called
-    QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
-    client->start();
-    return (client);
-}
-
-void            Port::_removeClient(Client *client)
-{
-    // Check if the client is in the clients list
-    if (this->clients.contains(client))
-        // Quit the client's thread. Its instance will also be deleted after the thread finished.
-        Threads::instance()->deleteThread(client);
-}
-
-Client          *Port::_finished()
-{
-    Client      *client = NULL;
-
-    // Search the client that has been finished
-    QListIterator<Client *> it(this->clients);
-    while (it.hasNext() && !client)
-        if (it.next()->isFinished())
-            client = it.peekPrevious();
-    // Delete the client
-    this->clients.removeAll(client);
-    delete client;
-    // If there are no more connected client and the server is no longer listening, the signal allClientsRemoved is emited
-    if (this->clients.size() == 0 && !this->isListening())
-        emit this->allClientsRemoved(this->port);
-    return (client);
 }

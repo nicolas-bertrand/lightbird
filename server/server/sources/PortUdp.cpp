@@ -1,44 +1,47 @@
+#include <QCoreApplication>
+
 #include "Log.h"
 #include "PortUdp.h"
+#include "SmartMutex.h"
 
-PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients, QObject *parent) :
-                 Port(port, LightBird::INetwork::UDP, protocols, maxClients, parent)
+PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
+                 Port(port, LightBird::INetwork::UDP, protocols, maxClients)
 {
-    this->socket.setParent(this);
-    // When a client connected to the server, the slot _read is called
-    QObject::connect(&this->socket, SIGNAL(readyRead()), this, SLOT(_readPendingDatagrams()), Qt::QueuedConnection);
-    // Listen on the given port
-    if (!this->socket.bind(port))
-    {
-        Log::error("Failed to bind", Properties("port", port).add("protocols", protocols.join(" ")).add("transport", "UDP")
-                   .add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
-        return ;
-    }
-    Log::info("Listening...", Properties("port", port).add("protocols", protocols.join(" ")).add("transport", "UDP")
-              .add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
-    this->_isListening(true);
+    this->moveToThread(this);
+    this->socket.moveToThread(this);
+    // Start the thread
+    this->start();
+    // Waits that the thread is started
+    Future<bool>(this->threadStarted).getResult();
 }
 
 PortUdp::~PortUdp()
 {
-    Log::trace("PortUdp destroyed!", Properties("Port", this->getPort()), "PortUdp", "~PortUdp");
+    // Quit the thread if it is still running
+    this->quit();
+    this->wait();
+    Log::trace("Port UDP destroyed!", Properties("port", this->getPort()), "PortUdp", "~PortUdp");
 }
 
-bool    PortUdp::isListening()
+void    PortUdp::run()
 {
-    if (!Port::isListening() || this->socket.state() != QAbstractSocket::BoundState)
-        return (false);
-    return (true);
-}
-
-void    PortUdp::stopListening()
-{
-    Log::error("Port closed", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" ")).add("transport", "UDP"), "PortUdp", "stopListening");
-    // Close the udp socket and disconect its signals
-    this->socket.close();
-    this->socket.disconnect();
-    // Removes all the remaining clients
-    Port::stopListening();
+    // When a client connected to the server, the slot _read is called
+    QObject::connect(&this->socket, SIGNAL(readyRead()), this, SLOT(_readPendingDatagrams()), Qt::QueuedConnection);
+    // Listen on the given port
+    if (!this->socket.bind(this->getPort()))
+    {
+        Log::error("Failed to bind the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
+                   .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
+        this->moveToThread(QCoreApplication::instance()->thread());
+        return ;
+    }
+    Log::info("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
+              .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
+    Port::_isListening(true);
+    this->threadStarted.setResult(true);
+    this->exec();
+    Log::info("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
+    this->moveToThread(QCoreApplication::instance()->thread());
 }
 
 bool    PortUdp::read(QByteArray &data, Client *)
@@ -47,28 +50,48 @@ bool    PortUdp::read(QByteArray &data, Client *)
     return (false);
 }
 
-bool    PortUdp::write(QByteArray &data, Client *client)
+bool            PortUdp::write(QByteArray *data, Client *client)
 {
-    int wrote;
+    SmartMutex  mutex(this->mutex, "PortUdp", "write");
+    int         wrote;
 
+    if (!mutex)
+        return (false);
     // Write the data on the socket
-    if ((wrote = this->socket.writeDatagram(data, client->getPeerAddress(), client->getPeerPort())) != data.size())
+    if ((wrote = this->socket.writeDatagram(*data, client->getPeerAddress(), client->getPeerPort())) != data->size())
     {
-        Log::debug("All data has not been written", Properties("wrote", wrote).add("toWrite", data.size()).add("id", client->getId()), "PortUdp", "write");
+        Log::debug("All data has not been written", Properties("wrote", wrote).add("toWrite", data->size()).add("id", client->getId()), "PortUdp", "write");
         return (false);
     }
     return (true);
 }
 
-void    PortUdp::_readPendingDatagrams()
+void            PortUdp::close()
 {
-    Client          *client;
-    QHostAddress    peerAddress;
-    quint16         peerPort;
+    SmartMutex  mutex(this->mutex, "PortUdp", "close");
 
+    if (!mutex)
+        return ;
+    // Close the udp socket and disconect its signals
+    this->socket.close();
+    this->socket.disconnect();
+    // Removes all the remaining clients
+    Port::close();
+}
+
+void             PortUdp::_readPendingDatagrams()
+{
+    SmartMutex   mutex(this->mutex, "PortUdp", "_readPendingDatagrams");
+    Client       *client;
+    QHostAddress peerAddress;
+    quint16      peerPort;
+
+    if (!mutex)
+        return ;
     // While there are pending datagrams, we read them
     while (this->socket.hasPendingDatagrams())
     {
+        // Reads the next datagram
         QByteArray *data = new QByteArray();
         data->resize(this->socket.pendingDatagramSize());
         this->socket.readDatagram(data->data(), data->size(), &peerAddress, &peerPort);
@@ -76,17 +99,35 @@ void    PortUdp::_readPendingDatagrams()
         QListIterator<Client *> it(this->clients);
         while (it.hasNext() == true && client == NULL)
         {
+            // The client is already connected
             if (it.peekNext()->getPeerAddress() == peerAddress && it.peekNext()->getPeerPort() == peerPort)
                 client = it.peekNext();
             it.next();
         }
         if (client != NULL || (unsigned int)this->clients.size() < this->getMaxClients())
         {
+            // If the client doesn't exists yet it is created
             if (client == NULL)
                 client = this->_addClient(&this->socket, peerAddress, peerPort);
             client->read(data);
         }
+        // There is already too many clients connected
         else
             delete data;
     }
+}
+
+Client          *PortUdp::_finished()
+{
+    SmartMutex  mutex(this->mutex, "PortUdp", "_finished");
+
+    // While there is a client to remove
+    while (mutex && Port::_finished())
+        ;
+    return (NULL);
+}
+
+bool    PortUdp::_isListening()
+{
+    return (Port::_isListening() && this->socket.state() == QAbstractSocket::BoundState);
 }

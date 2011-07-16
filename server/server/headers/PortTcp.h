@@ -1,45 +1,56 @@
 #ifndef PORTTCP_H
 # define PORTTCP_H
 
+# include <QQueue>
+# include <QPair>
 # include <QTcpServer>
 
+# include "Future.hpp"
 # include "Port.h"
 
-/// @brief Manage a TCP port of the network. It is a specialization
-/// of the abstract class Port, which don't care if the port is UDP or TCP.
-/// The TCP implementation use the QTcpServer to detect new connection,
-/// and accept them. One QTcpSocket is created by connection, and is attached
-/// to a Client. The socket is destroyed with the Client.
-/// @see Port
+/// @brief Manages a TCP port of the network. The TCP implementation uses
+/// QTcpServer to detect new connection, and QTcpSocket to send or receive data.
 class PortTcp : public Port
 {
     Q_OBJECT
 
 public:
-    PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0, QObject *parent = 0);
+    PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0);
     ~PortTcp();
 
-    /// @brief Returns true if the port is currently listening the network.
-    bool    isListening();
-    /// @brief Close the TCP server No new connections will be accepted after this call.
-    void    stopListening();
     bool    read(QByteArray &data, Client *client);
-    bool    write(QByteArray &data, Client *client);
+    bool    write(QByteArray *data, Client *client);
+    /// @brief Closes the TCP server. No new connections will be accepted.
+    void    close();
 
 private:
     PortTcp(const PortTcp &);
     PortTcp *operator=(const PortTcp &);
 
-    QTcpServer                          tcpServer;  ///< The TCP server, that listen on the network, and waiting new connections.
-    QMap<QAbstractSocket *, Client *>   sockets;    ///< Associates the socket with its client.
+    /// @brief The main method of the thread.
+    void    run();
+    /// @brief Returns true if the port is currently listening the network.
+    bool    _isListening();
+
+    QTcpServer                              tcpServer;     ///< The TCP server that listens on the network and waits new connections.
+    QMap<QAbstractSocket *, Client *>       sockets;       ///< Associates the socket with its client.
+    QQueue<QPair<Client *, QByteArray *> >  writeBuffer;   ///< List of the data that are going to be send from the thread.
+    Future<bool>                            threadStarted; ///< This future is unlocked when the thread is started.
 
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the tcpServer.
     void    _newConnection();
+    /// @brief Writes the data stored in writeBuffer on the network, from the port thread.
+    void    _write();
     /// @brief Called when a QTcpSocket is disconnected, to remove its client.
     void    _disconnected();
-    /// @brief Called when a Client's thread is finished. Used to destroy its QTcpSocket.
+    /// @brief Called when a client's is finished.
     Client  *_finished();
+
+signals:
+    /// @brief Emited when new data have to be write on the network, in order to
+    /// write these data from the port thread (where the tcp sockets live).
+    void    writeSignal();
 };
 
 #endif // PORTTCP_H

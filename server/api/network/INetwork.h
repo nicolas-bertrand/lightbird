@@ -22,7 +22,7 @@ namespace LightBird
     public:
         virtual ~INetwork() {}
 
-        /// List the available transports protocols.
+        /// The available transports protocols.
         enum Transport
         {
             TCP,
@@ -32,38 +32,36 @@ namespace LightBird
         /// Stores the informations on a client.
         struct Client
         {
-            Transport               transport;          ///< The transport protocol used by the underlaying socket.
-            QStringList             protocols;          ///< The names of the protocols used to communicate with the client.
-            unsigned short          port;               ///< The local port through which the client is connected.
-            int                     socketDescriptor;   ///< The descriptor of the socket.
-            QHostAddress            peerAddress;        ///< The address of the client.
-            unsigned short          peerPort;           ///< The peer port through which the client id connected.
-            QString                 peerName;           ///< The name of the client's host (usually empty).
-            QDateTime               connectionDate;     ///< The date of the creation of this object.
-            QString                 idAccount;          ///< The id of the account identified.
-            QMap<QString, QVariant> informations;       ///< Information on the client.
+            Transport               transport;        ///< The transport protocol used by the underlaying socket.
+            QStringList             protocols;        ///< The names of the protocols used to communicate with the client.
+            unsigned short          port;             ///< The local port through which the client is connected.
+            int                     socketDescriptor; ///< The descriptor of the socket.
+            QHostAddress            peerAddress;      ///< The address of the client.
+            unsigned short          peerPort;         ///< The peer port through which the client is connected.
+            QString                 peerName;         ///< The name of the client's host (usually empty).
+            QDateTime               connectionDate;   ///< The date of the connection.
+            QString                 idAccount;        ///< The id of the account identified.
+            QMap<QString, QVariant> informations;     ///< Information on the client.
         };
 
-        /// @brief Open a new port on the server. Since the port is opened in
-        /// a separate thread, users should use the IFuture returned to be aware
-        /// when the port is actualy listening.
-        /// @param port : The port to open.
+        /// @brief Opens a port on the server.
+        /// @param port : The number of the port to open.
         /// @param protocols : The names of the protocols used to communicate with
         /// the clients that connect to this port.
         /// @param transport : The transport protocol used by this port.
         /// @param maxClients : The maximum number of clients simultaneously
         /// connected to this port. When the number of client reach this limit, new
         /// connections are waiting that a connected client disconnect.
-        /// @return The future result of the action, e.g true if the port has been created.
-        virtual QSharedPointer<LightBird::IFuture<bool> >   addPort(unsigned short port,
-                                                                    const QStringList &protocols = QStringList(),
-                                                                    LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
-                                                                    unsigned int maxClients = ~0) = 0;
-        /// @brief Removes a port. This may take some time since all the operations
-        /// made on the removed port have to be finished.
-        /// @param port : The port to remove.
-        /// @return The future result of the action, e.g false if the port is not valid.
-        virtual QSharedPointer<LightBird::IFuture<bool> >   removePort(unsigned short port) = 0;
+        /// @return True if the port is listening.
+        virtual bool    openPort(unsigned short port, const QStringList &protocols = QStringList(),
+                                 LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
+                                 unsigned int maxClients = ~0) = 0;
+        /// @brief Closes a port. This may take some time since all the operations
+        /// made on the closed port have to be finished.
+        /// @param port : The number of the port to close.
+        /// @return False if the port is not valid. This method may return before
+        /// the port is actually closed.
+        virtual bool    closePort(unsigned short port) = 0;
         /// @brief Allows to get informations on an opened port.
         /// @param port : The port to get.
         /// @param protocols : The names of the protocols used by the port.
@@ -72,7 +70,7 @@ namespace LightBird
         /// allowed by the port.
         /// @return True if the port exists.
         virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) = 0;
-        /// @brief Returns the list of the open ports. Users can use getPort() to get
+        /// @brief Returns the list of the open ports. One can use getPort() to get
         /// more detailed informations about a specific port.
         /// @return The list of the opened ports on the server.
         virtual QList<unsigned short>   getPorts() = 0;
@@ -120,17 +118,18 @@ namespace LightBird
         /// @param id : The id of the client to disconnect. Nothing appends
         /// if it is already disconnected.
         /// @return True if the client exists.
-        virtual QSharedPointer<LightBird::IFuture<bool> >   disconnect(const QString &id) = 0;
+        virtual bool    disconnect(const QString &id) = 0;
         /// @brief Asks the server to call the LightBird::IDoSend interface in
         /// order to generate a request to send. This interface is called for the
         /// plugin that called this method. If other plugins have called it before,
         /// the request is queued until the other requests have been processed.
-        /// If a plugin calls this method several times, only one will be taken into
-        /// account. This method can only be used with the clients in CLIENT mode.
+        /// If a plugin calls this method several times, only one will be taken
+        /// into account for the same client. This method can only be used with
+        /// the clients in CLIENT mode.
         /// @param id : The id of the targeted client.
         /// @param protocol : The protocol used to communicate with the client.
         /// If empty the first protocol in the client protocols list (defined in
-        /// connect) is used. Therefore this list must not be empty in this case.
+        /// connect()) is used. Therefore this list must not be empty in this case.
         /// @return False if the client or the protocol is invalid.
         /// @see LightBird::IClient::Mode
         /// @see LightBird::IDoSend

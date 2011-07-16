@@ -3,7 +3,7 @@
 
 /// This header defines the macro used in the server.
 
-# define VERSION                              "0.0.1"               ///< The version of the server
+# define VERSION                              "11.11"               ///< The version of the server
 # define DATE_FORMAT                          "yyyy-MM-dd hh:mm:ss" ///< The database date format, used through QDateTime.
 # define MAXTRYLOCK                           -1                    ///< Maximum time to wait in a tryLock in milliseconds. After that, an error should be returned.
 # define PLUGINS_RESOURCES_PATH               ":plugins"            ///< The resources path of a plugin is this macro followed by its id.

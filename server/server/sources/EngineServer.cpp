@@ -1,4 +1,3 @@
-#include "IOnRead.h"
 #include "IOnProtocol.h"
 #include "IDoUnserializeHeader.h"
 #include "IDoUnserializeContent.h"
@@ -8,24 +7,15 @@
 #include "IDoSerializeHeader.h"
 #include "IDoSerializeContent.h"
 #include "IDoSerializeFooter.h"
-#include "IOnWrite.h"
 #include "IOnFinish.h"
 
 #include "EngineServer.h"
 #include "Plugins.hpp"
 
-EngineServer::EngineServer(Client &client, QObject *parent) : Engine(client, parent)
+EngineServer::EngineServer(Client &client) : Engine(client)
 {
-    // Connect the Engine's signals/slots
-    QObject::connect(this, SIGNAL(onProtocol()), this, SLOT(_onProtocol()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doUnserializeHeader()), this, SLOT(_doUnserializeHeader()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doUnserializeContent()), this, SLOT(_doUnserializeContent()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doUnserializeFooter()), this, SLOT(_doUnserializeFooter()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doExecution()), this, SLOT(_doExecution()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(onExecution()), this, SLOT(_onExecution()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doSerializeHeader()), this, SLOT(_doSerializeHeader()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doSerializeContent()), this, SLOT(_doSerializeContent()), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(doSerializeFooter()), this, SLOT(_doSerializeFooter()), Qt::QueuedConnection);
+    // Initialize the Engine
+    this->clear();
 }
 
 EngineServer::~EngineServer()
@@ -33,52 +23,20 @@ EngineServer::~EngineServer()
     Log::trace("EngineServer destroyed!", Properties("id", this->client.getId()), "EngineServer", "~EngineServer");
 }
 
-void    EngineServer::read(QByteArray &data)
+bool    EngineServer::run()
 {
-    this->_onRead(data);
-    this->data.append(data);
-    if (!this->running)
-    {
-        this->running = true;
-        if (this->state == Engine::READY)
-            emit this->onProtocol();
-        else if (this->state == Engine::HEADER)
-            emit this->doUnserializeHeader();
-        else if (this->state == Engine::CONTENT)
-            emit this->doUnserializeContent();
-        else if (this->state == Engine::FOOTER)
-            emit this->doUnserializeFooter();
-    }
+    return ((this->*state)());
 }
 
-bool    EngineServer::isRunning()
+void    EngineServer::clear()
 {
-    return (this->running);
+    this->state = &EngineServer::_onProtocol;
+    this->needResponse = true;
+    this->protocolUnknow.clear();
+    Engine::clear();
 }
 
-LightBird::IRequest &EngineServer::getRequest()
-{
-    return (this->request);
-}
-
-LightBird::IResponse &EngineServer::getResponse()
-{
-    return (this->response);
-}
-
-void    EngineServer::_onRead(QByteArray &data)
-{
-    QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
-
-    while (it.hasNext())
-    {
-        Log::trace("Calling IOnRead::onRead()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineServer", "_onRead");
-        it.peekNext().value()->onRead(this->client, data);
-        Plugins::instance()->release(it.next().key());
-    }
-}
-
-void        EngineServer::_onProtocol()
+bool        EngineServer::_onProtocol()
 {
     QString protocol;
     bool    unknow;
@@ -104,7 +62,7 @@ void        EngineServer::_onProtocol()
                     this->client.getProtocols().contains("all", Qt::CaseInsensitive))
                 {
                     this->request.setProtocol(protocol);
-                    this->state = Engine::HEADER;
+                    this->state = &EngineServer::_doUnserializeHeader;
                     Log::trace("Protocol found", Properties("id", this->client.getId()).add("plugin", it.key()).add("protocol", protocol), "EngineServer", "_onProtocol");
                 }
                 else
@@ -119,25 +77,28 @@ void        EngineServer::_onProtocol()
         }
         else
             Plugins::instance()->release(it.key());
-    // If there is no more plugins that can find the protocol, the data are cleared
-    if (this->protocolUnknow.size() >= plugins.size())
+    // If no plugin implements IOnProtocol the first protocol is used
+    if (plugins.isEmpty() && !this->client.getProtocols().isEmpty() && !this->client.getProtocols().contains("all", Qt::CaseInsensitive))
+    {
+        this->request.setProtocol(this->client.getProtocols().first());
+        this->state = &EngineServer::_doUnserializeHeader;
+        Log::trace("Default protocol used", Properties("id", this->client.getId()).add("protocol", this->request.getProtocol()), "EngineServer", "_onProtocol");
+    }
+    // If there is no more plugin that can find the protocol, the data are cleared
+    else if (this->protocolUnknow.size() >= plugins.size())
     {
         this->clear();
         this->data.clear();
-        this->client.read();
+        Log::warning("Protocol of the request not found", Properties("id", this->client.getId()), "EngineServer", "_onProtocol");
     }
-    else
-    {
-        // Go to the next step
-        if (this->state == Engine::HEADER)
-            this->doUnserializeHeader();
-        // Otherwise the engine waits for more data
-        else
-            this->running = false;
-    }
+    // The protocol has been found, and the engine can execute the next step
+    if (this->state == &EngineServer::_doUnserializeHeader)
+        return (true);
+    // Otherwise the engine waits for more data
+    return (false);
 }
 
-void    EngineServer::_doUnserializeHeader()
+bool    EngineServer::_doUnserializeHeader()
 {
     quint64 used = 0;
     bool    result;
@@ -162,7 +123,7 @@ void    EngineServer::_doUnserializeHeader()
                 Log::trace("Header complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineServer", "_doUnserializeHeader");
             // Calls onUnserialize
             this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeHeader);
-            this->state = Engine::CONTENT;
+            this->state = &EngineServer::_doUnserializeContent;
         }
         else
             // All the data has been used, but the header is not complete
@@ -175,17 +136,16 @@ void    EngineServer::_doUnserializeHeader()
     else
     {
         Log::trace("No plugin implempents IDoUnserializeHeader for this context", Properties("id", this->client.getId()), "EngineServer", "_doUnserializeHeader");
-        this->state = Engine::CONTENT;
+        this->state = &EngineServer::_doUnserializeContent;
     }
     // Go to the next step
-    if (this->state == Engine::CONTENT)
-        this->doUnserializeContent();
+    if (this->state == &EngineServer::_doUnserializeContent)
+        return (true);
     // Otherwise the engine waits for more data
-    else
-        this->running = false;
+    return (false);
 }
 
-void    EngineServer::_doUnserializeContent()
+bool    EngineServer::_doUnserializeContent()
 {
     quint64 used = 0;
     bool    result;
@@ -208,7 +168,7 @@ void    EngineServer::_doUnserializeContent()
                 this->data.clear();
             if (Log::instance()->isTrace())
                 Log::trace("Content complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineServer", "_doUnserializeContent");
-            this->state = Engine::FOOTER;
+            this->state = &EngineServer::_doUnserializeFooter;
         }
         else
             // All the data has been used, but the content is not complete
@@ -223,17 +183,16 @@ void    EngineServer::_doUnserializeContent()
     else
     {
         Log::trace("No plugin implempents IDoUnserializeContent for this context", Properties("id", this->client.getId()), "EngineServer", "_doUnserializeContent");
-        this->state = Engine::FOOTER;
+        this->state = &EngineServer::_doUnserializeFooter;
     }
     // Go to the next step
-    if (this->state == Engine::FOOTER)
-        this->doUnserializeFooter();
+    if (this->state == &EngineServer::_doUnserializeFooter)
+        return (true);
     // Otherwise the engine waits for more data
-    else if (this->data.isEmpty())
-        this->running = false;
+    return (false);
 }
 
-void    EngineServer::_doUnserializeFooter()
+bool    EngineServer::_doUnserializeFooter()
 {
     quint64 used = 0;
     bool    result;
@@ -258,7 +217,7 @@ void    EngineServer::_doUnserializeFooter()
                 Log::trace("Footer complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineServer", "_doUnserializeFooter");
             // Calls onUnserialize
             this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeFooter);
-            this->state = Engine::HEADER;
+            this->state = &EngineServer::_doExecution;
         }
         else
             // All the data has been used, but the footer is not complete
@@ -271,56 +230,41 @@ void    EngineServer::_doUnserializeFooter()
     else
     {
         Log::trace("No plugin implempents IDoUnserializeFooter for this context", Properties("id", this->client.getId()), "EngineServer", "_doUnserializeFooter");
-        this->state = Engine::HEADER;
+        this->state = &EngineServer::_doExecution;
     }
     // If the request has been unserialized
-    if (this->state == Engine::HEADER)
+    if (this->state == &EngineServer::_doExecution)
     {
-        // If the data has never been unserialize in header, content, or footer, they are cleared
-        if (!this->done)
-        {
-            Log::warning("The data has not been unserialized because no plugin implements IDoUnserialize* for this context, or the data are never used. The data has been cleared",
-                         Properties("id", this->client.getId()), "EngineServer", "_doUnserializeFooter");
-            this->clear();
-            this->data.clear();
-            this->client.read();
-        }
         // If the request has been unserialized, it is executed
-        else
+        if (this->done)
         {
             if (Log::instance()->isDebug())
                 Log::debug("Request complete", Properties("id", this->client.getId()), "EngineServer", "_doUnserializeFooter");
             // Calls onUnserialize
             this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserialize);
-            // Execute the unserialized request if there is no error
-            if (!this->request.isError())
-                this->doExecution();
-            // Otherwise the response, which may contains the error, is directly sent
-            else
+            // If there is an error in the request, the unserialized request is not executed, and the response which may contains the error is directly sent
+            if (this->request.isError())
             {
                 Log::debug("An error has been found in the request", Properties("id", this->client.getId()), "EngineServer", "_doUnserializeFooter");
-                emit this->doSerializeHeader();
+                this->state = &EngineServer::_doSerializeHeader;
             }
         }
-        this->done = false;
+        // If the data has never been unserialize in header, content, or footer, they are cleared
+        else
+        {
+            Log::warning("The data has not been unserialized because no plugin implements IDoUnserialize* for this context, or the data are never used. The data has been cleared",
+                         Properties("id", this->client.getId()), "EngineServer", "_doUnserializeFooter");
+            this->clear();
+            this->data.clear();
+            return (false);
+        }
+        return (true);
     }
     // Otherwise the engine waits for more data
-    else if (this->data.isEmpty())
-        this->running = false;
+    return (false);
 }
 
-void    EngineServer::_onUnserialize(LightBird::IOnUnserialize::Unserialize type)
-{
-    QMapIterator<QString, LightBird::IOnUnserialize *> it(Plugins::instance()->getInstances<LightBird::IOnUnserialize>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
-    while (it.hasNext())
-    {
-        Log::trace("Calling IOnUnserialize::onUnserialize()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineServer", "_onUnserialize");
-        it.peekNext().value()->onUnserialize(this->client, type);
-        Plugins::instance()->release(it.next().key());
-    }
-}
-
-void        EngineServer::_doExecution()
+bool        EngineServer::_doExecution()
 {
     QPair<QString, LightBird::IDoExecution *> instance;
 
@@ -334,10 +278,11 @@ void        EngineServer::_doExecution()
     }
     else
         Log::trace("No plugin implempents IDoExecution for this context", Properties("id", this->client.getId()), "EngineServer", "_doExecution");
-    this->onExecution();
+    this->state = &EngineServer::_onExecution;
+    return (true);
 }
 
-void        EngineServer::_onExecution()
+bool        EngineServer::_onExecution()
 {
     QMapIterator<QString, LightBird::IOnExecution *> it(Plugins::instance()->getInstances<LightBird::IOnExecution>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
     while (it.hasNext())
@@ -350,133 +295,115 @@ void        EngineServer::_onExecution()
         }
         Plugins::instance()->release(it.next().key());
     }
-    // If a response to the request is needed (if doExecution and onExecutions always returned true)
+    // If a response to the request is needed, it is going to be serialized
     if (this->needResponse)
-        emit this->doSerializeHeader();
+        this->state = &EngineServer::_doSerializeHeader;
+    // Otherwise the engine tries to process an other request
     else
     {
         this->_onFinish();
-        this->clear();
-        // If there are pending data, they are processed
-        if (this->data.size())
-            emit this->onProtocol();
-        // Otherwise, we tell the client that it can send more data if possible
-        else
-            this->client.read();
+        // If there is no pending data the engine waits for a new request
+        if (this->data.isEmpty())
+            return (false);
     }
+    return (true);
 }
 
-void    EngineServer::_onSerialize(LightBird::IOnSerialize::Serialize type)
-{
-    QMapIterator<QString, LightBird::IOnSerialize *> it(Plugins::instance()->getInstances<LightBird::IOnSerialize>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
-    while (it.hasNext())
-    {
-        Log::trace("Calling IOnSerialize::onSerialize()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineServer", "_onSerialize");
-        it.peekNext().value()->onSerialize(this->client, type);
-        Plugins::instance()->release(it.next().key());
-    }
-}
-
-void    EngineServer::_doSerializeHeader()
+bool    EngineServer::_doSerializeHeader()
 {
     QPair<QString, LightBird::IDoSerializeHeader *> instance;
-    QByteArray  data;
 
     this->done = false;
     this->_onSerialize(LightBird::IOnSerialize::IDoSerialize);
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
+        QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeHeader);
         Log::trace("Calling IDoSerializeHeader::doSerializeHeader()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doSerializeHeader");
-        instance.second->doSerializeHeader(this->client, data);
+        instance.second->doSerializeHeader(this->client, *data);
         Plugins::instance()->release(instance.first);
-        if (data.size())
+        if (data->size())
         {
-            this->_onWrite(data);
+            this->_onWrite(*data);
             this->client.write(data);
             this->done = true;
         }
+        else
+            delete data;
     }
     else
         Log::trace("No plugin implempents IDoSerializeHeader for this context", Properties("id", this->client.getId()), "EngineServer", "_doSerializeHeader");
-    emit this->doSerializeContent();
+    this->state = &EngineServer::_doSerializeContent;
+    return (true);
 }
 
-void    EngineServer::_doSerializeContent()
+bool    EngineServer::_doSerializeContent()
 {
     QPair<QString, LightBird::IDoSerializeContent *> instance;
-    QByteArray  data;
     bool        result = true;
 
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
+        QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeContent);
         Log::trace("Calling IDoSerializeContent::doSerializeContent()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doSerializeContent");
-        if ((result = instance.second->doSerializeContent(this->client, data)))
+        if ((result = instance.second->doSerializeContent(this->client, *data)))
             Log::trace("Content serialized", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doSerializeContent");
         Plugins::instance()->release(instance.first);
-        if (data.size())
+        if (data->size())
         {
-            this->_onWrite(data);
+            this->_onWrite(*data);
             this->client.write(data);
             this->done = true;
         }
         // There is no content to serialize
         else
+        {
             result = true;
+            delete data;
+        }
     }
     else
         Log::trace("No plugin implempents IDoSerializeContent for this context", Properties("id", this->client.getId()), "EngineServer", "_doSerializeContent");
     // The content has been serialized
     if (result)
-        emit this->doSerializeFooter();
+        this->state = &EngineServer::_doSerializeFooter;
     // There is more data to serialize
     else
-        emit this->doSerializeContent();
+        this->state = &EngineServer::_doSerializeContent;
+    return (true);
 }
 
-void    EngineServer::_doSerializeFooter()
+bool    EngineServer::_doSerializeFooter()
 {
     QPair<QString, LightBird::IDoSerializeFooter *> instance;
-    QByteArray  data;
 
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeFooter>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
+        QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeFooter);
         Log::trace("Calling IDoSerializeFooter::doSerializeFooter()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doSerializeFooter");
-        instance.second->doSerializeFooter(this->client, data);
+        instance.second->doSerializeFooter(this->client, *data);
         Plugins::instance()->release(instance.first);
-        if (data.size())
+        if (data->size())
         {
-            this->_onWrite(data);
+            this->_onWrite(*data);
             this->client.write(data);
             this->done = true;
         }
+        else
+            delete data;
     }
     else
         Log::trace("No plugin implempents IDoSerializeFooter for this context", Properties("id", this->client.getId()), "EngineServer", "_doSerializeFooter");
-    if (this->done)
-        this->_onFinish();
-    else
+    if (!this->done)
         Log::warning("The data has not been serialized because no plugin implements IDoSerialize* for this context.", Properties("id", this->client.getId()), "EngineServer", "_doSerializeFooter");
-    this->clear();
+    this->_onFinish();
     // If there are pending data, they are processed
-    if (this->data.size())
-        emit this->onProtocol();
-    // Otherwise, we tell the client that it can send more data if possible
-    else
-        this->client.read();
-}
-
-void    EngineServer::_onWrite(QByteArray &data)
-{
-    QMapIterator<QString, LightBird::IOnWrite *> it(Plugins::instance()->getInstances<LightBird::IOnWrite>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
-    while (it.hasNext())
-    {
-        Log::trace("Calling IOnWrite::onWrite()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "EngineServer", "_onWrite");
-        it.peekNext().value()->onWrite(this->client, data);
-        Plugins::instance()->release(it.next().key());
-    }
+    if (!this->data.isEmpty())
+        return (true);
+    // Otherwise, The engine will wait for more data
+    return (false);
 }
 
 void    EngineServer::_onFinish()
@@ -488,4 +415,5 @@ void    EngineServer::_onFinish()
         it.peekNext().value()->onFinish(this->client);
         Plugins::instance()->release(it.next().key());
     }
+    this->clear();
 }
