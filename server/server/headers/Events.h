@@ -30,7 +30,7 @@ private:
     Events(QObject *parent = NULL);
     ~Events();
     Events(const Events &);
-    Events *operator=(const Events &);
+    Events &operator=(const Events &);
 
     QMutex              mutex;      ///< Makes this class thread safe.
     QList<ApiEvents *>  events;     ///< The list of the plugins that can send and receive events.

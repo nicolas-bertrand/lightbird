@@ -40,7 +40,7 @@ private:
     Database(QObject *parent = 0);
     ~Database();
     Database(const Database &);
-    Database        *operator=(const Database &);
+    Database &operator=(const Database &);
 
     /// @brief Get the name of the database, and manage the database file if their is one (for example with SQLite).
     /// @param name : The name of the database, which can be the path to its file (with SQLite).
@@ -61,11 +61,11 @@ private:
     /// @brief Display the updates. For debug purpose only.
     void            _displayUpdates(LightBird::IDatabase::Updates &updates);
 
-    static Database             *_instance;     ///< The instance of the singleton that manage the database.
-    bool                        loaded;         ///< If the database has been correctly loaded.
-    QMap<QString, QDomDocument> queries;        ///< Contains the doms representations of the queries.
-    QMutex                      mutex;          ///< Makes this class thread safe.
-    QStringList                 tablesNames;    ///< Contains the names of the tables of the database.
+    static Database             *_instance;  ///< The instance of the singleton that manage the database.
+    bool                        loaded;      ///< If the database has been correctly loaded.
+    QMap<QString, QDomDocument> queries;     ///< Contains the doms representations of the queries.
+    QMutex                      mutex;       ///< Makes this class thread safe.
+    QStringList                 tablesNames; ///< Contains the names of the tables of the database.
 };
 
 #endif // DATABASE_H

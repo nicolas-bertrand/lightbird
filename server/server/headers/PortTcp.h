@@ -23,19 +23,19 @@ public:
     /// @brief Closes the TCP server. No new connections will be accepted.
     void    close();
 
+signals:
+    /// @brief Emited when new data have to be write on the network, in order to
+    /// write these data from the port thread (where the tcp sockets live).
+    void    writeSignal();
+
 private:
     PortTcp(const PortTcp &);
-    PortTcp *operator=(const PortTcp &);
+    PortTcp &operator=(const PortTcp &);
 
     /// @brief The main method of the thread.
     void    run();
     /// @brief Returns true if the port is currently listening the network.
     bool    _isListening();
-
-    QTcpServer                              tcpServer;     ///< The TCP server that listens on the network and waits new connections.
-    QMap<QAbstractSocket *, Client *>       sockets;       ///< Associates the socket with its client.
-    QQueue<QPair<Client *, QByteArray *> >  writeBuffer;   ///< List of the data that are going to be send from the thread.
-    Future<bool>                            threadStarted; ///< This future is unlocked when the thread is started.
 
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the tcpServer.
@@ -47,10 +47,11 @@ private slots:
     /// @brief Called when a client's is finished.
     Client  *_finished();
 
-signals:
-    /// @brief Emited when new data have to be write on the network, in order to
-    /// write these data from the port thread (where the tcp sockets live).
-    void    writeSignal();
+private:
+    QTcpServer                             tcpServer;     ///< The TCP server that listens on the network and waits new connections.
+    QMap<QAbstractSocket *, Client *>      sockets;       ///< Associates the socket with its client.
+    QQueue<QPair<Client *, QByteArray *> > writeBuffer;   ///< List of the data that are going to be send from the thread.
+    Future<bool>                           threadStarted; ///< This future is unlocked when the thread is started.
 };
 
 #endif // PORTTCP_H

@@ -22,21 +22,22 @@ public:
 
 private:
     PortUdp(const PortUdp &);
-    PortUdp *operator=(const PortUdp &);
+    PortUdp &operator=(const PortUdp &);
 
     /// @brief The main method of the thread.
     void    run();
     /// @brief Returns true if the socket is currently bound on the port of the network.
     bool    _isListening();
 
-    QUdpSocket   socket;        ///< This UDP socket is bound on the port to receive all datagrams sent to it.
-    Future<bool> threadStarted; ///< This future is unlocked when the thread is started.
-
 private slots:
     /// @brief This slot is called when datagrams are ready to be read.
     void    _readPendingDatagrams();
     /// @brief Called when a client's is finished.
     Client  *_finished();
+
+private:
+    QUdpSocket   socket;        ///< This UDP socket is bound on the port to receive all datagrams sent to it.
+    Future<bool> threadStarted; ///< This future is unlocked when the thread is started.
 };
 
 #endif // PORTUDP_H

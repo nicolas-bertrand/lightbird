@@ -5,7 +5,7 @@
 
 # include "IContent.h"
 
-/// @brief Server's implementation of IContent.
+/// @brief Server implementation of LightBird::IContent.
 class Content : public QObject,
                 public LightBird::IContent
 {
@@ -33,11 +33,11 @@ private:
     Content &operator=(const Content &);
 
     LightBird::IContent::Storage storage;
-    QByteArray                   *byteArray;
-    QVariant                     *variant;
-    QFile                        *file;
-    QTemporaryFile               *temporaryFile;
-    quint64                      seek;
+    QByteArray      *byteArray;
+    QVariant        *variant;
+    QFile           *file;
+    QTemporaryFile  *temporaryFile;
+    quint64         seek;
 };
 
 #endif // CONTENT_H

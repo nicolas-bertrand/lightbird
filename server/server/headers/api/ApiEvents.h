@@ -33,17 +33,15 @@ public:
     QList<QPair<QString, QVariant> > receive();
     bool    isAvailable();
 
+signals:
+    /// @brief Signal emitted by post() each time an event for which the
+    /// plugin has subscribed occur.
+    void    newEvent();
+
 private:
     ApiEvents();
     ApiEvents(const ApiEvents &);
-    ApiEvents* operator=(const ApiEvents &);
-
-    QString         id;         ///< The id of the plugin for which the object has been created.
-    QMutex          mutex;      ///< Makes this class thread safe.
-    QWaitCondition  wait;       ///< Allows to wait that the thread is started before return from the constructor.
-    bool            awake;      ///< If the wait condition has been called.
-    QStringList     subscribed; ///< List the events to which the plugin has subscribed.
-    QList<QPair<QString, QVariant> > events; ///< The list of the pending events.
+    ApiEvents &operator=(const ApiEvents &);
 
 private slots:
     /// @brief Calls IEvent for the plugins that implements it. This slot is
@@ -51,10 +49,13 @@ private slots:
     /// implements IEvent.
     void            _newEvent();
 
-signals:
-    /// @brief Signal emitted by post() each time an event for which the
-    /// plugin has subscribed occur.
-    void            newEvent();
+private:
+    QString         id;         ///< The id of the plugin for which the object has been created.
+    QMutex          mutex;      ///< Makes this class thread safe.
+    QWaitCondition  wait;       ///< Allows to wait that the thread is started before return from the constructor.
+    bool            awake;      ///< If the wait condition has been called.
+    QStringList     subscribed; ///< List the events to which the plugin has subscribed.
+    QList<QPair<QString, QVariant> > events; ///< The list of the pending events.
 };
 
 #endif // APIEVENTS_H

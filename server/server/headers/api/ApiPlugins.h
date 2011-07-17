@@ -32,7 +32,7 @@ private:
     ApiPlugins(QObject *parent = 0);
     ~ApiPlugins();
     ApiPlugins(const ApiPlugins &);
-    ApiPlugins          *operator=(const ApiPlugins &);
+    ApiPlugins &operator=(const ApiPlugins &);
 
     static ApiPlugins   *_instance; ///< The instance of the singleton.
 };

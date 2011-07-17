@@ -49,13 +49,14 @@ private:
     /// the server, under the nodes <plugin>, childrens of the node <plugins>.
     void    _loadPlugins();
 
-    Arguments   &arguments;     ///< Stores the arguments used to launch the server.
-    bool        initialized;    ///< True if the server has been correctly initialized.
-
 private slots:
     /// @brief Calls the IGui::show() method of a plugin that has just been loaded,
     /// and load its translations if possible.
     void    _pluginLoaded(QString id);
+
+private:
+    Arguments &arguments;  ///< Stores the arguments used to launch the server.
+    bool      initialized; ///< True if the server has been correctly initialized.
 };
 
 #endif // SERVER_H

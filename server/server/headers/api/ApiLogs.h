@@ -43,7 +43,7 @@ public:
 private:
     ApiLogs();
     ApiLogs(const ApiLogs &);
-    ApiLogs* operator=(const ApiLogs &);
+    ApiLogs &operator=(const ApiLogs &);
 
     QString id; ///< The id of the plugin for which the object has been created.
 };

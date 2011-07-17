@@ -41,12 +41,12 @@ public:
     QMap<QString, QString>  toMap() const;
 
 private:
-    QString                 mode;       ///< The connection mode of the client ("client" or "server").
-    QString                 transport;  ///< The transport protocol to use ("TCP" or "UDP").
-    QStringList             protocols;  ///< The list of communication protocols known by the plugin ("HTTP", "UPnP").
-    QList<unsigned short>   ports;      ///< The list of ports listenned by the plugin.
-    QStringList             methods;    ///< The list of request method available for the plugin.
-    QStringList             types;      ///< The list of file types handled by the plugin (MIME types).
+    QString               mode;      ///< The connection mode of the client ("client" or "server").
+    QString               transport; ///< The transport protocol to use ("TCP" or "UDP").
+    QStringList           protocols; ///< The list of communication protocols knowns by the plugin ("HTTP", "UPnP").
+    QList<unsigned short> ports;     ///< The list of ports listenned by the plugin.
+    QStringList           methods;   ///< The list of methods available for the plugin.
+    QStringList           types;     ///< The list of file types handled by the plugin (MIME types).
 };
 
 #endif // CONTEXT_H

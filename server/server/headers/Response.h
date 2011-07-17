@@ -7,8 +7,7 @@
 
 # include "IResponse.h"
 
-/// @brief Response is the server implementation of LightBird::IResponse,
-/// and represents a client's response.
+/// @brief The server implementation of LightBird::IResponse.
 class Response : public QObject,
                  public LightBird::IResponse
 {

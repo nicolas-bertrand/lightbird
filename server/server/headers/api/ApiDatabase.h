@@ -36,9 +36,9 @@ public:
 private:
     ApiDatabase();
     ApiDatabase(const ApiDatabase &);
-    ApiDatabase         *operator=(const ApiDatabase &);
+    ApiDatabase &operator=(const ApiDatabase &);
 
-    QString             id; ///< The id of the plugin for which the object has been created.
+    QString id; ///< The id of the plugin for which the object has been created.
 };
 
 #endif // APIDATABASE_H

@@ -12,7 +12,7 @@ public:
     TableDirectories(const QString &id = "");
     TableDirectories(const TableDirectories &t);
     ~TableDirectories();
-    TableDirectories  &operator=(const TableDirectories &t);
+    TableDirectories &operator=(const TableDirectories &t);
 
     QString     getIdFromVirtualPath(const QString &virtualPath);
     bool        setIdFromVirtualPath(const QString &virtualPath);

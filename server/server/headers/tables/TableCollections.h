@@ -12,7 +12,7 @@ public:
     TableCollections(const QString &id = "");
     TableCollections(const TableCollections &t);
     ~TableCollections();
-    TableCollections  &operator=(const TableCollections &t);
+    TableCollections &operator=(const TableCollections &t);
 
     QString     getIdFromVirtualPath(const QString &virtualPath);
     bool        setIdFromVirtualPath(const QString &virtualPath);

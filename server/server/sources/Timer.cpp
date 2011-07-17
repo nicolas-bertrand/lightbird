@@ -16,7 +16,7 @@ Timer::Timer(QString i, QString n, unsigned int t, ApiTimers &timers) : id(i),
                                                                         stopped(false)
 {
     Log::debug("Loading the timer", Properties("name", this->name).add("id", this->id).add("timeout", QString::number(this->timeout)), "Timer", "Timer");
-    // Start the Timer thread
+    // Starts the Timer thread
     this->moveToThread(this);
     Threads::instance()->newThread(this);
 }

@@ -29,7 +29,7 @@ public:
 private:
     ApiTimers();
     ApiTimers(const ApiTimers &);
-    ApiTimers* operator=(const ApiTimers &);
+    ApiTimers &operator=(const ApiTimers &);
 
     QString                 id;     ///< The id of the plugin for which the timers are managed.
     QMap<QString, Timer *>  timers; ///< The list of the timers of the plugin.

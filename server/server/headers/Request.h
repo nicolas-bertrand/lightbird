@@ -7,8 +7,7 @@
 
 # include "IRequest.h"
 
-/// @brief Request is the server implementation of LightBird::IRequest,
-/// and represents a client's request.
+/// @brief The server implementation of LightBird::IRequest.
 class Request : public QObject,
                 public LightBird::IRequest
 {
@@ -37,7 +36,7 @@ public:
     // Other
     /// @brief Cleans all the member of the instance.
     void                    clear();
-    /// @brief Set the protocol of the request.
+    /// @brief Sets the protocol of the request.
     void                    setProtocol(const QString &protocol);
 
 private:

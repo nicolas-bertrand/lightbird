@@ -12,7 +12,7 @@ public:
     TableEvents(const QString &id = "");
     TableEvents(const TableEvents &e);
     ~TableEvents();
-    TableEvents   &operator=(const TableEvents &e);
+    TableEvents &operator=(const TableEvents &e);
 
     QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime());
     bool        add(const QString &name, const QMap<QString, QVariant> &informations,

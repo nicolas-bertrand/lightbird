@@ -52,16 +52,17 @@ private:
     Network(QObject *parent = 0);
     ~Network();
     Network(const Network &);
-    Network         *operator=(const Network &);
-
-    QMap<unsigned short, Port *>    ports;      ///< The list of the open ports
-    Clients                         clients;    ///< Manages the clients in CLIENT mode.
-    QReadWriteLock                  mutex;      ///< Makes the class thread safe.
-    static Network                  *_instance; ///< The instance of the singleton.
+    Network &operator=(const Network &);
 
 private slots:
     /// @brief Called when a port thread is finished in order to delete it.
     void            _finished();
+
+private:
+    QMap<unsigned short, Port *> ports;      ///< The list of the open ports
+    Clients                      clients;    ///< Manages the clients in CLIENT mode.
+    QReadWriteLock               mutex;      ///< Makes the class thread safe.
+    static Network               *_instance; ///< The instance of the singleton.
 };
 
 #endif // NETWORK_H

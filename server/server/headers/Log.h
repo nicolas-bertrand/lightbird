@@ -13,8 +13,8 @@
 /// @brief Writes log entries.
 ///
 /// If a plugin implements ILog, the entry is passed to it.
-/// If the display node of the configuration is at true, the logs are written on the standard output.
-/// Handle several levels that can be used to set the importance of the logs. If the level of a
+/// If the display mode of the configuration is at true, the logs are written on the standard output.
+/// Handles several levels that can be used to set the importance of the logs. If the level of a
 /// log is lower than this->level, the log will not be written. For example, to write an info, call
 /// "Log::info("Your log");". The logs are written in a separate thread (except for the standard output)
 /// to ensure that they will not slow down the thread from which they are launched. Indeed, logs can
@@ -84,11 +84,15 @@ public:
     /// @brief The main method of the thread. The logs are wrote in the event loop of this method.
     void        run();
 
+signals:
+    /// @brief This signal is emited to write a log.
+    void        writeLog(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+
 private:
     Log(QObject *parent = 0);
     ~Log();
     Log(const Log &);
-    Log* operator=(const Log &);
+    Log &operator=(const Log &);
 
     /// @brief Store all the informations used in a log entry.
     struct LogInformations
@@ -113,6 +117,11 @@ private:
     /// @see write
     void        _print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 
+private slots:
+    /// @brief Write a log to the plugins that implements ILog.
+    void        _write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+
+private:
     LightBird::ILogs::Level                 level;      ///< The minimum level required to write a log.
     static Log                              *_instance; ///< The instance of the Singleton.
     QMap<LightBird::ILogs::Level, QString>  levels;     ///< Combines the levels and their names.
@@ -124,14 +133,6 @@ private:
     QMutex                                  waitMutex;  ///< Used by QWaitCondition.
     bool                                    awake;      ///< If the wait condition has been called.
     QObject                                 *parent;    ///< The parent of the Log.
-
-private slots:
-    /// @brief Write a log to the plugins that implements ILog.
-    void        _write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
-
-signals:
-    /// @brief This signal is emited to write a log.
-    void        writeLog(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 };
 
 #endif // LOG_H

@@ -48,6 +48,23 @@ public:
     /// thread of the class Clients.
     bool            connect(Client *client);
 
+signals:
+    /// @brief Connects a TCP client to the server.
+    void            connectSignal(QString id);
+    /// @brief Emited when new data have to be write on the network, in order to
+    /// write these data from the thread (where the sockets lives).
+    void            writeSignal();
+
+private slots:
+    /// @brief Connects a TCP client to the server.
+    void            _connect(QString id);
+    /// @brief Writes the data stored in writeBuffer on the network, from the thread.
+    void            _write();
+    /// @brief Called when a QTcpSocket is disconnected.
+    void            _disconnected();
+    /// @brief Called when the client is finished.
+    void            _finished();
+
 private:
     Clients(const Clients &);
     Clients &operator=(const Clients &);
@@ -63,23 +80,6 @@ private:
     QMap<QString, QPair<Future<QString> *, int> > connections;
     ///< List of the data that are going to be send from the thread.
     QQueue<QPair<Client *, QByteArray *> >        writeBuffer;
-
-private slots:
-    /// @brief Connects a TCP client to the server.
-    void            _connect(QString id);
-    /// @brief Writes the data stored in writeBuffer on the network, from the thread.
-    void            _write();
-    /// @brief Called when a QTcpSocket is disconnected.
-    void            _disconnected();
-    /// @brief Called when the client is finished.
-    void            _finished();
-
-signals:
-    /// @brief Connects a TCP client to the server.
-    void            connectSignal(QString id);
-    /// @brief Emited when new data have to be write on the network, in order to
-    /// write these data from the thread (where the sockets lives).
-    void            writeSignal();
 };
 
 #endif // CLIENTS_H

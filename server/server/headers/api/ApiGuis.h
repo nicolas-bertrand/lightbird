@@ -29,14 +29,15 @@ private:
     ApiGuis(QObject *parent = 0);
     ~ApiGuis();
     ApiGuis(const ApiGuis &);
-    ApiGuis  *operator=(const ApiGuis &);
-
-    static ApiGuis  *_instance; ///< The instance of the singleton.
-    bool            isNoGui;    ///< True if the server is in noGui mode.
+    ApiGuis &operator=(const ApiGuis &);
 
 private slots:
     void    _show(const QString &id);
     void    _hide(const QString &id);
+
+private:
+    static ApiGuis  *_instance; ///< The instance of the singleton.
+    bool            isNoGui;    ///< True if the server is in noGui mode.
 };
 
 #endif // APIGUIS_H

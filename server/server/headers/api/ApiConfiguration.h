@@ -33,7 +33,7 @@ public:
 private:
     ApiConfiguration();
     ApiConfiguration(const ApiConfiguration &);
-    ApiConfiguration *operator=(const ApiConfiguration &);
+    ApiConfiguration &operator=(const ApiConfiguration &);
 
     /// @brief Returns the element that contains the configuration of the plugin.
     /// @param dom : The root element of the configuration of the server.

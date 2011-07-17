@@ -77,7 +77,7 @@ protected slots:
 
 private:
     Port(const Port &);
-    Port    *operator=(const Port &);
+    Port &operator=(const Port &);
 
     LightBird::INetwork::Transport  transport;  ///< The transport protocol used by the port.
     QStringList                     protocols;  ///< The names of the protocols used to communicate with the clients connected to this port.

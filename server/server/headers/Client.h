@@ -89,10 +89,14 @@ public slots:
     /// ownership of the data.
     void                    read(QByteArray *data = NULL);
 
+signals:
+    /// @brief The client has been disconnected and can be safely destroyed.
+    void                    finished();
+
 private:
     Client();
     Client(const Client &);
-    Client  *operator=(const Client &);
+    Client &operator=(const Client &);
 
     /// @brief The possible states of the client.
     enum State
@@ -150,10 +154,6 @@ private:
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QPair<QString, QString> > sendRequests; ///< Stores the idPlugin and the protocol of the requests that are going to be sent.
     QMap<Future<bool> *, LightBird::INetwork::Client *> informationsRequests; ///< Used by getInformations to keep track of the informations requests.
-
-signals:
-    /// @brief The client has been disconnected and can be safely destroyed.
-    void            finished();
 };
 
 inline void Client::_newTask(Client::State state)

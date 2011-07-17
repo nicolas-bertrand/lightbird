@@ -145,7 +145,7 @@ private:
     Plugins(QObject *parent = 0);
     ~Plugins();
     Plugins(const Plugins &);
-    Plugins                 *operator=(const Plugins &);
+    Plugins &operator=(const Plugins &);
 
 private slots:
     void                    _load(const QString &id, Future<bool> *future);

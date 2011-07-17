@@ -27,15 +27,6 @@ private:
     EngineClient(const EngineClient &context);
     EngineClient &operator=(const EngineClient &context);
 
-    /// @brief A simple pointer to method.
-    /// @return True while the engine has enough data to run.
-    typedef bool (EngineClient::*Method) ();
-
-    ///< A pointer to method to the next step of the processing of the data.
-    Method  state;
-    /// Stores the list of the requests that the plugins want to send.
-    QList<QPair<QString, QString> > requests;
-
 private slots:
     // This methods calls the interfaces implemented by the plugins,
     // in order to generate a request and execute the response.
@@ -50,6 +41,16 @@ private slots:
     bool    _doExecution();
     bool    _onExecution();
     bool    _onFinish();
+
+private:
+    /// @brief A simple pointer to method.
+    /// @return True while the engine has enough data to run.
+    typedef bool (EngineClient::*Method)();
+
+    ///< A pointer to method to the next step of the processing of the data.
+    Method  state;
+    /// Stores the list of the requests that the plugins want to send.
+    QList<QPair<QString, QString> > requests;
 };
 
 #endif // ENGINECLIENT_H

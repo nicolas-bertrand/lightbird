@@ -23,14 +23,6 @@ private:
     EngineServer(const EngineServer &context);
     EngineServer &operator=(const EngineServer &context);
 
-    /// @brief A simple pointer to method.
-    /// @return True while the engine has enough data to run.
-    typedef bool (EngineServer::*Method) ();
-
-    Method      state;          ///< A pointer to method to the next step of the processing of the data.
-    bool        needResponse;   ///< If the request of the client needs a response.
-    QStringList protocolUnknow; ///< List the plugins that doesn't know the protocol of the request.
-
 private slots:
     // This methods calls the interfaces implemented by the plugins,
     // in order to execute the request and generate a response.
@@ -44,6 +36,15 @@ private slots:
     bool    _doSerializeContent();
     bool    _doSerializeFooter();
     void    _onFinish();
+
+private:
+    /// @brief A simple pointer to method.
+    /// @return True while the engine has enough data to run.
+    typedef bool (EngineServer::*Method)();
+
+    Method      state;          ///< A pointer to method to the next step of the processing of the data.
+    bool        needResponse;   ///< If the request of the client needs a response.
+    QStringList protocolUnknow; ///< List the plugins that doesn't know the protocol of the request.
 };
 
 #endif // ENGINESERVER_H

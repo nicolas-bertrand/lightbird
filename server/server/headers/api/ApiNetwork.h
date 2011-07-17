@@ -36,7 +36,7 @@ public:
 private:
     ApiNetwork();
     ApiNetwork(const ApiNetwork &);
-    ApiNetwork* operator=(const ApiNetwork &);
+    ApiNetwork &operator=(const ApiNetwork &);
 
     QString id; ///< The id of the plugin for which the object has been created.
 };

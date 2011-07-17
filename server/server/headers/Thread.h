@@ -18,6 +18,11 @@ public:
     /// @brief Emits the taskAvailableSignal which calls _taskAvailable in the thread.
     void    taskAvailable(ThreadPool::ITask *task);
 
+signals:
+    /// @brief This signal is emited when a new task is available
+    /// for the current thread.
+    void    taskAvailableSignal(ThreadPool::ITask *task);
+
 private:
     Thread(const Thread &);
     Thread &operator=(const Thread &);
@@ -25,11 +30,6 @@ private:
 private slots:
     /// @brief Runs a task.
     void    _taskAvailable(ThreadPool::ITask *task);
-
-signals:
-    /// @brief This signal is emited when a new task is available
-    /// for the current thread.
-    void    taskAvailableSignal(ThreadPool::ITask *task);
 };
 
 #endif // THREAD_H
