@@ -16,6 +16,7 @@ Plugins::Plugins()
 {
     this->unloadAllPlugins = false;
     this->awake = false;
+    this->libraryExtensions << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle";
     // Connect all the signals and slots
     qRegisterMetaType<Future<bool> >("Future<bool>");
     QObject::connect(this, SIGNAL(loadSignal(QString,Future<bool>*)), this, SLOT(_load(QString,Future<bool>*)), Qt::QueuedConnection);
@@ -367,6 +368,11 @@ bool            Plugins::isInstalled(const QString &id)
     return (!element.isNull());
 }
 
+QStringList Plugins::getLibraryExtensions()
+{
+    return (Plugins::instance()->libraryExtensions);
+}
+
 LightBird::IPlugins::State Plugins::getState(const QString &id)
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Plugins", "getState");
@@ -440,10 +446,7 @@ void                    Plugins::_findPlugins(const QString &pluginsPath, const 
 {
     QString             id;
     QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
-    QStringList         nameFilters;
 
-    // List the possible extensions of a plugin library
-    nameFilters << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle";
     // Run through all the directories of the current location to find the plugins
     while (it.hasNext())
     {
@@ -452,7 +455,7 @@ void                    Plugins::_findPlugins(const QString &pluginsPath, const 
         else
             id = it.peekNext();
         // If there is a library in the current directory, it is a plugin
-        if (!QDir(pluginsPath + "/" + id).entryList(nameFilters, QDir::Files).isEmpty())
+        if (!QDir(pluginsPath + "/" + id).entryList(this->libraryExtensions, QDir::Files).isEmpty())
             plugins << id;
         this->_findPlugins(pluginsPath, id, plugins);
         it.next();

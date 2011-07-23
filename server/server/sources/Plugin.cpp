@@ -222,13 +222,10 @@ void        Plugin::_initialize()
 
 bool                    Plugin::_loadLibrary()
 {
-    QStringList         nameFilters;
     LightBird::IPlugin  *instance;
 
-    // List the possible extensions
-    nameFilters << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle";
-    QStringListIterator dir(QDir(this->path).entryList(nameFilters, QDir::Files));
     // Iterate over the files of the plugin directory
+    QStringListIterator dir(QDir(this->path).entryList(Plugins::getLibraryExtensions(), QDir::Files));
     while (dir.hasNext() && !this->loader)
     {
         // If the file name has the good extension

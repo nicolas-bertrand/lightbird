@@ -115,6 +115,9 @@ public:
     /// is stored in the configuration of the server.
     /// @param id : The id of the plugin.
     static bool             isInstalled(const QString &id);
+    /// @brief Returns the list of the possible extensions that can have a plugin
+    /// library, preceded by ".*".
+    static QStringList      getLibraryExtensions();
     /// @brief Returns the instance of this class created by the Server.
     static Plugins          *instance();
 
@@ -164,12 +167,13 @@ private:
     /// @see getState
     LightBird::IPlugins::State _getState(const QString &id);
 
-    QMap<QString, Plugin *> plugins;          ///< The list of loaded plugins.
-    QStringList             orderedPlugins;   ///< Contains the id of the loaded plugins, and keep the order of their loading.
-    QWaitCondition          wait;             ///< This condition is awakened when the thread is running for the first time, and when all plugin has been unloaded using unloadAll().
-    bool                    awake;            ///< If the wait condition has been called.
-    bool                    unloadAllPlugins; ///< If true, no more plugins will be loaded. or installed.
-    mutable QReadWriteLock  mutex;            ///< Used to secure the access to the plugins map when a thread use it.
+    QMap<QString, Plugin *> plugins;           ///< The list of loaded plugins.
+    QStringList             orderedPlugins;    ///< Contains the id of the loaded plugins, and keep the order of their loading.
+    QStringList             libraryExtensions; ///< The possible extensions of a plugin library
+    QWaitCondition          wait;              ///< This condition is awakened when the thread is running for the first time, and when all plugin has been unloaded using unloadAll().
+    bool                    awake;             ///< If the wait condition has been called.
+    bool                    unloadAllPlugins;  ///< If true, no more plugins will be loaded. or installed.
+    mutable QReadWriteLock  mutex;             ///< Used to secure the access to the plugins map when a thread use it.
 };
 
 template<class T>
