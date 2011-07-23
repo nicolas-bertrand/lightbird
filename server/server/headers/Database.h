@@ -13,13 +13,17 @@
 
 # include "IDatabase.h"
 
+# include "Initialize.h"
+
 /// @brief Manage all the operations made on the database by the server and its plugins.
-class Database : public QObject
+class Database : public QObject,
+                 public Initialize
 {
     Q_OBJECT
 
 public:
-    static Database *instance(QObject *parent = 0);
+    Database(QObject *parent = 0);
+    ~Database();
 
     /// @see LightBird::IDatabase::query
     bool            query(QSqlQuery &query);
@@ -35,10 +39,10 @@ public:
     bool            updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());
     /// @brief Returns the names of the tables of the database.
     QStringList     getTableNames();
+    /// @brief Returns the instance of this class created by the Server.
+    static Database *instance();
 
 private:
-    Database(QObject *parent = 0);
-    ~Database();
     Database(const Database &);
     Database &operator=(const Database &);
 
@@ -61,11 +65,9 @@ private:
     /// @brief Display the updates. For debug purpose only.
     void            _displayUpdates(LightBird::IDatabase::Updates &updates);
 
-    static Database             *_instance;  ///< The instance of the singleton that manage the database.
-    bool                        loaded;      ///< If the database has been correctly loaded.
     QMap<QString, QDomDocument> queries;     ///< Contains the doms representations of the queries.
-    QMutex                      mutex;       ///< Makes this class thread safe.
     QStringList                 tablesNames; ///< Contains the names of the tables of the database.
+    QMutex                      mutex;       ///< Makes this class thread safe.
 };
 
 #endif // DATABASE_H

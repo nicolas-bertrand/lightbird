@@ -9,6 +9,7 @@
 #include "Log.h"
 #include "Plugins.hpp"
 #include "SmartMutex.h"
+#include "Server.h"
 #include "Table.h"
 #include "TableAccounts.h"
 #include "TableCollections.h"
@@ -21,36 +22,17 @@
 #include "TableTags.h"
 #include "Tools.h"
 
-Database    *Database::_instance = NULL;
-
-Database    *Database::instance(QObject *parent)
-{
-    if (Database::_instance == NULL)
-    {
-        Database::_instance = new Database(parent);
-        if (!Database::_instance->loaded)
-        {
-            delete Database::_instance;
-            Database::_instance = NULL;
-        }
-    }
-    return (Database::_instance);
-}
-
 Database::Database(QObject *parent) : QObject(parent)
 {
-    this->loaded = false;
     // Stores the names of the tables of the database
     this->tablesNames << "accounts" << "accounts_groups" << "accounts_informations" << "collections"
                       << "directories" << "events" << "events_informations" << "files" << "files_collections"
                       << "files_informations" << "groups" << "limits" << "permissions" << "tags";
-    // Connect the server to the database
-    if (!this->_connection())
-    {
+    // Connects the server to the database
+    if (this->_connection())
+        this->isInitialized();
+    else
         Log::error("Connection to the database failed", "Database", "Database");
-        return ;
-    }
-    this->loaded = true;
 }
 
 Database::~Database()
@@ -454,4 +436,9 @@ void    Database::_displayUpdates(LightBird::IDatabase::Updates &updates)
         }
         std::cout << "==========" << std::endl << std::endl;
     }
+}
+
+Database    *Database::instance()
+{
+    return (Server::instance().getDatabase());
 }

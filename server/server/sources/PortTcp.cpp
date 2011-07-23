@@ -4,20 +4,25 @@
 #include "Log.h"
 #include "PortTcp.h"
 #include "SmartMutex.h"
+#include "Threads.h"
 
 PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
                  Port(port, LightBird::INetwork::TCP, protocols, maxClients)
 {
     this->moveToThread(this);
     this->tcpServer.moveToThread(this);
-    // Start the thread
-    this->start();
+    // Starts the thread
+    Threads::instance()->newThread(this, false);
     // Waits that the thread is started
     Future<bool>(this->threadStarted).getResult();
 }
 
 PortTcp::~PortTcp()
 {
+    SmartMutex  mutex(this->mutex, "PortTcp", "~PortTcp");
+
+    if (!mutex)
+        return ;
     // Quit the thread if it is still running
     this->quit();
     this->wait();
@@ -47,8 +52,15 @@ void    PortTcp::run()
     Port::_isListening(true);
     this->threadStarted.setResult(true);
     this->exec();
-    Log::info("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
+    SmartMutex mutex(this->mutex, "PortTcp", "run");
+    this->tcpServer.close();
+    // Remove the remaining clients
+    QListIterator<Client *> client(this->clients);
+    while (client.hasNext())
+        delete client.next();
+    this->clients.clear();
     this->moveToThread(QCoreApplication::instance()->thread());
+    Log::info("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
 }
 
 bool    PortTcp::read(QByteArray &data, Client *client)

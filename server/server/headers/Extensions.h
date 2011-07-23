@@ -18,7 +18,8 @@ class Extensions : public QObject,
     Q_INTERFACES(LightBird::IExtensions)
 
 public:
-    static Extensions   *instance(QObject *parent = 0);
+    Extensions(QObject *parent = 0);
+    ~Extensions();
 
     /// @brief Adds an extension plugin to manage.
     void                add(Plugin *plugin);
@@ -28,13 +29,13 @@ public:
     QList<void *>       get(const QString &name);
     /// @see LightBird::IExtensions::release
     void                release(QList<void *> extensions);
+    /// @brief Returns the instance of this class created by the Server.
+    static Extensions   *instance();
 
 signals:
     void                releaseSignal(QString id);
 
 private:
-    Extensions(QObject *parent = 0);
-    ~Extensions();
     Extensions(const Extensions &);
     Extensions &operator=(const Extensions &);
 
@@ -61,7 +62,6 @@ private:
     QMap<QString, Extension>  extensions;        ///< Contains the extensions currently used. The key is the name of the extension.
     QMap<QString, QString>    extensionsPlugins; ///< Associates the extensions names to the plugins that implements them.
     QMutex                    mutex;             ///< Makes the class members thread safe.
-    static Extensions         *_instance;
 };
 
 #endif // EXTENSIONS_H

@@ -11,27 +11,26 @@ int                     main(int argc, char **argv)
 {
     Arguments           arguments(argc, argv);
     QCoreApplication    *application;
-    Server              *server;
     int                 result;
 
     // Instanciates Qt core class
     application = ::loadQt(arguments);
     // Instanciates and initializes the server
-    if (*(server = new Server(arguments, application)) == false)
+    if (Server::instance(arguments, application))
     {
-        // If the initialization of the server failed displays the logs on the
-        // standard output, in case the error occured before the logs was initialized.
-        Log::instance()->print();
-        std::cerr << "An error occurred while initializing the server. Check the log entries for more information." << std::endl;
-        delete server;
-        while (true)
-            ;
-        return (1);
+        Log::info("Executing the main event loop", "Server", "_initialize");
+        result = application->exec();
+        Log::info("The main event loop has finished", Properties("code", QString::number(result)), "main.cpp", "main");
     }
-    Log::info("Executing the main event loop", "Server", "_initialize");
-    result = application->exec();
-    Log::info("The main event loop has finished", Properties("code", QString::number(result)), "main.cpp", "main");
-    delete server;
+    // An error occured during the initialization
+    else
+    {
+        Log::instance()->print();
+        Log::instance()->isDisplay(true);
+        std::cerr << "An error occurred while initializing the server. Check the log entries for more information." << std::endl;
+        result = 1;
+    }
+    Server::shutdown();
     delete application;
     while (true)
         ;

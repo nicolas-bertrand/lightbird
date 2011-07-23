@@ -1,5 +1,10 @@
 #include "Arguments.h"
 
+Arguments::Arguments() : argc(0),
+                         argv(NULL)
+{
+}
+
 Arguments::Arguments(int ac, char **av) : argc(ac),
                                           argv(av)
 {
@@ -20,6 +25,23 @@ Arguments::Arguments(int ac, char **av) : argc(ac),
 
 Arguments::~Arguments()
 {
+}
+
+Arguments::Arguments(const Arguments &arguments)
+{
+    *this = arguments;
+}
+
+Arguments &Arguments::operator=(const Arguments &arguments)
+{
+    if (this != &arguments)
+    {
+        this->arguments = arguments.arguments;
+        this->raw = arguments.raw;
+        this->argc = arguments.argc;
+        this->argv = arguments.argv;
+    }
+    return (*this);
 }
 
 QString Arguments::getConfiguration()

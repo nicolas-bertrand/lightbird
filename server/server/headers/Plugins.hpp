@@ -16,24 +16,14 @@
 # include "Plugin.hpp"
 # include "Future.hpp"
 
-/// @brief A class class used by the server to manipulate plugins.
-/// This class is a thread-safe singleton.
+/// @brief Manages the plugins of the server.
 class Plugins : public QThread
 {
     Q_OBJECT
 
 public:
-    /// @brief Initialize the singleton and launch its thread
-    /// at the first call. Then returns the singleton instance.
-    /// @param parent : The parent of the instance of the class.
-    /// @return The instance to the class Plugins.
-    static Plugins          *instance(QObject *parent = 0);
-    /// @brief If the Plugins instance is loaded
-    static bool             isLoaded();
-
-    /// @brief Contains the event loop that manage all the operations
-    /// on the plugins.
-    void                    run();
+    Plugins();
+    ~Plugins();
 
     /// @param id : The id of the plugin.
     Future<bool>            load(const QString &id);
@@ -45,7 +35,41 @@ public:
     Future<bool>            uninstall(const QString &id);
     /// @brief Unload all the plugins synchronously. This function block until all
     /// plugins has been unloaded, and it is not possible to load a plugin after that.
-    void                    unloadAll();
+    void                    shutdown();
+    /// @brief A templated method used to get an instance of a plugin.
+    /// Users must call release() after using this method, and must not
+    /// use the return pointer after that. Thus, one can be sure that the
+    /// plugin will not be unloaded between the calls of get() and release().
+    /// @param id : The id of the plugin.
+    /// @return A pointer to an instance of the plugin of class T, or NULL
+    /// if the plugin don't implements this interface.
+    template<class T>
+    T       *getInstance(const QString &id);
+    /// @brief This method do the same job as getInstances, except that only the first
+    /// plugin that implements the interface ans maches the context is returned. Users
+    /// must release it as soon as possible.
+    /// @return A QPair that contains the name and the instance of the first plugin that
+    /// matches. The pair is empty if no plugin corresponds.
+    /// @see getInstances
+    template<class T>
+    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
+                                    const QStringList &protocols, unsigned short port, const QString &method = "",
+                                    const QString &type = "", bool all = false);
+    /// @brief A convenance method for getInstance.
+    /// @see getInstance
+    template<class T>
+    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
+                                    const QString &protocol, unsigned short port, const QString &method = "",
+                                    const QString &type = "", bool all = false);
+    /// @brief A templated method used to get the instances of all the plugins
+    /// that implements an interface. Users must call release() for each plugins
+    /// stored in the returned map, and must not use its instances after that.
+    /// Thus, one can be sure that the plugins will not be unloaded between the
+    /// calls of getInstances() and release().
+    /// @return A map of the plugins that implements the interface. The key
+    /// is the id of the plugins.
+    template<class T>
+    QMap<QString, T *>  getInstances();
     /// @brief This templated method is used to get all the instances of the plugins
     /// that implements the interface T, and whose context matches the parameters.
     /// Users must call release() for each plugins stored in the returned map,
@@ -62,37 +86,12 @@ public:
     QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                      const QStringList &protocols, unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
-    /// @brief This method do the same job as getInstances, except that only the first
-    /// plugin that implements the interface ans maches the context is returned. Users
-    /// must release it as soon as possible.
-    /// @return A QPair that contains the name and the instance of the first plugin that
-    /// matches. The pair is empty if no plugin corresponds.
-    /// @see getInstances
-    template<class T>
-    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
-                                    const QStringList &protocols, unsigned short port, const QString &method = "",
-                                    const QString &type = "", bool all = false);
-    /// @brief A templated method used to get an instance of a plugin.
-    /// Users must call release() after using this method, and must not
-    /// use the return pointer after that. Thus, one can be sure that the
-    /// plugin will not be unloaded between the calls of get() and release().
-    /// @param id : The id of the plugin.
-    /// @return A pointer to an instance of the plugin of class T, or NULL
-    /// if the plugin don't implements this interface.
-    template<class T>
-    T       *getInstance(const QString &id);
     /// @brief A convenance method for getInstances.
     /// @see getInstances
     template<class T>
     QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                      const QString &protocol, unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
-    /// @brief A convenance method for getInstance.
-    /// @see getInstance
-    template<class T>
-    QPair<QString, T *> getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
-                                    const QString &protocol, unsigned short port, const QString &method = "",
-                                    const QString &type = "", bool all = false);
     /// @brief Releases a plugin. Must be call after get().
     /// @param id : The id of the plugin.
     /// @return True on success, false otherwise.
@@ -116,6 +115,8 @@ public:
     /// is stored in the configuration of the server.
     /// @param id : The id of the plugin.
     static bool             isInstalled(const QString &id);
+    /// @brief Returns the instance of this class created by the Server.
+    static Plugins          *instance();
 
     /// @see LightBird::IPlugins::getState
     LightBird::IPlugins::State getState(const QString &id);
@@ -142,8 +143,6 @@ signals:
 
 
 private:
-    Plugins(QObject *parent = 0);
-    ~Plugins();
     Plugins(const Plugins &);
     Plugins &operator=(const Plugins &);
 
@@ -154,6 +153,8 @@ private slots:
     void                    _uninstall(const QString &id, Future<bool> *future);
 
 private:
+    /// @brief Contains the event loop that manages all the operations on the plugins.
+    void                    run();
     /// @brief This method run recursively through all the directories in the plugins path,
     /// in order to find all the plugins accessible by the server.
     /// @param pluginsPath : The root path of the plugins.
@@ -163,50 +164,28 @@ private:
     /// @see getState
     LightBird::IPlugins::State _getState(const QString &id);
 
-    static Plugins          *_instance;         ///< The only instance of the class.
-    QMap<QString, Plugin *> plugins;            ///< The list of loaded plugins.
-    QStringList             orderedPlugins;     ///< Contains the id of the loaded plugins, and keep the order of their loading.
-    mutable QReadWriteLock  mutex;              ///< Used to secure the access to the plugins map when a thread use it.
-    QWaitCondition          wait;               ///< This condition is awakened when the thread is running for the first time, and when all plugin has been unloaded using unloadAll().
-    bool                    awake;              ///< If the wait condition has been called.
-    QObject                 *parent;            ///< The parent of the Plugins.
-    bool                    unloadAllPlugins;   ///< If true, no more plugins will be loaded. or installed.
+    QMap<QString, Plugin *> plugins;          ///< The list of loaded plugins.
+    QStringList             orderedPlugins;   ///< Contains the id of the loaded plugins, and keep the order of their loading.
+    QWaitCondition          wait;             ///< This condition is awakened when the thread is running for the first time, and when all plugin has been unloaded using unloadAll().
+    bool                    awake;            ///< If the wait condition has been called.
+    bool                    unloadAllPlugins; ///< If true, no more plugins will be loaded. or installed.
+    mutable QReadWriteLock  mutex;            ///< Used to secure the access to the plugins map when a thread use it.
 };
 
 template<class T>
-QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
-                                          const QStringList &protocols, unsigned short port,
-                                          const QString &method, const QString &type, bool all)
+T       *Plugins::getInstance(const QString &id)
 {
-    QMap<QString, T *>  instances;
-    T                   *instance = NULL;
-    QString             modeText = "server";
-    QString             transportText = "TCP";
-    Plugin              *plugin;
+    T   *instance = NULL;
 
-    if (mode == LightBird::IClient::CLIENT)
-        modeText = "client";
-    if (transport == LightBird::INetwork::UDP)
-        transportText = "UDP";
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugins", "getInstances");
-        return (instances);
+        Log::error("Deadlock", "Plugins", "getInstance");
+        return (instance);
     }
-    QStringListIterator it(this->orderedPlugins);
-    while (it.hasNext())
-    {
-        plugin = this->plugins[it.next()];
-        if ((instance = plugin->getInstance<T>()))
-        {
-            if (plugin->checkContext(modeText, transportText, protocols, port, method, type, all))
-                instances.insert(it.peekPrevious(), instance);
-            else
-                plugin->release();
-        }
-    }
+    if (this->plugins.contains(id))
+        instance = this->plugins.value(id)->getInstance<T>();
     this->mutex.unlock();
-    return (instances);
+    return (instance);
 }
 
 template<class T>
@@ -249,19 +228,70 @@ QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBir
 }
 
 template<class T>
-T       *Plugins::getInstance(const QString &id)
+QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
+                                         const QString &protocol, unsigned short port,
+                                         const QString &method, const QString &type, bool all)
 {
-    T   *instance = NULL;
+    return (this->getInstance<T>(mode, transport, QStringList(protocol), port, method, type, all));
+}
+
+template<class T>
+QMap<QString, T *>  Plugins::getInstances()
+{
+    QMap<QString, T *>  instances;
+    T                   *instance = NULL;
+    Plugin              *plugin;
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugins", "getInstance");
-        return (instance);
+        Log::error("Deadlock", "Plugins", "getInstances");
+        return (instances);
     }
-    if (this->plugins.contains(id))
-        instance = this->plugins.value(id)->getInstance<T>();
+    QStringListIterator it(this->orderedPlugins);
+    while (it.hasNext())
+    {
+        plugin = this->plugins[it.next()];
+        if ((instance = plugin->getInstance<T>()))
+            instances.insert(it.peekPrevious(), instance);
+    }
     this->mutex.unlock();
-    return (instance);
+    return (instances);
+}
+
+template<class T>
+QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
+                                          const QStringList &protocols, unsigned short port,
+                                          const QString &method, const QString &type, bool all)
+{
+    QMap<QString, T *>  instances;
+    T                   *instance = NULL;
+    QString             modeText = "server";
+    QString             transportText = "TCP";
+    Plugin              *plugin;
+
+    if (mode == LightBird::IClient::CLIENT)
+        modeText = "client";
+    if (transport == LightBird::INetwork::UDP)
+        transportText = "UDP";
+    if (!this->mutex.tryLockForRead(MAXTRYLOCK))
+    {
+        Log::error("Deadlock", "Plugins", "getInstances");
+        return (instances);
+    }
+    QStringListIterator it(this->orderedPlugins);
+    while (it.hasNext())
+    {
+        plugin = this->plugins[it.next()];
+        if ((instance = plugin->getInstance<T>()))
+        {
+            if (plugin->checkContext(modeText, transportText, protocols, port, method, type, all))
+                instances.insert(it.peekPrevious(), instance);
+            else
+                plugin->release();
+        }
+    }
+    this->mutex.unlock();
+    return (instances);
 }
 
 template<class T>
@@ -270,14 +300,6 @@ QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBi
                                           const QString &method, const QString &type, bool all)
 {
     return (this->getInstances<T>(mode, transport, QStringList(protocol), port, method, type, all));
-}
-
-template<class T>
-QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
-                                         const QString &protocol, unsigned short port,
-                                         const QString &method, const QString &type, bool all)
-{
-    return (this->getInstance<T>(mode, transport, QStringList(protocol), port, method, type, all));
 }
 
 #endif // PLUGINS_H

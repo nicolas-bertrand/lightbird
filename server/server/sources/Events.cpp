@@ -1,15 +1,7 @@
 #include "Defines.h"
 #include "Events.h"
 #include "Log.h"
-
-Events  *Events::_instance = NULL;
-
-Events  *Events::instance(QObject *parent)
-{
-    if (Events::_instance == NULL)
-        Events::_instance = new Events(parent);
-    return (Events::_instance);
-}
+#include "Server.h"
 
 Events::Events(QObject *parent) : QObject(parent)
 {
@@ -46,4 +38,9 @@ void    Events::send(const QString &event, const QVariant &property)
     while (it.hasNext())
         it.next()->post(event, property);
     this->mutex.unlock();
+}
+
+Events  *Events::instance()
+{
+    return (Server::instance().getEvents());
 }

@@ -2,16 +2,8 @@
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
+#include "Server.h"
 #include "SmartMutex.h"
-
-Extensions  *Extensions::_instance = NULL;
-
-Extensions  *Extensions::instance(QObject *parent)
-{
-    if (Extensions::_instance == NULL)
-        Extensions::_instance = new Extensions(parent);
-    return (Extensions::_instance);
-}
 
 Extensions::Extensions(QObject *parent) : QObject(parent)
 {
@@ -168,4 +160,9 @@ void        Extensions::_remove(const QString &plugin)
 void    Extensions::_release(QString id)
 {
     Plugins::instance()->release(id);
+}
+
+Extensions  *Extensions::instance()
+{
+    return (Server::instance().getExtensions());
 }

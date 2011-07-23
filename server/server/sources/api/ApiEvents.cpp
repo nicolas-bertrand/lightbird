@@ -16,8 +16,8 @@ ApiEvents::ApiEvents(const QString &id, bool event)
     // If the plugin implements IEvent, the thread is started
     if (event)
     {
-        // Starting the events thread
         this->moveToThread(this);
+        // Starting the events thread
         Threads::instance()->newThread(this);
         this->connect(this, SIGNAL(newEvent()), SLOT(_newEvent()), Qt::QueuedConnection);
         // Wait that the thread is started

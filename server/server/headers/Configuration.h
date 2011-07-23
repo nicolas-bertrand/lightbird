@@ -9,7 +9,7 @@
 # include "IConfiguration.h"
 
 /// @brief Server implementation of the API's IConfiguration.
-/// Manage an XML configuration file. This class is thread safe.
+/// Manage an XML configuration file.
 class Configuration : public QObject,
                       public LightBird::IConfiguration
 {

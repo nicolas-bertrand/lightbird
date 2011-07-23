@@ -5,8 +5,8 @@
 
 # include "IPlugins.h"
 
-/// @brief A class used by the plugins to manipulate plugins.
-/// This class is a thread safe singleton.
+/// @brief The server implementation of IPlugin which allows plugins to
+/// manipulate plugins.
 class ApiPlugins : public QObject,
                    public LightBird::IPlugins
 {
@@ -14,7 +14,8 @@ class ApiPlugins : public QObject,
     Q_INTERFACES(LightBird::IPlugins)
 
 public:
-    static ApiPlugins   *instance(QObject *parent = 0);
+    ApiPlugins(QObject *parent = 0);
+    ~ApiPlugins();
 
     QSharedPointer<LightBird::IFuture<bool> > load(const QString &id);
     QSharedPointer<LightBird::IFuture<bool> > unload(const QString &id);
@@ -27,14 +28,11 @@ public:
     QStringList         getUnloadedPlugins();
     QStringList         getInstalledPlugins();
     QStringList         getUninstalledPlugins();
+    static ApiPlugins   *instance();
 
 private:
-    ApiPlugins(QObject *parent = 0);
-    ~ApiPlugins();
     ApiPlugins(const ApiPlugins &);
     ApiPlugins &operator=(const ApiPlugins &);
-
-    static ApiPlugins   *_instance; ///< The instance of the singleton.
 };
 
 #endif // APIPLUGINS_H

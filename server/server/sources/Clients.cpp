@@ -11,23 +11,13 @@ Clients::Clients()
 {
     this->moveToThread(this);
     // Starts the thread
-    this->start();
+    Threads::instance()->newThread(this, false);
     // Waits that the thread is started
     Future<bool>(this->threadStarted).getResult();
 }
 
 Clients::~Clients()
 {
-    // Quit the thread if it is still running
-    this->quit();
-    this->wait();
-    // Release the remaining connections requests
-    QMapIterator<QString, QPair<Future<QString> *, int> > it(this->connections);
-    while (it.hasNext())
-        delete it.next().value().first;
-    // Clean the write buffer
-    while (!this->writeBuffer.isEmpty())
-        delete this->writeBuffer.dequeue().second;
 }
 
 void    Clients::run()
@@ -38,6 +28,7 @@ void    Clients::run()
     QObject::connect(this, SIGNAL(writeSignal()), this, SLOT(_write()), Qt::QueuedConnection);
     this->threadStarted.setResult(true);
     this->exec();
+    this->shutdown();
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
@@ -188,6 +179,28 @@ bool            Clients::disconnect(const QString &id)
     return (false);
 }
 
+void            Clients::shutdown()
+{
+    SmartMutex  mutex(this->mutex, "Clients", "shutdown");
+
+    if (!mutex)
+        return ;
+    // Releases the remaining connections requests
+    QMapIterator<QString, QPair<Future<QString> *, int> > it(this->connections);
+    while (it.hasNext())
+        delete it.next().value().first;
+    this->connections.clear();
+    // Cleans the write buffer
+    while (!this->writeBuffer.isEmpty())
+        delete this->writeBuffer.dequeue().second;
+    this->writeBuffer.clear();
+    // Removes the remaining clients
+    QListIterator<Client *> client(this->clients);
+    while (client.hasNext())
+        delete client.next();
+    this->clients.clear();
+}
+
 bool    Clients::read(QByteArray &data, Client *client)
 {
     int read;
@@ -268,9 +281,9 @@ bool            Clients::connect(Client *client)
         return (false);
     // Gets the future that will be unlocked when the connection is etablished
     Future<QString> future(*this->connections.value(id).first);
-    mutex.unlock();
     // The connection to the client is made in the thread
     emit this->connectSignal(id);
+    mutex.unlock();
     // Waits the result of the connection
     return (!future.getResult().isEmpty());
 }

@@ -15,19 +15,19 @@ class ApiGuis : public QObject,
     Q_INTERFACES(LightBird::IGuis)
 
 public:
-    static ApiGuis *instance(QObject *parent = 0);
+    ApiGuis(QObject *parent = 0);
+    ~ApiGuis();
 
     void    show(const QString &id = "");
     void    hide(const QString &id = "");
     bool    noGui();
+    static ApiGuis *instance();
 
 signals:
     void    showSignal(const QString &id);
     void    hideSignal(const QString &id);
 
 private:
-    ApiGuis(QObject *parent = 0);
-    ~ApiGuis();
     ApiGuis(const ApiGuis &);
     ApiGuis &operator=(const ApiGuis &);
 
@@ -36,8 +36,7 @@ private slots:
     void    _hide(const QString &id);
 
 private:
-    static ApiGuis  *_instance; ///< The instance of the singleton.
-    bool            isNoGui;    ///< True if the server is in noGui mode.
+    bool    isNoGui; ///< True if the server is in noGui mode.
 };
 
 #endif // APIGUIS_H

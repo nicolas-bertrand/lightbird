@@ -1,15 +1,7 @@
 #include "ApiPlugins.h"
 #include "Log.h"
 #include "Plugins.hpp"
-
-ApiPlugins      *ApiPlugins::_instance = NULL;
-
-ApiPlugins      *ApiPlugins::instance(QObject *parent)
-{
-    if (ApiPlugins::_instance == NULL)
-        ApiPlugins::_instance = new ApiPlugins(parent);
-    return (ApiPlugins::_instance);
-}
+#include "Server.h"
 
 ApiPlugins::ApiPlugins(QObject *parent) : QObject(parent)
 {
@@ -74,4 +66,9 @@ QStringList ApiPlugins::getInstalledPlugins()
 QStringList ApiPlugins::getUninstalledPlugins()
 {
     return (Plugins::instance()->getUninstalledPlugins());
+}
+
+ApiPlugins  *ApiPlugins::instance()
+{
+    return (Server::instance().getApiPlugins());
 }

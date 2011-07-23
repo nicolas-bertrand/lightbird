@@ -6,24 +6,47 @@
 
 #include "IGui.h"
 
-#include "ApiGuis.h"
-#include "Configurations.h"
-#include "Database.h"
-#include "Events.h"
 #include "Log.h"
-#include "Network.h"
-#include "Plugins.hpp"
 #include "Server.h"
-#include "ThreadPool.h"
-#include "Threads.h"
 #include "Tools.h"
 
-bool    Server::restart = false;
+Server  *Server::_instance = NULL;
 
-Server::Server(Arguments &args, QObject *parent) : QObject(parent),
-                                                   arguments(args),
-                                                   initialized(false)
+Server  &Server::instance(Arguments &args, QObject *parent)
 {
+    if (Server::_instance == NULL)
+        Server::_instance = new Server(args, parent);
+    return (*Server::_instance);
+}
+
+Server  &Server::instance()
+{
+    if (Server::_instance == NULL)
+        Server::_instance = new Server();
+    return (*Server::_instance);
+}
+
+void    Server::shutdown()
+{
+    delete Server::_instance;
+    Server::_instance = NULL;
+}
+
+Server::Server(Arguments args, QObject *parent) : QObject(parent),
+                                                  arguments(args),
+                                                  restart(false),
+                                                  apiGuis(NULL),
+                                                  apiPlugins(NULL),
+                                                  configurations(NULL),
+                                                  database(NULL),
+                                                  events(NULL),
+                                                  extensions(NULL),
+                                                  network(NULL),
+                                                  plugins(NULL),
+                                                  threadPool(NULL),
+                                                  threads(NULL)
+{
+    Server::_instance = this;
     Log::info("Server starting", Properties("command line", this->arguments.toString()), "Server", "Server");
     this->_initialize();
 }
@@ -37,16 +60,16 @@ void    Server::_initialize()
     ::qsrand((unsigned)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
     // Then the configuration is loaded
     Log::info("Loading the server configuration", "Server", "_initialize");
-    if (!Configurations::server(this->arguments.getConfiguration(), this))
+    if (!*(this->configurations = new Configurations(this->arguments.getConfiguration(), this)))
         return Log::fatal("Failed to load the server configuration", "Server", "_initialize");
     // Tells Qt where are its plugins
     QCoreApplication::addLibraryPath(Configurations::instance()->get("QtPluginsPath"));
     // The threads manager must be initialized just after the configuration
     Log::info("Loading the thread manager", "Server", "_initialize");
-    Threads::instance(this);
+    this->threads = new Threads(this);
     // Load the thread pool
     Log::info("Loading the thread pool", "Server", "_initialize");
-    ThreadPool::instance(this);
+    this->threadPool = new ThreadPool(this);
     // Load the translator
     Log::info("Loading the translation", "Server", "_initialize");
     if (!this->_loadTranslation(Configurations::instance()->get("languagesPath") + "/", ":languages/"))
@@ -60,24 +83,24 @@ void    Server::_initialize()
         return Log::fatal("Failed to manage the temporary directory", "Server", "_initialize");
     // Load the database
     Log::info("Loading the database", "Server", "_initialize");
-    if (!Database::instance(this))
+    if (!*(this->database = new Database(this)))
         return Log::fatal("Failed to load the database", "Server", "_initialize");
     // Load the network
     Log::info("Loading the network", "Server", "_initialize");
-    Network::instance(this);
+    this->network = new Network(this);
     this->_loadNetwork();
     // Load the events system
-    Events::instance(this);
-    // The plugins are loaded
+    this->events = new Events(this);
+    // Load the plugins
     Log::info("Loading the plugins", "Server", "_initialize");
-    Plugins::instance(this);
+    this->plugins = new Plugins();
     this->_loadPlugins();
     // The log is then initialized which mean that previous logs are really write
     Log::info("Loading the logs", "Server", "_initialize");
     Log::instance()->setMode(Log::WRITE);
     Log::info("Server initialized", "Server", "_initialize");
     Events::instance()->send("server_started");
-    this->initialized = true;
+    this->isInitialized();
 }
 
 Server::~Server()
@@ -85,15 +108,37 @@ Server::~Server()
     Log::info("Server shutdown", "Server", "~Server");
     // From now on, the logs are printed directly on the standard output, and ILog will not be called anymore
     Log::instance()->setMode(Log::PRINT);
-    // Unload all the plugins (block until all plugins are unloaded)
-    if (Plugins::isLoaded())
-        Plugins::instance()->unloadAll();
-    // Finish all the threads (only once all the plugins are unloaded)
-    if (Threads::isLoaded())
-        Threads::instance()->deleteAll();
+    // Shutdown the features of the server
+    Log::info("Unloads all the plugins", "Server", "~Server");
+    if (this->plugins)
+        this->plugins->shutdown();
+    Log::info("Closes the thread pool", "Server", "~Server");
+    if (this->threadPool)
+        this->threadPool->shutdown();
+    Log::info("Finishes the other threads", "Server", "~Server");
+    if (this->threads)
+        this->threads->shutdown();
+    Log::info("Shutdown the network", "Server", "~Server");
+    if (this->network)
+        this->network->shutdown();
+    Log::info("Cleans the server features", "Server", "~Server");
+    // The reason why we dont delete directly these objects and call shutdown
+    // is that they still need each other before this point. Now we are guaranteed
+    // that there is no remaining activity on the server and we can destroy its
+    // features safely.
+    delete this->plugins;
+    delete this->extensions;
+    delete this->apiPlugins;
+    delete this->apiGuis;
+    delete this->events;
+    delete this->network;
+    delete this->database;
+    delete this->threadPool;
+    delete this->threads;
+    delete this->configurations;
     Log::info("Server stopped", "Server", "~Server");
     // Restart the server if necessary
-    if (Server::restart)
+    if (this->restart)
         QProcess::startDetached(QCoreApplication::instance()->applicationFilePath(), this->arguments.toStringList(), QDir::currentPath());
 }
 
@@ -185,8 +230,8 @@ void    Server::_loadNetwork()
         if (it.peekNext().value("transport").toUpper() == "UDP")
             transport = LightBird::INetwork::UDP;
         if (Network::instance()->openPort(it.peekNext().value("port").toShort(),
-                                         it.peekNext().value("protocols").simplified().split(' '),
-                                         transport, it.peekNext().value("maxClients").toUInt()))
+                                          it.peekNext().value("protocols").simplified().split(' '),
+                                          transport, it.peekNext().value("maxClients").toUInt()))
             loaded = true;
         it.next();
     }
@@ -202,10 +247,13 @@ void            Server::_loadPlugins()
     QStringList list;
     bool        loaded = false;
 
+    // Load some API and the extension manager
+    this->apiGuis = new ApiGuis(this);
+    this->apiPlugins = new ApiPlugins(this);
+    this->extensions = new Extensions(this);
     // Allows the server to know when a plugin is loaded (only in GUI mode)
     if (qobject_cast<QApplication *>(QCoreApplication::instance()))
         QObject::connect(Plugins::instance(), SIGNAL(loaded(QString)), this, SLOT(_pluginLoaded(QString)), Qt::QueuedConnection);
-    ApiGuis::instance(this);
     // If the word "all" is in the node "plugins", all the installed plugins are loaded
     if (Configurations::instance()->get("plugins").trimmed().toLower() == "all")
     {
@@ -253,7 +301,58 @@ void                Server::_pluginLoaded(QString id)
     }
 }
 
-Server::operator bool()
+void            Server::stop(bool restart)
 {
-    return (this->initialized);
+    this->restart = restart;
+    QCoreApplication::quit();
+}
+
+ApiGuis         *Server::getApiGuis()
+{
+    return (Server::instance().getApiGuis());
+}
+
+ApiPlugins      *Server::getApiPlugins()
+{
+    return (Server::instance().getApiPlugins());
+}
+
+Configuration   *Server::getConfiguration(const QString &configuration, const QString &alternative)
+{
+    return (Server::instance().configurations->getConfiguration(configuration, alternative));
+}
+
+Database        *Server::getDatabase()
+{
+    return (Server::instance().database);
+}
+
+Events          *Server::getEvents()
+{
+    return (Server::instance().events);
+}
+
+Extensions      *Server::getExtensions()
+{
+    return (Server::instance().extensions);
+}
+
+Network         *Server::getNetwork()
+{
+    return (Server::instance().network);
+}
+
+Plugins         *Server::getPlugins()
+{
+    return (Server::instance().plugins);
+}
+
+ThreadPool      *Server::getThreadPool()
+{
+    return (Server::instance().threadPool);
+}
+
+Threads         *Server::getThreads()
+{
+    return (Server::instance().threads);
 }

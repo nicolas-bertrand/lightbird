@@ -5,15 +5,7 @@
 #include "ApiGuis.h"
 #include "Log.h"
 #include "Plugins.hpp"
-
-ApiGuis *ApiGuis::_instance = NULL;
-
-ApiGuis *ApiGuis::instance(QObject *parent)
-{
-    if (ApiGuis::_instance == NULL)
-        ApiGuis::_instance = new ApiGuis(parent);
-    return (ApiGuis::_instance);
-}
+#include "Server.h"
 
 ApiGuis::ApiGuis(QObject *parent) : QObject(parent)
 {
@@ -53,15 +45,11 @@ void    ApiGuis::_show(const QString &id)
 
     if (id.isEmpty())
     {
-        QStringListIterator it(Plugins::instance()->getLoadedPlugins());
+        QMapIterator<QString, LightBird::IGui *> it(Plugins::instance()->getInstances<LightBird::IGui>());
         while (it.hasNext())
         {
-            if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(it.peekNext())))
-            {
-                instance->show();
-                Plugins::instance()->release(it.peekNext());
-            }
-            it.next();
+            it.peekNext().value()->show();
+            Plugins::instance()->release(it.next().key());
         }
     }
     else if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(id)))
@@ -77,15 +65,11 @@ void    ApiGuis::_hide(const QString &id)
 
     if (id.isEmpty())
     {
-        QStringListIterator it(Plugins::instance()->getLoadedPlugins());
+        QMapIterator<QString, LightBird::IGui *> it(Plugins::instance()->getInstances<LightBird::IGui>());
         while (it.hasNext())
         {
-            if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(it.peekNext())))
-            {
-                instance->hide();
-                Plugins::instance()->release(it.peekNext());
-            }
-            it.next();
+            it.peekNext().value()->hide();
+            Plugins::instance()->release(it.next().key());
         }
     }
     else if ((instance = Plugins::instance()->getInstance<LightBird::IGui>(id)))
@@ -93,4 +77,9 @@ void    ApiGuis::_hide(const QString &id)
         instance->hide();
         Plugins::instance()->release(id);
     }
+}
+
+ApiGuis *ApiGuis::instance()
+{
+    return (Server::instance().getApiGuis());
 }

@@ -5,16 +5,8 @@
 #include "Network.h"
 #include "PortTcp.h"
 #include "PortUdp.h"
+#include "Server.h"
 #include "SmartMutex.h"
-
-Network     *Network::_instance = NULL;
-
-Network     *Network::instance(QObject *parent)
-{
-    if (Network::_instance == NULL)
-        Network::_instance = new Network(parent);
-    return (Network::_instance);
-}
 
 Network::Network(QObject *parent) : QObject(parent)
 {
@@ -22,6 +14,7 @@ Network::Network(QObject *parent) : QObject(parent)
 
 Network::~Network()
 {
+    this->shutdown();
     Log::trace("Network destroyed!", "Network", "~Network");
 }
 
@@ -60,7 +53,6 @@ bool            Network::openPort(unsigned short port, const QStringList &protoc
 bool            Network::closePort(unsigned short port)
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "closePort");
-    Port        *p;
 
     if (!mutex)
         return (false);
@@ -76,9 +68,8 @@ bool            Network::closePort(unsigned short port)
         Log::warning("The port is already removing", Properties("port", port), "Network", "closePort");
         return (false);
     }
-    p = this->ports[port];
     // Forbids new connections to this port and removes all the remaining connected clients
-    p->close();
+    this->ports[port]->close();
     return (true);
 }
 
@@ -176,6 +167,27 @@ bool            Network::send(const QString &idClient, const QString &idPlugin, 
     return (this->clients.send(idClient, idPlugin, protocol));
 }
 
+void            Network::shutdown()
+{
+    SmartMutex  mutex(this->mutex, "Network", "shutdown");
+
+    if (!mutex)
+        return ;
+    // Quits the threads
+    QMapIterator<unsigned short, Port *> it(this->ports);
+    while (it.hasNext())
+        it.next().value()->quit();
+    it.toFront();
+    // Waits until the threads are finished
+    while (it.hasNext())
+        it.next().value()->wait();
+    it.toFront();
+    // Destroys the ports
+    while (it.hasNext())
+        delete it.next().value();
+    this->ports.clear();
+}
+
 void            Network::_finished()
 {
     SmartMutex  mutex(this->mutex, "Network", "_finished");
@@ -193,4 +205,9 @@ void            Network::_finished()
             it.remove();
         }
     }
+}
+
+Network *Network::instance()
+{
+    return (Server::instance().getNetwork());
 }

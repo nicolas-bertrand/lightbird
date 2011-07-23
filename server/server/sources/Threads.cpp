@@ -1,33 +1,17 @@
 #include "Defines.h"
 #include "Log.h"
+#include "Server.h"
 #include "SmartMutex.h"
 #include "Threads.h"
-
-Threads *Threads::_instance = NULL;
 
 Threads::Threads(QObject *parent) : QObject(parent)
 {
 }
 
-bool    Threads::isLoaded()
-{
-    if (Threads::_instance)
-        return (true);
-    return (false);
-}
-
 Threads::~Threads()
 {
-    // Detele all the remaining threads before the destruction of the singleton
-    this->deleteAll();
+    this->shutdown();
     Log::trace("Threads destroyed!", "Threads", "~Threads");
-}
-
-Threads *Threads::instance(QObject *parent)
-{
-    if (_instance == NULL)
-        _instance = new Threads(parent);
-    return (_instance);
 }
 
 void            Threads::newThread(QThread *thread, bool remove)
@@ -70,16 +54,12 @@ void            Threads::deleteThread(QThread *thread)
     }
 }
 
-void            Threads::deleteAll()
+void    Threads::shutdown()
 {
-    SmartMutex  mutex(this->mutex, "Threads", "deleteAll");
+    SmartMutex  mutex(this->mutex, "Threads", "shutdown");
 
     if (!mutex)
         return ;
-    // If all the threads are already deleted
-    if (this->threads.isEmpty())
-        return ;
-    Log::info("Deleting all the threads", "Threads", "deleteAll");
     QMutableMapIterator<QThread *, bool> it(this->threads);
     // Quit the event loop of all the threads
     while (it.hasNext())
@@ -97,8 +77,8 @@ void            Threads::deleteAll()
     while (it.hasNext())
     {
         it.next();
-        // Detele the object if it is orphan, and is not the log manager
-        if (it.value() && it.key()->parent() == NULL && it.key() != Log::instance())
+        // Detele the object if it is orphan
+        if (it.value() && it.key()->parent() == NULL)
         {
             if (QThread::currentThread() == it.key()->thread())
                 delete it.key();
@@ -122,8 +102,8 @@ void            Threads::_threadFinished()
         if (it.key()->isFinished())
         {
             Log::trace("Thread finished", Properties("thread", QString::number((quint64)it.key(), 16)).add("name", it.key()->objectName(), false), "Threads", "_threadFinished");
-            // Detele the object if it is orphan, and is not the log manager
-            if (it.value() && it.key()->parent() == NULL && it.key() != Log::instance())
+            // Detele the object if it is orphan
+            if (it.value() && it.key()->parent() == NULL)
             {
                 if (QThread::currentThread() == it.key()->thread())
                     delete it.key();
@@ -155,4 +135,9 @@ void            Threads::_threadDestroyed(QObject *object)
             break;
         }
     }
+}
+
+Threads *Threads::instance()
+{
+    return (Server::instance().getThreads());
 }

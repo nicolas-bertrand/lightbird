@@ -3,6 +3,7 @@
 #include "Log.h"
 #include "PortUdp.h"
 #include "SmartMutex.h"
+#include "Threads.h"
 
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
                  Port(port, LightBird::INetwork::UDP, protocols, maxClients)
@@ -10,7 +11,7 @@ PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int
     this->moveToThread(this);
     this->socket.moveToThread(this);
     // Start the thread
-    this->start();
+    Threads::instance()->newThread(this, false);
     // Waits that the thread is started
     Future<bool>(this->threadStarted).getResult();
 }
@@ -40,8 +41,15 @@ void    PortUdp::run()
     Port::_isListening(true);
     this->threadStarted.setResult(true);
     this->exec();
-    Log::info("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
+    SmartMutex mutex(this->mutex, "PortUdp", "run");
+    this->socket.close();
+    // Remove the remaining clients
+    QListIterator<Client *> client(this->clients);
+    while (client.hasNext())
+        delete client.next();
+    this->clients.clear();
     this->moveToThread(QCoreApplication::instance()->thread());
+    Log::info("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
 }
 
 bool    PortUdp::read(QByteArray &data, Client *)

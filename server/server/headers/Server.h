@@ -4,28 +4,54 @@
 # include <QObject>
 # include <QString>
 
+# include "ApiGuis.h"
+# include "ApiPlugins.h"
 # include "Arguments.h"
+# include "Configurations.h"
+# include "Database.h"
+# include "Events.h"
+# include "Extensions.h"
+# include "Initialize.h"
+# include "Network.h"
+# include "Plugins.hpp"
+# include "ThreadPool.h"
+# include "Threads.h"
 
-/// @brief The main class, called to initialize the server database, configuration,
-/// plugins... and which also cleans the server before it quits.
-class Server : public QObject
+/// @brief The main class of the LightBird server.
+class Server : public QObject,
+               public Initialize
 {
     Q_OBJECT
 
 public:
-    /// @brief Initialize all the component of the server.
-    Server(Arguments &arguments, QObject *parent = 0);
-    /// @brief Stop the server. This could take some time, since all the working
-    /// thread has to be finished.
-    ~Server();
+    /// @brief Initializes the server with the arguments in parameter.
+    static Server   &instance(Arguments &args, QObject *parent);
+    /// @brief Provides access to the Server instance.
+    static Server   &instance();
+    /// @brief Shutdown the Server and delete its instance.
+    static void     shutdown();
 
-    /// @return True if the server is correctly initialized.
-    operator bool();
-    /// @brief If true the server will be restarted after its destruction.
-    static bool restart;
+    /// @brief Stops the server, ie this entire process.
+    /// @param restart : It true, the server will be restarted in another process.
+    void            stop(bool restart = false);
+    // These methods allows to access to the features of the server.
+    ApiGuis         *getApiGuis();
+    ApiPlugins      *getApiPlugins();
+    Configuration   *getConfiguration(const QString &configuration, const QString &alternative);
+    Database        *getDatabase();
+    Events          *getEvents();
+    Extensions      *getExtensions();
+    Network         *getNetwork();
+    Plugins         *getPlugins();
+    ThreadPool      *getThreadPool();
+    Threads         *getThreads();
 
 private:
-    Server();
+    /// @brief Initializes all the components of the server.
+    Server(Arguments arguments = Arguments(), QObject *parent = 0);
+    /// @brief Stops the server. This may take some time, since all the working
+    /// threads have to be finished.
+    ~Server();
     Server(const Server &server);
     Server  &operator=(const Server &server);
 
@@ -55,8 +81,20 @@ private slots:
     void    _pluginLoaded(QString id);
 
 private:
-    Arguments &arguments;  ///< Stores the arguments used to launch the server.
-    bool      initialized; ///< True if the server has been correctly initialized.
+    Arguments       arguments;  ///< Stores the arguments used to launch the server.
+    bool            restart;    ///< If true, the server is going to be restarted.
+    static Server   *_instance; ///< The instance of the Server singleton.
+    // The following members manages all the features of the server.
+    ApiGuis         *apiGuis;
+    ApiPlugins      *apiPlugins;
+    Configurations  *configurations;
+    Database        *database;
+    Events          *events;
+    Extensions      *extensions;
+    Network         *network;
+    Plugins         *plugins;
+    ThreadPool      *threadPool;
+    Threads         *threads;
 };
 
 #endif // SERVER_H

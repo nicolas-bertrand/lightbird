@@ -1,17 +1,9 @@
 #include "Configurations.h"
 #include "defines.h"
 #include "Log.h"
+#include "Server.h"
 #include "Thread.h"
 #include "ThreadPool.h"
-
-ThreadPool *ThreadPool::_instance = NULL;
-
-ThreadPool *ThreadPool::instance(QObject *parent)
-{
-    if (ThreadPool::_instance == NULL)
-        ThreadPool::_instance = new ThreadPool(parent);
-    return (ThreadPool::_instance);
-}
 
 ThreadPool::ThreadPool(QObject *parent) : QObject(parent)
 {
@@ -22,23 +14,8 @@ ThreadPool::ThreadPool(QObject *parent) : QObject(parent)
 
 ThreadPool::~ThreadPool()
 {
+    this->shutdown();
     Log::trace("ThreadPool destroyed!", "ThreadPool", "~ThreadPool");
-    this->mutex.lock();
-    QListIterator<Thread *> it(this->threads);
-    // Exit the event loop of each threads
-    while (it.hasNext())
-        it.next()->exit();
-    it.toFront();
-    // Wait until each thread is finished and deleted
-    while (it.hasNext())
-    {
-        it.peekNext()->wait();
-        it.next()->deleteLater();
-    }
-    this->threads.clear();
-    this->available.clear();
-    this->tasks.clear();
-    this->mutex.unlock();
 }
 
 void    ThreadPool::addTask(ThreadPool::ITask *task)
@@ -65,6 +42,28 @@ void    ThreadPool::setThreadNumber(unsigned threadNumber)
     for (unsigned i = this->threads.count(); i > this->threadsNumber && !this->available.isEmpty(); --i)
         this->_removeThread(this->available.head());
     this->mutex.unlock();
+}
+
+void    ThreadPool::shutdown()
+{
+    this->mutex.lock();
+    QListIterator<Thread *> it(this->threads);
+    // Quits the event loop of each threads
+    while (it.hasNext())
+        it.next()->quit();
+    this->threadsNumber = 0;
+    this->threads.clear();
+    this->available.clear();
+    this->tasks.clear();
+    it.toFront();
+    this->mutex.unlock();
+    // Waits until each thread is finished
+    while (it.hasNext())
+        it.next()->wait();
+    it.toFront();
+    // Destroys the threads
+    while (it.hasNext())
+        delete it.next();
 }
 
 void    ThreadPool::_threadAvailable(Thread *thread)
@@ -105,4 +104,9 @@ void    ThreadPool::_executeTask()
 QThread *ThreadPool::ITask::getThread()
 {
     return (this->thread);
+}
+
+ThreadPool  *ThreadPool::instance()
+{
+    return (Server::instance().getThreadPool());
 }

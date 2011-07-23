@@ -57,6 +57,7 @@ HEADERS += headers/Arguments.h \
     headers/Events.h \
     headers/Extensions.h \
     headers/Future.hpp \
+    headers/Initialize.h \
     headers/IReadWrite.h \
     headers/Log.h \
     headers/Network.h \
@@ -110,6 +111,7 @@ SOURCES += sources/main.cpp \
     sources/EngineServer.cpp \
     sources/Events.cpp \
     sources/Extensions.cpp \
+    sources/Initialize.cpp \
     sources/Log.cpp \
     sources/Network.cpp \
     sources/Plugin.cpp \

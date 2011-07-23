@@ -5,42 +5,32 @@
 #include "Defines.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "Server.h"
 #include "SmartMutex.h"
 #include "Tools.h"
 
-QMap<QString, Configuration *>  Configurations::instances;
-QMutex                          Configurations::mutex(QMutex::Recursive);
-
-Configuration       *Configurations::server(const QString &configurationPath, QObject *parent)
+Configurations::Configurations(const QString &configurationPath, QObject *parent) : QObject(parent),
+                                                                                    mutex(QMutex::Recursive)
 {
     QString         path = configurationPath;
     Configuration   *instance;
-    SmartMutex      mutex(Configurations::mutex, "Configurations", "server");
+    SmartMutex      mutex(this->mutex, "Configurations", "server");
 
     if (!mutex)
-        return (NULL);
-    // Return the instance if it exists
-    if (Configurations::instances.contains(path))
-    {
-        instance = Configurations::instances[""];
-        return (instance);
-    }
-
-    // Instanciate the configuration of the server
+        return ;
+    // Creates the configuration of the server
     if (path.isEmpty())
         path = DEFAULT_CONFIGURATION_DIRECTORY + QString("/") + DEFAULT_CONFIGURATION_FILE;
-    Configurations::instances[""] = new Configuration(path, DEFAULT_CONFIGURATION_RESSOURCE, parent);
-
+    this->instances[""] = new Configuration(path, DEFAULT_CONFIGURATION_RESSOURCE, parent);
     // If the configuration failed to load
-    if (*Configurations::instances[""] == false)
+    if (*this->instances[""] == false)
     {
         Log::error("Failed to load the configuration", "Configurations", "instance");
-        delete Configurations::instances[""];
-        Configurations::instances.remove("");
-        return (NULL);
+        delete this->instances[""];
+        this->instances.remove("");
+        return ;
     }
-    instance = Configurations::instances[""];
-
+    instance = this->instances[""];
     //  Defines the default values
     if (instance->get("pluginsPath").isEmpty())
         instance->set("pluginsPath", DEFAULT_PLUGINS_PATH);
@@ -74,26 +64,26 @@ Configuration       *Configurations::server(const QString &configurationPath, QO
         instance->set("permissions/ownerInheritance", DEFAULT_PERMISSIONS_OWNERINHERITANCE);
     if (instance->get("permissions/groupInheritance").isEmpty())
         instance->set("permissions/groupInheritance", DEFAULT_PERMISSIONS_GROUPINHERITANCE);
-    return (instance);
+    this->isInitialized();
 }
 
-Configuration       *Configurations::instance(const QString &configuration, const QString &alternative)
+Configuration       *Configurations::getConfiguration(const QString &configuration, const QString &alternative)
 {
     QString         cleaned;
     QString         path;
     Configuration   *instance = NULL;
-    SmartMutex      mutex(Configurations::mutex, "Configurations", "instance");
+    SmartMutex      mutex(this->mutex, "Configurations", "instance");
 
     if (!mutex)
         return (NULL);
     // If the path is empty, the server configuration is returned
     if (configuration.isEmpty())
     {
-        instance = Configurations::instances.value("");
+        instance = this->instances.value("");
         return (instance);
     }
     // If the server configuration is not loaded
-    if (!Configurations::instances.contains(""))
+    if (!this->instances.contains(""))
     {
         Log::error("The configuration of the server must be initialized first", Properties("path", configuration).add("alternative", alternative), "Configurations", "instance");
         return (NULL);
@@ -104,11 +94,11 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     if (cleaned.at(cleaned.size() - 1) == '/')
         cleaned += DEFAULT_CONFIGURATION_FILE;
     // Otherwise it can be the id of a plugin
-    else if (QFileInfo(Configurations::instances[""]->get("pluginsPath") + "/" + cleaned).isDir())
+    else if (QFileInfo(this->instances[""]->get("pluginsPath") + "/" + cleaned).isDir())
     {
         path = Plugins::checkId(Tools::cleanPath(cleaned));
         // Creates the configuration of the plugin if it doesn't exists
-        if (!Configurations::instances.contains(path) && !*(instance = new ApiConfiguration(path)))
+        if (!this->instances.contains(path) && !*(instance = new ApiConfiguration(path)))
         {
             Log::error("Failed to load the configuration of the plugin", Properties("id", path), "Configurations", "instance");
             delete instance;
@@ -119,7 +109,7 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     if (path.isEmpty())
         path = Tools::cleanPath(cleaned);
     // Creates the configuration if it doesn't exists
-    if (instance == NULL && !Configurations::instances.contains(path) &&
+    if (instance == NULL && !this->instances.contains(path) &&
         !*(instance = new Configuration(path, alternative)))
     {
         Log::error("Failed to load the configuration", Properties("path", path).add("alternative", alternative), "Configurations", "instance");
@@ -130,14 +120,19 @@ Configuration       *Configurations::instance(const QString &configuration, cons
     if (instance)
     {
         // Add it to the configurations
-        Configurations::instances[path] = instance;
+        this->instances[path] = instance;
         // The living thread of the configuration must be the same as the server configuration to have the same parent
-        Configurations::instances[path]->moveToThread(Configurations::instances[""]->thread());
+        this->instances[path]->moveToThread(this->instances[""]->thread());
         // Set the parent of the configuration (it will be set in the parent thread)
-        Configurations::instances[path]->setParent(Configurations::instances[""]->parent());
+        this->instances[path]->setParent(this->instances[""]->parent());
     }
     // Otherwise get the configuration
     else
-        instance = Configurations::instances.value(path);
+        instance = this->instances.value(path);
     return (instance);
+}
+
+Configuration *Configurations::instance(const QString &path, const QString &alternative)
+{
+    return (Server::instance().getConfiguration(path, alternative));
 }

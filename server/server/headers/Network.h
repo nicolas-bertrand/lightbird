@@ -19,8 +19,8 @@ class Network : public QObject
     Q_OBJECT
 
 public:
-    /// @brief Returns the instance of the Network.
-    static Network  *instance(QObject *parent = 0);
+    Network(QObject *parent = 0);
+    ~Network();
 
     /// @see LightBird::INetwork::openPort
     bool            openPort(unsigned short port, const QStringList &protocols = QStringList(),
@@ -47,10 +47,12 @@ public:
     bool            disconnect(const QString &id);
     /// @see LightBird::INetwork::send
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "");
+    /// @brief Quits all the ports threads and delete them.
+    void            shutdown();
+    /// @brief Returns the instance of this class created by the Server.
+    static Network  *instance();
 
 private:
-    Network(QObject *parent = 0);
-    ~Network();
     Network(const Network &);
     Network &operator=(const Network &);
 
@@ -59,10 +61,9 @@ private slots:
     void            _finished();
 
 private:
-    QMap<unsigned short, Port *> ports;      ///< The list of the open ports
-    Clients                      clients;    ///< Manages the clients in CLIENT mode.
-    QReadWriteLock               mutex;      ///< Makes the class thread safe.
-    static Network               *_instance; ///< The instance of the singleton.
+    QMap<unsigned short, Port *> ports;   ///< The list of the open ports
+    Clients                      clients; ///< Manages the clients in CLIENT mode.
+    QReadWriteLock               mutex;   ///< Makes the class thread safe.
 };
 
 #endif // NETWORK_H

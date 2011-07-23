@@ -17,7 +17,9 @@ public:
     class ITask;
     friend class Thread;
 
-    static ThreadPool   *instance(QObject *parent = 0);
+    ThreadPool(QObject *parent = 0);
+    ~ThreadPool();
+
     /// @brief Adds a new task to the queue. It will be executed as soon as a thread
     /// is available. It is the responsability of the caller to free the task.
     void                addTask(ThreadPool::ITask *task);
@@ -25,12 +27,14 @@ public:
     unsigned            getThreadNumber();
     /// @brief Changes the number of threads in the pool.
     void                setThreadNumber(unsigned threadNumber);
+    /// @brief Quits all the threads and waits for them to be finished.
+    void                shutdown();
+    /// @brief Returns the instance of this class created by the Server.
+    static ThreadPool   *instance();
 
 private:
-    ThreadPool(QObject *parent = 0);
     ThreadPool(const ThreadPool &);
     ThreadPool &operator=(const ThreadPool &);
-    ~ThreadPool();
 
     /// @brief Allows the threads to tell when they are available.
     void                _threadAvailable(Thread *thread);
@@ -44,9 +48,8 @@ private:
     QQueue<ThreadPool::ITask *> tasks; ///< The list of the tasks to execute.
     QList<Thread *>     threads;       ///< The list of the threads in the pool.
     QQueue<Thread *>    available;     ///< Stores the treads that are waiting to execute a task.
-    QMutex              mutex;         ///< Makes this class thread safe.
     unsigned            threadsNumber; ///< The number of threads in the thread pool.
-    static ThreadPool   *_instance;    ///< The instance of the singleton.
+    QMutex              mutex;         ///< Makes this class thread safe.
 
 public:
     /// @brief This interface is used by the thread pool to execute a task.

@@ -9,9 +9,12 @@
 class Arguments
 {
 public:
-    /// @brief Parse the arguments in parameter.
+    Arguments();
+    /// @brief Parses the arguments in parameter.
     Arguments(int argc, char **argv);
     ~Arguments();
+    Arguments(const Arguments &arguments);
+    Arguments &operator=(const Arguments &arguments);
 
     /// @brief Returns the configuration path of the server.
     QString     getConfiguration();
@@ -27,10 +30,6 @@ public:
     QStringList toStringList();
 
 private:
-    Arguments();
-    Arguments(const Arguments &);
-    Arguments &operator=(const Arguments &);
-
     QMap<QString, QString>  arguments;  ///< The arguments after they have been parsed.
     QStringList             raw;        ///< The raw list of arguments (from argv).
     int                     argc;       ///< The original argc.

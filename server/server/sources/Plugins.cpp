@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QDir>
 
 #include "ApiPlugins.h"
@@ -6,29 +7,13 @@
 #include "Extensions.h"
 #include "Log.h"
 #include "Plugins.hpp"
+#include "Server.h"
 #include "SmartMutex.h"
 #include "Threads.h"
 #include "Tools.h"
 
-Plugins *Plugins::_instance = NULL;
-
-Plugins *Plugins::instance(QObject *parent)
+Plugins::Plugins()
 {
-    if (Plugins::_instance == NULL)
-        Plugins::_instance = new Plugins(parent);
-    return (Plugins::_instance);
-}
-
-bool    Plugins::isLoaded()
-{
-    if (Plugins::_instance)
-        return (true);
-    return (false);
-}
-
-Plugins::Plugins(QObject *parent)
-{
-    this->parent = parent;
     this->unloadAllPlugins = false;
     this->awake = false;
     // Connect all the signals and slots
@@ -37,9 +22,9 @@ Plugins::Plugins(QObject *parent)
     QObject::connect(this, SIGNAL(unloadSignal(QString,Future<bool>*)), this, SLOT(_unload(QString,Future<bool>*)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(installSignal(QString,Future<bool>*)), this, SLOT(_install(QString,Future<bool>*)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(uninstallSignal(QString,Future<bool>*)), this, SLOT(_uninstall(QString,Future<bool>*)), Qt::QueuedConnection);
-    // Starting the plugins thread
     this->moveToThread(this);
-    Threads::instance()->newThread(this);
+    // Starts the plugins thread
+    Threads::instance()->newThread(this, false);
     // Wait that the thread is started
     this->mutex.lockForWrite();
     if (!this->awake)
@@ -49,15 +34,14 @@ Plugins::Plugins(QObject *parent)
 
 Plugins::~Plugins()
 {
+    this->shutdown();
+    this->quit();
+    QThread::wait();
     Log::trace("Plugins destroyed!", "Plugins", "~Plugins");
 }
 
 void        Plugins::run()
 {
-    // Initialize the plugins API
-    ApiPlugins::instance(this);
-    // Initialize the extension manager
-    Extensions::instance(this);
     Log::debug("Plugins thread started", "Plugins", "run");
     // Tells to the thread that started the current thread that it is running
     this->mutex.lockForWrite();
@@ -67,9 +51,7 @@ void        Plugins::run()
     // Execute the event loop
     this->exec();
     Log::debug("Plugins thread finished", "Plugins", "run");
-    // The thread where lives the Plugins is changed to the thread of its parent
-    if (this->parent != NULL)
-        this->moveToThread(this->parent->thread());
+    this->moveToThread(QCoreApplication::instance()->thread());
 }
 
 Future<bool>        Plugins::load(const QString &id)
@@ -108,34 +90,28 @@ Future<bool>        Plugins::uninstall(const QString &id)
     return (result);
 }
 
-void    Plugins::unloadAll()
+void            Plugins::shutdown()
 {
-    Log::info("Unloading all the plugins", "Plugins", "unloadAll");
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugins", "unloadAll");
+    SmartMutex  mutex(this->mutex, "Plugins", "shutdown");
+
+    if (!mutex)
         return ;
-    }
     this->unloadAllPlugins = true;
     QStringListIterator it(this->orderedPlugins);
-    this->mutex.unlock();
+    mutex.unlock();
     // Try to unload all the plugins
     while (it.hasNext())
         this->unload(it.next()).getResult();
-    if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-    {
-        Log::error("Deadlock", "Plugins", "unloadAll");
+    if (!mutex.lock())
         return ;
-    }
     // If some plugins are still loaded, this mean that they are still used
     // and we wait until they are released.
     if (this->plugins.size() > 0)
     {
-        Log::info("Some plugins are still used. The server is waiting that all the plugins are unloaded...", "Plugins", "unloadAll");
+        Log::info("Some plugins are still used. The server is waiting that all the plugins are unloaded...", "Plugins", "shutdown");
         this->wait.wait(&this->mutex);
-        Log::info("All plugins has been unloaded", "Plugins", "unloadAll");
+        Log::info("All plugins has been unloaded", "Plugins", "shutdown");
     }
-    this->mutex.unlock();
 }
 
 void                                Plugins::_load(const QString &identifier, Future<bool> *f)
@@ -497,4 +473,9 @@ LightBird::IPlugins::State  Plugins::_getState(const QString &id)
     // The plugin is uninstalled
     else
         return (LightBird::IPlugins::UNINSTALLED);
+}
+
+Plugins *Plugins::instance()
+{
+    return (Server::instance().getPlugins());
 }

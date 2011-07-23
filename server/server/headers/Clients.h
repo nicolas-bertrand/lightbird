@@ -40,6 +40,8 @@ public:
     /// @brief Disconnects the client.
     /// @param id : The id of the client to disconnect.
     bool            disconnect(const QString &id);
+    /// @brief Cleans the client after the thread is finished.
+    void            shutdown();
 
     // IReadWrite
     bool            read(QByteArray &data, Client *client);

@@ -93,13 +93,12 @@ LightBird::ITimers          &Api::timers()
 
 void                        Api::stop()
 {
-    QCoreApplication::quit();
+    Server::instance().stop(false);
 }
 
 void                        Api::restart()
 {
-    Server::restart = true;
-    QCoreApplication::quit();
+    Server::instance().stop(true);
 }
 
 const QString               &Api::getId()
