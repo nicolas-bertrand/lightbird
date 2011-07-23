@@ -12,7 +12,7 @@ class Content : public QObject,
     Q_OBJECT
 
 public:
-    Content(QObject *parent = 0);
+    Content(QObject *parent = NULL);
     ~Content();
 
     LightBird::IContent::Storage getStorage() const;

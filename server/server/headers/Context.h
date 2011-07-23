@@ -14,7 +14,7 @@ class Context : public QObject
     Q_OBJECT
 
 public:
-    Context(QObject *parent = 0);
+    Context(QObject *parent = NULL);
     ~Context();
     Context(const Context &context);
     Context &operator=(const Context &context);

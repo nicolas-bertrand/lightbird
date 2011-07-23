@@ -15,7 +15,7 @@ class ApiGuis : public QObject,
     Q_INTERFACES(LightBird::IGuis)
 
 public:
-    ApiGuis(QObject *parent = 0);
+    ApiGuis(QObject *parent = NULL);
     ~ApiGuis();
 
     void    show(const QString &id = "");

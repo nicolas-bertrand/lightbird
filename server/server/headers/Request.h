@@ -14,7 +14,7 @@ class Request : public QObject,
     Q_OBJECT
 
 public:
-    Request(QObject *parent = 0);
+    Request(QObject *parent = NULL);
     ~Request();
 
     // LightBird::IRequest

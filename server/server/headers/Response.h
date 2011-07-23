@@ -14,7 +14,7 @@ class Response : public QObject,
     Q_OBJECT
 
 public:
-    Response(QObject *parent = 0);
+    Response(QObject *parent = NULL);
     ~Response();
 
     // LightBird::IResponse

@@ -18,7 +18,7 @@ class Extensions : public QObject,
     Q_INTERFACES(LightBird::IExtensions)
 
 public:
-    Extensions(QObject *parent = 0);
+    Extensions(QObject *parent = NULL);
     ~Extensions();
 
     /// @brief Adds an extension plugin to manage.

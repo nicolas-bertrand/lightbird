@@ -18,7 +18,7 @@ class ApiTimers : public QObject,
     Q_INTERFACES(LightBird::ITimers)
 
 public:
-    ApiTimers(const QString &id, QObject *parent = 0);
+    ApiTimers(const QString &id, QObject *parent = NULL);
     ~ApiTimers();
 
     void                        setTimer(const QString &name, unsigned int timeout);

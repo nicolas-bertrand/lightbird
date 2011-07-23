@@ -14,7 +14,7 @@ class ApiPlugins : public QObject,
     Q_INTERFACES(LightBird::IPlugins)
 
 public:
-    ApiPlugins(QObject *parent = 0);
+    ApiPlugins(QObject *parent = NULL);
     ~ApiPlugins();
 
     QSharedPointer<LightBird::IFuture<bool> > load(const QString &id);

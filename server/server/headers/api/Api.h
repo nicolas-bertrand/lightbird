@@ -21,7 +21,7 @@ public:
     /// @param configuration : Its configuration.
     /// @param event : If the plugin implements IEvent.
     /// @param timers : If the timers has to be loaded.
-    Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent = 0);
+    Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent = NULL);
     ~Api();
 
     LightBird::IConfiguration   &configuration(bool plugin = false);

@@ -23,7 +23,7 @@ public:
     /// @param parent : The parent of the server configuration instance will be also
     /// the parent of all the other configurations.
     /// @return NULL is the loading fail.
-    Configurations(const QString &path, QObject *parent = 0);
+    Configurations(const QString &path, QObject *parent = NULL);
     /// @brief Returns an instance of the Configuration identified by the path
     /// to the configuration. If the configuration has not been already loaded,
     /// the document is parsed and stored before beeing returned.

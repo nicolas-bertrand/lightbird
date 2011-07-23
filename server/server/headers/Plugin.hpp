@@ -27,7 +27,7 @@ public:
     /// @brief Initialize the object. The plugin is not loaded until
     /// load() is called.
     /// @param id : The directory where the plugin is stored.
-    Plugin(const QString &id, QObject *parent = 0);
+    Plugin(const QString &id, QObject *parent = NULL);
     ~Plugin();
 
     /// @param full : If true, the plugin will be completely loaded, i.e
