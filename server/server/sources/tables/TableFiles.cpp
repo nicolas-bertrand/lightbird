@@ -1,8 +1,6 @@
 #include <QFileInfo>
 
 #include "Configurations.h"
-#include "Defines.h"
-#include "Log.h"
 #include "Database.h"
 #include "TableFiles.h"
 #include "TableDirectories.h"

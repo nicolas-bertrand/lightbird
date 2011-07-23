@@ -1,7 +1,5 @@
 #include "Configurations.h"
 #include "Database.h"
-#include "Defines.h"
-#include "Log.h"
 #include "TableDirectories.h"
 #include "TablePermissions.h"
 #include "Tools.h"

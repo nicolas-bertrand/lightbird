@@ -1,4 +1,3 @@
-#include "Defines.h"
 #include "Log.h"
 #include "Server.h"
 #include "SmartMutex.h"

@@ -1,6 +1,5 @@
-#include "Defines.h"
-#include "Log.h"
 #include "Database.h"
+#include "Defines.h"
 #include "TableEvents.h"
 #include "Tools.h"
 

@@ -1,8 +1,6 @@
 #include <QCryptographicHash>
 
 #include "Database.h"
-#include "Defines.h"
-#include "Log.h"
 #include "TableAccounts.h"
 #include "Tools.h"
 
