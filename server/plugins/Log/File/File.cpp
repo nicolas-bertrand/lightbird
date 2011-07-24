@@ -162,11 +162,11 @@ QString File::_getNodeValue(const QString &nodeName)
     return (this->api->configuration(true).get(nodeName));
 }
 
-unsigned        File::_toBytes(const QString &str)
+unsigned int     File::_toBytes(const QString &str)
 {
-    char        type;
-    unsigned    bytes;
-    QString     string = str;
+    char         type;
+    unsigned int bytes;
+    QString      string = str;
 
     if (string.remove(' ').isEmpty())
         return (1024 * 1024);

@@ -42,9 +42,9 @@ QString     ApiConfiguration::get(const QString &nodeName)
     return (result);
 }
 
-unsigned        ApiConfiguration::count(const QString &nodeName)
+unsigned int     ApiConfiguration::count(const QString &nodeName)
 {
-    unsigned    result;
+    unsigned int result;
 
     result = this->_count(nodeName, this->_findConfiguration(this->configuration.readDom()));
     this->configuration.release();

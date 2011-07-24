@@ -14,7 +14,7 @@ class Timer : public QThread
     Q_OBJECT
 
 public :
-    Timer(QString id, QString name, unsigned timeout, ApiTimers &apiTimers);
+    Timer(QString id, QString name, unsigned int timeout, ApiTimers &apiTimers);
     ~Timer();
     Timer(const Timer &timer);
     Timer &operator=(const Timer &timer);

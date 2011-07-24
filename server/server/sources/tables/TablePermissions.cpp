@@ -448,12 +448,12 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     return (true);
 }
 
-unsigned    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right)
+unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right)
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
     QStringList                         rights;
-    unsigned                            granted;
+    unsigned int                        granted;
 
     rights.push_back(right);
     // Someone who can modify can read
@@ -488,12 +488,12 @@ unsigned    TablePermissions::_idAllowed(const QStringList &accessors, const QLi
     return (this->_checkRights(result, QStringList() << "", right));
 }
 
-unsigned        TablePermissions::_checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right)
+unsigned int     TablePermissions::_checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right)
 {
-    int         i;
-    int         s;
-    unsigned    granted = 0;
-    QList<int>  index;
+    int          i;
+    int          s;
+    unsigned int granted = 0;
+    QList<int>   index;
 
     // Get the indexes of the accessors we are interested in
     for (i = 0, s = rights.size(); i < s; ++i)

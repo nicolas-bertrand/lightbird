@@ -24,7 +24,7 @@ namespace LightBird
         /// that, this method will returns false, and the result is set to the default value. By
         /// default, this method will block infinitely until the result became available.
         /// @return True if the result has been set, and false if the time elapsed.
-        virtual bool    getResult(T &result, unsigned long time = ULONG_MAX) = 0;
+        virtual bool    getResult(T &result, unsigned int time = ULONG_MAX) = 0;
         /// @brief This method overload getResult and it block infinitely until the result
         /// became available.
         /// @return : The value of the Future.

@@ -24,9 +24,9 @@ public:
     /// is available. It is the responsability of the caller to free the task.
     void                addTask(ThreadPool::ITask *task);
     /// @brief Returns the number of threads currently in the pool.
-    unsigned            getThreadNumber();
+    unsigned int        getThreadNumber();
     /// @brief Changes the number of threads in the pool.
-    void                setThreadNumber(unsigned threadNumber);
+    void                setThreadNumber(unsigned int threadNumber);
     /// @brief Quits all the threads and waits for them to be finished.
     void                shutdown();
     /// @brief Returns the instance of this class created by the Server.
@@ -48,7 +48,7 @@ private:
     QQueue<ThreadPool::ITask *> tasks; ///< The list of the tasks to execute.
     QList<Thread *>     threads;       ///< The list of the threads in the pool.
     QQueue<Thread *>    available;     ///< Stores the treads that are waiting to execute a task.
-    unsigned            threadsNumber; ///< The number of threads in the thread pool.
+    unsigned int        threadsNumber; ///< The number of threads in the thread pool.
     QMutex              mutex;         ///< Makes this class thread safe.
 
 public:

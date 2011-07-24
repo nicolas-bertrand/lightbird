@@ -70,7 +70,7 @@ private:
     LightBird::IApi     *api;                       ///< The LightBird API.
     QString             path;                       ///< The path of the log directory.
     QString             name;                       ///< The name of the log file.
-    unsigned            maxSize;                    ///< The maximum size of the log file in byte. When it exceeds this size, an archive file is created and the log file is gutted.
+    unsigned int        maxSize;                    ///< The maximum size of the log file in byte. When it exceeds this size, an archive file is created and the log file is gutted.
     int                 expires;                    ///< The maximum number of days during witch the archives of the log file are kept.
     int                 maxNbOfFile;                ///< The maximum number of files in the log directory.
     bool                display;                    ///< If the logs have to be displayed on the standard output

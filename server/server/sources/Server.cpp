@@ -57,7 +57,7 @@ void    Server::_initialize()
     // Set the current path of the application to the path of the executable
     QDir::setCurrent(QCoreApplication::applicationDirPath());
     // Seed the random number generator
-    ::qsrand((unsigned)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
+    ::qsrand((unsigned int)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
     // Then the configuration is loaded
     Log::info("Loading the server configuration", "Server", "_initialize");
     if (!*(this->configurations = new Configurations(this->arguments.getConfiguration(), this)))

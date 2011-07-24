@@ -7,7 +7,7 @@
 ThreadPool::ThreadPool(QObject *parent) : QObject(parent)
 {
     this->threadsNumber = Configurations::instance()->get("threadsNumber").toUInt();
-    for (unsigned i = 0; i < this->threadsNumber; ++i)
+    for (unsigned int i = 0; i < this->threadsNumber; ++i)
         this->_createThread();
 }
 
@@ -25,20 +25,20 @@ void    ThreadPool::addTask(ThreadPool::ITask *task)
     this->mutex.unlock();
 }
 
-unsigned    ThreadPool::getThreadNumber()
+unsigned int    ThreadPool::getThreadNumber()
 {
     return (this->threadsNumber);
 }
 
-void    ThreadPool::setThreadNumber(unsigned threadNumber)
+void    ThreadPool::setThreadNumber(unsigned int threadNumber)
 {
     this->mutex.lock();
     if (threadNumber == 0)
         threadNumber = 1;
     this->threadsNumber = threadNumber;
-    for (unsigned i = this->threads.count(); i < this->threadsNumber; ++i)
+    for (unsigned int i = this->threads.count(); i < this->threadsNumber; ++i)
         this->_createThread();
-    for (unsigned i = this->threads.count(); i > this->threadsNumber && !this->available.isEmpty(); --i)
+    for (unsigned int i = this->threads.count(); i > this->threadsNumber && !this->available.isEmpty(); --i)
         this->_removeThread(this->available.head());
     this->mutex.unlock();
 }

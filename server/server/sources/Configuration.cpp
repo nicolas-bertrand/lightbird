@@ -118,7 +118,7 @@ QString         Configuration::get(const QString &nodeName)
     return (this->_get(nodeName, this->dom));
 }
 
-unsigned        Configuration::count(const QString &nodeName)
+unsigned int    Configuration::count(const QString &nodeName)
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "count");
 
@@ -246,9 +246,9 @@ QString                     Configuration::_get(const QString &nodeName, QDomEle
     return (result);
 }
 
-unsigned                    Configuration::_count(const QString &nodeName, QDomElement element)
+unsigned int                Configuration::_count(const QString &nodeName, QDomElement element)
 {
-    unsigned                result = 0;
+    unsigned int            result = 0;
     QString                 name;
     QString                 tmp;
     int                     index;

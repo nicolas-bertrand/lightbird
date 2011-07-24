@@ -22,7 +22,7 @@ public:
 
     QString         getPath();
     QString         get(const QString &nodeName);
-    unsigned        count(const QString &nodeName);
+    unsigned int    count(const QString &nodeName);
     void            set(const QString &nodeName, const QString &nodeValue);
     bool            remove(const QString &nodeName);
     QDomElement     readDom();

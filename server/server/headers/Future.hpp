@@ -83,7 +83,7 @@ public:
     /// @param time : The maximum amount of time in milliseconds to wait for the result. After
     /// that, this method will returns false, and the result is not modified.
     /// @return True if the result has been set, and false if the time elapsed.
-    bool        getResult(T &result, unsigned long time = ULONG_MAX)
+    bool        getResult(T &result, unsigned int time = ULONG_MAX)
     {
         bool    wait = true;
 
