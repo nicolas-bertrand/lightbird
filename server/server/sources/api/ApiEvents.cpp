@@ -69,6 +69,7 @@ void            ApiEvents::subscribe(const QStringList &events)
     if (!mutex)
         return ;
     this->subscribed = events;
+    Log::debug("Events subscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
 }
 
 void    ApiEvents::send(const QString &event, const QVariant &property)

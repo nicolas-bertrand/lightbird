@@ -37,6 +37,7 @@ void    Events::send(const QString &event, const QVariant &property)
     QListIterator<ApiEvents *> it(this->events);
     while (it.hasNext())
         it.next()->post(event, property);
+    Log::trace("Event sent", Properties("event", event).add("property", property.toString(), false), "Events", "send");
     this->mutex.unlock();
 }
 

@@ -309,12 +309,12 @@ void            Server::stop(bool restart)
 
 ApiGuis         *Server::getApiGuis()
 {
-    return (Server::instance().getApiGuis());
+    return (Server::instance().apiGuis);
 }
 
 ApiPlugins      *Server::getApiPlugins()
 {
-    return (Server::instance().getApiPlugins());
+    return (Server::instance().apiPlugins);
 }
 
 Configuration   *Server::getConfiguration(const QString &configuration, const QString &alternative)
