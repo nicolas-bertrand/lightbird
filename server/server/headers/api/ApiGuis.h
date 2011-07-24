@@ -20,7 +20,7 @@ public:
 
     void    show(const QString &id = "");
     void    hide(const QString &id = "");
-    bool    noGui();
+    bool    noGui() const;
     static ApiGuis *instance();
 
 signals:

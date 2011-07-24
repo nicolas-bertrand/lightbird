@@ -32,7 +32,7 @@ TableDirectories &TableDirectories::operator=(const TableDirectories &t)
     return (*this);
 }
 
-QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath)
+QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -86,7 +86,7 @@ bool    TableDirectories::add(const QString &name, const QString &id_directory, 
     return (true);
 }
 
-QString TableDirectories::getIdDirectory()
+QString TableDirectories::getIdDirectory() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -108,7 +108,7 @@ bool    TableDirectories::setIdDirectory(const QString &id_directory)
     return (Database::instance()->query(query));
 }
 
-QString TableDirectories::getVirtualPath(bool initialSlash, bool finalSlash)
+QString TableDirectories::getVirtualPath(bool initialSlash, bool finalSlash) const
 {
     TableDirectories    directory;
     QString             id_directory;
@@ -145,7 +145,7 @@ bool        TableDirectories::setVirtualPath(const QString &virtualPath)
     return (this->setIdDirectory(id_directory));
 }
 
-QStringList TableDirectories::getDirectories(const QString &id_accessor, const QString &right)
+QStringList TableDirectories::getDirectories(const QString &id_accessor, const QString &right) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -163,7 +163,7 @@ QStringList TableDirectories::getDirectories(const QString &id_accessor, const Q
     return (directories);
 }
 
-QStringList TableDirectories::getFiles(const QString &id_accessor, const QString &right)
+QStringList TableDirectories::getFiles(const QString &id_accessor, const QString &right) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;

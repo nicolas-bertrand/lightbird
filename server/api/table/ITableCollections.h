@@ -16,7 +16,7 @@ namespace LightBird
         virtual ~ITableCollections() {}
 
         /// @brief Returns the id of the collection from its virtual path.
-        virtual QString     getIdFromVirtualPath(const QString &virtualPath) = 0;
+        virtual QString     getIdFromVirtualPath(const QString &virtualPath) const = 0;
         /// @brief Set the id of the collection from its virtual path.
         virtual bool        setIdFromVirtualPath(const QString &virtualPath) = 0;
         /// @brief Creates a new collection.
@@ -30,7 +30,7 @@ namespace LightBird
         // Fields
         /// @brief Returns the id of the parent of the collection, or empty if
         /// it is at the root.
-        virtual QString     getIdCollection() = 0;
+        virtual QString     getIdCollection() const = 0;
         /// @brief Modifies the id of the parent of the collection.
         virtual bool        setIdCollection(const QString &id_collection = "") = 0;
 
@@ -38,7 +38,7 @@ namespace LightBird
         /// @brief Returns the virtual path of the collection.
         /// @param initialSlash : If true, the first char of the result will be "/".
         /// @param finalSlash : If true, the last char of the result will be "/".
-        virtual QString     getVirtualPath(bool initialSlash = false, bool finalSlash = false) = 0;
+        virtual QString     getVirtualPath(bool initialSlash = false, bool finalSlash = false) const = 0;
         /// @brief Moves the collection to the collection localized by the virtual
         /// path in parameter.
         virtual bool        setVirtualPath(const QString &virtualPath) = 0;
@@ -48,14 +48,14 @@ namespace LightBird
         /// @param id_accessor : If not empty, only the files for which this
         /// accessor has the right will be returned.
         /// @param right : The name of the right that the accessor must have.
-        virtual QStringList getCollections(const QString &id_accessor = "", const QString &right = "") = 0;
+        virtual QStringList getCollections(const QString &id_accessor = "", const QString &right = "") const = 0;
         /// @brief Returns the id of all the files in the current collection.
         /// If id_accessor and right are not empty, only the files for which
         /// the accessor has the right will be returned.
         /// @param id_accessor : If not empty, only the files for which this
         /// accessor has the right will be returned.
         /// @param right : The name of the right that the accessor must have.
-        virtual QStringList getFiles(const QString &id_accessor = "", const QString &right = "") = 0;
+        virtual QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const = 0;
     };
 }
 

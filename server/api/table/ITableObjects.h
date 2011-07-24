@@ -17,26 +17,26 @@ namespace LightBird
 
         // Fields
         /// @brief Returns the id of the account that possesses the object.
-        virtual QString     getIdAccount() = 0;
+        virtual QString     getIdAccount() const = 0;
         /// @brief Modifies the id of the account that possesses the object.
         virtual bool        setIdAccount(const QString &id_account = "") = 0;
         /// @brief Returns the name of the object.
-        virtual QString     getName() = 0;
+        virtual QString     getName() const = 0;
         /// @brief Modifies the name of the object.
         virtual bool        setName(const QString &name) = 0;
 
         // Other
         /// @brief Returns true if the accessor has the right on the object.
         /// @see LightBird::ITablePermissions::isAllowed
-        virtual bool        isAllowed(const QString &id_accessor, const QString &right) = 0;
+        virtual bool        isAllowed(const QString &id_accessor, const QString &right) const = 0;
         /// @brief Allows to get the list of the rights that the accessor has
         /// on the object.
         /// @see LightBird::ITablePermissions::getRights
-        virtual bool        getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied) = 0;
+        virtual bool        getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied) const = 0;
         /// @brief Returns the id of the tags of the object.
-        virtual QStringList getTags() = 0;
+        virtual QStringList getTags() const = 0;
         /// @brief Returns the limits of the object.
-        virtual QStringList getLimits() = 0;
+        virtual QStringList getLimits() const = 0;
     };
 }
 

@@ -24,7 +24,7 @@ public:
     /// is available. It is the responsability of the caller to free the task.
     void                addTask(ThreadPool::ITask *task);
     /// @brief Returns the number of threads currently in the pool.
-    unsigned int        getThreadNumber();
+    unsigned int        getThreadNumber() const;
     /// @brief Changes the number of threads in the pool.
     void                setThreadNumber(unsigned int threadNumber);
     /// @brief Quits all the threads and waits for them to be finished.

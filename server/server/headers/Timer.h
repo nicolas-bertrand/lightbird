@@ -22,7 +22,7 @@ public :
     ///< @brief The main method of the timer thread.
     void        run();
     ///< @brief Returns the interval between each events.
-    unsigned    getTimeout();
+    unsigned    getTimeout() const;
     ///< @brief Allows to modify the timeout of the timer.
     void        setTimeout(unsigned int timeout);
     ///< @brief Stops the timer.

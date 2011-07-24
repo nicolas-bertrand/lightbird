@@ -22,27 +22,27 @@ bool    ApiNetwork::closePort(unsigned short port)
     return (Network::instance()->closePort(port));
 }
 
-bool    ApiNetwork::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients)
+bool    ApiNetwork::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) const
 {
     return (Network::instance()->getPort(port, protocols, transport, maxClients));
 }
 
-QList<unsigned short>   ApiNetwork::getPorts()
+QList<unsigned short>   ApiNetwork::getPorts() const
 {
     return (Network::instance()->getPorts());
 }
 
-bool    ApiNetwork::getClient(const QString &id, LightBird::INetwork::Client &client)
+bool    ApiNetwork::getClient(const QString &id, LightBird::INetwork::Client &client) const
 {
     return (Network::instance()->getClient(id, client));
 }
 
-QStringList ApiNetwork::getClients()
+QStringList ApiNetwork::getClients() const
 {
     return (Network::instance()->getClients());
 }
 
-QStringList ApiNetwork::getClients(unsigned short port)
+QStringList ApiNetwork::getClients(unsigned short port) const
 {
     return (Network::instance()->getClients(port));
 }

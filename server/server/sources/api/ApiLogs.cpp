@@ -75,7 +75,7 @@ void    ApiLogs::trace(const QString &message, QMap<QString, QString> &propertie
     Log::instance()->write(LightBird::ILogs::TRACE, message, this->id, properties, className,method);
 }
 
-LightBird::ILogs::Level ApiLogs::getLevel()
+LightBird::ILogs::Level ApiLogs::getLevel() const
 {
     return (Log::instance()->getLevel());
 }
@@ -85,7 +85,7 @@ void    ApiLogs::setLevel(LightBird::ILogs::Level level)
     Log::instance()->setLevel(level);
 }
 
-bool    ApiLogs::isDisplay()
+bool    ApiLogs::isDisplay() const
 {
     return (Log::instance()->isDisplay());
 }
@@ -95,27 +95,27 @@ void    ApiLogs::isDisplay(bool display)
     Log::instance()->isDisplay(display);
 }
 
-bool    ApiLogs::isError()
+bool    ApiLogs::isError() const
 {
     return (Log::instance()->isError());
 }
 
-bool    ApiLogs::isWarning()
+bool    ApiLogs::isWarning() const
 {
     return (Log::instance()->isWarning());
 }
 
-bool    ApiLogs::isInfo()
+bool    ApiLogs::isInfo() const
 {
     return (Log::instance()->isInfo());
 }
 
-bool    ApiLogs::isDebug()
+bool    ApiLogs::isDebug() const
 {
     return (Log::instance()->isDebug());
 }
 
-bool    ApiLogs::isTrace()
+bool    ApiLogs::isTrace() const
 {
     return (Log::instance()->isTrace());
 }

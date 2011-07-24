@@ -24,7 +24,7 @@ TableObjects &TableObjects::operator=(const TableObjects &t)
     return (*this);
 }
 
-QString TableObjects::getIdAccount()
+QString TableObjects::getIdAccount() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -46,7 +46,7 @@ bool    TableObjects::setIdAccount(const QString &id_account)
     return (Database::instance()->query(query));
 }
 
-QString TableObjects::getName()
+QString TableObjects::getName() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -70,17 +70,17 @@ bool    TableObjects::setName(const QString &name)
     return (Database::instance()->query(query));
 }
 
-bool    TableObjects::isAllowed(const QString &id_accessor, const QString &right)
+bool    TableObjects::isAllowed(const QString &id_accessor, const QString &right) const
 {
     return (TablePermissions().isAllowed(id_accessor, this->id, right));
 }
 
-bool    TableObjects::getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied)
+bool    TableObjects::getRights(const QString &id_accessor, QStringList &allowed, QStringList &denied) const
 {
     return (TablePermissions().getRights(id_accessor, this->id, allowed, denied));
 }
 
-QStringList TableObjects::getTags()
+QStringList TableObjects::getTags() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -96,7 +96,7 @@ QStringList TableObjects::getTags()
     return (tags);
 }
 
-QStringList TableObjects::getLimits()
+QStringList TableObjects::getLimits() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;

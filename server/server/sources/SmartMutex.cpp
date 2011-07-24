@@ -37,7 +37,7 @@ SmartMutex::~SmartMutex()
     this->unlock();
 }
 
-SmartMutex::operator bool()
+SmartMutex::operator bool() const
 {
     return (this->isLock);
 }

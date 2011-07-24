@@ -20,14 +20,14 @@ namespace LightBird
 
         /// @brief Returns the id of an account from its name.
         /// @see setIdFromName
-        virtual QString getIdFromName(const QString &name) = 0;
+        virtual QString getIdFromName(const QString &name) const = 0;
         /// @brief Identify an account using its name.
         /// @param name : The name of the account.
         /// @return True if the account exists.
         virtual bool    setIdFromName(const QString &name) = 0;
         /// @brief Returns the id that corresponds to the parameters.
         /// @see setIdFromNameAndPassword
-        virtual QString getIdFromNameAndPassword(const QString &name, const QString &password = "") = 0;
+        virtual QString getIdFromNameAndPassword(const QString &name, const QString &password = "") const = 0;
         /// @brief Allows to identify a client. The name and the password must
         /// match to an existing account. The id of the current instance of
         /// ITableAccounts is set to the account.
@@ -38,7 +38,7 @@ namespace LightBird
         virtual bool    setIdFromNameAndPassword(const QString &name, const QString &password = "") = 0;
         /// @brief Returns the id that corresponds to the parameters.
         /// @see setIdFromIdentifiantAndSalt
-        virtual QString getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) = 0;
+        virtual QString getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) const = 0;
         /// @brief Allows to identify an account without knowing its name or password.
         /// These informations are contained in the identifiant with a salt.
         /// @param identifiant : A sha1 composed of the name and the password of
@@ -62,24 +62,24 @@ namespace LightBird
         // Fields
         /// @brief Returns the password as a sha1.
         /// @see passwordHash
-        virtual QString getPassword() = 0;
+        virtual QString getPassword() const = 0;
         /// @brief Modifies the password of the account.
         virtual bool    setPassword(const QString &password = "") = 0;
         /// @brief Returns true if the account is an administrator.
-        virtual bool    isAdministrator() = 0;
+        virtual bool    isAdministrator() const = 0;
         /// @brief Defines if the account is an administrator or not.
         virtual bool    isAdministrator(bool administrator) = 0;
         /// @brief Returns true if the account is a actived.
-        virtual bool    isActive() = 0;
+        virtual bool    isActive() const = 0;
         /// @brief Defines if the account is actived.
         virtual bool    isActive(bool active) = 0;
 
         // Informations
         /// @brief Returns the value of an information of the account.
         /// @param name : The name of the information to return.
-        virtual QVariant getInformation(const QString &name) = 0;
+        virtual QVariant getInformation(const QString &name) const = 0;
         /// @brief Returns all the informations of the account.
-        virtual QMap<QString, QVariant> getInformations() = 0;
+        virtual QMap<QString, QVariant> getInformations() const = 0;
         /// @brief Modifies the value of an information of the account, or create
         /// it if it doesn't exists.
         /// @param name : The name of the information to create or modify.
@@ -102,9 +102,9 @@ namespace LightBird
         /// @brief Returns the date when the account id of the current
         /// instance has been set (using setId(), setIdFromName(),
         /// setIdFromNameAndPassword(), or setIdFromIdentifiantAndSalt()).
-        virtual const QDateTime &getConnectionDate() = 0;
+        virtual const QDateTime &getConnectionDate() const = 0;
         /// @brief Returns the ids of the groups of the account.
-        virtual QStringList getGroups() = 0;
+        virtual QStringList getGroups() const = 0;
         /// @brief Add the account to the group in parameter.
         virtual bool    addGroup(const QString &id_group) = 0;
         /// @brief Remove the account from the group in parameter.
@@ -118,7 +118,7 @@ namespace LightBird
         /// salt to ensure that two identical passwords will have different
         /// footprints. If it is empty, the sha1 of the password is returned.
         /// @return The hash of the password and its salt.
-        virtual QString passwordHash(const QString &password, const QString &id = "") = 0;
+        virtual QString passwordHash(const QString &password, const QString &id = "") const = 0;
     };
 }
 

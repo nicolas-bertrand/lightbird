@@ -28,23 +28,23 @@ public:
     Configuration &operator=(const Configuration &);
 
     /// @brief If the configuration is loaded.
-    operator            bool();
+    operator            bool() const;
     /// @see LightBird::IConfiguration::getPath
-    virtual QString     getPath();
+    virtual QString     getPath() const;
     /// @see LightBird::IConfiguration::get
-    virtual QString     get(const QString &nodeName);
+    virtual QString     get(const QString &nodeName) const;
     /// @see LightBird::IConfiguration::count
-    virtual unsigned    count(const QString &nodeName);
+    virtual unsigned    count(const QString &nodeName) const;
     /// @see LightBird::IConfiguration::set
     virtual void        set(const QString &nodeName, const QString &nodeValue);
     /// @see LightBird::IConfiguration::remove
     virtual bool        remove(const QString &nodeName);
     /// @see LightBird::IConfiguration::readDom
-    virtual QDomElement readDom();
+    virtual QDomElement readDom() const;
     /// @see LightBird::IConfiguration::writeDom
     virtual QDomElement writeDom();
     /// @see LightBird::IConfiguration::release
-    virtual void        release();
+    virtual void        release() const;
     /// @see LightBird::IConfiguration::save
     virtual bool        save();
     /// @brief Set the parent of the object is his living thread (not in the current thread)
@@ -60,9 +60,9 @@ protected:
     /// @return If the file has been correctly loaded.
     bool                _load(const QString &configurationPath, const QString &alternativePath);
     /// @param root : The root element of the nodeName.
-    virtual QString     _get(const QString &nodeName, QDomElement root);
+    virtual QString     _get(const QString &nodeName, QDomElement root) const;
     /// @param root : The root element of the nodeName.
-    virtual unsigned    _count(const QString &nodeName, QDomElement root);
+    virtual unsigned    _count(const QString &nodeName, QDomElement root) const;
     /// @param root : The root element of the nodeName.
     virtual void        _set(const QString &nodeName, const QString &nodeValue, QDomElement root);
     /// @param root : The root element of the nodeName.
@@ -73,11 +73,11 @@ private slots:
     void                _setParent(QObject *parent);
 
 protected:
-    QReadWriteLock      mutex;  ///< Make the configuration thread safe.
-    QDomDocument        doc;    ///< The in-memory DOM representation of the XML document.
-    QDomElement         dom;    ///< The root of the XML document.
-    QFile               file;   ///< The XML configuration file.
-    bool                loaded; ///< If a configuration is loaded.
+    QDomDocument            doc;    ///< The in-memory DOM representation of the XML document.
+    QDomElement             dom;    ///< The root of the XML document.
+    QFile                   file;   ///< The XML configuration file.
+    bool                    loaded; ///< If a configuration is loaded.
+    mutable QReadWriteLock  mutex;  ///< Make the configuration thread safe.
 };
 
 #endif // CONFIGURATION_H

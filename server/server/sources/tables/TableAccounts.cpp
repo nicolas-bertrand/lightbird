@@ -41,7 +41,7 @@ bool        TableAccounts::setId(const QString &id)
     return (true);
 }
 
-QString     TableAccounts::getIdFromName(const QString &name)
+QString     TableAccounts::getIdFromName(const QString &name) const
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;
@@ -64,7 +64,7 @@ bool        TableAccounts::setIdFromName(const QString &name)
     return (true);
 }
 
-QString     TableAccounts::getIdFromNameAndPassword(const QString &name, const QString &password)
+QString     TableAccounts::getIdFromNameAndPassword(const QString &name, const QString &password) const
 {
     TableAccounts   account;
 
@@ -84,7 +84,7 @@ bool        TableAccounts::setIdFromNameAndPassword(const QString &name, const Q
     return (true);
 }
 
-QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt)
+QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) const
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;
@@ -138,7 +138,7 @@ bool        TableAccounts::add(const QString &name, const QString &password, boo
     return (this->add(name, QMap<QString, QVariant>(), password, administrator, active));
 }
 
-QString         TableAccounts::getPassword()
+QString         TableAccounts::getPassword() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -160,7 +160,7 @@ bool            TableAccounts::setPassword(const QString &password)
     return (Database::instance()->query(query));
 }
 
-bool            TableAccounts::isAdministrator()
+bool            TableAccounts::isAdministrator() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -182,7 +182,7 @@ bool            TableAccounts::isAdministrator(bool administrator)
     return (Database::instance()->query(query));
 }
 
-bool            TableAccounts::isActive()
+bool            TableAccounts::isActive() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -204,7 +204,7 @@ bool            TableAccounts::isActive(bool active)
     return (Database::instance()->query(query));
 }
 
-QVariant        TableAccounts::getInformation(const QString &name)
+QVariant        TableAccounts::getInformation(const QString &name) const
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;
@@ -217,7 +217,7 @@ QVariant        TableAccounts::getInformation(const QString &name)
     return ("");
 }
 
-QMap<QString, QVariant> TableAccounts::getInformations()
+QMap<QString, QVariant> TableAccounts::getInformations() const
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;
@@ -298,12 +298,12 @@ bool                    TableAccounts::removeInformations(const QStringList &inf
     return (result);
 }
 
-const QDateTime &TableAccounts::getConnectionDate()
+const QDateTime &TableAccounts::getConnectionDate() const
 {
     return (this->connectionDate);
 }
 
-QStringList     TableAccounts::getGroups()
+QStringList     TableAccounts::getGroups() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -342,7 +342,7 @@ bool            TableAccounts::removeGroup(const QString &id_group)
     return (Database::instance()->query(query) && query.numRowsAffected() > 0);
 }
 
-QString         TableAccounts::passwordHash(const QString &password, const QString &id)
+QString         TableAccounts::passwordHash(const QString &password, const QString &id) const
 {
     if (password.isEmpty())
         return ("");

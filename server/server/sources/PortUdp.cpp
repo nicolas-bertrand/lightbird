@@ -135,7 +135,7 @@ Client          *PortUdp::_finished()
     return (NULL);
 }
 
-bool    PortUdp::_isListening()
+bool    PortUdp::_isListening() const
 {
     return (Port::_isListening() && this->socket.state() == QAbstractSocket::BoundState);
 }

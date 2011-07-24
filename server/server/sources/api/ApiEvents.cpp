@@ -89,7 +89,7 @@ QList<QPair<QString, QVariant> > ApiEvents::receive()
     return (result);
 }
 
-bool            ApiEvents::isAvailable()
+bool            ApiEvents::isAvailable() const
 {
     SmartMutex  mutex(this->mutex, "ApiEvents", "isAvailable");
 

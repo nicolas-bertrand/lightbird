@@ -20,14 +20,14 @@ public:
     ApiConfiguration(const QString &id);
     ~ApiConfiguration();
 
-    QString         getPath();
-    QString         get(const QString &nodeName);
-    unsigned int    count(const QString &nodeName);
+    QString         getPath() const;
+    QString         get(const QString &nodeName) const;
+    unsigned int    count(const QString &nodeName) const;
     void            set(const QString &nodeName, const QString &nodeValue);
     bool            remove(const QString &nodeName);
-    QDomElement     readDom();
+    QDomElement     readDom() const;
     QDomElement     writeDom();
-    void            release();
+    void            release() const;
     bool            save();
 
 private:
@@ -37,7 +37,7 @@ private:
 
     /// @brief Returns the element that contains the configuration of the plugin.
     /// @param dom : The root element of the configuration of the server.
-    QDomElement     _findConfiguration(QDomElement root);
+    QDomElement     _findConfiguration(QDomElement root) const;
 
     QString         id;             ///< The id of the plugin for which the object has been created.
     Configuration   &configuration; ///< The configuration of the server.

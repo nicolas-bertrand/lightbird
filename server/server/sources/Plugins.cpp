@@ -373,7 +373,7 @@ QStringList Plugins::getLibraryExtensions()
     return (Plugins::instance()->libraryExtensions);
 }
 
-LightBird::IPlugins::State Plugins::getState(const QString &id)
+LightBird::IPlugins::State Plugins::getState(const QString &id) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Plugins", "getState");
     LightBird::IPlugins::State  state;
@@ -384,7 +384,7 @@ LightBird::IPlugins::State Plugins::getState(const QString &id)
     return (state);
 }
 
-QStringList     Plugins::getPlugins()
+QStringList     Plugins::getPlugins() const
 {
     QStringList plugins;
 
@@ -392,7 +392,7 @@ QStringList     Plugins::getPlugins()
     return (plugins);
 }
 
-QStringList     Plugins::getLoadedPlugins()
+QStringList     Plugins::getLoadedPlugins() const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Plugins", "getLoadedPlugins");
     QStringList list;
@@ -403,7 +403,7 @@ QStringList     Plugins::getLoadedPlugins()
     return (list);
 }
 
-QStringList     Plugins::getUnloadedPlugins()
+QStringList     Plugins::getUnloadedPlugins() const
 {
     QStringList plugins;
 
@@ -416,7 +416,7 @@ QStringList     Plugins::getUnloadedPlugins()
     return (plugins);
 }
 
-QStringList     Plugins::getInstalledPlugins()
+QStringList     Plugins::getInstalledPlugins() const
 {
     QStringList plugins;
     QDomElement element;
@@ -429,7 +429,7 @@ QStringList     Plugins::getInstalledPlugins()
     return (plugins);
 }
 
-QStringList     Plugins::getUninstalledPlugins()
+QStringList     Plugins::getUninstalledPlugins() const
 {
     QStringList plugins;
 
@@ -442,7 +442,7 @@ QStringList     Plugins::getUninstalledPlugins()
     return (plugins);
 }
 
-void                    Plugins::_findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins)
+void                    Plugins::_findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins) const
 {
     QString             id;
     QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
@@ -462,7 +462,7 @@ void                    Plugins::_findPlugins(const QString &pluginsPath, const 
     }
 }
 
-LightBird::IPlugins::State  Plugins::_getState(const QString &id)
+LightBird::IPlugins::State  Plugins::_getState(const QString &id) const
 {
     // A loaded plugin can be LOADED, UNLOADING, or UNLOADED
     if (this->plugins.contains(id))

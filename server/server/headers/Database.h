@@ -37,8 +37,6 @@ public:
     QString         getQuery(const QString &group, const QString &name, const QString &id);
     /// @see LightBird::IDatabase::updates
     bool            updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());
-    /// @brief Returns the names of the tables of the database.
-    QStringList     getTableNames();
     /// @brief Returns the instance of this class created by the Server.
     static Database *instance();
 
@@ -61,9 +59,9 @@ private:
     /// @brief Ensure that there is no NULL values in the bound values, and replace them by
     /// an empty string.
     /// @param query : The query to check.
-    void            _checkBoundValues(QSqlQuery &query);
+    void            _checkBoundValues(QSqlQuery &query) const;
     /// @brief Display the updates. For debug purpose only.
-    void            _displayUpdates(LightBird::IDatabase::Updates &updates);
+    void            _displayUpdates(LightBird::IDatabase::Updates &updates) const;
 
     QMap<QString, QDomDocument> queries;     ///< Contains the doms representations of the queries.
     QStringList                 tablesNames; ///< Contains the names of the tables of the database.

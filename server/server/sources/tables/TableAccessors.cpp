@@ -24,7 +24,7 @@ TableAccessors &TableAccessors::operator=(const TableAccessors &t)
     return (*this);
 }
 
-QString TableAccessors::getName()
+QString TableAccessors::getName() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -48,17 +48,17 @@ bool            TableAccessors::setName(const QString &name)
     return (Database::instance()->query(query));
 }
 
-bool        TableAccessors::isAllowed(const QString &id_object, const QString &right)
+bool        TableAccessors::isAllowed(const QString &id_object, const QString &right) const
 {
     return (TablePermissions().isAllowed(this->id, id_object, right));
 }
 
-bool        TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied)
+bool        TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
     return (TablePermissions().getRights(this->id, id_object, allowed, denied));
 }
 
-QStringList TableAccessors::getLimits()
+QStringList TableAccessors::getLimits() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;

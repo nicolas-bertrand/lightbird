@@ -16,13 +16,13 @@ public:
 
     bool    add(const QString &name, const QString &value, const QString &id_accessor = "", const QString &id_object = "");
 
-    QString getIdAccessor();
+    QString getIdAccessor() const;
     bool    setIdAccessor(const QString &id_accessor = "");
-    QString getIdObject();
+    QString getIdObject() const;
     bool    setIdObject(const QString &id_object = "");
-    QString getName();
+    QString getName() const;
     bool    setName(const QString &name);
-    QString getValue();
+    QString getValue() const;
     bool    setValue(const QString &value);
 };
 

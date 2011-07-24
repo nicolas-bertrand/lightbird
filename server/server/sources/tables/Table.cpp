@@ -32,7 +32,7 @@ Table &Table::operator=(const Table &t)
     return (*this);
 }
 
-const QString   &Table::getId()
+const QString   &Table::getId() const
 {
     return (this->id);
 }
@@ -81,7 +81,7 @@ bool            Table::remove(const QString &id)
     return (Database::instance()->query(query) && query.numRowsAffected() > 0);
 }
 
-QDateTime       Table::getModified()
+QDateTime       Table::getModified() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -93,7 +93,7 @@ QDateTime       Table::getModified()
     return (QDateTime());
 }
 
-QDateTime       Table::getCreated()
+QDateTime       Table::getCreated() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -105,24 +105,24 @@ QDateTime       Table::getCreated()
     return (QDateTime());
 }
 
-const QString   &Table::getTableName()
+const QString   &Table::getTableName() const
 {
     return (this->tableName);
 }
 
-LightBird::ITable::Table Table::getTableId()
+LightBird::ITable::Table Table::getTableId() const
 {
     return (this->tableId);
 }
 
-bool            Table::isTable(const QString &tableName)
+bool            Table::isTable(const QString &tableName) const
 {
     if (this->tableName != tableName)
         return (false);
     return (true);
 }
 
-bool            Table::isTable(LightBird::ITable::Table tableId)
+bool            Table::isTable(LightBird::ITable::Table tableId) const
 {
     if (this->tableId != tableId)
         return (false);

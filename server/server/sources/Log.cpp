@@ -128,7 +128,7 @@ void    Log::trace(const QString &message, const Properties &properties, const Q
     Log::instance()->write(LightBird::ILogs::TRACE, message, "", properties, object,method);
 }
 
-LightBird::ILogs::Level Log::getLevel()
+LightBird::ILogs::Level Log::getLevel() const
 {
     return (this->level);
 }
@@ -139,7 +139,7 @@ void    Log::setLevel(LightBird::ILogs::Level level)
         this->level = level;
 }
 
-bool    Log::isDisplay()
+bool    Log::isDisplay() const
 {
     return (this->display);
 }
@@ -149,35 +149,35 @@ void    Log::isDisplay(bool display)
     this->display = display;
 }
 
-bool    Log::isError()
+bool    Log::isError() const
 {
     if (this->level <= LightBird::ILogs::ERROR)
         return (true);
     return (false);
 }
 
-bool    Log::isWarning()
+bool    Log::isWarning() const
 {
     if (this->level <= LightBird::ILogs::WARNING)
         return (true);
     return (false);
 }
 
-bool    Log::isInfo()
+bool    Log::isInfo() const
 {
     if (this->level <= LightBird::ILogs::INFO)
         return (true);
     return (false);
 }
 
-bool    Log::isDebug()
+bool    Log::isDebug() const
 {
     if (this->level <= LightBird::ILogs::DEBUG)
         return (true);
     return (false);
 }
 
-bool    Log::isTrace()
+bool    Log::isTrace() const
 {
     if (this->level <= LightBird::ILogs::TRACE)
         return (true);
@@ -245,7 +245,7 @@ void    Log::_initializeWrite()
     this->waitMutex.unlock();
 }
 
-QString     Log::_mapToString(const QMap<QString, QString> &properties)
+QString     Log::_mapToString(const QMap<QString, QString> &properties) const
 {
     QMapIterator<QString, QString>  it(properties);
     QString                         result;
@@ -292,7 +292,7 @@ void    Log::_write(LightBird::ILogs::Level level, const QDateTime &date, const 
 }
 
 void        Log::_print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
-                        const QString &thread, const QString &plugin, const QString &object, const QString &method)
+                        const QString &thread, const QString &plugin, const QString &object, const QString &method) const
 {
     QString buffer;
 

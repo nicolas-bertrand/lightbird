@@ -313,7 +313,7 @@ void        Client::_onDisconnect()
     }
 }
 
-bool        Client::isFinished()
+bool        Client::isFinished() const
 {
     return (this->disconnected);
 }
@@ -368,14 +368,14 @@ LightBird::IClient::Mode Client::getMode() const
     return (this->mode);
 }
 
+QAbstractSocket &Client::getSocket()
+{
+    return (*this->socket);
+}
+
 QVariantMap     &Client::getInformations()
 {
     return (this->informations);
-}
-
-QAbstractSocket &Client::getSocket() const
-{
-    return (*this->socket);
 }
 
 LightBird::ITableAccounts &Client::getAccount()

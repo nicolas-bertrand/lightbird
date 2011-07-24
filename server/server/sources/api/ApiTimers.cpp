@@ -52,7 +52,7 @@ void    ApiTimers::setTimer(const QString &name, unsigned int timeout)
     }
 }
 
-unsigned int        ApiTimers::getTimer(const QString &name)
+unsigned int        ApiTimers::getTimer(const QString &name) const
 {
     unsigned int    timeout = 0;
 
@@ -67,7 +67,7 @@ unsigned int        ApiTimers::getTimer(const QString &name)
     return (timeout);
 }
 
-QMap<QString, unsigned int>     ApiTimers::getTimers()
+QMap<QString, unsigned int>     ApiTimers::getTimers() const
 {
     QMap<QString, unsigned int> timers;
 

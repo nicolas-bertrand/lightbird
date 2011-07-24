@@ -29,15 +29,15 @@ public:
     /// @see LightBird::INetwork::closePort
     bool            closePort(unsigned short port);
     /// @see LightBird::INetwork::getPort
-    bool            getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients);
+    bool            getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) const;
     /// @see LightBird::INetwork::getPorts
-    QList<unsigned short>   getPorts();
+    QList<unsigned short>   getPorts() const;
     /// @see LightBird::INetwork::getClient
-    bool            getClient(const QString &id, LightBird::INetwork::Client &client);
+    bool            getClient(const QString &id, LightBird::INetwork::Client &client) const;
     /// @brief Returns the list of the clients connected to a particular port.
     /// A negative number returns the clients connected in CLIENT mode.
     /// @see LightBird::INetwork::getClients
-    QStringList     getClients(int port = -1);
+    QStringList     getClients(int port = -1) const;
     /// @see LightBird::INetwork::connect
     Future<QString> connect(const QHostAddress &address, quint16 port,
                             const QStringList &protocols = QStringList(),
@@ -63,7 +63,7 @@ private slots:
 private:
     QMap<unsigned short, Port *> ports;   ///< The list of the open ports
     Clients                      clients; ///< Manages the clients in CLIENT mode.
-    QReadWriteLock               mutex;   ///< Makes the class thread safe.
+    mutable QReadWriteLock       mutex;   ///< Makes the class thread safe.
 };
 
 #endif // NETWORK_H

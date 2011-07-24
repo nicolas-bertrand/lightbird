@@ -16,20 +16,20 @@ namespace LightBird
 
         // Fields
         /// @brief Returns the name of the accessor.
-        virtual QString getName() = 0;
+        virtual QString getName() const = 0;
         /// @brief Modifies the name of the accessor.
         virtual bool    setName(const QString &name) = 0;
 
         // Other
         /// @brief Returns true if the accessor has the right on the object.
         /// @see LightBird::ITablePermissions::isAllowed
-        virtual bool        isAllowed(const QString &id_object, const QString &right) = 0;
+        virtual bool        isAllowed(const QString &id_object, const QString &right) const = 0;
         /// @brief Allows to get the list of the rights that the accessor has
         /// on the object.
         /// @see LightBird::ITablePermissions::getRights
-        virtual bool        getRights(const QString &id_object, QStringList &allowed, QStringList &denied) = 0;
+        virtual bool        getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const = 0;
         /// @brief Returns the limits of the accessor.
-        virtual QStringList getLimits() = 0;
+        virtual QStringList getLimits() const = 0;
     };
 }
 

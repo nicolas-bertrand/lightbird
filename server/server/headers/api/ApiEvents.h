@@ -31,7 +31,7 @@ public:
     void    subscribe(const QStringList &events);
     void    send(const QString &event, const QVariant &property = QVariant());
     QList<QPair<QString, QVariant> > receive();
-    bool    isAvailable();
+    bool    isAvailable() const;
 
 signals:
     /// @brief Signal emitted by post() each time an event for which the
@@ -51,11 +51,11 @@ private slots:
 
 private:
     QString         id;         ///< The id of the plugin for which the object has been created.
-    QMutex          mutex;      ///< Makes this class thread safe.
     QWaitCondition  wait;       ///< Allows to wait that the thread is started before return from the constructor.
     bool            awake;      ///< If the wait condition has been called.
     QStringList     subscribed; ///< List the events to which the plugin has subscribed.
     QList<QPair<QString, QVariant> > events; ///< The list of the pending events.
+    mutable QMutex  mutex;      ///< Makes this class thread safe.
 };
 
 #endif // APIEVENTS_H

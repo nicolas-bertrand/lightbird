@@ -31,7 +31,7 @@ TableEvents &TableEvents::operator=(const TableEvents &t)
     return (*this);
 }
 
-QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, const QDateTime &e)
+QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, const QDateTime &e) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   response;
@@ -81,7 +81,7 @@ bool        TableEvents::add(const QString &name, const QString &id_accessor, co
     return (this->add(name, QMap<QString, QVariant>(), id_accessor, id_object));
 }
 
-QString     TableEvents::getName()
+QString     TableEvents::getName() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -105,7 +105,7 @@ bool            TableEvents::setName(const QString &name)
     return (Database::instance()->query(query));
 }
 
-QString     TableEvents::getIdAccessor()
+QString     TableEvents::getIdAccessor() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -127,7 +127,7 @@ bool        TableEvents::setIdAccessor(const QString &id_accessor)
     return (Database::instance()->query(query));
 }
 
-QString     TableEvents::getIdObject()
+QString     TableEvents::getIdObject() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -149,7 +149,7 @@ bool        TableEvents::setIdObject(const QString &id_object)
     return (Database::instance()->query(query));
 }
 
-QVariant    TableEvents::getInformation(const QString &name)
+QVariant    TableEvents::getInformation(const QString &name) const
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;
@@ -162,7 +162,7 @@ QVariant    TableEvents::getInformation(const QString &name)
     return ("");
 }
 
-QMap<QString, QVariant> TableEvents::getInformations()
+QMap<QString, QVariant> TableEvents::getInformations() const
 {
     QVector<QMap<QString, QVariant> >   result;
     QSqlQuery                           query;

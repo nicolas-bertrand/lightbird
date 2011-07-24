@@ -26,9 +26,9 @@ public:
 
     /// @see LightBird::INetwork::getClient
     /// @param found : True if the client has been found on the port.
-    Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found);
+    Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const;
     /// @see LightBird::INetwork::getClients
-    QStringList     getClients();
+    QStringList     getClients() const;
     /// @brief Disconnects a client from this port.
     /// @param id : The id of the client to disconnect.
     /// @return True is the client exists.
@@ -37,16 +37,16 @@ public:
     /// remove all the clients currently connected.
     virtual void    close();
     /// @brief Returns the port number.
-    unsigned short  getPort();
+    unsigned short  getPort() const;
     /// @brief Returns the transport protocol used by this port.
-    LightBird::INetwork::Transport getTransport();
+    LightBird::INetwork::Transport getTransport() const;
     /// @brief Returns the names of the protocols used to communicate with the
     /// clients connected to this port.
-    const QStringList &getProtocols();
+    const QStringList &getProtocols() const;
     /// @brief Returns the maximum number of clients connected to this port.
-    unsigned int    getMaxClients();
+    unsigned int    getMaxClients() const;
     /// @brief Returns true if the port is listening the network.
-    bool            isListening();
+    bool            isListening() const;
     // IReadWrite
     virtual bool    read(QByteArray &data, Client *client) = 0;
     virtual bool    write(QByteArray *data, Client *client) = 0;
@@ -64,12 +64,12 @@ protected:
     /// @param client : The client to disconnect and remove.
     void            _removeClient(Client *client);
     /// @brief Returns true if the port is listening.
-    virtual bool    _isListening();
+    virtual bool    _isListening() const;
     /// @brief Sets if the port is listening the network.
     void            _isListening(bool listening);
 
-    QList<Client *> clients; ///< Contains the list of all the clients connected to this port.
-    QReadWriteLock  mutex;   ///< Makes this class is thread safe.
+    QList<Client *>         clients; ///< Contains the list of all the clients connected to this port.
+    mutable QReadWriteLock  mutex;   ///< Makes this class is thread safe.
 
 protected slots:
     /// @brief Called when a client is finished.

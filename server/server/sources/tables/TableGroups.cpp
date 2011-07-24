@@ -30,7 +30,7 @@ TableGroups &TableGroups::operator=(const TableGroups &t)
     return (*this);
 }
 
-QStringList     TableGroups::getIdFromName(const QString &name)
+QStringList     TableGroups::getIdFromName(const QString &name) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -62,7 +62,7 @@ bool            TableGroups::add(const QString &name, const QString &id_group)
     return (true);
 }
 
-QString         TableGroups::getIdGroup()
+QString         TableGroups::getIdGroup() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -107,7 +107,7 @@ bool            TableGroups::removeAccount(const QString &id_account)
     return (Database::instance()->query(query) && query.numRowsAffected() > 0);
 }
 
-QStringList     TableGroups::getAccounts()
+QStringList     TableGroups::getAccounts() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;

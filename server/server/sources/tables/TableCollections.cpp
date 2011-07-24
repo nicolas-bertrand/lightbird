@@ -32,7 +32,7 @@ TableCollections &TableCollections::operator=(const TableCollections &t)
     return (*this);
 }
 
-QString TableCollections::getIdFromVirtualPath(const QString &virtualPath)
+QString TableCollections::getIdFromVirtualPath(const QString &virtualPath) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -86,7 +86,7 @@ bool    TableCollections::add(const QString &name, const QString &id_collection,
     return (true);
 }
 
-QString TableCollections::getIdCollection()
+QString TableCollections::getIdCollection() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -108,7 +108,7 @@ bool    TableCollections::setIdCollection(const QString &id_collection)
     return (Database::instance()->query(query));
 }
 
-QString TableCollections::getVirtualPath(bool initialSlash, bool finalSlash)
+QString TableCollections::getVirtualPath(bool initialSlash, bool finalSlash) const
 {
     TableCollections    collection;
     QString             id_collection;
@@ -145,7 +145,7 @@ bool    TableCollections::setVirtualPath(const QString &virtualPath)
     return (this->setIdCollection(id_collection));
 }
 
-QStringList TableCollections::getCollections(const QString &id_accessor, const QString &right)
+QStringList TableCollections::getCollections(const QString &id_accessor, const QString &right) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -163,7 +163,7 @@ QStringList TableCollections::getCollections(const QString &id_accessor, const Q
     return (collections);
 }
 
-QStringList TableCollections::getFiles(const QString &id_accessor, const QString &right)
+QStringList TableCollections::getFiles(const QString &id_accessor, const QString &right) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;

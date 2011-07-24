@@ -44,12 +44,12 @@ Arguments &Arguments::operator=(const Arguments &arguments)
     return (*this);
 }
 
-QString Arguments::getConfiguration()
+QString Arguments::getConfiguration() const
 {
     return (this->arguments.value("configuration"));
 }
 
-bool    Arguments::isGui()
+bool    Arguments::isGui() const
 {
     if (this->arguments.contains("nogui"))
         return (false);
@@ -66,12 +66,12 @@ char    **Arguments::getArgv()
     return (this->argv);
 }
 
-QString Arguments::toString()
+QString Arguments::toString() const
 {
     return (this->raw.join(", ").prepend('"').append('"'));
 }
 
-QStringList     Arguments::toStringList()
+QStringList     Arguments::toStringList() const
 {
     QStringList result = this->raw;
 

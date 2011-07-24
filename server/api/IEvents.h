@@ -33,7 +33,7 @@ namespace LightBird
         /// @see LightBird::IEvent
         virtual QList<QPair<QString, QVariant> > receive() = 0;
         /// @brief Returns true if events are ready to be received.
-        virtual bool    isAvailable() = 0;
+        virtual bool    isAvailable() const = 0;
     };
 }
 

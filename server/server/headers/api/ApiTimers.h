@@ -22,8 +22,8 @@ public:
     ~ApiTimers();
 
     void                        setTimer(const QString &name, unsigned int timeout);
-    unsigned int                getTimer(const QString &name);
-    QMap<QString, unsigned int> getTimers();
+    unsigned int                getTimer(const QString &name) const;
+    QMap<QString, unsigned int> getTimers() const;
     bool                        removeTimer(const QString &name);
 
 private:
@@ -33,7 +33,7 @@ private:
 
     QString                 id;     ///< The id of the plugin for which the timers are managed.
     QMap<QString, Timer *>  timers; ///< The list of the timers of the plugin.
-    QReadWriteLock          mutex;  ///< Makes this class thread safe.
+    mutable QReadWriteLock  mutex;  ///< Makes this class thread safe.
 };
 
 #endif // APITIMERS_H

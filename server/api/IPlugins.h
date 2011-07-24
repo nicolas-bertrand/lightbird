@@ -66,19 +66,19 @@ namespace LightBird
         /// the methods defined in IPlugin.
         /// @param id : The id of the plugin.
         /// @return The current state of the plugin.
-        virtual LightBird::IPlugins::State getState(const QString &id) = 0;
+        virtual LightBird::IPlugins::State getState(const QString &id) const = 0;
         /// @brief Returns a list of the id of all the plugins available on the server.
-        virtual QStringList     getPlugins() = 0;
+        virtual QStringList     getPlugins() const = 0;
         /// @brief Returns a list of the id of the loaded plugins. It can't be called from
         /// the methods defined in IPlugin.
-        virtual QStringList     getLoadedPlugins() = 0;
+        virtual QStringList     getLoadedPlugins() const = 0;
         /// @brief Returns a list of the id of the plugins that are installed but not loaded.
         /// It can't be called from the methods defined in IPlugin.
-        virtual QStringList     getUnloadedPlugins() = 0;
+        virtual QStringList     getUnloadedPlugins() const = 0;
         /// @brief Returns a list of the id of the installed plugins.
-        virtual QStringList     getInstalledPlugins() = 0;
+        virtual QStringList     getInstalledPlugins() const = 0;
         /// @brief Returns a list of the id of the uninstalled plugins.
-        virtual QStringList     getUninstalledPlugins() = 0;
+        virtual QStringList     getUninstalledPlugins() const = 0;
     };
 }
 

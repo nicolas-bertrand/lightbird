@@ -21,11 +21,11 @@ public:
                                   unsigned int maxClients = ~0);
     bool                  closePort(unsigned short port);
     bool                  getPort(unsigned short port, QStringList &protocols,
-                                  LightBird::INetwork::Transport &transport, unsigned int &maxClients);
-    QList<unsigned short> getPorts();
-    bool                  getClient(const QString &id, LightBird::INetwork::Client &client);
-    QStringList           getClients();
-    QStringList           getClients(unsigned short port);
+                                  LightBird::INetwork::Transport &transport, unsigned int &maxClients) const;
+    QList<unsigned short> getPorts() const;
+    bool                  getClient(const QString &id, LightBird::INetwork::Client &client) const;
+    QStringList           getClients() const;
+    QStringList           getClients(unsigned short port) const;
     QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address,
                           quint16 port, const QStringList &protocols = QStringList(),
                           LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,

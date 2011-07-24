@@ -72,24 +72,24 @@ namespace LightBird
         /// @brief The current log level. The logs below this level are not saved.
         /// For example, WARNING is below ERROR, and INFO is below WARNING...
         /// @return The current log level.
-        virtual LightBird::ILogs::Level getLevel() = 0;
+        virtual LightBird::ILogs::Level getLevel() const = 0;
         /// @brief Modifies the log level.
         /// @param level : The new log level.
         virtual void        setLevel(LightBird::ILogs::Level level) = 0;
         /// @brief Returns true if the logs are beeing displayed on the standard output.
-        virtual bool        isDisplay() = 0;
+        virtual bool        isDisplay() const = 0;
         /// @brief Display of hide the logs on the standard output.
         virtual void        isDisplay(bool display) = 0;
         /// @return True if the error logs are saved.
-        virtual bool        isError() = 0;
+        virtual bool        isError() const = 0;
         /// @return True if the warning logs are saved.
-        virtual bool        isWarning() = 0;
+        virtual bool        isWarning() const = 0;
         /// @return True if the info logs are saved.
-        virtual bool        isInfo() = 0;
+        virtual bool        isInfo() const = 0;
         /// @return True if the debug logs are saved.
-        virtual bool        isDebug() = 0;
+        virtual bool        isDebug() const = 0;
         /// @return True if the trace logs are saved.
-        virtual bool        isTrace() = 0;
+        virtual bool        isTrace() const = 0;
     };
 }
 

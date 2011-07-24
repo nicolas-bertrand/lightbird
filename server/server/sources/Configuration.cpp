@@ -99,17 +99,17 @@ bool        Configuration::_load(const QString &configurationPath, const QString
     return (true);
 }
 
-Configuration::operator     bool()
+Configuration::operator     bool() const
 {
     return (this->loaded);
 }
 
-QString Configuration::getPath()
+QString Configuration::getPath() const
 {
     return (this->file.fileName());
 }
 
-QString         Configuration::get(const QString &nodeName)
+QString         Configuration::get(const QString &nodeName) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "get");
 
@@ -118,7 +118,7 @@ QString         Configuration::get(const QString &nodeName)
     return (this->_get(nodeName, this->dom));
 }
 
-unsigned int    Configuration::count(const QString &nodeName)
+unsigned int    Configuration::count(const QString &nodeName) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "count");
 
@@ -144,7 +144,7 @@ bool            Configuration::remove(const QString &nodeName)
     return (this->_remove(nodeName, this->dom));
 }
 
-QDomElement Configuration::readDom()
+QDomElement Configuration::readDom() const
 {
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
         Log::error("Deadlock", "Configuration", "readDom");
@@ -158,7 +158,7 @@ QDomElement Configuration::writeDom()
     return (this->dom);
 }
 
-void    Configuration::release()
+void    Configuration::release() const
 {
     this->mutex.unlock();
 }
@@ -194,7 +194,7 @@ bool            Configuration::save()
     return (true);
 }
 
-QString                     Configuration::_get(const QString &nodeName, QDomElement element)
+QString                     Configuration::_get(const QString &nodeName, QDomElement element) const
 {
     QString                 result = "";
     QDomNode                node;
@@ -246,7 +246,7 @@ QString                     Configuration::_get(const QString &nodeName, QDomEle
     return (result);
 }
 
-unsigned int                Configuration::_count(const QString &nodeName, QDomElement element)
+unsigned int                Configuration::_count(const QString &nodeName, QDomElement element) const
 {
     unsigned int            result = 0;
     QString                 name;

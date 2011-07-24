@@ -69,25 +69,25 @@ namespace LightBird
         /// @param maxClients : The maximum number of clients simultaneously connected,
         /// allowed by the port.
         /// @return True if the port exists.
-        virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) = 0;
+        virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) const = 0;
         /// @brief Returns the list of the open ports. One can use getPort() to get
         /// more detailed informations about a specific port.
         /// @return The list of the opened ports on the server.
-        virtual QList<unsigned short>   getPorts() = 0;
+        virtual QList<unsigned short>   getPorts() const = 0;
         /// @brief Returns the informations of a client.
         /// @param id : The id of the client.
         /// @param client : The informations of the client are stored in this structure.
         /// @return True if the client exists.
-        virtual bool    getClient(const QString &id, LightBird::INetwork::Client &client) = 0;
+        virtual bool    getClient(const QString &id, LightBird::INetwork::Client &client) const = 0;
         /// @brief Returns the list of the clients to which the server is connected.
         /// These clients are not connected to an opened port since the server
         /// initiated the connection.
         /// @return The list of the id of the clients in CLIENT mode.
-        virtual QStringList getClients() = 0;
+        virtual QStringList getClients() const = 0;
         /// @brief Returns the list of the clients connected to a particular port.
         /// @param port : The port of the clients.
         /// @return The list of the id of the clients connected to the port.
-        virtual QStringList getClients(unsigned short port) = 0;
+        virtual QStringList getClients(unsigned short port) const = 0;
         /// @brief Connects the server to an other server.
         /// IOnConnection is called if the connection success.
         /// The client is created using the CLIENT mode which uses a different

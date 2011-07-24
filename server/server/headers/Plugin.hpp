@@ -53,9 +53,9 @@ public:
     LightBird::IMetadata getMetadata() const;
     /// @brief Check if the given context is valid compared to the contexts of the plugin.
     bool    checkContext(const QString &mode, const QString &transport, const QStringList &protocols,
-                         unsigned short port, const QString &method, const QString &type, bool all);
+                         unsigned short port, const QString &method, const QString &type, bool all) const;
     /// @brief Returns the current state of the plugin.
-    LightBird::IPlugins::State  getState();
+    LightBird::IPlugins::State  getState() const;
 
 private:
     Plugin();

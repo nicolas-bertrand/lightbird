@@ -14,17 +14,17 @@ public:
     ~TableDirectories();
     TableDirectories &operator=(const TableDirectories &t);
 
-    QString     getIdFromVirtualPath(const QString &virtualPath);
+    QString     getIdFromVirtualPath(const QString &virtualPath) const;
     bool        setIdFromVirtualPath(const QString &virtualPath);
     bool        add(const QString &name, const QString &id_directory = "", const QString &id_account = "");
 
-    QString     getIdDirectory();
+    QString     getIdDirectory() const;
     bool        setIdDirectory(const QString &id_directory = "");
 
-    QString     getVirtualPath(bool initialSlash = false, bool finalSlash = false);
+    QString     getVirtualPath(bool initialSlash = false, bool finalSlash = false) const;
     bool        setVirtualPath(const QString &virtualPath);
-    QStringList getDirectories(const QString &id_accessor = "", const QString &right = "");
-    QStringList getFiles(const QString &id_accessor = "", const QString &right = "");
+    QStringList getDirectories(const QString &id_accessor = "", const QString &right = "") const;
+    QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const;
 };
 
 #endif // TABLEDIRECTORIES_H

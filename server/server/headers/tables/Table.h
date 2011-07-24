@@ -12,19 +12,19 @@ class Table : public QObject,
     Q_INTERFACES(LightBird::ITable)
 
 public:
-    const QString       &getId();
+    const QString       &getId() const;
     virtual bool        setId(const QString &id);
     bool                exists(const QString &id = "");
     void                clear();
     bool                remove(const QString &id = "");
 
-    QDateTime           getModified();
-    QDateTime           getCreated();
+    QDateTime           getModified() const;
+    QDateTime           getCreated() const;
 
-    const QString       &getTableName();
-    LightBird::ITable::Table getTableId();
-    bool                isTable(const QString &tableName);
-    bool                isTable(LightBird::ITable::Table tableId);
+    const QString       &getTableName() const;
+    LightBird::ITable::Table getTableId() const;
+    bool                isTable(const QString &tableName) const;
+    bool                isTable(LightBird::ITable::Table tableId) const;
 
     LightBird::ITableAccessors   *toAccessors();
     LightBird::ITableAccounts    *toAccounts();

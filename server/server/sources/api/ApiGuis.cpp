@@ -34,7 +34,7 @@ void    ApiGuis::hide(const QString &id)
         emit this->hideSignal(id);
 }
 
-bool    ApiGuis::noGui()
+bool    ApiGuis::noGui() const
 {
     return (this->isNoGui);
 }

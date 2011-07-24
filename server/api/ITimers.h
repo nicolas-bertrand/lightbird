@@ -21,9 +21,9 @@ namespace LightBird
         virtual void                            setTimer(const QString &name, unsigned int timeout) = 0;
         /// @brief Returns the timeout of a timer, or zero if it doesn't exists.
         /// @param name : The name of the timer.
-        virtual unsigned int                    getTimer(const QString &name) = 0;
+        virtual unsigned int                    getTimer(const QString &name) const = 0;
         /// @brief Returns a map of all the timers and their timeout.
-        virtual QMap<QString, unsigned int>     getTimers() = 0;
+        virtual QMap<QString, unsigned int>     getTimers() const = 0;
         /// @brief Remove a timer.
         /// @param name : The name of the timer.
         /// @return False if the timer doesn't exists.

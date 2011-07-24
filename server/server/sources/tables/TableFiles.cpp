@@ -36,7 +36,7 @@ TableFiles &TableFiles::operator=(const TableFiles &t)
     return (*this);
 }
 
-QString TableFiles::getIdFromVirtualPath(const QString &virtualPath)
+QString TableFiles::getIdFromVirtualPath(const QString &virtualPath) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -100,7 +100,7 @@ bool    TableFiles::add(const QString &name, const QString &path, const QString 
     return (this->add(name, path, QMap<QString, QVariant>(), type, id_directory, id_account));
 }
 
-QString TableFiles::getPath()
+QString TableFiles::getPath() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -112,7 +112,7 @@ QString TableFiles::getPath()
     return ("");
 }
 
-QString TableFiles::getFullPath()
+QString TableFiles::getFullPath() const
 {
     QString path = this->getPath();
 
@@ -135,7 +135,7 @@ bool    TableFiles::setPath(const QString &path)
     return (Database::instance()->query(query));
 }
 
-QString TableFiles::getType()
+QString TableFiles::getType() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -160,7 +160,7 @@ bool    TableFiles::setType(const QString &type)
     return (Database::instance()->query(query));
 }
 
-QString TableFiles::getIdDirectory()
+QString TableFiles::getIdDirectory() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -182,7 +182,7 @@ bool    TableFiles::setIdDirectory(const QString &id_directory)
     return (Database::instance()->query(query));
 }
 
-QVariant TableFiles::getInformation(const QString &name)
+QVariant TableFiles::getInformation(const QString &name) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -195,7 +195,7 @@ QVariant TableFiles::getInformation(const QString &name)
     return ("");
 }
 
-QMap<QString, QVariant> TableFiles::getInformations()
+QMap<QString, QVariant> TableFiles::getInformations() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -277,7 +277,7 @@ bool    TableFiles::removeInformations(const QStringList &informations)
     return (result);
 }
 
-QString TableFiles::getVirtualPath(bool initialSlash, bool fileName)
+QString TableFiles::getVirtualPath(bool initialSlash, bool fileName) const
 {
     TableDirectories    directory;
     QString             virtualPath;
@@ -310,7 +310,7 @@ bool    TableFiles::setVirtualPath(const QString &virtualPath)
     return (this->setIdDirectory(id_directory));
 }
 
-QStringList TableFiles::getCollections()
+QStringList TableFiles::getCollections() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;

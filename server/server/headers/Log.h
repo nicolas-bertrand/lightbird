@@ -67,15 +67,15 @@ public:
     static void trace(const QString &message, const QString &object = "", const QString &method = "");
     /// @brief Writes a trace log.
     static void trace(const QString &message, const Properties &properties, const QString &object = "", const QString &method = "");
-    LightBird::ILogs::Level getLevel();
+    LightBird::ILogs::Level getLevel() const;
     void    setLevel(LightBird::ILogs::Level level);
-    bool    isDisplay();
+    bool    isDisplay() const;
     void    isDisplay(bool display);
-    bool    isError();
-    bool    isWarning();
-    bool    isInfo();
-    bool    isDebug();
-    bool    isTrace();
+    bool    isError() const;
+    bool    isWarning() const;
+    bool    isInfo() const;
+    bool    isDebug() const;
+    bool    isTrace() const;
 
     /// @brief Set the mode of the log.
     void        setMode(Mode mode);
@@ -112,10 +112,10 @@ private:
     void        _initializeWrite();
     /// @brief Convert a QMap to a QString. The Entries are separate by ", "
     /// @return The result of the conversion.
-    QString     _mapToString(const QMap<QString, QString> &properties);
+    QString     _mapToString(const QMap<QString, QString> &properties) const;
     /// @brief Print the log in parameter on the standard output.
     /// @see write
-    void        _print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+    void        _print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method) const;
 
 private slots:
     /// @brief Write a log to the plugins that implements ILog.
@@ -125,7 +125,7 @@ private:
     LightBird::ILogs::Level                 level;      ///< The minimum level required to write a log.
     static Log                              *_instance; ///< The instance of the Singleton.
     QMap<LightBird::ILogs::Level, QString>  levels;     ///< Combines the levels and their names.
-    QMutex                                  mutex;      ///< Ensures that only one log is written at the same time.
+    mutable QMutex                          mutex;      ///< Ensures that only one log is written at the same time.
     QList<LogInformations>                  buffer;     ///< A buffer that stores the logs that haven't been saved yet.
     Mode                                    mode;       ///< The current mode of the log.
     bool                                    display;    ///< If the logs have to be displayed in the standard output.

@@ -18,7 +18,7 @@ namespace LightBird
         virtual ~ITableFiles() {}
 
         /// @brief Returns the id of a file, using its virtual path.
-        virtual QString     getIdFromVirtualPath(const QString &virtualPath) = 0;
+        virtual QString     getIdFromVirtualPath(const QString &virtualPath) const = 0;
         /// @brief Set the id of a file, using its virtual path.
         virtual bool        setIdFromVirtualPath(const QString &virtualPath) = 0;
         /// @brief Add a new file.
@@ -38,31 +38,31 @@ namespace LightBird
 
         // Fields
         /// @brief Returns the path of the file.
-        virtual QString     getPath() = 0;
+        virtual QString     getPath() const = 0;
         /// @brief If the path is relative, getPath() returns the path from the
         /// filesPath directory, which is not the working directory of the server.
         /// The path returned by getFullPath() contains the filesPath if it is
         /// relative, or just the path if it is absolute. Nothing is returned
         /// if the file has not been found.
-        virtual QString     getFullPath() = 0;
+        virtual QString     getFullPath() const = 0;
         /// @brief Modifies the path of the file.
         virtual bool        setPath(const QString &path) = 0;
         /// @brief Returns the type of the file, which can be image, audio, video,
         /// document, or other.
-        virtual QString     getType() = 0;
+        virtual QString     getType() const = 0;
         /// @brief Modifies the type of the file.
         virtual bool        setType(const QString &type = "") = 0;
         /// @brief Returns the id of the directory of the file.
-        virtual QString     getIdDirectory() = 0;
+        virtual QString     getIdDirectory() const = 0;
         /// @brief Modifies the id of the directory of the file.
         virtual bool        setIdDirectory(const QString &id_directory = "") = 0;
 
         // Informations
         /// @brief Returns the value of an information of the file.
         /// @param name : The name of the information to return.
-        virtual QVariant    getInformation(const QString &name) = 0;
+        virtual QVariant    getInformation(const QString &name) const = 0;
         /// @brief Returns all the informations of the file.
-        virtual QMap<QString, QVariant> getInformations() = 0;
+        virtual QMap<QString, QVariant> getInformations() const = 0;
         /// @brief Modify the value of an information of the file, or create it
         /// if it doesn't exists.
         /// @param name : The name of the information to create or modify.
@@ -85,14 +85,14 @@ namespace LightBird
         /// @brief Returns the virtual path of the file.
         /// @param initialSlash : If true, the first char of the result will be "/".
         /// @param fileName : If true, the file name is included in the result.
-        virtual QString     getVirtualPath(bool initialSlash = false, bool fileName = false) = 0;
+        virtual QString     getVirtualPath(bool initialSlash = false, bool fileName = false) const = 0;
         /// @brief Moves the file to the directory localized by the virtual
         /// path in parameter.
         virtual bool        setVirtualPath(const QString &virtualPath) = 0;
 
         // Collections
         /// @brief Returns the list of the id collection of the file.
-        virtual QStringList getCollections() = 0;
+        virtual QStringList getCollections() const = 0;
         /// @brief Add the file to the given collection.
         virtual bool        addCollection(const QString &id_collection) = 0;
         /// @brief Removes the file from the given collection.

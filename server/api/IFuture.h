@@ -28,7 +28,7 @@ namespace LightBird
         /// @brief This method overload getResult and it block infinitely until the result
         /// became available.
         /// @return : The value of the Future.
-        virtual T        getResult() = 0;
+        virtual T       getResult() = 0;
     };
 }
 

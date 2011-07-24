@@ -35,7 +35,7 @@ private:
     /// @brief The main method of the thread.
     void    run();
     /// @brief Returns true if the port is currently listening the network.
-    bool    _isListening();
+    bool    _isListening() const;
 
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the tcpServer.

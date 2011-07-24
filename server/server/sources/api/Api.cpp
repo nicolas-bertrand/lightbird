@@ -101,17 +101,17 @@ void                        Api::restart()
     Server::instance().stop(true);
 }
 
-const QString               &Api::getId()
+const QString               &Api::getId() const
 {
     return (this->id);
 }
 
-QString                     Api::getServerVersion()
+QString                     Api::getServerVersion() const
 {
     return (VERSION);
 }
 
-const QString               &Api::getPluginPath()
+const QString               &Api::getPluginPath() const
 {
     return (this->pluginPath);
 }

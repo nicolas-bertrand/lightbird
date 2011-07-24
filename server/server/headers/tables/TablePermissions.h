@@ -20,33 +20,33 @@ public:
     ~TablePermissions();
     TablePermissions &operator=(const TablePermissions &t);
 
-    QString     getId(const QString &id_accessor, const QString &id_object, const QString &right);
+    QString     getId(const QString &id_accessor, const QString &id_object, const QString &right) const;
     bool        setId(const QString &id_accessor, const QString &id_object, const QString &right);
     bool        add(const QString &id_accessor, const QString &id_object, const QString &right, bool granted = true);
 
-    QString     getIdAccessor();
+    QString     getIdAccessor() const;
     bool        setIdAccessor(const QString &id_accessor = "");
-    QString     getIdObject();
+    QString     getIdObject() const;
     bool        setIdObject(const QString &id_object = "");
-    QString     getRight();
+    QString     getRight() const;
     bool        setRight(const QString &right = "");
-    bool        isGranted();
+    bool        isGranted() const;
     bool        isGranted(bool granted);
 
-    bool        isAllowed(const QString &id_accessor, const QString &id_object, const QString &right);
-    bool        getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied);
+    bool        isAllowed(const QString &id_accessor, const QString &id_object, const QString &right) const;
+    bool        getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied) const;
 
 private:
     /// @brief Check if the accessors has the right on the object.
     /// @return 2 if the permission is granted, 1 if it is not, and 0 if the answer is unknow.
-    unsigned    _idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right);
+    unsigned    _idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right) const;
     /// @brief Check the rights of the accessors in the database.
     /// @return The same values as _isAllowed.
-    unsigned    _checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right);
+    unsigned    _checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right) const;
     /// @brief Fills the lists allowed and denied with the rights of the accessors of the object.
-    void        _getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied);
+    void        _getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied) const;
     /// @brief Merges the source rights to the destination rights.
-    void        _mergeRights(QStringList &allowedSrc, QStringList &deniedSrc, QStringList &allowedDest, QStringList &deniedDest);
+    void        _mergeRights(QStringList &allowedSrc, QStringList &deniedSrc, QStringList &allowedDest, QStringList &deniedDest) const;
 };
 
 #endif // TABLEPERMISSIONS_H

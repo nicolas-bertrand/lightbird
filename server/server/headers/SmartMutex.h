@@ -35,7 +35,7 @@ public:
 
     /// @brief Returns true if the mutex has been locked via this instance.
     /// It does not checks if the mutex is actually locked.
-    operator bool();
+    operator bool() const;
     /// @brief Lock an unlocked QMutex.
     /// @return False if the lock fail after wait milliseconds.
     bool    lock(int wait = MAXTRYLOCK);

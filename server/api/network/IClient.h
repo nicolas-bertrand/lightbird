@@ -39,7 +39,7 @@ namespace LightBird
         /// @brief Returns the client id. Each clients has a unique id.
         virtual const QString        &getId() const = 0;
         /// @brief The socket through which the client is connected.
-        virtual QAbstractSocket      &getSocket() const = 0;
+        virtual QAbstractSocket      &getSocket() = 0;
         /// @brief The local port from which the client is connected.
         virtual unsigned short       getPort() const = 0;
         /// @brief The names of the protocols used to communicate with the client.

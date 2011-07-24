@@ -40,7 +40,7 @@ void    Timer::run()
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
-unsigned int    Timer::getTimeout()
+unsigned int    Timer::getTimeout() const
 {
     return (this->timeout);
 }

@@ -34,9 +34,9 @@ public:
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol);
     /// @see LightBird::INetwork::getClient
     /// @param found : True if the client has been found.
-    Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found);
+    Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const;
     /// @see LightBird::INetwork::getClients
-    QStringList     getClients();
+    QStringList     getClients() const;
     /// @brief Disconnects the client.
     /// @param id : The id of the client to disconnect.
     bool            disconnect(const QString &id);
@@ -75,7 +75,7 @@ private:
     void            run();
 
     QList<Client *> clients;        ///< The list of the clients managed.
-    QMutex          mutex;          ///< Makes the class thread safe.
+    mutable QMutex  mutex;          ///< Makes the class thread safe.
     Future<bool>    threadStarted;  ///< This future is unlocked when the thread is started.
     /// The list of the futures waiting for the connection of the client
     /// in order to set their results.

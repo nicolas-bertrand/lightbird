@@ -24,19 +24,19 @@ namespace LightBird
 
         // Fields
         /// @brief Returns the id of the accessor on which the limit is applied.
-        virtual QString getIdAccessor() = 0;
+        virtual QString getIdAccessor() const = 0;
         /// @brief Changes the accessor on which the limit is applied.
         virtual bool    setIdAccessor(const QString &id_accessor = "") = 0;
         /// @brief Returns the id of the object on which the limit is applied.
-        virtual QString getIdObject() = 0;
+        virtual QString getIdObject() const = 0;
         /// @brief Changes the object on which the limit is applied.
         virtual bool    setIdObject(const QString &id_object = "") = 0;
         /// @brief Returns the name of the limit.
-        virtual QString getName() = 0;
+        virtual QString getName() const = 0;
         /// @brief Modifies the name of the limit.
         virtual bool    setName(const QString &name) = 0;
         /// @brief Returns the value of the limit.
-        virtual QString getValue() = 0;
+        virtual QString getValue() const = 0;
         /// @brief Modifies the value of the limit.
         virtual bool    setValue(const QString &value) = 0;
     };

@@ -16,7 +16,7 @@ namespace LightBird
         virtual ~ITableGroups() {}
 
         /// @brief Returns the id of the groups with this name.
-        virtual QStringList getIdFromName(const QString &name) = 0;
+        virtual QStringList getIdFromName(const QString &name) const = 0;
         /// @brief Creates a new group.
         /// @param name : The name of the new account. It must be unique.
         /// @param id_group : The id of the parent group.
@@ -26,7 +26,7 @@ namespace LightBird
         // Fields
         /// @brief Returns the id of the parent of the group, or empty if
         /// it is at the root.
-        virtual QString     getIdGroup() = 0;
+        virtual QString     getIdGroup() const = 0;
         /// @brief Modifies the id of the parent of the group.
         virtual bool        setIdGroup(const QString &id_group = "") = 0;
 
@@ -36,7 +36,7 @@ namespace LightBird
         /// @brief Remove the group from the account in parameter.
         virtual bool        removeAccount(const QString &id_account) = 0;
         /// @brief Returns the id of the accounts of the group.
-        virtual QStringList getAccounts() = 0;
+        virtual QStringList getAccounts() const = 0;
     };
 }
 

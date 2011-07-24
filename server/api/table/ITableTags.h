@@ -22,11 +22,11 @@ namespace LightBird
 
         // Fields
         /// @brief Returns the id of the object on which the tag is applied.
-        virtual QString getIdObject() = 0;
+        virtual QString getIdObject() const = 0;
         /// @brief Changes the object on which the tag is applied.
         virtual bool    setIdObject(const QString &id_object) = 0;
         /// @brief Returns the name of the tag.
-        virtual QString getName() = 0;
+        virtual QString getName() const = 0;
         /// @brief Modifies the name of the tag.
         virtual bool    setName(const QString &name) = 0;
     };

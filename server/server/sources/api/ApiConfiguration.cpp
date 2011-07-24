@@ -28,12 +28,12 @@ ApiConfiguration::~ApiConfiguration()
 {
 }
 
-QString     ApiConfiguration::getPath()
+QString     ApiConfiguration::getPath() const
 {
     return (this->id);
 }
 
-QString     ApiConfiguration::get(const QString &nodeName)
+QString     ApiConfiguration::get(const QString &nodeName) const
 {
     QString result;
 
@@ -42,7 +42,7 @@ QString     ApiConfiguration::get(const QString &nodeName)
     return (result);
 }
 
-unsigned int     ApiConfiguration::count(const QString &nodeName)
+unsigned int     ApiConfiguration::count(const QString &nodeName) const
 {
     unsigned int result;
 
@@ -66,7 +66,7 @@ bool        ApiConfiguration::remove(const QString &nodeName)
     return (result);
 }
 
-QDomElement ApiConfiguration::readDom()
+QDomElement ApiConfiguration::readDom() const
 {
     return (this->_findConfiguration(this->configuration.readDom()));
 }
@@ -76,7 +76,7 @@ QDomElement ApiConfiguration::writeDom()
     return (this->_findConfiguration(this->configuration.writeDom()));
 }
 
-void        ApiConfiguration::release()
+void        ApiConfiguration::release() const
 {
     this->configuration.release();
 }
@@ -86,7 +86,7 @@ bool        ApiConfiguration::save()
     return (this->configuration.save());
 }
 
-QDomElement ApiConfiguration::_findConfiguration(QDomElement dom)
+QDomElement ApiConfiguration::_findConfiguration(QDomElement dom) const
 {
     dom = dom.firstChildElement("configurations");
     for (dom = dom.firstChildElement("plugin"); !dom.isNull() && dom.attribute("id") != this->id; dom = dom.nextSiblingElement("plugin"))

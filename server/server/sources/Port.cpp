@@ -26,7 +26,7 @@ Port::~Port()
     }
 }
 
-Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found)
+Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "getClient");
 
@@ -46,7 +46,7 @@ Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &
     return (Future<bool>(false));
 }
 
-QStringList     Port::getClients()
+QStringList     Port::getClients() const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "getClients");
     QStringList result;
@@ -132,34 +132,34 @@ Client          *Port::_finished()
     return (client);
 }
 
-unsigned short  Port::getPort()
+unsigned short  Port::getPort() const
 {
     return (this->port);
 }
 
-LightBird::INetwork::Transport Port::getTransport()
+LightBird::INetwork::Transport Port::getTransport() const
 {
     return (this->transport);
 }
 
-const QStringList   &Port::getProtocols()
+const QStringList   &Port::getProtocols() const
 {
     return (this->protocols);
 }
 
-unsigned int    Port::getMaxClients()
+unsigned int    Port::getMaxClients() const
 {
     return (this->maxClients);
 }
 
-bool            Port::isListening()
+bool            Port::isListening() const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "isListening");
 
     return (mutex && this->_isListening());
 }
 
-bool            Port::_isListening()
+bool            Port::_isListening() const
 {
     return (this->listening && this->isRunning());
 }

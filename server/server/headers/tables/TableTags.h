@@ -16,9 +16,9 @@ public:
 
     bool    add(const QString &id_object, const QString &name);
 
-    QString getIdObject();
+    QString getIdObject() const;
     bool    setIdObject(const QString &id_object);
-    QString getName();
+    QString getName() const;
     bool    setName(const QString &name);
 };
 

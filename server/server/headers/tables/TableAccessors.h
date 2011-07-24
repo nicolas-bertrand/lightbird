@@ -9,12 +9,12 @@ class TableAccessors : virtual public Table,
                        virtual public LightBird::ITableAccessors
 {
 public:
-    QString     getName();
+    QString     getName() const;
     bool        setName(const QString &name);
 
-    bool        isAllowed(const QString &id_object, const QString &right);
-    bool        getRights(const QString &id_object, QStringList &allowed, QStringList &denied);
-    QStringList getLimits();
+    bool        isAllowed(const QString &id_object, const QString &right) const;
+    bool        getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const;
+    QStringList getLimits() const;
 
     virtual TableAccessors &operator=(const TableAccessors &t);
 

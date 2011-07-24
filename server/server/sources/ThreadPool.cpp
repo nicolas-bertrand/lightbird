@@ -25,7 +25,7 @@ void    ThreadPool::addTask(ThreadPool::ITask *task)
     this->mutex.unlock();
 }
 
-unsigned int    ThreadPool::getThreadNumber()
+unsigned int    ThreadPool::getThreadNumber() const
 {
     return (this->threadsNumber);
 }

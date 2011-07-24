@@ -27,7 +27,7 @@ private:
     /// @brief The main method of the thread.
     void    run();
     /// @brief Returns true if the socket is currently bound on the port of the network.
-    bool    _isListening();
+    bool    _isListening() const;
 
 private slots:
     /// @brief This slot is called when datagrams are ready to be read.

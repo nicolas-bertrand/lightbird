@@ -14,15 +14,15 @@ public:
     ~TableGroups();
     TableGroups &operator=(const TableGroups &t);
 
-    QStringList getIdFromName(const QString &name);
+    QStringList getIdFromName(const QString &name) const;
     bool        add(const QString &name, const QString &id_group = "");
 
-    QString     getIdGroup();
+    QString     getIdGroup() const;
     bool        setIdGroup(const QString &id_group = "");
 
     bool        addAccount(const QString &id_account);
     bool        removeAccount(const QString &id_account);
-    QStringList getAccounts();
+    QStringList getAccounts() const;
 };
 
 #endif // TABLEGROUPS_H

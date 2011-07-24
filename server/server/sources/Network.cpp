@@ -73,7 +73,7 @@ bool            Network::closePort(unsigned short port)
     return (true);
 }
 
-bool            Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients)
+bool            Network::getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "getPort");
 
@@ -87,7 +87,7 @@ bool            Network::getPort(unsigned short port, QStringList &protocols, Li
     return (true);
 }
 
-QList<unsigned short>   Network::getPorts()
+QList<unsigned short>   Network::getPorts() const
 {
     SmartMutex          mutex(this->mutex, SmartMutex::READ, "Network", "getPorts");
 
@@ -96,7 +96,7 @@ QList<unsigned short>   Network::getPorts()
     return (QList<unsigned short>());
 }
 
-bool            Network::getClient(const QString &id, LightBird::INetwork::Client &client)
+bool            Network::getClient(const QString &id, LightBird::INetwork::Client &client) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "getClient");
     bool        found;
@@ -125,7 +125,7 @@ bool            Network::getClient(const QString &id, LightBird::INetwork::Clien
     return (false);
 }
 
-QStringList     Network::getClients(int port)
+QStringList     Network::getClients(int port) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "getClients");
     QStringList result;

@@ -164,7 +164,7 @@ LightBird::IMetadata     Plugin::getMetadata() const
 }
 
 bool    Plugin::checkContext(const QString &mode, const QString &transport, const QStringList &protocols,
-                             unsigned short port, const QString &method, const QString &type, bool all)
+                             unsigned short port, const QString &method, const QString &type, bool all) const
 {
     QListIterator<Context>  it(this->contexts);
 
@@ -193,7 +193,7 @@ bool    Plugin::checkContext(const QString &mode, const QString &transport, cons
     return (false);
 }
 
-LightBird::IPlugins::State      Plugin::getState()
+LightBird::IPlugins::State      Plugin::getState() const
 {
     LightBird::IPlugins::State  state;
     SmartMutex                  mutex(this->mutex, SmartMutex::READ, "Plugin", "getState");

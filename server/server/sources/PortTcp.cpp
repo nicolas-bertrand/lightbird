@@ -211,7 +211,7 @@ Client          *PortTcp::_finished()
     return (NULL);
 }
 
-bool    PortTcp::_isListening()
+bool    PortTcp::_isListening() const
 {
     return (Port::_isListening() && this->tcpServer.isListening());
 }

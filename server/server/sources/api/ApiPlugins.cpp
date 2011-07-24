@@ -38,32 +38,32 @@ LightBird::IMetadata ApiPlugins::getMetadata(const QString &id) const
     return (Plugins::instance()->getMetadata(id));
 }
 
-LightBird::IPlugins::State ApiPlugins::getState(const QString &id)
+LightBird::IPlugins::State ApiPlugins::getState(const QString &id) const
 {
     return (Plugins::instance()->getState(id));
 }
 
-QStringList ApiPlugins::getPlugins()
+QStringList ApiPlugins::getPlugins() const
 {
     return (Plugins::instance()->getPlugins());
 }
 
-QStringList ApiPlugins::getLoadedPlugins()
+QStringList ApiPlugins::getLoadedPlugins() const
 {
     return (Plugins::instance()->getLoadedPlugins());
 }
 
-QStringList ApiPlugins::getUnloadedPlugins()
+QStringList ApiPlugins::getUnloadedPlugins() const
 {
     return (Plugins::instance()->getUnloadedPlugins());
 }
 
-QStringList ApiPlugins::getInstalledPlugins()
+QStringList ApiPlugins::getInstalledPlugins() const
 {
     return (Plugins::instance()->getInstalledPlugins());
 }
 
-QStringList ApiPlugins::getUninstalledPlugins()
+QStringList ApiPlugins::getUninstalledPlugins() const
 {
     return (Plugins::instance()->getUninstalledPlugins());
 }

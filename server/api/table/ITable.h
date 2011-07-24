@@ -45,7 +45,7 @@ namespace LightBird
         /// @brief Returns the id of the row stored in the current instances.
         /// Notice that the row represented by this id may no longer exist.
         /// Use the method exists() to check that is has not been deleted.
-        virtual const QString   &getId() = 0;
+        virtual const QString   &getId() const = 0;
         /// @brief Changes the row stored in the current instance. This doesn't
         /// changes the id of the current rows (which is not permitted by the database).
         /// @param id : The id of the new row, which must exist.
@@ -63,19 +63,19 @@ namespace LightBird
 
         // Dates
         /// @brief Returns the date of the last modification of the row.
-        virtual QDateTime       getModified() = 0;
+        virtual QDateTime       getModified() const = 0;
         /// @brief Returns the date of the creation of the row.
-        virtual QDateTime       getCreated() = 0;
+        virtual QDateTime       getCreated() const = 0;
 
         // Table
         /// @brief Returns the name of the table represented by the instance.
-        virtual const QString   &getTableName() = 0;
+        virtual const QString   &getTableName() const = 0;
         /// @brief Returns the id of the table represented by the instance.
-        virtual LightBird::ITable::Table getTableId() = 0;
+        virtual LightBird::ITable::Table getTableId() const = 0;
         /// @brief Returns true if the table corresponds to the paramater.
-        virtual bool            isTable(const QString &tableName) = 0;
+        virtual bool            isTable(const QString &tableName) const = 0;
         /// @brief Returns true if the table corresponds to the paramater.
-        virtual bool            isTable(LightBird::ITable::Table tableId) = 0;
+        virtual bool            isTable(LightBird::ITable::Table tableId) const = 0;
 
         // Casts
         /// @brief Cast the table if possible. Returns NULL otherwise.

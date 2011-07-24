@@ -129,7 +129,7 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
     return (true);
 }
 
-Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found)
+Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
 {
     SmartMutex  mutex(this->mutex, "Clients", "getClient");
 
@@ -149,7 +149,7 @@ Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Clien
     return (Future<bool>(false));
 }
 
-QStringList     Clients::getClients()
+QStringList     Clients::getClients() const
 {
     SmartMutex  mutex(this->mutex, "Clients", "getClients");
     QStringList result;

@@ -36,7 +36,7 @@ TablePermissions &TablePermissions::operator=(const TablePermissions &t)
     return (*this);
 }
 
-QString TablePermissions::getId(const QString &id_accessor, const QString &id_object, const QString &right)
+QString TablePermissions::getId(const QString &id_accessor, const QString &id_object, const QString &right) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -78,7 +78,7 @@ bool    TablePermissions::add(const QString &id_accessor, const QString &id_obje
     return (true);
 }
 
-QString TablePermissions::getIdAccessor()
+QString TablePermissions::getIdAccessor() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -100,7 +100,7 @@ bool    TablePermissions::setIdAccessor(const QString &id_accessor)
     return (Database::instance()->query(query));
 }
 
-QString TablePermissions::getIdObject()
+QString TablePermissions::getIdObject() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -122,7 +122,7 @@ bool    TablePermissions::setIdObject(const QString &id_object)
     return (Database::instance()->query(query));
 }
 
-QString TablePermissions::getRight()
+QString TablePermissions::getRight() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -144,7 +144,7 @@ bool    TablePermissions::setRight(const QString &right)
     return (Database::instance()->query(query));
 }
 
-bool    TablePermissions::isGranted()
+bool    TablePermissions::isGranted() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -166,7 +166,7 @@ bool    TablePermissions::isGranted(bool granted)
     return (Database::instance()->query(query));
 }
 
-bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &id_object, const QString &right)
+bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &id_object, const QString &right) const
 {
     LightBird::ITableAccounts   *account = NULL;
     LightBird::ITableFiles      *file = NULL;
@@ -294,7 +294,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     return (false);
 }
 
-bool    TablePermissions::getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied)
+bool    TablePermissions::getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
     LightBird::ITableAccounts   *account = NULL;
     LightBird::ITableFiles      *file = NULL;
@@ -448,7 +448,7 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     return (true);
 }
 
-unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right)
+unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -488,7 +488,7 @@ unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const
     return (this->_checkRights(result, QStringList() << "", right));
 }
 
-unsigned int     TablePermissions::_checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right)
+unsigned int     TablePermissions::_checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right) const
 {
     int          i;
     int          s;
@@ -536,7 +536,7 @@ unsigned int     TablePermissions::_checkRights(const QVector<QMap<QString, QVar
     return (granted);
 }
 
-void    TablePermissions::_getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied)
+void    TablePermissions::_getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -625,7 +625,7 @@ void    TablePermissions::_getRights(const QStringList &accessors, const QList<Q
         }
 }
 
-void    TablePermissions::_mergeRights(QStringList &allowedSrc, QStringList &deniedSrc, QStringList &allowedDest, QStringList &deniedDest)
+void    TablePermissions::_mergeRights(QStringList &allowedSrc, QStringList &deniedSrc, QStringList &allowedDest, QStringList &deniedDest) const
 {
     // Add the new rights to the allowed list
     if (!allowedDest.contains("") && !deniedDest.contains(""))

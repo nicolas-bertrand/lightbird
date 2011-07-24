@@ -12,7 +12,7 @@ public:
     Initialize &operator=(const Initialize &);
 
     /// @brief Returns true if the class have been properly initialized.
-    operator bool();
+    operator bool() const;
 
 protected:
     /// @brief Sets if the class have been properly initialized.

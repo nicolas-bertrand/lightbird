@@ -63,12 +63,12 @@ namespace LightBird
         /// @brief The id of the plugin. This id refered to the name of the
         /// directory where the plugin is stored. It may or not be the real
         /// name of the plugin. It is a way to identified it uniquely.
-        virtual const QString               &getId() = 0;
+        virtual const QString               &getId() const = 0;
         /// @brief Returns the path of the current plugin which consists of
         /// the pluginsPath plus its id.
-        virtual const QString               &getPluginPath() = 0;
+        virtual const QString               &getPluginPath() const = 0;
         /// @brief Returns the current version of the server.
-        virtual QString                     getServerVersion() = 0;
+        virtual QString                     getServerVersion() const = 0;
     };
 }
 

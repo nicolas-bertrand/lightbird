@@ -8,7 +8,7 @@ Initialize::~Initialize()
 {
 }
 
-Initialize::operator bool()
+Initialize::operator bool() const
 {
     return (this->initialized);
 }

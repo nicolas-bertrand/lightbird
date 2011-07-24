@@ -23,7 +23,7 @@ namespace LightBird
         /// @param start : The date on which the search begins.
         /// @param end : The date on which the search ends.
         /// @return The list of the id of the events that match the filters.
-        virtual QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime()) = 0;
+        virtual QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime()) const = 0;
         /// @brief Created a new event.
         /// @param name : The name of the event.
         /// @param id_accessor : The id of the accessor for which the event is defined.
@@ -39,24 +39,24 @@ namespace LightBird
 
         // Fields
         /// @brief Returns the name of the event.
-        virtual QString     getName() = 0;
+        virtual QString     getName() const = 0;
         /// @brief Modifies the name of the event.
         virtual bool        setName(const QString &name) = 0;
         /// @brief Returns the id of the accessor of the event.
-        virtual QString     getIdAccessor() = 0;
+        virtual QString     getIdAccessor() const = 0;
         /// @brief Modifies the id of the accessor of the event.
         virtual bool        setIdAccessor(const QString &id_accessor = "") = 0;
         /// @brief Returns the id of the object of the event.
-        virtual QString     getIdObject() = 0;
+        virtual QString     getIdObject() const = 0;
         /// @brief Modifies the id of the object of the event.
         virtual bool        setIdObject(const QString &id_object = "") = 0;
 
         // Informations
         /// @brief Returns the value of an information of the event.
         /// @param name : The name of the information to return.
-        virtual QVariant    getInformation(const QString &name) = 0;
+        virtual QVariant    getInformation(const QString &name) const = 0;
         /// @brief Returns all the informations of the event.
-        virtual QMap<QString, QVariant> getInformations() = 0;
+        virtual QMap<QString, QVariant> getInformations() const = 0;
         /// @brief Modify the value of an information of the event, or create
         /// it if it doesn't exists.
         /// @param name : The name of the information to create or modify.

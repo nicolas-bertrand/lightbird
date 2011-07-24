@@ -22,12 +22,12 @@ public:
     QSharedPointer<LightBird::IFuture<bool> > install(const QString &id);
     QSharedPointer<LightBird::IFuture<bool> > uninstall(const QString &id);
     LightBird::IMetadata getMetadata(const QString &id) const;
-    LightBird::IPlugins::State getState(const QString &id);
-    QStringList         getPlugins();
-    QStringList         getLoadedPlugins();
-    QStringList         getUnloadedPlugins();
-    QStringList         getInstalledPlugins();
-    QStringList         getUninstalledPlugins();
+    LightBird::IPlugins::State getState(const QString &id) const;
+    QStringList         getPlugins() const;
+    QStringList         getLoadedPlugins() const;
+    QStringList         getUnloadedPlugins() const;
+    QStringList         getInstalledPlugins() const;
+    QStringList         getUninstalledPlugins() const;
     static ApiPlugins   *instance();
 
 private:

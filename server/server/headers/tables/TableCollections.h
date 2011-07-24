@@ -14,17 +14,17 @@ public:
     ~TableCollections();
     TableCollections &operator=(const TableCollections &t);
 
-    QString     getIdFromVirtualPath(const QString &virtualPath);
+    QString     getIdFromVirtualPath(const QString &virtualPath) const;
     bool        setIdFromVirtualPath(const QString &virtualPath);
     bool        add(const QString &name, const QString &id_collection = "", const QString &id_account = "");
 
-    QString     getIdCollection();
+    QString     getIdCollection() const;
     bool        setIdCollection(const QString &id_collection = "");
 
-    QString     getVirtualPath(bool initialSlash = false, bool finalSlash = false);
+    QString     getVirtualPath(bool initialSlash = false, bool finalSlash = false) const;
     bool        setVirtualPath(const QString &virtualPath);
-    QStringList getCollections(const QString &id_accessor = "", const QString &right = "");
-    QStringList getFiles(const QString &id_accessor = "", const QString &right = "");
+    QStringList getCollections(const QString &id_accessor = "", const QString &right = "") const;
+    QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const;
 };
 
 #endif // TABLECOLLECTIONS_H

@@ -15,17 +15,17 @@ namespace LightBird
         virtual             ~IConfiguration() {}
 
         /// @brief Returns the path to the configuration file, including its name.
-        virtual QString     getPath() = 0;
+        virtual QString     getPath() const = 0;
         /// @brief Returns the value of the node identified by nodeName.
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName[.attribut]", or simply "nodeName".
         /// @return The node value.
-        virtual QString     get(const QString &nodeName) = 0;
+        virtual QString     get(const QString &nodeName) const = 0;
         /// @brief Count the number of occurence of nodeName in his parent node.
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName", or simply "nodeName".
         /// @return The number of nodeName in his parent node.
-        virtual unsigned    count(const QString &nodeName) = 0;
+        virtual unsigned    count(const QString &nodeName) const = 0;
         /// @brief Sets value of the node identified by nodeName.
         /// If nodeName does not exist, it'll be created.
         /// If nodeName occured multiple times on the tree,
@@ -44,7 +44,7 @@ namespace LightBird
         /// via release(). Otherwise, a deadlock will occure.
         /// @see release
         /// @return the configuration tree
-        virtual QDomElement readDom() = 0;
+        virtual QDomElement readDom() const = 0;
         /// @brief Gets the configuration tree as a Qt Object for write access.
         /// As soon as you have finished working with the tree, it MUST be released
         /// via release(). Otherwise, a deadlock will occure.
@@ -54,7 +54,7 @@ namespace LightBird
         /// @brief Release the tree locked by readDom() or writeDom().
         /// @see readDom
         /// @see writeDom
-        virtual void        release() = 0;
+        virtual void        release() const = 0;
         /// @brief Saves the modifications made to the configuration into the file.
         /// If the instance represents the configuration of the server, the event
         /// configuration_saved is sent.

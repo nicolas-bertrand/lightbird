@@ -36,9 +36,9 @@ public:
     LightBird::ITimers          &timers();
     void                        stop();
     void                        restart();
-    const QString               &getId();
-    QString                     getServerVersion();
-    const QString               &getPluginPath();
+    const QString               &getId() const;
+    QString                     getServerVersion() const;
+    const QString               &getPluginPath() const;
 
 private:
     Api();

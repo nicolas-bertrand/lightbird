@@ -392,7 +392,7 @@ bool        Database::_loadQueries(const QString &id)
     return (true);
 }
 
-void    Database::_checkBoundValues(QSqlQuery &query)
+void    Database::_checkBoundValues(QSqlQuery &query) const
 {
     QMapIterator<QString, QVariant> it(query.boundValues());
 
@@ -404,7 +404,7 @@ void    Database::_checkBoundValues(QSqlQuery &query)
     }
 }
 
-void    Database::_displayUpdates(LightBird::IDatabase::Updates &updates)
+void    Database::_displayUpdates(LightBird::IDatabase::Updates &updates) const
 {
     QMapIterator<QString, QMap<LightBird::IDatabase::State, QList<QMap<QString, QVariant> > > > i1 (updates);
     while (i1.hasNext())

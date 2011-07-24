@@ -122,17 +122,17 @@ public:
     static Plugins          *instance();
 
     /// @see LightBird::IPlugins::getState
-    LightBird::IPlugins::State getState(const QString &id);
+    LightBird::IPlugins::State getState(const QString &id) const;
     /// @see LightBird::IPlugins::getPlugins
-    QStringList             getPlugins();
+    QStringList             getPlugins() const;
     /// @see LightBird::IPlugins::getLoadedPlugins
-    QStringList             getLoadedPlugins();
+    QStringList             getLoadedPlugins() const;
     /// @see LightBird::IPlugins::getUnloadedPlugins
-    QStringList             getUnloadedPlugins();
+    QStringList             getUnloadedPlugins() const;
     /// @see LightBird::IPlugins::getInstalledPlugins
-    QStringList             getInstalledPlugins();
+    QStringList             getInstalledPlugins() const;
     /// @see LightBird::IPlugins::getUninstalledPlugins
-    QStringList             getUninstalledPlugins();
+    QStringList             getUninstalledPlugins() const;
 
 signals:
     void                    loadSignal(const QString &id, Future<bool> *future);
@@ -163,9 +163,9 @@ private:
     /// @param pluginsPath : The root path of the plugins.
     /// @param path : The path of the current directory checked.
     /// @param plugins : The plugins found.
-    void                    _findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins);
+    void                    _findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins) const;
     /// @see getState
-    LightBird::IPlugins::State _getState(const QString &id);
+    LightBird::IPlugins::State _getState(const QString &id) const;
 
     QMap<QString, Plugin *> plugins;           ///< The list of loaded plugins.
     QStringList             orderedPlugins;    ///< Contains the id of the loaded plugins, and keep the order of their loading.

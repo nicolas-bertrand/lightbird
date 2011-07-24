@@ -55,7 +55,7 @@ public:
     /// @brief Calls the IDoWrite interface of the plugins.
     bool                    doWrite(QByteArray &data);
     /// @brief Returns true if the client is finished and can be safely destroyed.
-    bool                    isFinished();
+    bool                    isFinished() const;
     /// @brief Changes the port member of the client (doesn't affect the real port).
     void                    setPort(unsigned short port);
     /// @brief This method is used to get the informations of a client in a thread
@@ -77,7 +77,7 @@ public:
     const QString           &getPeerName() const;
     const QDateTime         &getConnectionDate() const;
     LightBird::IClient::Mode getMode() const;
-    QAbstractSocket         &getSocket() const;
+    QAbstractSocket         &getSocket();
     QVariantMap             &getInformations();
     LightBird::ITableAccounts &getAccount();
     LightBird::IRequest     &getRequest();

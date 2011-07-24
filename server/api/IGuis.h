@@ -23,7 +23,7 @@ namespace LightBird
         virtual void    hide(const QString &id = "") = 0;
         /// @return True if the GUIs of the server are disabled using the "noGui"
         /// argument of the server.
-        virtual bool    noGui() = 0;
+        virtual bool    noGui() const = 0;
     };
 }
 

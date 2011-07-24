@@ -46,7 +46,7 @@ bool    TableTags::add(const QString &id_object, const QString &name)
     return (true);
 }
 
-QString TableTags::getIdObject()
+QString TableTags::getIdObject() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
@@ -68,7 +68,7 @@ bool    TableTags::setIdObject(const QString &id_object)
     return (Database::instance()->query(query));
 }
 
-QString TableTags::getName()
+QString TableTags::getName() const
 {
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
