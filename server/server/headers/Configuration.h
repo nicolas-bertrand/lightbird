@@ -8,9 +8,12 @@
 
 # include "IConfiguration.h"
 
+# include "Initialize.h"
+
 /// @brief Server implementation of the API's IConfiguration.
 /// Manage an XML configuration file.
 class Configuration : public QObject,
+                      public Initialize,
                       public LightBird::IConfiguration
 {
     Q_OBJECT
@@ -27,8 +30,6 @@ public:
     Configuration(const Configuration &);
     Configuration &operator=(const Configuration &);
 
-    /// @brief If the configuration is loaded.
-    operator            bool() const;
     /// @see LightBird::IConfiguration::getPath
     virtual QString     getPath() const;
     /// @see LightBird::IConfiguration::get
@@ -76,7 +77,6 @@ protected:
     QDomDocument            doc;    ///< The in-memory DOM representation of the XML document.
     QDomElement             dom;    ///< The root of the XML document.
     QFile                   file;   ///< The XML configuration file.
-    bool                    loaded; ///< If a configuration is loaded.
     mutable QReadWriteLock  mutex;  ///< Make the configuration thread safe.
 };
 

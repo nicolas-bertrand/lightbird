@@ -20,7 +20,7 @@ ApiConfiguration::ApiConfiguration(const QString &idPlugin) : id(Plugins::checkI
     if (element.firstChildElement("configurations").isNull())
         element.appendChild(element.toDocument().createElement("configurations"));
     element = element.firstChildElement("configurations").firstChildElement("plugin");
-    Configuration::loaded = true;
+    this->isInitialized();
     this->configuration.release();
 }
 

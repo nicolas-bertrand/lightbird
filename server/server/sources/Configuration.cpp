@@ -35,7 +35,6 @@ bool        Configuration::_load(const QString &configurationPath, const QString
     int     errorLine;
     int     errorColumn;
 
-    this->loaded = false;
     // Make sure that the path separators is /
     configuration = configurationPath;
     configuration.replace('\\', '/');
@@ -95,13 +94,8 @@ bool        Configuration::_load(const QString &configurationPath, const QString
     Log::debug("Configuration loaded", Properties("file", this->file.fileName()), "Configuration", "_load");
     this->file.close();
     this->dom = this->doc.documentElement();
-    this->loaded = true;
+    this->isInitialized();
     return (true);
-}
-
-Configuration::operator     bool() const
-{
-    return (this->loaded);
 }
 
 QString Configuration::getPath() const
@@ -171,7 +165,7 @@ bool            Configuration::save()
 
     if (!mutex)
         return (false);
-    if (this->loaded == false)
+    if (*this == false)
         return (false);
     if (this->file.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
     {
@@ -204,7 +198,7 @@ QString                     Configuration::_get(const QString &nodeName, QDomEle
     int                     index;
     QStringListIterator     it(nodeName.split('/'));
 
-    if (this->loaded == false)
+    if (*this == false)
         return ("");
     while (it.hasNext() == true && element.isNull() == false)
     {
@@ -255,7 +249,7 @@ unsigned int                Configuration::_count(const QString &nodeName, QDomE
     int                     i;
     QStringListIterator     it(nodeName.split('/'));
 
-    if (this->loaded == false)
+    if (*this == false)
         return (0);
     if (nodeName.isEmpty())
         return (0);
@@ -295,7 +289,7 @@ void                        Configuration::_set(const QString &nodeName, const Q
     int                     index;
     QStringListIterator     it(nodeName.split('/'));
 
-    if (this->loaded == false || element.isNull())
+    if (*this == false || element.isNull())
         return ;
     while (it.hasNext() == true)
     {
@@ -373,7 +367,7 @@ bool                        Configuration::_remove(const QString &nodeName, QDom
     int                     i;
     QStringListIterator     it(nodeName.split('/'));
 
-    if (this->loaded == false)
+    if (*this == false)
         return (false);
     if (nodeName.isEmpty())
         return (false);
