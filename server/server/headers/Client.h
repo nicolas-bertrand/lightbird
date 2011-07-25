@@ -1,6 +1,7 @@
 #ifndef CLIENT_H
 # define CLIENT_H
 
+# include <QList>
 # include <QMap>
 # include <QMutex>
 
@@ -144,7 +145,7 @@ private:
     QVariantMap              informations;        ///< Contains information on the client.
     QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
     TableAccounts            account;             ///< Allows the client to be identified as a know account.
-    QByteArray               *data;               ///< May contains data read from the network.
+    QList<QByteArray *>      data;                ///< The list of all the data read from the network.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
     bool                     running;             ///< A task is running in a thread of the threadpool.

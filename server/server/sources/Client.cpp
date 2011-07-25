@@ -23,7 +23,6 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
 {
     // Generates the uuid of the client
     this->id = Tools::createUuid();
-    this->data = NULL;
     this->readyRead = false;
     this->running = false;
     this->finish = false;
@@ -44,7 +43,6 @@ Client::~Client()
 {
     // Ensure that all the informations requests has been processed
     this->_getInformations();
-    delete this->data;
     delete this->engine;
     Log::trace("Client destroyed!", Properties("id", this->id), "Client", "~Client");
 }
@@ -131,21 +129,20 @@ void        Client::read(QByteArray *data)
         data = new QByteArray();
         this->readWriteInterface->read(*data, this);
     }
-    SmartMutex mutex(this->mutex, "Client", "read");
     // Nothing has been read
-    if (!mutex || data->isEmpty())
+    if (data->isEmpty())
+    {
+        delete data;
+        return ;
+    }
+    SmartMutex mutex(this->mutex, "Client", "read");
+    if (!mutex)
     {
         delete data;
         return ;
     }
     // Stores the new data
-    if (this->data)
-    {
-        this->data->append(*data);
-        delete data;
-    }
-    else
-        this->data = data;
+    this->data.append(data);
     this->readyRead = true;
     // If the client is not running, a new task can be created for read the data.
     // Otherwise the data will be read after the current task of the client is completed.
@@ -156,34 +153,20 @@ void        Client::read(QByteArray *data)
 bool            Client::_read()
 {
     SmartMutex  mutex(this->mutex, "Client", "_read");
-    QByteArray  *data = NULL;
 
     if (!mutex)
         return (false);
-    // If there are pending data, we use it
-    if (this->data)
-    {
-        data = this->data;
-        this->data = NULL;
-    }
-    mutex.unlock();
+    this->readyRead = false;
     // If there is no data, no processing are needed
-    if (!data || data->isEmpty())
-    {
-        if (Log::instance()->isTrace())
-            Log::trace("No data read", Properties("id", this->id), "Client", "read");
-        delete data;
-        mutex.lock();
-        this->readyRead = false;
+    if (this->data.isEmpty())
         return (false);
-    }
-    if (Log::instance()->isTrace())
-        Log::trace("Data received", Properties("id", this->id).add("data", Tools::simplify(*data)).add("size", data->size()), "Client", "read");
-    else if (Log::instance()->isDebug())
-        Log::debug("Data received", Properties("id", this->id).add("size", data->size()), "Client", "read");
     // Feed the engine
-    this->engine->read(*data);
-    delete data;
+    this->engine->read(this->data);
+    // Removes the data
+    QListIterator<QByteArray *> it(this->data);
+    while (it.hasNext())
+        delete it.next();
+    this->data.clear();
     return (true);
 }
 

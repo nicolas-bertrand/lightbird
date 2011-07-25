@@ -2,6 +2,7 @@
 #include "IOnRead.h"
 #include "IOnWrite.h"
 #include "Plugins.hpp"
+#include "Tools.h"
 
 Engine::Engine(Client &c) : client(c)
 {
@@ -11,10 +12,36 @@ Engine::~Engine()
 {
 }
 
-void    Engine::read(QByteArray &data)
+void    Engine::read(const QList<QByteArray *> &data)
 {
-    this->_onRead(data);
-    this->data.append(data);
+    // If there is only one data we can add it directly
+    if (data.size() == 1)
+    {
+        this->_onRead(*data.first());
+        this->data.append(*data.first());
+        return ;
+    }
+    // Otherwise the data must be aggregated
+    QListIterator<QByteArray *> it(data);
+    unsigned int                newSize = this->data.size();
+    unsigned int                oldSize = this->data.size();
+    // Get the new size of the data to aggregate
+    while (it.hasNext())
+    {
+        this->_onRead(*it.peekNext());
+        newSize += it.peekNext()->size();
+        it.next();
+    }
+    this->data.resize(newSize);
+    it.toFront();
+    // Aggregates the new data
+    while (it.hasNext())
+    {
+        newSize = it.peekNext()->size();
+        memcpy(this->data.data() + oldSize, it.peekNext()->data(), newSize);
+        oldSize += newSize;
+        it.next();
+    }
 }
 
 void    Engine::clear()
@@ -38,6 +65,10 @@ void    Engine::_onRead(QByteArray &data)
 {
     QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
 
+    if (Log::instance()->isTrace())
+        Log::trace("Data received", Properties("id", this->client.getId()).add("data", Tools::simplify(data)).add("size", data.size()), "Engine", "_onRead");
+    else if (Log::instance()->isDebug())
+        Log::debug("Data received", Properties("id", this->client.getId()).add("size", data.size()), "Engine", "_onRead");
     while (it.hasNext())
     {
         Log::trace("Calling IOnRead::onRead()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "Engine", "_onRead");

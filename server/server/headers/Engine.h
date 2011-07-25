@@ -23,7 +23,7 @@ public:
 
     /// @brief This method is called each time new data are available for the Engine.
     /// @param data : The data to process.
-    void            read(QByteArray &data);
+    void            read(const QList<QByteArray *> &data);
     /// @brief Run the engine. Process the data stored in this->data, of sent a
     /// new request/response.
     /// @return True while there is enough data to run the engine, and the client
