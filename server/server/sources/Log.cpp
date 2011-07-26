@@ -188,11 +188,11 @@ void    Log::setMode(Log::Mode mode)
 {
     if (this->mode == mode)
         return ;
+    if (mode == Log::WRITE)
+        this->_initializeWrite();
     this->mutex.lock();
     this->mode = mode;
     this->mutex.unlock();
-    if (this->mode == Log::WRITE)
-        this->_initializeWrite();
 }
 
 void        Log::run()
@@ -214,9 +214,9 @@ void    Log::_initializeWrite()
 {
     QString level;
 
-    if (this->mode != Log::WRITE || this->isRunning() || this->isFinished())
+    // Ensure that the write has not already been initialized
+    if (this->isRunning() || this->isFinished())
         return ;
-
     // Load the current log level
     level = Configurations::instance()->get("log/level").toLower();
     // Put the first letter in upper case, to match the values of the map
