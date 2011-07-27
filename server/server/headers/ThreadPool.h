@@ -61,12 +61,13 @@ public:
         virtual void    run() = 0;
         /// @brief Returns the thread in which the task is running, or NULL
         /// if it is not running.
-        QThread         *getThread();
+        QThread         *getThread() const;
+        /// @brief Allows to set the address of the thread in which the task is running.
+        void            setThread(QThread *thread);
 
     private:
         QThread         *thread; ///< The current thread of the task.
-        /// Allows the class Thread to update the current thread of the task.
-        friend class    Thread;
+        mutable QMutex  mutex;   ///< Makes this class thread safe.
     };
 };
 
