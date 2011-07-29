@@ -12,7 +12,6 @@ Thread::Thread()
 
 Thread::~Thread()
 {
-    Log::trace("Thread destroyed!", "Thread", "~Thread");
 }
 
 void    Thread::run()

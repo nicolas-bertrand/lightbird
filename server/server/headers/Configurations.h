@@ -24,6 +24,7 @@ public:
     /// the parent of all the other configurations.
     /// @return NULL is the loading fail.
     Configurations(const QString &path, QObject *parent = NULL);
+    ~Configurations();
     /// @brief Returns an instance of the Configuration identified by the path
     /// to the configuration. If the configuration has not been already loaded,
     /// the document is parsed and stored before beeing returned.
@@ -40,8 +41,8 @@ public:
     static Configuration *instance(const QString &path = "", const QString &alternative = "");
 
 private:
-    QMap<QString, Configuration *> instances; ///< The instances of the loaded configurations.
-    QMutex                         mutex;     ///< Makes this class thread safe.
+    QMap<QString, Configuration *> configurations;  ///< The instances of the loaded configurations.
+    QMutex                         mutex;           ///< Makes this class thread safe.
 };
 
 #endif // CONFIGURATIONS_H

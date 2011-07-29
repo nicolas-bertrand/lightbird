@@ -21,16 +21,16 @@ Configurations::Configurations(const QString &configurationPath, QObject *parent
     // Creates the configuration of the server
     if (path.isEmpty())
         path = DEFAULT_CONFIGURATION_DIRECTORY + QString("/") + DEFAULT_CONFIGURATION_FILE;
-    this->instances[""] = new Configuration(path, DEFAULT_CONFIGURATION_RESSOURCE, parent);
+    this->configurations[""] = new Configuration(path, DEFAULT_CONFIGURATION_RESSOURCE, parent);
     // If the configuration failed to load
-    if (*this->instances[""] == false)
+    if (*this->configurations[""] == false)
     {
         Log::error("Failed to load the configuration", "Configurations", "instance");
-        delete this->instances[""];
-        this->instances.remove("");
+        delete this->configurations[""];
+        this->configurations.remove("");
         return ;
     }
-    instance = this->instances[""];
+    instance = this->configurations[""];
     //  Defines the default values
     if (instance->get("pluginsPath").isEmpty())
         instance->set("pluginsPath", DEFAULT_PLUGINS_PATH);
@@ -67,6 +67,19 @@ Configurations::Configurations(const QString &configurationPath, QObject *parent
     this->isInitialized();
 }
 
+Configurations::~Configurations()
+{
+    SmartMutex  mutex(this->mutex, "Configurations", "~Configurations");
+
+    if (!mutex)
+        return ;
+    QMapIterator<QString, Configuration *> it(this->configurations);
+    while (it.hasNext())
+        delete it.next().value();
+    this->configurations.clear();
+    Log::trace("Configurations destroyed!", "Configurations", "~Configurations");
+}
+
 Configuration       *Configurations::getConfiguration(const QString &configuration, const QString &alternative)
 {
     QString         cleaned;
@@ -79,11 +92,11 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     // If the path is empty, the server configuration is returned
     if (configuration.isEmpty())
     {
-        instance = this->instances.value("");
+        instance = this->configurations.value("");
         return (instance);
     }
     // If the server configuration is not loaded
-    if (!this->instances.contains(""))
+    if (!this->configurations.contains(""))
     {
         Log::error("The configuration of the server must be initialized first", Properties("path", configuration).add("alternative", alternative), "Configurations", "instance");
         return (NULL);
@@ -94,11 +107,11 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     if (cleaned.at(cleaned.size() - 1) == '/')
         cleaned += DEFAULT_CONFIGURATION_FILE;
     // Otherwise it can be the id of a plugin
-    else if (QFileInfo(this->instances[""]->get("pluginsPath") + "/" + cleaned).isDir())
+    else if (QFileInfo(this->configurations[""]->get("pluginsPath") + "/" + cleaned).isDir())
     {
         path = Plugins::checkId(Tools::cleanPath(cleaned));
         // Creates the configuration of the plugin if it doesn't exists
-        if (!this->instances.contains(path) && !*(instance = new ApiConfiguration(path)))
+        if (!this->configurations.contains(path) && !*(instance = new ApiConfiguration(path)))
         {
             Log::error("Failed to load the configuration of the plugin", Properties("id", path), "Configurations", "instance");
             delete instance;
@@ -109,7 +122,7 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     if (path.isEmpty())
         path = Tools::cleanPath(cleaned);
     // Creates the configuration if it doesn't exists
-    if (instance == NULL && !this->instances.contains(path) &&
+    if (instance == NULL && !this->configurations.contains(path) &&
         !*(instance = new Configuration(path, alternative)))
     {
         Log::error("Failed to load the configuration", Properties("path", path).add("alternative", alternative), "Configurations", "instance");
@@ -120,15 +133,15 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     if (instance)
     {
         // Add it to the configurations
-        this->instances[path] = instance;
+        this->configurations[path] = instance;
         // The living thread of the configuration must be the same as the server configuration to have the same parent
-        this->instances[path]->moveToThread(this->instances[""]->thread());
+        this->configurations[path]->moveToThread(this->configurations[""]->thread());
         // Set the parent of the configuration (it will be set in the parent thread)
-        this->instances[path]->setParent(this->instances[""]->parent());
+        this->configurations[path]->setParent(this->configurations[""]->parent());
     }
     // Otherwise get the configuration
     else
-        instance = this->instances.value(path);
+        instance = this->configurations.value(path);
     return (instance);
 }
 
