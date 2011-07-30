@@ -28,10 +28,14 @@ public:
     void    post(const QString &event, const QVariant &property = QVariant());
 
     // LightBird::IEvents
-    void    subscribe(const QStringList &events);
-    void    send(const QString &event, const QVariant &property = QVariant());
+    void        subscribe(const QString &event);
+    void        subscribe(const QStringList &events);
+    void        unsubscribe(const QString &event);
+    void        unsubscribe(const QStringList &events);
+    QStringList getEvents() const;
+    void        send(const QString &event, const QVariant &property = QVariant());
     QList<QPair<QString, QVariant> > receive();
-    bool    isAvailable() const;
+    bool        isAvailable() const;
 
 signals:
     /// @brief Signal emitted by post() each time an event for which the

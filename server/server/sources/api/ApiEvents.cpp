@@ -62,14 +62,51 @@ void            ApiEvents::post(const QString &event, const QVariant &property)
     }
 }
 
+void    ApiEvents::subscribe(const QString &event)
+{
+    this->subscribe(QStringList() << event);
+}
+
 void            ApiEvents::subscribe(const QStringList &events)
 {
     SmartMutex  mutex(this->mutex, "ApiEvents", "subscribe");
 
     if (!mutex)
         return ;
-    this->subscribed = events;
+    this->subscribed << events;
+    this->subscribed.removeDuplicates();
     Log::debug("Events subscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
+}
+
+void            ApiEvents::unsubscribe(const QString &event)
+{
+    SmartMutex  mutex(this->mutex, "ApiEvents", "unsubscribe");
+
+    if (!mutex)
+        return ;
+    this->subscribed.removeAll(event);
+    Log::debug("Event unsubscribed", Properties("id", this->id).add("event", event), "ApiEvents", "unsubscribe");
+}
+
+void            ApiEvents::unsubscribe(const QStringList &events)
+{
+    SmartMutex  mutex(this->mutex, "ApiEvents", "unsubscribe");
+
+    if (!mutex)
+        return ;
+    QStringListIterator it(events);
+    while (it.hasNext())
+        this->subscribed.removeAll(it.next());
+    Log::debug("Events unsubscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
+}
+
+QStringList     ApiEvents::getEvents() const
+{
+    SmartMutex  mutex(this->mutex, "ApiEvents", "getEvents");
+
+    if (!mutex)
+        return (QStringList());
+    return (this->subscribed);
 }
 
 void    ApiEvents::send(const QString &event, const QVariant &property)
