@@ -59,21 +59,24 @@ namespace LightBird
         /// @brief Closes a port. This may take some time since all the operations
         /// made on the closed port have to be finished.
         /// @param port : The number of the port to close.
+        /// @param transport : The transport protocol of the port to close.
         /// @return False if the port is not valid. This method may return before
         /// the port is actually closed.
-        virtual bool    closePort(unsigned short port) = 0;
+        virtual bool    closePort(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) = 0;
         /// @brief Allows to get informations on an opened port.
-        /// @param port : The port to get.
+        /// @param port : The number of the port to get.
         /// @param protocols : The names of the protocols used by the port.
-        /// @param transport : The transport protocol of the port.
         /// @param maxClients : The maximum number of clients simultaneously connected,
         /// allowed by the port.
+        /// @param transport : The transport protocol of the port to get.
         /// @return True if the port exists.
-        virtual bool    getPort(unsigned short port, QStringList &protocols, LightBird::INetwork::Transport &transport, unsigned int &maxClients) const = 0;
-        /// @brief Returns the list of the open ports. One can use getPort() to get
-        /// more detailed informations about a specific port.
+        virtual bool    getPort(unsigned short port, QStringList &protocols, unsigned int &maxClients,
+                                LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
+        /// @brief Returns the list of the open ports in TCP or UDP. One can use
+        /// getPort() to get more detailed informations about a specific port.
+        /// @param transport : The transport protocol of the ports to get.
         /// @return The list of the opened ports on the server.
-        virtual QList<unsigned short>   getPorts() const = 0;
+        virtual QList<unsigned short>   getPorts(LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
         /// @brief Returns the informations of a client.
         /// @param id : The id of the client.
         /// @param client : The informations of the client are stored in this structure.
@@ -86,8 +89,9 @@ namespace LightBird
         virtual QStringList getClients() const = 0;
         /// @brief Returns the list of the clients connected to a particular port.
         /// @param port : The port of the clients.
+        /// @param transport : The transport protocol of the port.
         /// @return The list of the id of the clients connected to the port.
-        virtual QStringList getClients(unsigned short port) const = 0;
+        virtual QStringList getClients(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
         /// @brief Connects the server to an other server.
         /// IOnConnection is called if the connection success.
         /// The client is created using the CLIENT mode which uses a different

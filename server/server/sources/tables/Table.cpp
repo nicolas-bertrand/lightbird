@@ -54,6 +54,8 @@ bool            Table::exists(const QString &id)
     QSqlQuery                           query;
     QVector<QMap<QString, QVariant> >   result;
 
+    if (id.isEmpty())
+        return (false);
     query.prepare(Database::instance()->getQuery("Table", "exists").replace(":table", this->tableName));
     if (id.isEmpty())
         query.bindValue(":id", this->id);
