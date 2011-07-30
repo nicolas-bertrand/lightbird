@@ -8,27 +8,21 @@ TableCollections::TableCollections(const QString &id)
 {
     this->tableName = "collections";
     this->tableId = LightBird::ITable::Collections;
-    if (!id.isEmpty())
-        Table::setId(id);
+    this->setId(id);
 }
 
 TableCollections::~TableCollections()
 {
 }
 
-TableCollections::TableCollections(const TableCollections &t) : Table(), TableObjects()
+TableCollections::TableCollections(const TableCollections &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableCollections &TableCollections::operator=(const TableCollections &t)
+TableCollections &TableCollections::operator=(const TableCollections &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    TableObjects::operator=(table);
     return (*this);
 }
 

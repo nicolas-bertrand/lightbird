@@ -10,9 +10,9 @@ class TableFiles : virtual public TableObjects,
 {
 public:
     TableFiles(const QString &id = "");
-    TableFiles(const TableFiles &t);
     ~TableFiles();
-    TableFiles  &operator=(const TableFiles &t);
+    TableFiles(const TableFiles &table);
+    TableFiles  &operator=(const TableFiles &table);
 
     QString     getIdFromVirtualPath(const QString &virtualPath) const;
     bool        setIdFromVirtualPath(const QString &virtualPath);

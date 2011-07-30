@@ -9,14 +9,14 @@ Properties::Properties(const QString &key, const QVariant &value)
     this->add(key, value.toString());
 }
 
-Properties::Properties(const Properties &properties)
-{
-    this->properties = properties.properties;
-}
-
 Properties::Properties(const QMap<QString, QString> &properties)
 {
     this->properties = properties;
+}
+
+Properties::Properties(const Properties &properties)
+{
+    this->properties = properties.properties;
 }
 
 Properties  &Properties::operator=(const QMap<QString, QString> &properties)

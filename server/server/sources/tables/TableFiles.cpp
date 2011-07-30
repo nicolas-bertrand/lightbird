@@ -10,8 +10,7 @@ TableFiles::TableFiles(const QString &id)
 {
     this->tableName = "files";
     this->tableId = LightBird::ITable::Files;
-    if (!id.isEmpty())
-        Table::setId(id);
+    this->setId(id);
     this->types << "image" << "audio" << "video" << "document";
 }
 
@@ -19,19 +18,17 @@ TableFiles::~TableFiles()
 {
 }
 
-TableFiles::TableFiles(const TableFiles &t) : Table(), TableObjects()
+TableFiles::TableFiles(const TableFiles &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableFiles &TableFiles::operator=(const TableFiles &t)
+TableFiles &TableFiles::operator=(const TableFiles &table)
 {
-    if (this != &t)
+    if (this != &table)
     {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-        this->types = t.types;
+        TableObjects::operator=(table);
+        this->types = table.types;
     }
     return (*this);
 }

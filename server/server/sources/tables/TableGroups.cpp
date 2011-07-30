@@ -6,27 +6,21 @@ TableGroups::TableGroups(const QString &id)
 {
     this->tableName = "groups";
     this->tableId = LightBird::ITable::Groups;
-    if (!id.isEmpty())
-        this->setId(id);
+    this->setId(id);
 }
 
 TableGroups::~TableGroups()
 {
 }
 
-TableGroups::TableGroups(const TableGroups &t) : Table(), TableAccessors()
+TableGroups::TableGroups(const TableGroups &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableGroups &TableGroups::operator=(const TableGroups &t)
+TableGroups &TableGroups::operator=(const TableGroups &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    TableAccessors::operator=(table);
     return (*this);
 }
 

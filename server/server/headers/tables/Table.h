@@ -38,13 +38,11 @@ public:
     LightBird::ITablePermissions *toPermissions();
     LightBird::ITableTags        *toTags();
 
-    /// @brief This operator is virtual to allows subclasses to modify its behaviour.
-    virtual Table       &operator=(const Table &t);
-
 protected:
     Table();
-    Table(const Table &t);
     ~Table();
+    Table(const Table &table);
+    Table &operator=(const Table &table);
 
     QString             id;
     QString             tableName;

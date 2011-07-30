@@ -19,12 +19,11 @@ public:
     QStringList getTags() const;
     QStringList getLimits() const;
 
-    virtual TableObjects &operator=(const TableObjects &t);
-
 protected:
     TableObjects();
-    TableObjects(const TableObjects &t);
     ~TableObjects();
+    TableObjects(const TableObjects &table);
+    TableObjects &operator=(const TableObjects &table);
 };
 
 #endif // TABLEOBJECTS_H

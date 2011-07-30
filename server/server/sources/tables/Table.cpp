@@ -18,16 +18,18 @@ Table::~Table()
 {
 }
 
-Table::Table(const Table &t) : QObject()
+Table::Table(const Table &table)
 {
-    *this = t;
+    *this = table;
 }
 
-Table &Table::operator=(const Table &t)
+Table &Table::operator=(const Table &table)
 {
-    if (this != &t)
+    if (this != &table)
     {
-        ;
+        this->id = table.id;
+        this->tableName = table.tableName;
+        this->tableId = table.tableId;
     }
     return (*this);
 }

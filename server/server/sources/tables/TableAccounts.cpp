@@ -8,27 +8,24 @@ TableAccounts::TableAccounts(const QString &id)
 {
     this->tableName = "accounts";
     this->tableId = LightBird::ITable::Accounts;
-    if (!id.isEmpty())
-        this->setId(id);
+    this->setId(id);
 }
 
 TableAccounts::~TableAccounts()
 {
 }
 
-TableAccounts::TableAccounts(const TableAccounts &t) : Table(), TableAccessors()
+TableAccounts::TableAccounts(const TableAccounts &t)
 {
     *this = t;
 }
 
-TableAccounts &TableAccounts::operator=(const TableAccounts &t)
+TableAccounts &TableAccounts::operator=(const TableAccounts &table)
 {
-    if (this != &t)
+    if (this != &table)
     {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-        this->connectionDate = t.connectionDate;
+        TableAccessors::operator=(table);
+        this->connectionDate = table.connectionDate;
     }
     return (*this);
 }

@@ -10,9 +10,9 @@ class TableCollections : virtual public TableObjects,
 {
 public:
     TableCollections(const QString &id = "");
-    TableCollections(const TableCollections &t);
     ~TableCollections();
-    TableCollections &operator=(const TableCollections &t);
+    TableCollections(const TableCollections &table);
+    TableCollections &operator=(const TableCollections &table);
 
     QString     getIdFromVirtualPath(const QString &virtualPath) const;
     bool        setIdFromVirtualPath(const QString &virtualPath);

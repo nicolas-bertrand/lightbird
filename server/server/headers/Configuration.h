@@ -27,8 +27,6 @@ public:
     /// Configuration will not try to creates the file.
     Configuration(const QString &configurationPath, const QString &alternativePath = "", QObject *parent = 0);
     ~Configuration();
-    Configuration(const Configuration &);
-    Configuration &operator=(const Configuration &);
 
     /// @see LightBird::IConfiguration::getPath
     virtual QString     getPath() const;
@@ -56,6 +54,8 @@ signals:
 
 protected:
     Configuration();
+    Configuration(const Configuration &);
+    Configuration &operator=(const Configuration &);
     /// @brief Load the xml configuration file.
     /// @param path : The path to the file.
     /// @return If the file has been correctly loaded.

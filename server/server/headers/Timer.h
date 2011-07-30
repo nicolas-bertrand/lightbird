@@ -16,8 +16,6 @@ class Timer : public QThread
 public :
     Timer(QString id, QString name, unsigned int timeout, ApiTimers &apiTimers);
     ~Timer();
-    Timer(const Timer &timer);
-    Timer &operator=(const Timer &timer);
 
     ///< @brief The main method of the timer thread.
     void        run();
@@ -34,6 +32,8 @@ private slots:
 
 private:
     Timer();
+    Timer(const Timer &timer);
+    Timer &operator=(const Timer &timer);
 
     QString     id;         ///< The id of the plugin.
     QString     name;       ///< The name of the timer.

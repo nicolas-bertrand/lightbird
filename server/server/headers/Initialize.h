@@ -8,8 +8,8 @@ class Initialize
 public:
     Initialize(bool initialized = false);
     ~Initialize();
-    Initialize(const Initialize &);
-    Initialize &operator=(const Initialize &);
+    Initialize(const Initialize &initialize);
+    Initialize &operator=(const Initialize &initialize);
 
     /// @brief Returns true if the class have been properly initialized.
     operator bool() const;

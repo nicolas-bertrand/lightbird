@@ -12,7 +12,7 @@ namespace LightBird
     class IConfiguration
     {
     public:
-        virtual             ~IConfiguration() {}
+        virtual ~IConfiguration() {}
 
         /// @brief Returns the path to the configuration file, including its name.
         virtual QString     getPath() const = 0;

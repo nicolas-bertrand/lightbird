@@ -24,8 +24,8 @@ public:
     void    clear();
 
 private:
-    EngineClient(const EngineClient &context);
-    EngineClient &operator=(const EngineClient &context);
+    EngineClient(const EngineClient &);
+    EngineClient &operator=(const EngineClient &);
 
 private slots:
     // This methods calls the interfaces implemented by the plugins,

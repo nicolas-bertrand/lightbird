@@ -10,9 +10,9 @@ class TableLimits : virtual public Table,
 {
 public:
     TableLimits(const QString &id = "");
-    TableLimits(const TableLimits &t);
     ~TableLimits();
-    TableLimits &operator=(const TableLimits &t);
+    TableLimits(const TableLimits &table);
+    TableLimits &operator=(const TableLimits &table);
 
     bool    add(const QString &name, const QString &value, const QString &id_accessor = "", const QString &id_object = "");
 

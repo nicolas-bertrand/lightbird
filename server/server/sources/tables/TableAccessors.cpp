@@ -10,17 +10,14 @@ TableAccessors::~TableAccessors()
 {
 }
 
-TableAccessors::TableAccessors(const TableAccessors &t) : Table()
+TableAccessors::TableAccessors(const TableAccessors &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableAccessors &TableAccessors::operator=(const TableAccessors &t)
+TableAccessors &TableAccessors::operator=(const TableAccessors &table)
 {
-    if (this != &t)
-    {
-        ;
-    }
+    Table::operator=(table);
     return (*this);
 }
 

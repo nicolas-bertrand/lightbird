@@ -6,27 +6,21 @@ TableLimits::TableLimits(const QString &id)
 {
     this->tableName = "limits";
     this->tableId = LightBird::ITable::Limits;
-    if (!id.isEmpty())
-        this->setId(id);
+    this->setId(id);
 }
 
 TableLimits::~TableLimits()
 {
 }
 
-TableLimits::TableLimits(const TableLimits &t) : Table()
+TableLimits::TableLimits(const TableLimits &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableLimits &TableLimits::operator=(const TableLimits &t)
+TableLimits &TableLimits::operator=(const TableLimits &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    Table::operator=(table);
     return (*this);
 }
 

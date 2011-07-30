@@ -16,9 +16,9 @@ class TablePermissions : virtual public Table,
 {
 public:
     TablePermissions(const QString &id = "");
-    TablePermissions(const TablePermissions &t);
     ~TablePermissions();
-    TablePermissions &operator=(const TablePermissions &t);
+    TablePermissions(const TablePermissions &table);
+    TablePermissions &operator=(const TablePermissions &table);
 
     QString     getId(const QString &id_accessor, const QString &id_object, const QString &right) const;
     bool        setId(const QString &id_accessor, const QString &id_object, const QString &right);

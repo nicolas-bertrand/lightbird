@@ -8,27 +8,21 @@ TableDirectories::TableDirectories(const QString &id)
 {
     this->tableName = "directories";
     this->tableId = LightBird::ITable::Directories;
-    if (!id.isEmpty())
-        Table::setId(id);
+    this->setId(id);
 }
 
 TableDirectories::~TableDirectories()
 {
 }
 
-TableDirectories::TableDirectories(const TableDirectories &t) : Table(), TableObjects()
+TableDirectories::TableDirectories(const TableDirectories &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableDirectories &TableDirectories::operator=(const TableDirectories &t)
+TableDirectories &TableDirectories::operator=(const TableDirectories &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    TableObjects::operator=(table);
     return (*this);
 }
 

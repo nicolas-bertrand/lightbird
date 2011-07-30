@@ -10,9 +10,9 @@ class TableEvents : virtual public Table,
 {
 public:
     TableEvents(const QString &id = "");
-    TableEvents(const TableEvents &e);
     ~TableEvents();
-    TableEvents &operator=(const TableEvents &e);
+    TableEvents(const TableEvents &table);
+    TableEvents &operator=(const TableEvents &table);
 
     QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime()) const;
     bool        add(const QString &name, const QMap<QString, QVariant> &informations,

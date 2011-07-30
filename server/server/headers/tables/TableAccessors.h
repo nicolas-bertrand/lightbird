@@ -16,12 +16,11 @@ public:
     bool        getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const;
     QStringList getLimits() const;
 
-    virtual TableAccessors &operator=(const TableAccessors &t);
-
 protected:
     TableAccessors();
-    TableAccessors(const TableAccessors &t);
     ~TableAccessors();
+    TableAccessors(const TableAccessors &table);
+    TableAccessors &operator=(const TableAccessors &table);
 };
 
 #endif // TABLEACCESSORS_H

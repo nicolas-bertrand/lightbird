@@ -10,9 +10,9 @@ class TableGroups : virtual public TableAccessors,
 {
 public:
     TableGroups(const QString &id = "");
-    TableGroups(const TableGroups &t);
     ~TableGroups();
-    TableGroups &operator=(const TableGroups &t);
+    TableGroups(const TableGroups &table);
+    TableGroups &operator=(const TableGroups &table);
 
     QStringList getIdFromName(const QString &name) const;
     bool        add(const QString &name, const QString &id_group = "");

@@ -6,27 +6,21 @@ TableTags::TableTags(const QString &id)
 {
     this->tableName = "tags";
     this->tableId = LightBird::ITable::Tags;
-    if (!id.isEmpty())
-        this->setId(id);
+    this->setId(id);
 }
 
 TableTags::~TableTags()
 {
 }
 
-TableTags::TableTags(const TableTags &t) : Table()
+TableTags::TableTags(const TableTags &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableTags &TableTags::operator=(const TableTags &t)
+TableTags &TableTags::operator=(const TableTags &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    Table::operator=(table);
     return (*this);
 }
 

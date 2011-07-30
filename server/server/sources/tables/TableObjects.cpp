@@ -10,17 +10,14 @@ TableObjects::~TableObjects()
 {
 }
 
-TableObjects::TableObjects(const TableObjects &t) : Table()
+TableObjects::TableObjects(const TableObjects &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableObjects &TableObjects::operator=(const TableObjects &t)
+TableObjects &TableObjects::operator=(const TableObjects &table)
 {
-    if (this != &t)
-    {
-        ;
-    }
+    Table::operator=(table);
     return (*this);
 }
 

@@ -10,9 +10,9 @@ class TableAccounts : virtual public TableAccessors,
 {
 public:
     TableAccounts(const QString &id = "");
-    TableAccounts(const TableAccounts &t);
     ~TableAccounts();
-    TableAccounts &operator=(const TableAccounts &t);
+    TableAccounts(const TableAccounts &table);
+    TableAccounts &operator=(const TableAccounts &table);
 
     // Main
     bool            setId(const QString &id);

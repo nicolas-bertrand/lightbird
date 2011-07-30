@@ -10,9 +10,9 @@ class TableDirectories : virtual public TableObjects,
 {
 public:
     TableDirectories(const QString &id = "");
-    TableDirectories(const TableDirectories &t);
     ~TableDirectories();
-    TableDirectories &operator=(const TableDirectories &t);
+    TableDirectories(const TableDirectories &table);
+    TableDirectories &operator=(const TableDirectories &table);
 
     QString     getIdFromVirtualPath(const QString &virtualPath) const;
     bool        setIdFromVirtualPath(const QString &virtualPath);

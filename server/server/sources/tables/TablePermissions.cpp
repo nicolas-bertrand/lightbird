@@ -12,27 +12,21 @@ TablePermissions::TablePermissions(const QString &id)
 {
     this->tableName = "permissions";
     this->tableId = LightBird::ITable::Permissions;
-    if (!id.isEmpty())
-        Table::setId(id);
+    Table::setId(id);
 }
 
 TablePermissions::~TablePermissions()
 {
 }
 
-TablePermissions::TablePermissions(const TablePermissions &t) : Table()
+TablePermissions::TablePermissions(const TablePermissions &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TablePermissions &TablePermissions::operator=(const TablePermissions &t)
+TablePermissions &TablePermissions::operator=(const TablePermissions &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    Table::operator=(table);
     return (*this);
 }
 

@@ -37,8 +37,8 @@ public:
     LightBird::IResponse &getResponse();
 
 protected:
-    Engine(const Engine &context);
-    Engine &operator=(const Engine &context);
+    Engine(const Engine &);
+    Engine &operator=(const Engine &);
 
     /// @brief Calls LightBird::IOnRead.
     void            _onRead(QByteArray &data);

@@ -13,8 +13,8 @@ public:
     Properties();
     /// @brief Add directly a property at the construction.
     Properties(const QString &key, const QVariant &value);
-    Properties(const Properties &properties);
     Properties(const QMap<QString, QString> &properties);
+    Properties(const Properties &properties);
     Properties &operator=(const QMap<QString, QString> &properties);
 
     /// @brief Add a property.

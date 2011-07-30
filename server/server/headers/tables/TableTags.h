@@ -10,9 +10,9 @@ class TableTags : virtual public Table,
 {
 public:
     TableTags(const QString &id = "");
-    TableTags(const TableTags &t);
     ~TableTags();
-    TableTags &operator=(const TableTags &t);
+    TableTags(const TableTags &table);
+    TableTags &operator=(const TableTags &table);
 
     bool    add(const QString &id_object, const QString &name);
 

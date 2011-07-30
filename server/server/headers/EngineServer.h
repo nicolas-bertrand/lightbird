@@ -20,8 +20,8 @@ public:
     void    clear();
 
 private:
-    EngineServer(const EngineServer &context);
-    EngineServer &operator=(const EngineServer &context);
+    EngineServer(const EngineServer &);
+    EngineServer &operator=(const EngineServer &);
 
 private slots:
     // This methods calls the interfaces implemented by the plugins,

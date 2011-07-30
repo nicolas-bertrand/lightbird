@@ -7,27 +7,21 @@ TableEvents::TableEvents(const QString &id)
 {
     this->tableName = "events";
     this->tableId = LightBird::ITable::Events;
-    if (!id.isEmpty())
-        Table::setId(id);
+    this->setId(id);
 }
 
 TableEvents::~TableEvents()
 {
 }
 
-TableEvents::TableEvents(const TableEvents &t) : Table()
+TableEvents::TableEvents(const TableEvents &table)
 {
-    *this = t;
+    *this = table;
 }
 
-TableEvents &TableEvents::operator=(const TableEvents &t)
+TableEvents &TableEvents::operator=(const TableEvents &table)
 {
-    if (this != &t)
-    {
-        this->id = t.id;
-        this->tableId = t.tableId;
-        this->tableName = t.tableName;
-    }
+    Table::operator=(table);
     return (*this);
 }
 
