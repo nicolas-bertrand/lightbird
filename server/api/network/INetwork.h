@@ -93,7 +93,7 @@ namespace LightBird
         /// @return The list of the id of the clients connected to the port.
         virtual QStringList getClients(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
         /// @brief Connects the server to an other server.
-        /// IOnConnection is called if the connection success.
+        /// IOnConnection is called if the connection was successful.
         /// The client is created using the CLIENT mode which uses a different
         /// Engine than the SERVER mode.
         /// @param address : The address of the peer.

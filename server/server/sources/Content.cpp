@@ -1,3 +1,5 @@
+#include <QFileInfo>
+
 #include "Configurations.h"
 #include "Content.h"
 #include "Log.h"
@@ -10,6 +12,7 @@ Content::Content(QObject *parent) : QObject(parent)
     this->file = NULL;
     this->temporaryFile = NULL;
     this->seek = 0;
+    this->validFile = false;
 }
 
 Content::~Content()
@@ -38,7 +41,11 @@ void    Content::setStorage(LightBird::IContent::Storage storage, const QString 
     else if (this->storage == LightBird::IContent::VARIANT && !this->variant)
         this->variant = new QVariant();
     else if (this->storage == LightBird::IContent::FILE && !this->file)
+    {
         this->file = new QFile(fileName);
+        if (QFileInfo(*this->file).isFile())
+            this->validFile = true;
+    }
     else if (this->storage == LightBird::IContent::TEMPORARYFILE && !this->temporaryFile)
     {
         QString filePath = Configurations::instance()->get("temporaryPath");
@@ -168,7 +175,7 @@ qint64  Content::size() const
     if (this->storage == LightBird::IContent::BYTEARRAY)
         return (this->byteArray->size());
     else if (this->storage == LightBird::IContent::FILE)
-        return (this->file->size());
+        return (this->validFile ? this->file->size() : 0);
     else if (this->storage == LightBird::IContent::TEMPORARYFILE)
         return (this->temporaryFile->size());
     return (0);
@@ -201,6 +208,7 @@ void    Content::clear()
     {
         delete this->file;
         this->file = NULL;
+        this->validFile = false;
     }
     if (this->temporaryFile)
     {

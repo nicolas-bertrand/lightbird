@@ -38,6 +38,7 @@ private:
     QFile           *file;
     QTemporaryFile  *temporaryFile;
     quint64         seek;
+    bool            validFile;
 };
 
 #endif // CONTENT_H
