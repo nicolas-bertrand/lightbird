@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="The LightBird Http Client!" />
+  <link rel="stylesheet" type="text/css" href="Client/css/help.css" />
+  <link rel="stylesheet" type="text/css" href="Client/css/identification.css" />
+  <link rel="stylesheet" type="text/css" href="Client/css/index.css" />
+  <link rel="stylesheet" type="text/css" href="Client/css/windows.css" />
+  <link rel="icon" type="image/png" href="Client/images/favicon.png" />
+  <script type="text/javascript"  src="Client/js/Configuration.js"></script>
+  <script type="text/javascript"  src="Client/js/Account.js"></script>
+  <script type="text/javascript"  src="Client/js/Animations.js"></script>
+  <script type="text/javascript"  src="Client/js/Context.js"></script>
+  <script type="text/javascript"  src="Client/js/Help.js"></script>
+  <script type="text/javascript"  src="Client/js/Index.js"></script>
+  <script type="text/javascript"  src="Client/js/Resources.js"></script>
+  <script type="text/javascript"  src="Client/js/Selection.js"></script>
+  <script type="text/javascript"  src="Client/js/SHA1.js"></script>
+  <script type="text/javascript"  src="Client/js/Window.js"></script>
+  <script type="text/javascript"  src="Client/js/Windows.js"></script>
+  <script type="text/javascript" src="/Client/libs/SHJS/sh_main.js"></script>
+  <link href="/Client/libs/SHJS/sh_style.css" rel="stylesheet" type="text/css" />
+  <title>LightBird</title>
+</head>
+
+<body onload="load()" onmousemove="moveWindow(event)" onmousedown="contextMenu(event)" onmouseup="stopWindow()">
+  <img id="background" src="Client/images/backgrounds/07.jpg" alt="background" />
+  <img id="background_identification" src="Client/images/backgrounds/identification.jpg" alt="background" />
+  
+  <div id="desktop"></div>
+  
+  <div id="interfaces">
+    <div id="interface_desktop" class="on" onmouseover="interfaceOnMouseOver(this, true); hint('interface_desktop')" onmouseout="interfaceOnMouseOver(this, false); hint(false)">Bureau</div>
+    <div id="interface_web" class="off" onmouseover="interfaceOnMouseOver(this, true); hint('interface_web')" onmouseout="interfaceOnMouseOver(this, false); hint(false)">Web</div>
+    <div id="interface_mobile" class="off" onmouseover="interfaceOnMouseOver(this, true); hint('interface_mobile')" onmouseout="interfaceOnMouseOver(this, false); hint(false)">Mobile</div>
+  </div>
+  
+  <div id="identification_container" onmousemove="identificationCleanError()">
+	<form id="identification" action="javascript:identification()">
+	  <input class="blur" type="text" value="Utilisateur" maxlength="100" onfocus="focusOnIdentificationForm(true, 'Utilisateur', this)" onblur="focusOnIdentificationForm(false, 'Utilisateur', this)" />
+	  <input class="blur" type="password" value="Password" maxlength="100" onfocus="focusOnIdentificationForm(true, 'Password', this)" onblur="focusOnIdentificationForm(false, 'Password', this)" />
+	  <div>
+		<div id="identification_icon_blue_lock" onclick="identificationChangeLock(false)" onmouseover="hint('lock')" onmouseout="hint(false)"></div>
+		<div id="identification_icon_blue_unlock" onclick="identificationChangeLock(true)" onmouseover="hint('lock')" onmouseout="hint(false)"></div>
+		<div id="identification_icon_yellow"></div>
+		<div id="identification_icon_green"></div>
+		<div id="identification_icon_red"></div>
+        <div id="identification_submit_button_blue" onclick="identification()">Connection</div>
+        <div id="identification_submit_button_yellow">V&eacute;rification</div>
+        <div id="identification_submit_button_green">Connect&eacute;</div>
+        <div id="identification_submit_button_red" onclick="identification()">Erreur</div>
+      </div>
+	  <input type="submit" value="" class="identification_submit_input" />
+	</form>
+  </div>
+  
+  <div id="menus">
+    <ul>
+      <li onmousedown="openWindow('Fichiers', 'Explorer', event)">Fichiers</li>
+      <li onmousedown="openWindow('Lecteur', 'Player', event)">Lecteur</li>
+      <li onmousedown="openWindow('Envois', 'Upload', event)">Envois</li>
+      <li onmousedown="openWindow('Configuration', 'configuration', event)">Configuration</li>
+      <li onmousedown="help(event)">Aide</li>
+      <li onmousedown="disconnection(event)">D&eacute;connection</li>
+    </ul>
+  </div>
+  
+  <div id="windows">
+  </div>
+  <div id="window_template">
+	<div class="window" onmousedown="setWindowFocus(this.id, event)">
+		<div class="window_top">
+			<div class="window_top_left" onmousedown="startResizeWindow(getWindowId(this), event, 'nw')">
+				<div class="window_button_red" onmousedown="closeWindow(getWindowId(this), event)"></div>
+				<div class="window_button_yellow" onmousedown="hideWindow(getWindowId(this))"></div>
+			</div>
+			<div class="window_top_right" onmousedown="startResizeWindow(getWindowId(this), event, 'ne')">
+				<div class="window_button_green" onmousedown="maximizeWindow(getWindowId(this), event)"></div>
+				<div class="window_button_blue" onmousedown="hideOtherWindow(getWindowId(this), event)"></div>
+			</div>
+			<div class="window_top_middle" onmousedown="startMoveWindow(getWindowId(this), event)" ondblclick="maximizeWindow(getWindowId(this), event)">			
+				<div class="window_title">
+					<div class="window_title_container">
+						<div class="window_title_left"></div>
+						<div class="window_title_middle">
+							<div class="window_title_text">Fen&ecirc;tre</div>
+						</div>
+						<div class="window_title_right"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="window_middle">
+			<div class="window_middle_left" onmousedown="startResizeWindow(getWindowId(this), event, 'w')"></div>
+				<div class="window_middle_right" onmousedown="startResizeWindow(getWindowId(this), event, 'e')"></div>
+				<div class="window_middle_middle">
+					<div class="window_outer_content">
+						<div class="window_inner_content">
+							<div class="window_loading"><div></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="window_bottom">
+				<div class="window_bottom_left" onmousedown="startResizeWindow(getWindowId(this), event, 'sw')"></div>
+				<div class="window_bottom_right" onmousedown="startResizeWindow(getWindowId(this), event, 'se')"></div>
+				<div class="window_bottom_middle" onmousedown="startResizeWindow(getWindowId(this), event, 's')"></div>
+			</div>
+		</div>
+	</div>
+  </div>
+  
+  <ul id="context">
+    <li onmousedown="help(event)">Aide</li>
+    <li onmousedown="disconnection(event)">Se d&eacute;connecter</li>
+    <li onmousedown="disactivateContextMenu(event)">D&eacute;sactiver</li>
+  </ul>
+
+  <div id="hint">
+    <div class="top"><span id="hint_title"></span></div>
+    <div class="middle"><span id="hint_content"></span></div>
+    <div class="bottom"></div>
+  </div>
+  
+  <div id="help" onmousedown="help(event)">
+	<div id="help_center">
+	  <div id="help_panel" onmouseover="help_over=true;" onmouseout="help_over=false;">
+	    <ul id="help_menu">
+          <li onmousedown="loadHelp(this, 'home.html')" id="help_home">Accueil</li>
+          <li onmousedown="loadHelp(this, 'disconnection.html')">D&eacute;connection</li>
+          <li onmousedown="loadHelp(this, 'windows.html')">Fen&ecirc;tres</li>
+		</ul>
+		<div id="help_text"></div>
+		<div id="help_loading"></div>
+	  </div>
+	</div>
+  </div>
+  
+  <div id="load_images">
+    <img src="Client/images/identification/interface_left_off.png" alt="image" />
+    <img src="Client/images/identification/interface_middle_on.png" alt="image" />
+    <img src="Client/images/identification/interface_right_on.png" alt="image" />
+    <img src="Client/images/help/hint_top.png" alt="image" />
+    <img src="Client/images/help/hint_middle.png" alt="image" />
+    <img src="Client/images/help/hint_bottom.png" alt="image" />
+    <img src="Client/images/explorer.png" alt="image" />
+    <img src="Client/images/window/window.png" alt="image" />
+    <img src="Client/images/window/loading.gif" alt="image" />
+    <img src="Client/images/window/middle_left.png" alt="image" />
+    <img src="Client/images/window/middle_right.png" alt="image" />
+	<img src="Client/images/backgrounds/01.jpg" alt="image" />
+  </div>
+
+  <div id="loading_client" onclick="load()">
+	<h1>Chargement...</h1>
+	Ne pas attendre !
+  </div>
+</body>
+</html>

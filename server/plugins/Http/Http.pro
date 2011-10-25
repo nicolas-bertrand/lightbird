@@ -1,4 +1,5 @@
 TEMPLATE    =   subdirs
 
-SUBDIRS     =   Get \
+SUBDIRS     =   Client \
+                Get \
                 Parser

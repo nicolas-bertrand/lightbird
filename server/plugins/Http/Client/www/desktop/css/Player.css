@@ -1,0 +1,507 @@
+﻿/*////////////////////////////////////////////////////////////////////////////
+//                                  PLAYER                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+.player
+{
+	width: 100%;
+}
+
+.player .main
+{
+	float: left;
+	height: 100%;
+	display: table;
+}
+
+.player .main .content
+{
+	width: 100%;
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.player  .main .content img
+{
+	width: 100%;
+	min-height: 10px;
+}
+
+/* The documents need a scroll to be displayed */
+.player .main.document,
+.player .main.document .content
+{
+	display: block;
+}
+.player .main.document .content
+{
+	overflow: auto;
+	height: 100%;
+	text-align: left;
+}
+.player .main.document .content pre
+{
+	padding: 10px;
+	width: 200px;
+}
+
+/* Set the default contents */
+.player  .main .content.image,
+.player  .main .content.video,
+.player  .main .content.audio,
+.player  .main .content.document,
+.player  .main .content.other
+{
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+.player  .main .content.image { background-image: url("/Client/images/icons/image.png"); }
+.player  .main .content.video { background-image: url("/Client/images/icons/video.png"); }
+.player  .main .content.audio { background-image: url("/Client/images/icons/audio.png"); }
+.player  .main .content.document { background-image: url("/Client/images/icons/document.png"); }
+.player  .main .content.other { background-image: url("/Client/images/icons/other.png"); }
+
+/* Video layout */
+.player  .main .content video
+{
+	width: 100%;
+	height: 100%;
+}
+
+/* The controls buttons layout */
+.player .controls
+{
+	border-top: 1px solid #b2e5ff;
+	width: 500px;
+	height: 31px;
+	background-image: url("/Client/images/player/player.png");
+	background-position: 0px -170px;
+	position: absolute;
+	bottom: 0px;
+	overflow: hidden;
+	display: none;
+}
+
+.player .controls .overflow
+{
+	min-width: 450px;
+}
+
+.player .controls .left
+{
+	float: left;
+	margin-left: 5px;
+}
+
+.player .controls .right
+{
+	float: right;
+	margin-right: 5px;
+}
+
+.player .controls .middle
+{
+	height: 31px;
+	margin: 0px 198px 0px 141px;
+	cursor: pointer;
+}
+
+.player .controls .left div,
+.player .controls .right div
+{
+	height: 17px;
+	margin: 7px 5px 7px 5px;
+	background-image: url("/Client/images/player/player.png");
+	cursor: pointer;
+	float: left;
+}
+.player .controls .right div { float: right; }
+
+.player .controls .middle div
+{
+	background-image: url("/Client/images/player/player.png");
+}
+
+.player .controls .previous {
+	background-position: 0px 0px;
+	width: 21px; }
+.player .controls .previous:hover { background-position: 0px -20px; }
+.player .controls .previous:active { background-position: 0px -40px; }
+.player .controls .play {
+	background-position: -30px 0px;
+	position: relative;
+	left: 1px;
+	width: 13px; }
+.player .controls .play:hover { background-position: -30px -20px; }
+.player .controls .play:active { background-position: -30px -40px; }
+.player .controls .play.pause { background-position: -60px 0px; }
+.player .controls .play.pause:hover { background-position: -60px -20px; }
+.player .controls .play.pause:active { background-position: -60px -40px; }
+.player .controls .next {
+	background-position: -90px 0px;
+	width: 21px; }
+.player .controls .next:hover { background-position: -90px -20px; }
+.player .controls .next:active { background-position: -90px -40px; }
+.player .controls .fullscreen {
+	background-position: -120px 0px;
+	width: 18px; }
+.player .controls .fullscreen:hover { background-position: -120px -20px; }
+.player .controls .fullscreen:active { background-position: -120px -40px; }
+.player .controls .random {
+	background-position: -150px 0px;
+	width: 20px; }
+.player .controls .random:hover { background-position: -150px -20px; }
+.player .controls .random.selected { background-position: -150px -40px; }
+.player .controls .repeat {
+	background-position: -180px 0px;
+	width: 17px; }
+.player .controls .repeat:hover { background-position: -180px -20px; }
+.player .controls .repeat:active { background-position: -180px -40px; }
+.player .controls .quality {
+	background-position: -270px 0px;
+	width: 15px; }
+.player .controls .quality:hover { background-position: -270px -20px; }
+.player .controls .quality:active { background-position: -270px -40px; }
+.player .controls .volume {
+	background-position: -210px 0px;
+	width: 18px; }
+.player .controls .volume:hover { background-position: -210px -20px; }
+.player .controls .volume:active { background-position: -210px -40px; }
+.player .controls .volume.muted { background-position: -240px 0px; }
+.player .controls .volume.muted:hover { background-position: -240px -20px; }
+.player .controls .volume.muted:active { background-position: -240px -40px; }
+
+/* Hide the unused controls */
+.player .controls.display .middle,
+.player .controls.display .repeat,
+.player .controls.display .volume,
+.player .controls.display .quality
+{
+	display: none;
+}
+
+.player .controls.display .overflow
+{
+	min-width: 180px;
+}
+
+/* The seek bar */
+.player .controls .seek_left
+{
+	height: 31px;
+	width: 5px;
+	float: left;
+	background-position: 0px -60px;
+}
+
+.player .controls .seek_right
+{
+	height: 31px;
+	width: 5px;
+	float: right;
+	background-position: -10px -60px;
+}
+
+.player .controls div.seek_position,
+.player .controls div.seek_remaining
+{
+	height: 31px;
+	width: 45px;
+	text-align: center;
+	color: #4686b7;
+	font-weight: bold;
+	font-size: 14px;
+	padding-top: 7px;
+	background-image: none;
+}
+
+.player .controls div.seek_position
+{
+	float: left;
+	position: relative;
+	right: 56px;
+}
+
+.player .controls div.seek_remaining
+{
+	float: right;
+	position: relative;
+	left: 56px;
+}
+
+.player .controls .seek_middle
+{
+	height: 31px;
+	margin: 0px 5px 0px 5px;
+	background-position: 0px -90px;
+}
+
+.player .controls .middle div.seek_container
+{
+	padding-top: 7px;
+	float: left;
+	background-image: none;
+	position: absolute;
+}
+
+.player .controls .middle div.seeker
+{
+	height: 17px;
+	width: 12px;
+	background-position: -300px 0px;
+	position: relative;
+	left: -5px;
+}
+.player .controls .middle div.seeker:hover { background-position: -300px -20px; }
+.player .controls .middle div.seeker:active { background-position: -300px -40px; }
+
+/* The seek bar read */
+.player .controls .seek_read_left
+{
+	background-position: -40px -70px;
+	position: absolute;
+	margin-top: 10px;
+	height: 12px;
+	width: 5px;
+}
+
+.player .controls .seek_read_middle
+{
+	background-position: 0px -150px;
+	position: absolute;
+	margin-top: 10px;
+	height: 12px;
+	width: 0px;
+}
+
+/* The preview displayed on the seek bar at the current position of the cursor */
+
+.player_preview
+{
+	width: 100px;
+	position: absolute;
+	display: none;
+	top: 0px;
+}
+.player_preview img
+{
+	visibility: hidden;
+}
+
+/* Display the quality bar */
+.player .player_quality
+{
+	width: 32px;
+	height: 100px;
+	display: none;
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	cursor: pointer;
+}
+
+.player .quality_empty
+{
+	width: 32px;
+	height: 30%;
+	background-image: url("/Client/images/player/quality.png");
+	background-position: left top;
+}
+.player .player_quality:hover .quality_empty { background-position: right top; }
+
+.player .quality_full
+{
+	width: 32px;
+	height: 70%;
+	background-image: url("/Client/images/player/quality.png");
+	background-position: left bottom;
+}
+.player .player_quality:hover .quality_full { background-position: right bottom; }
+
+.player .quality_mask
+{
+	width: 32px;
+	height: 100px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                   PLAYLIST                               //
+////////////////////////////////////////////////////////////////////////////*/
+
+.player .playlist
+{
+	height: 100%;
+	float: right;
+}
+
+.player .playlist .drag
+{
+	height: 100%;
+	float: left;
+	width: 5px;
+	cursor: e-resize;
+	background-image: url("/Client/images/player/drag.png");
+}
+.player .playlist .drag:hover { background-position: -5px 0px; }
+.player .playlist .drag.move { background-position: -10px 0px; }
+
+.player .playlist .list
+{
+	height: 100%;
+	float: right;
+	width: 145px;
+	overflow: auto;
+}
+
+.player .playlist table
+{
+	width: 100%;
+	border: 0px;
+	border-collapse: collapse;
+	cursor: pointer;
+	border-bottom: 1px solid #b2e5ff;
+}
+
+.player .playlist table tr.odd
+{
+	background-color: #FFFFFF;
+}
+.player .playlist table tr.odd:hover
+{
+	color: #215f83;
+}
+
+.player .playlist table tr.even
+{
+	background-color: #ecf7ff;
+}
+.player .playlist table tr.even:hover
+{
+	color: #215f83;
+}
+
+/* Hover */
+.player .playlist table tr:hover td img
+{
+	visibility: hidden;
+}
+
+.player .playlist table  tr:hover  td.image
+{
+	background-image: url("/Client/images/player/playlist_hover.png");
+	background-position: center center;
+	background-repeat: repeat-x;
+	background-color: #97d9ff;
+}
+
+.player .playlist table tr:hover td
+{
+	background-color: #cdecff;
+}
+
+/* Celulles */
+.player .playlist table td.data
+{
+	text-align: left;
+	padding-left: 5px;
+	border-bottom: 1px solid #b2e5ff;
+}
+
+.player .playlist table td.data b
+{
+	font-size: 15px;
+}
+
+.player .playlist table td.image
+{
+	width: 80px;
+	background-color: white;
+	border-right: 1px solid #b2e5ff;
+}
+
+.player .playlist table td.image img
+{
+	max-width: 80px;
+	height: 60px;
+	display: block;
+	margin: auto;
+	position: absolute;
+	left: -10000px;
+	top: -10000px;
+}
+
+.player .playlist table td.image img.visible
+{
+	position: inherit;
+}
+
+/* No text */
+.player .playlist table.notext td.data
+{
+	display: none;
+}
+.player .playlist table.notext td.image
+{
+	width: 100%;
+}
+.player .playlist table.notext td.image img
+{
+	width: 100%;
+	max-width: inherit;
+	height: inherit;
+	max-height: 300px;
+}
+
+/* Text only */
+.player .playlist table.text td.image
+{
+	display: none;
+}
+
+/* Remove button */
+.player .playlist table td.data div.remove
+{
+	float: right;
+	margin: 4px 5px 0px 0px;
+	visibility: hidden;
+	width: 13px;
+	height: 13px;
+	background-image: url("/Client/images/icons/remove_small.png");
+}
+.player .playlist table tr:hover td.data div.remove
+{
+	visibility: visible;
+}
+.player .playlist table tr:hover td.data div.remove:hover
+{
+	background-image: url("/Client/images/icons/remove_small_hover.png");
+}
+
+/* Selected */
+.player .playlist table tr.selected td
+{
+	background-color: #ffe7c5;
+}
+.player .playlist table tr.selected:hover td
+{
+	background-color: #ffdba9;
+	color: #5c471b;
+}
+
+.player .playlist table tr.selected td img
+{
+	visibility: hidden;
+}
+
+.player .playlist table  tr.selected  td.image
+{
+	background-image: url("/Client/images/player/playlist_selected.png");
+	background-position: center center;
+	background-repeat: repeat-x;
+	background-color: #ffc97b;
+	border: 1px solid #ff9600;
+}

@@ -1,0 +1,336 @@
+﻿/*////////////////////////////////////////////////////////////////////////////
+//                                     TABLE                                //
+////////////////////////////////////////////////////////////////////////////*/
+
+.information
+{
+	width: 100%;
+	font-size: 15px;
+}
+
+.information table
+{
+	width: 100%;
+	border: 0px solid #b2e5ff;
+	border-color: #b2e5ff;
+	border-collapse: collapse;
+}
+
+.information table tr.odd
+{
+	background-color: #FFFFFF;
+}
+
+.information table tr.even
+{
+	background-color: #ecf7ff;
+}
+
+.information table tr:hover
+{
+	background-color: #fff0bc;
+	color: #6f571b;
+}
+.information table tr.preview:hover
+{
+	background-color: #FFFFFF;
+	color: #6f571b;
+}
+
+.information table td
+{
+	border-style: hidden;
+	border-top-style: solid;
+	border-bottom-style: solid;
+	border-color: #b2e5ff;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	height: 24px;
+	padding: 0px 5px 0px 5px;
+}
+
+.information table td.name a
+{
+	width: 100%;
+	color: #333333;
+	font-weight: bold;
+	font-size: 19px;
+	text-align: center;
+	display: block;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.information table td.name:hover a { color: #796023; }
+
+.information table td.preview
+{
+	padding: 15px 5px 15px 5px;
+}
+
+.information table  td.preview  img
+{
+	position: absolute;
+	top: -10000px;
+	left: -10000px;
+}
+
+.information table td.preview div.image
+{
+	cursor: pointer;
+	margin: auto;
+	border: 1px solid #b2e5ff;
+}
+
+.information table td.preview div.image:hover
+{
+	border: 1px solid #888888;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                             BUTTONS IN PREVIEW                           //
+////////////////////////////////////////////////////////////////////////////*/
+
+.information .preview_controls
+{
+	display: none;
+}
+
+.information .view
+{
+	display: block;
+}
+
+.information .buttons
+{
+	position: relative;
+	width: 300px;
+	height: 62px;
+	display: none;
+}
+
+.information .buttons .download
+{
+	width: 76px;
+	height: 62px;
+	float: left;
+	display: block;
+	background-image: url("/Client/images/information.png");
+	background-position: 0px 0px;
+}
+.information .buttons .download:hover { background-position: 0px -70px; }
+
+.information .buttons .play
+{
+	width: 72px;
+	height: 62px;
+	float: left;
+	background-image: url("/Client/images/information.png");
+	background-position: -76px 0px;
+}
+.information .buttons .play:hover { background-position: -76px -70px; }
+
+.information .buttons .edit
+{
+	width: 75px;
+	height: 62px;
+	float: left;
+	background-image: url("/Client/images/information.png");
+	background-position: -148px 0px;
+}
+.information .buttons .edit:hover { background-position: -148px -70px; }
+
+.information .buttons .remove
+{
+	width: 77px;
+	height: 62px;
+	float: left;
+	background-image: url("/Client/images/information.png");
+	background-position: -225px 0px;
+}
+.information .buttons .remove:hover { background-position: -225px -70px; }
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                BUTTONS MENU                              //
+////////////////////////////////////////////////////////////////////////////*/
+
+.information .menu
+{
+	display: none;
+	cursor: pointer;
+}
+
+.information table .menu
+{
+	display: block;
+}
+
+.information .menu .download
+{
+	width: 25%;
+	height: 61px;
+	float: left;
+	background-color: white;
+}
+.information .menu .download div
+{
+	width: 76px;
+	height: 61px;
+	margin: auto;
+	background-image: url("/Client/images/information.png");
+	background-position: 0px -140px;
+}
+.information .menu .download:hover div { background-position: 0px -210px; }
+
+.information .menu .play
+{
+	width: 25%;
+	height: 61px;
+	float: left;
+	background-color: white;
+}
+.information .menu .play div
+{
+	width: 72px;
+	height: 61px;
+	margin: auto;
+	background-image: url("/Client/images/information.png");
+	background-position: -76px -140px;
+}
+.information .menu .play:hover div { background-position: -76px -210px; }
+
+.information .menu .edit
+{
+	width: 25%;
+	height: 61px;
+	float: left;
+}
+.information .menu .edit div
+{
+	width: 75px;
+	height: 61px;
+	margin: auto;
+	background-image: url("/Client/images/information.png");
+	background-position: -148px -140px;
+}
+.information .menu .edit:hover div { background-position: -148px -210px; }
+
+.information .menu .remove
+{
+	width: 25%;
+	height: 61px;
+	float: left;
+}
+.information .menu .remove div
+{
+	width: 75px;
+	height: 61px;
+	margin: auto;
+	background-image: url("/Client/images/information.png");
+	background-position: -225px -140px;
+}
+.information .menu .remove:hover div { background-position: -225px -210px; }
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                   DETAILS                                //
+////////////////////////////////////////////////////////////////////////////*/
+
+.information .details
+{
+	text-align: center;
+	background-image: url("/Client/images/information.png");
+	background-position: 0px -320px;
+	background-repeat: repeat-x;
+	border-top-style: solid;
+	border-bottom-style: solid;
+	border-color: #b2e5ff;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	margin: 15px 0px 15px 0px;
+	padding: 3px 20px 0px 20px;
+	height: 22px;
+	font-weight: bold;
+	cursor: pointer;
+	font-size: 15px;
+}
+.information .details:hover
+{
+	background-position: 0px -350px;
+	border-color: #ffc600;
+	color: #796023;
+}
+.information .details.less { background-position: 0px -380px; }
+.information .details.less:hover { background-position: 0px -410px; }
+
+.information .details.more div
+{
+	background-image: url("/Client/images/information.png");
+	background-position: 0px -300px;
+	margin-top: 4px;
+	height: 15px;
+	width: 10px;
+}
+.information .details:hover.more div { background-position: -40px -300px; }
+
+.information .details.less div
+{
+	background-image: url("/Client/images/information.png");
+	background-position: -20px -300px;
+	margin-top: 4px;
+	height: 15px;
+	width: 10px;
+}
+.information .details:hover.less div { background-position: -60px -300px; }
+
+.information .details .left { float: left; }
+.information .details .right { float: right; }
+
+/*////////////////////////////////////////////////////////////////////////////
+//                             REMOVE CONFIRMATION                          //
+////////////////////////////////////////////////////////////////////////////*/
+
+.information .preview .valid_delete
+{
+	width: 50%;
+	height: 62px;
+	float: left;
+	background-image: url("/Client/images/information.png");
+	background-position: 0px -740px;
+	border-top: 1px solid #888888;
+}
+.information .preview .valid_delete div
+{
+	width: 76px;
+	height: 62px;
+	margin: auto;
+	background-image: url("/Client/images/information.png");
+	background-position: -51px -520px;
+}
+.information .preview .valid_delete:hover { background-position: 0px -600px; }
+.information .preview .valid_delete:hover div { background-position: -51px -450px; }
+
+.information .preview .cancel_delete
+{
+	width: 50%;
+	height: 62px;
+	float: left;
+	background-image: url("/Client/images/information.png");
+	background-position: 0px -810px;
+	border-top: 1px solid #888888;
+}
+.information .preview .cancel_delete div
+{
+	width: 76px;
+	height: 62px;
+	margin: auto;
+	background-image: url("/Client/images/information.png");
+	background-position: -149px -520px;
+}
+.information .preview .cancel_delete:hover { background-position: 0px -670px; }
+.information .preview .cancel_delete:hover div { background-position: -149px -450px; }
+
+.information .menu .valid_delete,
+.information .menu .cancel_delete
+{
+	height: 61px;
+	border-top: 0px;
+}

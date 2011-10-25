@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <contexts>
+    <context>
+      <mode>Server</mode>
+      <transport>TCP</transport>
+      <protocol>HTTP</protocol>
+      <method>GET</method>
+    </context>
+  </contexts>
+  <timers>
+    <session>60000</session>
+  </timers>
+  <resources>
+    <resource alias="desktop/index.html">www/desktop/index.html</resource>
+	<resource alias="desktop/css/Explorer.css">www/desktop/css/Explorer.css</resource>
+	<resource alias="desktop/css/help.css">www/desktop/css/help.css</resource>
+	<resource alias="desktop/css/identification.css">www/desktop/css/identification.css</resource>
+	<resource alias="desktop/css/index.css">www/desktop/css/index.css</resource>
+	<resource alias="desktop/css/Information.css">www/desktop/css/Information.css</resource>
+	<resource alias="desktop/css/Player.css">www/desktop/css/Player.css</resource>
+	<resource alias="desktop/css/Upload.css">www/desktop/css/Upload.css</resource>
+	<resource alias="desktop/css/windows.css">www/desktop/css/windows.css</resource>
+	<resource alias="desktop/help/help/disconnection.html">www/desktop/help/help/disconnection.html</resource>
+	<resource alias="desktop/help/help/home.html">www/desktop/help/help/home.html</resource>
+	<resource alias="desktop/help/help/windows.html">www/desktop/help/help/windows.html</resource>
+	<resource alias="desktop/help/hint/interface_desktop.html">www/desktop/help/hint/interface_desktop.html</resource>
+	<resource alias="desktop/help/hint/interface_mobile.html">www/desktop/help/hint/interface_mobile.html</resource>
+	<resource alias="desktop/help/hint/interface_web.html">www/desktop/help/hint/interface_web.html</resource>
+	<resource alias="desktop/help/hint/lock.html">www/desktop/help/hint/lock.html</resource>
+	<resource alias="desktop/html/Explorer.html">www/desktop/html/Explorer.html</resource>
+	<resource alias="desktop/html/Information.html">www/desktop/html/Information.html</resource>
+	<resource alias="desktop/html/Player.html">www/desktop/html/Player.html</resource>
+	<resource alias="desktop/html/Upload.html">www/desktop/html/Upload.html</resource>
+	<resource alias="desktop/images/explorer.png">www/desktop/images/explorer.png</resource>
+	<resource alias="desktop/images/favicon.png">www/desktop/images/favicon.png</resource>
+	<resource alias="desktop/images/information.png">www/desktop/images/information.png</resource>
+	<resource alias="desktop/images/upload.png">www/desktop/images/upload.png</resource>
+	<resource alias="desktop/images/backgrounds/01.jpg">www/desktop/images/backgrounds/01.jpg</resource>
+	<resource alias="desktop/images/backgrounds/07.jpg">www/desktop/images/backgrounds/07.jpg</resource>
+	<resource alias="desktop/images/backgrounds/identification.jpg">www/desktop/images/backgrounds/identification.jpg</resource>
+	<resource alias="desktop/images/help/avertissement.png">www/desktop/images/help/avertissement.png</resource>
+	<resource alias="desktop/images/help/background.png">www/desktop/images/help/background.png</resource>
+	<resource alias="desktop/images/help/hint_bottom.png">www/desktop/images/help/hint_bottom.png</resource>
+	<resource alias="desktop/images/help/hint_middle.png">www/desktop/images/help/hint_middle.png</resource>
+	<resource alias="desktop/images/help/hint_top.png">www/desktop/images/help/hint_top.png</resource>
+	<resource alias="desktop/images/help/loading.gif">www/desktop/images/help/loading.gif</resource>
+	<resource alias="desktop/images/help/menu_black.png">www/desktop/images/help/menu_black.png</resource>
+	<resource alias="desktop/images/help/menu_green.png">www/desktop/images/help/menu_green.png</resource>
+	<resource alias="desktop/images/help/menu_white.png">www/desktop/images/help/menu_white.png</resource>
+	<resource alias="desktop/images/help/panel.png">www/desktop/images/help/panel.png</resource>
+	<resource alias="desktop/images/icons/audio.png">www/desktop/images/icons/audio.png</resource>
+	<resource alias="desktop/images/icons/document.png">www/desktop/images/icons/document.png</resource>
+	<resource alias="desktop/images/icons/image.png">www/desktop/images/icons/image.png</resource>
+	<resource alias="desktop/images/icons/other.png">www/desktop/images/icons/other.png</resource>
+	<resource alias="desktop/images/icons/remove_small.png">www/desktop/images/icons/remove_small.png</resource>
+	<resource alias="desktop/images/icons/remove_small_hover.png">www/desktop/images/icons/remove_small_hover.png</resource>
+	<resource alias="desktop/images/icons/video.png">www/desktop/images/icons/video.png</resource>
+	<resource alias="desktop/images/identification/error.png">www/desktop/images/identification/error.png</resource>
+	<resource alias="desktop/images/identification/form.png">www/desktop/images/identification/form.png</resource>
+	<resource alias="desktop/images/identification/interface_left_off.png">www/desktop/images/identification/interface_left_off.png</resource>
+	<resource alias="desktop/images/identification/interface_left_on.png">www/desktop/images/identification/interface_left_on.png</resource>
+	<resource alias="desktop/images/identification/interface_middle_off.png">www/desktop/images/identification/interface_middle_off.png</resource>
+	<resource alias="desktop/images/identification/interface_middle_on.png">www/desktop/images/identification/interface_middle_on.png</resource>
+	<resource alias="desktop/images/identification/interface_right_off.png">www/desktop/images/identification/interface_right_off.png</resource>
+	<resource alias="desktop/images/identification/interface_right_on.png">www/desktop/images/identification/interface_right_on.png</resource>
+	<resource alias="desktop/images/identification/loading.gif">www/desktop/images/identification/loading.gif</resource>
+	<resource alias="desktop/images/identification/lock.png">www/desktop/images/identification/lock.png</resource>
+	<resource alias="desktop/images/identification/panel.png">www/desktop/images/identification/panel.png</resource>
+	<resource alias="desktop/images/identification/submit_blue.png">www/desktop/images/identification/submit_blue.png</resource>
+	<resource alias="desktop/images/identification/submit_green.png">www/desktop/images/identification/submit_green.png</resource>
+	<resource alias="desktop/images/identification/submit_red.png">www/desktop/images/identification/submit_red.png</resource>
+	<resource alias="desktop/images/identification/submit_yellow.png">www/desktop/images/identification/submit_yellow.png</resource>
+	<resource alias="desktop/images/identification/unlock.png">www/desktop/images/identification/unlock.png</resource>
+	<resource alias="desktop/images/identification/valid.png">www/desktop/images/identification/valid.png</resource>
+	<resource alias="desktop/images/player/drag.png">www/desktop/images/player/drag.png</resource>
+	<resource alias="desktop/images/player/player.png">www/desktop/images/player/player.png</resource>
+	<resource alias="desktop/images/player/playlist_hover.png">www/desktop/images/player/playlist_hover.png</resource>
+	<resource alias="desktop/images/player/playlist_selected.png">www/desktop/images/player/playlist_selected.png</resource>
+	<resource alias="desktop/images/player/quality.png">www/desktop/images/player/quality.png</resource>
+	<resource alias="desktop/images/window/loading.gif">www/desktop/images/window/loading.gif</resource>
+	<resource alias="desktop/images/window/middle_left.png">www/desktop/images/window/middle_left.png</resource>
+	<resource alias="desktop/images/window/middle_middle_opaque.png">www/desktop/images/window/middle_middle_opaque.png</resource>
+	<resource alias="desktop/images/window/middle_middle_transparent.png">www/desktop/images/window/middle_middle_transparent.png</resource>
+	<resource alias="desktop/images/window/middle_right.png">www/desktop/images/window/middle_right.png</resource>
+	<resource alias="desktop/images/window/window.png">www/desktop/images/window/window.png</resource>
+	<resource alias="desktop/js/Account.js">www/desktop/js/Account.js</resource>
+	<resource alias="desktop/js/Animations.js">www/desktop/js/Animations.js</resource>
+	<resource alias="desktop/js/Configuration.js">www/desktop/js/Configuration.js</resource>
+	<resource alias="desktop/js/Context.js">www/desktop/js/Context.js</resource>
+	<resource alias="desktop/js/Explorer.js">www/desktop/js/Explorer.js</resource>
+	<resource alias="desktop/js/Help.js">www/desktop/js/Help.js</resource>
+	<resource alias="desktop/js/Index.js">www/desktop/js/Index.js</resource>
+	<resource alias="desktop/js/Information.js">www/desktop/js/Information.js</resource>
+	<resource alias="desktop/js/Player.js">www/desktop/js/Player.js</resource>
+	<resource alias="desktop/js/Resources.js">www/desktop/js/Resources.js</resource>
+	<resource alias="desktop/js/Selection.js">www/desktop/js/Selection.js</resource>
+	<resource alias="desktop/js/SHA1.js">www/desktop/js/SHA1.js</resource>
+	<resource alias="desktop/js/Upload.js">www/desktop/js/Upload.js</resource>
+	<resource alias="desktop/js/Window.js">www/desktop/js/Window.js</resource>
+	<resource alias="desktop/js/Windows.js">www/desktop/js/Windows.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_c.js">www/desktop/libs/SHJS/sh_c.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_caml.js">www/desktop/libs/SHJS/sh_caml.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_cpp.js">www/desktop/libs/SHJS/sh_cpp.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_csharp.js">www/desktop/libs/SHJS/sh_csharp.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_css.js">www/desktop/libs/SHJS/sh_css.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_diff.js">www/desktop/libs/SHJS/sh_diff.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_html.js">www/desktop/libs/SHJS/sh_html.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_java.js">www/desktop/libs/SHJS/sh_java.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_javascript.js">www/desktop/libs/SHJS/sh_javascript.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_latex.js">www/desktop/libs/SHJS/sh_latex.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_ldap.js">www/desktop/libs/SHJS/sh_ldap.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_log.js">www/desktop/libs/SHJS/sh_log.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_main.js">www/desktop/libs/SHJS/sh_main.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_makefile.js">www/desktop/libs/SHJS/sh_makefile.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_pascal.js">www/desktop/libs/SHJS/sh_pascal.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_perl.js">www/desktop/libs/SHJS/sh_perl.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_php.js">www/desktop/libs/SHJS/sh_php.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_python.js">www/desktop/libs/SHJS/sh_python.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_ruby.js">www/desktop/libs/SHJS/sh_ruby.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_sml.js">www/desktop/libs/SHJS/sh_sml.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_spec.js">www/desktop/libs/SHJS/sh_spec.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_sql.js">www/desktop/libs/SHJS/sh_sql.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_style.css">www/desktop/libs/SHJS/sh_style.css</resource>
+	<resource alias="desktop/libs/SHJS/sh_tcl.js">www/desktop/libs/SHJS/sh_tcl.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_xml.js">www/desktop/libs/SHJS/sh_xml.js</resource>
+	<resource alias="desktop/libs/SHJS/sh_xorg.js">www/desktop/libs/SHJS/sh_xorg.js</resource>
+  </resources>
+  <preview>
+    <!-- True if the cache is enabled -->
+    <cacheEnabled>true</cacheEnabled>
+    <!-- The path to the cache directory, where are stored the previews generated (from the plugin directory).
+       By default, they are stored in the "cache" directory of the plugin. -->
+    <cachePath>../../../cache</cachePath>
+    <!-- The maximum size of the cache directory in Mo. After that size, the oldest files are deleted.
+       If it is not defined, there is no cache size limit. -->
+    <cacheMaxSize>1000</cacheMaxSize>
+  </preview>
+</configuration>
