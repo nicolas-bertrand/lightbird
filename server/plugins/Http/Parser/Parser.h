@@ -15,7 +15,7 @@ public:
     Parser(LightBird::IClient &client);
     virtual ~Parser();
 
-    /// @brief Find the protocol of the client (HTTP or WebClient).
+    /// @brief Search the protocol of the client (HTTP).
     virtual bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
     /// @brief Unserialize the header.
     virtual bool    doUnserializeHeader(const QByteArray &data, quint64 &used) = 0;

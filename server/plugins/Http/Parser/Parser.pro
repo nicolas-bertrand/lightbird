@@ -1,6 +1,6 @@
 TEMPLATE = lib
 CONFIG += plugin
-QT +=  network sql xml
+QT += network sql xml
 RESOURCES = resources.qrc
 
 INCLUDEPATH += . \

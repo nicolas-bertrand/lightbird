@@ -42,7 +42,7 @@
     <expires>30</expires>
   </log>
   <ports>
-    <port protocol="HTTP WebClient" transport="TCP" maxClients="100">80</port>
+    <port protocol="HTTP" transport="TCP" maxClients="100">80</port>
   </ports>
   <plugins>
     <plugin>Http/Get</plugin>

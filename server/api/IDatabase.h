@@ -65,11 +65,11 @@ namespace LightBird
         /// @return NULL if the table has not been found.
         /// @example getTable
         /// This example shows how to cast ITable into ITableAccounts :
-        /// LightBird::ITableAccounts *account = getTable(LightBird::ITable::Accounts)->toTableAccounts();
+        /// LightBird::ITableAccounts *account = getTable(LightBird::ITable::Accounts)->toAccounts();
         /// delete account; // Do not forget to delete the instance.
         ///
         /// Users can also use a shared pointer, so that the instance is deleted automatically when it goes out of scope :
-        /// QSharedPointer<LightBird::ITableAccounts> account(getTable(LightBird::ITable::Accounts)->toTableAccounts());
+        /// QSharedPointer<LightBird::ITableAccounts> account(getTable(LightBird::ITable::Accounts)->toAccounts());
         virtual LightBird::ITable   *getTable(LightBird::ITable::Table table, const QString &id = "") = 0;
         /// @brief This method helps to make the queries independent of the database type used. The
         /// SQL queries of the plugins are stored in a XML file named QtSqlDriverName.xml, instead of being

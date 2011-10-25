@@ -202,7 +202,7 @@ bool                Client::_send()
 
     if (!mutex)
         return (false);
-    if ((engine = dynamic_cast<EngineClient *>(this->engine)))
+    if ((engine = qobject_cast<EngineClient *>(this->engine)))
     {
         // Sets the send requests to the engine
         QListIterator<QPair<QString, QString> > it(this->sendRequests);
