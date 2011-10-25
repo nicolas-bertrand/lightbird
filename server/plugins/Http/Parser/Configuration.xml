@@ -4,7 +4,6 @@
     <context>
       <transport>TCP</transport>
       <protocol>HTTP</protocol>
-      <protocol>WebClient</protocol>
     </context>
   </contexts>
   <!-- The maximum size of the header. After that, an error is sent to the client, and it is disconnected. -->

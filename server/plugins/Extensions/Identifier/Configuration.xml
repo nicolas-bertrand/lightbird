@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <resources>
+    <resource alias="mime">Mime.xml</resource>
+  </resources>
+  <!-- The hashes is not calculated for files whose size exceeds this value.
+       If the value is zero, the hashes will not be computed.
+       A negative number means no limit. -->
+  <maxSizeHash>30000000</maxSizeHash>
+</configuration>

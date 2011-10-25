@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/plugins/Extensions/Identifier">
+        <file alias="configuration">Configuration.xml</file>
+        <file alias="mime">Mime.xml</file>
+    </qresource>
+</RCC>
