@@ -8,7 +8,6 @@
 Extensions::Extensions(QObject *parent) : QObject(parent)
 {
     Log::trace("Extensions created", "Extensions", "Extensions");
-    QObject::connect(this, SIGNAL(releaseSignal(QString)), this, SLOT(_release(QString)), Qt::QueuedConnection);
 }
 
 Extensions::~Extensions()
@@ -116,7 +115,7 @@ void            Extensions::release(QList<void *> extensions)
             {
                 plugin = it2.value().plugin;
                 this->plugins[plugin].extensions->releaseExtension(it2.key(), it2.value().instance);
-                emit this->releaseSignal(plugin);
+                emit Plugins::instance()->release(plugin);
                 Log::trace("Extension instance released", Properties("pluginId", plugin).add("extensionName", it2.key()), "Extensions", "release");
                 it2.remove();
                 if (this->plugins[plugin].loaded == false)
@@ -155,11 +154,6 @@ void        Extensions::_remove(const QString &plugin)
     }
     else
         Log::trace("Some extensions of this plugin are still used", Properties("pluginId", plugin), "Extensions", "_remove");
-}
-
-void    Extensions::_release(QString id)
-{
-    Plugins::instance()->release(id);
 }
 
 Extensions  *Extensions::instance()

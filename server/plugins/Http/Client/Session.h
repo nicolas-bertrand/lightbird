@@ -24,10 +24,10 @@ public:
     void                        setUpdate();
 
 private:
-    QString                     id;         ///< The id of the session (sid).
-    LightBird::ITableAccounts   *account;   ///< The account from which the client if connected.
-    QDateTime                   creation;   ///< The date of the creation of the session.
-    QDateTime                   update;     ///< The date of the last update of the session.
+    QString                     id;       ///< The id of the session (sid).
+    LightBird::ITableAccounts   *account; ///< The account from which the client if connected.
+    QDateTime                   creation; ///< The date of the creation of the session.
+    QDateTime                   update;   ///< The date of the last update of the session.
 };
 
 #endif // SESSION_H

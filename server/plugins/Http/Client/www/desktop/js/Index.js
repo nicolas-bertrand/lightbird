@@ -1,4 +1,4 @@
-/* This file contains the main scripts of the web client. */
+/* This file contains the main scripts of the client. */
 
 // True if the page has been loaded
 var gl_loaded = false;

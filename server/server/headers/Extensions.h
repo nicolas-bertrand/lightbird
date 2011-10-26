@@ -54,9 +54,6 @@ private:
         void                  *instance;    ///< The instance of the extension.
     };
 
-private slots:
-    void                      _release(QString id);
-
 private:
     QMap<QString, PluginInfo> plugins;           ///< The list of the plugins that implements one or more extensions. The key is the id of the plugin.
     QMap<QString, Extension>  extensions;        ///< Contains the extensions currently used. The key is the name of the extension.

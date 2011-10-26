@@ -18,8 +18,8 @@
 Execute::Execute(LightBird::IApi &a, LightBird::IClient &c, const QString &com) :
          api(a), client(c), request(c.getRequest()), response(c.getResponse())
 {
-    QList<QByteArray>           l;
-    QString                     command = com;
+    QList<QByteArray>   l;
+    QString             command = com;
 
     // If is not connected and it doesn't try to identify
     if (client.getAccount().getId().isEmpty())

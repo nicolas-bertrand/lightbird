@@ -92,11 +92,6 @@ public:
     QMap<QString, T *>  getInstances(LightBird::IClient::Mode mode, LightBird::INetwork::Transport transport,
                                      const QString &protocol, unsigned short port, const QString &method = "",
                                      const QString &type = "", bool all = false);
-    /// @brief Releases a plugin. Must be call after get().
-    /// @param id : The id of the plugin.
-    /// @return True on success, false otherwise.
-    /// @see get
-    bool                    release(const QString &id);
     /// @brief Returns the metadata of a plugin.
     /// @param id : The plugin id.
     LightBird::IMetadata    getMetadata(const QString &id) const;
@@ -133,6 +128,13 @@ public:
     QStringList             getInstalledPlugins() const;
     /// @see LightBird::IPlugins::getUninstalledPlugins
     QStringList             getUninstalledPlugins() const;
+
+public slots:
+    /// @brief Releases a plugin. Must be call after get().
+    /// @param id : The id of the plugin.
+    /// @return True on success, false otherwise.
+    /// @see get
+    bool                    release(const QString &id);
 
 signals:
     void                    loadSignal(const QString &id, Future<bool> *future);

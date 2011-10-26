@@ -9,7 +9,7 @@
 # include "Configuration.h"
 # include "Timer.h"
 
-/// @brief This class is the server implementation of the ITimer interface
+/// @brief This class is the server implementation of the ITimers interface
 /// that allows plugins to manage their timers.
 class ApiTimers : public QObject,
                   public LightBird::ITimers
