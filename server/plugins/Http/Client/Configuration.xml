@@ -36,7 +36,6 @@
 	<resource alias="desktop/images/favicon.png">www/desktop/images/favicon.png</resource>
 	<resource alias="desktop/images/information.png">www/desktop/images/information.png</resource>
 	<resource alias="desktop/images/upload.png">www/desktop/images/upload.png</resource>
-	<resource alias="desktop/images/backgrounds/01.jpg">www/desktop/images/backgrounds/01.jpg</resource>
 	<resource alias="desktop/images/backgrounds/07.jpg">www/desktop/images/backgrounds/07.jpg</resource>
 	<resource alias="desktop/images/backgrounds/identification.jpg">www/desktop/images/backgrounds/identification.jpg</resource>
 	<resource alias="desktop/images/help/avertissement.png">www/desktop/images/help/avertissement.png</resource>

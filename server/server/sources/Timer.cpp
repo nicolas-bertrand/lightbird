@@ -1,5 +1,4 @@
 #include <QCoreApplication>
-#include <QTimer>
 
 #include "ITimer.h"
 
@@ -9,13 +8,15 @@
 #include "Threads.h"
 #include "Timer.h"
 
-Timer::Timer(QString i, QString n, unsigned int t, ApiTimers &timers) : id(i),
-                                                                        name(n),
-                                                                        timeout(t),
-                                                                        apiTimers(timers),
-                                                                        stopped(false)
+Timer::Timer(QString i, QString n, unsigned int in, ApiTimers &timers) : id(i),
+                                                                         name(n),
+                                                                         timer(this),
+                                                                         interval(in),
+                                                                         apiTimers(timers),
+                                                                         stopped(false)
 {
-    Log::debug("Loading the timer", Properties("name", this->name).add("id", this->id).add("timeout", QString::number(this->timeout)), "Timer", "Timer");
+    Log::debug("Loading the timer", Properties("name", this->name).add("id", this->id).add("interval", QString::number(this->interval)), "Timer", "Timer");
+    this->timer.setSingleShot(true);
     // Starts the Timer thread
     this->moveToThread(this);
     Threads::instance()->newThread(this);
@@ -32,7 +33,9 @@ void    Timer::run()
     if (!Plugins::instance()->getInstance<LightBird::ITimer>(this->id) || this->stopped)
         return ;
     Plugins::instance()->release(this->id);
-    QTimer::singleShot(this->timeout, this, SLOT(_timeout()));
+    QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(_timeout()), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(setIntervalSignal()), this, SLOT(_setInterval()), Qt::QueuedConnection);
+    this->timer.start(this->interval);
     Log::trace("Timer thread started", Properties("id", this->id).add("name", this->name), "Timer", "run");
     this->exec();
     Log::trace("Timer thread finished", Properties("id", this->id).add("name", this->name), "Timer", "run");
@@ -40,14 +43,20 @@ void    Timer::run()
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
-unsigned int    Timer::getTimeout() const
+unsigned int    Timer::getInterval() const
 {
-    return (this->timeout);
+    return (this->interval);
 }
 
-void            Timer::setTimeout(unsigned int timeout)
+void            Timer::setInterval(unsigned int interval)
 {
-    this->timeout = timeout;
+    this->interval = interval;
+    emit this->setIntervalSignal();
+}
+
+void            Timer::_setInterval()
+{
+    this->timer.setInterval(this->interval);
 }
 
 void            Timer::stop()
@@ -66,7 +75,7 @@ void                    Timer::_timeout()
     result = instance->timer(this->name);
     Plugins::instance()->release(this->id);
     if (!this->stopped && result)
-        QTimer::singleShot(this->timeout, this, SLOT(_timeout()));
+        this->timer.start();
     // Removes the timer if the plugin returned false
     if (!result)
         this->apiTimers.removeTimer(this->name);

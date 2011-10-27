@@ -26,7 +26,6 @@
 		<file alias="desktop/images/favicon.png">www/desktop/images/favicon.png</file>
 		<file alias="desktop/images/information.png">www/desktop/images/information.png</file>
 		<file alias="desktop/images/upload.png">www/desktop/images/upload.png</file>
-		<file alias="desktop/images/backgrounds/01.jpg">www/desktop/images/backgrounds/01.jpg</file>
 		<file alias="desktop/images/backgrounds/07.jpg">www/desktop/images/backgrounds/07.jpg</file>
 		<file alias="desktop/images/backgrounds/identification.jpg">www/desktop/images/backgrounds/identification.jpg</file>
 		<file alias="desktop/images/help/avertissement.png">www/desktop/images/help/avertissement.png</file>

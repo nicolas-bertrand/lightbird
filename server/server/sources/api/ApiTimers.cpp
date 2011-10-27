@@ -31,7 +31,7 @@ ApiTimers::~ApiTimers()
     this->timers.clear();
 }
 
-void    ApiTimers::setTimer(const QString &name, unsigned int timeout)
+void    ApiTimers::setTimer(const QString &name, unsigned int interval)
 {
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
@@ -40,21 +40,21 @@ void    ApiTimers::setTimer(const QString &name, unsigned int timeout)
     }
     if (this->timers.contains(name))
     {
-        Log::trace("Timer modified", Properties("id", this->id).add("name", name).add("timeout", QString::number(timeout)), "ApiTimers", "setTimer");
-        this->timers.value(name)->setTimeout(timeout);
+        Log::trace("Timer modified", Properties("id", this->id).add("name", name).add("interval", QString::number(interval)), "ApiTimers", "setTimer");
+        this->timers.value(name)->setInterval(interval);
         this->mutex.unlock();
     }
     else
     {
-        Log::trace("Timer created", Properties("id", this->id).add("name", name).add("timeout", QString::number(timeout)), "ApiTimers", "setTimer");
-        this->timers.insert(name, new Timer(this->id, name, timeout, *this));
+        Log::trace("Timer created", Properties("id", this->id).add("name", name).add("interval", QString::number(interval)), "ApiTimers", "setTimer");
+        this->timers.insert(name, new Timer(this->id, name, interval, *this));
         this->mutex.unlock();
     }
 }
 
 unsigned int        ApiTimers::getTimer(const QString &name) const
 {
-    unsigned int    timeout = 0;
+    unsigned int    interval = 0;
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
@@ -62,9 +62,9 @@ unsigned int        ApiTimers::getTimer(const QString &name) const
         return (0);
     }
     if (this->timers.contains(name))
-        timeout = this->timers.value(name)->getTimeout();
+        interval = this->timers.value(name)->getInterval();
     this->mutex.unlock();
-    return (timeout);
+    return (interval);
 }
 
 QMap<QString, unsigned int>     ApiTimers::getTimers() const
@@ -80,7 +80,7 @@ QMap<QString, unsigned int>     ApiTimers::getTimers() const
     while (it.hasNext())
     {
         it.next();
-        timers.insert(it.key(), it.value()->getTimeout());
+        timers.insert(it.key(), it.value()->getInterval());
     }
     this->mutex.unlock();
     return (timers);

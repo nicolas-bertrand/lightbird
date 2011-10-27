@@ -15,14 +15,14 @@ namespace LightBird
     public:
         virtual ~ITimers() {}
 
-        /// @brief Add a new timer. If the timer already exists, its timeout is modified.
+        /// @brief Add a new timer. If the timer already exists, its interval is modified.
         /// @param name : The name of the timer.
-        /// @param timeout : The time between each calls in milliseconds.
-        virtual void                            setTimer(const QString &name, unsigned int timeout) = 0;
-        /// @brief Returns the timeout of a timer, or zero if it doesn't exists.
+        /// @param interval : The time between each calls in milliseconds.
+        virtual void                            setTimer(const QString &name, unsigned int interval) = 0;
+        /// @brief Returns the interval of a timer, or zero if it doesn't exists.
         /// @param name : The name of the timer.
         virtual unsigned int                    getTimer(const QString &name) const = 0;
-        /// @brief Returns a map of all the timers and their timeout.
+        /// @brief Returns a map of all the timers and their interval.
         virtual QMap<QString, unsigned int>     getTimers() const = 0;
         /// @brief Remove a timer.
         /// @param name : The name of the timer.

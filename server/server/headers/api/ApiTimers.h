@@ -21,7 +21,7 @@ public:
     ApiTimers(const QString &id, QObject *parent = NULL);
     ~ApiTimers();
 
-    void                        setTimer(const QString &name, unsigned int timeout);
+    void                        setTimer(const QString &name, unsigned int interval);
     unsigned int                getTimer(const QString &name) const;
     QMap<QString, unsigned int> getTimers() const;
     bool                        removeTimer(const QString &name);
