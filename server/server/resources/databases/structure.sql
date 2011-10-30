@@ -131,6 +131,23 @@ CREATE TABLE permissions (
   PRIMARY KEY(id),
   UNIQUE(id_accessor, id_object, right)
 );
+CREATE TABLE sessions (
+  "id" VARCHAR(36) NOT NULL,
+  "expiration" DATETIME DEFAULT "" NOT NULL,
+  "id_account" VARCHAR(36) DEFAULT "" NOT NULL,
+  "modified" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
+  "created" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
+  PRIMARY KEY(id)
+);
+CREATE TABLE sessions_informations (
+  "id" VARCHAR(36) NOT NULL,
+  "id_session" VARCHAR(36) NOT NULL,
+  "name" VARCHAR(255) NOT NULL,
+  "value" VARCHAR(255) NOT NULL,
+  "modified" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
+  "created" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
+  PRIMARY KEY(id)
+);
 CREATE TABLE tags (
   "id" VARCHAR(36) NOT NULL,
   "id_object" VARCHAR(36) NOT NULL,
@@ -139,4 +156,4 @@ CREATE TABLE tags (
   "created" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
   PRIMARY KEY(id),
   UNIQUE(id_object, name)
- );
+);

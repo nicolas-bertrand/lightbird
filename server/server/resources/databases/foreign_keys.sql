@@ -1,4 +1,4 @@
--- Ces triggers simulent les foreign key de SQLite qui sont disponible a partir de la version 3.6.19
+-- These triggers simulate the foreign key of SQLite that are available from version 3.6.19
 
 -----------------------------
 -- Accounts
@@ -13,6 +13,7 @@ BEGIN
     DELETE FROM directories WHERE id_account = old.id;
     DELETE FROM collections WHERE id_account = old.id;
     DELETE FROM files WHERE id_account = old.id;
+    DELETE FROM sessions WHERE id_account = old.id;
 END;
 
 CREATE TRIGGER "fk_update_accounts" BEFORE UPDATE ON accounts
@@ -25,13 +26,15 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_insert_accounts_groups" BEFORE INSERT ON accounts_groups
 BEGIN
-    SELECT RAISE(ROLLBACK, '') WHERE (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
-    SELECT RAISE(ROLLBACK, '') WHERE (SELECT "id" FROM "groups" WHERE "id" = NEW."id_group") IS NULL;
+    SELECT RAISE(ROLLBACK, 'insert | accounts_groups | id_account') WHERE (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
+    SELECT RAISE(ROLLBACK, 'insert | accounts_groups | id_group') WHERE (SELECT "id" FROM "groups" WHERE "id" = NEW."id_group") IS NULL;
 END;
 
 CREATE TRIGGER "fk_update_accounts_groups" BEFORE UPDATE ON accounts_groups
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW."id" != OLD."id";
+    SELECT RAISE(ROLLBACK, 'update | accounts_groups | id_account') WHERE (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
+    SELECT RAISE(ROLLBACK, 'update | accounts_groups | id_group') WHERE (SELECT "id" FROM "groups" WHERE "id" = NEW."id_group") IS NULL;
 END;
 
 -----------------------------
@@ -45,7 +48,7 @@ END;
 CREATE TRIGGER "fk_update_accounts_informations" BEFORE UPDATE ON accounts_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW."id" != OLD."id";
-    SELECT RAISE(ROLLBACK, '') WHERE (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
+    SELECT RAISE(ROLLBACK, 'update | accounts_informations | id_account') WHERE (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
 END;
 
 -----------------------------
@@ -286,6 +289,39 @@ BEGIN
         (SELECT "id" FROM "files" WHERE "id" = NEW."id_object") IS NULL AND
         (SELECT "id" FROM "directories" WHERE "id" = NEW."id_object") IS NULL AND
         (SELECT "id" FROM "collections" WHERE "id" = NEW."id_object") IS NULL;
+END;
+
+-----------------------------
+-- Sessions
+-----------------------------
+CREATE TRIGGER "fk_delete_sessions" BEFORE DELETE ON sessions
+BEGIN
+    DELETE FROM sessions_informations WHERE id_session = old.id;
+END;
+
+CREATE TRIGGER "fk_insert_sessions" BEFORE INSERT ON sessions
+BEGIN
+    SELECT RAISE(ROLLBACK, 'insert | sessions | id_account') WHERE NEW."id_account" != "" AND (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
+END;
+
+CREATE TRIGGER "fk_update_sessions" BEFORE UPDATE ON sessions
+BEGIN
+    SELECT RAISE(ROLLBACK, '') WHERE NEW."id" != OLD."id";
+    SELECT RAISE(ROLLBACK, 'update | sessions | id_account') WHERE NEW."id_account" != "" AND (SELECT "id" FROM "accounts" WHERE "id" = NEW."id_account") IS NULL;
+END;
+
+-----------------------------
+-- Sessions_informations
+-----------------------------
+CREATE TRIGGER "fk_insert_sessions_informations" BEFORE INSERT ON sessions_informations
+BEGIN
+    SELECT RAISE(ROLLBACK, 'insert | sessions_informations | id_session') WHERE (SELECT "id" FROM "sessions" WHERE "id" = NEW."id_session") IS NULL;
+END;
+
+CREATE TRIGGER "fk_update_sessions_informations" BEFORE UPDATE ON sessions_informations
+BEGIN
+    SELECT RAISE(ROLLBACK, '') WHERE NEW."id" != OLD."id";
+    SELECT RAISE(ROLLBACK, 'update | sessions_informations | id_session') WHERE (SELECT "id" FROM "sessions" WHERE "id" = NEW."id_session") IS NULL;
 END;
 
 -----------------------------
