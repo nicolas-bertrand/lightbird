@@ -3,6 +3,7 @@
 #include "Defines.h"
 #include "Events.h"
 #include "Log.h"
+#include "Network.h"
 #include "Server.h"
 #include "Session.h"
 #include "SmartMutex.h"

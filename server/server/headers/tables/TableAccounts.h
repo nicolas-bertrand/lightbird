@@ -43,14 +43,10 @@ public:
     bool            removeInformations(const QStringList &informations);
 
     // Other
-    const QDateTime &getConnectionDate() const;
     QStringList     getGroups() const;
     bool            addGroup(const QString &id_group);
     bool            removeGroup(const QString &id_group);
     QString         passwordHash(const QString &password, const QString &id = "") const;
-
-private:
-    QDateTime       connectionDate; ///< The date of the connection of the client.
 };
 
 #endif // TABLEACCOUNTS_H

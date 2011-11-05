@@ -76,9 +76,9 @@ namespace LightBird
         /// @brief Modifies the log level.
         /// @param level : The new log level.
         virtual void        setLevel(LightBird::ILogs::Level level) = 0;
-        /// @brief Returns true if the logs are beeing displayed on the standard output.
+        /// @brief Returns true if the logs are displayed on the standard output.
         virtual bool        isDisplay() const = 0;
-        /// @brief Display of hide the logs on the standard output.
+        /// @brief Display or hide the logs on the standard output.
         virtual void        isDisplay(bool display) = 0;
         /// @return True if the error logs are saved.
         virtual bool        isError() const = 0;

@@ -23,10 +23,7 @@ TableAccounts::TableAccounts(const TableAccounts &t)
 TableAccounts &TableAccounts::operator=(const TableAccounts &table)
 {
     if (this != &table)
-    {
         TableAccessors::operator=(table);
-        this->connectionDate = table.connectionDate;
-    }
     return (*this);
 }
 
@@ -34,7 +31,6 @@ bool        TableAccounts::setId(const QString &id)
 {
     if (!Table::setId(id))
         return (false);
-    this->connectionDate = QDateTime::currentDateTime();
     return (true);
 }
 
@@ -57,7 +53,6 @@ bool        TableAccounts::setIdFromName(const QString &name)
     if ((id = this->getIdFromName(name)).isEmpty())
         return (false);
     this->id = id;
-    this->connectionDate = QDateTime::currentDateTime();
     return (true);
 }
 
@@ -77,7 +72,6 @@ bool        TableAccounts::setIdFromNameAndPassword(const QString &name, const Q
     if ((id = this->getIdFromNameAndPassword(name, password)).isEmpty())
         return (false);
     this->id = id;
-    this->connectionDate = QDateTime::currentDateTime();
     return (true);
 }
 
@@ -105,7 +99,6 @@ bool        TableAccounts::setIdFromIdentifiantAndSalt(const QString &identifian
     if ((id = this->getIdFromIdentifiantAndSalt(identifiant, salt)).isEmpty())
         return (false);
     this->id = id;
-    this->connectionDate = QDateTime::currentDateTime();
     return (true);
 }
 
@@ -293,11 +286,6 @@ bool                    TableAccounts::removeInformations(const QStringList &inf
             result = false;
     }
     return (result);
-}
-
-const QDateTime &TableAccounts::getConnectionDate() const
-{
-    return (this->connectionDate);
 }
 
 QStringList     TableAccounts::getGroups() const

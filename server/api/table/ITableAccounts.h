@@ -99,10 +99,6 @@ namespace LightBird
         virtual bool    removeInformations(const QStringList &informations) = 0;
 
         // Other
-        /// @brief Returns the date when the account id of the current
-        /// instance has been set (using setId(), setIdFromName(),
-        /// setIdFromNameAndPassword(), or setIdFromIdentifiantAndSalt()).
-        virtual const QDateTime &getConnectionDate() const = 0;
         /// @brief Returns the ids of the groups of the account.
         virtual QStringList getGroups() const = 0;
         /// @brief Add the account to the group in parameter.
