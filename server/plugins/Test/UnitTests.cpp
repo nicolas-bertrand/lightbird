@@ -12,11 +12,11 @@ UnitTests::UnitTests(LightBird::IApi &a) : api(a),
     bool    result = true;
 
     this->log.info("Runing the unit tests of the whole server", "UnitTests", "UnitTests");
-    if (!this->_configuration())
-        result = false;
-    else if (!this->_accounts())
+    if (!this->_accounts())
         result = false;
     else if (!this->_collections())
+        result = false;
+    else if (!this->_configuration())
         result = false;
     else if (!this->_directories())
         result = false;
@@ -30,6 +30,8 @@ UnitTests::UnitTests(LightBird::IApi &a) : api(a),
         result = false;
     else if (!this->_permissions())
         result = false;
+    else if (!this->_sessions())
+        result = false;
     else if (!this->_tags())
         result = false;
     if (result)
@@ -40,80 +42,6 @@ UnitTests::UnitTests(LightBird::IApi &a) : api(a),
 
 UnitTests::~UnitTests()
 {
-}
-
-bool    UnitTests::_configuration()
-{
-    LightBird::IConfiguration   &c = this->api.configuration();
-
-    log.debug("Running the unit tests of the configuration...", "UnitTests", "_configuration");
-    // Build the test tree
-    c.remove("unitTests");
-    c.set("unitTests/node1", "node1A1");
-    c.set("unitTests/node1[1]", "node1B1");
-    c.set("unitTests/node2[0]", "node2A1");
-    c.set("unitTests/node1[2]", "node1C1");
-    c.set("unitTests/node2[1]", "node2B1");
-    c.set("unitTests/node1[6]", "node1D1");
-    c.set("unitTests/node1[4]", "node1E1");
-    c.set("unitTests/node1[2]/node3", "node3A1");
-    c.set("unitTests/node1[2]/node3[1]", "node3B1");
-    c.set("unitTests/node1[2]/node3[2]", "node3C1");
-    c.set("unitTests/node1[2]/node3.attr1", "node3D1");
-    c.set("unitTests/node1[2]/node3.attr2", "node3E1");
-    c.set("unitTests/node1[2]/node3.attr1", "node3D2");
-    c.set("unitTests/node1[2]/node3[2].attr3", "node3F1");
-    c.set("unitTests/node1[2]/node3[1].attr4", "node3G1");
-    c.set("unitTests/node1[2].attr5", "node1F1");
-    c.set("unitTests/node1[3].attr5", "node1F2");
-    c.set("unitTests/node1[2]/node3", "node3A2");
-    c.set("unitTests/node1[2]/node3[1]", "node3B2");
-    c.set("unitTests/node1[2]/node3[2]", "node3C2");
-    c.set("unitTests/node1", "node1A2");
-    c.set("unitTests/node1[2]", "node1C2");
-    c.set("unitTests/node1[4]", "node1E2");
-    try
-    {
-        // Test if the tree has been correctly built
-        ASSERT(c.get("unitTests/node1[1]") == "node1B1");
-        ASSERT(c.get("unitTests/node2[0]") == "node2A1");
-        ASSERT(c.get("unitTests/node2[1]") == "node2B1");
-        ASSERT(c.get("unitTests/node1[3]") == "node1D1");
-        ASSERT(c.get("unitTests/node1[2]/node3.attr2") == "node3E1");
-        ASSERT(c.get("unitTests/node1[2]/node3.attr1") == "node3D2");
-        ASSERT(c.get("unitTests/node1[2]/node3[2].attr3") == "node3F1");
-        ASSERT(c.get("unitTests/node1[2]/node3[1].attr4") == "node3G1");
-        ASSERT(c.get("unitTests/node1[2].attr5") == "node1F1");
-        ASSERT(c.get("unitTests/node1[3].attr5") == "node1F2");
-        ASSERT(c.get("unitTests/node1[2]/node3") == "node3A2");
-        ASSERT(c.get("unitTests/node1[2]/node3[1]") == "node3B2");
-        ASSERT(c.get("unitTests/node1[2]/node3[2]") == "node3C2");
-        ASSERT(c.get("unitTests/node1") == "node1A2");
-        ASSERT(c.get("unitTests/node1[2]") == "node1C2");
-        ASSERT(c.get("unitTests/node1[4]") == "node1E2");
-        ASSERT(c.get("unitTests/node1[78]") == "");
-        ASSERT(c.get("unitTests/node1[-1]") == "node1A2");
-        ASSERT(c.get("unitTests/node1[egshuge]") == "node1A2");
-        ASSERT(c.get("unitTests/node1[]") == "node1A2");
-        ASSERT(c.get("unitTests/node4") == "");
-        ASSERT(c.get("unitTests/node[3].attr6") == "");
-        // Test the count function
-        ASSERT(c.count("unitTests") == 1);
-        ASSERT(c.count("unitTests/node1") == 5);
-        ASSERT(c.count("unitTests/node2") == 2);
-        ASSERT(c.count("unitTests/node1[2]/node3") == 3);
-        ASSERT(c.count("") == 0);
-        ASSERT(c.count("gesgsho") == 0);
-        ASSERT(c.count("unitTests/gsegesi") == 0);
-        c.remove("unitTests");
-    }
-    catch (QMap<QString, QString> properties)
-    {
-        this->log.error("Unit tests of the configuration failed", properties, "UnitTests", "_configuration");
-        return (false);
-    }
-    this->log.debug("Unit tests of the configuration successful!", "UnitTests", "_configuration");
-    return (true);
 }
 
 bool            UnitTests::_accounts()
@@ -322,6 +250,80 @@ bool            UnitTests::_collections()
     return (true);
 }
 
+bool    UnitTests::_configuration()
+{
+    LightBird::IConfiguration   &c = this->api.configuration();
+
+    log.debug("Running the unit tests of the configuration...", "UnitTests", "_configuration");
+    // Build the test tree
+    c.remove("unitTests");
+    c.set("unitTests/node1", "node1A1");
+    c.set("unitTests/node1[1]", "node1B1");
+    c.set("unitTests/node2[0]", "node2A1");
+    c.set("unitTests/node1[2]", "node1C1");
+    c.set("unitTests/node2[1]", "node2B1");
+    c.set("unitTests/node1[6]", "node1D1");
+    c.set("unitTests/node1[4]", "node1E1");
+    c.set("unitTests/node1[2]/node3", "node3A1");
+    c.set("unitTests/node1[2]/node3[1]", "node3B1");
+    c.set("unitTests/node1[2]/node3[2]", "node3C1");
+    c.set("unitTests/node1[2]/node3.attr1", "node3D1");
+    c.set("unitTests/node1[2]/node3.attr2", "node3E1");
+    c.set("unitTests/node1[2]/node3.attr1", "node3D2");
+    c.set("unitTests/node1[2]/node3[2].attr3", "node3F1");
+    c.set("unitTests/node1[2]/node3[1].attr4", "node3G1");
+    c.set("unitTests/node1[2].attr5", "node1F1");
+    c.set("unitTests/node1[3].attr5", "node1F2");
+    c.set("unitTests/node1[2]/node3", "node3A2");
+    c.set("unitTests/node1[2]/node3[1]", "node3B2");
+    c.set("unitTests/node1[2]/node3[2]", "node3C2");
+    c.set("unitTests/node1", "node1A2");
+    c.set("unitTests/node1[2]", "node1C2");
+    c.set("unitTests/node1[4]", "node1E2");
+    try
+    {
+        // Test if the tree has been correctly built
+        ASSERT(c.get("unitTests/node1[1]") == "node1B1");
+        ASSERT(c.get("unitTests/node2[0]") == "node2A1");
+        ASSERT(c.get("unitTests/node2[1]") == "node2B1");
+        ASSERT(c.get("unitTests/node1[3]") == "node1D1");
+        ASSERT(c.get("unitTests/node1[2]/node3.attr2") == "node3E1");
+        ASSERT(c.get("unitTests/node1[2]/node3.attr1") == "node3D2");
+        ASSERT(c.get("unitTests/node1[2]/node3[2].attr3") == "node3F1");
+        ASSERT(c.get("unitTests/node1[2]/node3[1].attr4") == "node3G1");
+        ASSERT(c.get("unitTests/node1[2].attr5") == "node1F1");
+        ASSERT(c.get("unitTests/node1[3].attr5") == "node1F2");
+        ASSERT(c.get("unitTests/node1[2]/node3") == "node3A2");
+        ASSERT(c.get("unitTests/node1[2]/node3[1]") == "node3B2");
+        ASSERT(c.get("unitTests/node1[2]/node3[2]") == "node3C2");
+        ASSERT(c.get("unitTests/node1") == "node1A2");
+        ASSERT(c.get("unitTests/node1[2]") == "node1C2");
+        ASSERT(c.get("unitTests/node1[4]") == "node1E2");
+        ASSERT(c.get("unitTests/node1[78]") == "");
+        ASSERT(c.get("unitTests/node1[-1]") == "node1A2");
+        ASSERT(c.get("unitTests/node1[egshuge]") == "node1A2");
+        ASSERT(c.get("unitTests/node1[]") == "node1A2");
+        ASSERT(c.get("unitTests/node4") == "");
+        ASSERT(c.get("unitTests/node[3].attr6") == "");
+        // Test the count function
+        ASSERT(c.count("unitTests") == 1);
+        ASSERT(c.count("unitTests/node1") == 5);
+        ASSERT(c.count("unitTests/node2") == 2);
+        ASSERT(c.count("unitTests/node1[2]/node3") == 3);
+        ASSERT(c.count("") == 0);
+        ASSERT(c.count("gesgsho") == 0);
+        ASSERT(c.count("unitTests/gsegesi") == 0);
+        c.remove("unitTests");
+    }
+    catch (QMap<QString, QString> properties)
+    {
+        this->log.error("Unit tests of the configuration failed", properties, "UnitTests", "_configuration");
+        return (false);
+    }
+    this->log.debug("Unit tests of the configuration successful!", "UnitTests", "_configuration");
+    return (true);
+}
+
 bool            UnitTests::_directories()
 {
     QSharedPointer<LightBird::ITableDirectories> d1(this->database.getDirectories());
@@ -373,7 +375,7 @@ bool            UnitTests::_directories()
         ASSERT(d2->setVirtualPath("////\\\\/images///france/\\\\"));
         ASSERT(d2->getIdDirectory() == d1->getIdFromVirtualPath("///\\images///france\\"));
         ASSERT(d2->setVirtualPath("images"));
-        ASSERT(d2->getIdDirectory() == d1->getId())
+        ASSERT(d2->getIdDirectory() == d1->getId());
         ASSERT(f->add("toto.png", "/", "", d1->getId()));
         ASSERT(f->add("titi.png", "/", "", d1->getId()));
         ASSERT(a->add("a"));
@@ -1062,6 +1064,104 @@ bool            UnitTests::_permissions()
         return (false);
     }
     this->log.debug("Unit tests of the permissions successful!", "UnitTests", "_permissions");
+    return (true);
+}
+
+bool            UnitTests::_sessions()
+{
+    QSharedPointer<LightBird::ITableAccounts> a(this->database.getAccounts());
+    QSqlQuery   query;
+    QString     id1;
+    QString     id2;
+    QVariantMap i;
+    QStringList l;
+
+    this->log.debug("Running unit tests of the sessions...", "UnitTests", "_sessions");
+    query.prepare("DELETE FROM accounts WHERE name=\"a1\"");
+    this->database.query(query);
+    try
+    {
+        ASSERT(a->add("a1", "p1"));
+        i["key1"] = "value1";
+        i["key2"] = 42;
+        i["key3"] = "value3";
+        id1 = this->api.sessions().create();
+        id2 = this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client2", i);
+        ASSERT(!id1.isEmpty());
+        ASSERT(!id2.isEmpty());
+        QSharedPointer<LightBird::ISession> s1(this->api.sessions().getSession(id1));
+        QSharedPointer<LightBird::ISession> s2(this->api.sessions().getSession(id2));
+        ASSERT(s1->getClients().isEmpty());
+        ASSERT(s2->getClients() == (QStringList() << "client1" << "client2"));
+        ASSERT(s2->setClient("client3"));
+        ASSERT(s2->setClient("client1"));
+        ASSERT(s2->getClients() == (QStringList() << "client1" << "client2" << "client3"));
+        ASSERT(s2->removeClient("client2"));
+        ASSERT(s2->getClients() == (QStringList() << "client1" << "client3"));
+        ASSERT(s2->setClients(QStringList() << "client4" << "client5" << "client1"));
+        ASSERT(s2->getClients() == (QStringList() << "client1" << "client3" << "client4" << "client5"));
+        ASSERT(s2->removeClients(QStringList() << "client1" << "client4"));
+        ASSERT(s2->getClients() == (QStringList() << "client3" << "client5"));
+        ASSERT(s2->removeClients());
+        ASSERT(s2->getClients().isEmpty());
+        ASSERT(s2->setClients(QStringList() << "client3" << "client5"));
+        ASSERT(!s2->setAccount("test"));
+        ASSERT(s1->setAccount(s2->getAccount()));
+        ASSERT(s2->setAccount());
+        ASSERT(s2->getAccount().isEmpty());
+        ASSERT(s1->getAccount() == a->getId());
+        ASSERT(s2->setAccount(a->getId()));
+        ASSERT(s1->getCreation() < QDateTime::currentDateTime().addSecs(10));
+        ASSERT(s1->getCreation() > QDateTime::currentDateTime().addSecs(-10));
+        ASSERT(s2->getInformation("key2") == 42);
+        ASSERT(s2->getInformation("key1") == "value1");
+        ASSERT(s2->setInformation("key1", "value2"));
+        ASSERT(s2->getInformation("key1") == "value2");
+        ASSERT(s2->setInformation("key2", "value3"));
+        ASSERT(s2->getInformation("key2") == "value3");
+        i.insert("key1", "value2");
+        i.insert("key2", "value3");
+        ASSERT(i == s2->getInformations());
+        i.insert("key2", "value4");
+        i.insert("key3", "value5");
+        ASSERT(s2->setInformations(i));
+        ASSERT(i == s2->getInformations());
+        ASSERT(i.remove("key2"));
+        ASSERT(s2->removeInformation("key3"));
+        ASSERT(!s2->removeInformations(i.keys()));
+        ASSERT(s2->getInformations().size() == 1);
+        ASSERT(s2->getInformation("key2") == "value4");
+        ASSERT(!s1->isExpired());
+        ASSERT(!s2->isExpired());
+        ASSERT(this->api.sessions().getSession(s1->getId()).data() == s1.data());
+        ASSERT(this->api.sessions().destroy(s1->getId()));
+        ASSERT(s1->isExpired());
+        ASSERT(this->api.sessions().getSession(s1->getId()).isNull());
+        s1 = this->api.sessions().getSession(this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client3"));
+        ASSERT(!s1->isExpired());
+        ASSERT((l = this->api.sessions().getSessions()).contains(s1->getId()) && l.contains(s2->getId()));
+        ASSERT((l = this->api.sessions().getSessions(a->getId())).contains(s1->getId()) && l.contains(s2->getId()));
+        s1->setAccount();
+        ASSERT((l = this->api.sessions().getSessions(a->getId())).contains(s2->getId()) && !l.contains(s1->getId()));
+        ASSERT((l = this->api.sessions().getSessions("", "client5")).contains(s2->getId()) && !l.contains(s1->getId()));
+        ASSERT((l = this->api.sessions().getSessions("", "client3")).contains(s2->getId()) && l.contains(s1->getId()));
+        ASSERT((l = this->api.sessions().getSessions(a->getId(), "client3")).contains(s2->getId()) && !l.contains(s1->getId()));
+        ASSERT(this->api.sessions().getSessions(a->getId(), "client").isEmpty());
+        ASSERT(s2->setExpiration(s1->getExpiration().addSecs(10)));
+        ASSERT(!s2->isExpired());
+        ASSERT(s2->setExpiration());
+        ASSERT(!s2->isExpired());
+        ASSERT(s2->setExpiration(QDateTime::currentDateTime().addSecs(-10)));
+        ASSERT(s2->isExpired());
+        ASSERT(this->api.sessions().destroy(s1->getId()));
+        ASSERT(s1->isExpired());
+    }
+    catch (QMap<QString, QString> properties)
+    {
+        this->log.error("Unit tests of the sessions failed", properties, "UnitTests", "_sessions");
+        return (false);
+    }
+    this->log.debug("Unit tests of the sessions successful!", "UnitTests", "_sessions");
     return (true);
 }
 

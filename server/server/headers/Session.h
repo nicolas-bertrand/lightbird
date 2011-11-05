@@ -36,7 +36,7 @@ public:
     bool            setClient(const QString &client);
     bool            setClients(const QStringList &clients);
     bool            removeClient(const QString &client);
-    bool            removeClients(const QStringList &clients);
+    bool            removeClients(const QStringList &clients = QStringList());
 
     // Informations
     QVariant        getInformation(const QString &name) const;

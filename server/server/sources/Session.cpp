@@ -32,8 +32,8 @@ Session::Session(const QString &id) : destroyed(false)
             this->informations[result[i]["name"].toString()] = result[i]["value"];
 }
 
-Session::Session(const QDateTime &e, const QString &a, const QStringList &c, const QVariantMap &i) :
-                 expiration(e), id_account(a), creation(QDateTime::currentDateTime()), clients(c), informations(i), destroyed(false)
+Session::Session(const QDateTime &e, const QString &a, const QStringList &c, const QVariantMap &informations) :
+                 expiration(e), id_account(a), creation(QDateTime::currentDateTime()), clients(c), destroyed(false)
 {
     QSqlQuery   query;
     QString     id;
@@ -46,8 +46,8 @@ Session::Session(const QDateTime &e, const QString &a, const QStringList &c, con
     if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
         return ;
     this->id = id;
-    if (!this->informations.isEmpty())
-        this->setInformations(this->informations);
+    if (!informations.isEmpty())
+        this->setInformations(informations);
 }
 
 Session::~Session()
@@ -110,7 +110,7 @@ bool            Session::isExpired() const
 
     if (!mutex || destroyed)
         return (true);
-    return (this->expiration < QDateTime::currentDateTime());
+    return (this->expiration.isValid() && this->expiration < QDateTime::currentDateTime());
 
 }
 
@@ -196,9 +196,14 @@ bool    Session::removeClients(const QStringList &clients)
 
     if (!mutex)
         return (false);
-    QStringListIterator it(clients);
-    while (it.hasNext())
-        this->clients.removeAll(it.next());
+    if (clients.isEmpty())
+        this->clients.clear();
+    else
+    {
+        QStringListIterator it(clients);
+        while (it.hasNext())
+            this->clients.removeAll(it.next());
+    }
     return (true);
 }
 
@@ -251,10 +256,7 @@ bool            Session::setInformation(const QString &name, const QVariant &val
 bool            Session::setInformations(const QVariantMap &informations)
 {
     bool        result = true;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setInformations");
 
-    if (!mutex)
-        return (false);
     QMapIterator<QString, QVariant> it(informations);
     while (it.hasNext() && result)
     {
@@ -283,10 +285,7 @@ bool            Session::removeInformation(const QString &name)
 bool            Session::removeInformations(const QStringList &informations)
 {
     bool        result = true;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "removeInformations");
 
-    if (!mutex)
-        return (false);
     QStringListIterator it(informations);
     while (it.hasNext() && result)
         result = this->removeInformation(it.next());

@@ -52,7 +52,9 @@ namespace LightBird
         /// @brief Removes a client of the session.
         virtual bool        removeClient(const QString &client) = 0;
         /// @brief Removes several clients of the session.
-        virtual bool        removeClients(const QStringList &clients) = 0;
+        /// @param clients : The id of the clients to remove. If empty,
+        /// all the clients are removed.
+        virtual bool        removeClients(const QStringList &clients = QStringList()) = 0;
 
         // Informations
         /// @brief Returns the value of an information of the session.

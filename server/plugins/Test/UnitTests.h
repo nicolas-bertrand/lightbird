@@ -16,15 +16,16 @@ private:
     UnitTests(const UnitTests &);
     UnitTests &operator=(const UnitTests &);
 
-    bool    _configuration();
     bool    _accounts();
     bool    _collections();
+    bool    _configuration();
     bool    _directories();
     bool    _events();
     bool    _files();
     bool    _groups();
     bool    _limits();
     bool    _permissions();
+    bool    _sessions();
     bool    _tags();
 
     LightBird::IApi      &api;
@@ -33,11 +34,13 @@ private:
 };
 
 // Macro used by the unit tests.
-# define ASSERT(a) if (!(a))\
+# define ASSERT(a)\
+if (!(a))\
 {\
     QMap<QString, QString> properties;\
     properties.insert("line", QString::number(__LINE__));\
     throw (properties);\
-}
+}\
+else (void)0
 
 #endif // UNITTESTS_H

@@ -79,6 +79,7 @@ QStringList     ApiSessions::getSessions(const QString &id_account, const QStrin
     // Get the sessions that match the account
     query.prepare(Database::instance()->getQuery("Sessions", "getSessions"));
     query.bindValue(":id_account", id_account);
+    query.bindValue(":ignore_account", id_account.isEmpty());
     if (Database::instance()->query(query, result))
         for (i = 0, s = result.size(); i < s; ++i)
             // Get the sessions that are associated with the client
