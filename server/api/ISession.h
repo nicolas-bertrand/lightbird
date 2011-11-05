@@ -59,7 +59,7 @@ namespace LightBird
         /// @param name : The name of the information to return.
         virtual QVariant    getInformation(const QString &name) const = 0;
         /// @brief Returns all the informations of the session.
-        virtual QMap<QString, QVariant> getInformations() const = 0;
+        virtual QVariantMap getInformations() const = 0;
         /// @brief Modifies the value of an information of the session, or create
         /// it if it doesn't exists.
         /// @param name : The name of the information to create or modify.
@@ -69,7 +69,7 @@ namespace LightBird
         /// @param informations : The informations to modify or create.
         /// The keys of the map are the keys of the informations, and
         /// the values of the map are the values of the informations.
-        virtual bool        setInformations(const QMap<QString, QVariant> &informations) = 0;
+        virtual bool        setInformations(const QVariantMap &informations) = 0;
         /// @brief Removes an information of the session.
         /// @param name : The name of the information to remove.
         virtual bool        removeInformation(const QString &name) = 0;

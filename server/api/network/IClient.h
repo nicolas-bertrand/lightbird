@@ -57,7 +57,7 @@ namespace LightBird
         /// @brief The connection mode of the client.
         virtual LightBird::IClient::Mode getMode() const = 0;
         /// @brief Allows to store informations on the client.
-        virtual QMap<QString, QVariant> &getInformations() = 0;
+        virtual QVariantMap          &getInformations() = 0;
         /// @brief This account is used to identified the client.
         virtual LightBird::ITableAccounts &getAccount() = 0;
         /// @brief The request sent by the client.

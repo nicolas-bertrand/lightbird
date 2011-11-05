@@ -21,10 +21,10 @@ TableAccessors &TableAccessors::operator=(const TableAccessors &table)
     return (*this);
 }
 
-QString TableAccessors::getName() const
+QString     TableAccessors::getName() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableAccessors", "getName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -57,11 +57,11 @@ bool        TableAccessors::getRights(const QString &id_object, QStringList &all
 
 QStringList TableAccessors::getLimits() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         tags;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             tags;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableAccessors", "getLimits"));
     query.bindValue(":id_accessor", this->id);

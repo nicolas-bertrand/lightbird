@@ -198,7 +198,7 @@ bool            UnitTests::_accounts()
         ASSERT(a1->getInformation("key1") == "value2");
         ASSERT(a1->setInformation("key2", "value3"));
         ASSERT(a1->getInformation("key2") == "value3");
-        QMap<QString, QVariant> i;
+        QVariantMap i;
         i.insert("key1", "value2");
         i.insert("key2", "value3");
         ASSERT(i == a1->getInformations());
@@ -418,9 +418,9 @@ bool                        UnitTests::_events()
 {
     QSharedPointer<LightBird::ITableEvents> e1(this->database.getEvents());
     QSharedPointer<LightBird::ITableEvents> e2(this->database.getEvents());
-    QMap<QString, QVariant> informations;
-    QSqlQuery               query;
-    QStringList             events;
+    QVariantMap informations;
+    QSqlQuery   query;
+    QStringList events;
 
     this->log.debug("Running unit tests of the events...", "UnitTests", "_events");
     query.prepare("DELETE FROM events WHERE name=\"e1\"");
@@ -546,7 +546,7 @@ bool            UnitTests::_files()
         ASSERT(f1->setInformation("k1", "v2"));
         ASSERT(f1->getInformation("k1") == "v2");
         ASSERT(!f1->setInformation("toto", QVariant()));
-        QMap<QString, QVariant> i;
+        QVariantMap i;
         ASSERT((i = f1->getInformations()).size() == 2);
         ASSERT(f2->getInformations().isEmpty());
         i.remove("k1");

@@ -32,7 +32,7 @@ Properties  &Properties::add(const QString &key, const QVariant &value, bool emp
     return (*this);
 }
 
-Properties  &Properties::add(const QMap<QString, QVariant> &properties)
+Properties  &Properties::add(const QVariantMap &properties)
 {
     QMapIterator<QString, QVariant> it(properties);
 

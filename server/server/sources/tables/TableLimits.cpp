@@ -44,8 +44,8 @@ bool    TableLimits::add(const QString &name, const QString &value, const QStrin
 
 QString TableLimits::getIdAccessor() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableLimits", "getIdAccessor"));
     query.bindValue(":id", this->id);
@@ -66,8 +66,8 @@ bool    TableLimits::setIdAccessor(const QString &id_accessor)
 
 QString TableLimits::getIdObject() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableLimits", "getIdObject"));
     query.bindValue(":id", this->id);
@@ -88,8 +88,8 @@ bool    TableLimits::setIdObject(const QString &id_object)
 
 QString TableLimits::getName() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableLimits", "getName"));
     query.bindValue(":id", this->id);
@@ -110,8 +110,8 @@ bool    TableLimits::setName(const QString &name)
 
 QString TableLimits::getValue() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableLimits", "getValue"));
     query.bindValue(":id", this->id);

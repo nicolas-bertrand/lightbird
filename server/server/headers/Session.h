@@ -40,9 +40,9 @@ public:
 
     // Informations
     QVariant        getInformation(const QString &name) const;
-    QMap<QString, QVariant> getInformations() const;
+    QVariantMap     getInformations() const;
     bool            setInformation(const QString &name, const QVariant &value);
-    bool            setInformations(const QMap<QString, QVariant> &informations);
+    bool            setInformations(const QVariantMap &informations);
     bool            removeInformation(const QString &name);
     bool            removeInformations(const QStringList &informations);
 
@@ -54,7 +54,7 @@ private:
     QString                 id_account;   ///< The account to which is associated the session.
     QDateTime               creation;     ///< The creation date of the session in the database.
     QStringList             clients;      ///< Stores the clients of the session.
-    QMap<QString, QVariant> informations; ///< Stores the informations of the session.
+    QVariantMap             informations; ///< Stores the informations of the session.
     bool                    destroyed;    ///< True when the session has expired and has been destroyed.
     mutable QReadWriteLock  mutex;        ///< Makes this class thread safe.
 };

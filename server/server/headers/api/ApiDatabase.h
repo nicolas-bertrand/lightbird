@@ -17,7 +17,7 @@ public:
     ~ApiDatabase();
 
     bool                query(QSqlQuery &query);
-    bool                query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result);
+    bool                query(QSqlQuery &query, QVector<QVariantMap> &result);
     LightBird::ITable   *getTable(LightBird::ITable::Table table, const QString &id = "");
     QString             getQuery(const QString &group, const QString &name);
     QString             getQuery(const QString &group, const QString &name, const QString &id);

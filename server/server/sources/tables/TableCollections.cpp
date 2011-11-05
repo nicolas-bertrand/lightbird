@@ -28,10 +28,10 @@ TableCollections &TableCollections::operator=(const TableCollections &table)
 
 QString TableCollections::getIdFromVirtualPath(const QString &virtualPath) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QString                             path;
-    QString                             id_collection = "";
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QString                 path;
+    QString                 id_collection = "";
 
     path = Tools::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
@@ -64,9 +64,9 @@ bool        TableCollections::setIdFromVirtualPath(const QString &virtualPath)
 
 bool    TableCollections::add(const QString &name, const QString &id_collection, const QString &id_account)
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QString                             id;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QString                 id;
 
     id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableCollections", "add"));
@@ -82,8 +82,8 @@ bool    TableCollections::add(const QString &name, const QString &id_collection,
 
 QString TableCollections::getIdCollection() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableCollections", "getIdCollection"));
     query.bindValue(":id", this->id);
@@ -141,12 +141,12 @@ bool    TableCollections::setVirtualPath(const QString &virtualPath)
 
 QStringList TableCollections::getCollections(const QString &id_accessor, const QString &right) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         collections;
-    int                                 i;
-    int                                 s;
-    TablePermissions                    p;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             collections;
+    int                     i;
+    int                     s;
+    TablePermissions        p;
 
     query.prepare(Database::instance()->getQuery("TableCollections", "getCollections"));
     query.bindValue(":id_collection", this->id);
@@ -159,12 +159,12 @@ QStringList TableCollections::getCollections(const QString &id_accessor, const Q
 
 QStringList TableCollections::getFiles(const QString &id_accessor, const QString &right) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         files;
-    int                                 i;
-    int                                 s;
-    TablePermissions                    p;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             files;
+    int                     i;
+    int                     s;
+    TablePermissions        p;
 
     query.prepare(Database::instance()->getQuery("TableCollections", "getFiles"));
     query.bindValue(":id_collection", this->id);

@@ -16,7 +16,7 @@ public:
 
     QString     getIdFromVirtualPath(const QString &virtualPath) const;
     bool        setIdFromVirtualPath(const QString &virtualPath);
-    bool        add(const QString &name, const QString &path, const QMap<QString, QVariant> &informations,
+    bool        add(const QString &name, const QString &path, const QVariantMap &informations,
                     const QString &type = "", const QString &id_directory = "", const QString &id_account = "");
     bool        add(const QString &name, const QString &path, const QString &type = "",
                     const QString &id_directory = "", const QString &id_account = "");
@@ -33,9 +33,9 @@ public:
     bool        setVirtualPath(const QString &virtualPath);
 
     QVariant    getInformation(const QString &name) const;
-    QMap<QString, QVariant> getInformations() const;
+    QVariantMap getInformations() const;
     bool        setInformation(const QString &name, const QVariant &value);
-    bool        setInformations(const QMap<QString, QVariant> &informations);
+    bool        setInformations(const QVariantMap &informations);
     bool        removeInformation(const QString &name);
     bool        removeInformations(const QStringList &informations);
 

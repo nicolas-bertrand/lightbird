@@ -22,7 +22,7 @@ public:
     bool            setIdFromNameAndPassword(const QString &name, const QString &password = "");
     QString         getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) const;
     bool            setIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt);
-    bool            add(const QString &name, const QMap<QString, QVariant> &informations,
+    bool            add(const QString &name, const QVariantMap &informations,
                         const QString &password = "", bool administrator = false, bool active = true);
     bool            add(const QString &name, const QString &password = "", bool administrator = false, bool active = true);
 
@@ -36,9 +36,9 @@ public:
 
     // Informations
     QVariant        getInformation(const QString &name) const;
-    QMap<QString, QVariant> getInformations() const;
+    QVariantMap     getInformations() const;
     bool            setInformation(const QString &name, const QVariant &value);
-    bool            setInformations(const QMap<QString, QVariant> &informations);
+    bool            setInformations(const QVariantMap &informations);
     bool            removeInformation(const QString &name);
     bool            removeInformations(const QStringList &informations);
 

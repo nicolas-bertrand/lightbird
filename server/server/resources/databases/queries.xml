@@ -26,7 +26,6 @@
         <remove>DELETE FROM :table WHERE id=:id</remove>
         <getModified>SELECT modified FROM :table WHERE id=:id</getModified>
         <getCreated>SELECT created FROM :table WHERE id=:id</getCreated>
-        <getTable>SELECT 1 FROM :table WHERE id=:id</getTable>
     </Table>
     <TableAccessors>
         <getName>SELECT name FROM :table WHERE id=:id</getName>

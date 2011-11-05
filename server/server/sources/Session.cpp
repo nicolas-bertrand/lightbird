@@ -7,10 +7,10 @@
 
 Session::Session(const QString &id) : destroyed(false)
 {
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    int                     i;
+    int                     s;
 
     this->tableName = "sessions";
     this->tableId = LightBird::ITable::Unknow;
@@ -19,7 +19,7 @@ Session::Session(const QString &id) : destroyed(false)
     // Get the details of the session
     query.prepare(Database::instance()->getQuery("Sessions", "getSession"));
     query.bindValue(":id", id);
-    if (!Database::instance()->query(query, result) || query.numRowsAffected() == 0)
+    if (!Database::instance()->query(query, result) || result.size() <= 0)
         return ;
     this->expiration = result[0]["expiration"].toDateTime();
     this->id_account = result[0]["id_account"].toString();
@@ -211,12 +211,12 @@ QVariant        Session::getInformation(const QString &name) const
     return (this->informations.value(name));
 }
 
-QMap<QString, QVariant> Session::getInformations() const
+QVariantMap     Session::getInformations() const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getInformations");
 
     if (!mutex)
-        return (QMap<QString, QVariant>());
+        return (QVariantMap());
     return (this->informations);
 }
 
@@ -248,7 +248,7 @@ bool            Session::setInformation(const QString &name, const QVariant &val
     return (true);
 }
 
-bool            Session::setInformations(const QMap<QString, QVariant> &informations)
+bool            Session::setInformations(const QVariantMap &informations)
 {
     bool        result = true;
     SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setInformations");

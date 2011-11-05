@@ -19,7 +19,7 @@ bool    ApiDatabase::query(QSqlQuery &query)
     return (Database::instance()->query(query));
 }
 
-bool    ApiDatabase::query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result)
+bool    ApiDatabase::query(QSqlQuery &query, QVector<QVariantMap> &result)
 {
     return (Database::instance()->query(query, result));
 }

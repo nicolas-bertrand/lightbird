@@ -26,11 +26,11 @@ TableGroups &TableGroups::operator=(const TableGroups &table)
 
 QStringList     TableGroups::getIdFromName(const QString &name) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         groups;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             groups;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableGroups", "getId"));
     query.bindValue(":name", name);
@@ -58,8 +58,8 @@ bool            TableGroups::add(const QString &name, const QString &id_group)
 
 QString         TableGroups::getIdGroup() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableGroups", "getIdGroup"));
     query.bindValue(":id", this->id);
@@ -103,11 +103,11 @@ bool            TableGroups::removeAccount(const QString &id_account)
 
 QStringList     TableGroups::getAccounts() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         accounts;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             accounts;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableGroups", "getAccounts"));
     query.bindValue(":id_group", this->id);

@@ -5,6 +5,7 @@
 # include <QMap>
 # include <QString>
 # include <QStringList>
+# include <QVariant>
 # include <QVector>
 
 # include "ITablePermissions.h"
@@ -42,7 +43,7 @@ private:
     unsigned    _idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right) const;
     /// @brief Check the rights of the accessors in the database.
     /// @return The same values as _isAllowed.
-    unsigned    _checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right) const;
+    unsigned    _checkRights(const QVector<QVariantMap> &rights, const QStringList &accessors, const QString &right) const;
     /// @brief Fills the lists allowed and denied with the rights of the accessors of the object.
     void        _getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied) const;
     /// @brief Merges the source rights to the destination rights.

@@ -15,7 +15,7 @@ public:
     TableEvents &operator=(const TableEvents &table);
 
     QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime()) const;
-    bool        add(const QString &name, const QMap<QString, QVariant> &informations,
+    bool        add(const QString &name, const QVariantMap &informations,
                     const QString &id_accessor = "", const QString &id_object = "");
     bool        add(const QString &name, const QString &id_accessor = "", const QString &id_object = "");
 
@@ -27,9 +27,9 @@ public:
     bool        setIdObject(const QString &id_object = "");
 
     QVariant    getInformation(const QString &name) const;
-    QMap<QString, QVariant> getInformations() const;
+    QVariantMap getInformations() const;
     bool        setInformation(const QString &name, const QVariant &value);
-    bool        setInformations(const QMap<QString, QVariant> &informations);
+    bool        setInformations(const QVariantMap &informations);
     bool        removeInformation(const QString &name);
     bool        removeInformations(const QStringList &informations);
 };

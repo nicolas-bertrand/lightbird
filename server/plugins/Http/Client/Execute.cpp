@@ -79,11 +79,11 @@ void        Execute::_preview()
 
 void        Execute::_select()
 {
-    QSqlQuery                               query;
-    QVector<QMap<QString, QVariant> >       result;
-    int                                     s = 0;
     QSharedPointer<LightBird::ITableFiles>  file(this->api.database().getFiles());
-    QMap<QString, QVariant>                 row;
+    QSqlQuery                               query;
+    QVector<QVariantMap>                    result;
+    int                                     s = 0;
+    QVariantMap                             row;
     QList<QVariant>                         rows;
 
     query.prepare(this->api.database().getQuery("HttpClient", "select_all_files"));

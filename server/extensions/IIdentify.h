@@ -26,8 +26,8 @@ namespace LightBird
         /// @brief Contains the information that has been collected on the file.
         struct Information
         {
-            Type                    type;   ///< The type of the file.
-            QMap<QString, QVariant> data;   ///< More data on the file.
+            Type        type; ///< The type of the file.
+            QVariantMap data; ///< More data on the file.
         };
 
         /// @brief Get information on a file.

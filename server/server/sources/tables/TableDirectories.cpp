@@ -28,10 +28,10 @@ TableDirectories &TableDirectories::operator=(const TableDirectories &table)
 
 QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QString                             path;
-    QString                             id_directory = "";
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QString                 path;
+    QString                 id_directory = "";
 
     path = Tools::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
@@ -64,9 +64,9 @@ bool        TableDirectories::setIdFromVirtualPath(const QString &virtualPath)
 
 bool    TableDirectories::add(const QString &name, const QString &id_directory, const QString &id_account)
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QString                             id;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QString                 id;
 
     id = Tools::createUuid();
     query.prepare(Database::instance()->getQuery("TableDirectories", "add"));
@@ -82,8 +82,8 @@ bool    TableDirectories::add(const QString &name, const QString &id_directory, 
 
 QString TableDirectories::getIdDirectory() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableDirectories", "getIdDirectory"));
     query.bindValue(":id", this->id);
@@ -141,12 +141,12 @@ bool        TableDirectories::setVirtualPath(const QString &virtualPath)
 
 QStringList TableDirectories::getDirectories(const QString &id_accessor, const QString &right) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         directories;
-    int                                 i;
-    int                                 s;
-    TablePermissions                    p;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             directories;
+    int                     i;
+    int                     s;
+    TablePermissions        p;
 
     query.prepare(Database::instance()->getQuery("TableDirectories", "getDirectories"));
     query.bindValue(":id_directory", this->id);
@@ -159,12 +159,12 @@ QStringList TableDirectories::getDirectories(const QString &id_accessor, const Q
 
 QStringList TableDirectories::getFiles(const QString &id_accessor, const QString &right) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         files;
-    int                                 i;
-    int                                 s;
-    TablePermissions                    p;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             files;
+    int                     i;
+    int                     s;
+    TablePermissions        p;
 
     query.prepare(Database::instance()->getQuery("TableDirectories", "getFiles"));
     query.bindValue(":id_directory", this->id);

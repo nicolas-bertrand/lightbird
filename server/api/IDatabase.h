@@ -56,7 +56,7 @@ namespace LightBird
         /// to a value like this : result[1]["field"]. But first, plugins have to test that the
         /// row 1 exists.
         /// @return False if an error occured, true otherwise.
-        virtual bool    query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result) = 0;
+        virtual bool    query(QSqlQuery &query, QVector<QVariantMap> &result) = 0;
         /// @brief Returns an instance of the table requested in parameter. Users MUST delete themself the
         /// instance returned, or a memory leak will occure.
         /// @param table : The table to get. If the table is unknow, this

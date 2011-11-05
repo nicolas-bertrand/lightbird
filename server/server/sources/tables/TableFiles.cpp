@@ -35,11 +35,11 @@ TableFiles &TableFiles::operator=(const TableFiles &table)
 
 QString TableFiles::getIdFromVirtualPath(const QString &virtualPath) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QString                             name;
-    QString                             path;
-    QString                             id_directory = "";
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QString                 name;
+    QString                 path;
+    QString                 id_directory = "";
 
     path = Tools::cleanPath(virtualPath);
     name = path;
@@ -69,7 +69,7 @@ bool        TableFiles::setIdFromVirtualPath(const QString &virtualPath)
     return (true);
 }
 
-bool    TableFiles::add(const QString &name, const QString &path, const QMap<QString, QVariant> &informations,
+bool    TableFiles::add(const QString &name, const QString &path, const QVariantMap &informations,
                         const QString &type, const QString &id_directory, const QString &id_account)
 {
     QSqlQuery   query;
@@ -94,13 +94,13 @@ bool    TableFiles::add(const QString &name, const QString &path, const QMap<QSt
 bool    TableFiles::add(const QString &name, const QString &path, const QString &type,
                         const QString &id_directory, const QString &id_account)
 {
-    return (this->add(name, path, QMap<QString, QVariant>(), type, id_directory, id_account));
+    return (this->add(name, path, QVariantMap(), type, id_directory, id_account));
 }
 
 QString TableFiles::getPath() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "getPath"));
     query.bindValue(":id", this->id);
@@ -134,8 +134,8 @@ bool    TableFiles::setPath(const QString &path)
 
 QString TableFiles::getType() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "getType"));
     query.bindValue(":id", this->id);
@@ -159,8 +159,8 @@ bool    TableFiles::setType(const QString &type)
 
 QString TableFiles::getIdDirectory() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "getIdDirectory"));
     query.bindValue(":id", this->id);
@@ -181,8 +181,8 @@ bool    TableFiles::setIdDirectory(const QString &id_directory)
 
 QVariant TableFiles::getInformation(const QString &name) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "getInformation"));
     query.bindValue(":id_file", this->id);
@@ -194,11 +194,11 @@ QVariant TableFiles::getInformation(const QString &name) const
 
 QMap<QString, QVariant> TableFiles::getInformations() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QMap<QString, QVariant>             informations;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QVariantMap             informations;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "getInformations"));
     query.bindValue(":id_file", this->id);
@@ -210,8 +210,8 @@ QMap<QString, QVariant> TableFiles::getInformations() const
 
 bool    TableFiles::setInformation(const QString &name, const QVariant &value)
 {
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
+    QVector<QVariantMap>    result;
+    QSqlQuery               query;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "setInformation_select"));
     query.bindValue(":id_file", this->id);
@@ -236,7 +236,7 @@ bool    TableFiles::setInformation(const QString &name, const QVariant &value)
     return (Database::instance()->query(query));
 }
 
-bool    TableFiles::setInformations(const QMap<QString, QVariant> &informations)
+bool    TableFiles::setInformations(const QVariantMap &informations)
 {
     QMapIterator<QString, QVariant> it(informations);
     bool                            result = true;
@@ -309,11 +309,11 @@ bool    TableFiles::setVirtualPath(const QString &virtualPath)
 
 QStringList TableFiles::getCollections() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         collections;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             collections;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "getCollections"));
     query.bindValue(":id_file", this->id);

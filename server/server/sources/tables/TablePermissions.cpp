@@ -32,8 +32,8 @@ TablePermissions &TablePermissions::operator=(const TablePermissions &table)
 
 QString TablePermissions::getId(const QString &id_accessor, const QString &id_object, const QString &right) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "getId"));
     query.bindValue(":id_accessor", id_accessor);
@@ -74,8 +74,8 @@ bool    TablePermissions::add(const QString &id_accessor, const QString &id_obje
 
 QString TablePermissions::getIdAccessor() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "getIdAccessor"));
     query.bindValue(":id", this->id);
@@ -96,8 +96,8 @@ bool    TablePermissions::setIdAccessor(const QString &id_accessor)
 
 QString TablePermissions::getIdObject() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "getIdObject"));
     query.bindValue(":id", this->id);
@@ -118,8 +118,8 @@ bool    TablePermissions::setIdObject(const QString &id_object)
 
 QString TablePermissions::getRight() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "getRight"));
     query.bindValue(":id", this->id);
@@ -140,8 +140,8 @@ bool    TablePermissions::setRight(const QString &right)
 
 bool    TablePermissions::isGranted() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "getGranted"));
     query.bindValue(":id", this->id);
@@ -444,10 +444,10 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
 
 unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, const QString &right) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         rights;
-    unsigned int                        granted;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             rights;
+    unsigned int            granted;
 
     rights.push_back(right);
     // Someone who can modify can read
@@ -482,7 +482,7 @@ unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const
     return (this->_checkRights(result, QStringList() << "", right));
 }
 
-unsigned int     TablePermissions::_checkRights(const QVector<QMap<QString, QVariant> > &rights, const QStringList &accessors, const QString &right) const
+unsigned int     TablePermissions::_checkRights(const QVector<QVariantMap> &rights, const QStringList &accessors, const QString &right) const
 {
     int          i;
     int          s;
@@ -532,13 +532,13 @@ unsigned int     TablePermissions::_checkRights(const QVector<QMap<QString, QVar
 
 void    TablePermissions::_getRights(const QStringList &accessors, const QList<QStringList> &groups, const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    int                                 i;
-    int                                 s;
-    QStringList                         allowedTmp;
-    QStringList                         deniedTmp;
-    QString                             right;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    int                     i;
+    int                     s;
+    QStringList             allowedTmp;
+    QStringList             deniedTmp;
+    QString                 right;
 
     query.prepare(Database::instance()->getQuery("TablePermissions", "_getRights")
                   .replace(":accessors", "'" + accessors.join("','") + "'"));

@@ -55,12 +55,12 @@ bool        Database::query(QSqlQuery &query)
     return (error);
 }
 
-bool                        Database::query(QSqlQuery &query, QVector<QMap<QString, QVariant> > &result)
+bool            Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
 {
-    bool                    error;
-    int                     count;
-    int                     r;
-    QMap<QString, QVariant> row;
+    bool        error;
+    int         count;
+    int         r;
+    QVariantMap row;
 
     this->_checkBoundValues(query);
     // Execute the query
@@ -86,12 +86,12 @@ bool                        Database::query(QSqlQuery &query, QVector<QMap<QStri
     return (error);
 }
 
-LightBird::ITable   *Database::getTable(LightBird::ITable::Table table, const QString &id)
+LightBird::ITable           *Database::getTable(LightBird::ITable::Table table, const QString &id)
 {
-    QStringList                         tables;
-    QString                             name;
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QStringList             tables;
+    QString                 name;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     // If the table is unknow, tries to find it using the id of the row
     if (!id.isEmpty() && (table == LightBird::ITable::Unknow || table == LightBird::ITable::Accessor || table == LightBird::ITable::Object))
@@ -107,7 +107,7 @@ LightBird::ITable   *Database::getTable(LightBird::ITable::Table table, const QS
         QStringListIterator it(tables);
         while (it.hasNext() && name.isEmpty())
         {
-            query.prepare(this->getQuery("Table", "getTable").replace(":table", it.peekNext()));
+            query.prepare(this->getQuery("Table", "exists").replace(":table", it.peekNext()));
             query.bindValue(":id", id);
             if (!this->query(query, result))
                 return (NULL);
@@ -162,16 +162,16 @@ QString         Database::getQuery(const QString &group, const QString &name, co
     return ("");
 }
 
-bool                                    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
+bool                            Database::updates(LightBird::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
 {
-    QVector<QMap<QString, QVariant> >   result;
-    LightBird::IDatabase::State         state;
-    QString                             date;
-    QSqlQuery                           query;
-    QStringList                         tables;
-    QString                             table;
-    int                                 i;
-    int                                 s;
+    LightBird::IDatabase::State state;
+    QString                     date;
+    QSqlQuery                   query;
+    QVector<QVariantMap>        result;
+    QStringList                 tables;
+    QString                     table;
+    int                         i;
+    int                         s;
 
     date = d.toString(DATE_FORMAT);
     tables = t;

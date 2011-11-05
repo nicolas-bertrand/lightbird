@@ -67,11 +67,11 @@ bool            ApiSessions::destroy(const QString &id, bool disconnect)
 
 QStringList     ApiSessions::getSessions(const QString &id_account, const QString &client) const
 {
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
-    int                                 i;
-    int                                 s;
-    QStringList                         sessions;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    int                     i;
+    int                     s;
+    QStringList             sessions;
     SmartMutex  mutex(this->mutex, "ApiSessions", "getSessions");
 
     if (!mutex)
@@ -107,12 +107,12 @@ QSharedPointer<LightBird::ISession> ApiSessions::getSession(const QString &id)
     return (result);
 }
 
-void                                    ApiSessions::expiration()
+void                        ApiSessions::expiration()
 {
-    QVector<QMap<QString, QVariant> >   result;
-    QSqlQuery                           query;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    int                     i;
+    int                     s;
 
     // If the current thread is not the main thread (where the sessions live),
     // we emit a signal that will call expiration in the correct thread.

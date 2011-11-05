@@ -24,7 +24,7 @@ public:
     /// @return A reference on the current object so that you can chain the calls.
     Properties                      &add(const QString &key, const QVariant &value, bool empty = true);
     /// @brief Add all the elements of the map to the properties.
-    Properties                      &add(const QMap<QString, QVariant> &properties);
+    Properties                      &add(const QVariantMap &properties);
     /// @brief Converts the properties to a map.
     const QMap<QString, QString>    &toMap() const;
 

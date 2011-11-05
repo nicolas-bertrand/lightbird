@@ -23,8 +23,8 @@ TableObjects &TableObjects::operator=(const TableObjects &table)
 
 QString TableObjects::getIdAccount() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableObjects", "getIdAccount").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -45,8 +45,8 @@ bool    TableObjects::setIdAccount(const QString &id_account)
 
 QString TableObjects::getName() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("TableObjects", "getName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -79,11 +79,11 @@ bool    TableObjects::getRights(const QString &id_accessor, QStringList &allowed
 
 QStringList TableObjects::getTags() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         tags;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             tags;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableObjects", "getTags"));
     query.bindValue(":id_object", this->id);
@@ -95,11 +95,11 @@ QStringList TableObjects::getTags() const
 
 QStringList TableObjects::getLimits() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
-    QStringList                         limits;
-    int                                 i;
-    int                                 s;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    QStringList             limits;
+    int                     i;
+    int                     s;
 
     query.prepare(Database::instance()->getQuery("TableObjects", "getLimits"));
     query.bindValue(":id_object", this->id);

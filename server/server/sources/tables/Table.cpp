@@ -51,8 +51,8 @@ bool            Table::setId(const QString &id)
 
 bool            Table::exists(const QString &id)
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("Table", "exists").replace(":table", this->tableName));
     if (id.isEmpty())
@@ -85,8 +85,8 @@ bool            Table::remove(const QString &id)
 
 QDateTime       Table::getModified() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("Table", "getModified").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -97,8 +97,8 @@ QDateTime       Table::getModified() const
 
 QDateTime       Table::getCreated() const
 {
-    QSqlQuery                           query;
-    QVector<QMap<QString, QVariant> >   result;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
 
     query.prepare(Database::instance()->getQuery("Table", "getCreated").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
