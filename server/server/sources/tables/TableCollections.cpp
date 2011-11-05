@@ -26,12 +26,13 @@ TableCollections &TableCollections::operator=(const TableCollections &table)
     return (*this);
 }
 
-QString TableCollections::getIdFromVirtualPath(const QString &virtualPath) const
+QString TableCollections::getIdFromVirtualPath(const QString &virtualPath, const QString &id_account) const
 {
     QSqlQuery               query;
     QVector<QVariantMap>    result;
     QString                 path;
     QString                 id_collection = "";
+    int                     row;
 
     path = Tools::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
@@ -39,24 +40,28 @@ QString TableCollections::getIdFromVirtualPath(const QString &virtualPath) const
     {
         if (!it.peekNext().isEmpty())
         {
-            result.clear();
             query.prepare(Database::instance()->getQuery("TableCollections", "getIdFromVirtualPath"));
             query.bindValue(":id_collection", id_collection);
             query.bindValue(":name", it.peekNext());
             if (!Database::instance()->query(query, result) || result.size() <= 0)
                 return ("");
-            id_collection = result[0]["id"].toString();
+            row = 0;
+            for (int i = 1; i < result.size() && row == 0; ++i)
+                if (result[i]["id_account"] == id_account)
+                    row = i;
+            id_collection = result[row]["id"].toString();
+
         }
         it.next();
     }
     return (id_collection);
 }
 
-bool        TableCollections::setIdFromVirtualPath(const QString &virtualPath)
+bool        TableCollections::setIdFromVirtualPath(const QString &virtualPath, const QString &id_account)
 {
     QString id;
 
-    if ((id = this->getIdFromVirtualPath(virtualPath)).isEmpty())
+    if ((id = this->getIdFromVirtualPath(virtualPath, id_account)).isEmpty())
         return (false);
     this->id = id;
     return (true);

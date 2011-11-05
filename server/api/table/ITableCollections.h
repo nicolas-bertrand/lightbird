@@ -16,9 +16,15 @@ namespace LightBird
         virtual ~ITableCollections() {}
 
         /// @brief Returns the id of the collection from its virtual path.
-        virtual QString     getIdFromVirtualPath(const QString &virtualPath) const = 0;
+        /// @param id_account : The id of the account of the collection to get.
+        /// It is used if several accounts have the same collection name in the
+        /// same parent collection.
+        virtual QString     getIdFromVirtualPath(const QString &virtualPath, const QString &id_account = "") const = 0;
         /// @brief Set the id of the collection from its virtual path.
-        virtual bool        setIdFromVirtualPath(const QString &virtualPath) = 0;
+        /// @param id_account : The id of the account of the collection to get.
+        /// It is used if several accounts have the same collection name in the
+        /// same parent collection.
+        virtual bool        setIdFromVirtualPath(const QString &virtualPath, const QString &id_account = "") = 0;
         /// @brief Creates a new collection.
         /// @param name : The name of the new collection.
         /// @param id_collection : The id of the parent collection, or empty

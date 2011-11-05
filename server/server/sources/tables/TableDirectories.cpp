@@ -39,7 +39,6 @@ QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
     {
         if (!it.peekNext().isEmpty())
         {
-            result.clear();
             query.prepare(Database::instance()->getQuery("TableDirectories", "getIdFromVirtualPath"));
             query.bindValue(":id_directory", id_directory);
             query.bindValue(":name", it.peekNext());

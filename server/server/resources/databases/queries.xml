@@ -54,7 +54,7 @@
         <removeGroup>DELETE FROM accounts_groups WHERE id_account=:id_account AND id_group=:id_group</removeGroup>
     </TableAccounts>
     <TableCollections>
-        <getIdFromVirtualPath>SELECT id FROM collections WHERE id_collection=:id_collection AND name=:name</getIdFromVirtualPath>
+        <getIdFromVirtualPath>SELECT id, id_account FROM collections WHERE id_collection=:id_collection AND name=:name</getIdFromVirtualPath>
         <add>INSERT INTO collections (id, name, id_collection, id_account) VALUES (:id, :name, :id_collection, :id_account)</add>
         <getIdCollection>SELECT id_collection FROM collections WHERE id=:id</getIdCollection>
         <setIdCollection>UPDATE collections SET id_collection=:id_collection WHERE id=:id</setIdCollection>

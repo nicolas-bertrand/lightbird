@@ -34,7 +34,8 @@ CREATE TABLE collections (
   "id_account" VARCHAR(36) DEFAULT "" NOT NULL,
   "modified" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
   "created" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
-  PRIMARY KEY(id)
+  PRIMARY KEY(id),
+  UNIQUE(name, id_collection, id_account)
 );
 CREATE TABLE deleted (
   "table" VARCHAR(255) NOT NULL,

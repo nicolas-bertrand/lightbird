@@ -226,6 +226,12 @@ bool            UnitTests::_collections()
         ASSERT(l.contains(f->getIdFromVirtualPath("toto.xml")));
         ASSERT(l.contains(f->getIdFromVirtualPath("\\///titi.xml")));
         ASSERT(a->add("a"));
+        ASSERT(!c2->add("france", c1->getIdFromVirtualPath("images")));
+        ASSERT(c2->add("france", c1->getIdFromVirtualPath("images"), a->getId()));
+        ASSERT(c1->getIdFromVirtualPath("images/france") != c2->getId());
+        ASSERT(c1->getIdFromVirtualPath("images/france", a->getId()) == c2->getId());
+        ASSERT(c2->remove());
+        ASSERT(c2->setIdFromVirtualPath("images/egypte"));
         ASSERT(c1->getCollections(a->getId(), "read").size() == 0);
         ASSERT(c1->getFiles(a->getId(), "read").size() == 0);
         ASSERT(p->add(a->getId(), c2->getId(), "read"));

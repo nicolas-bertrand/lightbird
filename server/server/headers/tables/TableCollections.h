@@ -14,8 +14,8 @@ public:
     TableCollections(const TableCollections &table);
     TableCollections &operator=(const TableCollections &table);
 
-    QString     getIdFromVirtualPath(const QString &virtualPath) const;
-    bool        setIdFromVirtualPath(const QString &virtualPath);
+    QString     getIdFromVirtualPath(const QString &virtualPath, const QString &id_account = "") const;
+    bool        setIdFromVirtualPath(const QString &virtualPath, const QString &id_account = "");
     bool        add(const QString &name, const QString &id_collection = "", const QString &id_account = "");
 
     QString     getIdCollection() const;
