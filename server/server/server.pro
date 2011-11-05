@@ -71,6 +71,7 @@ HEADERS += headers/Arguments.h \
     headers/Response.h \
     headers/Server.h \
     headers/SmartMutex.h \
+    headers/Session.h \
     headers/Thread.h \
     headers/ThreadPool.h \
     headers/Threads.h \
@@ -84,6 +85,7 @@ HEADERS += headers/Arguments.h \
     headers/api/ApiLogs.h \
     headers/api/ApiNetwork.h \
     headers/api/ApiPlugins.h \
+    headers/api/ApiSessions.h \
     headers/api/ApiTimers.h \
     headers/tables/Table.h \
     headers/tables/TableAccessors.h \
@@ -124,6 +126,7 @@ SOURCES += sources/main.cpp \
     sources/Response.cpp \
     sources/Server.cpp \
     sources/SmartMutex.cpp \
+    sources/Session.cpp \
     sources/Thread.cpp \
     sources/ThreadPool.cpp \
     sources/Threads.cpp \
@@ -137,6 +140,7 @@ SOURCES += sources/main.cpp \
     sources/api/ApiLogs.cpp \
     sources/api/ApiNetwork.cpp \
     sources/api/ApiPlugins.cpp \
+    sources/api/ApiSessions.cpp \
     sources/api/ApiTimers.cpp \
     sources/tables/Table.cpp \
     sources/tables/TableAccessors.cpp \
@@ -154,7 +158,5 @@ OTHER_FILES = resources/configurations/Configuration.xml \
     resources/databases/queries.xml \
     resources/databases/foreign_keys.sql \
     resources/databases/structure.sql \
-    resources/databases/triggers_delete.sql \
-    resources/databases/triggers_insert.sql \
-    resources/databases/triggers_update.sql \
+    resources/databases/triggers.sql \
     resources/databases/tuple.sql

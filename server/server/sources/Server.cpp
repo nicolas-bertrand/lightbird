@@ -37,6 +37,7 @@ Server::Server(Arguments args, QObject *parent) : QObject(parent),
                                                   restart(false),
                                                   apiGuis(NULL),
                                                   apiPlugins(NULL),
+                                                  apiSessions(NULL),
                                                   configurations(NULL),
                                                   database(NULL),
                                                   events(NULL),
@@ -129,6 +130,7 @@ Server::~Server()
     delete this->plugins;
     delete this->extensions;
     delete this->apiPlugins;
+    delete this->apiSessions;
     delete this->apiGuis;
     delete this->events;
     delete this->network;
@@ -250,6 +252,7 @@ void            Server::_loadPlugins()
     // Load some API and the extension manager
     this->apiGuis = new ApiGuis(this);
     this->apiPlugins = new ApiPlugins(this);
+    this->apiSessions = new ApiSessions(this);
     this->extensions = new Extensions(this);
     // Allows the server to know when a plugin is loaded (only in GUI mode)
     if (qobject_cast<QApplication *>(QCoreApplication::instance()))
@@ -315,6 +318,11 @@ ApiGuis         *Server::getApiGuis()
 ApiPlugins      *Server::getApiPlugins()
 {
     return (Server::instance().apiPlugins);
+}
+
+ApiSessions     *Server::getApiSessions()
+{
+    return (Server::instance().apiSessions);
 }
 
 Configuration   *Server::getConfiguration(const QString &configuration, const QString &alternative)

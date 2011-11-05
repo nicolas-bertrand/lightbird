@@ -5,6 +5,21 @@
         <update_select_modified_created>SELECT * FROM :table WHERE modified > :modified OR created > :created</update_select_modified_created>
         <update_select_deleted>SELECT id, "table" FROM deleted WHERE date > :date</update_select_deleted>
     </Database>
+    <Sessions>
+        <getSession>SELECT expiration, id_account, creation FROM sessions WHERE id=:id</getSession>
+        <getInformations>SELECT name, value FROM sessions_informations WHERE id_session=:id_session</getInformations>
+        <add>INSERT INTO sessions (id, expiration, id_account) VALUES (:id, :expiration, :id_account)</add>
+        <getSessions>SELECT id FROM sessions WHERE id_account=:id_account OR :id_account=""</getSessions>
+        <delete>DELETE FROM sessions WHERE id=:id</delete>
+        <deleteExpiredSessions>DELETE FROM sessions WHERE expiration&lt;:expiration OR expiration=""</deleteExpiredSessions>
+        <setAccount>UPDATE sessions SET id_account=:id_account WHERE id=:id</setAccount>
+        <setAccount>UPDATE sessions SET expiration=:expiration WHERE id=:id</setAccount>
+        <setInformation_update>UPDATE sessions_informations SET value=:value WHERE id_session=:id_session AND name=:name</setInformation_update>
+        <setInformation_insert>INSERT INTO sessions_informations (id, id_session, name, value) VALUES (:id, :id_session, :name, :value)</setInformation_insert>
+        <removeInformation>DELETE FROM sessions_informations WHERE id_session=:id_session AND name=:name</removeInformation>
+        <getExpiredSessions>SELECT id FROM sessions WHERE expiration&lt;:expiration AND expiration!=""</getExpiredSessions>
+        <getNextExpiration>SELECT id, expiration FROM sessions WHERE expiration!="" ORDER BY expiration LIMIT 1</getNextExpiration>
+    </Sessions>
     <Table>
         <exists>SELECT id FROM :table WHERE id=:id</exists>
         <id_select>SELECT id FROM :table WHERE id=:id</id_select>

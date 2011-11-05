@@ -6,6 +6,7 @@
 
 # include "ApiGuis.h"
 # include "ApiPlugins.h"
+# include "ApiSessions.h"
 # include "Arguments.h"
 # include "Configurations.h"
 # include "Database.h"
@@ -32,11 +33,12 @@ public:
     static void     shutdown();
 
     /// @brief Stops the server, ie this entire process.
-    /// @param restart : It true, the server will be restarted in another process.
+    /// @param restart : If true, the server will be restarted in another process.
     void            stop(bool restart = false);
     // These methods allows to access to the features of the server.
     ApiGuis         *getApiGuis();
     ApiPlugins      *getApiPlugins();
+    ApiSessions     *getApiSessions();
     Configuration   *getConfiguration(const QString &configuration, const QString &alternative);
     Database        *getDatabase();
     Events          *getEvents();
@@ -87,6 +89,7 @@ private:
     // The following members manages all the features of the server.
     ApiGuis         *apiGuis;
     ApiPlugins      *apiPlugins;
+    ApiSessions     *apiSessions;
     Configurations  *configurations;
     Database        *database;
     Events          *events;

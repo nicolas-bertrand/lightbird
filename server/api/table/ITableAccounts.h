@@ -86,7 +86,7 @@ namespace LightBird
         /// @brief value : The new value of the information.
         virtual bool    setInformation(const QString &name, const QVariant &value) = 0;
         /// @brief Modifies or creates multiple informations for the account.
-        /// @param informations : The infotmations to modify or create.
+        /// @param informations : The informations to modify or create.
         /// The keys of the map are the keys of the informations, and
         /// the values of the map are the values of the informations.
         virtual bool    setInformations(const QMap<QString, QVariant> &informations) = 0;

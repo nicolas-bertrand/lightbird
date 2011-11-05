@@ -33,6 +33,7 @@ public:
     LightBird::ILogs            &log();
     LightBird::INetwork         &network();
     LightBird::IPlugins         &plugins();
+    LightBird::ISessions        &sessions();
     LightBird::ITimers          &timers();
     void                        stop();
     void                        restart();

@@ -3,6 +3,7 @@
 #include "Api.h"
 #include "ApiGuis.h"
 #include "ApiPlugins.h"
+#include "ApiSessions.h"
 #include "Configurations.h"
 #include "Extensions.h"
 #include "Log.h"
@@ -84,6 +85,11 @@ LightBird::INetwork         &Api::network()
 LightBird::IPlugins         &Api::plugins()
 {
     return (*ApiPlugins::instance());
+}
+
+LightBird::ISessions        &Api::sessions()
+{
+    return (*ApiSessions::instance());
 }
 
 LightBird::ITimers          &Api::timers()

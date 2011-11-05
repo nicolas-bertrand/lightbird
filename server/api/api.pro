@@ -19,6 +19,8 @@ HEADERS         =   IApi.h \
                     ITimers.h \
                     IPlugin.h \
                     IPlugins.h \
+                    ISession.h \
+                    ISessions.h \
                     network/IClient.h \
                     network/IContent.h \
                     network/IDoExecution.h \

@@ -11,6 +11,7 @@
 # include "ILogs.h"
 # include "INetwork.h"
 # include "IPlugins.h"
+# include "ISessions.h"
 # include "ITimers.h"
 
 /// @brief Contains all the LightBird's API.
@@ -52,6 +53,8 @@ namespace LightBird
         virtual LightBird::INetwork         &network() = 0;
         /// @brief Allows plugins to manage other plugins.
         virtual LightBird::IPlugins         &plugins() = 0;
+        /// @brief Returns the session manager.
+        virtual LightBird::ISessions        &sessions() = 0;
         /// @brief Manages the timers of the current plugin.
         virtual LightBird::ITimers          &timers() = 0;
         /// @brief Stops the server. The server will stop as soon as all its
