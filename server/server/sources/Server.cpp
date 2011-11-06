@@ -212,6 +212,8 @@ void    Server::_loadNetwork()
     QList<QMap<QString, QString> >  ports;
     LightBird::INetwork::Transport  transport;
     bool                            loaded = false;
+    unsigned short                  from;
+    unsigned short                  to;
 
     // Get the information on the ports to load from the configuration
     node = Configurations::instance()->readDom().firstChildElement("ports");
@@ -221,7 +223,22 @@ void    Server::_loadNetwork()
         port["protocols"] = node.attribute("protocol");
         port["transport"] = node.attribute("transport");
         port["maxClients"] = node.attribute("maxClients");
-        ports.push_back(port);
+        // Open a range of ports
+        if (port["port"].contains('-'))
+        {
+            from = port["port"].left(port["port"].indexOf('-')).toUShort();
+            to = port["port"].right(port["port"].size() - port["port"].indexOf('-') - 1).toUShort();
+            if (from >= to)
+                Log::warning("Bad port range", Properties("range", port["port"]), "Server", "_loadNetwork");
+            else
+                while (from <= to)
+                {
+                    port["port"] = QString::number(from++);
+                    ports.push_back(port);
+                }
+        }
+        else
+            ports.push_back(port);
     }
     Configurations::instance()->release();
     // Opens the ports in the list
