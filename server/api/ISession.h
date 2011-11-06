@@ -20,7 +20,6 @@ namespace LightBird
     public:
         virtual ~ISession() {}
 
-        // Fields
         /// @brief Returns the id of the session.
         virtual const QString &getId() const = 0;
         /// @brief Returns the id of the account of the session, if there is one.
@@ -41,6 +40,8 @@ namespace LightBird
         virtual bool        setExpiration(const QDateTime &expiration = QDateTime()) = 0;
         /// @brief Returns the creation date of the session.
         virtual QDateTime   getCreation() const = 0;
+        /// @see LightBird::ISessions::destroy
+        bool                destroy(bool disconnect = false);
 
         // Clients
         /// @brief Returns the list of the clients associated with the session.

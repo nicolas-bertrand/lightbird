@@ -58,7 +58,7 @@ bool            ApiSessions::destroy(const QString &id, bool disconnect)
             Network::instance()->disconnect(it.next());
     }
     // Delete the session from the database
-    dynamic_cast<Session *>(session.data())->destroy();
+    dynamic_cast<Session *>(session.data())->remove();
     // Removes the session from the cache
     this->sessions.remove(id);
     Events::instance()->send("session_destroyed", id);

@@ -22,7 +22,6 @@ public:
     Session(const Session &session);
     Session &operator=(const Session &session);
 
-    // Fields
     const QString   &getId() const;
     QString         getAccount() const;
     bool            setAccount(const QString &id_account = "");
@@ -30,6 +29,7 @@ public:
     QDateTime       getExpiration() const;
     bool            setExpiration(const QDateTime &expiration = QDateTime());
     QDateTime       getCreation() const;
+    bool            destroy(bool disconnect = false);
 
     // Clients
     QStringList     getClients() const;
@@ -47,7 +47,7 @@ public:
     bool            removeInformations(const QStringList &informations);
 
     /// @brief Delete the session in the database.
-    bool            destroy();
+    bool            remove();
 
 private:
     QDateTime               expiration;   ///< When this data is reached, the session is destroyed.

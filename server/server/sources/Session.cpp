@@ -292,7 +292,12 @@ bool            Session::removeInformations(const QStringList &informations)
     return (result);
 }
 
-bool            Session::destroy()
+bool            Session::destroy(bool disconnect)
+{
+    return (ApiSessions::instance()->destroy(this->id, disconnect));
+}
+
+bool            Session::remove()
 {
     QSqlQuery   query;
     SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "destroy");
