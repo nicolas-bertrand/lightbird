@@ -37,7 +37,7 @@ public:
     bool        setInformation(const QString &name, const QVariant &value);
     bool        setInformations(const QVariantMap &informations);
     bool        removeInformation(const QString &name);
-    bool        removeInformations(const QStringList &informations);
+    bool        removeInformations(const QStringList &informations = QStringList());
 
     QStringList getCollections() const;
     bool        addCollection(const QString &id_collection);

@@ -1143,7 +1143,10 @@ bool            UnitTests::_sessions()
         ASSERT(this->api.sessions().destroy(s1->getId()));
         ASSERT(s1->isExpired());
         ASSERT(this->api.sessions().getSession(s1->getId()).isNull());
-        s1 = this->api.sessions().getSession(this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client3"));
+        s1 = this->api.sessions().getSession(this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client3", i));
+        ASSERT(s1->getInformations().size() == i.size());
+        ASSERT(s1->removeInformations());
+        ASSERT(s1->getInformations().isEmpty());
         ASSERT(!s1->isExpired());
         ASSERT((l = this->api.sessions().getSessions()).contains(s1->getId()) && l.contains(s2->getId()));
         ASSERT((l = this->api.sessions().getSessions(a->getId())).contains(s1->getId()) && l.contains(s2->getId()));

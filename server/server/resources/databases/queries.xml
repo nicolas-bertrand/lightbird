@@ -17,6 +17,7 @@
         <setInformation_update>UPDATE sessions_informations SET value=:value WHERE id_session=:id_session AND name=:name</setInformation_update>
         <setInformation_insert>INSERT INTO sessions_informations (id, id_session, name, value) VALUES (:id, :id_session, :name, :value)</setInformation_insert>
         <removeInformation>DELETE FROM sessions_informations WHERE id_session=:id_session AND name=:name</removeInformation>
+        <removeInformations>DELETE FROM sessions_informations WHERE id_session=:id_session</removeInformations>
         <getExpiredSessions>SELECT id FROM sessions WHERE expiration&lt;:expiration AND expiration!=""</getExpiredSessions>
         <getNextExpiration>SELECT id, expiration FROM sessions WHERE expiration!="" ORDER BY expiration LIMIT 1</getNextExpiration>
     </Sessions>
@@ -49,6 +50,7 @@
         <setInformation_insert>INSERT INTO accounts_informations (id, id_account, name, value) VALUES (:id, :id_account, :name, :value)</setInformation_insert>
         <getInformations>SELECT name, value FROM accounts_informations WHERE id_account=:id_account</getInformations>
         <removeInformation>DELETE FROM accounts_informations WHERE id_account=:id_account AND name=:name</removeInformation>
+        <removeInformations>DELETE FROM accounts_informations WHERE id_account=:id_account</removeInformations>
         <getGroups>SELECT id_group FROM accounts_groups WHERE id_account=:id_account</getGroups>
         <addGroup>INSERT INTO accounts_groups (id, id_account, id_group) VALUES (:id, :id_account, :id_group)</addGroup>
         <removeGroup>DELETE FROM accounts_groups WHERE id_account=:id_account AND id_group=:id_group</removeGroup>
@@ -83,6 +85,7 @@
         <setInformation_insert>INSERT INTO events_informations (id, id_event, name, value) VALUES (:id, :id_event, :name, :value)</setInformation_insert>
         <getInformations>SELECT name, value FROM events_informations WHERE id_event=:id_event</getInformations>
         <removeInformation>DELETE FROM events_informations WHERE id_event=:id_event AND name=:name</removeInformation>
+        <removeInformations>DELETE FROM events_informations WHERE id_event=:id_event</removeInformations>
         <getEvents>SELECT id FROM events WHERE name=:name AND created >= :begin AND :end >= created</getEvents>
     </TableEvents>
     <TableFiles>
@@ -100,6 +103,7 @@
         <setInformation_update>UPDATE files_informations SET value=:value WHERE id_file=:id_file AND name=:name</setInformation_update>
         <getInformations>SELECT name, value FROM files_informations WHERE id_file=:id_file</getInformations>
         <removeInformation>DELETE FROM files_informations WHERE id_file=:id_file AND name=:name</removeInformation>
+        <removeInformations>DELETE FROM files_informations WHERE id_file=:id_file</removeInformations>
         <getCollections>SELECT id_collection FROM files_collections WHERE id_file=:id_file</getCollections>
         <addCollection>INSERT INTO files_collections (id, id_file, id_collection) VALUES (:id, :id_file, :id_collection)</addCollection>
         <removeCollection>DELETE FROM files_collections where id_file=:id_file AND id_collection=:id_collection</removeCollection>

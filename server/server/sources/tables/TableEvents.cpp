@@ -223,16 +223,22 @@ bool        TableEvents::removeInformation(const QString &name)
     return (Database::instance()->query(query) && query.numRowsAffected() > 0);
 }
 
-bool        TableEvents::removeInformations(const QStringList &informations)
+bool            TableEvents::removeInformations(const QStringList &informations)
 {
-    QStringListIterator it(informations);
-    bool                result = true;
+    QSqlQuery   query;
+    bool        result = true;
 
-    while (it.hasNext())
+    if (informations.isEmpty())
     {
-        it.next();
-        if (!this->removeInformation(it.peekPrevious()))
-            result = false;
+        query.prepare(Database::instance()->getQuery("TableEvents", "removeInformations"));
+        query.bindValue(":id_event", this->id);
+        result = Database::instance()->query(query);
+    }
+    else
+    {
+        QStringListIterator it(informations);
+        while (it.hasNext())
+            result = this->removeInformation(it.next());
     }
     return (result);
 }

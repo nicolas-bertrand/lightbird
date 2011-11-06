@@ -44,7 +44,7 @@ public:
     bool            setInformation(const QString &name, const QVariant &value);
     bool            setInformations(const QVariantMap &informations);
     bool            removeInformation(const QString &name);
-    bool            removeInformations(const QStringList &informations);
+    bool            removeInformations(const QStringList &informations = QStringList());
 
     /// @brief Delete the session in the database.
     bool            remove();

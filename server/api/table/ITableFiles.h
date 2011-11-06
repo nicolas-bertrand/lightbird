@@ -78,8 +78,8 @@ namespace LightBird
         virtual bool        removeInformation(const QString &name) = 0;
         /// @brief Removes multiple informations of the file.
         /// @param informations : This list contains the name of each
-        /// informations to remove.
-        virtual bool        removeInformations(const QStringList &informations) = 0;
+        /// informations to remove. If empty all the informations are removed.
+        virtual bool        removeInformations(const QStringList &informations = QStringList()) = 0;
 
         // Directories
         /// @brief Returns the virtual path of the file.

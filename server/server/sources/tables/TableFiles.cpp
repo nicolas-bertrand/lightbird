@@ -262,14 +262,20 @@ bool    TableFiles::removeInformation(const QString &name)
 
 bool    TableFiles::removeInformations(const QStringList &informations)
 {
-    QStringListIterator it(informations);
-    bool                result = true;
+    QSqlQuery   query;
+    bool        result = true;
 
-    while (it.hasNext())
+    if (informations.isEmpty())
     {
-        it.next();
-        if (!this->removeInformation(it.peekPrevious()))
-            result = false;
+        query.prepare(Database::instance()->getQuery("TableFiles", "removeInformations"));
+        query.bindValue(":id_file", this->id);
+        result = Database::instance()->query(query);
+    }
+    else
+    {
+        QStringListIterator it(informations);
+        while (it.hasNext())
+            result = this->removeInformation(it.next());
     }
     return (result);
 }

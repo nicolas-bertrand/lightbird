@@ -284,11 +284,25 @@ bool            Session::removeInformation(const QString &name)
 
 bool            Session::removeInformations(const QStringList &informations)
 {
+    QSqlQuery   query;
     bool        result = true;
 
-    QStringListIterator it(informations);
-    while (it.hasNext() && result)
-        result = this->removeInformation(it.next());
+    if (informations.isEmpty())
+    {
+        SmartMutex mutex(this->mutex, SmartMutex::WRITE, "Session", "removeInformations");
+        if (!mutex)
+            return (false);
+        query.prepare(Database::instance()->getQuery("Sessions", "removeInformations"));
+        query.bindValue(":id_session", this->id);
+        result = Database::instance()->query(query);
+        this->informations.clear();
+    }
+    else
+    {
+        QStringListIterator it(informations);
+        while (it.hasNext() && result)
+            result = this->removeInformation(it.next());
+    }
     return (result);
 }
 

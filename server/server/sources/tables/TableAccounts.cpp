@@ -274,16 +274,22 @@ bool            TableAccounts::removeInformation(const QString &name)
     return (Database::instance()->query(query) && query.numRowsAffected() > 0);
 }
 
-bool                    TableAccounts::removeInformations(const QStringList &informations)
+bool            TableAccounts::removeInformations(const QStringList &informations)
 {
-    QStringListIterator it(informations);
-    bool                result = true;
+    QSqlQuery   query;
+    bool        result = true;
 
-    while (it.hasNext())
+    if (informations.isEmpty())
     {
-        it.next();
-        if (!this->removeInformation(it.peekPrevious()))
-            result = false;
+        query.prepare(Database::instance()->getQuery("TableAccounts", "removeInformations"));
+        query.bindValue(":id_account", this->id);
+        result = Database::instance()->query(query);
+    }
+    else
+    {
+        QStringListIterator it(informations);
+        while (it.hasNext() && result)
+            result = this->removeInformation(it.next());
     }
     return (result);
 }
