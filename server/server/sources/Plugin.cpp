@@ -378,14 +378,15 @@ void                        Plugin::_loadContexts()
     this->configuration->release();
 }
 
-void    Plugin::_loadResources()
+void            Plugin::_loadResources()
 {
-    QDomNode                read;
-    QDomNode                dom;
-    QString                 nodeName;
-    QString                 nodeValue;
-    QString                 path;
-    QString                 resourcesPath;
+    QDomNode    read;
+    QDomNode    dom;
+    QString     nodeName;
+    QString     nodeValue;
+    QString     path;
+    QString     alias;
+    QString     resourcesPath;
 
     // Creates the resources of the plugin that doesn't exists
     resourcesPath = Plugins::getResourcesPath(this->id);
@@ -397,9 +398,11 @@ void    Plugin::_loadResources()
         {
             nodeName = dom.nodeName().toLower().trimmed();
             nodeValue = dom.toElement().text().trimmed();
-            if (nodeName == "resource" && !QFileInfo(this->path + nodeValue).isFile())
+            nodeValue = Tools::cleanPath(this->path + nodeValue);
+            alias = dom.toElement().attribute("alias");
+            // Copy the file
+            if (nodeName == "resource" && !alias.isEmpty() && !QFileInfo(nodeValue).isFile())
             {
-                nodeValue = Tools::cleanPath(this->path + nodeValue);
                 // Creates the directory of the resource if it doesn't exists
                 path = nodeValue.left(nodeValue.lastIndexOf('/'));
                 if (!QFileInfo(path).isDir())
@@ -412,10 +415,51 @@ void    Plugin::_loadResources()
                     Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
                                  .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
             }
+            // Copy all the files in the resources of the plugin
+            else if (nodeName == "resource" && alias.isEmpty())
+                this->_copyAllResources(resourcesPath, nodeValue);
         }
         dom = dom.nextSibling();
     }
     this->configuration->release();
+}
+
+void            Plugin::_copyAllResources(const QString &resourcesPath, const QString &destDir, QString currentDir)
+{
+    QStringList files;
+    QString     source;
+    QString     destination;
+
+    // Copy all the files in the current directory
+    files = QDir(resourcesPath + "/" + currentDir).entryList(QDir::Files | QDir::NoDotAndDotDot);
+    if (currentDir.isEmpty())
+    {
+        files.removeAll("configuration");
+        files.removeAll("queries");
+    }
+    QStringListIterator f(files);
+    while (f.hasNext())
+    {
+        source = resourcesPath + currentDir + "/" + f.peekNext();
+        destination = destDir + currentDir + "/" + f.peekNext();
+        if (!QFileInfo(destination).isFile())
+        {
+            // Create the directory of the resource if it doesn't exists
+            if (!QFileInfo(destDir + "/" + currentDir).isDir())
+                QDir().mkpath(destDir + "/" + currentDir);
+            // Copy the resource
+            Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
+                       .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
+            if (!Tools::copy(source, destination))
+                Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
+                             .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
+        }
+        f.next();
+    }
+    // Run recursively through all the directories of the current folder
+    QStringListIterator d(QDir(resourcesPath + "/" + currentDir).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
+    while (d.hasNext())
+        this->_copyAllResources(resourcesPath, destDir, currentDir + "/" + d.next());
 }
 
 void    Plugin::_unload()

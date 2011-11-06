@@ -81,6 +81,8 @@ private:
     void                _loadContexts();
     /// @brief Copy the resources of the plugin into its directory.
     void                _loadResources();
+    /// @brief Copy all the resources of the plugin into its directory.
+    void                _copyAllResources(const QString &resourcesPath, const QString &destination, QString source = QString());
     /// @brief Unload the plugin.
     void                _unload();
     /// @brief Creates the configuration of the plugin inside the configuration
