@@ -19,13 +19,14 @@ public:
     ApiSessions(QObject *parent = NULL);
     ~ApiSessions();
 
-    QString             create(const QDateTime &expiration = QDateTime(),
+    LightBird::Session  create(const QDateTime &expiration = QDateTime(),
                                const QString &id_account = QString(),
                                const QStringList &clients = QStringList(),
                                const QVariantMap &informations = QVariantMap());
     bool                destroy(const QString &id, bool disconnect = false);
     QStringList         getSessions(const QString &id_account = "", const QString &client = "") const;
-    QSharedPointer<LightBird::ISession> getSession(const QString &id);
+    LightBird::Session  getSession(const QString &id);
+    bool                exists(const QString &id);
     static ApiSessions  *instance();
 
 public slots:
@@ -43,7 +44,7 @@ private:
     ApiSessions &operator=(const ApiSessions &);
 
 private:
-    QMap<QString, QSharedPointer<LightBird::ISession> > sessions; ///< A cache that stores the session beeing used by the plugins.
+    QMap<QString, LightBird::Session> sessions; ///< A cache that stores the session beeing used by the plugins.
     QTimer              timer;  ///< Calls expiration each time a session expires.
     mutable QMutex      mutex;  ///< Makes this class thread safe.
 };

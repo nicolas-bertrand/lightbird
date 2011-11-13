@@ -18,7 +18,6 @@ HEADERS = Plugin.h \
     Media.h \
     Medias.h \
     Preview.h \
-    Session.h \
     Uploads.h \
     Video.h
 SOURCES = Plugin.cpp \
@@ -27,7 +26,6 @@ SOURCES = Plugin.cpp \
     Media.cpp \
     Medias.cpp \
     Preview.cpp \
-    Session.cpp \
     Uploads.cpp \
     Video.cpp
 OTHER_FILES = Configuration.xml \

@@ -83,6 +83,8 @@ public:
     LightBird::ITableAccounts &getAccount();
     LightBird::IRequest     &getRequest();
     LightBird::IResponse    &getResponse();
+    QStringList             getSessions(const QString &id_account = QString()) const;
+    LightBird::Session      getSession(const QString &id_account = QString()) const;
 
 public slots:
     /// @brief Calling this method tells the Client that new data are available to read.

@@ -6,7 +6,7 @@
         <update_select_deleted>SELECT id, "table" FROM deleted WHERE date > :date</update_select_deleted>
     </Database>
     <Sessions>
-        <getSession>SELECT expiration, id_account, creation FROM sessions WHERE id=:id</getSession>
+        <getSession>SELECT expiration, id_account, created FROM sessions WHERE id=:id</getSession>
         <getInformations>SELECT name, value FROM sessions_informations WHERE id_session=:id_session</getInformations>
         <add>INSERT INTO sessions (id, expiration, id_account) VALUES (:id, :expiration, :id_account)</add>
         <getSessions>SELECT id FROM sessions WHERE id_account=:id_account OR :ignore_account="true"</getSessions>

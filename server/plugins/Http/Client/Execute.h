@@ -22,6 +22,7 @@ private:
 
     void                 _audio();
     void                 _disconnect();
+    void                 _identify();
     void                 _preview();
     void                 _select();
     void                 _startUpload();

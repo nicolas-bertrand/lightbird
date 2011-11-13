@@ -28,19 +28,19 @@ ApiSessions::~ApiSessions()
     Log::trace("ApiSessions destroyed!", "ApiSessions", "~ApiSessions");
 }
 
-QString         ApiSessions::create(const QDateTime &expiration, const QString &id_account, const QStringList &clients, const QVariantMap &informations)
+LightBird::Session  ApiSessions::create(const QDateTime &expiration, const QString &id_account, const QStringList &clients, const QVariantMap &informations)
 {
-    SmartMutex  mutex(this->mutex, "ApiSessions", "create");
-    Session     *session;
+    SmartMutex      mutex(this->mutex, "ApiSessions", "create");
+    Session         *session;
 
     if (!mutex)
-        return (QString());
+        return (QSharedPointer<LightBird::ISession>());
     // Create the session
     session = new Session(expiration, id_account, clients, informations);
     // Add it in the cache
     this->sessions[session->getId()] = QSharedPointer<LightBird::ISession>(session);
     this->expiration();
-    return (session->getId());
+    return (this->sessions.value(session->getId()));
 }
 
 bool            ApiSessions::destroy(const QString &id, bool disconnect)
@@ -76,22 +76,35 @@ QStringList     ApiSessions::getSessions(const QString &id_account, const QStrin
 
     if (!mutex)
         return (QStringList());
-    // Get the sessions that match the account
-    query.prepare(Database::instance()->getQuery("Sessions", "getSessions"));
-    query.bindValue(":id_account", id_account);
-    query.bindValue(":ignore_account", id_account.isEmpty());
-    if (Database::instance()->query(query, result))
-        for (i = 0, s = result.size(); i < s; ++i)
-            // Get the sessions that are associated with the client
-            if (client.isEmpty() || (this->sessions.contains(result[i]["id"].toString()) &&
-                                     this->sessions[result[i]["id"].toString()]->getClients().contains(client)))
+    // If a specific client is wanted, the session is in the cache
+    if (!client.isEmpty())
+    {
+        QMapIterator<QString, LightBird::Session> it(this->sessions);
+        while (it.hasNext())
+        {
+            it.next();
+            if (it.value()->getClients().contains(client) &&
+                (id_account.isEmpty() || id_account == it.value()->getAccount()))
+                sessions << it.key();
+        }
+    }
+    // Otherwise it should be in the database
+    else
+    {
+        // Get the sessions that match the account
+        query.prepare(Database::instance()->getQuery("Sessions", "getSessions"));
+        query.bindValue(":id_account", id_account);
+        query.bindValue(":ignore_account", id_account.isEmpty());
+        if (Database::instance()->query(query, result))
+            for (i = 0, s = result.size(); i < s; ++i)
                 sessions << result[i]["id"].toString();
+    }
     return (sessions);
 }
 
-QSharedPointer<LightBird::ISession> ApiSessions::getSession(const QString &id)
+LightBird::Session  ApiSessions::getSession(const QString &id)
 {
-    SmartMutex  mutex(this->mutex, "ApiSessions", "destroy");
+    SmartMutex      mutex(this->mutex, "ApiSessions", "destroy");
     QSharedPointer<LightBird::ISession> result;
 
     if (!mutex)
@@ -108,12 +121,17 @@ QSharedPointer<LightBird::ISession> ApiSessions::getSession(const QString &id)
     return (result);
 }
 
+bool        ApiSessions::exists(const QString &id)
+{
+    return (!this->getSession(id).isNull() && !this->getSession(id)->isExpired());
+}
+
 void                        ApiSessions::expiration()
 {
     QSqlQuery               query;
     QVector<QVariantMap>    result;
     int                     i;
-    int                     s;
+    qint64                  s;
 
     // If the current thread is not the main thread (where the sessions live),
     // we emit a signal that will call expiration in the correct thread.
@@ -135,8 +153,9 @@ void                        ApiSessions::expiration()
     // The timer will call expiration the next time a session expire
     if (mutex && Database::instance()->query(query, result) && result.size() > 0)
     {
-        if ((s = result[0]["expiration"].toDateTime().toMSecsSinceEpoch() - QDateTime::currentDateTime().toMSecsSinceEpoch()) < 0)
-            s = 0;
+        s = result[0]["expiration"].toDateTime().toMSecsSinceEpoch() - QDateTime::currentDateTime().toMSecsSinceEpoch();
+        // Avoid a possible int overflow
+        s = (s < 0) ? 0 : (s > 2000000000) ? 2000000000 : s;
         this->timer.start(s);
     }
     else

@@ -1091,12 +1091,12 @@ bool            UnitTests::_sessions()
         i["key1"] = "value1";
         i["key2"] = 42;
         i["key3"] = "value3";
-        id1 = this->api.sessions().create();
-        id2 = this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client2", i);
+        id1 = this->api.sessions().create()->getId();
+        id2 = this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client2", i)->getId();
         ASSERT(!id1.isEmpty());
         ASSERT(!id2.isEmpty());
-        QSharedPointer<LightBird::ISession> s1(this->api.sessions().getSession(id1));
-        QSharedPointer<LightBird::ISession> s2(this->api.sessions().getSession(id2));
+        LightBird::Session s1(this->api.sessions().getSession(id1));
+        LightBird::Session s2(this->api.sessions().getSession(id2));
         ASSERT(s1->getClients().isEmpty());
         ASSERT(s2->getClients() == (QStringList() << "client1" << "client2"));
         ASSERT(s2->setClient("client3"));
@@ -1143,7 +1143,7 @@ bool            UnitTests::_sessions()
         ASSERT(this->api.sessions().destroy(s1->getId()));
         ASSERT(s1->isExpired());
         ASSERT(this->api.sessions().getSession(s1->getId()).isNull());
-        s1 = this->api.sessions().getSession(this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client3", i));
+        s1 = this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a->getId(), QStringList() << "client1" << "client3", i);
         ASSERT(s1->getInformations().size() == i.size());
         ASSERT(s1->removeInformations());
         ASSERT(s1->getInformations().isEmpty());
@@ -1164,6 +1164,7 @@ bool            UnitTests::_sessions()
         ASSERT(s2->isExpired());
         ASSERT(this->api.sessions().destroy(s1->getId()));
         ASSERT(s1->isExpired());
+        ASSERT(a->remove());
     }
     catch (QMap<QString, QString> properties)
     {

@@ -6,6 +6,7 @@
 #include "IDoWrite.h"
 #include "IOnDisconnect.h"
 
+#include "ApiSessions.h"
 #include "Client.h"
 #include "EngineClient.h"
 #include "EngineServer.h"
@@ -374,6 +375,21 @@ LightBird::IRequest     &Client::getRequest()
 LightBird::IResponse    &Client::getResponse()
 {
     return (this->engine->getResponse());
+}
+
+QStringList Client::getSessions(const QString &id_account) const
+{
+    return (ApiSessions::instance()->getSessions(id_account, this->getId()));
+}
+
+LightBird::Session      Client::getSession(const QString &id_account) const
+{
+    QStringList         id;
+    LightBird::Session  session;
+
+    if (!(id = ApiSessions::instance()->getSessions(id_account, this->getId())).isEmpty())
+        session = ApiSessions::instance()->getSession(id.first());
+    return (session);
 }
 
 void    Client::setPort(unsigned short port)

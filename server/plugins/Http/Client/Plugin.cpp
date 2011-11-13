@@ -53,6 +53,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     this->interfaces.push_back("desktop");
     this->interfaces.push_back("web");
     this->interfaces.push_back("mobile");
+    if ((this->wwwDir = this->api->configuration(true).get("resources/resource")).isEmpty())
+        this->wwwDir = "www";
     Medias::getInstance(this);
     Uploads::getInstance(this);
     return (true);
@@ -108,8 +110,8 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     client.getResponse().getHeader().insert("server", "LightBird");
     client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
     client.getResponse().getHeader().insert("cache-control", "private");
-    // Create the session cookie
-    this->_cookie(client);
+    // Manage the session cookie
+    this->_session(client);
     // Get the uri of the request
     uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority |
                                                 QUrl::RemoveQuery | QUrl::RemoveFragment);
@@ -118,14 +120,12 @@ bool        Plugin::doExecution(LightBird::IClient &client)
         uri = uri.right(uri.size() - 1);
     // Remove "Client" of the uri
     uri.remove(QRegExp("^Client/"));
-    // Try to identify the user
-    this->_identify(client, uri);
     // Find the interface of the user
     interface = this->_getInterface(client);
     // The blank uri does nothing
     if (uri == "blank")
         return (true);
-    // If the characters ".." are in the uri, it is unvalid
+    // The characters ".." and "~" are forbidden in the uri
     if (uri.contains("..") || uri.contains("~"))
         this->response(client, 403, "Forbidden", "The uri in the header must not contains \"..\" or \"~\".");
     // The client wants to execute something
@@ -136,7 +136,7 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     {
         if (uri.isEmpty())
             uri = "index.html";
-        path = this->api->getPluginPath() + "/www/" + interface + "/" + uri;
+        path = this->api->getPluginPath() + this->wwwDir + "/" + interface + "/" + uri;
         // If there an id in the uri, the file is in the filesPath
         if (!client.getRequest().getUri().queryItemValue("id").isEmpty())
             this->_getFile(client);
@@ -170,36 +170,9 @@ bool        Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerial
 void        Plugin::onFinish(LightBird::IClient &client)
 {
     Medias::getInstance().onFinish(client);
-    // Check if the session of the client has to be destroyed
-    if (!this->destroySessions.contains(client.getId()))
-        return ;
-    QListIterator<unsigned short>   portsIt(this->api->network().getPorts());
-    QStringList                     protocols;
-    unsigned int                    maxClients;
-    QStringList                     clients;
-    LightBird::INetwork::Client     clientInfo;
-    QString                         sid;
-
-    // Disconnect all the clients of the session to destroy
-    this->destroySessions.removeAll(client.getId());
-    sid = client.getInformations().value("sid").toString();
-    // Get the number of the HTTP ports
-    while (portsIt.hasNext())
-    {
-        this->api->network().getPort(portsIt.peekNext(), protocols, maxClients);
-        if (protocols.contains("http", Qt::CaseInsensitive))
-            clients.append(this->api->network().getClients(portsIt.peekNext()));
-        portsIt.next();
-    }
-    // Disconnect all the connections of the account to disconnect, on the port of the web client
-    QStringListIterator it(clients);
-    while (it.hasNext())
-    {
-        this->api->network().getClient(it.peekNext(), clientInfo);
-        if (clientInfo.informations.value("sid") == sid)
-            this->api->network().disconnect(it.peekNext());
-        it.next();
-    }
+    // The session is destroyed and all the clients associated to it are disconnected
+    if (client.getInformations().contains("disconnect") && !client.getSessions().isEmpty())
+        this->api->sessions().destroy(client.getSessions().first(), true);
 }
 
 void    Plugin::onDisconnect(LightBird::IClient &client)
@@ -208,137 +181,49 @@ void    Plugin::onDisconnect(LightBird::IClient &client)
     Uploads::getInstance().disconnected(client);
 }
 
-bool    Plugin::timer(const QString &name)
+void        Plugin::_session(LightBird::IClient &client)
 {
-    QDateTime connected = QDateTime::currentDateTime().addSecs(-(60 * 60));
-    QDateTime disconnected = QDateTime::currentDateTime().addSecs(-60);
+    QString sid = this->getCookie(client, "sid");
+    QString id = this->getCookie(client, "identifiant");
+    LightBird::Session session;
 
-    // Remove expired sessions
-    if (name == "session")
+    // If the session or the identifiant doesn't exists, the cookie and the account are cleared
+    if (sid.isEmpty() || (session = this->api->sessions().getSession(sid)).isNull() ||
+        (!id.isEmpty() && (session->getInformation("identifiant") != id)))
     {
-        this->sessionsMutex.lock();
-        QMutableMapIterator<QString, Session> it(this->sessions);
-        while (it.hasNext())
+        client.getResponse().getHeader().remove("set-cookie");
+        this->addCookie(client, "sid");
+        this->addCookie(client, "identifiant");
+        // Ensures that the client is not associated with a session
+        if (!(id = client.getAccount().getId()).isEmpty() && !client.getSessions(id).isEmpty())
         {
-            it.next();
-            // If the user is connected
-            if (!it.value().getAccount().getId().isEmpty())
-            {
-                // The session has not been updated for too long
-                if (it.value().getUpdate() < connected)
-                    it.remove();
-            }
-            // The session is disconnected for too long
-            else if (it.value().getCreation() < disconnected)
-                it.remove();
+            QStringListIterator it(client.getSessions(id));
+            while (it.hasNext())
+                this->api->sessions().getSession(it.next())->removeClient(client.getId());
         }
-        this->sessionsMutex.unlock();
+        client.getAccount().clear();
+        if (!id.isEmpty())
+            this->response(client, 403, "Forbidden");
     }
-    return (true);
-}
-
-LightBird::IApi &Plugin::getApi()
-{
-    return (*this->api);
-}
-
-void    Plugin::response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content)
-{
-    client.getResponse().setCode(code);
-    client.getResponse().setMessage(message);
-    if (!content.isEmpty())
-        client.getResponse().getContent().setContent(content, false);
-}
-
-QString Plugin::httpDate(const QDateTime &date, bool separator)
-{
-    QString s = " ";
-
-    if (separator)
-        s = "-";
-    return (this->daysOfWeek[date.date().dayOfWeek()] + ", " + date.toString("dd") +
-            s + this->months[date.date().month()] + s + date.toString("yyyy") + " " +
-            date.toString("hh:mm:ss")+ " GMT");
-}
-
-void    Plugin::removeSession(LightBird::IClient &client)
-{
-    this->sessionsMutex.lock();
-    this->destroySessions.push_back(client.getId());
-    this->sessions.remove(client.getInformations().value("sid").toString());
-    this->sessionsMutex.unlock();
-}
-
-void        Plugin::_cookie(LightBird::IClient &client)
-{
-    QString sid = this->_getCookie(client, "sid");
-
-    this->sessionsMutex.lock();
-    // If the session id doesn't exists or it is unknow, the cookie is created
-    if (sid.isEmpty() || !this->sessions.contains(sid))
-        this->_createCookie(client);
-    // Otherwise, the session id is saved and updated
-    else
+    // Otherwise the client is identified
+    else if (!id.isEmpty())
     {
-        client.getInformations().insert("sid", sid);
-        this->sessions[sid].setUpdate();
-    }
-    this->sessionsMutex.unlock();
-}
-
-void    Plugin::_createCookie(LightBird::IClient &client)
-{
-    Session session;
-    QString cookie;
-
-    // Add the Set-Cookie HTTP header
-    cookie = "sid=" + session.getId() + "; expires=";
-    cookie += this->httpDate(QDateTime::currentDateTime().addYears(2), true);
-    cookie += "; path=/";
-    client.getResponse().getHeader().insertMulti("set-cookie", cookie);
-    // Save the session id
-    client.getInformations().insert("sid", session.getId());
-    this->sessions.insert(session.getId(), session);
-}
-
-void    Plugin::_identify(LightBird::IClient &client, const QString &uri)
-{
-    QString identifiant = this->_getCookie(client, "identifiant");
-    QString sid;
-    QString aid;
-
-    // If there no identifiant, the user is not connected
-    if (identifiant.isEmpty())
-        return (client.getAccount().clear());
-    sid = client.getInformations().value("sid").toString();
-    // Try to identiy the user
-    if (client.getAccount().setIdFromIdentifiantAndSalt(identifiant, sid))
-    {
-        this->sessionsMutex.lock();
-        // Connect the session
-        if ((aid = this->sessions[sid].getAccount().getId()).isEmpty())
-            this->sessions[sid].getAccount().setId(client.getAccount().getId());
-        // Check that the session account is the same
-        else if (aid != client.getAccount().getId())
-            // Disconnect the client
-            client.getAccount().clear();
-        this->sessionsMutex.unlock();
-    }
-    // If the client try to identify, an error occured
-    else if (uri == "blank")
-    {
-        this->response(client, 403, "Forbidden", "Access denied.");
-        // Delete the cookie if it is not correct
-        client.getResponse().getHeader().insertMulti("set-cookie", "identifiant=; path=/");
+        // Ensure that it is associated with the session
+        this->api->sessions().getSession(sid)->setClient(client.getId());
+        if (client.getAccount().getId() != session->getAccount())
+            client.getAccount().setId(session->getAccount());
+        // Update the expiration date of the session
+        if (session->getExpiration() < QDateTime::currentDateTime().addDays(7))
+            session->setExpiration(QDateTime::currentDateTime().addMonths(1));
     }
 }
 
-QString Plugin::_getInterface(LightBird::IClient &client)
+QString     Plugin::_getInterface(LightBird::IClient &client)
 {
     QString interface;
 
     // Get the name of the interface from the cookies
-    if (!(interface = this->_getCookie(client, "interface")).isEmpty())
+    if (!(interface = this->getCookie(client, "interface")).isEmpty())
         // The interface doesn't exists
         if (!this->interfaces.contains(interface))
             interface.clear();
@@ -385,7 +270,20 @@ QString             Plugin::_getMime(const QString &file)
     return (result);
 }
 
-QString     Plugin::_getCookie(LightBird::IClient &client, const QString &n)
+LightBird::IApi &Plugin::getApi()
+{
+    return (*this->api);
+}
+
+void    Plugin::response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content)
+{
+    client.getResponse().setCode(code);
+    client.getResponse().setMessage(message);
+    if (!content.isEmpty())
+        client.getResponse().getContent().setContent(content, false);
+}
+
+QString     Plugin::getCookie(LightBird::IClient &client, const QString &n)
 {
     QString name(n + "=");
     QString cookies(client.getRequest().getHeader().value("cookie"));
@@ -400,6 +298,28 @@ QString     Plugin::_getCookie(LightBird::IClient &client, const QString &n)
         it.next();
     }
     return ("");
+}
+
+void        Plugin::addCookie(LightBird::IClient &client, const QString &name, const QString &value)
+{
+    QString cookie;
+
+    cookie = name + "=" + value + "; ";
+    if (!value.isEmpty())
+        cookie += "expires=" + Plugin::getInstance().httpDate(QDateTime::currentDateTime().addYears(2), true) + "; ";
+    cookie += "path=/";
+    client.getResponse().getHeader().insertMulti("set-cookie", cookie);
+}
+
+QString Plugin::httpDate(const QDateTime &date, bool separator)
+{
+    QString s = " ";
+
+    if (separator)
+        s = "-";
+    return (this->daysOfWeek[date.date().dayOfWeek()] + ", " + date.toString("dd") +
+            s + this->months[date.date().month()] + s + date.toString("yyyy") + " " +
+            date.toString("hh:mm:ss")+ " GMT");
 }
 
 Q_EXPORT_PLUGIN2(plugin, Plugin)

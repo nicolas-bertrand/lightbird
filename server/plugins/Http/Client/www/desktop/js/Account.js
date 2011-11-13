@@ -42,10 +42,10 @@ function checkIdentification()
 		// Delete the session cookies
 		setCookie("sid", "", 0);
 		setCookie("identifiant", "", 0);
-		unlock = document.getElementById("identification_icon_blue_lock").style.display = "none";
+		document.getElementById("identification_icon_blue_lock").style.display = "none";
 	}
 	else
-		unlock = document.getElementById("identification_icon_blue_unlock").style.display = "none";
+		document.getElementById("identification_icon_blue_unlock").style.display = "none";
 	
 	// Get the value of the session cookies
 	var sid = getCookie("sid");
@@ -119,18 +119,28 @@ function identification()
 	var greenIcon = document.getElementById("identification_icon_green");
 	var redIcon = document.getElementById("identification_icon_red");
 	
+	// Display the loading image
+	animation(yellowIcon, 500, animationOpacity, true);
+	// If the red button is displayed, it is hide before the identification
+	if (isDisplayed(redButton))
+	{
+		animation(redButton, 500, animationOpacity, false);
+		animation(redIcon, 500, animationOpacity, false);
+	}
+	// Hide the blue button
+	else
+	{
+		animation(blueButton, 500, animationOpacity, false);
+		identificationDisplayLock(false);
+	}
+	
 	// Get the values of the inputs
 	var inputs = document.getElementById("identification").getElementsByTagName("input");
 	var name = inputs[0].value;
 	var password = inputs[1].value;
-	var sid = getCookie("sid");
 	
-	// Set the identifiant that will be used by the server to identify the user
-	setCookie("identifiant", hex_sha1(name + hex_sha1(password) + sid));
-	
-	// This function is called once the response has been received from the server,
-	// and is used to check if the user has been identified or not.
-	var callback = function (HttpRequest)
+	// Checks if the identification was successful
+	var identify = function (HttpRequest)
 	{
 		// The user is identified
 		if (HttpRequest.status == 200 && getCookie("identifiant").length > 0)
@@ -171,23 +181,16 @@ function identification()
 			animation(redIcon, 500, animationOpacity, true);
 		}
 	}
+	
+	// Now that we have the salt, we can generate the identifiant using the data privided by the user
+	var generateIdentifiant = function(HttpRequest)
+	{
+		request("GET", "Execute/Identify?identifiant=" + hex_sha1(name + hex_sha1(password + getCookie("salt")) + getCookie("sid")), identify);
+	}
 
-	// Display the loading image
-	animation(yellowIcon, 500, animationOpacity, true);
-	// If the red button is displayed, it is hide before the identification
-	if (isDisplayed(redButton))
-	{
-		animation(redButton, 500, animationOpacity, false);
-		animation(redIcon, 500, animationOpacity, false);
-	}
-	// Hide the blue button
-	else
-	{
-		animation(blueButton, 500, animationOpacity, false);
-		identificationDisplayLock(false);
-	}
-	// Ask to the server if the informations gived by the user are correct
-	animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "blank", callback);});
+	// Get the salt from the account name, that will allow us to generate the identifiant
+	var salt = Math.random().toString().substring(2, 10);
+	animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + hex_sha1(name + salt) + "&salt=" + salt, generateIdentifiant);});
 }
 
 // Replace the error button by the connect button if the error is displayed

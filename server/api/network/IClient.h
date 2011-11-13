@@ -13,6 +13,7 @@
 # include "ITableAccounts.h"
 # include "IRequest.h"
 # include "IResponse.h"
+# include "ISessions.h"
 
 namespace LightBird
 {
@@ -64,6 +65,15 @@ namespace LightBird
         virtual LightBird::IRequest  &getRequest() = 0;
         /// @brief The response of the request made by the client.
         virtual LightBird::IResponse &getResponse() = 0;
+        /// @brief The sessions to which the client is associated.
+        /// @param id_account : The id of the account of the session to get.
+        /// Ignored by default.
+        virtual QStringList          getSessions(const QString &id_account = QString()) const = 0;
+        /// @brief Returns the session of the client. A convenient method when
+        /// there is only one session per client. A null session can be returned.
+        /// @param id_account : The id of the account of the session to get.
+        /// Ignored by default.
+        virtual LightBird::Session   getSession(const QString &id_account = QString()) const = 0;
     };
 }
 
