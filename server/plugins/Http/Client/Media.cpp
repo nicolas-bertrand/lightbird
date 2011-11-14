@@ -3,7 +3,7 @@
 #include "Media.h"
 #include "Plugin.h"
 
-Media::Media(LightBird::IClient &cl) : api(Plugin::getInstance().getApi()), client(cl), uri(client.getRequest().getUri()),
+Media::Media(LightBird::IClient &cl) : api(Plugin::api()), client(cl), uri(client.getRequest().getUri()),
              file(api.database().getFiles()), response(client.getResponse())
 {
     this->error = false;

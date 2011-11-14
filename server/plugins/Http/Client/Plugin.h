@@ -15,6 +15,7 @@
 
 # define DEFAULT_CONTENT_TYPE   "application/octet-stream" // This is the default MIME type. The browser may download the content.
 # define DEFAULT_INTERFACE_NAME "desktop"
+# define DATE_FORMAT            "yyyy-MM-dd hh:mm"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -29,7 +30,6 @@ class Plugin : public QObject,
                  LightBird::IOnFinish LightBird::IOnDisconnect)
 
 public:
-    static Plugin &getInstance();
     Plugin();
     ~Plugin();
 
@@ -48,8 +48,9 @@ public:
     void    onDisconnect(LightBird::IClient &client);
 
     // Other
-    /// @brief Returns the LightBird API in order to make it accessible in all the plugin.
-    LightBird::IApi &getApi();
+    static Plugin   &getInstance();
+    /// @brief Returns the LightBird Api.
+    static LightBird::IApi &api();
     /// @brief Send a response to the client.
     static void     response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content = "");
     /// @brief Returns the value of a cookie using its name.
@@ -64,8 +65,10 @@ public:
     QString         httpDate(const QDateTime &date, bool separator = false);
 
 private:
-    /// @brief Manage the session cookie.
+    /// @brief Manages the session cookie.
     void    _session(LightBird::IClient &client);
+    /// @brief Checks that the token is correct.
+    bool    _checkToken(LightBird::Session &session, const QByteArray &token);
     /// @brief Returns the name of the interface used by the user.
     QString _getInterface(LightBird::IClient &client);
     /// @brief Returns a file that is stored in the filesPath instead of the www directory.
@@ -74,7 +77,7 @@ private:
     /// @brief Returns the mime type of the file in parameter.
     QString _getMime(const QString &file);
 
-    LightBird::IApi     *api;       ///< The LightBird's Api.
+    LightBird::IApi     *_api;      ///< The LightBird's Api.
     static Plugin       *instance;  ///< The instance of the plugin singleton.
     QStringList         interfaces; ///< Contains the name of the interfaces available.
     QString             wwwDir;     ///< The path to the www directory (where the interface is stored).

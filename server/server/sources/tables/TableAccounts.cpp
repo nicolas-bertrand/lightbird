@@ -339,5 +339,5 @@ QString         TableAccounts::passwordHash(const QString &password, const QStri
         return ("");
     if (id.isEmpty())
         return (QCryptographicHash::hash(password.toAscii(), QCryptographicHash::Sha1).toHex());
-    return (QCryptographicHash::hash(password.toAscii() + id.left(8).toAscii(), QCryptographicHash::Sha1).toHex());
+    return (QCryptographicHash::hash(password.toAscii() + id.toAscii(), QCryptographicHash::Sha1).toHex());
 }

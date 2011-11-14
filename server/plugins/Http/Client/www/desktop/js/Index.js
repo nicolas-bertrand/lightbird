@@ -119,11 +119,10 @@ function request(method, url, callback, cache, data)
 	// Execute the request
 	if (cache != true)
 	{
-		if (url.indexOf("?") != -1)
-			url += "&";
-		else
-			url += "?";
+		url += (url.indexOf("?") == -1 ? "?" : "&");
 		url += "t=" + Math.random();
+		if (localStorage.getItem("identifiant") != undefined)
+			url += "&token=" + hex_sha1(localStorage.getItem("identifiant") + ISODateString(new Date()))
 	}
 	HttpRequest.open(method, "Client/" + url, true);
 	if (method.toUpperCase() == "POST")
@@ -375,3 +374,28 @@ function positive(n)
 		return (0);
 	return (n);
 }
+
+// Converts a date in a ISO8601 string, without T&Z
+function ISODateString(d)
+{
+  function pad(n){return n<10 ? '0'+n : n}
+  return d.getUTCFullYear()+'-'
+      + pad(d.getUTCMonth()+1)+'-'
+      + pad(d.getUTCDate())+' '
+      + pad(d.getUTCHours())+':'
+      + pad(d.getUTCMinutes());
+}
+
+// Generate a random string.
+// @param size : The size of the string returned.
+function randomString(size)
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for(var i = 0; i < size; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return (text);
+}
+
+

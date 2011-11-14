@@ -34,22 +34,22 @@ function checkIdentification()
 	}
 	
 	// Check if the session has been remembered
-	if (getCookie("remember").length == 0)
-		setCookie("remember", "true");
-	if (getCookie("remember") == "false")
+	if (localStorage.getItem("remember") != "false")
+		localStorage.setItem("remember", "true");
+	if (localStorage.getItem("remember") == "false")
 	{
 		gl_identificationRemember = false;
-		// Delete the session cookies
+		// Delete the session cookie and the identifiant
 		setCookie("sid", "", 0);
-		setCookie("identifiant", "", 0);
+		localStorage.removeItem("identifiant");
 		document.getElementById("identification_icon_blue_lock").style.display = "none";
 	}
 	else
 		document.getElementById("identification_icon_blue_unlock").style.display = "none";
 	
-	// Get the value of the session cookies
+	// Get the value of the session cookie
 	var sid = getCookie("sid");
-	var identifiant = getCookie("identifiant");
+	var identifiant = localStorage.getItem("identifiant");
 	// If the sid and the identifiant cookies are defined, we try to identify the user
 	if (sid.length > 0 && identifiant.length > 0)
 	{
@@ -143,7 +143,7 @@ function identification()
 	var identify = function (HttpRequest)
 	{
 		// The user is identified
-		if (HttpRequest.status == 200 && getCookie("identifiant").length > 0)
+		if (HttpRequest.status == 200)
 		{
 			gl_identified = true;
 			// Replace the yellow button by the green one
@@ -179,17 +179,19 @@ function identification()
 			animation(yellowIcon, 500, animationOpacity, false);
 			animation(redButton, 500, animationOpacity, true, function() { gl_identification = false; });
 			animation(redIcon, 500, animationOpacity, true);
+			localStorage.removeItem("identifiant");
 		}
 	}
 	
 	// Now that we have the salt, we can generate the identifiant using the data privided by the user
 	var generateIdentifiant = function(HttpRequest)
 	{
-		request("GET", "Execute/Identify?identifiant=" + hex_sha1(name + hex_sha1(password + getCookie("salt")) + getCookie("sid")), identify);
+		localStorage.setItem("identifiant", hex_sha1(name + hex_sha1(password + HttpRequest.responseText) + getCookie("sid")));
+		request("GET", "Execute/Identify", identify);
 	}
 
 	// Get the salt from the account name, that will allow us to generate the identifiant
-	var salt = Math.random().toString().substring(2, 10);
+	var salt = randomString(32);
 	animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + hex_sha1(name + salt) + "&salt=" + salt, generateIdentifiant);});
 }
 
@@ -216,8 +218,8 @@ function disconnection()
 	{
 		// The server has disconnected the user
 		gl_identified = false;
-		setCookie("identifiant", "", 0);
 		setCookie("sid", "", 0);
+		localStorage.removeItem("identifiant");
 		var next;
 		// Close the windows
 		for (id in gl_windows)
@@ -265,14 +267,14 @@ function identificationChangeLock(displayLock)
 	{
 		animation(lock, 250, animationOpacity, true);
 		animation(unlock, 250, animationOpacity, false);
-		setCookie("remember", "true");
+		localStorage.setItem("remember", "true");
 		gl_identificationRemember = true;
 	}
 	else
 	{
 		animation(unlock, 250, animationOpacity, true);
 		animation(lock, 250, animationOpacity, false);
-		setCookie("remember", "false");
+		localStorage.setItem("remember", "false");
 		gl_identificationRemember = false;
 	}
 }

@@ -45,7 +45,7 @@ void    Uploads::progress(LightBird::IClient &client)
         if (this->stopList.contains(id))
         {
             this->stopList.removeAll(id);
-            Plugin::getInstance().getApi().network().disconnect(client.getId());
+            Plugin::api().network().disconnect(client.getId());
         }
         else if (this->uploads[id].progress == this->uploads[id].size)
             this->uploads.remove(id);
@@ -87,7 +87,7 @@ void    Uploads::disconnected(LightBird::IClient &client)
         if (it.value().clientId == client.getId())
         {
             it.remove();
-            break ;
+            break;
         }
     }
     this->mutex.unlock();

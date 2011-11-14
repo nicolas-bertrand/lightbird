@@ -1,4 +1,5 @@
 #include <QtPlugin>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
@@ -29,7 +30,7 @@ Plugin::~Plugin()
 
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
-    this->api = api;
+    this->_api = api;
     Plugin::instance = this;
     this->daysOfWeek[1] = "Mon";
     this->daysOfWeek[2] = "Tue";
@@ -53,7 +54,7 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     this->interfaces.push_back("desktop");
     this->interfaces.push_back("web");
     this->interfaces.push_back("mobile");
-    if ((this->wwwDir = this->api->configuration(true).get("resources/resource")).isEmpty())
+    if ((this->wwwDir = this->_api->configuration(true).get("resources/resource")).isEmpty())
         this->wwwDir = "www";
     Medias::getInstance(this);
     Uploads::getInstance(this);
@@ -66,13 +67,13 @@ void    Plugin::onUnload()
 
 bool    Plugin::onInstall(LightBird::IApi *api)
 {
-    this->api = api;
+    this->_api = api;
     return (true);
 }
 
 void    Plugin::onUninstall(LightBird::IApi *api)
 {
-    this->api = api;
+    this->_api = api;
 }
 
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
@@ -130,13 +131,13 @@ bool        Plugin::doExecution(LightBird::IClient &client)
         this->response(client, 403, "Forbidden", "The uri in the header must not contains \"..\" or \"~\".");
     // The client wants to execute something
     else if (uri.left(8) == "Execute/")
-        Execute(*this->api, client, uri.right(uri.size() - uri.indexOf('/') - 1));
+        Execute(*this->_api, client, uri.right(uri.size() - uri.indexOf('/') - 1));
     // The client wants to download a file
     else
     {
         if (uri.isEmpty())
             uri = "index.html";
-        path = this->api->getPluginPath() + this->wwwDir + "/" + interface + "/" + uri;
+        path = this->_api->getPluginPath() + this->wwwDir + "/" + interface + "/" + uri;
         // If there an id in the uri, the file is in the filesPath
         if (!client.getRequest().getUri().queryItemValue("id").isEmpty())
             this->_getFile(client);
@@ -172,7 +173,7 @@ void        Plugin::onFinish(LightBird::IClient &client)
     Medias::getInstance().onFinish(client);
     // The session is destroyed and all the clients associated to it are disconnected
     if (client.getInformations().contains("disconnect") && !client.getSessions().isEmpty())
-        this->api->sessions().destroy(client.getSessions().first(), true);
+        this->_api->sessions().destroy(client.getSessions().first(), true);
 }
 
 void    Plugin::onDisconnect(LightBird::IClient &client)
@@ -183,39 +184,51 @@ void    Plugin::onDisconnect(LightBird::IClient &client)
 
 void        Plugin::_session(LightBird::IClient &client)
 {
+    QString id;
     QString sid = this->getCookie(client, "sid");
-    QString id = this->getCookie(client, "identifiant");
+    QString token = client.getRequest().getUri().queryItemValue("token");
     LightBird::Session session;
 
-    // If the session or the identifiant doesn't exists, the cookie and the account are cleared
-    if (sid.isEmpty() || (session = this->api->sessions().getSession(sid)).isNull() ||
-        (!id.isEmpty() && (session->getInformation("identifiant") != id)))
+    // If the session or the token doesn't exists, the cookie and the account are cleared
+    if (sid.isEmpty() || (session = this->_api->sessions().getSession(sid)).isNull() ||
+        (!token.isEmpty() && !this->_checkToken(session, token.toAscii())))
     {
         client.getResponse().getHeader().remove("set-cookie");
         this->addCookie(client, "sid");
-        this->addCookie(client, "identifiant");
         // Ensures that the client is not associated with a session
         if (!(id = client.getAccount().getId()).isEmpty() && !client.getSessions(id).isEmpty())
         {
             QStringListIterator it(client.getSessions(id));
             while (it.hasNext())
-                this->api->sessions().getSession(it.next())->removeClient(client.getId());
+                this->_api->sessions().getSession(it.next())->removeClient(client.getId());
         }
         client.getAccount().clear();
-        if (!id.isEmpty())
+        if (!token.isEmpty())
             this->response(client, 403, "Forbidden");
     }
     // Otherwise the client is identified
-    else if (!id.isEmpty())
+    else if (!token.isEmpty())
     {
-        // Ensure that it is associated with the session
-        this->api->sessions().getSession(sid)->setClient(client.getId());
+        // Ensure that it is associated to the session
+        session->setClient(client.getId());
         if (client.getAccount().getId() != session->getAccount())
             client.getAccount().setId(session->getAccount());
         // Update the expiration date of the session
         if (session->getExpiration() < QDateTime::currentDateTime().addDays(7))
             session->setExpiration(QDateTime::currentDateTime().addMonths(1));
     }
+}
+
+bool            Plugin::_checkToken(LightBird::Session &session, const QByteArray &token)
+{
+    QByteArray  identifiant = session->getInformation("identifiant").toByteArray();
+    QDateTime   date = QDateTime::currentDateTime().toUTC();
+
+    // The token is the combination of the identifiant and the current date (+/- 1 minute)
+    if (token == QCryptographicHash::hash(identifiant + date.toString(DATE_FORMAT).toAscii(), QCryptographicHash::Sha1).toHex() ||
+        token == QCryptographicHash::hash(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii(), QCryptographicHash::Sha1).toHex())
+        return (true);
+    return (false);
 }
 
 QString     Plugin::_getInterface(LightBird::IClient &client)
@@ -238,14 +251,15 @@ QString     Plugin::_getInterface(LightBird::IClient &client)
 
 void    Plugin::_getFile(LightBird::IClient &client)
 {
-    QSharedPointer<LightBird::ITableFiles> file(this->api->database().getFiles(client.getRequest().getUri().queryItemValue("id")));
+    QSharedPointer<LightBird::ITableFiles> file(this->_api->database().getFiles(client.getRequest().getUri().queryItemValue("id")));
     QString path;
 
     // Check that the user can access to the file
-    if (!file->isAllowed(client.getAccount().getId(), "read"))
+    if (client.getRequest().getUri().queryItemValue("token").isEmpty() ||
+        !file->isAllowed(client.getAccount().getId(), "read"))
         return (this->response(client, 403, "Forbidden", "Access denied."));
     path = file->getFullPath();
-    // Check that the file extsis on the disk
+    // Check that the file exists on the disk
     if (!QFileInfo(path).isFile())
         return (this->response(client, 404, "Not Found", "File not found."));
     // If the file has to be downloaded by the browser, a special MIME is used
@@ -263,16 +277,16 @@ QString             Plugin::_getMime(const QString &file)
 
     if (!file.contains('.'))
         return (result);
-    extensions = this->api->extensions().get("IMime");
+    extensions = this->_api->extensions().get("IMime");
     if (!extensions.isEmpty())
         result = static_cast<LightBird::IMime *>(extensions.first())->getMime(file);
-    this->api->extensions().release(extensions);
+    this->_api->extensions().release(extensions);
     return (result);
 }
 
-LightBird::IApi &Plugin::getApi()
+LightBird::IApi &Plugin::api()
 {
-    return (*this->api);
+    return (*Plugin::instance->_api);
 }
 
 void    Plugin::response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content)
