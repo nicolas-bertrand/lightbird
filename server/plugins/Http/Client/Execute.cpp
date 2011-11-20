@@ -119,7 +119,8 @@ void                        Execute::_identify()
     else if (!(token = this->request.getUri().queryItemValue("token")).isEmpty() &&
              !(sid = Plugin::getCookie(client, "sid")).isEmpty() &&
              !(session = this->api.sessions().getSession(sid)).isNull() &&
-             client.getAccount().setId(session->getAccount()))
+             client.getAccount().setId(session->getAccount()) &&
+             client.getAccount().isActive())
     {
         session->setAccount(client.getAccount().getId());
         session->setExpiration(QDateTime::currentDateTime().addMonths(1));
