@@ -51,7 +51,7 @@ function checkIdentification()
 	var sid = getCookie("sid");
 	var identifiant = localStorage.getItem("identifiant");
 	// If the sid and the identifiant cookies are defined, we try to identify the user
-	if (sid.length > 0 && identifiant.length > 0)
+	if (sid.length > 0 && identifiant != undefined)
 	{
 		var callback = function (HttpRequest)
 		{

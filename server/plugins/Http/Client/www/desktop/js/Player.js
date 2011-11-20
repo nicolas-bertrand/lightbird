@@ -553,7 +553,7 @@ Player.prototype.play = function(row)
 					// The document is hightlighted if possible
 					player.content.innerHTML = "<pre class=\"" + PlayerDocumentExtensionSHJS[key] + "\">" + HttpRequest.responseText.replace(/</g, "&lt;") + "</pre>";
 					sh_highlightDocument("Client/libs/SHJS/", ".js");
-				}, true);
+				});
 				removeClassName(player.content, "document");
 				break ;
 			}

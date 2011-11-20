@@ -93,7 +93,6 @@ function getBrowserSize()
 // @method : The Http method to execute (GET or POST).
 // @url : The url of the Http request.
 // @callback : A function that will be called once the responce has been received.
-// @cache : If the response can be cached (false by default).
 // @data : The data that has to be sent with the POST method.
 // The response may be invalid.
 function request(method, url, callback, cache, data)
@@ -116,14 +115,17 @@ function request(method, url, callback, cache, data)
 				callback(HttpRequest);
 	}
 
-	// Execute the request
-	if (cache != true)
+	// Add a random string in the uri to prevent the result being cached
+	url += (url.indexOf("?") == -1 ? "?" : "&");
+	url += "r=" + Math.random();
+	// Add the token that identify the client : SHA1(identifiant + date + url)
+	if (localStorage.getItem("identifiant") != undefined)
 	{
-		url += (url.indexOf("?") == -1 ? "?" : "&");
-		url += "t=" + Math.random();
-		if (localStorage.getItem("identifiant") != undefined)
-			url += "&token=" + hex_sha1(localStorage.getItem("identifiant") + ISODateString(new Date()))
+		var location = url.substring(0, (url.indexOf("?") != -1 ? url.indexOf("?") : url.length));
+		url += "&token=" + hex_sha1(localStorage.getItem("identifiant") + ISODateString(new Date()) + location);
 	}
+
+	// Execute the request
 	HttpRequest.open(method, "Client/" + url, true);
 	if (method.toUpperCase() == "POST")
 	{

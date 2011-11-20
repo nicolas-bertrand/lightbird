@@ -111,8 +111,6 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     client.getResponse().getHeader().insert("server", "LightBird");
     client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
     client.getResponse().getHeader().insert("cache-control", "private");
-    // Manage the session cookie
-    this->_session(client);
     // Get the uri of the request
     uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority |
                                                 QUrl::RemoveQuery | QUrl::RemoveFragment);
@@ -123,6 +121,8 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     uri.remove(QRegExp("^Client/"));
     // Find the interface of the user
     interface = this->_getInterface(client);
+    // Manage the session cookie
+    this->_session(client, uri);
     // The blank uri does nothing
     if (uri == "blank")
         return (true);
@@ -182,7 +182,7 @@ void    Plugin::onDisconnect(LightBird::IClient &client)
     Uploads::getInstance().disconnected(client);
 }
 
-void        Plugin::_session(LightBird::IClient &client)
+void        Plugin::_session(LightBird::IClient &client, const QString &uri)
 {
     QString id;
     QString sid = this->getCookie(client, "sid");
@@ -191,7 +191,7 @@ void        Plugin::_session(LightBird::IClient &client)
 
     // If the session or the token doesn't exists, the cookie and the account are cleared
     if (sid.isEmpty() || (session = this->_api->sessions().getSession(sid)).isNull() ||
-        (!token.isEmpty() && !this->_checkToken(session, token.toAscii())))
+        (!token.isEmpty() && !this->_checkToken(session, token.toAscii(), uri)))
     {
         client.getResponse().getHeader().remove("set-cookie");
         this->addCookie(client, "sid");
@@ -219,14 +219,14 @@ void        Plugin::_session(LightBird::IClient &client)
     }
 }
 
-bool            Plugin::_checkToken(LightBird::Session &session, const QByteArray &token)
+bool            Plugin::_checkToken(LightBird::Session &session, const QByteArray &token, const QString &uri)
 {
     QByteArray  identifiant = session->getInformation("identifiant").toByteArray();
     QDateTime   date = QDateTime::currentDateTime().toUTC();
 
     // The token is the combination of the identifiant and the current date (+/- 1 minute)
-    if (token == QCryptographicHash::hash(identifiant + date.toString(DATE_FORMAT).toAscii(), QCryptographicHash::Sha1).toHex() ||
-        token == QCryptographicHash::hash(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii(), QCryptographicHash::Sha1).toHex())
+    if (token == QCryptographicHash::hash(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii(), QCryptographicHash::Sha1).toHex() ||
+        token == QCryptographicHash::hash(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii(), QCryptographicHash::Sha1).toHex())
         return (true);
     return (false);
 }

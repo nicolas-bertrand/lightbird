@@ -65,10 +65,10 @@ public:
     QString         httpDate(const QDateTime &date, bool separator = false);
 
 private:
-    /// @brief Manages the session cookie.
-    void    _session(LightBird::IClient &client);
+    /// @brief Manages the session.
+    void    _session(LightBird::IClient &client, const QString &uri);
     /// @brief Checks that the token is correct.
-    bool    _checkToken(LightBird::Session &session, const QByteArray &token);
+    bool    _checkToken(LightBird::Session &session, const QByteArray &token, const QString &uri);
     /// @brief Returns the name of the interface used by the user.
     QString _getInterface(LightBird::IClient &client);
     /// @brief Returns a file that is stored in the filesPath instead of the www directory.

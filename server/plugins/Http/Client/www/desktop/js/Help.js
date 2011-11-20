@@ -104,7 +104,7 @@ function hint(info)
 				// Otherwise, the page will never been asked again
 				else
 					gl_hints[info] = false;
-			}, true);
+			});
 	}
 	else if (hint.style.display == "block")
 		animation(hint, 200, animationOpacity, false);
