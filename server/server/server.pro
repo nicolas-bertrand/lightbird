@@ -70,8 +70,9 @@ HEADERS += headers/Arguments.h \
     headers/Request.h \
     headers/Response.h \
     headers/Server.h \
-    headers/SmartMutex.h \
     headers/Session.h \
+    headers/Sha256.h \
+    headers/SmartMutex.h \
     headers/Thread.h \
     headers/ThreadPool.h \
     headers/Threads.h \
@@ -125,8 +126,9 @@ SOURCES += sources/main.cpp \
     sources/Request.cpp \
     sources/Response.cpp \
     sources/Server.cpp \
-    sources/SmartMutex.cpp \
     sources/Session.cpp \
+    sources/Sha256.cpp \
+    sources/SmartMutex.cpp \
     sources/Thread.cpp \
     sources/ThreadPool.cpp \
     sources/Threads.cpp \

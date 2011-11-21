@@ -225,8 +225,8 @@ bool            Plugin::_checkToken(LightBird::Session &session, const QByteArra
     QDateTime   date = QDateTime::currentDateTime().toUTC();
 
     // The token is the combination of the identifiant, the current date (+/- 1 minute), and a part of the URI
-    if (token == QCryptographicHash::hash(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii(), QCryptographicHash::Sha1).toHex() ||
-        token == QCryptographicHash::hash(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii(), QCryptographicHash::Sha1).toHex())
+    if (token == this->_api->sha256(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii()) ||
+        token == this->_api->sha256(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii()))
         return (true);
     return (false);
 }

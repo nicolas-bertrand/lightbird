@@ -88,7 +88,7 @@
 		<file alias="desktop/js/Window.js">www/desktop/js/Window.js</file>
 		<file alias="desktop/js/Windows.js">www/desktop/js/Windows.js</file>
 		<file alias="desktop/libs/jQuery/jquery.js">www/desktop/libs/jQuery/jquery.js</file>
-		<file alias="desktop/libs/SHA1.js">www/desktop/libs/SHA1.js</file>
+		<file alias="desktop/libs/SHA256.js">www/desktop/libs/SHA256.js</file>
 		<file alias="desktop/libs/SHJS/sh_c.js">www/desktop/libs/SHJS/sh_c.js</file>
 		<file alias="desktop/libs/SHJS/sh_caml.js">www/desktop/libs/SHJS/sh_caml.js</file>
 		<file alias="desktop/libs/SHJS/sh_cpp.js">www/desktop/libs/SHJS/sh_cpp.js</file>

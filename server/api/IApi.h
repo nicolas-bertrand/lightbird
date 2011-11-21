@@ -72,6 +72,8 @@ namespace LightBird
         virtual const QString               &getPluginPath() const = 0;
         /// @brief Returns the current version of the server.
         virtual QString                     getServerVersion() const = 0;
+        /// @brief Returns the SHA-256 of data in hex.
+        virtual QByteArray                  sha256(const QByteArray &data) const = 0;
     };
 }
 

@@ -9,6 +9,7 @@
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Server.h"
+#include "Sha256.h"
 
 Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent) :
          QObject(parent),
@@ -120,4 +121,9 @@ QString                     Api::getServerVersion() const
 const QString               &Api::getPluginPath() const
 {
     return (this->pluginPath);
+}
+
+QByteArray                  Api::sha256(const QByteArray &data) const
+{
+    return (Sha256::hash(data));
 }

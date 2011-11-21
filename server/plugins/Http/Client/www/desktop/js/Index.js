@@ -118,11 +118,11 @@ function request(method, url, callback, cache, data)
 	// Add a random string in the uri to prevent the result being cached
 	url += (url.indexOf("?") == -1 ? "?" : "&");
 	url += "r=" + Math.random();
-	// Add the token that identify the client : SHA1(identifiant + date + url)
+	// Add the token that identify the client : SHA256(identifiant + date + url)
 	if (localStorage.getItem("identifiant") != undefined)
 	{
 		var location = url.substring(0, (url.indexOf("?") != -1 ? url.indexOf("?") : url.length));
-		url += "&token=" + hex_sha1(localStorage.getItem("identifiant") + ISODateString(new Date()) + location);
+		url += "&token=" + SHA256(localStorage.getItem("identifiant") + ISODateString(new Date()) + location);
 	}
 
 	// Execute the request

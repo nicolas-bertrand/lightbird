@@ -40,6 +40,7 @@ public:
     const QString               &getId() const;
     QString                     getServerVersion() const;
     const QString               &getPluginPath() const;
+    QByteArray                  sha256(const QByteArray &data) const;
 
 private:
     Api();

@@ -1,6 +1,7 @@
 #include <QCryptographicHash>
 
 #include "Database.h"
+#include "Sha256.h"
 #include "TableAccounts.h"
 #include "Tools.h"
 
@@ -87,7 +88,7 @@ QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifian
         // Check the identifiant of all the account
         for (i = 0, s = result.size(); i < s; ++i)
             // If the identifiant of the account match, it is connected
-            if (identifiant == QCryptographicHash::hash(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii(), QCryptographicHash::Sha1).toHex())
+            if (identifiant == Sha256::hash(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii()))
                 return (result[i]["id"].toString());
     return ("");
 }
@@ -336,8 +337,8 @@ bool            TableAccounts::removeGroup(const QString &id_group)
 QString         TableAccounts::passwordHash(const QString &password, const QString &id) const
 {
     if (password.isEmpty())
-        return ("");
+        return (QString());
     if (id.isEmpty())
-        return (QCryptographicHash::hash(password.toAscii(), QCryptographicHash::Sha1).toHex());
-    return (QCryptographicHash::hash(password.toAscii() + id.toAscii(), QCryptographicHash::Sha1).toHex());
+        return (Sha256::hash(password.toAscii()));
+    return (Sha256::hash(password.toAscii() + id.toAscii()));
 }

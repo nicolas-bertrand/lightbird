@@ -41,7 +41,7 @@ namespace LightBird
         virtual QString getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) const = 0;
         /// @brief Allows to identify an account without knowing its name or password.
         /// These informations are contained in the identifiant with a salt.
-        /// @param identifiant : A sha1 composed of the name and the password of
+        /// @param identifiant : A SHA-256 composed of the name and the password of
         /// the account with a salt.
         /// @param salt : The salt used to create the identifiant.
         /// @return True if the identifiant and the salt are correct.
@@ -60,7 +60,7 @@ namespace LightBird
                             bool active = true) = 0;
 
         // Fields
-        /// @brief Returns the password as a sha1.
+        /// @brief Returns the password as a SHA-256.
         /// @see passwordHash
         virtual QString getPassword() const = 0;
         /// @brief Modifies the password of the account.
@@ -105,14 +105,13 @@ namespace LightBird
         virtual bool    addGroup(const QString &id_group) = 0;
         /// @brief Remove the account from the group in parameter.
         virtual bool    removeGroup(const QString &id_group) = 0;
-        /// @brief Converts a password into a hash that can be stored into
-        /// the database. Returns the sha1 of the password concatened with
-        /// the first eight characters of the id.
+        /// @brief Converts a password into a hash that can be stored in the
+        /// database. Returns the SHA-256 of the password concatened with the id.
         /// @param password : The password to hash.
-        /// @param id : The id of the account of the password. The first eight
-        /// characters of the id are used inside the sha1 with the password as a
-        /// salt to ensure that two identical passwords will have different
-        /// footprints. If it is empty, the sha1 of the password is returned.
+        /// @param id : The id of the account of the password. It is used inside
+        /// the SHA-256 with the password as a salt to ensure that two identical
+        /// passwords will have different footprints. If it is empty, the SHA-256
+        /// of the password is returned.
         /// @return The hash of the password and its salt.
         virtual QString passwordHash(const QString &password, const QString &id = "") const = 0;
     };

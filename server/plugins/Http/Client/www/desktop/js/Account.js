@@ -110,7 +110,7 @@ function identification()
 	if (gl_identification)
 		return ;
 	gl_identification = true;
-	
+
 	var blueButton = document.getElementById("identification_submit_button_blue");
 	var yellowButton = document.getElementById("identification_submit_button_yellow");
 	var greenButton = document.getElementById("identification_submit_button_green");
@@ -186,13 +186,13 @@ function identification()
 	// Now that we have the salt, we can generate the identifiant using the data privided by the user
 	var generateIdentifiant = function(HttpRequest)
 	{
-		localStorage.setItem("identifiant", hex_sha1(name + hex_sha1(password + HttpRequest.responseText) + getCookie("sid")));
+		localStorage.setItem("identifiant", SHA256(name + SHA256(password + HttpRequest.responseText) + getCookie("sid")));
 		request("GET", "Execute/Identify", identify);
 	}
 
 	// Get the salt from the account name, that will allow us to generate the identifiant
 	var salt = randomString(32);
-	animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + hex_sha1(name + salt) + "&salt=" + salt, generateIdentifiant);});
+	animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);});
 }
 
 // Replace the error button by the connect button if the error is displayed

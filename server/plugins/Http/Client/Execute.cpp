@@ -82,7 +82,7 @@ void                        Execute::_identify()
     QString                 sid;
 
     // The client is asking the id of the account and a session id, in order to
-    // generate the identifiant : SHA1(name + SHA1(password + aid) + sid)
+    // generate the identifiant : SHA-256(name + SHA-256(password + aid) + sid)
     if (!(name = this->request.getUri().queryItemValue("name")).isEmpty() &&
         (salt = this->request.getUri().queryItemValue("salt")).size() >= 32)
     {
@@ -91,7 +91,7 @@ void                        Execute::_identify()
         query.prepare(database.getQuery("HttpClient", "select_all_accounts"));
         if (database.query(query, result))
             for (i = 0, s = result.size(); i < s && id.isEmpty(); ++i)
-                if (name == QCryptographicHash::hash(result[i]["name"].toByteArray() + salt.toAscii(), QCryptographicHash::Sha1).toHex())
+                if (name == this->api.sha256(result[i]["name"].toByteArray() + salt.toAscii()))
                 {
                     id = result[i]["id"].toString();
                     break;
@@ -103,7 +103,7 @@ void                        Execute::_identify()
             // Create a new session. The client has 30 seconds to generate the identifiant.
             session = this->api.sessions().create(QDateTime::currentDateTime().addSecs(30), id, QStringList() << client.getId());
             // Compute the identifiant of the client
-            session->setInformation("identifiant", QCryptographicHash::hash(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + session->getId().toAscii(), QCryptographicHash::Sha1).toHex());
+            session->setInformation("identifiant", this->api.sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + session->getId().toAscii()));
             Plugin::addCookie(client, "sid", session->getId());
             // Return the id of the account, which is the salt of the password
             this->response.getContent().setContent(id.toAscii());
