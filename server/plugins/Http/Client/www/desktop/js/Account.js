@@ -69,7 +69,6 @@ function checkIdentification()
 			else
 			{
 				animation(identification, 1000, animationOpacity, true, null, 250);
-				animation(document.getElementById("interfaces"), 500, animationOpacity, true);
 				animation(document.getElementById("background"), 250, animationOpacity, false, null);
 			}
 		}
@@ -80,7 +79,6 @@ function checkIdentification()
 	else
 	{
 		animation(identification, 1000, animationOpacity, true, null, 250);
-		animation(document.getElementById("interfaces"), 500, animationOpacity, true);
 		animation(document.getElementById("background"), 250, animationOpacity, false, null);
 		getNewSessionId(false);
 	}
@@ -168,7 +166,6 @@ function identification()
 					changeOpacity(blueButton, 1);
 					gl_identification = false;
 				}, 500);
-				animation(document.getElementById("interfaces"), 500, animationOpacity, false, null, 250);
 				animation(document.getElementById("background"), 500, animationOpacity, true, null, 750);
 				animation(document.getElementById("menus"), 2000, animationOpacity, true, null, 500);
 			});

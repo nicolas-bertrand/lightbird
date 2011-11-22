@@ -17,8 +17,8 @@
 # define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser may download the content.
 # define DEFAULT_INTERFACE_NAME  "desktop"
 # define DATE_FORMAT             "yyyy-MM-dd hh:mm"
-# define IDENTIFICATION_ATTEMPTS 5  // Number of identifications attempts that can be done before the connection is systematically refused.
-# define IDENTIFICATION_TIME     30 // The period during which the failed identifications are kept.
+# define IDENTIFICATION_ATTEMPTS 10 // Number of identifications attempts that can be done before the connection is systematically refused.
+# define IDENTIFICATION_TIME     60 // The period during which the failed identifications are kept.
 
 class Plugin : public QObject,
                public LightBird::IPlugin,

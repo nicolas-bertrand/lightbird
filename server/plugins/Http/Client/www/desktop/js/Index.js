@@ -194,42 +194,6 @@ function changeOpacity(node, value)
 		node.style.opacity = value;
 }
 
-// Manage the display of the interfaces buttons when the mouse is over it
-// @param active : The node of the actived interface.
-// @param over : If the mouse is over or out.
-function interfaceOnMouseOver(active, over)
-{
-	var inactive1;
-	var inactive2;
-	
-	if (active == document.getElementById("interface_desktop"))
-	{
-		inactive1 = document.getElementById("interface_web");
-		inactive2 = document.getElementById("interface_mobile");
-	}
-	else if (active == document.getElementById("interface_web"))
-	{
-		inactive1 = document.getElementById("interface_desktop");
-		inactive2 = document.getElementById("interface_mobile");
-	}
-	else
-	{
-		inactive1 = document.getElementById("interface_desktop");
-		inactive2 = document.getElementById("interface_web");
-	}
-	if (over)
-	{
-		active.className = "on";
-		inactive1.className = "off";
-		inactive2.className = "off";
-	}
-	else
-	{
-		active.className = "off";
-		document.getElementById("interface_desktop").className = "on";
-	}
-}
-
 // Calculates the coordonates of the mouse
 function mouseCoordinates(event)
 {

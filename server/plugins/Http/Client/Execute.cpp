@@ -81,6 +81,7 @@ void                        Execute::_identify()
     int                     s;
     QString                 sid;
 
+    // If too many identification failed attempts has been done
     if (!Plugin::getInstance().identificationAllowed(this->client))
         return Plugin::response(client, 403, "Forbidden");
     // The client is asking the id of the account and a session id, in order to

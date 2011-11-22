@@ -14,9 +14,6 @@
 		<file alias="desktop/help/help/disconnection.html">www/desktop/help/help/disconnection.html</file>
 		<file alias="desktop/help/help/home.html">www/desktop/help/help/home.html</file>
 		<file alias="desktop/help/help/windows.html">www/desktop/help/help/windows.html</file>
-		<file alias="desktop/help/hint/interface_desktop.html">www/desktop/help/hint/interface_desktop.html</file>
-		<file alias="desktop/help/hint/interface_mobile.html">www/desktop/help/hint/interface_mobile.html</file>
-		<file alias="desktop/help/hint/interface_web.html">www/desktop/help/hint/interface_web.html</file>
 		<file alias="desktop/help/hint/lock.html">www/desktop/help/hint/lock.html</file>
 		<file alias="desktop/html/Explorer.html">www/desktop/html/Explorer.html</file>
 		<file alias="desktop/html/Information.html">www/desktop/html/Information.html</file>
@@ -47,12 +44,6 @@
 		<file alias="desktop/images/icons/video.png">www/desktop/images/icons/video.png</file>
 		<file alias="desktop/images/identification/error.png">www/desktop/images/identification/error.png</file>
 		<file alias="desktop/images/identification/form.png">www/desktop/images/identification/form.png</file>
-		<file alias="desktop/images/identification/interface_left_off.png">www/desktop/images/identification/interface_left_off.png</file>
-		<file alias="desktop/images/identification/interface_left_on.png">www/desktop/images/identification/interface_left_on.png</file>
-		<file alias="desktop/images/identification/interface_middle_off.png">www/desktop/images/identification/interface_middle_off.png</file>
-		<file alias="desktop/images/identification/interface_middle_on.png">www/desktop/images/identification/interface_middle_on.png</file>
-		<file alias="desktop/images/identification/interface_right_off.png">www/desktop/images/identification/interface_right_off.png</file>
-		<file alias="desktop/images/identification/interface_right_on.png">www/desktop/images/identification/interface_right_on.png</file>
 		<file alias="desktop/images/identification/loading.gif">www/desktop/images/identification/loading.gif</file>
 		<file alias="desktop/images/identification/lock.png">www/desktop/images/identification/lock.png</file>
 		<file alias="desktop/images/identification/panel.png">www/desktop/images/identification/panel.png</file>
