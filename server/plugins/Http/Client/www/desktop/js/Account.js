@@ -39,6 +39,8 @@ function checkIdentification()
 	if (localStorage.getItem("remember") == "false")
 	{
 		gl_identificationRemember = false;
+		// Tells the server that the session can be destroyed
+		request("GET", "Execute/Disconnect");
 		// Delete the session cookie and the identifiant
 		setCookie("sid", "", 0);
 		localStorage.removeItem("identifiant");
