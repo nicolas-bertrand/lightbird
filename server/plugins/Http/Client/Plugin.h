@@ -1,6 +1,7 @@
 #ifndef PLUGIN_H
 # define PLUGIN_H
 
+# include <QHash>
 # include <QMap>
 # include <QMutex>
 # include <QObject>
@@ -13,9 +14,11 @@
 # include "IPlugin.h"
 # include "ITimer.h"
 
-# define DEFAULT_CONTENT_TYPE   "application/octet-stream" // This is the default MIME type. The browser may download the content.
-# define DEFAULT_INTERFACE_NAME "desktop"
-# define DATE_FORMAT            "yyyy-MM-dd hh:mm"
+# define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser may download the content.
+# define DEFAULT_INTERFACE_NAME  "desktop"
+# define DATE_FORMAT             "yyyy-MM-dd hh:mm"
+# define IDENTIFICATION_ATTEMPTS 5  // Number of identifications attempts that can be done before the connection is systematically refused.
+# define IDENTIFICATION_TIME     30 // The period during which the failed identifications are kept.
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -23,11 +26,12 @@ class Plugin : public QObject,
                public LightBird::IDoExecution,
                public LightBird::IOnSerialize,
                public LightBird::IOnFinish,
-               public LightBird::IOnDisconnect
+               public LightBird::IOnDisconnect,
+               public LightBird::ITimer
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin LightBird::IOnUnserialize LightBird::IDoExecution LightBird::IOnSerialize
-                 LightBird::IOnFinish LightBird::IOnDisconnect)
+                 LightBird::IOnFinish LightBird::IOnDisconnect LightBird::ITimer)
 
 public:
     Plugin();
@@ -46,6 +50,7 @@ public:
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
     void    onFinish(LightBird::IClient &client);
     void    onDisconnect(LightBird::IClient &client);
+    bool    timer(const QString &name);
 
     // Other
     static Plugin   &getInstance();
@@ -63,12 +68,17 @@ public:
     /// @param separator : If true, the separator of the date (dd MM yyyy) is "-".
     /// Otherwise it is " ".
     QString         httpDate(const QDateTime &date, bool separator = false);
+    /// @brief Checks if the client is allowed to attempt a new identification.
+    /// If it failed a few times over a given period, the attempt is refused.
+    bool            identificationAllowed(LightBird::IClient &client);
+    /// @brief Called when a identification attempt failed.
+    void            identificationFailed(LightBird::IClient &client);
 
 private:
     /// @brief Manages the session.
     void    _session(LightBird::IClient &client, const QString &uri);
     /// @brief Checks that the token is correct.
-    bool    _checkToken(LightBird::Session &session, const QByteArray &token, const QString &uri);
+    bool    _checkToken(LightBird::IClient &client, LightBird::Session &session, const QByteArray &token, const QString &uri);
     /// @brief Returns the name of the interface used by the user.
     QString _getInterface(LightBird::IClient &client);
     /// @brief Returns a file that is stored in the filesPath instead of the www directory.
@@ -83,6 +93,8 @@ private:
     QString             wwwDir;     ///< The path to the www directory (where the interface is stored).
     QMap<int, QString>  daysOfWeek; ///< The names of the days of the week in english in three letters.
     QMap<int, QString>  months;     ///< The names of the months in three letters.
+    QHash<QHostAddress, QPair<QDateTime, quint32> > attempts; ///< Stores the number of failed connection attempts per ip and date.
+    QMutex              mutex;      ///< Makes this class thread safe.
 };
 
 #endif // PLUGIN_H

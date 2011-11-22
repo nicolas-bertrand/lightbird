@@ -58,6 +58,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->wwwDir = "www";
     Medias::getInstance(this);
     Uploads::getInstance(this);
+    // This timer will remove the outdated data in this->attempts
+    api->timers().setTimer("attempts", IDENTIFICATION_TIME * 1000);
     return (true);
 }
 
@@ -182,6 +184,24 @@ void    Plugin::onDisconnect(LightBird::IClient &client)
     Uploads::getInstance().disconnected(client);
 }
 
+bool    Plugin::timer(const QString &name)
+{
+    // Remove the outdated data in this->attempts
+    if (name == "attempts")
+    {
+        this->mutex.lock();
+        QMutableHashIterator<QHostAddress, QPair<QDateTime, quint32> > it(this->attempts);
+        while (it.hasNext())
+        {
+            it.next();
+            if (it.value().first < QDateTime::currentDateTime())
+                it.remove();
+        }
+        this->mutex.unlock();
+    }
+    return (true);
+}
+
 void        Plugin::_session(LightBird::IClient &client, const QString &uri)
 {
     QString id;
@@ -191,7 +211,7 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
 
     // If the session or the token doesn't exists, the cookie and the account are cleared
     if (sid.isEmpty() || (session = this->_api->sessions().getSession(sid)).isNull() ||
-        (!token.isEmpty() && !this->_checkToken(session, token.toAscii(), uri)))
+        (!token.isEmpty() && !this->_checkToken(client, session, token.toAscii(), uri)))
     {
         client.getResponse().getHeader().remove("set-cookie");
         this->addCookie(client, "sid");
@@ -219,7 +239,7 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
     }
 }
 
-bool            Plugin::_checkToken(LightBird::Session &session, const QByteArray &token, const QString &uri)
+bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Session &session, const QByteArray &token, const QString &uri)
 {
     QByteArray  identifiant = session->getInformation("identifiant").toByteArray();
     QDateTime   date = QDateTime::currentDateTime().toUTC();
@@ -228,6 +248,7 @@ bool            Plugin::_checkToken(LightBird::Session &session, const QByteArra
     if (token == this->_api->sha256(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii()) ||
         token == this->_api->sha256(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii()))
         return (true);
+    this->identificationFailed(client);
     return (false);
 }
 
@@ -334,6 +355,26 @@ QString Plugin::httpDate(const QDateTime &date, bool separator)
     return (this->daysOfWeek[date.date().dayOfWeek()] + ", " + date.toString("dd") +
             s + this->months[date.date().month()] + s + date.toString("yyyy") + " " +
             date.toString("hh:mm:ss")+ " GMT");
+}
+
+bool        Plugin::identificationAllowed(LightBird::IClient &client)
+{
+    bool    result = true;
+
+    this->mutex.lock();
+    if (this->attempts.value(client.getPeerAddress()).second >= IDENTIFICATION_ATTEMPTS &&
+        this->attempts.value(client.getPeerAddress()).first > QDateTime::currentDateTime())
+        result = false;
+    this->mutex.unlock();
+    return (result);
+}
+
+void    Plugin::identificationFailed(LightBird::IClient &client)
+{
+    this->mutex.lock();
+    this->attempts[client.getPeerAddress()].first = QDateTime::currentDateTime().addSecs(IDENTIFICATION_TIME);
+    this->attempts[client.getPeerAddress()].second++;
+    this->mutex.unlock();
 }
 
 Q_EXPORT_PLUGIN2(plugin, Plugin)
