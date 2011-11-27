@@ -110,9 +110,10 @@ function loadJsCssFile(name)
 		document.getElementsByTagName("head")[0].appendChild(node);
 }
 
-// Register a new resource that can be loaded an any time using the method load
-// @resource : The name of the resource to register. it must correspond to the
-// files resources.(css|js|html)
+// Register a new resource that can be loaded an any time using the method load.
+// @resource : The name of the resource to register. It must correspond to the
+// files "resource.(css|js|html)". The Javascript must have a method
+// "initialize + resource" which is called the first time the resource is loaded.
 Resources.prototype.register = function(resource)
 {
 	this[resource] = new Object();

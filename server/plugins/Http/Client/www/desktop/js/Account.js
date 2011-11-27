@@ -216,30 +216,25 @@ function disconnection()
 	if (gl_disconnecting == true)
 		return ;
 	gl_disconnecting = true;
-	var callback = function (HttpRequest)
-	{
-		// The server has disconnected the user
-		gl_identified = false;
-		setCookie("sid", "", 0);
-		localStorage.removeItem("identifiant");
-		var next;
-		// Close the windows
-		for (id in gl_windows)
-			closeWindow(id);
-		// Hide the help
-		if (document.getElementById("help").style.display == "block")
-			animation(document.getElementById("help"), 1000, animationOpacity, false);
-		// Hide the menu and the background
-		animation(document.getElementById("menus"), 1000, animationOpacity, false, function() {gl_disconnecting = false; checkIdentification();});
-		animation(document.getElementById("background"), 250, animationOpacity, false, null, 250);
-		// Display the identification background
-		document.getElementById("background_identification").style.display = "block";
-		// Get a new session id
-		getNewSessionId(false);
-	}
-	
 	// Tells the server that the client want to disconnect
-	request("GET", "Execute/Disconnect", callback);
+	request("GET", "Execute/Disconnect");
+	// We are no longer identified
+	gl_identified = false;
+	setCookie("sid", "", 0);
+	localStorage.removeItem("identifiant");
+	// Close the windows
+	for (id in gl_windows)
+		closeWindow(id);
+	// Hide the help
+	if (document.getElementById("help").style.display == "block")
+		animation(document.getElementById("help"), 1000, animationOpacity, false);
+	// Hide the menu and the background
+	animation(document.getElementById("menus"), 1000, animationOpacity, false, function() {gl_disconnecting = false; checkIdentification();});
+	animation(document.getElementById("background"), 250, animationOpacity, false, null, 250);
+	// Display the identification background
+	document.getElementById("background_identification").style.display = "block";
+	// Get a new session id
+	getNewSessionId(false);
 }
 
 // If the user is not identified, a new session id is get every 30 seconds via this method.
