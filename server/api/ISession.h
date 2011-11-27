@@ -41,7 +41,7 @@ namespace LightBird
         /// @brief Returns the creation date of the session.
         virtual QDateTime   getCreation() const = 0;
         /// @see LightBird::ISessions::destroy
-        bool                destroy(bool disconnect = false);
+        virtual bool        destroy(bool disconnect = false) = 0;
 
         // Clients
         /// @brief Returns the list of the clients associated with the session.

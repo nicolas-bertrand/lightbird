@@ -7,57 +7,22 @@ var gl_errorMessage = "<h2>Erreur !</h2><p>Impossible de r&eacute;cup&eacute;rer
 function Resources()
 {
 	// Manage the explorer window
-	this.Explorer = new Object();
-	this.Explorer.html = "Explorer.html";
-	this.Explorer.css = "Explorer.css";
-	this.Explorer.js = "Explorer.js";
-	this.Explorer.callback = "initializeExplorer";
-	this.Explorer.loaded = false;
-	this.Explorer.jsLoaded = false;
-	this.Explorer.loading = false;
-	this.Explorer.queue = new Array();
-	
+	this.register("Explorer");
 	// Display and modify informations on a file
-	this.Information = new Object();
-	this.Information.html = "Information.html";
-	this.Information.css = "Information.css";
-	this.Information.js = "Information.js";
-	this.Information.callback = "initializeInformation";
-	this.Information.loaded = false;
-	this.Information.jsLoaded = false;
-	this.Information.loading = false;
-	this.Information.queue = new Array();
-	
+	this.register("Information");
 	// The media player
-	this.Player = new Object();
-	this.Player.html = "Player.html";
-	this.Player.css = "Player.css";
-	this.Player.js = "Player.js";
-	this.Player.callback = "initializePlayer";
-	this.Player.loaded = false;
-	this.Player.jsLoaded = false;
-	this.Player.loading = false;
-	this.Player.queue = new Array();
-	
+	this.register("Player");
 	// The uploader
-	this.Upload = new Object();
-	this.Upload.html = "Upload.html";
-	this.Upload.css = "Upload.css";
-	this.Upload.js = "Upload.js";
-	this.Upload.callback = "initializeUpload";
-	this.Upload.loaded = false;
-	this.Upload.jsLoaded = false;
-	this.Upload.loading = false;
-	this.Upload.queue = new Array();
+	this.register("Upload");
 	
-	this.load("Explorer");
+	/*this.load("Explorer");
 	this.load("Information");
 	this.load("Player");
-	this.load("Upload");
+	this.load("Upload");*/
 }
 
 // Load a resource.
-// @resource : The name og the resource to load.
+// @resource : The name of the resource to load.
 // @callback : A function that will be called when the resource has been loaded.
 // The content of the html is given in parameter.
 // @return True if the resource is going to be loaded.
@@ -143,4 +108,20 @@ function loadJsCssFile(name)
 	}
 	if (node != undefined)
 		document.getElementsByTagName("head")[0].appendChild(node);
+}
+
+// Register a new resource that can be loaded an any time using the method load
+// @resource : The name of the resource to register. it must correspond to the
+// files resources.(css|js|html)
+Resources.prototype.register = function(resource)
+{
+	this[resource] = new Object();
+	this[resource].html = resource + ".html";
+	this[resource].css = resource + ".css";
+	this[resource].js = resource + ".js";
+	this[resource].callback = "initialize" + resource;
+	this[resource].loaded = false;
+	this[resource].jsLoaded = false;
+	this[resource].loading = false;
+	this[resource].queue = new Array();
 }

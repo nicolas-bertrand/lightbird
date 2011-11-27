@@ -123,12 +123,12 @@ void                        Execute::_identify()
     else if (!(token = this->request.getUri().queryItemValue("token")).isEmpty() &&
              !(sid = Plugin::getCookie(client, "sid")).isEmpty() &&
              !(session = this->api.sessions().getSession(sid)).isNull() &&
+             !this->request.isError() &&
              client.getAccount().setId(session->getAccount()) &&
              client.getAccount().isActive())
     {
         session->setAccount(client.getAccount().getId());
         session->setExpiration(QDateTime::currentDateTime().addMonths(1));
-        session->setInformation("identifiant", id);
     }
     // The identification failed
     else
@@ -137,6 +137,8 @@ void                        Execute::_identify()
         client.getResponse().getHeader().remove("set-cookie");
         Plugin::addCookie(client, "sid");
         client.getAccount().clear();
+        if (!session.isNull())
+            session->destroy();
     }
 }
 

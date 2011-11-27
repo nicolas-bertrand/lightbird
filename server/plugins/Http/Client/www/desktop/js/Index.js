@@ -35,6 +35,9 @@ function onResize()
 	for (var id in gl_windows)
 		if (gl_windows[id].onResize != undefined)
 			gl_windows[id].onResize();
+	// Ensures that this function is called every time the browser is resized
+	if (!gl_loaded)
+		window.onresize = onResize;
 }
 
 // Ajust the background size according to the size of the browser
@@ -52,13 +55,6 @@ function adjustBackgroundSize()
 	var desktop = document.getElementById("desktop");
 	desktop.style.width = gl_browserSize.width + "px";
 	desktop.style.height = gl_browserSize.height + "px";
-	
-	// Display the background the first time the page is loaded
-	if (!gl_loaded)
-	{
-		window.onresize = onResize;
-		animation(background_identification, 500, animationOpacity, true, null, 0, 10);
-	}
 }
 
 // Find the size of the browser window

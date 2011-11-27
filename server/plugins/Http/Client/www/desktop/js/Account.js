@@ -81,6 +81,9 @@ function checkIdentification()
 		animation(identification, 1000, animationOpacity, true, null, 250);
 		animation(document.getElementById("background"), 250, animationOpacity, false, null);
 		getNewSessionId(false);
+		// Display the background the first time the page is loaded
+		if (!gl_loaded)
+			animation(document.getElementById("background_identification"), 500, animationOpacity, true, null, 0, 10);
 	}
 }
 
@@ -229,6 +232,8 @@ function disconnection()
 		// Hide the menu and the background
 		animation(document.getElementById("menus"), 1000, animationOpacity, false, function() {gl_disconnecting = false; checkIdentification();});
 		animation(document.getElementById("background"), 250, animationOpacity, false, null, 250);
+		// Display the identification background
+		document.getElementById("background_identification").style.display = "block";
 		// Get a new session id
 		getNewSessionId(false);
 	}
