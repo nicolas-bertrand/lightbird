@@ -68,6 +68,7 @@
 		<file alias="desktop/js/Animations.js">www/desktop/js/Animations.js</file>
 		<file alias="desktop/js/Configuration.js">www/desktop/js/Configuration.js</file>
 		<file alias="desktop/js/Context.js">www/desktop/js/Context.js</file>
+		<file alias="desktop/js/Desktop.js">www/desktop/js/Desktop.js</file>
 		<file alias="desktop/js/Explorer.js">www/desktop/js/Explorer.js</file>
 		<file alias="desktop/js/Help.js">www/desktop/js/Help.js</file>
 		<file alias="desktop/js/Index.js">www/desktop/js/Index.js</file>
@@ -78,6 +79,8 @@
 		<file alias="desktop/js/Upload.js">www/desktop/js/Upload.js</file>
 		<file alias="desktop/js/Window.js">www/desktop/js/Window.js</file>
 		<file alias="desktop/js/Windows.js">www/desktop/js/Windows.js</file>
+		<file alias="desktop/languages/en.js">www/desktop/languages/en.js</file>
+		<file alias="desktop/languages/fr.js">www/desktop/languages/fr.js</file>
 		<file alias="desktop/libs/jQuery/jquery.js">www/desktop/libs/jQuery/jquery.js</file>
 		<file alias="desktop/libs/SHA256.js">www/desktop/libs/SHA256.js</file>
 		<file alias="desktop/libs/SHJS/sh_c.js">www/desktop/libs/SHJS/sh_c.js</file>

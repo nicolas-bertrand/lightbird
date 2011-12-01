@@ -81,6 +81,8 @@ private:
     bool    _checkToken(LightBird::IClient &client, LightBird::Session &session, const QByteArray &token, const QString &uri);
     /// @brief Returns the name of the interface used by the user.
     QString _getInterface(LightBird::IClient &client);
+    /// @brief Returns the correct translation of the client.
+    void    _translation(LightBird::IClient &client, const QString &interface);
     /// @brief Returns a file that is stored in the filesPath instead of the www directory.
     /// The account must have the right to read the file.
     void    _getFile(LightBird::IClient &client);

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <configuration>
-  <name></name>
+  <name>Tarsiger cyanurus</name>
   <pluginsPath>plugins</pluginsPath>
   <QtPluginsPath>QtPlugins</QtPluginsPath>
   <filesPath>files</filesPath>
@@ -43,14 +43,18 @@
   </log>
   <ports>
     <port protocol="HTTP" transport="TCP" maxClients="100">80</port>
+    <port protocol="HTTP" transport="TCP" maxClients="100">4242</port>
   </ports>
   <plugins>
-    <plugin>Http/Get</plugin>
+    <plugin>Extensions/Identifier</plugin>
+    <plugin>Http/Client</plugin>
     <plugin>Http/Parser</plugin>
     <plugin>Log/File</plugin>
+    <!--plugin>Test</plugin-->
   </plugins>
   <configurations>
-    <plugin id="Http/Get"/>
+    <plugin id="Extensions/Identifier"/>
+    <plugin id="Http/Client"/>
     <plugin id="Http/Parser"/>
     <plugin id="Log/File"/>
     <plugin id="Test"/>

@@ -8,6 +8,14 @@ var Configuration =
 	newWindowHeight : 300,
 	// Default animation FPS
 	animationFPS : 20,
+    // The configuration of the desktop
+    Desktop :
+    {
+        minWidth : 600,
+        minHeight : 400,
+        player_document_height : 50,
+        player_media_height : 100,
+    },
 	// The size of the window
 	Window :
 	{

@@ -18,7 +18,7 @@ int                     main(int argc, char **argv)
     // Instanciates and initializes the server
     if (Server::instance(arguments, application))
     {
-        Log::info("Executing the main event loop", "Server", "_initialize");
+        Log::info("Executing the main event loop", "main.cpp", "main");
         result = application->exec();
         Log::info("The main event loop has finished", Properties("code", QString::number(result)), "main.cpp", "main");
     }

@@ -10,8 +10,6 @@ var gl_disconnecting = false;	// Ensure that there is only one disconnection at 
 // Initialize the Account scripts
 function initializeAccount()
 {
-	// Launch the identification timer
-	gl_identificationTimer = setTimeout("getNewSessionId(true)", C.identificationTimerTimeout);
 	// Check if the user is identifies to an account
 	checkIdentification();
 }
@@ -21,17 +19,9 @@ function initializeAccount()
 function checkIdentification()
 {
 	var identification = document.getElementById("identification");
-
-	// If the browser is Internet Explorer, the padding of the identification forms is modified
-	if (/MSIE (\d+\.\d+);/.test(navigator.userAgent))
-	{
-		var forms = identification.getElementsByTagName("input");
-		for (i = 0; i < forms.length; ++i)
-		{
-			forms[i].style.paddingTop = "9px";
-			forms[i].style.height = "29px";
-		}
-	}
+    
+    // Translate the value of the user input
+    identification.getElementsByTagName("input")[0].value = T.Identification.user;
 	
 	// Check if the session has been remembered
 	if (localStorage.getItem("remember") != "false")
@@ -40,7 +30,8 @@ function checkIdentification()
 	{
 		gl_identificationRemember = false;
 		// Tells the server that the session can be destroyed
-		request("GET", "Execute/Disconnect");
+        if (!gl_loaded)
+            request("GET", "Execute/Disconnect");
 		// Delete the session cookie and the identifiant
 		setCookie("sid", "", 0);
 		localStorage.removeItem("identifiant");
@@ -61,8 +52,7 @@ function checkIdentification()
 			if (HttpRequest.status == 200)
 			{
 				gl_identified = true;
-				document.getElementById("menus").style.display = "block";
-				animation(document.getElementById("menus"), 2000, animationOpacity, true);
+				animation(document.getElementById("desktop"), 2000, animationOpacity, true);
 				animation(document.getElementById("background"), 250, animationOpacity, true, null);
 			}
 			// Display the identification panel
@@ -80,7 +70,6 @@ function checkIdentification()
 	{
 		animation(identification, 1000, animationOpacity, true, null, 250);
 		animation(document.getElementById("background"), 250, animationOpacity, false, null);
-		getNewSessionId(false);
 		// Display the background the first time the page is loaded
 		if (!gl_loaded)
 			animation(document.getElementById("background_identification"), 500, animationOpacity, true, null, 0, 10);
@@ -169,8 +158,8 @@ function identification()
 					changeOpacity(blueButton, 1);
 					gl_identification = false;
 				}, 500);
+				animation(document.getElementById("desktop"), 2000, animationOpacity, true, null, 500);
 				animation(document.getElementById("background"), 500, animationOpacity, true, null, 750);
-				animation(document.getElementById("menus"), 2000, animationOpacity, true, null, 500);
 			});
 		}
 		// Otherwise a wrong password has been gived
@@ -229,30 +218,10 @@ function disconnection()
 	if (document.getElementById("help").style.display == "block")
 		animation(document.getElementById("help"), 1000, animationOpacity, false);
 	// Hide the menu and the background
-	animation(document.getElementById("menus"), 1000, animationOpacity, false, function() {gl_disconnecting = false; checkIdentification();});
+	animation(document.getElementById("desktop"), 1000, animationOpacity, false, function() {gl_disconnecting = false; checkIdentification();});
 	animation(document.getElementById("background"), 250, animationOpacity, false, null, 250);
 	// Display the identification background
 	document.getElementById("background_identification").style.display = "block";
-	// Get a new session id
-	getNewSessionId(false);
-}
-
-// If the user is not identified, a new session id is get every 30 seconds via this method.
-// It is called by the timer gl_identificationTimer.
-// @param repeat : If the timer has to be repeated
-function getNewSessionId(repeat)
-{
-	// A new id is get only if the user is not identified
-	if (gl_identified == false)
-	{
-		// Remove the session cookie
-		var sid = setCookie("sid", "", 0);
-		// Get the new session id
-		request("GET", "blank");
-	}
-	// Repeat the timer
-	if (repeat == true)
-		gl_identificationTimer = setTimeout("getNewSessionId(true)", C.identificationTimerTimeout);
 }
 
 // Handle the lock/unlock button that allows user to stay connected when the page is refreshed.

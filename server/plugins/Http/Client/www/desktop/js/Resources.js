@@ -14,7 +14,7 @@ function Resources()
 	this.register("Player");
 	// The uploader
 	this.register("Upload");
-	
+	// Load the resources
 	/*this.load("Explorer");
 	this.load("Information");
 	this.load("Player");

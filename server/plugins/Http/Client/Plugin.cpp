@@ -134,6 +134,8 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     // The client wants to execute something
     else if (uri.left(8) == "Execute/")
         Execute(*this->_api, client, uri.right(uri.size() - uri.indexOf('/') - 1));
+    else if (uri.left(14) == "Translation.js")
+        _translation(client, interface);
     // The client wants to download a file
     else
     {
@@ -270,6 +272,24 @@ QString     Plugin::_getInterface(LightBird::IClient &client)
     else if ((interface = client.getInformations().value("interface").toString()).isEmpty())
         interface = DEFAULT_INTERFACE_NAME;
     return (interface);
+}
+
+void    Plugin::_translation(LightBird::IClient &client, const QString &interface)
+{
+    QString path = this->_api->getPluginPath() + this->wwwDir + "/" + interface + "/languages/";
+    QString language = this->getCookie(client, "language");
+
+    // Try to get the translation in the language asked by the client in the cookie
+    if (language.size() == 2 && QFileInfo(path + language + ".js").isFile())
+        path += language + ".js";
+    // Otherwise if there is a translation in the language of the server we use it
+    else if (QFileInfo(path + this->_api->getLanguage() + ".js").isFile())
+        path += this->_api->getLanguage() + ".js";
+    // English is the default language
+    else
+        path += "en.js";
+    // Sends the translation
+    client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
 }
 
 void    Plugin::_getFile(LightBird::IClient &client)

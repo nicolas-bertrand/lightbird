@@ -5,7 +5,7 @@
 Video::Video(LightBird::IClient &client) : Media(client)
 {
     QString format;
-    quint32 width = this->file->getInformation("width").toUInt();
+    qint32  width = this->file->getInformation("width").toUInt();
     quint32 quality = this->uri.queryItemValue("quality").toUInt();
     quint32 seek = this->uri.queryItemValue("seek").toUInt();
 

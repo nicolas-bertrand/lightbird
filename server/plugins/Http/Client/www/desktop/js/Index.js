@@ -5,23 +5,26 @@ var gl_loaded = false;
 // Holds the size of the browser
 var gl_browserSize;
 
-// Initialise the page
+// Initialize the page (called by onload)
 function load()
 {
 	if (gl_loaded)
 		return ;
-	// The right click is disabled in order to replace the normal contextual menu of the browser.
-	// This behaviour should be editable via the preferences.
-	//document.oncontextmenu = function() { return (false); };
+	// Initialize the resources
+	gl_resources = new Resources();
+	// Initialize the desktop
+	gl_desktop = new Desktop();
 	// Initialise the browser size
 	onResize();
-	// Initialize the Account management
+	// onResize is called every time the browser is resized
+	window.onresize = onResize;
+	// Initialize the Account management system
 	initializeAccount();
-	// Load the resources
-	gl_resources = new Resources();
+	// The right click is disabled in order to replace the normal contextual menu of the browser.
+	//document.oncontextmenu = function() { return (false); };
+	document.getElementById("loading_client").style.display = "none";
 	// Ensure that the load function will not be called twice
 	gl_loaded = true;
-	document.getElementById("loading_client").style.display = "none";
 }
 
 // This function is called when the size of the browser change
@@ -31,13 +34,12 @@ function onResize()
 	gl_browserSize = getBrowserSize();
 	// Update the background
 	adjustBackgroundSize();
+    // Resize the desktop
+    gl_desktop.onResize();
 	// Call the resize function of all the windows that implements it
 	for (var id in gl_windows)
 		if (gl_windows[id].onResize != undefined)
 			gl_windows[id].onResize();
-	// Ensures that this function is called every time the browser is resized
-	if (!gl_loaded)
-		window.onresize = onResize;
 }
 
 // Ajust the background size according to the size of the browser
@@ -360,4 +362,12 @@ function randomString(size)
     return (text);
 }
 
+// Translate the text in the correct language
+function tr(text)
+{
+    if (text)
+        document.write(text);
+    else
+        document.write("Untranslated");
+}
 
