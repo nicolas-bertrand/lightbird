@@ -54,7 +54,7 @@ Session::~Session()
 {
 }
 
-Session::Session(const Session &session)
+Session::Session(const Session &session) : Table()
 {
     *this = session;
 }

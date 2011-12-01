@@ -15,7 +15,7 @@ TableCollections::~TableCollections()
 {
 }
 
-TableCollections::TableCollections(const TableCollections &table)
+TableCollections::TableCollections(const TableCollections &table) : Table(), TableObjects()
 {
     *this = table;
 }

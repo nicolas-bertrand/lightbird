@@ -15,7 +15,7 @@ TableDirectories::~TableDirectories()
 {
 }
 
-TableDirectories::TableDirectories(const TableDirectories &table)
+TableDirectories::TableDirectories(const TableDirectories &table) : Table(), TableObjects()
 {
     *this = table;
 }

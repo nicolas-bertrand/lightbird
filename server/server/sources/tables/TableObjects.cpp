@@ -10,7 +10,7 @@ TableObjects::~TableObjects()
 {
 }
 
-TableObjects::TableObjects(const TableObjects &table)
+TableObjects::TableObjects(const TableObjects &table) : Table()
 {
     *this = table;
 }

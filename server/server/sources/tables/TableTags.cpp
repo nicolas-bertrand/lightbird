@@ -13,7 +13,7 @@ TableTags::~TableTags()
 {
 }
 
-TableTags::TableTags(const TableTags &table)
+TableTags::TableTags(const TableTags &table) : Table()
 {
     *this = table;
 }

@@ -13,7 +13,7 @@ TableGroups::~TableGroups()
 {
 }
 
-TableGroups::TableGroups(const TableGroups &table)
+TableGroups::TableGroups(const TableGroups &table) : Table(), TableAccessors()
 {
     *this = table;
 }

@@ -20,9 +20,7 @@ public:
     /// @see _initialize
     Future()
     {
-        T   defaultValue;
-
-        this->_initialize(*&defaultValue);
+        this->_initialize(T());
     }
     /// @see _initialize
     Future(T defaultValue)

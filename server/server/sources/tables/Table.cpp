@@ -18,7 +18,7 @@ Table::~Table()
 {
 }
 
-Table::Table(const Table &table)
+Table::Table(const Table &table) : QObject()
 {
     *this = table;
 }
