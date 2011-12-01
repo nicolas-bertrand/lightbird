@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 SUBDIRS = server \
-          clients \
+          #clients \

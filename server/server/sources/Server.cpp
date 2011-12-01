@@ -160,7 +160,7 @@ bool            Server::_loadTranslation(const QString &file, const QString &res
         language = resource + language;
     if (!translator.load(language))
     {
-        Log::debug("Failed to load the translation", Properties("file", language), "Server", "_loadTranslation");
+        Log::warning("Failed to load the translation", Properties("file", language), "Server", "_loadTranslation");
         return (false);
     }
     Log::debug("Translation loaded", Properties("file", language), "Server", "_loadTranslation");

@@ -33,8 +33,8 @@ RC_FILE = resources/images/logo.rc  # Windows
 ICON = resources/images/logo.icns   # Mac OS X
 
 # Translations
-TRANSLATIONS = resources/languages/server_en.ts \
-    resources/languages/server_fr.ts
+TRANSLATIONS = resources/languages/en.ts \
+    resources/languages/fr.ts
 
 # Temporary directories
 OBJECTS_DIR = tmp

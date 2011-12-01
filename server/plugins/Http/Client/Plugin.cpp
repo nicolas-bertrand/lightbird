@@ -223,9 +223,6 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
                 this->_api->sessions().getSession(it.next())->removeClient(client.getId());
         }
         client.getAccount().clear();
-        // Tells the client that it is not identified
-        if (uri == "blank")
-            this->response(client, 403, "Forbidden");
     }
     // Otherwise the client is identified
     else if (!token.isEmpty())
@@ -251,6 +248,9 @@ bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Sessi
         return (true);
     this->identificationFailed(client);
     client.getRequest().setError(true);
+    // Tells the client that it is not identified
+    if (uri == "blank")
+        this->response(client, 403, "Forbidden");
     return (false);
 }
 

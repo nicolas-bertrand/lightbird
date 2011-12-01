@@ -123,6 +123,17 @@ const QString               &Api::getPluginPath() const
     return (this->pluginPath);
 }
 
+QString                     Api::getLanguage() const
+{
+    QString language = Configurations::instance()->get("language");
+
+    if (language.isEmpty())
+        language = QLocale::system().name().section('_', 0, 0);
+    if (language.isEmpty())
+        language = "en";
+    return (language);
+}
+
 QByteArray                  Api::sha256(const QByteArray &data) const
 {
     return (Sha256::hash(data));
