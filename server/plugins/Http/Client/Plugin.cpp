@@ -112,7 +112,7 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     // Set the generic HTTP headers
     client.getResponse().getHeader().insert("server", "LightBird");
     client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
-    client.getResponse().getHeader().insert("cache-control", "private");
+    client.getResponse().getHeader().insert("cache-control", "no-cache");
     // Get the uri of the request
     uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority |
                                                 QUrl::RemoveQuery | QUrl::RemoveFragment);

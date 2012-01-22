@@ -14,7 +14,7 @@ function load()
 	gl_resources = new Resources();
 	// Initialize the desktop
 	gl_desktop = new Desktop();
-	// Initialise the browser size
+	// Initialize the browser size
 	onResize();
 	// onResize is called every time the browser is resized
 	window.onresize = onResize;
@@ -52,11 +52,6 @@ function adjustBackgroundSize()
 	var background_identification = document.getElementById("background_identification");
 	background_identification.style.width = gl_browserSize.width + "px";
 	background_identification.style.height = gl_browserSize.height + "px";
-	
-	// Set the size of the desktop (which is above the background)
-	var desktop = document.getElementById("desktop");
-	desktop.style.width = gl_browserSize.width + "px";
-	desktop.style.height = gl_browserSize.height + "px";
 }
 
 // Find the size of the browser window

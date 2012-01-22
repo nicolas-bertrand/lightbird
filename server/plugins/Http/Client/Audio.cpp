@@ -5,7 +5,7 @@
 Audio::Audio(LightBird::IClient &client) : Media(client)
 {
     QString format = "mp3";
-    qint32  bitrate = this->file->getInformation("bit rate").toUInt();
+    qint32  bitrate = this->file->getInformation("bit rate").toInt();
     quint32 quality = this->uri.queryItemValue("quality").toUInt();
     quint32 seek = this->uri.queryItemValue("seek").toUInt();
 

@@ -1,52 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="UTF-8" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="description" content="The LightBird Http Client!" />
-    <link rel="stylesheet" type="text/css" href="Client/css/help.css" />
-    <link rel="stylesheet" type="text/css" href="Client/css/identification.css" />
-    <link rel="stylesheet" type="text/css" href="Client/css/index.css" />
-    <link rel="stylesheet" type="text/css" href="Client/css/windows.css" />
-    <link rel="icon" type="image/png" href="Client/images/favicon.png" />
-    <script type="text/javascript" src="Client/js/Configuration.js"></script>
-    <script type="text/javascript" src="Client/js/Account.js"></script>
-    <script type="text/javascript" src="Client/js/Animations.js"></script>
-    <script type="text/javascript" src="Client/js/Context.js"></script>
-    <script type="text/javascript" src="Client/js/Desktop.js"></script>
-    <script type="text/javascript" src="Client/js/Help.js"></script>
-    <script type="text/javascript" src="Client/js/Index.js"></script>
-    <script type="text/javascript" src="Client/js/Resources.js"></script>
-    <script type="text/javascript" src="Client/js/Selection.js"></script>
-    <script type="text/javascript" src="Client/js/Window.js"></script>
-    <script type="text/javascript" src="Client/js/Windows.js"></script>
-    <script type="text/javascript" src="/Client/libs/jQuery/jquery.js"></script>
-    <script type="text/javascript" src="Client/libs/SHA256.js"></script>
-    <script type="text/javascript" src="/Client/libs/SHJS/sh_main.js"></script>
-    <script type="text/javascript" src="Client/Translation.js"></script>
-    <link href="/Client/libs/SHJS/sh_style.css" rel="stylesheet" type="text/css" />
+    <link href="/Client/css/help.css" rel="stylesheet" />
+    <link href="/Client/css/identification.css" rel="stylesheet" />
+    <link href="/Client/css/index.css" rel="stylesheet" />
+    <link href="/Client/css/windows.css" rel="stylesheet" />
+    <link href="/Client/libs/SHJS/sh_style.css" rel="stylesheet" />
+    <link href="/Client/images/favicon.png" rel="icon" />
+    <script src="/Client/js/Configuration.js"></script>
+    <script src="/Client/js/Account.js"></script>
+    <script src="/Client/js/Animations.js"></script>
+    <script src="/Client/js/Context.js"></script>
+    <script src="/Client/js/Desktop.js"></script>
+    <script src="/Client/js/Help.js"></script>
+    <script src="/Client/js/Index.js"></script>
+    <script src="/Client/js/Resources.js"></script>
+    <script src="/Client/js/Selection.js"></script>
+    <script src="/Client/js/Window.js"></script>
+    <script src="/Client/js/Windows.js"></script>
+    <script src="/Client/libs/jQuery/jquery.js"></script>
+    <script src="/Client/libs/SHA256.js"></script>
+    <script src="/Client/libs/SHJS/sh_main.js"></script>
+    <script src="/Client/Translation.js"></script>
     <title>LightBird</title>
 </head>
 
-<body onload="load()" onmousemove="moveWindow(event)" onmousedown="contextMenu(event)" onmouseup="stopWindow()">
+<body onload="load()" onmousemove="gl_desktop.mouseMove(event)" onmouseup="gl_desktop.mouseUp()" onmousedown="contextMenu(event)">
     <img id="background" src="Client/images/backgrounds/07.jpg" alt="background" />
     <img id="background_identification" src="Client/images/backgrounds/identification.jpg" alt="background" />
 
     <div id="desktop">
         <div class="top">
-            <div class="menus">
+            <div class="menu">
                 <ul>
-                    <li onmousedown="openWindow(T.Menus.files, 'Explorer', event)"><script>tr(T.Menus.files)</script></li>
-                    <li onmousedown="openWindow(T.Menus.uploads, 'Upload', event)"><script>tr(T.Menus.uploads)</script></li>
-                    <li onmousedown="openWindow(T.Menus.settings, 'Player', event)"><script>tr(T.Menus.settings)</script></li>
-                    <li onmousedown="help(event)"><script>tr(T.Menus.help)</script></li>
-                    <li onmousedown="disconnection(event)"><script>tr(T.Menus.quit)</script></li>
+                    <li onmousedown="gl_desktop.open('files', event)"><script>tr(T.Menu.files)</script></li>
+                    <li onmousedown="openWindow(T.Menu.uploads, 'Upload', event)"><script>tr(T.Menu.uploads)</script></li>
+                    <li onmousedown="openWindow(T.Menu.settings, 'Player', event)"><script>tr(T.Menu.settings)</script></li>
+                    <li onmousedown="help(event)"><script>tr(T.Menu.help)</script></li>
+                    <li onmousedown="disconnection(event)"><script>tr(T.Menu.quit)</script></li>
                 </ul>
             </div>
             <div class="tasks"></div>
             <div class="middle">
                 <div class="player_document"></div>
-                <div class="main"></div>
+                <div class="content"></div>
             </div>
         </div>
         <div class="player_media"></div>

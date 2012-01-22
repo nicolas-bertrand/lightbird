@@ -14,13 +14,14 @@ var Translation =
         connected : "Connected",
         error : "Error",
     },
-    Menus :
+    Menu :
     {
         files : "Files",
         uploads : "Uploads",
         settings : "Settings",
         help : "Help",
         quit : "Quit",
+        width : 100,
     }
 };
 var T = Translation;

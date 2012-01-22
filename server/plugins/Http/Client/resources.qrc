@@ -109,5 +109,8 @@
 		<file alias="desktop/libs/SHJS/sh_tcl.js">www/desktop/libs/SHJS/sh_tcl.js</file>
 		<file alias="desktop/libs/SHJS/sh_xml.js">www/desktop/libs/SHJS/sh_xml.js</file>
 		<file alias="desktop/libs/SHJS/sh_xorg.js">www/desktop/libs/SHJS/sh_xorg.js</file>
+		<file alias="desktop/resources/files.css">www/desktop/resources/files.css</file>
+		<file alias="desktop/resources/files.html">www/desktop/resources/files.html</file>
+		<file alias="desktop/resources/files.js">www/desktop/resources/files.js</file>
     </qresource>
 </RCC>

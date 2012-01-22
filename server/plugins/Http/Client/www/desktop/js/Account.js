@@ -48,18 +48,18 @@ function checkIdentification()
 	{
 		var callback = function (HttpRequest)
 		{
-			// The user id identified
+			// The user is identified
 			if (HttpRequest.status == 200)
 			{
 				gl_identified = true;
 				animation(document.getElementById("desktop"), 2000, animationOpacity, true);
-				animation(document.getElementById("background"), 250, animationOpacity, true, null);
+				animation(document.getElementById("background"), 250, animationOpacity, true);
 			}
 			// Display the identification panel
 			else
 			{
 				animation(identification, 1000, animationOpacity, true, null, 250);
-				animation(document.getElementById("background"), 250, animationOpacity, false, null);
+				animation(document.getElementById("background"), 250, animationOpacity, false);
 			}
 		}
 		// Try to identify the user
@@ -69,7 +69,7 @@ function checkIdentification()
 	else
 	{
 		animation(identification, 1000, animationOpacity, true, null, 250);
-		animation(document.getElementById("background"), 250, animationOpacity, false, null);
+		animation(document.getElementById("background"), 250, animationOpacity, false);
 		// Display the background the first time the page is loaded
 		if (!gl_loaded)
 			animation(document.getElementById("background_identification"), 500, animationOpacity, true, null, 0, 10);
@@ -205,8 +205,6 @@ function disconnection()
 	if (gl_disconnecting == true)
 		return ;
 	gl_disconnecting = true;
-	// Tells the server that the client want to disconnect
-	request("GET", "Execute/Disconnect");
 	// We are no longer identified
 	gl_identified = false;
 	setCookie("sid", "", 0);
@@ -222,6 +220,8 @@ function disconnection()
 	animation(document.getElementById("background"), 250, animationOpacity, false, null, 250);
 	// Display the identification background
 	document.getElementById("background_identification").style.display = "block";
+	// Tells the server that the client want to disconnect
+	request("GET", "Execute/Disconnect");
 }
 
 // Handle the lock/unlock button that allows user to stay connected when the page is refreshed.

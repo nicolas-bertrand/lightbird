@@ -6,14 +6,6 @@ var gl_errorMessage = "<h2>Erreur !</h2><p>Impossible de r&eacute;cup&eacute;rer
 
 function Resources()
 {
-	// Manage the explorer window
-	this.register("Explorer");
-	// Display and modify informations on a file
-	this.register("Information");
-	// The media player
-	this.register("Player");
-	// The uploader
-	this.register("Upload");
 	// Load the resources
 	/*this.load("Explorer");
 	this.load("Information");
@@ -29,20 +21,17 @@ function Resources()
 Resources.prototype.load = function (resource, callback)
 {
 	if (this[resource] == undefined)
-	{
-		callback(gl_errorMessage);
-		return (false);
-	}
+        this.initialize(resource);
 	if (callback != undefined)
 		this[resource].queue.push(callback);
 	if (this[resource].loading)
-		return ;
+		return (true);
 	// Load the resource
 	if (!this[resource].loaded)
 	{
 		this[resource].loading = true;
 		// Load the HTML
-		request("GET", "html/" + this[resource].html, function(HttpRequest)
+		request("GET", this[resource].html, function(HttpRequest)
 		{
 			if (HttpRequest.status == 200)
 				gl_resources[resource].content = HttpRequest.responseText;
@@ -54,10 +43,10 @@ Resources.prototype.load = function (resource, callback)
 		});
 		// Load the CSS
 		if (this[resource].css != undefined)
-			loadJsCssFile("css/" + this[resource].css);
+			loadJsCssFile(this[resource].css);
 		// Load the JavaScript
 		if (this[resource].js != undefined)
-			loadJsCssFile("js/" + this[resource].js);
+			loadJsCssFile(this[resource].js);
 	}
 	// The resource has already been loaded
 	else if (this[resource].content != undefined)
@@ -114,13 +103,13 @@ function loadJsCssFile(name)
 // @resource : The name of the resource to register. It must correspond to the
 // files "resource.(css|js|html)". The Javascript must have a method
 // "initialize + resource" which is called the first time the resource is loaded.
-Resources.prototype.register = function(resource)
+Resources.prototype.initialize = function(resource)
 {
 	this[resource] = new Object();
-	this[resource].html = resource + ".html";
-	this[resource].css = resource + ".css";
-	this[resource].js = resource + ".js";
-	this[resource].callback = "initialize" + resource;
+	this[resource].html = "resources/" + resource + ".html";
+	this[resource].css = "resources/" + resource + ".css";
+	this[resource].js = "resources/" + resource + ".js";
+	this[resource].callback = "initialize_" + resource;
 	this[resource].loaded = false;
 	this[resource].jsLoaded = false;
 	this[resource].loading = false;

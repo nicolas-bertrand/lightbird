@@ -168,7 +168,7 @@ function Information(id)
 		// If the file is the same
 		if (fileData.id == file.id && force != true)
 			return ;
-		// Initialise the page
+		// Initialize the page
 		file = fileData;
 		for (var i = 0, s = table.rows.length; i < s; ++i)
 			table.deleteRow(0);

@@ -97,7 +97,7 @@ function safe_add(x, y)
 	return (msw << 16) | (lsw & 0xffff);
 }
 
-/* Initialise the SHA256 computation */
+/* Initialize the SHA256 computation */
 function sha256_init() {
 	ihash = new Array(8);
 	count = new Array(2);
