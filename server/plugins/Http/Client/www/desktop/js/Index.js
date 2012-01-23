@@ -318,6 +318,24 @@ function getEventTarget(event, name)
 	}
 }
 
+// Returns the number of a button in a cross browser way.
+// 0 is the left button
+// 1 is the middle button
+// 2 is the right button
+function getButton(event)
+{
+    // IE
+    if (/MSIE /.test(navigator.userAgent))
+    {
+        if (event.button == 1)
+            return (0);
+        else if (event.button == 4)
+            return (1);
+    }
+    // Other
+    return (event.button);
+}
+
 // Same as parseInt, except that NaN is replaced by 0.
 function toNumber(number)
 {

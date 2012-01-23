@@ -26,6 +26,10 @@ function Desktop()
     this.node.tasks.style.width = C.Desktop.tasks_width + "px";
     this.middle_margin_left = T.Menu.width + C.Desktop.tasks_width;
     this.node.middle.style.marginLeft = this.middle_margin_left + "px";
+    this.node.tasks.lastChild.style.height = C.Desktop.new_task_height + "px";
+    // Set the onmousewheel event
+    var mouseWheelEvent = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel";
+    addEvent(this.node.tasks, mouseWheelEvent, function(event) { gl_desktop.mouseWheel(event) });
     // The task or page being dragged
     this.drag = undefined;
 }
@@ -44,7 +48,7 @@ Desktop.prototype.onResize = function ()
 // @param event : The event that triggered the call
 Desktop.prototype.open = function (resource, event)
 {
-	if (event != undefined && event.button == 2)
+	if (getButton(event) != 0)
 		return ;
     var desktop = this;
     // Load the task from the resources
@@ -63,12 +67,12 @@ Desktop.prototype.open = function (resource, event)
 // @param event : The event that triggered the call
 Desktop.prototype.mouseMove = function (event)
 {
-	var mouse = mouseCoordinates(event);
+	this.mouse = mouseCoordinates(event);
     // If a task is being dragged
     if (this.drag)
     {
         // Move the dragged task vertically
-        var y = mouse.y - this.drag.mouse.y
+        var y = this.mouse.y - this.drag.mouse.y;
         if (y < 0)
             this.drag.div.style.top = "0px";
         else if (y > this.top_height - C.Desktop.task_height)
@@ -76,21 +80,30 @@ Desktop.prototype.mouseMove = function (event)
         else
             this.drag.div.style.top = y + "px";
         // Move the dragged task horizontally if the mouse exceeds the magnetic limit
-        if (mouse.x > this.middle_margin_left + C.Desktop.task_magnetic_drag)
+        if (this.mouse.x > this.middle_margin_left + C.Desktop.task_magnetic_drag)
         {
-            this.drag.div.style.left = (mouse.x - this.drag.mouse.x) + "px";
+            this.drag.div.style.left = (this.mouse.x - this.drag.mouse.x) + "px";
             this._setOriginalGhost();
         }
         // Otherwise update the tasks list
         else
         {
             this.drag.div.style.left = (T.Menu.width + C.Desktop.page_padding) + "px";
-            this._updateTasks(mouse.y);
+            this._updateTasks(this.mouse.y);
         }
     }
     // Otherwise a window may be dragged
     else
         moveWindow(event);
+    // The top scrolling area of the tasks list
+    if (this.mouse.x < this.middle_margin_left && this.mouse.x > T.Menu.width && this.mouse.y <= C.Desktop.tasks_scroll)
+        this._scrollTasks(1 - (this.mouse.y / C.Desktop.tasks_scroll));
+    // The bottom scrolling area of the tasks list
+    else if (this.mouse.x < this.middle_margin_left && this.mouse.x > T.Menu.width && this.mouse.y > this.top_height - C.Desktop.tasks_scroll && this.mouse.y <= this.top_height)
+        this._scrollTasks((this.top_height - C.Desktop.tasks_scroll - this.mouse.y) / C.Desktop.tasks_scroll);
+    // Ensures that the scrolling is stopped outside of the scrolling areas
+    else
+        this._stopScroll();
 }
 
 // Called when the mouse is up
@@ -108,6 +121,14 @@ Desktop.prototype.mouseUp = function (event)
     // Otherwise stop the window
     else
         stopWindow(event);
+}
+
+// Called each time the mouse wheel is used on the tasks list
+Desktop.prototype.mouseWheel = function (event)
+{
+    // Scroll the tasks list depending on the mouse wheel delta
+    this.node.tasks.scrollTop -= (event.detail ? event.detail * (-28) : event.wheelDelta) / C.Desktop.wheelSpeed;
+    this._updateTasks(this.mouse.y);
 }
 
 // Put the ghost at its original place
@@ -128,8 +149,10 @@ Desktop.prototype._setOriginalGhost = function ()
 // @param y : The y position of the mouse
 Desktop.prototype._updateTasks = function (y)
 {
+    if (!this.drag)
+        return ;
     // Change the reference y depending if the task has been dragged up or down
-    y = y - this.drag.mouse.y;
+    y = y - this.drag.mouse.y + this.node.tasks.scrollTop;
     if (y > this.drag.position.y)
         y += C.Desktop.task_height;
     this._removeGhostTask();
@@ -139,7 +162,10 @@ Desktop.prototype._updateTasks = function (y)
     var task = data.task;
     // If we want to create a page, the ghost is not required
     if (this.taskCache.createPage)
+    {
+        this.node.tasks.lastChild.style.height = C.Desktop.new_task_height + C.Desktop.task_height + "px";
         return ;
+    }
     // Create a ghost task in the current page
     this.ghost = document.createElement("div");
     this.ghost.className = "ghost";
@@ -165,6 +191,7 @@ Desktop.prototype._updateTasks = function (y)
         else
             page.appendChild(this.ghost);
     }
+    this.node.tasks.lastChild.style.height = C.Desktop.new_task_height + "px";
 }
 
 // Get the position of the task under the cursor and some other data
@@ -177,10 +204,10 @@ Desktop.prototype._getCursorPosition = function (y)
     var page, task;
     
     // If the position have already been calculated for this interval, we return the cache
-    if (this.taskCache && y < this.taskCache.position && y > this.taskCache.limit)
+    if (this.taskCache && y < this.taskCache.position && y > this.taskCache.limit && !this.taskCache.createPage)
         return (this.taskCache);
     // Run through the tasks in order to find the position of the task under the cursor
-    for (page = this.node.tasks.firstChild; page && (position < y || !number_page); page = page.nextSibling, number_page++)
+    for (page = this.node.tasks.firstChild; page && page.className == "page" && (position < y || !number_page); page = page.nextSibling, number_page++)
     {
         position += C.Desktop.page_padding;
         for (task = page.firstChild, number_task = 0; task && (position < y || !number_task); task = task.nextSibling, number_task++)
@@ -189,7 +216,7 @@ Desktop.prototype._getCursorPosition = function (y)
             position += C.Desktop.page_padding;
     }
     // Get the correct nodes
-    (page) ? page = page.previousSibling : page = this.node.tasks.lastChild;
+    page = page.previousSibling;
     (task) ? task = task.previousSibling : task = page.lastChild;
     // Calculate the upper limit
     var limit = position - C.Desktop.task_height;
@@ -206,7 +233,7 @@ Desktop.prototype._getCursorPosition = function (y)
 Desktop.prototype._moveTask = function ()
 {
     // Ensures that a new page is only created if necessary
-    if ((this.ghost && this.ghost.original) || (!this.drag.div.nextSibling && !this.drag.div.previousSibling && !this.drag.div.parentNode.nextSibling))
+    if ((this.ghost && this.ghost.original) || (!this.drag.div.nextSibling && !this.drag.div.previousSibling && this.drag.div.parentNode.nextSibling.className != "page"))
         this.taskCache.createPage = false;
     // If the dragged task has been moved
     if (this.taskCache.number_page != this.drag.place.page || this.taskCache.number_task != this.drag.place.task || this.taskCache.createPage)
@@ -219,16 +246,7 @@ Desktop.prototype._moveTask = function ()
             this.ghost.parentNode.insertBefore(this.drag.div, this.ghost);
         // Put the task in a new page
         else
-        {
-            var div = document.createElement("div");
-            div.className = "page";
-            if (tmp_page_background++ % 2)
-                div.style.backgroundColor = "#88CCFF";
-            else
-                div.style.backgroundColor = "#88AAFF";
-            div.appendChild(this.drag.div);
-            this.node.tasks.appendChild(div);
-        }
+            new Page(this.drag);
         this._removeGhostTask();
         // If the old page is empty, we remove it
         if (!parent.firstChild)
@@ -236,6 +254,7 @@ Desktop.prototype._moveTask = function ()
     }
     else
         this._removeGhostTask();
+    this.node.tasks.lastChild.style.height = C.Desktop.new_task_height + "px";
     this.taskCache = undefined;
     this.drag.div.style.position = "static";
 }
@@ -264,11 +283,74 @@ Desktop.prototype._getTaskPosition = function (task)
             task : number_task};
 }
 
+// Scroll the tasks list up or down, depending on the delta
+// @param delta : The speed of the scroll. Scroll top if positive, down if negative.
+// Should be between 1 and -1.
+Desktop.prototype._scrollTasks = function (delta)
+{
+    var tasks = this.node.tasks;
+    var height = tasks.scrollHeight - this.top_height;
+    
+    // Nothing to scroll
+    if (!height || !delta || (delta > 0 && tasks.scrollTop == 0) || (delta < 0 && tasks.scrollTop == height))
+    {
+        this._stopScroll();
+        return ;
+    }
+    // Create the interval that will scroll the tasks
+    if (!this.scroll)
+    {
+        var id = setInterval("gl_desktop._scrollTasksDo()", 1000 / C.animationFPS);
+        this.scroll = {id : id, delta : delta}
+    }
+    else
+        this.scroll.delta = delta;
+}
+
+// This method is called by setInterval, and scroll the tasks list depending on the delta
+Desktop.prototype._scrollTasksDo = function ()
+{
+    var tasks = this.node.tasks;
+    
+    if (!this.scroll)
+        return ;
+    // Calculate the number of pixels to scroll
+    if (this.scroll.delta > 0)
+        tasks.scrollTop -= (Math.exp(Math.abs(this.scroll.delta)) - 1) * 15;
+    else
+        tasks.scrollTop += (Math.exp(Math.abs(this.scroll.delta)) - 1) * 15;
+    this._updateTasks(this.mouse.y);
+    // Scroll top finished
+    if (tasks.scrollTop <= 0)
+    {
+        tasks.scrollTop = 0;
+        clearInterval(this.scroll.id);
+        delete this.scroll;
+    }
+    // Scroll down finished
+    else if (tasks.scrollTop >= tasks.scrollHeight - this.top_height)
+    {
+        tasks.scrollTop = tasks.scrollHeight - this.top_height;
+        this._stopScroll();
+    }
+}
+
+// Stop the scrolling of the tasks list
+Desktop.prototype._stopScroll = function ()
+{
+    if (this.scroll)
+    {
+        clearInterval(this.scroll.id);
+        delete this.scroll;
+    }
+}
+
 /********** Page **********/
 var tmp_page_background = 0;//#######################
 // A page is a container that can store multiple tasks.
 // Pages are stored in the tasks list of the desktop.
-function Page()
+// @param task : The first task of the page (optional)
+function Page(task)
 {
     // Create the page and insert it in the tasks list
     this.id = gl_uid++;
@@ -279,7 +361,16 @@ function Page()
         this.div.style.backgroundColor = "#88CCFF";
     else
         this.div.style.backgroundColor = "#88AAFF";
-    gl_desktop.node.tasks.appendChild(this.div);
+    var page = this.div;
+    // Close the page
+    addEvent(this.div, "mousedown", function(event)
+    {
+        if (getButton(event) == 1 && (event.target || event.srcElement).className == "page")
+            page.parentNode.removeChild(page);
+    });
+    if (task)
+        this.div.appendChild(task.div);
+    gl_desktop.node.tasks.insertBefore(this.div, gl_desktop.node.tasks.lastChild);
 }
 
 /********** Task **********/
@@ -301,21 +392,39 @@ function Task(resource, page)
     // This event allows the task to be moved in other pages by being dragged
     addEvent(this.div, "mousedown", function(event)
     {
-        gl_desktop.drag = task;
-        disableSelection(false);
-        var mouse = mouseCoordinates(event);
-        var element = elementCoordinates(task.div);
-        task.mouse = {x : mouse.x - element.x,
-                      y : mouse.y - element.y};
-        task.position = {x : element.x,
-                         y : element.y};
-        task.div.style.position = "absolute";
-        task.div.style.top = element.y + "px";
-        task.div.style.left = (T.Menu.width + C.Desktop.page_padding) + "px";
-        task.place = gl_desktop._getTaskPosition(task.div);
-        gl_desktop._updateTasks(mouse.y);
+        // Move the task
+        if (getButton(event) == 0)
+        {
+            gl_desktop.drag = task;
+            disableSelection(false);
+            var mouse = mouseCoordinates(event);
+            var element = elementCoordinates(task.div);
+            element.y = element.y;
+            task.mouse = {x : mouse.x - element.x,
+                          y : mouse.y - element.y + gl_desktop.node.tasks.scrollTop};
+            task.position = {x : element.x,
+                             y : element.y};
+            task.div.style.position = "absolute";
+            task.div.style.top = mouse.y - task.mouse.y + "px";
+            task.div.style.left = (T.Menu.width + C.Desktop.page_padding) + "px";
+            task.place = gl_desktop._getTaskPosition(task.div);
+            gl_desktop.node.tasks.lastChild.style.height = C.Desktop.new_task_height + C.Desktop.task_height + "px";
+            gl_desktop._updateTasks(mouse.y);
+        }
+        // Close the task
+        else if (getButton(event) == 1)
+        {
+            var page = task.div.parentNode;
+            task.div.parentNode.removeChild(task.div);
+            if (!page.firstChild)
+                page.parentNode.removeChild(page);
+        }
     });
     // Put the task in a page
     if (page)
+    {
         page.div.appendChild(this.div);
+        // Scroll to the bottom of the list
+        gl_desktop.node.tasks.scrollTop = gl_desktop.node.tasks.scrollHeight - gl_desktop.top_height - C.Desktop.new_task_height;
+    }
 }

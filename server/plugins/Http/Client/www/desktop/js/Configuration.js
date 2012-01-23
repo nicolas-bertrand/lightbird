@@ -16,8 +16,11 @@ var Configuration =
         player_media_height : 100,
         tasks_width : 50,
         task_height : 30,
-        page_padding : 5,
+        page_padding : 7,
         task_magnetic_drag : 0, // Limit between the tasks drag and the free drag (from the tasks right border)
+        tasks_scroll : 75, // Size of the scrolling areas of the tasks list
+        new_task_height : 20, // Height of the new task area
+        wheelSpeed : 2, // Decreases the mouse whell speed
     },
 	// The size of the window
 	Window :

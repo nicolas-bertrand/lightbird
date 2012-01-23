@@ -145,14 +145,14 @@ a:visited
 
 #desktop>.top>.tasks .page
 {
-    padding: 5px;
+    padding: 7px;
 	background-color: red;
     cursor: pointer;
 }
 
 #desktop>.top>.tasks .task
 {
-    width: 40px;
+    width: 36px;
     height: 30px;
     text-align: center;
 	font-weight: bold;
@@ -169,6 +169,11 @@ a:visited
 #desktop>.top>.tasks .task:hover
 {
 	background-color: #ffffff;
+}
+
+#desktop>.top>.tasks .new
+{
+    height: 40px; /* C.Desktop.new_task_height */
 }
 
 /*////////////////////////////////////////////////////////////////////////////
