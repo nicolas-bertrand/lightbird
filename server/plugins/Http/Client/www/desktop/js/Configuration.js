@@ -11,6 +11,7 @@ var Configuration =
     // The configuration of the desktop
     Desktop :
     {
+        minWidth : 600,
         minHeight : 400,
         player_document_height : 50,
         player_media_height : 100,
@@ -18,9 +19,11 @@ var Configuration =
         task_height : 30,
         page_padding : 7,
         task_magnetic_drag : 0, // Limit between the tasks drag and the free drag (from the tasks right border)
-        tasks_scroll : 75, // Size of the scrolling areas of the tasks list
+        tasks_scroll : 50, // Size of the scrolling areas of the tasks list
+        scrollSpeed : 10,
         new_task_height : 20, // Height of the new task area
         wheelSpeed : 2, // Decreases the mouse whell speed
+        pagePreviewDelay : 250, // The delay to display a page when the mouse enters the tasks list.
     },
 	// The size of the window
 	Window :

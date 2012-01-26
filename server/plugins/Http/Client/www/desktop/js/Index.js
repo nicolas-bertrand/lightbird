@@ -302,17 +302,40 @@ function compare(str1, str2)
 	return (-1);
 }
 
-// Find the target of the event, in a cross browser way.
-function getEventTarget(event, name)
+// Find the target of the event in a cross browser way.
+function getEventTarget(event, name, depth)
 {
 	target = (event.target || event.srcElement);
 	if (name == undefined)
 		return (target);
-	while (target)
+	for (var d = 0; target && (!depth || d < depth); d++)
 	{
 		if (target.tagName.toLowerCase() == name.toLowerCase() ||
-		    (target.className.toLowerCase() == name.toLowerCase() &&
-			 target.className.length > 0))
+		    (target.className && target.className.toLowerCase() == name.toLowerCase()))
+			return (target);
+		target = target.parentNode;
+	}
+}
+
+// Find the related target of the event in a cross browser way.
+function getEventRelatedTarget(event, name, depth)
+{
+    var target;
+    
+    if (event.relatedTarget)
+        target = event.relatedTarget;
+    else if (event.type == "mouseout")
+        target = event.toElement;
+    else if (event.type == "mouseover")
+        target = event.fromElement;
+	if (name == undefined)
+		return (target);
+    if (!depth)
+        depth = 999;
+	for (var d = 0; target && d < depth; d++)
+	{
+		if (target.tagName.toLowerCase() == name.toLowerCase() ||
+		    (target.className && target.className.toLowerCase() == name.toLowerCase()))
 			return (target);
 		target = target.parentNode;
 	}

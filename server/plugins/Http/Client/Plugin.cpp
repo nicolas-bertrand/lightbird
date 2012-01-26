@@ -135,7 +135,7 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     else if (uri.left(8) == "Execute/")
         Execute(*this->_api, client, uri.right(uri.size() - uri.indexOf('/') - 1));
     else if (uri.left(14) == "Translation.js")
-        _translation(client, interface);
+        this->_translation(client, interface);
     // The client wants to download a file
     else
     {
@@ -289,6 +289,7 @@ void    Plugin::_translation(LightBird::IClient &client, const QString &interfac
     else
         path += "en.js";
     // Sends the translation
+    client.getResponse().setType(this->_getMime(path));
     client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
 }
 

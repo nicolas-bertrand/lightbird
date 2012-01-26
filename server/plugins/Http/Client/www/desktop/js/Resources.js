@@ -73,7 +73,7 @@ Resources.prototype.loaded = function (resource)
 Resources.prototype.callJs = function(resource, parameter)
 {
 	if (this[resource] != undefined && this[resource].callback != undefined)
-		eval(this[resource].callback + "(\"" + parameter + "\")");
+		window[this[resource].callback](parameter);
 }
 
 // Load a javascript or a css file.
