@@ -181,41 +181,59 @@ void        Client::write(QByteArray *data)
     this->readWriteInterface->write(data, this);
 }
 
-void            Client::send(const QString &id, const QString &protocol)
+bool            Client::send(const QString &protocol, const QString &id)
 {
     SmartMutex  mutex(this->mutex, "Client", "send");
 
     if (!mutex)
-        return ;
-    if (this->mode == LightBird::IClient::CLIENT)
+        return (false);
+    if (this->mode == LightBird::IClient::SERVER)
+    {
+        // In SERVER mode we don't use the idPlugin
+        this->sendRequests.push_back(QPair<QString, QString>("", protocol));
+        // If the engine is idle and nothing has been received yet
+        if (!this->running && (qobject_cast<EngineServer *>(this->engine))->isIdle())
+            this->_newTask(Client::SEND);
+        else
+            return (false);
+    }
+    else if (this->mode == LightBird::IClient::CLIENT)
     {
         this->sendRequests.push_back(QPair<QString, QString>(id, protocol));
         if (!this->running)
             this->_newTask(Client::SEND);
     }
+    return (true);
 }
 
 bool                Client::_send()
 {
     SmartMutex      mutex(this->mutex, "Client", "_send");
-    EngineClient    *engine;
+    EngineServer    *engineServer = qobject_cast<EngineServer *>(this->engine);
+    EngineClient    *engineClient = qobject_cast<EngineClient *>(this->engine);
     bool            run = false;
 
     if (!mutex)
         return (false);
-    if ((engine = qobject_cast<EngineClient *>(this->engine)))
+    if (engineServer && engineServer->isIdle() && !this->sendRequests.isEmpty())
+    {
+        engineServer->send(this->sendRequests.first().second);
+        this->sendRequests.pop_front();
+        run = true;
+    }
+    else if (engineClient)
     {
         // Sets the send requests to the engine
         QListIterator<QPair<QString, QString> > it(this->sendRequests);
         while (it.hasNext())
         {
             // If Engine::send returned true at least once, the engine needs to run
-            if (engine->send(it.peekNext().first, it.peekNext().second))
+            if (engineClient->send(it.peekNext().first, it.peekNext().second))
                 run = true;
             it.next();
         }
+        this->sendRequests.clear();
     }
-    this->sendRequests.clear();
     return (run);
 }
 

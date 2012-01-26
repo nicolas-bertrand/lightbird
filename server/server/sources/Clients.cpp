@@ -50,7 +50,7 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         this->clients.push_back(client);
         socket->setParent(client);
         client->moveToThread(this);
-        // When the client thread is finished, _finished is called
+        // When the client is finished, _finished is called
         QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
         // When new data are received on this socket, Client::read is called
         QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
@@ -105,10 +105,7 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
             client = it.peekPrevious();
     // The client doesn't exists
     if (!client)
-    {
-        Log::warning("Unknow client id", Properties("idClient", idClient).add("idPlugin", idPlugin), "Clients", "send");
         return (false);
-    }
     protocols = client->getProtocols();
     // If the protocol is defined we check that it is in the protocols handled by the client
     if (!protocol.isEmpty() && !protocols.contains("all") && !protocols.contains(protocol))
@@ -125,7 +122,7 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
         Log::warning("No protocol defined for the request", Properties("idClient", idClient).add("idPlugin", idPlugin), "Clients", "send");
         return (false);
     }
-    client->send(idPlugin, protocol);
+    client->send(protocol, idPlugin);
     return (true);
 }
 

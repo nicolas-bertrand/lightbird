@@ -15,7 +15,7 @@
 EngineServer::EngineServer(Client &client) : Engine(client)
 {
     // Initialize the Engine
-    this->clear();
+    this->_clear();
 }
 
 EngineServer::~EngineServer()
@@ -28,12 +28,25 @@ bool    EngineServer::run()
     return ((this->*state)());
 }
 
-void    EngineServer::clear()
+bool    EngineServer::isIdle()
+{
+    return (this->state == &EngineServer::_onProtocol && this->data.isEmpty() && this->idle);
+}
+
+void    EngineServer::send(const QString &protocol)
+{
+    this->request.setProtocol(protocol);
+    this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserialize);
+    this->state = &EngineServer::_doExecution;
+}
+
+void    EngineServer::_clear()
 {
     this->state = &EngineServer::_onProtocol;
     this->needResponse = true;
     this->protocolUnknow.clear();
-    Engine::clear();
+    this->idle = true;
+    Engine::_clear();
 }
 
 bool        EngineServer::_onProtocol()
@@ -42,6 +55,7 @@ bool        EngineServer::_onProtocol()
     bool    unknow;
     bool    result = false;
 
+    this->idle = false;
     QMap<QString, LightBird::IOnProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IOnProtocol>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort());
     QMapIterator<QString, LightBird::IOnProtocol *> it(plugins);
     if (!it.hasNext())
@@ -87,7 +101,7 @@ bool        EngineServer::_onProtocol()
     // If there is no more plugin that can find the protocol, the data are cleared
     else if (this->protocolUnknow.size() >= plugins.size())
     {
-        this->clear();
+        this->_clear();
         this->data.clear();
         Log::warning("Protocol of the request not found", Properties("id", this->client.getId()), "EngineServer", "_onProtocol");
     }
@@ -254,7 +268,7 @@ bool    EngineServer::_doUnserializeFooter()
         {
             Log::warning("The data has not been unserialized because no plugin implements IDoUnserialize* for this context, or the data are never used. The data has been cleared",
                          Properties("id", this->client.getId()), "EngineServer", "_doUnserializeFooter");
-            this->clear();
+            this->_clear();
             this->data.clear();
             return (false);
         }
@@ -415,5 +429,5 @@ void    EngineServer::_onFinish()
         it.peekNext().value()->onFinish(this->client);
         Plugins::instance()->release(it.next().key());
     }
-    this->clear();
+    this->_clear();
 }

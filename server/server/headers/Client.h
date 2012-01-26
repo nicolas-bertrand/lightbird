@@ -45,10 +45,14 @@ public:
     void                    run();
     /// @brief Write the data to the client. This method takes ownership of the data.
     void                    write(QByteArray *data);
-    /// @brief Asks the engine to call IDoSend in order to generate a request
-    /// that will be send to a client.
-    /// @param id : The id of the plugin that will be called by IDoSend.
-    void                    send(const QString &id, const QString &protocol);
+    /// @brief Depending on the client mode, asks the engine to call IDoSend
+    /// in order to generate a request that will be send to a client, or tries
+    /// to send a response without waiting for a request.
+    /// @param protocol : The protocol used to communicate with the client.
+    /// @param id : The id of the plugin that will be called by IDoSend. Not used
+    /// in SERVER mode.
+    /// @return False in SERVER mode if a request is unserializing. True overwise.
+    bool                    send(const QString &protocol, const QString &id = "");
     /// @brief Disconnect the client
     void                    disconnect();
     /// @brief Calls the IDoRead interface of the plugins.

@@ -21,11 +21,12 @@ public:
     /// @param id : The id of the plugin that wants to send the request.
     /// @return True if the engine is ready to run and send a new request.
     bool    send(const QString &id, const QString &protocol);
-    void    clear();
 
 private:
     EngineClient(const EngineClient &);
     EngineClient &operator=(const EngineClient &);
+
+    void    _clear();
 
 private slots:
     // This methods calls the interfaces implemented by the plugins,

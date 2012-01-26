@@ -44,13 +44,6 @@ void    Engine::read(const QList<QByteArray *> &data)
     }
 }
 
-void    Engine::clear()
-{
-    this->request.clear();
-    this->response.clear();
-    this->done = false;
-}
-
 LightBird::IRequest &Engine::getRequest()
 {
     return (this->request);
@@ -59,6 +52,13 @@ LightBird::IRequest &Engine::getRequest()
 LightBird::IResponse &Engine::getResponse()
 {
     return (this->response);
+}
+
+void    Engine::_clear()
+{
+    this->request.clear();
+    this->response.clear();
+    this->done = false;
 }
 
 void    Engine::_onRead(QByteArray &data)

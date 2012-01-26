@@ -33,6 +33,9 @@ public:
     /// @param id : The id of the client to disconnect.
     /// @return True is the client exists.
     bool            disconnect(const QString &id);
+    /// @brief Tries to send a response without waiting for a request.
+    /// @see LightBird::INetwork::send
+    bool            send(const QString &id, const QString &protocol = "");
     /// @brief Closes the port. Denies all the new connections to the port and
     /// remove all the clients currently connected.
     virtual void    close();

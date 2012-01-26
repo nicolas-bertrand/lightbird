@@ -123,18 +123,26 @@ namespace LightBird
         /// if it is already disconnected.
         /// @return True if the client exists.
         virtual bool    disconnect(const QString &id) = 0;
-        /// @brief Asks the server to call the LightBird::IDoSend interface in
-        /// order to generate a request to send. This interface is called for the
-        /// plugin that called this method. If other plugins have called it before,
-        /// the request is queued until the other requests have been processed.
-        /// If a plugin calls this method several times, only one will be taken
-        /// into account for the same client. This method can only be used with
-        /// the clients in CLIENT mode.
+        /// @brief The behaviour of this method depends on the mode of the client.
+        /// * In CLIENT mode it asks the server to call the LightBird::IDoSend
+        /// interface in order to generate a request to send. This interface is
+        /// called for the plugin that called this method. If other plugins have
+        /// called it before, the request is queued until the other requests have
+        /// been processed. If a plugin calls this method several times, only one
+        /// will be taken into account for the same client.
+        /// * In SERVER mode it allows to bypass the unserialization of the requests
+        /// and to call directly LightBird::IOnUnserialize followed by IDoExecution,
+        /// in order to send a response to the client without waiting for a request.
+        /// If is a request is unserializing, false is returned and the server
+        /// will wait that the request has been entirely processed before calling
+        /// LightBird::IOnUnserialize. If this method is called multiple times,
+        /// it will generate as much responses.
         /// @param id : The id of the targeted client.
         /// @param protocol : The protocol used to communicate with the client.
         /// If empty the first protocol in the client protocols list (defined in
         /// connect()) is used. Therefore this list must not be empty in this case.
         /// @return False if the client or the protocol is invalid.
+        /// * In SERVER mode false is returned if a request is unserializing.
         /// @see LightBird::IClient::Mode
         /// @see LightBird::IDoSend
         /// @see LightBird::INetwork::connect

@@ -113,7 +113,7 @@ bool            Network::getClient(const QString &id, LightBird::INetwork::Clien
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext())
     {
-        QMapIterator<unsigned short, Port *> it(this->ports[transport.next().key()]);
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext())
         {
             // If the client has been found, we wait its informations outside the mutex
@@ -144,16 +144,16 @@ QStringList     Network::getClients(int port, LightBird::INetwork::Transport tra
     return (result);
 }
 
-Future<QString>     Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                                     LightBird::INetwork::Transport transport, int wait)
+Future<QString> Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
+                                 LightBird::INetwork::Transport transport, int wait)
 {
     return (this->clients.connect(address, port, protocols, transport, wait));
 }
 
-bool                Network::disconnect(const QString &id)
+bool            Network::disconnect(const QString &id)
 {
-    SmartMutex      mutex(this->mutex, SmartMutex::READ, "Network", "disconnect");
-    bool            found = false;
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "disconnect");
+    bool        found = false;
 
     if (!mutex)
         return (false);
@@ -161,7 +161,7 @@ bool                Network::disconnect(const QString &id)
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext() && !found)
     {
-        QMapIterator<unsigned short, Port *> it(this->ports[transport.next().key()]);
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext() && !found)
             if (it.next().value()->disconnect(id))
                 found = true;
@@ -171,7 +171,21 @@ bool                Network::disconnect(const QString &id)
 
 bool            Network::send(const QString &idClient, const QString &idPlugin, const QString &protocol)
 {
-    return (this->clients.send(idClient, idPlugin, protocol));
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "send");
+
+    if (!mutex)
+        return (false);
+    if (this->clients.send(idClient, idPlugin, protocol))
+        return (true);
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->send(idClient, protocol))
+                return (true);
+    }
+    return (false);
 }
 
 void            Network::shutdown()
@@ -184,7 +198,7 @@ void            Network::shutdown()
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext())
     {
-        QMapIterator<unsigned short, Port *> it(this->ports[transport.next().key()]);
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext())
             it.next().value()->quit();
     }
@@ -192,7 +206,7 @@ void            Network::shutdown()
     // Waits until the threads are finished
     while (transport.hasNext())
     {
-        QMapIterator<unsigned short, Port *> it(this->ports[transport.next().key()]);
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext())
             it.next().value()->wait();
     }
@@ -200,7 +214,7 @@ void            Network::shutdown()
     // Destroys the ports
     while (transport.hasNext())
     {
-        QMapIterator<unsigned short, Port *> it(this->ports[transport.next().key()]);
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext())
             delete it.next().value();
     }

@@ -17,11 +17,19 @@ public:
     ~EngineServer();
 
     bool    run();
-    void    clear();
+    /// @brief Sends a response without waiting for a request. Bypass the
+    /// unserialize api, and call directly IOnUnserialize followed by IDoExecution.
+    /// @param protocol : The protocol used to communicate with the client.
+    void    send(const QString &protocol);
+    /// @brief Returns true if the engine has just been cleared, i.e if it is
+    /// not running and no data has been received yet.
+    bool    isIdle();
 
 private:
     EngineServer(const EngineServer &);
     EngineServer &operator=(const EngineServer &);
+
+    void    _clear();
 
 private slots:
     // This methods calls the interfaces implemented by the plugins,
@@ -45,6 +53,7 @@ private:
     Method      state;          ///< A pointer to method to the next step of the processing of the data.
     bool        needResponse;   ///< If the request of the client needs a response.
     QStringList protocolUnknow; ///< List the plugins that doesn't know the protocol of the request.
+    bool        idle;           ///< True if the engine has just been cleared, and no data has been received yet.
 };
 
 #endif // ENGINESERVER_H

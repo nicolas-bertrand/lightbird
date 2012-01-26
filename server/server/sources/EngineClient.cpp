@@ -16,7 +16,7 @@
 EngineClient::EngineClient(Client &client) : Engine(client)
 {
     // Initialize the Engine
-    this->clear();
+    this->_clear();
 }
 
 EngineClient::~EngineClient()
@@ -48,10 +48,10 @@ bool    EngineClient::send(const QString &id, const QString &protocol)
     return (false);
 }
 
-void    EngineClient::clear()
+void    EngineClient::_clear()
 {
     this->state = NULL;
-    Engine::clear();
+    Engine::_clear();
 }
 
 bool        EngineClient::_doSend()
@@ -88,7 +88,7 @@ bool        EngineClient::_doSend()
         if (!this->requests.isEmpty())
             return (true);
         // Nothing to do
-        this->clear();
+        this->_clear();
         return (false);
     }
     // Go to the next step
@@ -221,7 +221,7 @@ bool    EngineClient::_doSerializeFooter()
     else
     {
         Log::warning("The data has not been serialized because no plugin implements IDoSerialize* for this context.", Properties("id", this->client.getId()), "EngineClient", "_doSerializeFooter");
-        this->clear();
+        this->_clear();
         if (this->requests.isEmpty())
             return (false);
         this->state = &EngineClient::_doSend;
@@ -434,7 +434,7 @@ bool    EngineClient::_onFinish()
         it.peekNext().value()->onFinish(this->client);
         Plugins::instance()->release(it.next().key());
     }
-    this->clear();
+    this->_clear();
     if (this->requests.isEmpty())
         return (false);
     this->state = &EngineClient::_doSend;
