@@ -48,6 +48,21 @@ bool    EngineClient::send(const QString &id, const QString &protocol)
     return (false);
 }
 
+bool    EngineClient::receive(const QString &protocol)
+{
+    if (!this->isIdle())
+        return (false);
+    this->request.setProtocol(protocol);
+    this->_onSerialize(LightBird::IOnSerialize::IDoSerialize);
+    this->state = &EngineClient::_doUnserializeHeader;
+    return (true);
+}
+
+bool    EngineClient::isIdle()
+{
+    return (!this->state && !this->data.isEmpty());
+}
+
 void    EngineClient::_clear()
 {
     this->state = NULL;

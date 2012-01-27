@@ -19,8 +19,17 @@ public:
     bool    run();
     /// @brief Adds a new request to send.
     /// @param id : The id of the plugin that wants to send the request.
+    /// @param protocol : The protocol used to communicate with the client.
     /// @return True if the engine is ready to run and send a new request.
     bool    send(const QString &id, const QString &protocol);
+    /// @brief Receive a response without sending a request. Bypass the serialize
+    /// api and call directly IOnSerialize followed by IDoUnserializeHeader.
+    /// @param protocol : The protocol used to communicate with the client.
+    /// @return False if the engine is not idle.
+    bool    receive(const QString &protocol);
+    /// @brief Returns true if the engine has just been cleared and data are
+    /// waiting to be processed.
+    bool    isIdle();
 
 private:
     EngineClient(const EngineClient &);

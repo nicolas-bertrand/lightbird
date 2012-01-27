@@ -107,7 +107,7 @@ namespace LightBird
         /// and is only used with a TCP connection. If wait is negative, this
         /// function will not time out.
         /// @return The id of the client if the connection successed. Otherwise
-        /// it returns an empty string. In UDP this method don't check that the
+        /// it returns an empty string. In UDP this method doesn't check that the
         /// peer actually exists, since there is no connection in UDP.
         /// @see LightBird::IClient::Mode
         virtual QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address,
@@ -124,12 +124,6 @@ namespace LightBird
         /// @return True if the client exists.
         virtual bool    disconnect(const QString &id) = 0;
         /// @brief The behaviour of this method depends on the mode of the client.
-        /// * In CLIENT mode it asks the server to call the LightBird::IDoSend
-        /// interface in order to generate a request to send. This interface is
-        /// called for the plugin that called this method. If other plugins have
-        /// called it before, the request is queued until the other requests have
-        /// been processed. If a plugin calls this method several times, only one
-        /// will be taken into account for the same client.
         /// * In SERVER mode it allows to bypass the unserialization of the requests
         /// and to call directly LightBird::IOnUnserialize followed by IDoExecution,
         /// in order to send a response to the client without waiting for a request.
@@ -137,16 +131,39 @@ namespace LightBird
         /// will wait that the request has been entirely processed before calling
         /// LightBird::IOnUnserialize. If this method is called multiple times,
         /// it will generate as much responses.
+        /// * In CLIENT mode it asks the server to call the LightBird::IDoSend
+        /// interface in order to generate a request to send. This interface is
+        /// called for the plugin that called this method. If other plugins have
+        /// called it before, the request is queued until the other requests have
+        /// been processed. If a plugin calls this method several times, only one
+        /// will be taken into account for the same client.
         /// @param id : The id of the targeted client.
         /// @param protocol : The protocol used to communicate with the client.
         /// If empty the first protocol in the client protocols list (defined in
         /// connect()) is used. Therefore this list must not be empty in this case.
         /// @return False if the client or the protocol is invalid.
-        /// * In SERVER mode false is returned if a request is unserializing.
+        /// * In SERVER mode false is also returned if a request is unserializing.
         /// @see LightBird::IClient::Mode
         /// @see LightBird::IDoSend
         /// @see LightBird::INetwork::connect
         virtual bool    send(const QString &id, const QString &protocol = "") = 0;
+        /// @brief If the client is in CLIENT mode, the server will try to bypass
+        /// the serialization of the request, and call directly LightBird::IOnSerialize
+        /// followed by IDoUnserializeHeader in order to read the response of
+        /// the client without having to send a request. If a request is being
+        /// serialized, false is returned and the server will wait that the
+        /// request has been entirely processed before calling IOnSerialize.
+        /// The same thing happends when no data has been received yet. If this
+        /// method is called multiple times, it will read as much responses.
+        /// @param id : The id of the targeted client.
+        /// @param protocol : The protocol used to communicate with the client.
+        /// If empty the first protocol in the client protocols list (defined in
+        /// connect()) is used. Therefore this list must not be empty in this case.
+        /// @return False if the client or the protocol is invalid, if a response
+        /// is being serialized, or if no data have been received yet.
+        /// @see LightBird::IClient::Mode
+        /// @see LightBird::INetwork::connect
+        virtual bool    receive(const QString &id, const QString &protocol = "") = 0;
     };
 }
 

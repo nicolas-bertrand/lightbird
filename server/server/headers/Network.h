@@ -48,6 +48,8 @@ public:
     bool            disconnect(const QString &id);
     /// @see LightBird::INetwork::send
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "");
+    /// @see LightBird::INetwork::receive
+    bool            receive(const QString &idClient, const QString &protocol = "");
     /// @brief Quits all the ports threads and delete them.
     void            shutdown();
     /// @brief Returns the instance of this class created by the Server.

@@ -188,6 +188,11 @@ bool            Network::send(const QString &idClient, const QString &idPlugin, 
     return (false);
 }
 
+bool            Network::receive(const QString &idClient, const QString &protocol)
+{
+    return (this->clients.receive(idClient, protocol));
+}
+
 void            Network::shutdown()
 {
     SmartMutex  mutex(this->mutex, "Network", "shutdown");

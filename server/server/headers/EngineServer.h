@@ -20,9 +20,10 @@ public:
     /// @brief Sends a response without waiting for a request. Bypass the
     /// unserialize api, and call directly IOnUnserialize followed by IDoExecution.
     /// @param protocol : The protocol used to communicate with the client.
-    void    send(const QString &protocol);
-    /// @brief Returns true if the engine has just been cleared, i.e if it is
-    /// not running and no data has been received yet.
+    /// @return False if the engine is not idle.
+    bool    send(const QString &protocol);
+    /// @brief Returns true if the engine has just been cleared and no data has
+    /// been received yet.
     bool    isIdle();
 
 private:

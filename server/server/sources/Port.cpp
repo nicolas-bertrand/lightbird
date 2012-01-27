@@ -81,8 +81,7 @@ bool            Port::send(const QString &id, const QString &p)
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "send");
     Client      *client = NULL;
-    QString     protocol = p;
-    QStringList protocols;
+    QString     protocol;
 
     if (!mutex)
         return (false);
@@ -94,20 +93,10 @@ bool            Port::send(const QString &id, const QString &p)
     // The client doesn't exists
     if (!client)
         return (false);
-    protocols = client->getProtocols();
-    // If the protocol is defined we check that it is in the protocols handled by the client
-    if (!protocol.isEmpty() && !protocols.contains("all") && !protocols.contains(protocol))
+    // Checks the protocol
+    if ((protocol = client->getProtocol(p)).isEmpty())
     {
-        Log::warning("The protocol is not handled by the client", Properties("id", id).add("protocol", protocol), "Port", "send");
-        return (false);
-    }
-    // Otherwise the protocol is the first in the list
-    if (protocol.isEmpty() && !protocols.isEmpty() && !protocols.contains("all"))
-        protocol = protocols.first();
-    // No protocol has been found
-    if (protocol.isEmpty())
-    {
-        Log::warning("No protocol defined for the request", Properties("id", id), "Port", "send");
+        Log::warning("Invalid protocol", Properties("id", id).add("protocol", p, false), "Port", "send");
         return (false);
     }
     return (client->send(protocol));

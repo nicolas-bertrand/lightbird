@@ -51,6 +51,8 @@ Client::~Client()
 void        Client::run()
 {
     State   newTask = Client::NONE;
+    bool    send = true;
+    bool    receive = true;
 
     // Performs different actions depending on the client's state
     switch (this->state)
@@ -77,7 +79,13 @@ void        Client::run()
 
         case Client::SEND :
             // Some data have to be sent to the client
-            if (this->_send())
+            if ((send = this->_send()))
+                newTask = Client::RUN;
+            break;
+
+        case Client::RECEIVE :
+            // Some data have to be received without sending a request
+            if ((receive = this->_receive()))
                 newTask = Client::RUN;
             break;
 
@@ -112,8 +120,11 @@ void        Client::run()
     else if (newTask != Client::NONE)
         this->_newTask(newTask);
     // Some data have to be sent to the client
-    else if (!this->sendRequests.isEmpty())
+    else if (!this->sendRequests.isEmpty() && send)
         this->_newTask(Client::SEND);
+    // Some data have to be received without sending a request
+    else if (!this->receiveResponses.isEmpty() && receive)
+        this->_newTask(Client::RECEIVE);
     // Some data are available to be read on the network
     else if (this->readyRead)
         this->_newTask(Client::READ);
@@ -151,9 +162,10 @@ void        Client::read(QByteArray *data)
         this->_newTask(Client::READ);
 }
 
-bool            Client::_read()
+bool                    Client::_read()
 {
-    SmartMutex  mutex(this->mutex, "Client", "_read");
+    SmartMutex          mutex(this->mutex, "Client", "_read");
+    QList<QByteArray *> data;
 
     if (!mutex)
         return (false);
@@ -161,13 +173,16 @@ bool            Client::_read()
     // If there is no data, no processing are needed
     if (this->data.isEmpty())
         return (false);
-    // Feed the engine
-    this->engine->read(this->data);
+    // Copy the data in order to clear the list inside the mutex
+    data = this->data;
+    this->data.clear();
+    mutex.unlock();
+    // Feed the engine outside the mutex
+    this->engine->read(data);
     // Removes the data
-    QListIterator<QByteArray *> it(this->data);
+    QListIterator<QByteArray *> it(data);
     while (it.hasNext())
         delete it.next();
-    this->data.clear();
     return (true);
 }
 
@@ -191,8 +206,7 @@ bool            Client::send(const QString &protocol, const QString &id)
     {
         // In SERVER mode we don't use the idPlugin
         this->sendRequests.push_back(QPair<QString, QString>("", protocol));
-        // If the engine is idle and nothing has been received yet
-        if (!this->running && (qobject_cast<EngineServer *>(this->engine))->isIdle())
+        if (!this->running && this->engine->isIdle())
             this->_newTask(Client::SEND);
         else
             return (false);
@@ -215,12 +229,9 @@ bool                Client::_send()
 
     if (!mutex)
         return (false);
-    if (engineServer && engineServer->isIdle() && !this->sendRequests.isEmpty())
-    {
-        engineServer->send(this->sendRequests.first().second);
+    if (engineServer && !this->sendRequests.isEmpty()
+        && (run = engineServer->send(this->sendRequests.first().second)))
         this->sendRequests.pop_front();
-        run = true;
-    }
     else if (engineClient)
     {
         // Sets the send requests to the engine
@@ -234,6 +245,37 @@ bool                Client::_send()
         }
         this->sendRequests.clear();
     }
+    return (run);
+}
+
+bool            Client::receive(const QString &protocol)
+{
+    SmartMutex  mutex(this->mutex, "Client", "receive");
+
+    if (!mutex)
+        return (false);
+    if (this->mode == LightBird::IClient::CLIENT)
+    {
+        this->receiveResponses.push_back(protocol);
+        if (!this->running && this->engine->isIdle())
+            this->_newTask(Client::RECEIVE);
+        else
+            return (false);
+    }
+    return (true);
+}
+
+bool                Client::_receive()
+{
+    SmartMutex      mutex(this->mutex, "Client", "_receive");
+    EngineClient    *engine = qobject_cast<EngineClient *>(this->engine);
+    bool            run = false;
+
+    if (!mutex)
+        return (false);
+    if (engine && !this->receiveResponses.isEmpty()
+        && (run = engine->receive(this->receiveResponses.first())))
+        this->receiveResponses.pop_front();
     return (run);
 }
 
@@ -413,6 +455,26 @@ LightBird::Session      Client::getSession(const QString &id_account) const
 void    Client::setPort(unsigned short port)
 {
     this->port = port;
+}
+
+QString         Client::getProtocol(QString protocol)
+{
+    // If the protocol is defined we check that it is in the protocols handled by the client
+    if (!protocol.isEmpty() && !this->protocols.contains("all") && !this->protocols.contains(protocol))
+    {
+        Log::debug("The protocol is not handled by the client", Properties("id", this->id).add("protocol", protocol), "Clients", "send");
+        return (QString());
+    }
+    // Otherwise the protocol is the first in the protocols list
+    if (protocol.isEmpty() && !this->protocols.isEmpty() && !this->protocols.contains("all"))
+        protocol = this->protocols.first();
+    // No protocol has been found
+    if (protocol.isEmpty())
+    {
+        Log::debug("No protocol defined for the request", Properties("id", this->id), "Clients", "send");
+        return (QString());
+    }
+    return (protocol);
 }
 
 void            Client::getInformations(LightBird::INetwork::Client &client, Future<bool> *future)

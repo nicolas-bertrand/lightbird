@@ -28,16 +28,19 @@ bool    EngineServer::run()
     return ((this->*state)());
 }
 
-bool    EngineServer::isIdle()
+bool    EngineServer::send(const QString &protocol)
 {
-    return (this->state == &EngineServer::_onProtocol && this->data.isEmpty() && this->idle);
-}
-
-void    EngineServer::send(const QString &protocol)
-{
+    if (!this->isIdle())
+        return (false);
     this->request.setProtocol(protocol);
     this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserialize);
     this->state = &EngineServer::_doExecution;
+    return (true);
+}
+
+bool    EngineServer::isIdle()
+{
+    return (this->state == &EngineServer::_onProtocol && this->data.isEmpty() && this->idle);
 }
 
 void    EngineServer::_clear()

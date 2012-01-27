@@ -32,6 +32,7 @@ public:
                           int wait = -1);
     bool                  disconnect(const QString &id);
     bool                  send(const QString &id, const QString &protocol = "");
+    bool                  receive(const QString &id, const QString &protocol = "");
 
 private:
     ApiNetwork();

@@ -31,7 +31,11 @@ public:
     Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
                             LightBird::INetwork::Transport transport, int wait);
     /// @brief Asks the engine of a client to generate a new request.
+    /// @see LightBird::INetwork::send
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol);
+    /// @brief Asks the engine of a client to read a response.
+    /// @see LightBird::INetwork::receive
+    bool            receive(const QString &id, const QString &protocol);
     /// @see LightBird::INetwork::getClient
     /// @param found : True if the client has been found.
     Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const;

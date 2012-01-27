@@ -70,3 +70,8 @@ bool    ApiNetwork::send(const QString &idClient, const QString &protocol)
 {
     return (Network::instance()->send(idClient, this->id, protocol));
 }
+
+bool    ApiNetwork::receive(const QString &idClient, const QString &protocol)
+{
+    return (Network::instance()->receive(idClient, protocol));
+}

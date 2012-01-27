@@ -45,14 +45,12 @@ public:
     void                    run();
     /// @brief Write the data to the client. This method takes ownership of the data.
     void                    write(QByteArray *data);
-    /// @brief Depending on the client mode, asks the engine to call IDoSend
-    /// in order to generate a request that will be send to a client, or tries
-    /// to send a response without waiting for a request.
-    /// @param protocol : The protocol used to communicate with the client.
-    /// @param id : The id of the plugin that will be called by IDoSend. Not used
-    /// in SERVER mode.
-    /// @return False in SERVER mode if a request is unserializing. True overwise.
+    /// @brief Asks the engine to generate a new request.
+    /// @see LightBird::INetwork::send
     bool                    send(const QString &protocol, const QString &id = "");
+    /// @brief Asks the engine to read a response without sending a request.
+    /// @see LightBird::INetwork::receive
+    bool                    receive(const QString &protocol);
     /// @brief Disconnect the client
     void                    disconnect();
     /// @brief Calls the IDoRead interface of the plugins.
@@ -63,6 +61,10 @@ public:
     bool                    isFinished() const;
     /// @brief Changes the port member of the client (doesn't affect the real port).
     void                    setPort(unsigned short port);
+    /// @brief Checks if the client accepts the protocol in parameter. If it is
+    /// empty, the first protocol in the protocols list is returned. If nothing
+    /// is returned, the protocol is invalid.
+    QString                 getProtocol(QString protocol = "");
     /// @brief This method is used to get the informations of a client in a thread
     /// safe way. It stores the information request in a map (this->informationsRequests), which
     /// will be used in the client's ThreadPool to fill the informations and unlock the future.
@@ -111,6 +113,7 @@ private:
         CONNECT,    ///< The client is still connecting.
         READ,       ///< Data should be available to read on the network.
         SEND,       ///< Data have to be sent to the client.
+        RECEIVE,    ///< Data have to be received without sending a request.
         RUN,        ///< The engine is running.
         DISCONNECT, ///< The client is going to be disconnected.
         NONE        ///< The client is idle.
@@ -126,6 +129,9 @@ private:
     /// @brief Asks the Engine to generate a new request.
     /// @return True if the Engine is generating the request.
     bool    _send();
+    /// @brief Asks the Engine to read a response without sending a request.
+    /// @return True if the Engine is ready to read the response.
+    bool    _receive();
     /// @brief Calls IOnConnect.
     bool    _onConnect();
     /// @brief Calls IOnDisconnect.
@@ -160,6 +166,7 @@ private:
     bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QPair<QString, QString> > sendRequests; ///< Stores the idPlugin and the protocol of the requests that are going to be sent.
+    QList<QString>           receiveResponses;    ///< Stores the protocol of the responses that are going to be received.
     QMap<Future<bool> *, LightBird::INetwork::Client *> informationsRequests; ///< Used by getInformations to keep track of the informations requests.
 };
 

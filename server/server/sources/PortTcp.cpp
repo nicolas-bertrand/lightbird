@@ -164,7 +164,7 @@ void            PortTcp::_write()
             client->getSocket().state() == QAbstractSocket::ConnectedState &&
             !client->doWrite(*data))
         {
-            //If no plugins implements IDoWrite, the server write the data itself
+            // If no plugins implements IDoWrite, the server write the data itself
             if ((wrote = client->getSocket().write(*data)) != data->size())
                 Log::warning("All data has not been written", Properties("wrote", wrote)
                              .add("size", data->size()).add("id", client->getId()), "PortTcp", "write");

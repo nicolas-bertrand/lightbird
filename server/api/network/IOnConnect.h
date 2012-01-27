@@ -5,9 +5,9 @@
 
 namespace LightBird
 {
-    /// @brief By inheriting this interface, the onConnect method will be called
+    /// @brief By inheriting this interface the onConnect method will be called
     /// each time a new client connects to a port of the server.
-    /// It allows to denied the connection. This is useful to banish some clients.
+    /// It allows to deny the connection. This is useful to banish some clients.
     class IOnConnect
     {
     public:

@@ -93,8 +93,7 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
 {
     SmartMutex  mutex(this->mutex, "Clients", "send");
     Client      *client = NULL;
-    QString     protocol = p;
-    QStringList protocols;
+    QString     protocol;
 
     if (!mutex)
         return (false);
@@ -106,24 +105,39 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
     // The client doesn't exists
     if (!client)
         return (false);
-    protocols = client->getProtocols();
-    // If the protocol is defined we check that it is in the protocols handled by the client
-    if (!protocol.isEmpty() && !protocols.contains("all") && !protocols.contains(protocol))
+    // Checks the protocol
+    if ((protocol = client->getProtocol(p)).isEmpty())
     {
-        Log::warning("The protocol is not handled by the client", Properties("idClient", idClient).add("idPlugin", idPlugin).add("protocol", protocol), "Clients", "send");
-        return (false);
-    }
-    // Otherwise the protocol is the first in the list
-    if (protocol.isEmpty() && !protocols.isEmpty() && !protocols.contains("all"))
-        protocol = protocols.first();
-    // No protocol has been found
-    if (protocol.isEmpty())
-    {
-        Log::warning("No protocol defined for the request", Properties("idClient", idClient).add("idPlugin", idPlugin), "Clients", "send");
+        Log::warning("Invalid protocol", Properties("idClient", idClient).add("idPlugin", idPlugin).add("protocol", p, false), "Clients", "send");
         return (false);
     }
     client->send(protocol, idPlugin);
     return (true);
+}
+
+bool            Clients::receive(const QString &id, const QString &p)
+{
+    SmartMutex  mutex(this->mutex, "Clients", "send");
+    Client      *client = NULL;
+    QString     protocol;
+
+    if (!mutex)
+        return (false);
+    // Search the client
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext() && !client)
+        if (it.next()->getId() == id)
+            client = it.peekPrevious();
+    // The client doesn't exists
+    if (!client)
+        return (false);
+    // Checks the protocol
+    if ((protocol = client->getProtocol(p)).isEmpty())
+    {
+        Log::warning("Invalid protocol", Properties("id", id).add("protocol", p, false), "Clients", "receive");
+        return (false);
+    }
+    return (client->receive(protocol));
 }
 
 Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
@@ -251,7 +265,7 @@ void            Clients::_write()
             mutex.unlock();
             // Calls the IDoWrite interface of the plugins, if the client still exists and is connected
             if(client->getSocket().state() == QAbstractSocket::ConnectedState && !client->doWrite(*data))
-                //If no plugins implements IDoWrite, the server write the data itself
+                // If no plugins implements IDoWrite, the server write the data itself
                 if ((wrote = client->getSocket().write(*data)) != data->size())
                     Log::warning("All data has not been written", Properties("wrote", wrote)
                                  .add("size", data->size()).add("id", client->getId()), "Clients", "write");
