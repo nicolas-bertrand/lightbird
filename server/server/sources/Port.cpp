@@ -77,7 +77,7 @@ bool            Port::disconnect(const QString &id)
     return (false);
 }
 
-bool            Port::send(const QString &id, const QString &p)
+bool            Port::send(const QString &id, const QString &p, const QVariantMap &informations)
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "send");
     Client      *client = NULL;
@@ -99,7 +99,7 @@ bool            Port::send(const QString &id, const QString &p)
         Log::warning("Invalid protocol", Properties("id", id).add("protocol", p, false), "Port", "send");
         return (false);
     }
-    return (client->send(protocol));
+    return (client->send(protocol, informations));
 }
 
 void            Port::close()

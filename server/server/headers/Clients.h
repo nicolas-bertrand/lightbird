@@ -32,10 +32,10 @@ public:
                             LightBird::INetwork::Transport transport, int wait);
     /// @brief Asks the engine of a client to generate a new request.
     /// @see LightBird::INetwork::send
-    bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol);
+    bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol, const QVariantMap &informations);
     /// @brief Asks the engine of a client to read a response.
     /// @see LightBird::INetwork::receive
-    bool            receive(const QString &id, const QString &protocol);
+    bool            receive(const QString &id, const QString &protocol, const QVariantMap &informations);
     /// @see LightBird::INetwork::getClient
     /// @param found : True if the client has been found.
     Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const;

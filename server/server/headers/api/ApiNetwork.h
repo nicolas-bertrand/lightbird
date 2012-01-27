@@ -31,8 +31,8 @@ public:
                           LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                           int wait = -1);
     bool                  disconnect(const QString &id);
-    bool                  send(const QString &id, const QString &protocol = "");
-    bool                  receive(const QString &id, const QString &protocol = "");
+    bool                  send(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
+    bool                  receive(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
 
 private:
     ApiNetwork();

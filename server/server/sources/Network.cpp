@@ -169,28 +169,28 @@ bool            Network::disconnect(const QString &id)
     return (found);
 }
 
-bool            Network::send(const QString &idClient, const QString &idPlugin, const QString &protocol)
+bool            Network::send(const QString &idClient, const QString &idPlugin, const QString &protocol, const QVariantMap &informations)
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Network", "send");
 
     if (!mutex)
         return (false);
-    if (this->clients.send(idClient, idPlugin, protocol))
+    if (this->clients.send(idClient, idPlugin, protocol, informations))
         return (true);
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext())
     {
         QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext())
-            if (it.next().value()->send(idClient, protocol))
+            if (it.next().value()->send(idClient, protocol, informations))
                 return (true);
     }
     return (false);
 }
 
-bool            Network::receive(const QString &idClient, const QString &protocol)
+bool            Network::receive(const QString &idClient, const QString &protocol, const QVariantMap &informations)
 {
-    return (this->clients.receive(idClient, protocol));
+    return (this->clients.receive(idClient, protocol, informations));
 }
 
 void            Network::shutdown()

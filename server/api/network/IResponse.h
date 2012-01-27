@@ -4,7 +4,7 @@
 # include <QMap>
 # include <QString>
 # include <QUrl>
-# include <QVariantList>
+# include <QVariantMap>
 
 # include "IContent.h"
 
@@ -40,8 +40,8 @@ namespace LightBird
         virtual QMap<QString, QString> &getHeader() = 0;
         /// @brief The content of the response.
         virtual LightBird::IContent &getContent() = 0;
-        /// @brief This method is used to store additionnals informations on the response
-        virtual QVariantList    &getInformations() = 0;
+        /// @brief This method is used to store additionnals informations on the response.
+        virtual QVariantMap     &getInformations() = 0;
         /// @brief If there is an error in the response.
         virtual bool    isError() const = 0;
         /// @brief If there is an error in the response.

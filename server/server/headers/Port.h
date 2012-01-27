@@ -35,7 +35,7 @@ public:
     bool            disconnect(const QString &id);
     /// @brief Tries to send a response without waiting for a request.
     /// @see LightBird::INetwork::send
-    bool            send(const QString &id, const QString &protocol = "");
+    bool            send(const QString &id, const QString &protocol, const QVariantMap &informations);
     /// @brief Closes the port. Denies all the new connections to the port and
     /// remove all the clients currently connected.
     virtual void    close();

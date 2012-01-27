@@ -31,13 +31,18 @@ bool    EngineClient::run()
     return (false);
 }
 
-bool    EngineClient::send(const QString &id, const QString &protocol)
+bool    EngineClient::send(const QString &id, const QString &protocol, const QVariantMap &informations)
 {
+    QVariantMap request;
+
     // Checks that the plugin does not have a request already pending
-    QListIterator<QPair<QString, QString> > it(this->requests);
-    this->requests.push_back(QPair<QString, QString>(id, protocol));
+    QListIterator<QVariantMap> it(this->requests);
+    request["id"] = id;
+    request["protocol"] = protocol;
+    request["informations"] = informations;
+    this->requests.push_back(request);
     while (it.hasNext())
-        if (it.peekNext().first == id)
+        if (it.peekNext().value("id").toString() == id)
             this->requests.pop_back();
     // If the engine is ready to process a new request
     if (this->state == NULL)
@@ -48,11 +53,12 @@ bool    EngineClient::send(const QString &id, const QString &protocol)
     return (false);
 }
 
-bool    EngineClient::receive(const QString &protocol)
+bool    EngineClient::receive(const QString &protocol, const QVariantMap &informations)
 {
     if (!this->isIdle())
         return (false);
     this->request.setProtocol(protocol);
+    this->request.getInformations() = informations;
     this->_onSerialize(LightBird::IOnSerialize::IDoSerialize);
     this->state = &EngineClient::_doUnserializeHeader;
     return (true);
@@ -73,9 +79,10 @@ bool        EngineClient::_doSend()
 {
     bool    found = false;
     bool    result = false;
-    QString id = this->requests.front().first;
+    QString id = this->requests.front().value("id").toString();
 
-    this->request.setProtocol(this->requests.front().second);
+    this->request.setProtocol(this->requests.front().value("protocol").toString());
+    this->request.getInformations() = this->requests.front().value("informations").toMap();
     this->requests.pop_front();
     // Gets the plugins that asked to send a request
     QMapIterator<QString, LightBird::IDoSend *> it(Plugins::instance()->getInstances<LightBird::IDoSend>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));

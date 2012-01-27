@@ -4,7 +4,7 @@
 # include <QMap>
 # include <QString>
 # include <QUrl>
-# include <QVariantList>
+# include <QVariantMap>
 
 # include "IContent.h"
 
@@ -36,8 +36,8 @@ namespace LightBird
         virtual const QString   &getType() const = 0;
         /// @brief The type of the content of the request.
         virtual void            setType(const QString &type) = 0;
-        /// @brief This method is used to store additionnals informations on the response
-        virtual QVariantList    &getInformations() = 0;
+        /// @brief This method is used to store additionnals informations on the response.
+        virtual QVariantMap     &getInformations() = 0;
         /// @brief A header is a set of meta-information related to the request.
         /// This method allows one to access to the header and modified it.
         /// @return The header of the request.

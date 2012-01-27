@@ -196,16 +196,18 @@ void        Client::write(QByteArray *data)
     this->readWriteInterface->write(data, this);
 }
 
-bool            Client::send(const QString &protocol, const QString &id)
+bool            Client::send(const QString &protocol, const QVariantMap &informations, const QString &id)
 {
     SmartMutex  mutex(this->mutex, "Client", "send");
+    QVariantMap sendRequest;
 
     if (!mutex)
         return (false);
+    sendRequest["protocol"] = protocol;
+    sendRequest["informations"] = informations;
     if (this->mode == LightBird::IClient::SERVER)
     {
-        // In SERVER mode we don't use the idPlugin
-        this->sendRequests.push_back(QPair<QString, QString>("", protocol));
+        this->sendRequests.push_back(sendRequest);
         if (!this->running && this->engine->isIdle())
             this->_newTask(Client::SEND);
         else
@@ -213,7 +215,8 @@ bool            Client::send(const QString &protocol, const QString &id)
     }
     else if (this->mode == LightBird::IClient::CLIENT)
     {
-        this->sendRequests.push_back(QPair<QString, QString>(id, protocol));
+        sendRequest["id"] = id;
+        this->sendRequests.push_back(sendRequest);
         if (!this->running)
             this->_newTask(Client::SEND);
     }
@@ -230,16 +233,19 @@ bool                Client::_send()
     if (!mutex)
         return (false);
     if (engineServer && !this->sendRequests.isEmpty()
-        && (run = engineServer->send(this->sendRequests.first().second)))
+        && (run = engineServer->send(this->sendRequests.first().value("protocol").toString(),
+                                     this->sendRequests.first().value("informations").toMap())))
         this->sendRequests.pop_front();
     else if (engineClient)
     {
         // Sets the send requests to the engine
-        QListIterator<QPair<QString, QString> > it(this->sendRequests);
+        QListIterator<QVariantMap> it(this->sendRequests);
         while (it.hasNext())
         {
             // If Engine::send returned true at least once, the engine needs to run
-            if (engineClient->send(it.peekNext().first, it.peekNext().second))
+            if (engineClient->send(it.peekNext().value("id").toString(),
+                                   it.peekNext().value("protocol").toString(),
+                                   it.peekNext().value("informations").toMap()))
                 run = true;
             it.next();
         }
@@ -248,15 +254,18 @@ bool                Client::_send()
     return (run);
 }
 
-bool            Client::receive(const QString &protocol)
+bool            Client::receive(const QString &protocol, const QVariantMap &informations)
 {
     SmartMutex  mutex(this->mutex, "Client", "receive");
+    QVariantMap receiveResponses;
 
     if (!mutex)
         return (false);
+    receiveResponses["protocol"] = protocol;
+    receiveResponses["informations"] = informations;
     if (this->mode == LightBird::IClient::CLIENT)
     {
-        this->receiveResponses.push_back(protocol);
+        this->receiveResponses.push_back(receiveResponses);
         if (!this->running && this->engine->isIdle())
             this->_newTask(Client::RECEIVE);
         else
@@ -274,7 +283,8 @@ bool                Client::_receive()
     if (!mutex)
         return (false);
     if (engine && !this->receiveResponses.isEmpty()
-        && (run = engine->receive(this->receiveResponses.first())))
+        && (run = engine->receive(this->receiveResponses.first().value("protocol").toString(),
+                                  this->receiveResponses.first().value("informations").toMap())))
         this->receiveResponses.pop_front();
     return (run);
 }

@@ -49,7 +49,7 @@ void                    Response::setType(const QString &type)
     this->type = type;
 }
 
-QVariantList            &Response::getInformations()
+QVariantMap             &Response::getInformations()
 {
     return (this->informations);
 }

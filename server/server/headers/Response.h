@@ -26,7 +26,7 @@ public:
     void                    setMessage(const QString &message);
     const QString           &getType() const;
     void                    setType(const QString &type);
-    QVariantList            &getInformations();
+    QVariantMap             &getInformations();
     QMap<QString, QString>  &getHeader();
     LightBird::IContent     &getContent();
     bool                    isError() const;
@@ -44,7 +44,7 @@ private:
     int                     code;
     QString                 message;
     QString                 type;
-    QVariantList            informations;
+    QVariantMap             informations;
     QMap<QString, QString>  header;
     Content                 content;
     bool                    error;

@@ -20,13 +20,15 @@ public:
     /// @brief Adds a new request to send.
     /// @param id : The id of the plugin that wants to send the request.
     /// @param protocol : The protocol used to communicate with the client.
+    /// @param informations : The informations of the request.
     /// @return True if the engine is ready to run and send a new request.
-    bool    send(const QString &id, const QString &protocol);
+    bool    send(const QString &id, const QString &protocol, const QVariantMap &informations);
     /// @brief Receive a response without sending a request. Bypass the serialize
     /// api and call directly IOnSerialize followed by IDoUnserializeHeader.
     /// @param protocol : The protocol used to communicate with the client.
+    /// @param informations : The informations of the request.
     /// @return False if the engine is not idle.
-    bool    receive(const QString &protocol);
+    bool    receive(const QString &protocol, const QVariantMap &informations);
     /// @brief Returns true if the engine has just been cleared and data are
     /// waiting to be processed.
     bool    isIdle();
@@ -60,7 +62,7 @@ private:
     ///< A pointer to method to the next step of the processing of the data.
     Method  state;
     /// Stores the list of the requests that the plugins want to send.
-    QList<QPair<QString, QString> > requests;
+    QList<QVariantMap>  requests;
 };
 
 #endif // ENGINECLIENT_H

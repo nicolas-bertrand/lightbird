@@ -66,12 +66,12 @@ bool    ApiNetwork::disconnect(const QString &id)
     return (Network::instance()->disconnect(id));
 }
 
-bool    ApiNetwork::send(const QString &idClient, const QString &protocol)
+bool    ApiNetwork::send(const QString &idClient, const QString &protocol, const QVariantMap &informations)
 {
-    return (Network::instance()->send(idClient, this->id, protocol));
+    return (Network::instance()->send(idClient, this->id, protocol, informations));
 }
 
-bool    ApiNetwork::receive(const QString &idClient, const QString &protocol)
+bool    ApiNetwork::receive(const QString &idClient, const QString &protocol, const QVariantMap &informations)
 {
-    return (Network::instance()->receive(idClient, protocol));
+    return (Network::instance()->receive(idClient, protocol, informations));
 }

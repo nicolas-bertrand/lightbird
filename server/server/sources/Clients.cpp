@@ -89,7 +89,7 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
     return (Future<QString>());
 }
 
-bool            Clients::send(const QString &idClient, const QString &idPlugin, const QString &p)
+bool            Clients::send(const QString &idClient, const QString &idPlugin, const QString &p, const QVariantMap &informations)
 {
     SmartMutex  mutex(this->mutex, "Clients", "send");
     Client      *client = NULL;
@@ -111,11 +111,11 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
         Log::warning("Invalid protocol", Properties("idClient", idClient).add("idPlugin", idPlugin).add("protocol", p, false), "Clients", "send");
         return (false);
     }
-    client->send(protocol, idPlugin);
+    client->send(protocol, informations, idPlugin);
     return (true);
 }
 
-bool            Clients::receive(const QString &id, const QString &p)
+bool            Clients::receive(const QString &id, const QString &p, const QVariantMap &informations)
 {
     SmartMutex  mutex(this->mutex, "Clients", "send");
     Client      *client = NULL;
@@ -137,7 +137,7 @@ bool            Clients::receive(const QString &id, const QString &p)
         Log::warning("Invalid protocol", Properties("id", id).add("protocol", p, false), "Clients", "receive");
         return (false);
     }
-    return (client->receive(protocol));
+    return (client->receive(protocol, informations));
 }
 
 Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const

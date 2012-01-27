@@ -54,7 +54,7 @@ void                    Request::setType(const QString &type)
     this->type = type;
 }
 
-QVariantList            &Request::getInformations()
+QVariantMap             &Request::getInformations()
 {
     return (this->informations);
 }

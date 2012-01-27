@@ -27,7 +27,7 @@ public:
     void                    setVersion(const QString &version);
     const QString           &getType() const;
     void                    setType(const QString &type);
-    QVariantList            &getInformations();
+    QVariantMap             &getInformations();
     QMap<QString, QString>  &getHeader();
     LightBird::IContent     &getContent();
     bool                    isError() const;
@@ -48,7 +48,7 @@ private:
     QUrl                    uri;
     QString                 version;
     QString                 type;
-    QVariantList            informations;
+    QVariantMap             informations;
     QMap<QString, QString>  header;
     Content                 content;
     bool                    error;

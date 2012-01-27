@@ -47,10 +47,10 @@ public:
     void                    write(QByteArray *data);
     /// @brief Asks the engine to generate a new request.
     /// @see LightBird::INetwork::send
-    bool                    send(const QString &protocol, const QString &id = "");
+    bool                    send(const QString &protocol, const QVariantMap &informations, const QString &id = "");
     /// @brief Asks the engine to read a response without sending a request.
     /// @see LightBird::INetwork::receive
-    bool                    receive(const QString &protocol);
+    bool                    receive(const QString &protocol, const QVariantMap &informations);
     /// @brief Disconnect the client
     void                    disconnect();
     /// @brief Calls the IDoRead interface of the plugins.
@@ -165,8 +165,8 @@ private:
     bool                     finish;              ///< If true, the client is going to be disconnected.
     bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.
     QMutex                   mutex;               ///< Makes this class thread safe.
-    QList<QPair<QString, QString> > sendRequests; ///< Stores the idPlugin and the protocol of the requests that are going to be sent.
-    QList<QString>           receiveResponses;    ///< Stores the protocol of the responses that are going to be received.
+    QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.
+    QList<QVariantMap>       receiveResponses;    ///< Stores the protocol and the informations of the responses that are going to be received.
     QMap<Future<bool> *, LightBird::INetwork::Client *> informationsRequests; ///< Used by getInformations to keep track of the informations requests.
 };
 

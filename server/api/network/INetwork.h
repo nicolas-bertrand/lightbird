@@ -9,6 +9,7 @@
 # include <QString>
 # include <QStringList>
 # include <QVariant>
+# include <QVariantMap>
 
 # include "IFuture.h"
 
@@ -141,12 +142,14 @@ namespace LightBird
         /// @param protocol : The protocol used to communicate with the client.
         /// If empty the first protocol in the client protocols list (defined in
         /// connect()) is used. Therefore this list must not be empty in this case.
+        /// @param informations : This parameter will be stored in the request.
+        /// Use LightBird::IRequest::getInformations to access it.
         /// @return False if the client or the protocol is invalid.
         /// * In SERVER mode false is also returned if a request is unserializing.
         /// @see LightBird::IClient::Mode
         /// @see LightBird::IDoSend
         /// @see LightBird::INetwork::connect
-        virtual bool    send(const QString &id, const QString &protocol = "") = 0;
+        virtual bool    send(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap()) = 0;
         /// @brief If the client is in CLIENT mode, the server will try to bypass
         /// the serialization of the request, and call directly LightBird::IOnSerialize
         /// followed by IDoUnserializeHeader in order to read the response of
@@ -159,11 +162,13 @@ namespace LightBird
         /// @param protocol : The protocol used to communicate with the client.
         /// If empty the first protocol in the client protocols list (defined in
         /// connect()) is used. Therefore this list must not be empty in this case.
+        /// @param informations : This parameter will be stored in the request.
+        /// Use LightBird::IRequest::getInformations to access it.
         /// @return False if the client or the protocol is invalid, if a response
         /// is being serialized, or if no data have been received yet.
         /// @see LightBird::IClient::Mode
         /// @see LightBird::INetwork::connect
-        virtual bool    receive(const QString &id, const QString &protocol = "") = 0;
+        virtual bool    receive(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap()) = 0;
     };
 }
 

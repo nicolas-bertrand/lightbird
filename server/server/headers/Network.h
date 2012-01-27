@@ -47,9 +47,9 @@ public:
     /// @see LightBird::INetwork::disconnect
     bool            disconnect(const QString &id);
     /// @see LightBird::INetwork::send
-    bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "");
+    bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     /// @see LightBird::INetwork::receive
-    bool            receive(const QString &idClient, const QString &protocol = "");
+    bool            receive(const QString &idClient, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     /// @brief Quits all the ports threads and delete them.
     void            shutdown();
     /// @brief Returns the instance of this class created by the Server.

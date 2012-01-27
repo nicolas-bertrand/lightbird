@@ -28,11 +28,12 @@ bool    EngineServer::run()
     return ((this->*state)());
 }
 
-bool    EngineServer::send(const QString &protocol)
+bool    EngineServer::send(const QString &protocol, const QVariantMap &informations)
 {
     if (!this->isIdle())
         return (false);
     this->request.setProtocol(protocol);
+    this->request.getInformations() = informations;
     this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserialize);
     this->state = &EngineServer::_doExecution;
     return (true);
