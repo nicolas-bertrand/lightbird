@@ -310,7 +310,7 @@ function getEventTarget(event, name, depth)
 		return (target);
 	for (var d = 0; target && (!depth || d < depth); d++)
 	{
-		if (target.tagName.toLowerCase() == name.toLowerCase() ||
+		if ((target.tagName && target.tagName.toLowerCase() == name.toLowerCase()) ||
 		    (target.className && target.className.toLowerCase() == name.toLowerCase()))
 			return (target);
 		target = target.parentNode;
@@ -334,7 +334,7 @@ function getEventRelatedTarget(event, name, depth)
         depth = 999;
 	for (var d = 0; target && d < depth; d++)
 	{
-		if (target.tagName.toLowerCase() == name.toLowerCase() ||
+		if ((target.tagName && target.tagName.toLowerCase() == name.toLowerCase()) ||
 		    (target.className && target.className.toLowerCase() == name.toLowerCase()))
 			return (target);
 		target = target.parentNode;

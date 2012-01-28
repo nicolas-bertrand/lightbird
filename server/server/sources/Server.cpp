@@ -168,7 +168,7 @@ bool            Server::_loadTranslation(const QString &file, const QString &res
     return (true);
 }
 
-bool    Server::_temporaryDirectory()
+bool        Server::_temporaryDirectory()
 {
     QString path;
     QDir    directory;
