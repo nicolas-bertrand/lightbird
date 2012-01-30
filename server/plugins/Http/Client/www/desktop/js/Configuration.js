@@ -18,13 +18,14 @@ var Configuration =
         tasks_list_width : 50,
         task_height : 30,
         page_padding : 7,
-        task_magnetic_drag : 0, // Limit between the tasks list drag and the free drag (from the tasks list right border)
+        task_magnetic_drag_x : 0, // Limit between the tasks list drag and the free drag (from the tasks list right border)
+        task_magnetic_drag_y : 3, // Number of pixels a task have to be dragged vertically before actually moving
         tasks_list_scroll : 50, // Size of the scrolling areas of the tasks list
         scrollSpeed : 10,
         new_task_height : 20, // Height of the new task area
         wheelSpeed : 2, // Decreases the mouse whell speed
-        pagePreviewDelay : 300, // The delay to display a page when the mouse enters the tasks list.
-        task_margin : 20, // The margin between the tasks of a page.
+        pagePreviewDelay : 300, // The delay to display a page when the mouse enters the tasks list
+        task_margin : 20, // The margin between the tasks of a page
     },
 	// The size of the window
 	Window :

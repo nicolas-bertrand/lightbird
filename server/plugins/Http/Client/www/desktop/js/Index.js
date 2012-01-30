@@ -280,11 +280,8 @@ function setClassName(node, className)
 
 function removeClassName(node, className)
 {
-	if (getClassName(node, className))
-	{
-		node.className = node.className.replace(new RegExp('\\b' + className + '\\b'), "");
-		node.className = node.className.replace("  ", " ");
-	}
+    node.className = node.className.replace(new RegExp('\\b' + className + '\\b'), "");
+    node.className = node.className.replace("  ", " ");
 }
 
 // Compare too strings
