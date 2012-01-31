@@ -25,7 +25,10 @@ var Configuration =
         new_task_height : 20, // Height of the new task area
         wheelSpeed : 2, // Decreases the mouse whell speed
         pagePreviewDelay : 300, // The delay to display a page when the mouse enters the tasks list
-        task_margin : 20, // The margin between the tasks of a page
+        task_margin : 20 / 2, // The margin between the tasks of a page
+        free_drag_shift_x : 10, // The x shift of the dragged task when we are in free drag
+        free_drag_shift_y : 10, // The y shift of the dragged task when we are in free drag
+        defaultPosition : "e", // The default position of a task moved (n s e w)
     },
 	// The size of the window
 	Window :

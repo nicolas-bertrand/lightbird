@@ -149,6 +149,14 @@ a:visited
     background-color: #FFFFFF;
 }
 
+#desktop>.top>.middle .preview
+{
+    position: absolute;
+    opacity: 0.5;
+    background-color: #88BBFF;
+    display: none;
+}
+
 #desktop>.player_media
 {
     height: 100px; /* C.Desktop.player_media_height */
@@ -185,6 +193,11 @@ a:visited
 #desktop>.top>.tasks_list .task:hover
 {
 	background-color: #ffffff;
+}
+
+#desktop>.top>.tasks_list .drag
+{
+    z-index: 999999;
 }
 
 #desktop>.top>.tasks_list .new
