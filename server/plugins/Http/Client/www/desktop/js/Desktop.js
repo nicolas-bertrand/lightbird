@@ -128,12 +128,16 @@ Desktop.prototype.mouseWheel = function (event)
 // Doesn't display the page under the cursor immediatly
 Desktop.prototype.mouseOverTasksList = function (event)
 {
-    if (!getEventRelatedTarget(event, "tasks_list", 3))
+    // Ensures that we are really on the tasks list
+    if (!getEventRelatedTarget(event, "tasks_list", 3) && (event.target || event.srcElement).object != gl_desktop.drag)
     {
         this.content.timeout = setTimeout("gl_desktop.mouseOverTasksListTimeout()", C.Desktop.pagePreviewDelay);
         // These variables must be undefined in the tasks list
         gl_desktop.addTaskPosition = undefined;
         gl_desktop.addTaskParent = undefined;
+        // Ensures that the preview is correctly displayed
+        if (this.drag && this.content.page)
+            this.content.page.preview();
     }
 }
 Desktop.prototype.mouseOverTasksListTimeout = function ()
@@ -289,6 +293,7 @@ function Page()
 {
     this.id = gl_uid++;
     this.order = 1;
+    this.number_task = 0;
     var page = this;
     
     // Create the page and insert it in the tasks list
@@ -401,6 +406,7 @@ Page.prototype.addTask = function (task, position, parent, beforeIcon)
         beforeIcon.parentNode.insertBefore(task.icon, beforeIcon);
     else
         this.icon.appendChild(task.icon);
+    this.number_task++;
     // Update the display of the page
     task.content.style.display = "block";
     this.onResize();
@@ -423,6 +429,7 @@ Page.prototype.removeTask = function (task, move)
         this.removeNode(task.node);
         this.onResize();
     }
+    this.number_task--;
 }
 
 // Resize the tasks of the page
@@ -642,7 +649,7 @@ Page.prototype.preview = function(task, position)
     // Display the preview on the page
     else
     {
-        // Move the preview in a node in static position
+        // Move the preview to a node in static position
         preview.parentNode.removeChild(preview);
         gl_desktop.node.middle.appendChild(preview);
         // Display the preview based on the position of the mouse in the page
@@ -654,7 +661,7 @@ Page.prototype.preview = function(task, position)
         if (position == "n" || position == "s")
             preview.style.height = this.height / 2 + "px";
         if (position == "s")
-            preview.style.top = this.height / 2 + "px";
+            preview.style.top = this.top + this.height / 2 + "px";
         if (position == "w" || position == "e")
             preview.style.width = this.width / 2 + "px";
         if (position == "e")
@@ -731,24 +738,28 @@ Task.prototype.mouseDown = function (event)
 
 // The mouse moved over the content of a task
 // Get the position of the mouse in the task (north south east west)
-Task.prototype.mouseMove = function (event)
+// @param coord : The coordinates of the square from which the position is computed.
+// If not defined, the coordinates of the task are used instead.
+Task.prototype.mouseMove = function (event, coord)
 {
+    if (!coord)
+        coord = this;
     var mouse = mouseCoordinates(event);
-    var x = mouse.x - this.left;
-    var y = mouse.y - this.top;
-    var ratio = this.width / this.height;
+    var x = mouse.x - coord.left;
+    var y = mouse.y - coord.top;
+    var ratio = coord.width / coord.height;
     var oldPosition = gl_desktop.addTaskPosition;
     var oldParent = gl_desktop.addTaskParent;
     
     // In the corner of the task we use the diagonal to get the position
-    if (!gl_desktop.addTaskPosition || y < this.height / 3 && x < this.width / 3 || y < this.height / 3 && x > this.width * 2 / 3
-                                    || y > this.height * 2 / 3 && x < this.width / 3 || y > this.height * 2 / 3 && x > this.width * 2 / 3)
+    if (!gl_desktop.addTaskPosition || y < coord.height / 3 && x < coord.width / 3 || y < coord.height / 3 && x > coord.width * 2 / 3
+                                    || y > coord.height * 2 / 3 && x < coord.width / 3 || y > coord.height * 2 / 3 && x > coord.width * 2 / 3)
     {
-        if (x > y * ratio && (this.width - x) > y * ratio)
+        if (x > y * ratio && (coord.width - x) > y * ratio)
             gl_desktop.addTaskPosition = "n";
         else if (x > y * ratio)
             gl_desktop.addTaskPosition = "e";
-        else if ((this.width - x) > y * ratio)
+        else if ((coord.width - x) > y * ratio)
             gl_desktop.addTaskPosition = "w";
         else
             gl_desktop.addTaskPosition = "s";
@@ -756,11 +767,11 @@ Task.prototype.mouseMove = function (event)
     // Facilites the transition east/west
     else if (gl_desktop.addTaskPosition == "e" || gl_desktop.addTaskPosition == "w")
     {
-        if (y > this.height / 3 && y < this.height * 2 / 3 && x < this.width / 2)
+        if (y > coord.height / 3 && y < coord.height * 2 / 3 && x < coord.width / 2)
             gl_desktop.addTaskPosition = "w";
-        else if (y > this.height / 3 && y < this.height * 2 / 3 && x > this.width / 2)
+        else if (y > coord.height / 3 && y < coord.height * 2 / 3 && x > coord.width / 2)
             gl_desktop.addTaskPosition = "e";
-        else if (y < this.height / 2)
+        else if (y < coord.height / 2)
             gl_desktop.addTaskPosition = "n";
         else
             gl_desktop.addTaskPosition = "s";
@@ -768,15 +779,17 @@ Task.prototype.mouseMove = function (event)
     // Facilites the transition north/south
     else
     {
-        if (x > this.width / 3 && x < this.width * 2 / 3 && y < this.height / 2)
+        if (x > coord.width / 3 && x < coord.width * 2 / 3 && y < coord.height / 2)
             gl_desktop.addTaskPosition = "n";
-        else if (x > this.width / 3 && x < this.width * 2 / 3 && y > this.height / 2)
+        else if (x > coord.width / 3 && x < coord.width * 2 / 3 && y > coord.height / 2)
             gl_desktop.addTaskPosition = "s";
-        else if (x < this.width / 2)
+        else if (x < coord.width / 2)
             gl_desktop.addTaskPosition = "w";
         else
             gl_desktop.addTaskPosition = "e";
     }
+    if (coord != this)
+        return ;
     gl_desktop.addTaskParent = this;
     // If the position has changed, the preview is displayed
     if (oldPosition != gl_desktop.addTaskPosition || oldParent != gl_desktop.addTaskParent)
@@ -784,7 +797,6 @@ Task.prototype.mouseMove = function (event)
 }
 
 // Move the task
-// @param mouse : The position of the mouse
 Task.prototype.mouseMoveDesktop = function (mouse)
 {
     var y = mouse.y - this.mouse.y;
@@ -816,6 +828,35 @@ Task.prototype.mouseMoveDesktop = function (mouse)
     {
         this.icon.style.left = (T.Menu.width + C.Desktop.page_padding) + "px";
         this.updateTasksList(mouse.y);
+    }
+    // Allows to add a task in the border of the page
+    var page = this.icon.parentNode.object;
+    if (!gl_desktop.drag.taskCache.createPage && gl_desktop.content.page && gl_desktop.content.page.number_task > 1 &&
+        mouse.x - page.left > 0 && mouse.x - page.left < page.width && mouse.y - page.top > 0 && mouse.y - page.top < page.height
+        && (mouse.x - page.left < C.Desktop.insert_task_border || mouse.x - page.left > page.width - C.Desktop.insert_task_border
+            || mouse.y - page.top < C.Desktop.insert_task_border || mouse.y - page.top > page.height - C.Desktop.insert_task_border))
+    {
+        // Get the position of the mouse in the page (n s e w)
+        this.mouseMove(event, page);
+        var position = gl_desktop.addTaskPosition;
+        var preview = gl_desktop.node.preview;
+        // Display the preview
+        preview.parentNode.removeChild(preview);
+        gl_desktop.node.middle.appendChild(preview);
+        preview.style.display = "block";
+        preview.style.top = page.top + "px";
+        preview.style.left = page.left + "px";
+        preview.style.width = page.width + "px";
+        preview.style.height = page.height + "px";
+        if (position == "n" || position == "s")
+            preview.style.height = C.Desktop.insert_task_border + "px";
+        if (position == "s")
+            preview.style.top = page.top + (page.height - C.Desktop.insert_task_border) + "px";
+        if (position == "w" || position == "e")
+            preview.style.width = C.Desktop.insert_task_border + "px";
+        if (position == "e")
+            preview.style.left = page.left + (page.width - C.Desktop.insert_task_border) + "px";
+        gl_desktop.addTaskParent = undefined;
     }
 }
 

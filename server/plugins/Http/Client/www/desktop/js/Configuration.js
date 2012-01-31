@@ -29,6 +29,7 @@ var Configuration =
         free_drag_shift_x : 10, // The x shift of the dragged task when we are in free drag
         free_drag_shift_y : 10, // The y shift of the dragged task when we are in free drag
         defaultPosition : "e", // The default position of a task moved (n s e w)
+        insert_task_border : 50, // The size of the page border areas that allows to insert a task
     },
 	// The size of the window
 	Window :

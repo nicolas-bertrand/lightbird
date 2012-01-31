@@ -23,9 +23,9 @@ public:
 
     /// @brief If the plugin implements IEvent a thread is created to deliver
     /// the events to the plugin via this interface.
-    void    run();
+    void        run();
     /// @brief Add a new event to the queue if the plugin has subscribed to it.
-    void    post(const QString &event, const QVariant &property = QVariant());
+    void        post(const QString &event, const QVariant &property = QVariant());
 
     // LightBird::IEvents
     void        subscribe(const QString &event);
@@ -40,7 +40,7 @@ public:
 signals:
     /// @brief Signal emitted by post() each time an event for which the
     /// plugin has subscribed occur.
-    void    newEvent();
+    void        newEvent();
 
 private:
     ApiEvents();

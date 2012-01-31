@@ -305,6 +305,8 @@ function getEventTarget(event, name, depth)
 	target = (event.target || event.srcElement);
 	if (name == undefined)
 		return (target);
+    if (!depth)
+        depth = 999;
 	for (var d = 0; target && (!depth || d < depth); d++)
 	{
 		if ((target.tagName && target.tagName.toLowerCase() == name.toLowerCase()) ||
