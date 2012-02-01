@@ -25,11 +25,14 @@ var Configuration =
         new_task_height : 20, // Height of the new task area
         wheelSpeed : 2, // Decreases the mouse whell speed
         pagePreviewDelay : 300, // The delay to display a page when the mouse enters the tasks list
-        task_margin : 20 / 2, // The margin between the tasks of a page
+        task_margin : 20, // The margin between the tasks of a page
         free_drag_shift_x : 10, // The x shift of the dragged task when we are in free drag
         free_drag_shift_y : 10, // The y shift of the dragged task when we are in free drag
         defaultPosition : "e", // The default position of a task moved (n s e w)
         insert_task_border : 50, // The size of the page border areas that allows to insert a task
+        resizeTaskLimitMin : 0, // Between 0 and 1
+        resizeTaskLimitMax : 1, // Between 0 and 1
+        resizeResistance : 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
     },
 	// The size of the window
 	Window :

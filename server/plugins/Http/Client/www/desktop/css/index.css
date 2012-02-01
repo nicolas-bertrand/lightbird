@@ -128,11 +128,6 @@ a:visited
 	background-color: #0000bb;
 }
 
-#desktop>.top>.middle>.pages
-{
-    height: 100%;
-}
-
 #desktop>.top>.middle>.pages>.page
 {
     height: 0px;
@@ -140,13 +135,28 @@ a:visited
     position: absolute;
     left: 0px;
     top: 0px;
+}
+
+#desktop>.top>.middle>.pages>.page>.resize
+{
+    position: absolute;
+}
+#desktop>.top>.middle>.pages>.page>.resize.horizontal
+{
     background-color: #FF0000;
+    cursor: s-resize;
+}
+#desktop>.top>.middle>.pages>.page>.resize.vertical
+{
+    background-color: #00FF00;
+    cursor: e-resize;
 }
 
 #desktop>.top>.middle>.tasks>.task
 {
     position: absolute;
     background-color: #FFFFFF;
+    overflow: hidden;
 }
 
 #desktop>.top>.middle .preview
