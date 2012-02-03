@@ -107,24 +107,15 @@ a:visited
 	background-color: #eeeeee;
 }
 
-#desktop>.top>.tasks_list
-{
-    width: 40px; /* C.Desktop.tasks_list_width */
-    height: 100%;
-    float: left;
-    overflow: hidden;
-	background-color: #00dd22;
-}
-
 #desktop>.top>.middle
 {
     height: 100%;
-    margin-left: 190px; /* menu width + tasks list width */
+    margin-left: 190px; /* menu width + tasks list width + resize tasks list width */
 }
 
 #desktop>.top>.middle>.player_document
 {
-    height: 100px; /* C.Desktop.player_document_height */
+    height: 100px; /* C.Desktop.playerDocumentHeight */
 	background-color: #0000bb;
 }
 
@@ -143,12 +134,10 @@ a:visited
 }
 #desktop>.top>.middle>.pages>.page>.resize.horizontal
 {
-    background-color: #FF0000;
     cursor: s-resize;
 }
 #desktop>.top>.middle>.pages>.page>.resize.vertical
 {
-    background-color: #00FF00;
     cursor: e-resize;
 }
 
@@ -169,7 +158,7 @@ a:visited
 
 #desktop>.player_media
 {
-    height: 100px; /* C.Desktop.player_media_height */
+    height: 100px; /* C.Desktop.playerMediaHeight */
 	background-color: #2277bb;
 }
 
@@ -177,27 +166,45 @@ a:visited
 //                                TASKS LIST                                //
 ////////////////////////////////////////////////////////////////////////////*/
 
+#desktop>.top>.tasks_list
+{
+    width: 40px; /* C.Desktop.tasksListWidth */
+    height: 100%;
+    float: left;
+    overflow: hidden;
+	background-color: #00dd22;
+}
+
+#desktop>.top>.resize_tasks_list
+{
+    width: 1px; /* C.Desktop.resizeTasksListWidth */
+    height: 100%;
+    float: left;
+	background-color: #FF0000;
+    cursor: e-resize;
+}
+
 #desktop>.top>.tasks_list .page
 {
-    padding: 7px;
+    padding: 7px; /* C.Desktop.tasksListPadding */
 	background-color: red;
     cursor: pointer;
 }
 
 #desktop>.top>.tasks_list .task
 {
-    width: 36px;
-    height: 30px;
+    width: 36px; /* C.Desktop.tasksListWidth - 2 * C.Desktop.tasksListPadding */
+    height: 30px; /* width * C.Desktop.taskHeightRatio */
     text-align: center;
 	font-weight: bold;
     font-size: 23px;
 	background-color: #eeeeee;
+    overflow: hidden;
 }
 
 #desktop>.top>.tasks_list .ghost
 {
-    width: 36px;
-    height: 30px;
+    height: 30px; /* task height */
 }
 
 #desktop>.top>.tasks_list .task:hover
@@ -212,7 +219,7 @@ a:visited
 
 #desktop>.top>.tasks_list .new
 {
-    height: 40px; /* C.Desktop.new_task_height */
+    height: 40px; /* C.Desktop.newTaskHeight */
 }
 
 /*////////////////////////////////////////////////////////////////////////////

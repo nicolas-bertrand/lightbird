@@ -1,38 +1,41 @@
 // The configuration of the Client.
 var Configuration =
 {
-	// The time between each new session id.
-	identificationTimerTimeout : 50000,
-	// The default size of the new windows
+	// The default size of the new windows.
 	newWindowWidth : 600,
 	newWindowHeight : 300,
-	// Default animation FPS
+	// Default animation FPS.
 	animationFPS : 20,
-    // The configuration of the desktop
+    // The configuration of the desktop.
     Desktop :
     {
-        minWidth : 600,
-        minHeight : 400,
-        player_document_height : 50,
-        player_media_height : 100,
-        tasks_list_width : 50,
-        task_height : 30,
-        page_padding : 7,
-        task_magnetic_drag_x : 0, // Limit between the tasks list drag and the free drag (from the tasks list right border)
-        task_magnetic_drag_y : 3, // Number of pixels a task have to be dragged vertically before actually moving
-        tasks_list_scroll : 50, // Size of the scrolling areas of the tasks list
-        scrollSpeed : 10,
-        new_task_height : 20, // Height of the new task area
-        wheelSpeed : 2, // Decreases the mouse whell speed
-        pagePreviewDelay : 300, // The delay to display a page when the mouse enters the tasks list
-        task_margin : 20, // The margin between the tasks of a page
-        free_drag_shift_x : 10, // The x shift of the dragged task when we are in free drag
-        free_drag_shift_y : 10, // The y shift of the dragged task when we are in free drag
-        defaultPosition : "e", // The default position of a task moved (n s e w)
-        insert_task_border : 50, // The size of the page border areas that allows to insert a task
-        resizeTaskLimitMin : 0, // Between 0 and 1
-        resizeTaskLimitMax : 1, // Between 0 and 1
+        minWidth : 600, // The minimum width of the desktop.
+        minHeight : 400, // The minimum height of the desktop.
+        playerDocumentHeight : 50, // The height of the document player.
+        playerMediaHeight : 100, // The height of the media player.
+        tasksListWidth : 50, // The width of the tasks list.
+        resizeTasksListWidth : 1, // The width of the div that allows to resize the tasks list.
+        taskHeightRatio : 5 / 6, // The height of the task icon in the tasks list is : task width * taskHeightRatio
+        tasksListPadding : 7, // The padding of the page icons in the tasks list.
+        taskMagneticDragX : 0, // Limit between the tasks list drag and the free drag (from the tasks list right border).
+        taskMagneticDragY : 3, // Number of pixels a task have to be dragged vertically before actually moving.
+        tasksListScrollHeight : 50, // Height of the scrolling areas of the tasks list.
+        scrollSpeed : 12, // The speed of the scroll areas of the tasks list.
+        mouseWheelScrollSpeed : 13, // The number of pixels scrolled by each mouse wheel click.
+        moveTaskWheelSpeed : 10, // The speed at which the tasks are changed with the mouse wheel when a task is dragged ouside the tasks list.
+        newTaskHeight : 20, // Height of the new task area.
+        pagePreviewDelay : 500, // The delay to display a page when the mouse enters the tasks list.
+        taskMargin : 20, // The margin between the tasks of a page. It is also the size of the resize task bars.
+        freeDragTashShift : { x : 10, y : 10 }, // The shift of the dragged task when we are in free drag.
+        defaultPosition : "e", // The default position of a task moved (n s e w).
+        insertTaskAreaSize : 50, // The size of the page border areas that allows to insert a task.
+        resizeTaskLimitMin : 0, // The minimum ratio by which a task can be resized. Between 0 and 1.
+        resizeTaskLimitMax : 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
         resizeResistance : 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
+        stabilizeTaskResize : true, // If true, the ratio of the tasks being resized is stabilized.
+        resizeTasksListMin : 30, // The minimum size of the tasks list.
+        resizeTasksListMax : 200, // The maximum size of the tasks list.
+        taskIconMinWidth : 15, // The minimum width if a task icon.
     },
 	// The size of the window
 	Window :
