@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link href="documentation.css" rel="stylesheet" />
+    <title>Plugins - LightBird</title>
+</head>
+
+<body>
+    <div class="content">
+        <h1>Plugins</h1>
+        <hr />
+        
+        <h2>I. Généralités</h2>
+        <p>Les plugins constituent l’intelligence du serveur. Ce sont eux qui implémentent les fonctionnalités exploitables par les clients et les utilisateurs. Sans plugin le serveur ne fait rien.</p>
+        <p>Un plugin est une bibliothèque dynamique (dll, so, dylib…) qui implémente des interfaces fournies par le serveur, dont les méthodes sont appelées en fonction de divers événements, qui peuvent provenir du réseau ou d’interfaces graphiques par exemple.</p>
+        <p>En plus de ces événements, le serveur propose aux plugins une série d’APIs qui leurs permettent d’exploiter certaines fonctionnalités du serveur, et de faciliter leur implémentation.</p>
+        
+        <h2>II. Composition</h2>
+        <p>Un plugin est constitué de plusieurs éléments avec chacun un rôle précis :</p>
+        <table class="small_value">
+            <tr>
+                <th>Elément</th>
+                <th>Description</th>
+                <th>Requis</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Plugin.*</td>
+                <td>La bibliothèque dynamique constituant le plugin. Son extension peut être dll, so, sl, a, bundle ou dylib, en fonction du système pour laquelle elle a été compilée. En dehors de l’extension, le nom de ce fichier n’a pas d’importance.</td>
+                <td class="value">Oui</td>
+            </tr>
+            <tr>
+                <td class="key">Configuration</td>
+                <td>La configuration d’un plugin est stockée à l’intérieur de la configuration du serveur. Si elle n’est pas présente, le plugin est considéré comme désinstallé.</td>
+                <td class="value">Oui</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Queries.xml</td>
+                <td>Les plugins peuvent utiliser ce fichier pour stocker leurs requêtes SQL.</td>
+                <td class="value">Non</td>
+            </tr>
+            <tr class="last">
+                <td class="key">Logo.png</td>
+                <td>Ce logo peut être utilisé par une interface graphique afin d’illustrer le plugin.</td>
+                <td class="value">Non</td>
+            </tr>
+        </table>
+        <p>Tous les éléments d’un plugin sont regroupés dans un dossier qui lui est propre, et qui se trouve lui-même dans le dossier « <strong>plugins</strong> » du serveur (par défaut). Il est libre d’y ajouter ses fichiers et dossiers, en fonction de ce dont il a besoin.</p>
+        <p>Le nom du dossier dans lequel se trouve le plugin représente son identifiant unique. Si le chemin vers le plugin dans le dossier des plugins contient plusieurs sous-dossiers, son identifiant sera le nom de ces sous-dossiers séparés pas des « <strong>/</strong> ». Par exemple si un plugin se trouve dans le dossier plugins/Example/Basic, son identifiant sera Example/Basic.</p>
+        
+        <h2>III. Installation et chargement</h2>
+        <p>Pour installer un plugin, sa configuration doit être présente dans le fichier de configuration du serveur, entre les nœuds <strong>configurations</strong> :</p>
+        <div class="xml">
+            <span class="chevron">&lt;</span>configurations<span class="chevron">&gt;</span>
+            <div class="indent">
+                <span class="chevron">&lt;</span>plugin <span class="key">id</span><span class="value">=</span><span class="text">"</span><span class="value">Example/Basic</span><span class="text">"</span><span class="chevron">&gt;</span>
+                <div class="indent">
+                    <span class="comment">&lt;!—Configuration of the plugin --&gt;</span>
+                </div>
+                <span class="chevron">&lt;/</span>plugin<span class="chevron">&gt;</span>
+            </div>
+            <span class="chevron">&lt;/</span>configurations<span class="chevron">&gt;</span>
+        </div>
+        <p>Pour charger un plugin, son id du doit être ajouté dans le nœud <strong>plugins</strong> de la configuration du serveur. Le plugin sera ainsi chargé au prochain démarrage du serveur. Un plugin doit être installé pour être chargé.</p>
+        <div class="xml">
+            <span class="chevron">&lt;</span>plugins<span class="chevron">&gt;</span>
+            <div class="indent">
+                <span class="chevron">&lt;</span>plugin<span class="chevron">&gt;</span><span class="value">Example/Basic</span><span class="chevron">&lt;/</span>plugin<span class="chevron">&gt;</span>
+            </div>
+            <span class="chevron">&lt;/</span>plugins<span class="chevron">&gt;</span>
+        </div>
+        <p>Il est possible d’installer, charger, décharger, et désinstaller un plugin à la volée, c'est-à-dire en plein fonctionnement du serveur, via l’API Plugins. Si un plugin est déchargé à chaud, le serveur lui laisse le temps de terminer toutes ses tâches en cours, avant de le décharger concrètement. Un plugin peu se décharger lui-même.</p>
+        <p>Lorsqu’un plugin est désinstallé, il doit s’assurer que tous les fichiers qu’il a créés durant son existence sont effacés.</p>
+
+        <h2>IV. Métadonnées</h2>
+        <p>Les métadonnées sont des informations fournies par chaque plugin, qui permettent aux utilisateurs de les identifier, et de comprendre leur utilité :</p>
+        <table>
+            <tr>
+                <th>Métadonnée</th>
+                <th>Description</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Name</td>
+                <td>Le nom réel du plugin. Celui qui sera affiché aux utilisateurs.</td>
+            </tr>
+            <tr>
+                <td class="key">Brief</td>
+                <td>Une courte description de la fonction du plugin.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Description</td>
+                <td>Une description plus détaillée.</td>
+            </tr>
+            <tr>
+                <td class="key">Autor</td>
+                <td>Nom de l’auteur du plugin.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Site</td>
+                <td>Le site web de l’auteur.</td>
+            </tr>
+            <tr>
+                <td class="key">Email</td>
+                <td>Son adresse email.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Version</td>
+                <td>La version actuelle du plugin.</td>
+            </tr>
+            <tr class="last">
+                <td class="key">Licence</td>
+                <td>La licence sous laquelle le plugin est distribué. Les plugins officiels de LightBird sont en <em>Creative Common BY-NC-SA 3.0</em>.</td>
+            </tr>
+        </table>
+        
+        <h2>V. Configuration</h2>
+        <p>La configuration d’un plugin est stockée dans la configuration du serveur, à l’intérieur du nœud <strong>configurations</strong> :</p>
+        <div class="xml">
+            <span class="chevron">&lt;</span>plugin <span class="key">id</span><span class="value">=</span><span class="text">"</span><span class="value">Example/Basic</span><span class="text">"</span><span class="chevron">&gt;</span><br />
+            <div class="indent">
+                <span class="chevron">&lt;</span>translation<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron"><span class="chevron">&lt;</span>/</span>translation<span class="chevron">&gt;</span><br />
+                <span class="chevron">&lt;</span>contexts<span class="chevron">&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>context<span class="chevron">&gt;</span><br />
+                    <div class="indent">
+                        <span class="chevron">&lt;</span>mode<span class="chevron">&gt;</span><span class="text">Server</span><span class="chevron"><span class="chevron">&lt;</span>/</span>mode<span class="chevron">&gt;</span><br />
+                        <span class="chevron">&lt;</span>transport<span class="chevron">&gt;</span><span class="text">TCP</span><span class="chevron"><span class="chevron">&lt;</span>/</span>transport<span class="chevron">&gt;</span><br />
+                        <span class="chevron">&lt;</span>protocol<span class="chevron">&gt;</span><span class="text">HTTP</span><span class="chevron"><span class="chevron">&lt;</span>/</span>protocol<span class="chevron">&gt;</span><br />
+                        <span class="chevron">&lt;</span>port<span class="chevron">&gt;</span><span class="text">80</span><span class="chevron"><span class="chevron">&lt;</span>/</span>port<span class="chevron">&gt;</span><br />
+                        <span class="chevron">&lt;</span>method<span class="chevron">&gt;</span><span class="text">GET</span><span class="chevron"><span class="chevron">&lt;</span>/</span>method<span class="chevron">&gt;</span><br />
+                        <span class="chevron">&lt;</span>method<span class="chevron">&gt;</span><span class="text">POST</span><span class="chevron"><span class="chevron">&lt;</span>/</span>method<span class="chevron">&gt;</span><br />
+                        <span class="chevron">&lt;</span>type<span class="chevron">&gt;</span><span class="text">text/html</span><span class="chevron"><span class="chevron">&lt;</span>/</span>type<span class="chevron">&gt;</span><br />
+                    </div>
+                    <span class="chevron"><span class="chevron">&lt;</span>/</span>context<span class="chevron">&gt;</span><br />
+                </div>
+                <span class="chevron"><span class="chevron">&lt;</span>/</span>contexts<span class="chevron">&gt;</span><br />
+                <span class="chevron">&lt;</span>timers<span class="chevron">&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>myTimer1<span class="chevron">&gt;</span><span class="text">1000</span><span class="chevron"><span class="chevron">&lt;</span>/</span>myTimer1<span class="chevron">&gt;</span><br />
+                    <span class="chevron">&lt;</span>myTimer2<span class="chevron">&gt;</span><span class="text">60000</span><span class="chevron"><span class="chevron">&lt;</span>/</span>myTimer2<span class="chevron">&gt;</span><br />
+                </div>
+                <span class="chevron"><span class="chevron">&lt;</span>/</span>timers<span class="chevron">&gt;</span><br />
+                <span class="chevron">&lt;</span>resources<span class="chevron">&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>resource <span class="key">alias</span><span class="value">=</span><span class="text">"</span><span class="value">example.xml</span><span class="text">"</span><span class="chevron">&gt;</span><span class="text">Directory/Example.xml</span><span class="chevron"><span class="chevron">&lt;</span>/</span>resource<span class="chevron">&gt;</span><br />
+                </div>
+                <span class="chevron"><span class="chevron">&lt;</span>/</span>resources<span class="chevron">&gt;</span><br />
+            </div>
+            <span class="chevron"><span class="chevron">&lt;</span>/</span>plugin<span class="chevron">&gt;</span>
+        </div>
+        <p>Les plugins sont libres d’ajouter d’autres nœuds à leur fichier de configuration, et peuvent y accéder via l’API Configuration. Ils peuvent également créer leurs propres fichiers de configuration dans leur dossier.</p>
+        
+        <h3>1. Traduction</h3>
+        <p>Si le nœud <strong><em>translation</em></strong> vaut <strong>true</strong>, la traduction du plugin est automatiquement chargée par le serveur. La langue utilisée est celle de ce dernier. Elle doit se trouver dans les ressources du plugin, sous le dossier <strong><em>languages</em></strong>. Par exemple, le chemin du fichier de traduction en anglais du plugin <strong>Example/Basic</strong> est :</p>
+        <p>« <strong>:plugins/Example/Basic/languages/en</strong> »</p>
+        
+        <h3>2. Contexts</h3>
+        <p>Les contextes permettent au serveur de savoir quand appeler les interfaces réseau d’un plugin. Un plugin peut avoir plusieurs contextes simultanément, chacun étant dans un nœud <strong><em>context</em></strong> distinct.</p>
+        <table>
+            <tr>
+                <th>Configuration</th>
+                <th>Description</th>
+                <th>Valeur par défaut</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Mode</td>
+                <td>Défini pour quel mode de connexion des clients le plugin a été conçu. Les modes possibles sont <strong>Client</strong> et <strong>Server</strong>. Un client est en mode Server lorsqu’il s’est connecté à un port du serveur. A l’inverse il est en mode Client lorsque c’est le server qui s’est connecté au client (dans ce cas le client est en faite un serveur).</td>
+                <td class="value">Tous les modes</td>
+            </tr>
+            <tr>
+                <td class="key">Transport</td>
+                <td>Indique quel protocole de transport est supporté par le plugin (TCP ou UDP).</td>
+                <td class="value">Tous les protocoles de transport</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Protocol</td>
+                <td>Le protocole pour lequel le plugin a été implémenté. Il ne sera appelé que pour les requêtes utilisant ce protocole. Les protocoles disponibles sur le serveur sont définis dans son le fichier de configuration. La valeur spéciale <strong>All</strong> en protocole indique que le plugin est indépendant du protocole, et sera donc utilisé pour tous les protocoles.</td>
+                <td class="value">Aucun protocole</td>
+            </tr>
+            <tr>
+                <td class="key">Port</td>
+                <td>Le port pour lequel le plugin a été implémenté. Il ne sera appelé que pour les requêtes provenant de ce port. Les ports ouverts sur le serveur sont définis dans son fichier de configuration. La valeur spéciale <strong>All</strong> indique que le plugin est indépendant du port, et sera donc utilisé pour tous les ports.</td>
+                <td class="value">Aucun port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Method</td>
+                <td>La méthode de la requête pour laquelle le plugin a été implémenté. Il ne sera appelé que pour les requêtes appelant cette méthode.</td>
+                <td class="value">Toutes les méthodes</td>
+            </tr>
+            <tr class="last">
+                <td class="key">Type</td>
+                <td>Le type MIME de la ressource pointée par la requête pour laquelle le plugin a été implémenté. Il ne sera appelé que pour les ressources avec ce type.</td>
+                <td class="value">Tous les types</td>
+            </tr>
+        </table>
+        
+        <h3 id="configuration_timers">3. Timers</h3>
+        <p>Les timers permettent aux plugins d’effectuer des opérations asynchrones de manière régulière. Plus clairement, le serveur appelle à intervalle régulier une méthode du plugin, dans un thread dédié.</p>
+        <p>Les nœuds timers de la configuration permettent d’appeler l’interface <strong>ITimer</strong> des plugins régulièrement. Le délai entre chaque appel est définit en millisecondes. Chaque appel est lancé dans un thread. Le timer est suspendu jusqu’à ce que le thread du précédent appel soit terminé. Le nom du nœud de chaque timer est un identifiant transmit au plugin afin de lui permettre d’identifier quel timer c’est déclenché. Dans la configuration ci-dessus, les timers myTimer1 et myTimer2 seront respectivement appelés toutes les secondes et toutes les minutes.</p>
+        <p>Les plugins peuvent modifier leurs timers pendant l’exécution du serveur, via l’API Timers.</p>
+        
+        <h3>4. Resources</h3>
+        <p>Les plugins peuvent embarquer des ressources Qt dans leur bibliothèque dynamique. Cela permet par exemple d’y stocker la configuration par défaut, qui sera copiée dans la configuration du serveur lors de son installation. Reportez vous à la documentation Qt pour en apprendre plus sur le fonctionnement des ressources.</p>
+        <p>Chaque plugin possède un chemin de ressource unique, dans lequel il doit stocker ses ressources. Pour le plugin <strong>Example/Basic</strong>, ce chemin est « <strong>:plugins/Example/Basic</strong> ».</p>
+        <p>Le nœud <strong>resources</strong> de la configuration permet aux plugins de copier automatiquement lors de leur chargement des fichiers de leurs ressources vers leur répertoire s’ils n’existent pas. Par exemple, dans la configuration ci-dessus, le fichier de ressource nommé « plugins/Example/Basic/example.xml » sera copié dans le répertoire « Directory » du dossier du plugin, et se nommera « Example.xml ». Il est aussi possible de copier automatiquement toutes les ressources d’un plugin dans un dossier en omettant la propriété "alias" : <span class="xml"><span class="chevron">&lt;</span>resource<span class="chevron">&gt;</span><span class="text">directory</span><span class="chevron">&lt;/</span>resource<span class="chevron">&gt;</span></span></p>
+        <p>Pour que le serveur puisse copier automatiquement la configuration par défaut du plugin depuis ses ressources lors de l’installation, la ressource du fichier de configuration doit se nommer <strong>configuration</strong>. De même, si le plugin utilise un fichier Queries.xml pour stocker ses requêtes SQL, il peut le mettre dans ses ressources sous l’alias <strong>queries</strong>.</p>
+        <p>Ce système permet à un plugin de créer automatiquement tous les fichiers dont il a besoin dans son dossier, seulement à partir de sa bibliothèque dynamique, qui agie ainsi comme un conteneur. De cette façon, seule la bibliothèque du plugin a besoin d’être distribuée. Le reste des fichiers pouvant être déployés à partir de ses ressources. </p>
+        
+        <h2 id="api_events">VI. Evénements de l’API</h2>
+        <p>Les événements qui se produisent sur le serveur sont communiqués aux plugins via les interfaces qu’ils implémentent, en fonction des contextes définis dans leur configuration. Il existe des interfaces pour les logs, les timers, les extensions, les GUIs, mais ce sont les interfaces réseau qui sont les plus importantes.</p>
+        <p>Toutes les interfaces commencent pas la lettre « <strong>i</strong> » en majuscule, et font parties du namespace « <strong>LightBird</strong> ». Celles relatives à l’API réseau sont de deux types :</p>
+        <h4>Event</h4>
+        <p>Les events sont appelées lorsqu’un événement se produit. Tous les events commencent par « <strong>IOn</strong> ». Tous les plugins implémentant un event sont appelés dans l’ordre de leur chargement (c'est-à-dire l’ordre de leur apparition dans le fichier de configuration du serveur).</p>
+        <h4>Handle</h4>
+        <p>Les handles permettent quand à eux de prendre la main sur une fonctionnalité du serveur (c'est-à-dire la remplacer). Ils commencent tous par « <strong>IDo</strong> ». Un handle ne peut être exécuté qu’une seule fois par requête. Si plusieurs plugins sont attachés au même handle dans le même contexte, seul le premier dans l’ordre de chargement des plugins sera appelé.</p>
+        <p>Pour savoir dans quelles circonstances les différentes interfaces sont utilisées, consultez leurs commentaires.</p>
+        
+        <h2>VII. Flux de données serveur</h2>
+        <p>Le schéma qui suit représente le flux de données des interfaces de l’API réseau.</p>
+        <div class="image">
+            <img src="server_mode.png" alt="server mode">
+        </div>
+        <p>Lorsqu'un client se connecte à un port du serveur, l'interface <strong>IOnConnect</strong> est appelée. Si la connexion est refusée par un des plugins implémentant cette interface, elle est coupée. <strong>IOnDisconnect</strong> est appelée à chaque fois qu'un client se déconnecte, peut importe la raison.</p>
+        <p>Plus tard lorsque des données sont reçues, les interfaces <strong>IDoRead</strong> et <strong>IOnRead</strong> sont appelées, puis les plugins doivent définir le protocole utilisé par la requête via l’interface <strong>IOnProtocol</strong>, après quoi la phase de désérialisation commence.</p>
+        <p>La désérialisation consiste à transformer les données brutes reçues (qui sont sous la forme d’un QByteArray), en un objet structuré, exploitable par les plugins qui vont se charger d’exécuter la requête. Cette phase peut être effectuée en trois étapes, selon les protocoles. Le <strong>header</strong> est d’abord désérialisé, puis vient le tour du <strong>content</strong>, et enfin du <strong>footer</strong>. Par exemple le protocole HTTP a un header, un content, mais pas de footer.</p>
+        <p>Puisque que les données peuvent arriver en plusieurs morceaux depuis le réseau, chaque étape est répétée autant de fois qu’il le faut pour la compléter. Par exemple si le header est reçu en trois fois, <strong>IDoUnserializeHeader</strong> sera appelée trois fois avant de passer au contenu. A chaque fois que de nouvelles données sont reçues, IDoRead et IOnRead sont appelées, avant l’appel à une interface IDoUnserialize*.</p>
+        <p>La méthode <strong>IOnUnserialize</strong> est appelée après chaque étapes qu’un plugin implémente, ainsi qu’une de plus lorsque toute la requête est totalement désérialisée.</p>
+        <p>A tout moment lors de la désérialisation, les plugins peuvent indiquer au serveur qu’une erreur c’est produite, ou que le client n’a pas le droit d’effectuer la requête. Dans ce cas,  l’étape suivante, à savoir l’exécution de la requête, ne sera pas effectuée, et la sérialisation (de l’erreur) commencera directement.</p>
+        <p>L’étape d’exécution est centrale dans le flux de données. C’est en effet dans ces méthodes que les plugins peuvent exécuter la requête, générer la réponse, ou décider qu’aucune réponse n’est requise.</p>
+        <p>Après l’exécution, la phase finale de ce processus est la sérialisation de la réponse. Le principe est de transformer l’objet qui représente la réponse, généré précédemment, en données brutes qu’il est possible d’envoyer au client par le réseau.</p>
+        <p>Tout comme la désérialisation, la sérialisation (qui est donc son inverse), se fait en trois étapes, à savoir la sérialisation du <strong>header</strong>, du <strong>content</strong>, et du <strong>footer</strong>. Le header et le footer ne sont appelés qu’une fois, tandis que le content est appelé tant que tout n’a pas été totalement sérialisé, les gros content devant être envoyés en plusieurs fois. <strong>IOnSerialize</strong> est appelée avant chaque étape qu’un plugin implémente, plus une fois avant que la requête n’ait commencée à être sérialisée. Après chaque étape, les interfaces <strong>IOnWrite</strong> et <strong>IDoWrite</strong> sont appelés, et les données sont envoyées. <strong>IOnFinish</strong> est enfin appelée pour signaler que le traitement de la requête est terminé, qu’une réponse ait été envoyée ou non.</p>
+        <p>Il est possible d’envoyer une réponse au client sans attendre que ce dernier envoie une requête. Pour cela il faut utiliser la méthode <strong>INetwork::send</strong> qui demande au serveur de sauter l’étape de désérialisation, et de passer directement à <strong>IOnUnserialize</strong>, suivi de <strong>IDoExecution</strong>.</p>
+        
+        <h2>VIII. Flux de données client</h2>
+        <p>Le serveur est capable de se comporter comme un client. C'est-à-dire qu’il peut initier lui même la connexion à d’autres serveurs plutôt que d’attendre les connexions des clients. Ceci permet au serveur d’être intégré au sein d’un réseau pair à pair, ou de se connecter à un service web par exemple. Ce comportement est appelé <strong>mode CLIENT</strong>, par opposition au <strong>mode SERVER</strong> déjà décrit dans la partie précédente. Concrètement se sont les plugins qui initient les connexions en indiquant au serveur l’adresse des clients où se connecter, via l’API réseau.</p>
+        <p>Le flux de données du mode client appel les mêmes interfaces que le mode serveur mais dans l’ordre inverse. En effet c’est la requête qui est générée et envoyée par le serveur et non la réponse. C’est donc la requête qui est sérialisée et la réponse qui est désérialisée. L’exécution de la réponse est quand à elle effectué à la fin du flux de données, après sa réception. </p>
+        <p>Lorsqu’un plugin souhaite échanger des information avec un serveur, il s’y connecte via <strong>INetwork::connect</strong>. Si la connexion réussie l'interface <strong>IOnConnect</strong> est appelée, et le plugin peut commencer le processus d’envoie d'une requête via la méthode <strong>INetwork::send</strong>, ce qui provoque l’appel de l’interface <strong>IDoSend</strong> pour le plugin qui a utilisé INetwork::send. Si cette interface n’est pas implémentée, l’envoie est annulé.</p>
+        <p>Il est possible de lire les réponses du client sans avoir préalablement envoyé de requêtes. Pour cela il faut utiliser la méthode <strong>INetwork::receive</strong> qui demande au serveur de sauter l’étape de sérialisation, et de passer directement à <strong>IOnSerialize</strong> suivi de <strong>IDoUnserializeHeader</strong>.</p>
+        <p>Le schéma qui suit détaille l’enchainement interfaces du flux de données client.</p>
+        <div class="image">
+            <img src="client_mode.png" alt="client mode">
+        </div>
+        
+        <h2>IX. Interfaces</h2>
+        <p>Comme évoqué précédemment, les plugins doivent hériter de certaines interfaces pour être appelés par le serveur. Cette partie décrie de manière succincte les interfaces implémentables. Pour des informations plus spécifiques, consultez les commentaires de ces interfaces.</p>
+        
+        <h3>1. IPlugin</h3>
+        <p>IPlugin est l’interface de base des plugins. C’est elle qui est appelée par le serveur lors de leur chargement, et doit donc être implémentée par tous les plugins.</p>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Description</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">onInstall</td>
+                <td>Cette méthode sert à prévenir un plugin qu’il est en cour d’installation. Elle lui permet d’effectuer des actions spécifiques à l’installation, tel que créer les tables dont ils ont besoin dans la base de données, copier des fichiers...</td>
+            </tr>
+            <tr>
+                <td class="key">onUninstall</td>
+                <td>Lors de leur désinstallation, les plugins doivent nettoyer toutes les modifications qu’ils ont effectuées lors de l’installation.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">onLoad</td>
+                <td>Cet événement prévient le plugin qu’il est en cour de chargement. Cette méthode peut par exemple lui permettre d’instancier les objets dont il aura besoin lors de son fonctionnement. Peut être comparé à un constructeur.</td>
+            </tr>
+            <tr>
+                <td class="key">onUnload</td>
+                <td>Est appelé lors du décharnement du plugin. Le plugin doit rapidement quitter proprement tous les threads avec lesquels il travaille, et libérer toutes les ressources allouées.</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">getMetadata</td>
+                <td>Cette méthode peut être appelée n’importe quand par le serveur, que le plugin soit chargé ou non, et permet de récupérer les métadonnées relatives au plugin.</td>
+            </tr>
+        </table>
+        
+        <h3>2. ITimer</h3>
+        <p>ITimer est décrite dans la partie <a href="#configuration_timers">V.3</a>. C’est cette interface qui est appelés lors de chaque échéance d’un timer.</p>
+        
+        <h3>3. IEvent</h3>
+        <p>Est appelée à chaque fois qu’un événement pour lequel le plugin a souscrit se produit. Voir la partie <a href="#events">XIII</a>.</p>
+        
+        <h3>4. ILog</h3>
+        <p>Autorise les plugins à prendre en charge les logs. ILog est appelé à chaque fois qu’un log est enregistré sur le serveur, ce qui permet par exemple de l’afficher, de le sauvegarder dans un fichier, de l’envoyer à un autre programme, ou sur le réseau à un serveur de log.</p>
+        
+        <h3>5. IGui</h3>
+        <p>Cette interface permet de faciliter la création d’interfaces utilisateurs par les plugins. Par exemple, la méthode <strong>gui</strong> est appelée juste après le chargement du plugin, dans le thread GUI du serveur, ce qui permet au plugin de créer ses widgets, et de connecter ses signaux. Qt limite en effet les opérations GUI au thread qui a instancié QApplication, c'est-à-dire le thread principal du serveur.</p>
+        
+        <h3>6. Réseau</h3>
+        <p>Les interfaces réseau participent aux flux de données vu précédemment, et permettent donc de traiter les requêtes et les réponses des clients.</p>
+        <p>Le tableau qui suit décrit les différentes interfaces que les plugins peuvent implémenter, ainsi que leur enchainement. Le contexte représente les conditions que les plugins doivent remplir pour se faire appeler par un événement. Cela est défini dans leur configuration. Par exemple un plugin qui veut être appelé par l’interface IOnConnect doit être configuré pour le même port (ou le même protocole) que celui auquel le client c’est connecté.</p>
+        <table class="small_value">
+            <tr>
+                <th>Interface</th>
+                <th>Description</th>
+                <th>Contextes</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">IOnConnect</td>
+                <td>Lorsqu’un client se connecte au serveur, ce dernier appel cette fonction. Le plugin qui l’implémente peut décider de refuser la connexion au client. Dans se cas IOnDisconnect est appelé et le client déconnecté. En mode CLIENT cette interface est appelée lorsqu'une connexion est établie.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IOnDisconnect</td>
+                <td>Cet événement est appelé après la fermeture d’une connexion. Cette déconnection peut être initié par le serveur, le client, ou par un problème réseau. Il permet généralement de libérer les ressources allouées pour le client durant sa connexion.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IDoRead</td>
+                <td>Uniquement disponible en TCP, IDoRead est appelée lorsque des données sont disponibles en lecture sur le socket du client, afin de permettre aux plugins de remplacer la lecture des données normal du serveur. Ceci est par exemple utilisé dans l’implémentation d’un plugin gérant SSL/TLS.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IOnRead</td>
+                <td>Est appelé juste après IDoRead, et permet de notifier aux plugins que des données ont été reçus.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IOnProtocol</td>
+                <td>Cette interface permet de définir quel est le protocole utilisé par le client dans ses requêtes. Elle est appelée juste avant IDoUnserializeHeader, autant de fois qu’il le faut pour identifier le protocole de la requête. Si aucun plugin n’est en mesure de trouver le protocole utilisé, toutes les données reçues jusque là sont supprimées. Le nom du protocole retourné par cette interface est utilisé par le serveur pour savoir s’il doit appeler les interfaces qui suivent (à l’exception d’IDoWrite, IOnWrite, et IOnFinish).</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IDoSend</td>
+                <td>Cette interface est appelée en mode CLIENT suite à l'appel de la méthode INetwork::send, pour le plugin ayant fait la demande. Elle permet de générer l'objet qui va être sérialisé et envoyé au client.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IOnSend</td>
+                <td>Appelé juste après IDoSend, elle peut être utilisée pour préparer la requête qui va être envoyée au client. A ce stade il est encore possible d'annuler l'envoie de la requête.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IDoUnserializeHeader<br />IDoUnserializeContent<br />IDoUnserializeFooter</td>
+                <td>Ces interfaces permettent aux plugins de transformer les données reçus sur le réseau en un objet de type IRequest. Cet objet est indépendant du protocole de communication. Les IDoUnserialize* sont appelés en boucle tant que le plugin qui l’implémente estime que la requête n’est pas complète, et que d’autres données doivent être reçus.</td>
+                <td class="value">Protocole<br />Port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IOnUnserialize</td>
+                <td>IOnUnserialize est appelé après chaque étapes complétés des IDoUnserialize*, ainsi qu’une fois que la requête est complètement sérialisée ; sauf dans le cas de IDoUnserializeContent où IOnUnserialize est utilisé après chaque appels. Ceci permet de suivre l’avancement du téléchargement d’un fichier par exemple.</td>
+                <td class="value">Protocole<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IDoExecution</td>
+                <td>C’est dans cette interface que la requête est exécutée. Concrètement, l’objet IRequest permet de générer un objet IResponse qui sera plus tard sérialisé puis envoyer sur le réseau. Les plugins peuvent également décider ici de ne pas envoyer de réponse à une requête.</td>
+                <td class="value">Protocole<br />Port<br />Méthode<br />Type</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IOnExecution</td>
+                <td>Cet événement est appelé à la suite de l’exécution de la requête (IDoExecution), et permet également de refuser l’envoi d’une réponse.</td>
+                <td class="value">Protocole<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IOnSerialize</td>
+                <td>Cet événement est appelé avant chaque appels aux interfaces IDoSerialize*, ainsi qu’avant que commence la sérialisation.</td>
+                <td class="value">Protocole<br />Port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IDoSerializeHeader<br />IDoSerializeContent<br />IDoSerializeFooter</td>
+                <td>Les trois fonctions de sérialisation ont pour rôle de convertir l’objet IResponse en une chaine de données à envoyer sur le réseau, ce qui est l’inverse de la désérialisation. IDoSerializeHeader a pour rôle de sérialiser le header de la réponse, si le protocole utilisé en a un. IDoSerializeContent sérialise le contenu et est appelée en boucle, tant que le plugin qui s’en charge estime qu’il reste des données à envoyer. Engin, le footer est sérialisé par IDoSerializeFooter.</td>
+                <td class="value">Protocole<br />Port</td>
+            </tr>
+            <tr>
+                <td class="key">IOnWrite</td>
+                <td>Permet d’être avertis que des données sont envoyées, et de les modifier si nécessaire. Est appelée après chaque appel aux interfaces IDoSerialize.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">IDoWrite</td>
+                <td>Appelé à la suite de IOnWrite, IDoWrite autorise les plugins à remplacer l’écriture des données sur le réseau que fait normalement le serveur, comme pour IDoRead. C’est au plugin qui implémente cette interface d’envoyer les données au client.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr class="last">
+                <td class="key">IOnFinish</td>
+                <td>Une fois qu’une requête a été complètement traitée, et qu’une réponse a été envoyée ou non, cette interface est appelée. Cela permet par exemple à un plugin de déconnecter un client après chaque transaction, plutôt que de laisser la connexion active inutilement.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+        </table>
+        
+        <h2>X. APIs</h2>
+        <p>Le serveur propose aux plugins une série d’interfaces de programmation, leur permettant d’effectuer divers opérations. Ces fonctionnalités sont regroupées par thème, chacune accessible via l’interface IApi, que les plugins doivent récupérer et stocker lors de leur chargement.</p>
+        <table>
+            <tr>
+                <th>Noeud</th>
+                <th>Description</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Configuration</td>
+                <td>Accès à la configuration XML du serveur et des plugins. Permet également de charger facilement un fichier XML propre à un plugin, et de l’utiliser : lecture, modification, et suppression de nœuds, ainsi que des opérations plus complexes via le DOM.</td>
+            </tr>
+            <tr>
+                <td class="key">Database</td>
+                <td>Accès à la base de données. Permet d’exécuter des requêtes SQL, d’en charger depuis un fichier XML (queries.xml), ou d’accéder à l’abstraction de la base de données, qui facilite grandement son utilisation.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Guis</td>
+                <td>Autorise les plugins à effectuer des opérations basiques sur d’autres plugins, relatives à leur interface utilisateur.</td>
+            </tr>
+            <tr>
+                <td class="key">Log</td>
+                <td>Permet d’enregistrer des logs sur plusieurs niveaux.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Réseau</td>
+                <td>Permet d’effectuer divers actions sur le réseau tel que déconnecter un client, ajouter ou supprimer un port TCP/UDP, et obtenir des informations sur les clients connectés.</td>
+            </tr>
+            <tr>
+                <td class="key">Plugins</td>
+                <td>Les plugins peuvent gérer d’autres plugins grâce à cette interface. Elle permet en effet de charger, décharger, installer, et de désinstaller n’importe quel plugin, ou encore de consulter leurs états. Un plugin peut même se décharger lui-même, à la volée.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Extensions</td>
+                <td>Permet d’accéder aux extensions chargées sur le serveur. Voir la partie <a href="#extensions">XV</a>.</td>
+            </tr>
+            <tr>
+                <td class="key">Evénements</td>
+                <td>Permet d’envoyer et de recevoir des événements depuis le serveur et d’autres plugins.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Timer</td>
+                <td>Cette API permet de gérer les timers d’un plugin : changer leurs intervalles de déclenchement, en ajouter, ou en supprimer.</td>
+            </tr>
+            <tr class="last">
+                <td class="key">Sessions</td>
+                <td>Une session permet d’associer un ou plusieurs clients à un account, et peut persister après l’arrêt du serveur. Elle peut stocker des informations, et possède une date d’expiration.</td>
+            </tr>
+        </table>
+        <p>Pour des informations plus précises sur ces interfaces, consultez leurs commentaires.</p>
+        
+        <h2>XI. TCP et UDP</h2>
+        <p>Le serveur abstrait totalement la gestion des protocoles de transport TCP et UDP. Quelque soit le protocole utilisé, cela n’a pas d’impact directe sur les plugins, ce qui signifie qu’un plugin développé et testé avec TCP marchera en UDP (s’il on ignore les pertes possibles de paquets en UDP).</p>
+        <p>Notez tout de même que les interfaces IDoRead et IDoWrite ne sont appelés qu’en TCP.</p>
+        
+        <h2>XII. Abstraction de la base de données</h2>
+        <p>L’abstraction de la base de données est un ensemble complet de classes facilitant l’usage de la base de données. Chaque interface représente une table, et chaque instance une entrée. Il est ainsi possible d’utiliser la base de données sans avoir à utiliser de requête SQL. Seules les opérations complexes, telles que les jointures, peuvent nécessiter des requêtes fournies par les plugins.</p>
+        <p>La gestion des droits, ou de l’arborescence des fichiers et des dossiers sont également implémentés, ainsi que le support des concepts d’accessors et d’objects.</p>
+        <p>Les instances sont créées à partir de la méthode getTable de l’API de la base de données. Consultez ses commentaires pour obtenir un exemple de création  d’instance.</p>
+        
+        <h2 id="events">XIII. Evénements</h2>
+        <p>En plus des événements générés par l’API décrit dans la partie <a href="#api_events">VI</a>, le serveur propose aux plugins un système plus souple qui leur permet d’échanger des événements entre eux simplement. Un événement est constitué d’un nom et d’une propriété optionnelle. Leur gestion se fait via l’API d’événements. Les plugins doivent déclarer les événements qu’ils souhaitent recevoir et utiliser l’une de ces deux méthodes pour les récupérer :</p>
+        <ul class="list">
+            <li><strong>Push</strong> : Implémenter IEvent qui sera appelée dans un thread dédié pour chaque nouvel événement.</li>
+            <li><strong>Pull</strong> : Demander directement les événements en attente à l’API d’événements.</li>
+        </ul>
+        <p>Le serveur utilise aussi ce système pour envoyer quelques événements :</p>
+        <table class="small_value">
+            <tr>
+                <th>Evénement</th>
+                <th>Description</th>
+                <th>Propriété</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">server_started</td>
+                <td>Appelé une seule fois, après la fin de l’initialisation du serveur, juste avant d’entrer dans sa boucle d’exécution.</td>
+                <td class="value">Aucune</td>
+            </tr>
+            <tr>
+                <td class="key">plugin_loaded</td>
+                <td>Lorsqu’un plugin est chargé.</td>
+                <td class="value">Id du plugin</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">plugin_unloaded</td>
+                <td>Un plugin est déchargé.</td>
+                <td class="value">Id du plugin</td>
+            </tr>
+            <tr>
+                <td class="key">plugin_installed</td>
+                <td>Un plugin est installé.</td>
+                <td class="value">Id du plugin</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">plugin_uninstalled</td>
+                <td>Un plugin est désinstallé.</td>
+                <td class="value">Id du plugin</td>
+            </tr>
+            <tr>
+                <td class="key">configuration_saved</td>
+                <td>La configuration du serveur a été sauvée, via la méthode save().</td>
+                <td class="value">Aucune</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">session_destroyed</td>
+                <td>Une session a été détruite.</td>
+                <td class="value">Id de la session</td>
+            </tr>
+        </table>
+        
+        <h2>XIV. Implémentation</h2>
+        <p>Les plugins sont composés d’une classe principale, qui hérite de toutes les interfaces dont ils ont besoins. Cette classe doit impérativement être <strong>thread safe</strong>, car le serveur peut appeler les méthodes implémentées par un plugin dans de multiples threads simultanément. C’est donc aux plugins de protéger leurs données communes à plusieurs threads, tels que les variables membres, afin d’éviter que deux thread y accèdent en même temps.</p>
+        <p>Les plugins situés dans le dossier <strong>Example</strong> montre divers implémentations simples. Le plugin <strong>Example/Basic</strong> peut être utilisé comme base pour créer n’importe quel plugin.</p>
+        
+        <h2 id="extensions">XV. Extensions</h2>
+        <p>Les extensions sont des plugins dont le but est d’étendre l’API du serveur, et donc de proposer des services aux autres plugins. Une extension pourrait par exemple proposer de convertir des images dans d’autres formats (jpeg à png), et serait utilisé par tous les plugins ayant besoin de cette fonctionnalité.</p>
+        <p>Concrètement, les plugins extensions sont des plugins normaux, mais qui implémentent l’interface <strong>IExtension</strong>, en plus des autres interfaces. Cette dernière permet de déclarer les extensions que le plugin implémente. Une extension est une partie de ce plugin, qui implémente une interface présente dans le dossier <strong>extensions</strong> du serveur. Ce sont les plugins qui installent des interfaces dans ce dossier.</p>
+        <p>Un système de compteur interne au serveur permet de savoir quelles extensions sont utilisées par d’autres plugins à tout moment. Ceci permet d’éviter le déchargement d’un plugin dont les extensions sont utilisées ailleurs. Le plugin sera déchargé lorsque toutes ses extensions seront relâchées.</p>
+    </div>
+</body>
+</html>

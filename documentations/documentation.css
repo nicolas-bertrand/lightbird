@@ -1,0 +1,385 @@
+/*////////////////////////////////////////////////////////////////////////////
+//                                  GLOBAL                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+*
+{
+	margin: 0px;
+	padding: 0px;
+}
+
+body
+{
+	font-family: arial, verdana;
+	font-size: 1em;
+	color: #191919;
+	text-align: justify;
+    background-color: #D9D9D9;
+	cursor: auto;
+    padding: 40px;
+}
+
+a, a:active, a:visited, a:hover, a img
+{
+	text-decoration: none;
+	border: 0px;
+	color: #365F91;
+}
+
+a:hover
+{
+	color: #191919;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                 CONTENT                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+div.content
+{
+    background-color: #FFFFFF;
+    padding: 30px 30px 15px 30px;
+    margin: auto;
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 0 0 10px #888888;
+    max-width: 1280px;
+    min-width: 600px;
+}
+
+h1
+{
+    margin-bottom: 5px;
+    color: #173560;
+    font-family: Cambria;
+    font-weight: normal;
+    font-size: 3em;
+}
+
+hr
+{
+    color: #173560;
+    margin-bottom: 50px;
+}
+
+h2
+{
+    color: #365F91;
+    font-weight: 500;
+    font-size: 1.6em;
+    margin: 60px 0px 30px 0px;
+}
+
+h3
+{
+    color: #4F81BD;
+    font-weight: 500;
+    font-size: 1.3em;
+    margin: 60px 0px 30px 0px;
+}
+
+h2+h3
+{
+    margin-top: 0px;
+}
+
+h4
+{
+    color: #4F81BD;
+    font-weight: 500;
+    font-size: 1.1em;
+    margin: 30px 0px 10px 0px;
+    font-style: italic;
+}
+
+p
+{
+    line-height: 1.5em;
+    margin-bottom: 20px;
+}
+
+div.image
+{
+    text-align: center;
+    margin: 40px 0px 40px 0px;
+    overflow: auto;
+}
+
+ul.list
+{
+    margin: 20px 20px 20px 40px;
+    line-height: 1.5em;
+}
+
+span.warning
+{
+    color: red;
+    font-weight: bold;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                   TABLE                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+table
+{
+    border-collapse:collapse;
+    border:none;
+    margin: 20px 0 40px 0px;
+    width: 100%;
+    line-height: 1.5em;
+}
+
+tr
+{
+    vertical-align: center;
+}
+
+th
+{
+    border: none;
+    border-bottom: solid #4F81BD 4px;
+    background-color: white;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+    font-size: 1.1em;
+}
+
+td
+{
+    border: none;
+    border-right: solid #4F81BD 1px;
+    padding: 10px;
+    background-color: white;
+}
+
+tr.odd td
+{
+    background-color: #D7E3F2;
+}
+
+tr.last td
+{
+    border-bottom: solid #4F81BD 1px;
+}
+
+tr td.key
+{
+    text-align: right;
+    font-weight: bold;
+    background-color: white;
+    min-width: 150px;
+    max-width: 200px;
+    border-bottom: none;
+}
+
+td.value
+{
+    text-align: center;
+    min-width: 160px;
+}
+
+table.large_five td.value
+{
+    min-width: inherit;
+    width: 22%;
+    border-right: none;
+}
+
+table.large_five td.right
+{
+    border-right: solid #4F81BD 1px;
+}
+
+table.small_value td.value
+{
+    min-width: 110px;
+}
+
+table.small_value td
+{
+    border-right: none;
+}
+
+table.small_value td.value,
+table.small_value td.key
+{
+    border-right: solid #4F81BD 1px;
+}
+
+table.fields td.key
+{
+    width: 100px;
+}
+
+table.fields td.first
+{
+    border-top: solid #4F81BD 1px;
+}
+
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                    XML                                   //
+////////////////////////////////////////////////////////////////////////////*/
+
+span.xml
+{
+    font-family: "Courier New";
+    color: #A31515;
+}
+
+div.xml
+{
+    font-family: "Courier New";
+    color: #A31515;
+    border: dashed #BBBBBB 2px;
+    background-color: #F3F3F8;
+    padding: 20px;
+    border-radius: 5px 5px 5px 5px;
+    line-height: 1.2em;
+	text-align: left;
+    margin-bottom: 40px;
+}
+
+.xml .indent
+{
+    margin-left: 2em;
+}
+
+.xml p
+{
+    line-height: 0.5em;
+}
+
+.xml span.chevron
+{
+    color: blue;
+}
+
+.xml span.value
+{
+    color: blue;
+}
+
+.xml span.key
+{
+    color: red;
+}
+
+.xml span.text
+{
+    color: black;
+}
+
+.xml span.comment
+{
+    color: green;
+}
+
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                 QUOTE                                    //
+////////////////////////////////////////////////////////////////////////////*/
+
+div.quote
+{
+    font-family: "Courier New";
+    border: dashed #BBBBBB 2px;
+    background-color: #F3F3F8;
+    padding: 20px;
+    border-radius: 5px 5px 5px 5px;
+    line-height: 1.5em;
+	text-align: left;
+    font-size: 1.1em;
+    margin-bottom: 40px;
+}
+
+div.quote ul
+{
+    margin-left: 2.5em;
+    list-style-type: disc;
+}
+
+.allowed
+{
+    color: #00A030;
+}
+
+.denied
+{
+    color: red;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                 DATABASE                                 //
+////////////////////////////////////////////////////////////////////////////*/
+
+table.legend
+{
+    text-align: center;
+}
+
+table.condition
+{
+    text-align: center;
+}
+
+table.legend th
+{
+    border: none;
+    width: 20%;
+}
+
+table.condition td.key
+{
+    border: none;
+    border-right: solid #538ed5 4px;
+}
+
+table.legend td,
+table.condition td
+{
+    border: solid #538ed5 1px;
+    width: 20%;
+}
+
+table.legend td.all,
+table.condition td.all
+{
+    color: #006100;
+    background-color: #c6efce;
+}
+
+table.legend td.right,
+table.condition td.right
+{
+    color: #9c6522;
+    background-color: #ffeb9c;
+}
+
+table.legend td.owner,
+table.condition td.owner
+{
+    color: #254061;
+    background-color: #b8cce4;
+}
+
+table.legend td.administrator,
+table.condition td.administrator
+{
+    color: #632523;
+    background-color: #ffb7b7;
+}
+
+table.legend td.impossible,
+table.condition td.impossible
+{
+    color: #000000;
+    background-color: #a5a5a5;
+}
+
+table.condition tr.last td.right
+{
+    border-bottom: solid #538ed5 4px;
+}
+

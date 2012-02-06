@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link href="documentation.css" rel="stylesheet" />
+    <title>Serveur - LightBird</title>
+</head>
+
+<body>
+    <div class="content">
+        <h1>Serveur</h1>
+        <hr />
+        
+        <h2>I. Généralités</h2>
+        <p>Le serveur LightBird est un programme qui fonctionne en fond de tâche sur l’ordinateur qui héberge les fichiers à partager d’un utilisateur. Son rôle est de diffuser ces fichiers aux clients, en fonction des droits d’accès qui leurs sont accordés.</p>
+        <p>Pour l’utilisateur final son fonctionnement se veut le plus simple et transparent possible. Dans la plus part des cas il n’a pas à s’en soucier, son administration se faisant via des interfaces séparés.</p>
+        <p>Le serveur est composé de trois parties principales, à savoir la <strong>base de données</strong> qui stocke les données persistantes, les <strong>plugins</strong> qui constituent l’intelligence du serveur et qui définissent comment il interagit avec les utilisateurs, et enfin le <strong>serveur</strong> lui-même qui a pour rôle d’orchestrer le tout.</p>
+        <p>Les plugins et la base de données sont traités dans des documentations séparés. Celle-ci se concentre sur le serveur.</p>
+        <p>Le serveur est développé en utilisant le Framework Qt, en version 4.7.0 à l’heure ou ces lignes sont écrites (05/2011), et fonctionne sur tous les systèmes supportés par Qt (principalement Windows, Linux, et Mac OSX).</p>
+        
+        <h2>II. Arguments</h2>
+        <p>L’exécutable du serveur peut prendre deux arguments optionnels :</p>
+        <table>
+            <tr>
+                <th>Argument</th>
+                <th>Description</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">-c <em>configuration.xml</em></td>
+                <td>L’argument <strong>-c</strong>, est suivi du chemin complet (absolu ou relatif) vers le fichier de configuration du serveur. Ce dernier contient toutes les informations permettant au serveur de démarrer selon les préférences de l’utilisateur. Si cet argument n’est pas défini, le chemin de configuration par défaut est « <strong>configurations/Configuration.xml</strong> ». Si la configuration spécifiée ou par défaut n’existe pas, elle sera créée à partir des ressources du serveur.</td>
+            </tr>
+            <tr class="last">
+                <td class="key">-noGui</td>
+                <td>Si cet argument est présent il indique au serveur de démarrer en mode <strong>noGui</strong>, c'est-à-dire qu’aucune interface graphique ne sera affichée. Cela permet de faire fonctionner le serveur sur un système ne disposant pas d’affichage graphique (tels qu’un serveur Linux sans serveur X).</td>
+            </tr>
+        </table>
+        
+        <h2>III. Configuration</h2>
+        <p>Le fichier de configuration du serveur est au format XML. Il contient toutes les informations permettant de lancer le serveur suivant les préférences de l’utilisateur.</p>
+        <p>Une version par défaut de ce fichier est présente dans les ressources du serveur (dans son exécutable), et est utilisée dans le cas ou aucune autre configuration n’est trouvée.</p>
+        <p>Voici un exemple de configuration :</p>
+        <div class="xml">
+            <span class="chevron">&lt;?</span>xml <span class="key">version</span><span class="value">=</span><span class="text">"<span class="value">1.0</span>" <span class="key">encoding</span><span class="value">=</span>"<span class="value">UTF-8</span>"<span class="value">?&gt;</span></span><br />
+            <span class="chevron">&lt;</span>configuration<span class="chevron">/&gt;</span><br />
+            <div class="indent">
+                <span class="chevron">&lt;</span>name<span class="chevron">&gt;</span><span class="text">Home</span><span class="chevron">&lt;/</span>name<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>pluginsPath<span class="chevron">&gt;</span><span class="text">plugins</span><span class="chevron">&lt;/</span>pluginsPath<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>QtPluginsPath<span class="chevron">&gt;</span><span class="text">QtPlugins</span><span class="chevron">&lt;/</span>QtPluginsPath<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>filesPath<span class="chevron">&gt;</span><span class="text">files</span><span class="chevron">&lt;/</span>filesPath<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>temporaryPath<span class="chevron">&gt;</span><span class="text">tmp</span><span class="chevron">&lt;/</span>temporaryPath<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>cleanTemporaryPath<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron">&lt;/</span>cleanTemporaryPath<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>languagesPath<span class="chevron">&gt;</span><span class="text">languages</span><span class="chevron">&lt;/</span>languagesPath<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>language<span class="chevron">&gt;</span><span class="text">fr</span><span class="chevron">&lt;/</span>language<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>threadsNumber<span class="chevron">&gt;</span><span class="text">10</span><span class="chevron">&lt;/</span>threadsNumber<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>database<span class="chevron">/&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>name<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>file<span class="chevron">&gt;</span><span class="text">database.sqlite</span><span class="chevron">&lt;/</span>file<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>path<span class="chevron">&gt;</span><span class="text">databases</span><span class="chevron">&lt;/</span>path<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>resource<span class="chevron">&gt;</span><span class="text">:database</span><span class="chevron">&lt;/</span>resource<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>type<span class="chevron">&gt;</span><span class="text">QSQLITE</span><span class="chevron">&lt;/</span>type<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>user<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>password<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>host<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>port<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>options<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>pragmas<span class="chevron">/&gt;</span><br />
+                    <div class="indent">
+                        <span class="chevron">&lt;</span>pragma<span class="chevron">&gt;</span><span class="text">PRAGMA recursive_triggers=true</span><span class="chevron">&lt;/</span>pragma<span class="chevron">/&gt;</span><br />
+                        <span class="chevron">&lt;</span>pragma<span class="chevron">&gt;</span><span class="text">PRAGMA synchronous=false</span><span class="chevron">&lt;/</span>pragma<span class="chevron">/&gt;</span><br />
+                    </div>
+                    <span class="chevron">&lt;/</span>pragmas<span class="chevron">/&gt;</span><br />
+                </div>
+                <span class="chevron">&lt;/</span>database<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>permissions<span class="chevron">&gt; </span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>activate<span class="chevron">&gt;</span><span class="text">false</span><span class="chevron">&lt;/</span>active<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>default<span class="chevron">&gt;</span><span class="text">false</span><span class="chevron">&lt;/</span>default<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>inheritance<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron">&lt;/</span>inheritance<span class="chevron">&gt;</span><br />
+                    <span class="chevron">&lt;</span>ownerInheritance<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron">&lt;/</span>ownerInheritance<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>groupInheritance<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron">&lt;/</span>groupInheritance<span class="chevron">/&gt;</span><br />
+                </div>
+                <span class="chevron">&lt;/</span>permissions<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>log<span class="chevron">/&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>level<span class="chevron">&gt;</span><span class="text">Trace</span><span class="chevron">&lt;/</span>level<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>display<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron">&lt;/</span>display<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>file<span class="chevron">&gt;</span><span class="text">server.log</span><span class="chevron">&lt;/</span>file<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>path<span class="chevron">&gt;</span><span class="text">logs</span><span class="chevron">&lt;/</span>path<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>maxNbOfFile<span class="chevron">&gt;</span><span class="text">10</span><span class="chevron">&lt;/</span>maxNbOfFile<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>maxSize<span class="chevron">&gt;</span><span class="text">1M</span><span class="chevron">&lt;/</span>maxSize<span class="chevron">/&gt;</span><br />
+                    <span class="chevron">&lt;</span>expires<span class="chevron">&gt;</span><span class="text">30</span><span class="chevron">&lt;/</span>expires<span class="chevron">/&gt;</span><br />
+                </div>
+                <span class="chevron">&lt;/</span>log<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>ports<span class="chevron">/&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>port <span class="key">protocol</span><span class="value">=</span><span class="text">"</span><span class="value">HTTP UPnP</span><span class="text">"</span><span class="key">transport</span><span class="value">=</span><span class="text">"</span><span class="value">TCP</span><span class="text">"</span> <span class="key">maxClients</span><span class="value">=</span><span class="text">"</span><span class="value">100</span><span class="text">"<span class="value">&gt;</span></span><span class="text">80</span><span class="chevron">&lt;/</span>port<span class="chevron">&gt;</span><br />
+                </div>
+                <span class="chevron">&lt;/</span>ports<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>plugins<span class="chevron">/&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>plugin<span class="chevron">&gt;</span><span class="text">Example/Basic</span><span class="chevron">&lt;/</span>plugin<span class="chevron">/&gt;</span><br />
+                </div>
+                <span class="chevron">&lt;/</span>plugins<span class="chevron">/&gt;</span><br />
+                <span class="chevron">&lt;</span>configurations<span class="chevron">/&gt;</span><br />
+                <div class="indent">
+                    <span class="chevron">&lt;</span>plugin <span class="key">id</span><span class="value">=</span><span class="text">"<span class="value">Example/Basic</span>"<span class="value">&gt;</span></span><br />
+                    <div class="indent">
+                        <span class="comment">&lt;!-- Configuration of the plugin --&gt;</span><br />
+                    </div>
+                    <span class="chevron">&lt;/</span>plugin<span class="chevron">/&gt;</span><br />
+                </div>
+                <span class="chevron">&lt;/</span>configurations<span class="chevron">/&gt;</span><br />
+            </div>
+            <span class="chevron">&lt;/</span>configuration<span class="chevron">/&gt;</span><br />
+        </div>
+        
+        <h3>1. Divers</h3>
+        <table>
+            <tr>
+                <th>Noeud</th>
+                <th>Description</th>
+                <th>Valeur par défaut</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">name</td>
+                <td>Le nom du serveur, donné par l’utilisateur lors de son installation.</td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr>
+                <td class="key">pluginsPath</td>
+                <td>Contient le nom du répertoire dans lequel se trouvent les plugins.</td>
+                <td class="value">plugins</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">QtPluginsPath</td>
+                <td>Le chemin vers les plugins Qt utilisés dans les versions distribués du serveur.</td>
+                <td class="value">QtPlugins</td>
+            </tr>
+            <tr>
+                <td class="key">filesPath</td>
+                <td>Nom du dossier dans lequel sont stockés les fichiers à partager. Il est possible de partager des fichiers en dehors de ce dossier, mais les fichiers envoyés par les clients sont stockés ici.</td>
+                <td class="value">files</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">temporaryPath</td>
+                <td>Ce dossier stocke les fichiers temporairement créés lors de l’exécution du serveur. Ces fichiers sont en général supprimés lorsque le serveur ou ses plugins n’en ont plus besoin. Ce dossier est créé s’il n’existe pas.</td>
+                <td class="value">tmp</td>
+            </tr>
+            <tr>
+                <td class="key">cleanTemporaryPath</td>
+                <td>Si la valeur de ce nœud est <strong>true</strong>, le dossier temporaire défini par temporaryPath est vidé à chaque démarrage du serveur.</td>
+                <td class="value">true</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">languagesPath</td>
+                <td>Le chemin du dossier qui contient les fichiers de traductions. Ces fichiers ont l’extension <strong>.qm</strong>,  et sont générés via les outils de Qt.</td>
+                <td class="value">languages</td>
+            </tr>
+            <tr>
+                <td class="key">language</td>
+                <td>Le nom du fichier de langage à charger afin de traduire le serveur, sans son extension finale. Si ce fichier n’existe pas dans le dossier des langages, il sera cherché dans les resources du serveur, sous le dossier « languages ». Si ce nœud est vide ou non défini, la langue locale du système est utilisée (en, fr…).</td>
+                <td class="value">Langue locale</td>
+            </tr>
+            <tr class="last odd">
+                <td class="key">threadsNumber</td>
+                <td>Le nombre de threads dans la thread pool. Ces threads sont principalement utilisés pour traiter les requêtes et les réponses du serveur. Cette valeur dépend de l’utilisation qui est faite du serveur et de l’environnement dans lequel il est exécuté.</td>
+                <td class="value">10</td>
+            </tr>
+        </table>
+        
+        <h3>2. Database</h3>
+        <p>Ce nœud contient toutes les informations permettant au serveur de se connecter à la base de données. La configuration ci-dessus montre comment accéder à une base de données SQLite. Mais il est possible de configurer le serveur pour accéder à d’autres types de base de données, le serveur utilisant l’abstraction fournie par Qt.</p>
+        <table>
+            <tr>
+                <th>Noeud</th>
+                <th>Description</th>
+                <th>Valeur par défaut</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">name</td>
+                <td>Si ce nœud est défini, la base de données est considérée comme étant basée sur un serveur (Oracle, MySQL). Dans le cas contraire, elle est basée sur un fichier (SQLite), et les nœuds <strong>path/file</strong> sont utilisés.</td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr>
+                <td class="key">file</td>
+                <td>Si la base de données est basée sur un fichier, ce nœud contient le nom de ce fichier.</td>
+                <td class="value">database.sqlite</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">path</td>
+                <td>Si la base de données est basée sur un fichier, représente le chemin vers le fichier défini par le nœud <strong>file</strong>.</td>
+                <td class="value">databases</td>
+            </tr>
+            <tr>
+                <td class="key">type</td>
+                <td>Le nom du driver Qt utilisé pour accéder à la base de données. Par exemple, le driver SQLite se nomme QSQLITE.</td>
+                <td class="value">QSQLITE</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">user</td>
+                <td>Nom de l’utilisateur pour se connecter à la base de données.</td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr>
+                <td class="key">password</td>
+                <td>Mot de passe pour se connecter à la base de données.</td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">host</td>
+                <td>Adresse de la base de données. </td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr>
+                <td class="key">port</td>
+                <td>Port de la base de données.</td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">options</td>
+                <td>Options spécifiques à la base de données. Consultez la documentation Qt sur la méthode <strong>QSqlDatabase::setConnectOptions</strong> pour plus d’informations. Chaque option doit être dans un nœud <strong>option</strong>, fils du nœud <strong>options</strong>.</td>
+                <td class="value">Vide</td>
+            </tr>
+            <tr class="last">
+                <td class="key">pragmas</td>
+                <td>Un pragma est une requête SQL non standard, donc spécifique à chaque type base de données, utilisée pour la configurer. Les pragmas de la configuration sont exécutés juste après la connexion à la base de données. Dans l’exemple au-dessus, le premier pragma active les triggers récursifs de SQLite, et le second désactive la synchronisation de l’écriture sur le disque, ce qui accélère nettement les requêtes.</td>
+                <td class="value">Vide</td>
+            </tr>
+        </table>
+        
+        <h3>3. Permissions</h3>
+        <p>Ces nœuds permettent de configurer le système de permission du serveur.</p>
+        <table>
+            <tr>
+                <th>Noeud</th>
+                <th>Description</th>
+                <th>Valeur par défaut</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">activate</td>
+                <td>Si ce nœud est à true, le système de permission est activé. Dans le cas contraire, tous les utilisateurs ont accès à tous les fichiers du serveur en lecture et en écriture. Les fonctions d’administrations restent cependant uniquement accessibles par les administrateurs.</td>
+                <td class="value">false</td>
+            </tr>
+            <tr>
+                <td class="key">default</td>
+                <td>Ce nœud défini les droits par défaut des objets n’ayant pas de permissions hérités ou explicites.</td>
+                <td class="value">false</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">inheritance</td>
+                <td>Permet de désactiver l’héritage des permissions des objets à travers l’arborescence des dossiers et des collections. Si l’héritage est désactivé, tous les objets sur lesquels des droits n’ont pas été explicitement appliqués se retrouvent avec la permission par défaut (définie par le nœud <strong>default</strong>).</td>
+                <td class="value">true</td>
+            </tr>
+            <tr>
+                <td class="key">ownerInheritance</td>
+                <td>Si cette option est activée, le propriétaire d’un dossier a tous les droits sur les objets qu’il contient, même s’il n’a pas de permission dessus. Pour les collections, il a tous les droits sur ses sous collections, pas sur les fichiers.</td>
+                <td class="value">true</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">groupInheritance</td>
+                <td>En cas de conflit entre groupes sur une permission, c’est l’autorisation ou la restriction la plus basse dans l’arborescence des groupes qui l’emporte.</td>
+                <td class="value">true</td>
+            </tr>
+        </table>
+        
+        <h3>4. Logs</h3>
+        <p>Le serveur fourni un affichage des logs basique sur la sortie standard, ainsi qu’un système de niveaux afin de les trier par importance. Les fonctionnalités avancées des logs sont gérés par les plugins. Ainsi, seules les nœuds <strong>level</strong> et <strong>display</strong> sont utilisés directement par le serveur. Les autres nœuds sont utilisés par le plugin <strong>Log/File</strong> qui écrit les logs dans un fichier, et d’autres. La liste des nœuds ci-dessous n’est donc pas exhaustive, et dépend des plugins installés.</p>
+        <table>
+            <tr>
+                <th>Noeud</th>
+                <th>Description</th>
+                <th>Valeur par défaut</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">level</td>
+                <td>Niveau à partir duquel les logs sont affichés. Les logs inférieurs à ce niveau ne sont pas traités. Les niveaux par ordre décroissant d’importance sont Fatal, Error, Warning, Info, Debug, et Trace.</td>
+                <td class="value">Info</td>
+            </tr>
+            <tr>
+                <td class="key">display</td>
+                <td>Si ce nœud vaut <strong>true</strong> les logs seront affichés sur la sortie standard.</td>
+                <td class="value">False</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">file</td>
+                <td>Nom du fichier dans lequel les logs sont écrits. Ce nœud et les suivants dépendent du plugin <strong>Log/File</strong>.</td>
+                <td class="value">server.log</td>
+            </tr>
+            <tr>
+                <td class="key">path</td>
+                <td>Chemin vers le fichier de log.</td>
+                <td class="value">logs</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">maxNbOfFile</td>
+                <td>Nombre maximum de fichier de log. Lorsque ce nombre est dépassé, les fichiers les plus anciens sont supprimés du dossier de log.</td>
+                <td class="value">10</td>
+            </tr>
+            <tr>
+                <td class="key">maxSize</td>
+                <td>Taille maximale d’un fichier de log en octet. Lorsque cette taille est dépassée, le fichier est renommé avec le paterne « <strong>fichier.yyyy-MM-dd hh-mm-ss.extension</strong> ». Il est possible de mettre les lettres <strong>K</strong>, <strong>M</strong>, ou <strong>G</strong>, pour indiquer que la taille est en <strong>Kilo</strong>, <strong>Mega</strong>, ou <strong>Gigaoctets</strong>. Par exemple 42K est l’équivalent de 43008 (42 * 1024) octets.</td>
+                <td class="value">1M</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">expires</td>
+                <td>Durée maximal de conservation des fichiers de logs en jour.</td>
+                <td class="value">30</td>
+            </tr>
+        </table>
+        <p>Voici la liste des niveaux de logs possible :</p>
+        <table>
+            <tr>
+                <th>Niveau</th>
+                <th>Description</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Fatal</td>
+                <td>Sévère erreur qui a causée un arrêt prématuré.</td>
+            </tr>
+            <tr>
+                <td class="key">Error</td>
+                <td>Autre erreur de fonctionnement, ou une condition inattendue.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Warning</td>
+                <td>Utilisation d’une API dépréciée, presque une erreur, ou une situation indésirable ou inattendue, mais qui n’est pas forcément fausse.</td>
+            </tr>
+            <tr>
+                <td class="key">Info</td>
+                <td>Evénement intéressant du fonctionnement (démarrage/arrêt). Doit être gardé au minimum.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Debug</td>
+                <td>Informations détaillées sur le fonctionnement du système.</td>
+            </tr>
+            <tr class="last">
+                <td class="key">Trace</td>
+                <td>Informations plus détaillées.</td>
+            </tr>
+        </table>
+        
+        <h3>5. Ports</h3>
+        <p>Les ports permettent au serveur d’écouter sur le réseau, et de traiter les requêtes des clients. La liste des ports se trouve dans le nœud <strong>ports</strong>, et la valeur de chaque nœud <strong>port</strong> est le numéro du port à ouvrir. La valeur <strong>80-90</strong> ouvrira les 11 ports de 80 à 90. Chaque port peut prendre différents attributs, qui sont détaillés dans le tableau ci-dessous. Il est possible que le server ne puisse pas ouvrir un port, si celui-ci est déjà utilisé par un autre programme.</p>
+        <table>
+            <tr>
+                <th>Attribut</th>
+                <th>Description</th>
+                <th>Valeur par défaut</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">transport</td>
+                <td>Nom du protocole de transport utilisé par les clients pour se connecter au serveur.  La valeur peut être <strong>TCP</strong> ou <strong>UDP</strong>.</td>
+                <td class="value">TCP</td>
+            </tr>
+            <tr>
+                <td class="key">protocol</td>
+                <td>Noms des protocoles que les clients doivent utiliser pour communiquer avec le serveur via ce port. Les noms des protocoles sont séparés par des espaces. La valeur spéciale <strong>All</strong> indique que tous les protocoles peuvent être utilisés sur le port. Dans la configuration d’exemple ci-dessus, le port <strong>80</strong> est ouvert aux protocoles <strong>HTTP</strong> et <strong>UPnP</strong>. Une même connexion peut utiliser plusieurs protocoles. Le protocole utilisé par un client est défini pour chaque nouvelle requête, et est utilisé pour la réponse associée. Cet attribut est essentiellement utilisé par les plugins, puisque ce sont eux qui communiquent avec les clients. Le serveur ne maîtrise aucun protocole.</td>
+                <td class="value">Aucun protocole</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">maxClients</td>
+                <td>Nombre maximum de clients pouvant se connecter en même temps à un port.</td>
+                <td class="value">Pas de limite</td>
+            </tr>
+        </table>
+        
+        <h3>6. Plugins</h3>
+        <p>Ce nœud liste les plugins à charger lors du démarrage du serveur. Les plugins sont chargés dans l’ordre de leur apparition, et sont également appelés dans cet ordre (mais cela ne doit pas avoir de conséquence sur leur fonctionnement). Un plugin doit être installé pour être chargé.</p>
+        <p>La valeur de chaque nœud <strong>plugin</strong> est l’identifiant du plugin à charger, c'est-à-dire le nom du ou des dossiers dans lequel il se trouve, sous le dossier défini par le nœud <strong>pluginsPath</strong>.</p>
+        <p>La valeur spéciale <strong>All</strong> chargera tous les plugins installés sur le serveur.</p>
+        
+        <h3>7. Configurations</h3>
+        <p>Le nœud <strong>configurations</strong> contient les configurations des plugins installés. Chaque configuration est stockée dans un nœud <strong>plugin</strong> dont l’attribut <strong>id</strong> est le nom du plugin concerné. Si la configuration d’un plugin n’est pas présente dans le nœud configurations, il n’est pas installé et ne pourra pas être chargé.</p>
+        <p>Chaque plugin possède une configuration qu’il peut structurer comme bon lui semble, à l’exception de quelques nœuds qui ont une signification particulière. Consultez la documentation sur les plugins pour plus d’informations.</p>
+        
+        <h2>IV. Fonctionnement</h2>
+        <p>Cette partie explique le fonctionnement interne du serveur.</p>
+        
+        <h3>1. Droits</h3>
+        <p>Le serveur offre une gestion complète des droits. La première chose à savoir est qu’il y a deux types d’utilisateurs, les administrateurs et les autres. Les administrateurs ont accès à la totalité des fonctionnalités du serveur, ainsi qu’à tous les fichiers qui y sont stockés. Ils ne sont donc pas soumis au système de droit.</p>
+        <p>Par défaut, le système de permissions du serveur est désactivé, afin de simplifier son utilisation pour le grand publique. Tous les utilisateurs enregistrés ont ainsi accès à la totalité des fichiers du serveur, et peuvent les modifier comme bon leur semble. Bien entendu, les fonctions d’administration sont toujours réservées aux administrateurs. Le nœud <strong>permissions/activate</strong> de la configuration du serveur permet de modifier ce comportement.</p>
+        <p>Lorsque le système de permissions est activé, les choses se compliquent :</p>
+        
+        <h4>Types de droits</h4>
+        <p>Il existe quatre types de droits par défaut, chacun ayant des conséquences variés pour les objets sur lesquels ils sont appliqués. Les plugins peuvent ajouter leurs propres droits à ce système.</p>
+        <p>Le tableau qui suit lie les permissions et leurs conséquences sur les objets :</p>
+        <table class="large_five">
+            <tr>
+                <th>Objets / Droits</th>
+                <th>Add</th>
+                <th>Read</th>
+                <th>Modify</th>
+                <th>Delete</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Files</td>
+                <td class="value">-</td>
+                <td class="value">Lecture du fichier et de ses informations.</td>
+                <td class="value">Modification du fichier et de ses informations.</td>
+                <td class="value right">Suppression.</td>
+            </tr>
+            <tr>
+                <td class="key">Directories</td>
+                <td class="value">Ajout de fichiers ou de dossiers.</td>
+                <td class="value">Affichage du contenu et de ses informations.</td>
+                <td class="value">Modification de ses informations.</td>
+                <td class="value right">Suppression, si les éléments qu’il contient peuvent eux aussi être supprimés.</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">Collections</td>
+                <td class="value">Ajout de fichiers ou de collections.</td>
+                <td class="value">Affichage du contenu et de ses informations.</td>
+                <td class="value">Modification de ses informations.</td>
+                <td class="value right">Suppression, si les collections qu’elle contient peuvent elles aussi être supprimées.</td>
+            </tr>
+        </table>
+        
+        <h4>Droits implicites</h4>
+        <p>Il est important de noter que certains droits en impliquent d’autres. Ainsi, lorsque le droit <em>delete</em> est accordé à un utilisateur, les droits <em>modify</em> et <em>read</em> lui sont implicitement attribué. De même, si la permission <em>modify</em> est accordée, <em>read</em> l’est aussi implicitement. Pour résumer, <em>delete</em> implique <em>modify</em>, qui implique lui-même <em>read</em>. Le droit <em>add</em> n’est pas concerné. Il est possible d’accorder ou de refuser explicitement un droit.</p>
+        
+        <h4>Héritage</h4>
+        <p>Les droits sont héréditaires, c'est-à-dire que lorsqu’un droit est appliqué à un dossier, tous les objets qu’il contient et qui ne redéfinissent pas ce droit en héritent. Ainsi c'est l'autorisation ou la restriction la plus basse dans l'arborescence des dossiers qui est prise en compte. Contrairement aux dossiers pour lesquels l’héritage concerne les fichiers et les dossiers qu’ils contiennent, les droits sur les collections ne sont héréditaires que pour les collections qu’elles contiennent, les fichiers gardant les mêmes droits que dans l’arborescence des dossiers.</p>
+        <p>Lorsqu’un objet n’hérite d’aucun droit, le nœud <strong>permissions/default</strong> de la configuration défini le comportement à adopter. L’héritage des droits peut être désactivé par le nœud <strong>permissions/inheritance</strong>.</p>
+        
+        <h4>Exemple</h4>
+        <p>Voici un exemple qui illustre le fonctionnement des droits :</p>
+        <div class="quote">
+            <ul>
+                <li class="denied">Directory1
+                    <ul>
+                        <li class="allowed">Directory2
+                            <ul>
+                                <li class="denied">Directory3
+                                    <ul>
+                                        <li class="denied">File1.txt</li>
+                                        <li class="denied">File2.txt</li>
+                                    </ul>
+                                </li>
+                                <li class="allowed">Directory4
+                                    <ul>
+                                        <li class="denied">File3.txt</li>
+                                    </ul>
+                                </li>
+                                <li class="allowed">File4.txt</li>
+                            </ul>
+                        </li>
+                        <li class="denied">Directory5</li>
+                        <li class="denied">File5.txt</li>
+                        <li class="allowed">File6.txt</li>
+                    </ul>
+                </li>
+                <li class="allowed">Directory6
+                    <ul>
+                        <li class="allowed">File7.txt</li>
+                    </ul>
+                </li>
+                <li class="denied">Directory7
+                    <ul>
+                        <li class="allowed">Directory8
+                            <ul>
+                                <li class="allowed">File8.txt</li>
+                            </ul>
+                        </li>
+                        <li class="denied">File9.txt</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <p>Les permissions accordées sont en <strong class="allowed">vert</strong>, et celles refusées sont en <strong class="denied">rouge</strong>. Par défaut les droits sont refusés. Voici les permissions qui permettent de définir ces droits {nom du fichier, droit accordé ou refusé} :</p>
+        <div class="quote">
+            <span class="allowed">{"Directory2", "true"}</span><br />
+            <span class="denied">{"Directory3", "false"}</span><br />
+            <span class="denied">{"File2.txt", "false"}</span><br />
+            <span class="denied">{"File3.txt", "false"}</span><br />
+            <span class="denied">{"File6.txt", "false"}</span><br />
+            <span class="allowed">{"File6.txt", "true"}</span><br />
+            <span class="allowed">{"Directory6", "true"}</span><br />
+            <span class="allowed">{"Directory8", "true"}</span>
+        </div>
+        
+        <h4>Propriétaire</h4>
+        <p>Les objets peuvent être associés à un propriétaire, qui est généralement l’utilisateur qui a créé l’objet. Le propriétaire d’un objet a tous les droits sur ce dernier, quelque soit les permissions qui y sont appliquées. De plus les droits des propriétaires sont héréditaires. Ainsi le propriétaire d’un dossier aura tous les droits sur les objets qu’il contient, même s’il n’est pas propriétaire de ces éléments et qu’il n’a pas de droits dessus. Ce comportement peut être modifié par la propriété <strong>permissions/ownerInheritance</strong> de la configuration.</p>
+        
+        <h4>Groupes et comptes</h4>
+        <p>Les permissions sur des objets peuvent être attribuées à des groupes ou des comptes. Les groupes sont des listes de comptes, et un compte peut appartenir à plusieurs groupes. Les groupes peuvent contenir d’autres groupes.</p>
+        <p>Si un compte n’a pas accès à un objet, mais qu’au moins un de ses groupes y a accès, c’est la permission la plus basse dans l’arborescence qui accordée. Dans l’exemple du dessus, si l’utilisateur a le droit de modifier le <strong>Directory2</strong> mais qu’un groupe auquel il appartient n’a explicitement pas le droit de modifier le <strong>Directory3</strong>, l’utilisateur ne pourra pas modifier <strong>File1.txt</strong> et <strong>File2.txt</strong>.</p>
+        <p>Si la permission d’un groupe et d’un compte sont au même niveau dans l’arborescence, c’est celle du compte qui l’emporte. Si ce conflit oppose plusieurs groupes, c’est l’autorisation qui l’emporte. Si <strong>permissions/groupInheritance</strong> est activé dans la configuration, c’est le groupe dont l’autorisation ou le refus est le plus bas dans l’arborescence des groupes qui l’emporte.</p>
+        
+        <h4>Généralisation</h4>
+        <p>Lorsqu’on applique un droit, on n’est pas obligé de préciser à qui se droit est destiné. Il sera donc appliqué à tous le monde. De même si on ne précise pas d’objet sur lequel un droit s’applique, cela revient à désigner la racine du serveur. Enfin si on ne précise pas le nom du droit qui lie un objet à un accesseur, cela désigne tous les droits.</p>
+        <p>Ces permissions génériques ne sont pas prioritaires sur les droits spécifiques. Donc si on autorise tout le monde à regarder une vidéo, mais qu’en même temps on interdit quelqu’un de la voir, ça revient à dire tout le monde sauf cette personne.</p>
+        
+        <h3>2. Threads</h3>
+        <p>Le serveur utilise massivement les threads pour gérer ses fonctionnalités. Il existe deux systèmes de gestion des threads. Le premier exploite les threads individuellement via l’objet Threads, qui permet de les nettoyer automatiquement lorsqu’ils se terminent. Voici la liste des threads gérés par ce système :</p>
+        <table>
+            <tr>
+                <th>Objet</th>
+                <th>Description</th>
+            </tr>
+            <tr class="odd">
+                <td class="key">Plugins</td>
+                <td>Ce thread est spécifiquement dédié au chargement, déchargement, installation, et désinstallation des plugins. Ceci permet de rendre ces opérations asynchrone tout en s’assurant qu’un seul thread les effectue à la fois.</td>
+            </tr>
+            <tr>
+                <td class="key">ApiEvents</td>
+                <td>Lorsqu’un plugin implémente l’interface <strong>LightBird::IEvent</strong>, les événement qu’il reçoit lui sont transmit via ce thread, ce qui lui permet de ne pas interrompre ses opérations, et d’être informé aussitôt qu’un événement se produit. Un thread est créé pour chaque plugin implémentant cette interface, et il est exclusivement dédié au traitement des événements de son plugin.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Timer</td>
+                <td>Chaque timer utilisé par les plugins est un thread spécifiquement dédié à cette tâche, et qui reste en vie tant que le timer est actif. Il appel à intervalle régulier l’interface <strong>LightBird::ITimer</strong> de son plugin.</td>
+            </tr>
+            <tr>
+                <td class="key">Port</td>
+                <td>Chaque port du serveur exploite un thread dédié qui gère les connections, la lecture et l’écriture des données sur le réseau, que ce soit en TCP ou UDP. L’exécution des requêtes et la génération des réponses est cependant faite via la ThreadPool.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Clients</td>
+                <td>La connexion, la lecture et l’écriture des données sur le réseau en mode CLIENT est effectuée via ce thread. La génération des requêtes et l’exécution des réponses est cependant faite via la ThreadPool.</td>
+            </tr>
+            <tr>
+                <td class="key">Log</td>
+                <td>L’appel aux plugins implémentant l’interface <strong>LightBird::ILog</strong> est effectué via ce thread. Ceci permet aux logs de ne par perturber l’exécution du serveur. Cependant pour faciliter le débogage, l’écriture sur la sortie standard des logs effectuée par le serveur est faite dans le thread qui a écrit le log.</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">Thread principal</td>
+                <td>Le thread principal du serveur est quand à lui dédié à la gestion des interfaces utilisateurs, s’il y en a. Il gère également la fermeture du serveur le cas échéant.</td>
+            </tr>
+        </table>
+        <p>Le second système de gestion des threads est la <strong>ThreadPool</strong>. Son principe est de créer dés le lancement du serveur un certain nombre de threads, défini dans la configuration par <strong>threadsNumber</strong>. Lorsque des tâches sont disponibles, elles sont exécutées par ces threads. Ceci permet d’éviter le coût de création et suppression des threads pour chaque tâche. C’est dans la ThreadPool que sont traitées toutes les tâches qui permettent de générer ou d’exécuter les requêtes et les réponses des clients. Toutes les interfaces réseau de l’API sont appelées depuis la ThreadPool. Ceci permet de fluidifier considérablement les échanges avec les clients, et de traiter un très grand nombre de demandes simultanément.</p>
+    </div>
+</body>
+</html>
