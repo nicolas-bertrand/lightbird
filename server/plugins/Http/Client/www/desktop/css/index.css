@@ -222,6 +222,16 @@ a:visited
     height: 40px; /* C.Desktop.newTaskHeight */
 }
 
+#desktop>.top>.tasks_list>.page.odd
+{
+    background-color: #88CCFF;
+}
+
+#desktop>.top>.tasks_list>.page.even
+{
+    background-color: #88AAFF;
+}
+
 /*////////////////////////////////////////////////////////////////////////////
 //                              CONTEXT MENU                                //
 ////////////////////////////////////////////////////////////////////////////*/

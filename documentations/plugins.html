@@ -216,7 +216,7 @@
         <p>Pour savoir dans quelles circonstances les différentes interfaces sont utilisées, consultez leurs commentaires.</p>
         
         <h2>VII. Flux de données serveur</h2>
-        <p>Le schéma qui suit représente le flux de données des interfaces de l’API réseau.</p>
+        <p>Le schéma qui suit représente le flux de données des interfaces de l’API réseau :</p>
         <div class="image">
             <img src="server_mode.png" alt="server mode">
         </div>
@@ -236,7 +236,7 @@
         <p>Le flux de données du mode client appel les mêmes interfaces que le mode serveur mais dans l’ordre inverse. En effet c’est la requête qui est générée et envoyée par le serveur et non la réponse. C’est donc la requête qui est sérialisée et la réponse qui est désérialisée. L’exécution de la réponse est quand à elle effectué à la fin du flux de données, après sa réception. </p>
         <p>Lorsqu’un plugin souhaite échanger des information avec un serveur, il s’y connecte via <strong>INetwork::connect</strong>. Si la connexion réussie l'interface <strong>IOnConnect</strong> est appelée, et le plugin peut commencer le processus d’envoie d'une requête via la méthode <strong>INetwork::send</strong>, ce qui provoque l’appel de l’interface <strong>IDoSend</strong> pour le plugin qui a utilisé INetwork::send. Si cette interface n’est pas implémentée, l’envoie est annulé.</p>
         <p>Il est possible de lire les réponses du client sans avoir préalablement envoyé de requêtes. Pour cela il faut utiliser la méthode <strong>INetwork::receive</strong> qui demande au serveur de sauter l’étape de sérialisation, et de passer directement à <strong>IOnSerialize</strong> suivi de <strong>IDoUnserializeHeader</strong>.</p>
-        <p>Le schéma qui suit détaille l’enchainement interfaces du flux de données client.</p>
+        <p>Le schéma qui suit détaille l’enchainement interfaces du flux de données client :</p>
         <div class="image">
             <img src="client_mode.png" alt="client mode">
         </div>

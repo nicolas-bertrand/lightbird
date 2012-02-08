@@ -17,12 +17,11 @@ var Configuration =
         resizeTasksListWidth : 1, // The width of the div that allows to resize the tasks list.
         taskHeightRatio : 5 / 6, // The height of the task icon in the tasks list is : task width * taskHeightRatio
         tasksListPadding : 7, // The padding of the page icons in the tasks list.
-        taskMagneticDragX : 0, // Limit between the tasks list drag and the free drag (from the tasks list right border).
-        taskMagneticDragY : 3, // Number of pixels a task have to be dragged vertically before actually moving.
+        taskResistance : 3, // Number of pixels a task have to be dragged vertically before actually moving.
         tasksListScrollHeight : 50, // Height of the scrolling areas of the tasks list.
         scrollSpeed : 12, // The speed of the scroll areas of the tasks list.
         mouseWheelScrollSpeed : 13, // The number of pixels scrolled by each mouse wheel click.
-        moveTaskWheelSpeed : 10, // The speed at which the tasks are changed with the mouse wheel when a task is dragged ouside the tasks list.
+        movePageWheelSpeed : 8, // The speed at which the pages are changed with the mouse wheel when a task is dragged ouside the tasks list.
         newTaskHeight : 20, // Height of the new task area.
         pagePreviewDelay : 500, // The delay to display a page when the mouse enters the tasks list.
         taskMargin : 20, // The margin between the tasks of a page. It is also the size of the resize task bars.

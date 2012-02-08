@@ -4,6 +4,8 @@
 var gl_loaded = false;
 // Holds the size of the browser
 var gl_browserSize;
+// A number used to get an unique id across the session. Use getUid() to get one.
+var gl_uid = 0;
 
 // Initialize the page (called by onload)
 function load()
@@ -338,6 +340,21 @@ function getEventRelatedTarget(event, name, depth)
 			return (target);
 		target = target.parentNode;
 	}
+}
+
+// Returns the name of the object
+function getObjectName(object)
+{ 
+    var funcNameRegex = /function (.{1,})\(/;
+    var results = (funcNameRegex).exec(object.constructor.toString());
+    return (results && results.length > 1) ? results[1] : "";
+}
+
+// Allows to get a unique id across the current session.
+// Increments the value each time an id is needed.
+function getUid()
+{
+    return (gl_uid++);
 }
 
 // Returns the number of a button in a cross browser way.
