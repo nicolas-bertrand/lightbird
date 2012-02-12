@@ -74,6 +74,13 @@ namespace LightBird
         /// @param id_account : The id of the account of the session to get.
         /// Ignored by default.
         virtual LightBird::Session   getSession(const QString &id_account = QString()) const = 0;
+        /// @brief Returns true if the client is disconnecting. This occurs when
+        /// a client is disconnected but false has been returned on a call to
+        /// LightBird::IOnDisconnect. As a result the client is not destroyed
+        /// immediatly, and it is marked as disconnecting in order to allow its
+        /// remaining data to be processed normally.
+        /// @see LightBird::IOnDisconnect
+        virtual bool                 isDisconnecting() const = 0;
     };
 }
 

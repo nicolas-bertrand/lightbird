@@ -180,10 +180,11 @@ void        Plugin::onFinish(LightBird::IClient &client)
         this->_api->sessions().destroy(client.getSessions().first(), true);
 }
 
-void    Plugin::onDisconnect(LightBird::IClient &client)
+bool    Plugin::onDisconnect(LightBird::IClient &client)
 {
     Medias::getInstance().disconnected(client);
     Uploads::getInstance().disconnected(client);
+    return (true);
 }
 
 bool    Plugin::timer(const QString &name)

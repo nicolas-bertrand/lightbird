@@ -124,7 +124,7 @@ Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &p
     client = new Client(socket, this->transport, this->protocols, this->port,
                         socket->socketDescriptor(), peerAddress, peerPort,
                         socket->peerName(), LightBird::IClient::SERVER, this);
-    // Add the client
+    // Adds the client
     this->clients.push_back(client);
     // When the client thread is finished, _finished is called
     QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
@@ -133,28 +133,29 @@ Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &p
 
 void            Port::_removeClient(Client *client)
 {
-    // Check if the client is in the clients list
+    // Checks if the client is in the clients list
     if (this->clients.contains(client))
-        // Disconnect the client
+        // Disconnects the client
         client->disconnect();
 }
 
-Client          *Port::_finished()
+bool            Port::_finished(Client *client)
 {
-    Client      *client = NULL;
-
-    // Search the client that has been finished
+    // Searches a finished client
     QListIterator<Client *> it(this->clients);
     while (it.hasNext() && !client)
         if (it.next()->isFinished())
             client = it.peekPrevious();
-    // Delete the client
+    // No client found
+    if (!client)
+        return (false);
+    // Deletes the client
     this->clients.removeAll(client);
     delete client;
     // If there are no more connected client and the server is no longer listening, the thread is quit
     if (this->clients.size() == 0 && !this->_isListening())
         this->quit();
-    return (client);
+    return (true);
 }
 
 unsigned short  Port::getPort() const

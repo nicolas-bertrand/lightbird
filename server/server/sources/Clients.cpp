@@ -205,6 +205,7 @@ void            Clients::shutdown()
     while (!this->writeBuffer.isEmpty())
         delete this->writeBuffer.dequeue().second;
     this->writeBuffer.clear();
+    this->writeBufferClients.clear();
     // Removes the remaining clients
     QListIterator<Client *> client(this->clients);
     while (client.hasNext())
@@ -242,6 +243,7 @@ bool            Clients::write(QByteArray *data, Client *client)
     if (this->writeBuffer.isEmpty())
         emit writeSignal();
     this->writeBuffer.enqueue(QPair<Client *, QByteArray *>(client, data));
+    this->writeBufferClients.push_back(client);
     return (true);
 }
 
@@ -274,6 +276,7 @@ void            Clients::_write()
         delete data;
         this->writeBuffer.dequeue();
     }
+    this->writeBufferClients.clear();
 }
 
 bool            Clients::connect(Client *client)
@@ -341,7 +344,6 @@ void            Clients::_connect(QString id)
 void                Clients::_disconnected()
 {
     SmartMutex      mutex(this->mutex);
-    Client          *client = NULL;
     QAbstractSocket *socket;
 
     if (!mutex)
@@ -351,10 +353,13 @@ void                Clients::_disconnected()
     {
         // Search the client associated with this socket
         QListIterator<Client *> it(this->clients);
-        while (it.hasNext() && !client)
+        while (it.hasNext())
             // And disconnect it
             if (&(it.next()->getSocket()) == socket)
+            {
                 it.peekPrevious()->disconnect();
+                break;
+            }
     }
 }
 
@@ -368,7 +373,8 @@ void            Clients::_finished()
     // Delete the clients finished
     QMutableListIterator<Client *> it(this->clients);
     while (it.hasNext())
-        if ((client = it.next())->isFinished())
+        // The client is deleted only if there is no remaining data in the writeBuffer
+        if ((client = it.next())->isFinished() && !this->writeBufferClients.contains(client))
         {
             it.remove();
             delete client;

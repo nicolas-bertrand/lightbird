@@ -220,7 +220,7 @@
         <div class="image">
             <img src="server_mode.png" alt="server mode">
         </div>
-        <p>Lorsqu'un client se connecte à un port du serveur, l'interface <strong>IOnConnect</strong> est appelée. Si la connexion est refusée par un des plugins implémentant cette interface, elle est coupée. <strong>IOnDisconnect</strong> est appelée à chaque fois qu'un client se déconnecte, peut importe la raison.</p>
+        <p>Lorsqu'un client se connecte à un port du serveur, l'interface <strong>IOnConnect</strong> est appelée. Si la connexion est refusée par un des plugins implémentant cette interface, elle est coupée. <strong>IOnDisconnect</strong> suivi de <strong>IOnDestroy</strong> sont appelées à chaque fois qu'un client se déconnecte, peu importe la raison.</p>
         <p>Plus tard lorsque des données sont reçues, les interfaces <strong>IDoRead</strong> et <strong>IOnRead</strong> sont appelées, puis les plugins doivent définir le protocole utilisé par la requête via l’interface <strong>IOnProtocol</strong>, après quoi la phase de désérialisation commence.</p>
         <p>La désérialisation consiste à transformer les données brutes reçues (qui sont sous la forme d’un QByteArray), en un objet structuré, exploitable par les plugins qui vont se charger d’exécuter la requête. Cette phase peut être effectuée en trois étapes, selon les protocoles. Le <strong>header</strong> est d’abord désérialisé, puis vient le tour du <strong>content</strong>, et enfin du <strong>footer</strong>. Par exemple le protocole HTTP a un header, un content, mais pas de footer.</p>
         <p>Puisque que les données peuvent arriver en plusieurs morceaux depuis le réseau, chaque étape est répétée autant de fois qu’il le faut pour la compléter. Par exemple si le header est reçu en trois fois, <strong>IDoUnserializeHeader</strong> sera appelée trois fois avant de passer au contenu. A chaque fois que de nouvelles données sont reçues, IDoRead et IOnRead sont appelées, avant l’appel à une interface IDoUnserialize*.</p>
@@ -301,75 +301,80 @@
             </tr>
             <tr>
                 <td class="key">IOnDisconnect</td>
-                <td>Cet événement est appelé après la fermeture d’une connexion. Cette déconnection peut être initié par le serveur, le client, ou par un problème réseau. Il permet généralement de libérer les ressources allouées pour le client durant sa connexion.</td>
+                <td>Cet événement est appelé après la fermeture d’une connexion. Cette déconnection peut être initié par le serveur, le client, ou par un problème réseau. Il permet généralement de libérer les ressources allouées pour le client durant sa connexion. Les plugins peuvent utiliser cette interface pour indiquer si le client déconnecté doit être suprimmé immédiatement, ou s'il on doit attendre que toutes ses données aient été traitées.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
             <tr class="odd">
+                <td class="key">IOnDestroy</td>
+                <td>Cette interface est appelée lorsqu'un client est sur le point d'être supprimé, après un appel à IOnDisconnect. Si ce dernier a retourné true, le client est détruit immédiatement. Sinon le serveur attend que toutes ses données aient été traitées avant de lancer la supression.</td>
+                <td class="value">Protocoles<br />Port</td>
+            </tr>
+            <tr>
                 <td class="key">IDoRead</td>
                 <td>Uniquement disponible en TCP, IDoRead est appelée lorsque des données sont disponibles en lecture sur le socket du client, afin de permettre aux plugins de remplacer la lecture des données normal du serveur. Ceci est par exemple utilisé dans l’implémentation d’un plugin gérant SSL/TLS.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">IOnRead</td>
                 <td>Est appelé juste après IDoRead, et permet de notifier aux plugins que des données ont été reçus.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">IOnProtocol</td>
                 <td>Cette interface permet de définir quel est le protocole utilisé par le client dans ses requêtes. Elle est appelée juste avant IDoUnserializeHeader, autant de fois qu’il le faut pour identifier le protocole de la requête. Si aucun plugin n’est en mesure de trouver le protocole utilisé, toutes les données reçues jusque là sont supprimées. Le nom du protocole retourné par cette interface est utilisé par le serveur pour savoir s’il doit appeler les interfaces qui suivent (à l’exception d’IDoWrite, IOnWrite, et IOnFinish).</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">IDoSend</td>
                 <td>Cette interface est appelée en mode CLIENT suite à l'appel de la méthode INetwork::send, pour le plugin ayant fait la demande. Elle permet de générer l'objet qui va être sérialisé et envoyé au client.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">IOnSend</td>
                 <td>Appelé juste après IDoSend, elle peut être utilisée pour préparer la requête qui va être envoyée au client. A ce stade il est encore possible d'annuler l'envoie de la requête.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">IDoUnserializeHeader<br />IDoUnserializeContent<br />IDoUnserializeFooter</td>
                 <td>Ces interfaces permettent aux plugins de transformer les données reçus sur le réseau en un objet de type IRequest. Cet objet est indépendant du protocole de communication. Les IDoUnserialize* sont appelés en boucle tant que le plugin qui l’implémente estime que la requête n’est pas complète, et que d’autres données doivent être reçus.</td>
                 <td class="value">Protocole<br />Port</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">IOnUnserialize</td>
                 <td>IOnUnserialize est appelé après chaque étapes complétés des IDoUnserialize*, ainsi qu’une fois que la requête est complètement sérialisée ; sauf dans le cas de IDoUnserializeContent où IOnUnserialize est utilisé après chaque appels. Ceci permet de suivre l’avancement du téléchargement d’un fichier par exemple.</td>
                 <td class="value">Protocole<br />Port</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">IDoExecution</td>
                 <td>C’est dans cette interface que la requête est exécutée. Concrètement, l’objet IRequest permet de générer un objet IResponse qui sera plus tard sérialisé puis envoyer sur le réseau. Les plugins peuvent également décider ici de ne pas envoyer de réponse à une requête.</td>
                 <td class="value">Protocole<br />Port<br />Méthode<br />Type</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">IOnExecution</td>
                 <td>Cet événement est appelé à la suite de l’exécution de la requête (IDoExecution), et permet également de refuser l’envoi d’une réponse.</td>
                 <td class="value">Protocole<br />Port</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">IOnSerialize</td>
                 <td>Cet événement est appelé avant chaque appels aux interfaces IDoSerialize*, ainsi qu’avant que commence la sérialisation.</td>
                 <td class="value">Protocole<br />Port</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">IDoSerializeHeader<br />IDoSerializeContent<br />IDoSerializeFooter</td>
                 <td>Les trois fonctions de sérialisation ont pour rôle de convertir l’objet IResponse en une chaine de données à envoyer sur le réseau, ce qui est l’inverse de la désérialisation. IDoSerializeHeader a pour rôle de sérialiser le header de la réponse, si le protocole utilisé en a un. IDoSerializeContent sérialise le contenu et est appelée en boucle, tant que le plugin qui s’en charge estime qu’il reste des données à envoyer. Engin, le footer est sérialisé par IDoSerializeFooter.</td>
                 <td class="value">Protocole<br />Port</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">IOnWrite</td>
                 <td>Permet d’être avertis que des données sont envoyées, et de les modifier si nécessaire. Est appelée après chaque appel aux interfaces IDoSerialize.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">IDoWrite</td>
                 <td>Appelé à la suite de IOnWrite, IDoWrite autorise les plugins à remplacer l’écriture des données sur le réseau que fait normalement le serveur, comme pour IDoRead. C’est au plugin qui implémente cette interface d’envoyer les données au client.</td>
                 <td class="value">Protocoles<br />Port</td>
             </tr>
-            <tr class="last">
+            <tr class="odd last">
                 <td class="key">IOnFinish</td>
                 <td>Une fois qu’une requête a été complètement traitée, et qu’une réponse a été envoyée ou non, cette interface est appelée. Cela permet par exemple à un plugin de déconnecter un client après chaque transaction, plutôt que de laisser la connexion active inutilement.</td>
                 <td class="value">Protocoles<br />Port</td>

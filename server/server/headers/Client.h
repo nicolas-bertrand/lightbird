@@ -91,6 +91,7 @@ public:
     LightBird::IResponse    &getResponse();
     QStringList             getSessions(const QString &id_account = QString()) const;
     LightBird::Session      getSession(const QString &id_account = QString()) const;
+    bool                    isDisconnecting() const;
 
 public slots:
     /// @brief Calling this method tells the Client that new data are available to read.
@@ -135,7 +136,9 @@ private:
     /// @brief Calls IOnConnect.
     bool    _onConnect();
     /// @brief Calls IOnDisconnect.
-    void    _onDisconnect();
+    bool    _onDisconnect();
+    /// @brief Calls IOnDestroy.
+    void    _onDestroy();
     /// @brief Calls _getInformations for each elements in this->informationsRequests.
     void    _getInformations();
     /// @brief Fills the informations of the client in the client struct, and unlock the future.
@@ -163,6 +166,7 @@ private:
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     readyRead;           ///< Data are available on the network.
     bool                     finish;              ///< If true, the client is going to be disconnected.
+    bool                     disconnecting;       ///< The client is disconnected from the server, but there is still data to process.
     bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.

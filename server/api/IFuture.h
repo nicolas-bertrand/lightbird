@@ -5,9 +5,9 @@
 
 namespace LightBird
 {
-    /// @brief This classe has the same behavior than QFuture, and is uses for the
+    /// @brief This classe has the same behavior as QFuture, and is uses for the
     /// same purpose, which is to allow a thread to get the result of an asynchronous
-    /// operation, and wait until this result became available.
+    /// operation, and wait until this result becomes available.
     /// The type of the result is defined by the type of the template.
     template<class T>
     class IFuture
@@ -15,8 +15,8 @@ namespace LightBird
     public:
         virtual ~IFuture() {}
 
-        /// @brief This method block the caller thread until the result became available,
-        /// or the time given in parameter elapsed. The result is then set to the reference
+        /// @brief This method block the caller thread until the result become available,
+        /// or the time given in parameter elapsed. The result is then sets to the reference
         /// parameter (if it is available). The maximum time to wait for the result can be
         /// defined using the parameter time.
         /// @param result : The result of Future, if it became available during the given time.

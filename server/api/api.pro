@@ -35,6 +35,7 @@ HEADERS         =   IApi.h \
                     network/IDoWrite.h \
                     network/INetwork.h \
                     network/IOnConnect.h \
+                    network/IOnDestroy.h \
                     network/IOnDisconnect.h \
                     network/IOnExecution.h \
                     network/IOnFinish.h \

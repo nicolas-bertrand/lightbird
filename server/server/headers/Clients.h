@@ -84,8 +84,10 @@ private:
     /// The list of the futures waiting for the connection of the client
     /// in order to set their results.
     QMap<QString, QPair<Future<QString> *, int> > connections;
-    ///< List of the data that are going to be send from the thread.
+    /// The list of the data that are going to be send from the thread.
     QQueue<QPair<Client *, QByteArray *> >        writeBuffer;
+    /// The list of the clients that are going to send data (the same as in writeBuffer).
+    QList<Client *> writeBufferClients;
 };
 
 #endif // CLIENTS_H

@@ -93,6 +93,7 @@ bool            PortTcp::write(QByteArray *data, Client *client)
     if (this->writeBuffer.isEmpty())
         emit writeSignal();
     this->writeBuffer.enqueue(QPair<Client *, QByteArray *>(client, data));
+    this->writeBufferClients.push_back(client);
     return (true);
 }
 
@@ -173,6 +174,7 @@ void            PortTcp::_write()
         delete data;
         this->writeBuffer.dequeue();
     }
+    this->writeBufferClients.clear();
 }
 
 void                PortTcp::_disconnected()
@@ -184,31 +186,38 @@ void                PortTcp::_disconnected()
         return ;
     // If the sender of the signal is a QAbstractSocket
     if ((socket = qobject_cast<QAbstractSocket *>(this->sender())))
-        // Search the client associated with this socket
+        // Searches the client associated with this socket
         if (this->sockets.contains(socket))
             // Removes the client of the disconnected socket
             this->_removeClient(this->sockets.value(socket));
 }
 
-Client          *PortTcp::_finished()
+bool            PortTcp::_finished(Client *client)
 {
     SmartMutex  mutex(this->mutex, "PortTcp", "_finished");
-    Client      *client;
 
-    // Removes the clients finished
-    while (mutex && (client = Port::_finished()))
-    {
-        // Removes the socket from the sockets map
-        this->sockets.remove(this->sockets.key(client));
-        // If the server is still listening and there are pending connections,
-        // a new client can replace the destroyed one.
-        if (this->_isListening() && this->tcpServer.hasPendingConnections())
+    if (!mutex)
+        return (false);
+    // Searches the clients that have been finished
+    client = NULL;
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext())
+        // The client is deleted only if there is no remaining data in the writeBuffer
+        if ((client = it.next())->isFinished() && !this->writeBufferClients.contains(client))
         {
-            mutex.unlock();
-            this->_newConnection();
+            // Removes the client
+            Port::_finished(client);
+            // Removes the socket from the sockets map
+            this->sockets.remove(this->sockets.key(client));
         }
+    // If the server is still listening and there are pending connections,
+    // new clients can replace those that were destroyed.
+    if (client && this->_isListening() && this->tcpServer.hasPendingConnections())
+    {
+        mutex.unlock();
+        this->_newConnection();
     }
-    return (NULL);
+    return (true);
 }
 
 bool    PortTcp::_isListening() const

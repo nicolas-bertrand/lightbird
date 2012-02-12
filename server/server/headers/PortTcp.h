@@ -44,13 +44,14 @@ private slots:
     void    _write();
     /// @brief Called when a QTcpSocket is disconnected, to remove its client.
     void    _disconnected();
-    /// @brief Called when a client's is finished.
-    Client  *_finished();
+    /// @brief Called when a client is finished.
+    bool    _finished(Client *client = NULL);
 
 private:
     QTcpServer                             tcpServer;     ///< The TCP server that listens on the network and waits new connections.
     QMap<QAbstractSocket *, Client *>      sockets;       ///< Associates the socket with its client.
     QQueue<QPair<Client *, QByteArray *> > writeBuffer;   ///< List of the data that are going to be send from the thread.
+    QList<Client *>                        writeBufferClients; ///< The list of the clients that are going to send data (the same as in writeBuffer).
     Future<bool>                           threadStarted; ///< This future is unlocked when the thread is started.
 };
 

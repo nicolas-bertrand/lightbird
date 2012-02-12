@@ -76,7 +76,10 @@ protected:
 
 protected slots:
     /// @brief Called when a client is finished.
-    virtual Client  *_finished();
+    /// @param client : The finished client. If not provided, the first finished
+    /// client will be used.
+    /// @return True if a client has been finished.
+    virtual bool    _finished(Client *client = NULL);
 
 private:
     Port(const Port &);

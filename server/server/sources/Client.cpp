@@ -4,6 +4,7 @@
 #include "IOnConnect.h"
 #include "IDoRead.h"
 #include "IDoWrite.h"
+#include "IOnDestroy.h"
 #include "IOnDisconnect.h"
 
 #include "ApiSessions.h"
@@ -27,6 +28,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->readyRead = false;
     this->running = false;
     this->finish = false;
+    this->disconnecting = false;
     this->disconnected = false;
     this->state = Client::NONE;
     // Set the connection date at the current date
@@ -99,14 +101,19 @@ void        Client::run()
             break;
 
         case Client::DISCONNECT :
-            this->_onDisconnect();
-            Log::info("Client disconnected", Properties("id", this->id), "Client", "run");
-            return this->_finish();
+            this->finish = false;
+            if (this->_onDisconnect())
+                // The client is destroyed now
+                return this->_finish();
+            // Otherwise it will be destroyed when all the data have been processed
+            this->disconnecting = true;
+            break;
 
         default:
             break;
     }
 
+    // Runs a new task
     SmartMutex mutex(this->mutex, "Client", "run");
     if (!mutex)
         return ;
@@ -115,19 +122,31 @@ void        Client::run()
         this->_getInformations();
     // The client must be disconnected
     if (this->finish)
-        this->_newTask(Client::DISCONNECT);
-    // A new task has been assigned
+        newTask = Client::DISCONNECT;
+    // A new task has already been assigned
     else if (newTask != Client::NONE)
-        this->_newTask(newTask);
+        newTask = newTask;
     // Some data have to be sent to the client
     else if (!this->sendRequests.isEmpty() && send)
-        this->_newTask(Client::SEND);
+        newTask = Client::SEND;
     // Some data have to be received without sending a request
     else if (!this->receiveResponses.isEmpty() && receive)
-        this->_newTask(Client::RECEIVE);
+        newTask = Client::RECEIVE;
     // Some data are available to be read on the network
     else if (this->readyRead)
-        this->_newTask(Client::READ);
+        newTask = Client::READ;
+    // The client is disconnecting and there is nothing left to do
+    else if (this->disconnecting)
+    {
+        mutex.unlock();
+        return this->_finish();
+    }
+    // Starts the new task
+    if (newTask != Client::NONE)
+    {
+        mutex.unlock();
+        this->_newTask(newTask);
+    }
     // All the tasks of the client has been completed
     else
         this->running = false;
@@ -192,8 +211,12 @@ void        Client::write(QByteArray *data)
         Log::trace("Writing data", Properties("id", this->id).add("data", Tools::simplify(*data)).add("size", data->size()), "Client", "write");
     else if (Log::instance()->isDebug())
         Log::debug("Writing data", Properties("id", this->id).add("size", data->size()), "Client", "write");
-    // Writes the data
-    this->readWriteInterface->write(data, this);
+    // Writes the data if the client is still connected
+    if (!this->disconnecting)
+        this->readWriteInterface->write(data, this);
+    // Otherwise we have to destroy them
+    else
+        delete data;
 }
 
 bool            Client::send(const QString &protocol, const QVariantMap &informations, const QString &id)
@@ -293,7 +316,7 @@ void            Client::disconnect()
 {
     SmartMutex  mutex(this->mutex, "Client", "disconnect");
 
-    if (!mutex)
+    if (!mutex || this->disconnecting)
         return ;
     // If the client is not running, a new task can be created to disconnect it.
     // Otherwise it will be disconnected after the current task is completed.
@@ -355,14 +378,29 @@ bool        Client::_onConnect()
     return (accept);
 }
 
-void        Client::_onDisconnect()
+bool        Client::_onDisconnect()
 {
-    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->mode, this->transport, this->protocols, this->port));
+    bool    finish = true;
 
+    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->mode, this->transport, this->protocols, this->port));
     while (it.hasNext())
     {
         Log::trace("Calling IOnDisconnect::onDisconnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDisconnect");
-        it.peekNext().value()->onDisconnect(*this);
+        if (!it.peekNext().value()->onDisconnect(*this))
+            finish = false;
+        Plugins::instance()->release(it.next().key());
+    }
+    Log::info("Client disconnected", Properties("id", this->id).add("disconnecting", !finish), "Client", "run");
+    return (finish);
+}
+
+void        Client::_onDestroy()
+{
+    QMapIterator<QString, LightBird::IOnDestroy *> it(Plugins::instance()->getInstances<LightBird::IOnDestroy>(this->mode, this->transport, this->protocols, this->port));
+    while (it.hasNext())
+    {
+        Log::trace("Calling IOnDestroy::onDestroy()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDestroy");
+        it.peekNext().value()->onDestroy(*this);
         Plugins::instance()->release(it.next().key());
     }
 }
@@ -462,6 +500,11 @@ LightBird::Session      Client::getSession(const QString &id_account) const
     return (session);
 }
 
+bool                    Client::isDisconnecting() const
+{
+    return (this->disconnecting);
+}
+
 void    Client::setPort(unsigned short port)
 {
     this->port = port;
@@ -532,10 +575,7 @@ void    Client::_getInformations(LightBird::INetwork::Client &client, Future<boo
 
 void            Client::_finish()
 {
-    SmartMutex  mutex(this->mutex, "Client", "_finish");
-
-    if (!mutex)
-        return ;
+    this->_onDestroy();
     this->disconnected = true;
     emit this->finished();
 }

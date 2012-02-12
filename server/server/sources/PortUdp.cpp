@@ -125,14 +125,14 @@ void             PortUdp::_readPendingDatagrams()
     }
 }
 
-Client          *PortUdp::_finished()
+bool            PortUdp::_finished(Client *)
 {
     SmartMutex  mutex(this->mutex, "PortUdp", "_finished");
 
     // While there is a client to remove
     while (mutex && Port::_finished())
         ;
-    return (NULL);
+    return (true);
 }
 
 bool    PortUdp::_isListening() const

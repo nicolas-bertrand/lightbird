@@ -32,8 +32,8 @@ private:
 private slots:
     /// @brief This slot is called when datagrams are ready to be read.
     void    _readPendingDatagrams();
-    /// @brief Called when a client's is finished.
-    Client  *_finished();
+    /// @brief Called when a client is finished.
+    bool    _finished(Client *client = NULL);
 
 private:
     QUdpSocket   socket;        ///< This UDP socket is bound on the port to receive all datagrams sent to it.
