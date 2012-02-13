@@ -60,7 +60,9 @@ void    Log::write(LightBird::ILogs::Level level, const QString &message, const 
             }
             break;
         case Log::BUFFER:
+            this->mutex.lock();
             this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method));
+            this->mutex.unlock();
             break;
         default:
             if (this->levels.contains(level) && this->level <= level)
@@ -226,6 +228,7 @@ void    Log::_initializeWrite()
     if (Configurations::instance()->get("log/display") == "true")
         this->display = true;
     // Write the buffered logs
+    this->mutex.lock();
     QListIterator<Log::LogInformations> log(this->buffer);
     while (log.hasNext())
         if (this->level <= log.next().level)
@@ -243,6 +246,7 @@ void    Log::_initializeWrite()
     if (!this->awake)
         this->waitRun.wait(&waitMutex);
     this->waitMutex.unlock();
+    this->mutex.unlock();
 }
 
 QString     Log::_mapToString(const QMap<QString, QString> &properties) const
@@ -319,14 +323,16 @@ void        Log::_print(LightBird::ILogs::Level level, const QDateTime &date, co
 
 void    Log::print()
 {
-    QListIterator<Log::LogInformations> it(Log::buffer);
     bool                                display = this->display;
 
+    this->mutex.lock();
     this->display = true;
+    QListIterator<Log::LogInformations> it(Log::buffer);
     while (it.hasNext())
     {
-        Log::_print(it.peekNext().level, it.peekNext().date, it.peekNext().message, it.peekNext().properties, it.peekNext().thread, it.peekNext().plugin, it.peekNext().object, it.peekNext().method);
+        this->_print(it.peekNext().level, it.peekNext().date, it.peekNext().message, it.peekNext().properties, it.peekNext().thread, it.peekNext().plugin, it.peekNext().object, it.peekNext().method);
         it.next();
     }
     this->display = display;
+    this->mutex.unlock();
 }

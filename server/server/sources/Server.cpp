@@ -55,9 +55,9 @@ Server::Server(Arguments args, QObject *parent) : QObject(parent),
 void    Server::_initialize()
 {
     Log::info("Initialazing the server", "Server", "_initialize");
-    // Set the current path of the application to the path of the executable
+    // Sets the current path of the application to the path of the executable
     QDir::setCurrent(QCoreApplication::applicationDirPath());
-    // Seed the random number generator
+    // Seeds the random number generator
     ::qsrand((unsigned int)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
     // Then the configuration is loaded
     Log::info("Loading the server configuration", "Server", "_initialize");
@@ -68,10 +68,10 @@ void    Server::_initialize()
     // The threads manager must be initialized just after the configuration
     Log::info("Loading the thread manager", "Server", "_initialize");
     this->threads = new Threads(this);
-    // Load the thread pool
+    // Loads the thread pool
     Log::info("Loading the thread pool", "Server", "_initialize");
     this->threadPool = new ThreadPool(this);
-    // Load the translator
+    // Loads the translator
     Log::info("Loading the translation", "Server", "_initialize");
     if (!this->_loadTranslation(Configurations::instance()->get("languagesPath") + "/", ":languages/"))
         Log::error("Unable to load the translation of the server", "Server", "_initialize");
@@ -82,19 +82,25 @@ void    Server::_initialize()
     // Creates the temporary directory
     if (!this->_temporaryDirectory())
         return Log::fatal("Failed to manage the temporary directory", "Server", "_initialize");
-    // Load the database
+    // Loads the database
     Log::info("Loading the database", "Server", "_initialize");
     if (!*(this->database = new Database(this)))
         return Log::fatal("Failed to load the database", "Server", "_initialize");
-    // Load the network
+    // Loads the events system
+    this->events = new Events(this);
+    // Loads the plugins manager and some APIs
+    Log::info("Loading the plugins manager", "Server", "_initialize");
+    this->plugins = new Plugins();
+    this->apiGuis = new ApiGuis(this);
+    this->apiPlugins = new ApiPlugins(this);
+    this->apiSessions = new ApiSessions(this);
+    this->extensions = new Extensions(this);
+    // Loads the network
     Log::info("Loading the network", "Server", "_initialize");
     this->network = new Network(this);
     this->_loadNetwork();
-    // Load the events system
-    this->events = new Events(this);
-    // Load the plugins
+    // Loads the plugins
     Log::info("Loading the plugins", "Server", "_initialize");
-    this->plugins = new Plugins();
     this->_loadPlugins();
     // The log is then initialized which mean that previous logs are really write
     Log::info("Loading the logs", "Server", "_initialize");
@@ -139,7 +145,7 @@ Server::~Server()
     delete this->threads;
     delete this->configurations;
     Log::info("Server stopped", "Server", "~Server");
-    // Restart the server if necessary
+    // Restarts the server if necessary
     if (this->restart)
         QProcess::startDetached(QCoreApplication::instance()->applicationFilePath(), this->arguments.toStringList(), QDir::currentPath());
 }
@@ -182,7 +188,7 @@ bool        Server::_temporaryDirectory()
         {
             Log::debug("Cleaning the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
             directory.setPath(path);
-            // Loop over all the files of the directory
+            // Loops over all the files of the directory
             QStringListIterator it(directory.entryList(QDir::Files));
             while (it.hasNext())
                 if (!directory.remove(it.next()))
@@ -215,7 +221,7 @@ void    Server::_loadNetwork()
     unsigned short                  from;
     unsigned short                  to;
 
-    // Get the information on the ports to load from the configuration
+    // Gets the information on the ports to load from the configuration
     node = Configurations::instance()->readDom().firstChildElement("ports");
     for (node = node.firstChildElement("port"); !node.isNull(); node = node.nextSiblingElement("port"))
     {
@@ -223,7 +229,7 @@ void    Server::_loadNetwork()
         port["protocols"] = node.attribute("protocol");
         port["transport"] = node.attribute("transport");
         port["maxClients"] = node.attribute("maxClients");
-        // Open a range of ports
+        // Opens a range of ports
         if (port["port"].contains('-'))
         {
             from = port["port"].left(port["port"].indexOf('-')).toUShort();
@@ -266,11 +272,6 @@ void            Server::_loadPlugins()
     QStringList list;
     bool        loaded = false;
 
-    // Load some API and the extension manager
-    this->apiGuis = new ApiGuis(this);
-    this->apiPlugins = new ApiPlugins(this);
-    this->apiSessions = new ApiSessions(this);
-    this->extensions = new Extensions(this);
     // Allows the server to know when a plugin is loaded (only in GUI mode)
     if (qobject_cast<QApplication *>(QCoreApplication::instance()))
         QObject::connect(Plugins::instance(), SIGNAL(loaded(QString)), this, SLOT(_pluginLoaded(QString)), Qt::QueuedConnection);
@@ -280,7 +281,7 @@ void            Server::_loadPlugins()
         Log::debug("All the installed plugins are going to be loaded", "Server", "_loadPlugins");
         list = Plugins::instance()->getInstalledPlugins();
     }
-    // Get the list of the plugins to load
+    // Gets the list of the plugins to load
     else
     {
         plugin = Configurations::instance()->readDom().firstChildElement("plugins");
@@ -288,7 +289,7 @@ void            Server::_loadPlugins()
             list.push_back(plugin.text());
         Configurations::instance()->release();
     }
-    // Load the plugins in the list
+    // Loads the plugins in the list
     QStringListIterator it(list);
     while (it.hasNext())
         // The getResult allows to wait until the plugin is actually loaded (or not)
@@ -305,7 +306,7 @@ void                Server::_pluginLoaded(QString id)
     LightBird::IGui *instance;
     QString         path;
 
-    // Load the translation of the plugin if possible
+    // Loads the translation of the plugin if possible
     path = Configurations::instance()->get("pluginsPath") + "/" + id + "/";
     if (Configurations::instance(id)->count("translation") &&
         Configurations::instance(id)->get("translation") == "true")

@@ -17,7 +17,7 @@ Plugins::Plugins()
     this->unloadAllPlugins = false;
     this->awake = false;
     this->libraryExtensions << "*.dll" << "*.so" << "*.a" << "*.sl" << "*.dylib" << "*.bundle";
-    // Connect all the signals and slots
+    // Connects all the signals and slots
     qRegisterMetaType<Future<bool> >("Future<bool>");
     QObject::connect(this, SIGNAL(loadSignal(QString,Future<bool>*)), this, SLOT(_load(QString,Future<bool>*)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(unloadSignal(QString,Future<bool>*)), this, SLOT(_unload(QString,Future<bool>*)), Qt::QueuedConnection);
@@ -26,7 +26,7 @@ Plugins::Plugins()
     this->moveToThread(this);
     // Starts the plugins thread
     Threads::instance()->newThread(this, false);
-    // Wait that the thread is started
+    // Waits that the thread is started
     this->mutex.lockForWrite();
     if (!this->awake)
         this->wait.wait(&mutex);
@@ -49,7 +49,7 @@ void        Plugins::run()
     this->awake = true;
     this->wait.wakeAll();
     this->mutex.unlock();
-    // Execute the event loop
+    // Executes the event loop
     this->exec();
     Log::debug("Plugins thread finished", "Plugins", "run");
     this->moveToThread(QCoreApplication::instance()->thread());
@@ -100,7 +100,7 @@ void            Plugins::shutdown()
     this->unloadAllPlugins = true;
     QStringListIterator it(this->orderedPlugins);
     mutex.unlock();
-    // Try to unload all the plugins
+    // Tries to unload all the plugins
     while (it.hasNext())
         this->unload(it.next()).getResult();
     if (!mutex.lock())
@@ -407,7 +407,7 @@ QStringList     Plugins::getUnloadedPlugins() const
 {
     QStringList plugins;
 
-    // Get all the installed plugins
+    // Gets all the installed plugins
     plugins = this->getInstalledPlugins();
     // Removes the plugins loaded
     QStringListIterator it(this->getLoadedPlugins());
@@ -433,7 +433,7 @@ QStringList     Plugins::getUninstalledPlugins() const
 {
     QStringList plugins;
 
-    // Get all the plugins
+    // Gets all the plugins
     this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins);
     // Removes the plugins installed
     QStringListIterator it(this->getInstalledPlugins());
@@ -447,7 +447,7 @@ void                    Plugins::_findPlugins(const QString &pluginsPath, const 
     QString             id;
     QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
 
-    // Run through all the directories of the current location to find the plugins
+    // Runs through all the directories of the current location to find the plugins
     while (it.hasNext())
     {
         if (!path.isEmpty())

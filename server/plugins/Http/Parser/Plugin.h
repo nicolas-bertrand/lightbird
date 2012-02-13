@@ -64,7 +64,7 @@ public:
 
     // Connect / Disconnect
     bool    onConnect(LightBird::IClient &client);
-    void    onDisconnect(LightBird::IClient &client);
+    bool    onDisconnect(LightBird::IClient &client);
 
     // Unserialize
     bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error);

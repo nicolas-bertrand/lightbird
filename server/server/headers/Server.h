@@ -59,14 +59,14 @@ private:
 
     /// @brief Called by the constructor to initialize the server.
     void    _initialize();
-    /// @brief Load the translatations of the texts of the server and the plugins
+    /// @brief Loads the translatations of the texts of the server and the plugins
     /// in the local language.
     /// @param file : The path of the language file on the file system.
     /// @param resource : The path of the language file in the resources. Used only
     /// if the file has not been found using the first parameter.
     /// @return True if the translation has been loaded.
     bool    _loadTranslation(const QString &file, const QString &resource);
-    /// @brief Manage the temporary directory. Creates it if it doesn't exists, or
+    /// @brief Manages the temporary directory. Creates it if it doesn't exists, or
     /// removes its files.
     /// @return True if no error occured.
     bool    _temporaryDirectory();
