@@ -350,6 +350,22 @@ function getObjectName(object)
     return (results && results.length > 1) ? results[1] : "";
 }
 
+// Removes the texts nodes of a node (nodes without a tagName)
+function removeTextNodes(node)
+{
+    var child = node.firstChild;
+    
+    while (child)
+    {
+        var previous = child;
+        child = child.nextSibling;
+        // If the child doesn't have a tag name we remove it
+        if (!previous.tagName)
+            previous.parentNode.removeChild(previous);
+    }
+    return (node);
+}
+    
 // Allows to get a unique id across the current session.
 // Increments the value each time an id is needed.
 function getUid()

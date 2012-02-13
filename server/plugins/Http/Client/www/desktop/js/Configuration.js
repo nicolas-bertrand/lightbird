@@ -1,11 +1,9 @@
 // The configuration of the Client.
 var Configuration =
 {
-	// The default size of the new windows.
-	newWindowWidth : 600,
-	newWindowHeight : 300,
-	// Default animation FPS.
-	animationFPS : 20,
+	newWindowWidth : 600, // The default width of the new windows.
+	newWindowHeight : 300, // The default height of the new windows.
+	animationFPS : 20, // Default animation FPS.
     // The configuration of the desktop.
     Desktop :
     {
@@ -35,6 +33,7 @@ var Configuration =
         resizeTasksListMin : 30, // The minimum size of the tasks list.
         resizeTasksListMax : 200, // The maximum size of the tasks list.
         taskIconMinWidth : 15, // The minimum width if a task icon.
+        mouseWheelMultiplier : 2, // Used to normalize the mouse wheel delta. Increases the delta of each click.
     },
 	// The size of the window
 	Window :

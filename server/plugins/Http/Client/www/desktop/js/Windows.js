@@ -13,9 +13,47 @@ var gl_windowInitialMax = 10;
 // The old size of a window, before it has been maximized
 var gl_beforeMaximiseWindow = new Object();
 // The opacity of the windows that have not the focus
-var gl_noFocusWindowOpacity = 1;
+var gl_noFocusWindowOpacity = 0.7;
+// The list of the windows saved when saveWindows was called. THey can be restored by calling restoreWindows.
+var gl_savedWindows = undefined;
 // A map of all the opened windows. The key is the id of the window.
 var gl_windows = new Object();
+
+// Create and open a new window.
+// @page : The page displayed by the window.
+// @focus : If the focus has to be put on the new window.
+function openWindow(page, focus)
+{
+	// Create the window
+	var window = new Window();
+	// Initialize the window properties
+	window.setTitle("page");
+	window.setWidth(C.newWindowWidth);
+	window.setHeight(C.newWindowHeight);
+	window.setTop(gl_windowInitialY + gl_windowInitialCurrent * gl_windowInitialIncrement);
+	window.setLeft(gl_windowInitialX + gl_windowInitialCurrent * gl_windowInitialIncrement);
+	window.setPage(page);
+	if (++gl_windowInitialCurrent >= gl_windowInitialMax)
+		gl_windowInitialCurrent = 0;
+	// Add the window to the map
+	gl_windows[window.getId()] = window;
+	if (focus != false)
+		setWindowFocus(window.getId());
+	// Attach the window in the document
+	document.getElementById("windows").appendChild(window.root.parentNode);
+	// Open the window
+	window.open();
+}
+
+// Close a window
+function closeWindow(id, event)
+{
+	if ((event != undefined && event.button == 2) || gl_windows[id] == undefined)
+		return ;
+	gl_windows[id].close(undefined, true);
+	delete gl_windows[id];
+	setNewWindowFocus();
+}
 
 // Start to move the window
 function startMoveWindow(id, event)
@@ -73,6 +111,7 @@ function moveWindow(event)
 			gl_windows[id].setLeft(C.Window.minOutX);
 		if (mouse.y - gl_windowFocus.mouseY < C.Window.minOutY)
 			gl_windows[id].setTop(C.Window.minOutY);
+        gl_windows[id].getPage().onResize();
 	}
 	else if (gl_windowFocus.type == "resize")
 	{
@@ -121,53 +160,8 @@ function moveWindow(event)
 			height = C.Window.minHeight;
 		gl_windows[id].setWidth(width);
 		gl_windows[id].setHeight(height);
+        gl_windows[id].getPage().onResize();
 	}
-}
-
-// Create and open a new window.
-// @title : The title of the window.
-// @file : The name of the content file of the window.
-// @event : The event that calls this function.
-// @argument : An optionnal argument that is passed to the window.
-// @focus : If the focus has to be put on the new window
-function openWindow(title, file, event, argument, focus)
-{
-	if (event != undefined && event.button == 2)
-		return ;
-	
-	// Create the window
-	var window = new Window();
-	
-	// Initialize the window properties
-	window.setTitle(title);
-	window.setWidth(C.newWindowWidth);
-	window.setHeight(C.newWindowHeight);
-	window.setTop(gl_windowInitialY + gl_windowInitialCurrent * gl_windowInitialIncrement);
-	window.setLeft(gl_windowInitialX + gl_windowInitialCurrent * gl_windowInitialIncrement);
-	window.setArgument(argument);
-	window.setType(file);
-	if (++gl_windowInitialCurrent >= gl_windowInitialMax)
-		gl_windowInitialCurrent = 0;
-	// Add the window to the map
-	gl_windows[window.getId()] = window;
-	// Fill the content of the window
-	gl_resources.load(file, function(content) {window.setContent(content); gl_resources.callJs(file, window.getId())});
-	if (focus != false)
-		setWindowFocus(window.getId());
-	// Attach the window in the document
-	document.getElementById("windows").appendChild(window.root.parentNode);
-	// Open the window
-	window.open();
-}
-
-// Close a window
-function closeWindow(id, event)
-{
-	if ((event != undefined && event.button == 2) || gl_windows[id] == undefined)
-		return ;
-	gl_windows[id].close();
-	delete gl_windows[id];
-	setNewWindowFocus();
 }
 
 // Hide a window
@@ -205,6 +199,14 @@ function hideOtherWindow(id, event)
 		for (var i in gl_windows)
 			if (gl_windows[i].isHidden())
 				gl_windows[i].isHidden(false);
+}
+
+// Hide all the windows
+function hideAllWindows()
+{
+	for (var i in gl_windows)
+		if (!gl_windows[i].isHidden())
+			gl_windows[i].isHidden(true);
 }
 
 // Change the focused window
@@ -255,7 +257,7 @@ function getWindowIdByType(type)
 	return (false);
 }
 
-// Search the id of the windows using its type.
+// Search the id of the windows using their type.
 function getWindowsIdByType(type)
 {
 	var result = new Array;
@@ -265,3 +267,26 @@ function getWindowsIdByType(type)
 			result.push(id);
 	return (result);
 }
+
+// Saves the list of the displayed windows.
+function saveWindows()
+{
+    gl_savedWindows = new Array();
+	for (var i in gl_windows)
+		if (!gl_windows[i].isHidden())
+			gl_savedWindows.push(i);
+}
+
+// Restores the saved windows by displaying them.
+function restoreWindows()
+{
+    hideAllWindows();
+    if (gl_savedWindows)
+        for (var i = 0; i < gl_savedWindows.length; i++)
+        {
+            var id = gl_savedWindows[i];
+            if (gl_windows[id] && gl_windows[id].isHidden())
+                gl_windows[id].isHidden(false);
+        }
+}
+

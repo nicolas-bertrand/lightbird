@@ -36,13 +36,15 @@
             <div class="menu">
                 <ul>
                     <li onmousedown="gl_desktop.open('files', event)"><script>tr(T.Menu.files)</script></li>
-                    <li onmousedown="openWindow(T.Menu.uploads, 'Upload', event)"><script>tr(T.Menu.uploads)</script></li>
+                    <li onmousedown="openWindow(T.Menu.uploads, 'files', event)"><script>tr(T.Menu.uploads)</script></li>
                     <li onmousedown="openWindow(T.Menu.settings, 'Player', event)"><script>tr(T.Menu.settings)</script></li>
                     <li onmousedown="help(event)"><script>tr(T.Menu.help)</script></li>
                     <li onmousedown="disconnection(event)"><script>tr(T.Menu.quit)</script></li>
                 </ul>
             </div>
-            <div class="tasks_list"><div class="new"></div></div>
+            <div class="tasks_list">
+                <div class="new"></div>
+            </div>
             <div class="resize_tasks_list"></div>
             <div class="middle">
                 <div class="player_document"></div>
@@ -100,12 +102,11 @@
             </div>
             <div class="window_middle">
                 <div class="window_middle_left" onmousedown="startResizeWindow(getWindowId(this), event, 'w')"></div>
-                    <div class="window_middle_right" onmousedown="startResizeWindow(getWindowId(this), event, 'e')"></div>
-                    <div class="window_middle_middle">
-                        <div class="window_outer_content">
-                            <div class="window_inner_content">
-                                <div class="window_loading"><div></div>
-                            </div>
+                <div class="window_middle_right" onmousedown="startResizeWindow(getWindowId(this), event, 'e')"></div>
+                <div class="window_middle_middle">
+                    <div class="window_outer_content">
+                        <div class="window_inner_content">
+                            <!--div class="window_loading"><div></div></div-->
                         </div>
                     </div>
                 </div>

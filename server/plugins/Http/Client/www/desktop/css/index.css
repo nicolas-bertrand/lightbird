@@ -65,7 +65,6 @@ a:visited
 
 #desktop
 {
-	z-index: -997;
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -131,6 +130,8 @@ a:visited
 #desktop>.top>.middle>.pages>.page>.resize
 {
     position: absolute;
+    background-color: #0044FF;
+    opacity: 0.3;
 }
 #desktop>.top>.middle>.pages>.page>.resize.horizontal
 {
