@@ -7,7 +7,8 @@
 	z-index: 1;
 }
 
-.window
+#windows .window,
+#window_template  .window
 {
 	position: absolute;
 	width: 400px;

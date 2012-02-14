@@ -56,6 +56,7 @@ Window.prototype.close = function (page, closePage)
         animation(this.root, 250, animationOpacity, false, function(node) {document.getElementById("windows").removeChild(node.parentNode);});
         // Let the window on the top while it fade out
         this.setZIndex(this.getZIndex() + 10);
+        delete gl_windows[this.getId()];
     }
 }
 
@@ -66,6 +67,18 @@ Window.prototype.display = function (page, main)
     this.isHidden(false);
     if (main)
         setWindowFocus(this.getId());
+}
+
+// Returns true if the window is currently displayed.
+Window.prototype.isDisplayed = function ()
+{
+    return (!this.isHidden());
+}
+
+// Hides the window.
+Window.prototype.hide = function ()
+{
+    this.isHidden(true);
 }
 
 Window.prototype.focus = function ()

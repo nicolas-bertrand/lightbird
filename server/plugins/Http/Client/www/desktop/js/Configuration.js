@@ -34,6 +34,7 @@ var Configuration =
         resizeTasksListMax : 200, // The maximum size of the tasks list.
         taskIconMinWidth : 15, // The minimum width if a task icon.
         mouseWheelMultiplier : 2, // Used to normalize the mouse wheel delta. Increases the delta of each click.
+        taskButtonsWidth : 20, // The width of the buttons in the task icon.
     },
 	// The size of the window
 	Window :

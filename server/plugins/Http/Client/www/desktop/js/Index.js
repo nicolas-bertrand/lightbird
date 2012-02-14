@@ -312,7 +312,7 @@ function getEventTarget(event, name, depth)
 	for (var d = 0; target && (!depth || d < depth); d++)
 	{
 		if ((target.tagName && target.tagName.toLowerCase() == name.toLowerCase()) ||
-		    (target.className && target.className.toLowerCase() == name.toLowerCase()))
+		    (target.className && (new RegExp('\\b' + name + '\\b')).test(target.className)))
 			return (target);
 		target = target.parentNode;
 	}
@@ -335,8 +335,7 @@ function getEventRelatedTarget(event, name, depth)
         depth = 999;
 	for (var d = 0; target && d < depth; d++)
 	{
-		if ((target.tagName && target.tagName.toLowerCase() == name.toLowerCase()) ||
-		    (target.className && target.className.toLowerCase() == name.toLowerCase()))
+        if (target.className && (new RegExp('\\b' + name + '\\b')).test(target.className))
 			return (target);
 		target = target.parentNode;
 	}

@@ -200,7 +200,6 @@ a:visited
 	font-weight: bold;
     font-size: 23px;
 	background-color: #eeeeee;
-    overflow: hidden;
 }
 
 #desktop>.top>.tasks_list .ghost
@@ -231,6 +230,61 @@ a:visited
 #desktop>.top>.tasks_list>.page.even
 {
     background-color: #88AAFF;
+}
+
+/********** task_buttons **********/
+#desktop>.top>.tasks_list .task_buttons
+{
+    position: absolute;
+    width: 120px;
+    height: 0px;
+    z-index: 999999;
+    opacity: 0.3;
+}
+#desktop>.top>.task_buttons,
+#desktop>.top>.tasks_list .task_buttons.hide,
+#desktop>.top>.tasks_list .task_buttons.scroll
+{
+    display: none;
+}
+
+#desktop>.top>.tasks_list .task_buttons:hover
+{
+    opacity: 1;
+}
+
+#desktop>.top>.tasks_list .task_buttons>div
+{
+    position: relative;
+    left: -36px;
+    top: 0px;
+}
+
+#desktop>.top>.tasks_list .task_buttons>div>div
+{
+    width: 20px;
+    height: 30px;
+}
+
+#desktop>.top>.tasks_list .task_buttons .close
+{
+    background-color: red;
+    float: left;
+}
+#desktop>.top>.tasks_list .task_buttons .hide
+{
+    background-color: yellow;
+    float: left;
+}
+#desktop>.top>.tasks_list .task_buttons .window
+{
+    background-color: green;
+    float: right;
+}
+#desktop>.top>.tasks_list .task_buttons .full_screen
+{
+    background-color: blue;
+    float: right;
 }
 
 /*////////////////////////////////////////////////////////////////////////////

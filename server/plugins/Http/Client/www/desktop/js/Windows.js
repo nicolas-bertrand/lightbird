@@ -209,6 +209,15 @@ function hideAllWindows()
 			gl_windows[i].isHidden(true);
 }
 
+// Returns true if at least one window is displayed.
+function isWindowsDisplay()
+{
+	for (var i in gl_windows)
+		if (!gl_windows[i].isHidden())
+			return (true);
+    return (false);
+}
+
 // Change the focused window
 function setWindowFocus(id, event)
 {
