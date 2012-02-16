@@ -70,6 +70,8 @@
         <setIdDirectory>UPDATE directories SET id_directory=:id_directory WHERE id=:id</setIdDirectory>
         <getDirectories>SELECT id FROM directories WHERE id_directory=:id_directory</getDirectories>
         <getFiles>SELECT id FROM files WHERE id_directory=:id_directory</getFiles>
+        <getDirectory>SELECT id FROM directories WHERE id_directory=:id_directory AND name=:name</getDirectory>
+        <getFile>SELECT id FROM files WHERE id_directory=:id_directory AND name=:name</getFile>
     </TableDirectories>
     <TableEvents>
         <add>INSERT INTO events (id, name, id_accessor, id_object) VALUES (:id, :name, :id_accessor, :id_object)</add>

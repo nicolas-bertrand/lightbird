@@ -173,3 +173,50 @@ QStringList TableDirectories::getFiles(const QString &id_accessor, const QString
             files << result[i]["id"].toString();
     return (files);
 }
+
+QString     TableDirectories::getDirectory(const QString &name) const
+{
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+
+    query.prepare(Database::instance()->getQuery("TableDirectories", "getDirectory"));
+    query.bindValue(":id_directory", this->id);
+    query.bindValue(":name", name);
+    if (Database::instance()->query(query, result) && result.size() > 0)
+        return (result[0]["id"].toString());
+    return (QString());
+}
+
+QString     TableDirectories::getFile(const QString &name) const
+{
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+
+    query.prepare(Database::instance()->getQuery("TableDirectories", "getFile"));
+    query.bindValue(":id_directory", this->id);
+    query.bindValue(":name", name);
+    if (Database::instance()->query(query, result) && result.size() > 0)
+        return (result[0]["id"].toString());
+    return (QString());
+}
+
+bool                    TableDirectories::createVirtualPath(const QString &virtualPath, const QString &id_account)
+{
+    TableDirectories    directory;
+    QString             id;
+
+    directory.setId(this->getId());
+    QStringListIterator it(Tools::cleanPath(virtualPath).split('/'));
+    while (it.hasNext())
+    {
+        if (!it.peekNext().isEmpty())
+        {
+            if (!(id = directory.getDirectory(it.peekNext())).isEmpty())
+                directory.setId(id);
+            else if (!directory.add(it.peekNext(), directory.getId(), id_account))
+                return (false);
+        }
+        it.next();
+    }
+    return (true);
+}

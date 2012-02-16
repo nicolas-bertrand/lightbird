@@ -33,9 +33,9 @@ bool            Tools::copy(const QString &sourceName, const QString &destinatio
     return (true);
 }
 
-QString Tools::cleanPath(const QString &path)
+QString     Tools::cleanPath(const QString &p)
 {
-    return (QDir::cleanPath(QString(path).replace('\\', '/')));
+    return (QDir::cleanPath(QString(p).replace('\\', '/')).replace("//", "/"));
 }
 
 QString Tools::createUuid()

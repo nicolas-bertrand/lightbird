@@ -56,6 +56,20 @@ namespace LightBird
         /// accessor has the right will be returned.
         /// @param right : The name of the right that the accessor must have.
         virtual QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const = 0;
+        /// @brief Returns the id of the directory with the given name in the
+        /// current directory if it exists.
+        /// @param name : The name of the directory to return.
+        virtual QString     getDirectory(const QString &name) const = 0;
+        /// @brief Returns the id of the file with the given name in the current
+        /// directory if it exists.
+        /// @param name : The name of the file to return.
+        virtual QString     getFile(const QString &name) const = 0;
+        /// @brief Creates all the directories that are missing in the path from
+        /// the current directory, or from the root if the directory is not set.
+        /// @param path : The path to create from the current directory or the root.
+        /// @param id_account : The owner of all the directories that will be created.
+        /// @return True if the path has been completely created or already exists.
+        virtual bool        createVirtualPath(const QString &virtualPath, const QString &id_account = "") = 0;
     };
 }
 

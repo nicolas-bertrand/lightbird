@@ -18,7 +18,8 @@ namespace LightBird
         /// @brief Add a new timer. If the timer already exists, its interval is modified.
         /// @param name : The name of the timer.
         /// @param interval : The time between each calls in milliseconds.
-        virtual void                            setTimer(const QString &name, unsigned int interval) = 0;
+        /// If null the timer is called immediatly.
+        virtual void                            setTimer(const QString &name, unsigned int interval = 0) = 0;
         /// @brief Returns the interval of a timer, or zero if it doesn't exists.
         /// @param name : The name of the timer.
         virtual unsigned int                    getTimer(const QString &name) const = 0;

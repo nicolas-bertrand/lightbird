@@ -25,6 +25,9 @@ public:
     bool        setVirtualPath(const QString &virtualPath);
     QStringList getDirectories(const QString &id_accessor = "", const QString &right = "") const;
     QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const;
+    QString     getDirectory(const QString &name) const;
+    QString     getFile(const QString &name) const;
+    bool        createVirtualPath(const QString &virtualPath, const QString &id_account = "");
 };
 
 #endif // TABLEDIRECTORIES_H
