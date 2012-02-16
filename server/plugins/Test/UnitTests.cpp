@@ -340,6 +340,7 @@ bool            UnitTests::_directories()
     QSqlQuery   query;
     QStringList l;
     QStringList m;
+    QString     d;
 
     this->log.debug("Running unit tests of the directories...", "UnitTests", "_directories");
     query.prepare("DELETE FROM directories WHERE name IN('videos', 'images', 'egypte', 'spiders', 'pictures')");
@@ -412,19 +413,20 @@ bool            UnitTests::_directories()
         ASSERT(d2->remove(d1->getId()));
         ASSERT(!d2->remove());
         ASSERT(d2->remove(d1->getIdFromVirtualPath("videos")));
-        ASSERT(d1->createVirtualPath("////videos////././///d2"));
-        ASSERT(d1->createVirtualPath("videos////././///d2"));
+        ASSERT(!(d = d1->createVirtualPath("////videos////././///d2")).isEmpty());
         ASSERT(d1->setIdFromVirtualPath("videos"));
         d2->clear();
         ASSERT(d2->getDirectory("videos") == d1->getId());
         ASSERT(!d2->setIdFromVirtualPath("videos/d1"));
         ASSERT(d2->setIdFromVirtualPath("/////videos////d2///"));
+        ASSERT(d2->getId() == d);
+        ASSERT(d1->createVirtualPath("//././///d2") == d2->getId());
         ASSERT(d1->getDirectory("d2") == d2->getId());
         ASSERT(d1->getDirectory("d3").isEmpty());
-        ASSERT(d1->createVirtualPath("/////d2////d3///"));
+        ASSERT(!d1->createVirtualPath("/////d2////d3///").isEmpty());
         ASSERT(d1->setIdFromVirtualPath("videos/d2/d3"));
-        ASSERT(d1->createVirtualPath("//"));
-        ASSERT(d1->createVirtualPath(""));
+        ASSERT(d1->createVirtualPath("//") == d1->getId());
+        ASSERT(d1->createVirtualPath("") == d1->getId());
         ASSERT(d1->remove());
     }
     catch (QMap<QString, QString> properties)

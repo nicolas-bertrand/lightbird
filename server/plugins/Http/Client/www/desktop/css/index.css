@@ -266,24 +266,24 @@ a:visited
     height: 30px;
 }
 
-#desktop>.top>.tasks_list .task_buttons .close
+#desktop>.top>.tasks_list .task_buttons .full_screen
 {
-    background-color: red;
-    float: left;
-}
-#desktop>.top>.tasks_list .task_buttons .hide
-{
-    background-color: yellow;
+    background-color: blue;
     float: left;
 }
 #desktop>.top>.tasks_list .task_buttons .window
 {
     background-color: green;
+    float: left;
+}
+#desktop>.top>.tasks_list .task_buttons .hide
+{
+    background-color: yellow;
     float: right;
 }
-#desktop>.top>.tasks_list .task_buttons .full_screen
+#desktop>.top>.tasks_list .task_buttons .close
 {
-    background-color: blue;
+    background-color: red;
     float: right;
 }
 

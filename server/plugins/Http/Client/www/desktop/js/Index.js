@@ -117,11 +117,11 @@ function request(method, url, callback, cache, data)
 	if (localStorage.getItem("identifiant") != undefined)
 	{
 		var location = url.substring(0, (url.indexOf("?") != -1 ? url.indexOf("?") : url.length));
-		url += "&token=" + SHA256(localStorage.getItem("identifiant") + ISODateString(new Date()) + location);
+		url += "&token=" + getToken(location);
 	}
 
 	// Execute the request
-	HttpRequest.open(method, "Client/" + url, true);
+	HttpRequest.open(method, "/Client/" + url, true);
 	if (method.toUpperCase() == "POST")
 	{
 		HttpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");

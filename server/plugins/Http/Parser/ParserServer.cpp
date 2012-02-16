@@ -7,6 +7,7 @@
 ParserServer::ParserServer(LightBird::IClient &client) : Parser(client)
 {
     this->contentSent = 0;
+    this->contentStored = 0;
 }
 
 ParserServer::~ParserServer()
@@ -46,6 +47,8 @@ bool    ParserServer::doUnserializeHeader(const QByteArray &data, quint64 &used)
             this->request.setError();
         this->header.clear();
         this->contentSent = 0;
+        this->contentStored = 0;
+        this->client.getInformations().remove("keepInMemory");
         this->contentLength = this->request.getHeader().value("content-length").toULongLong();
         this->request.getContent().setStorage(LightBird::IContent::BYTEARRAY);
         // The header has been completely received
@@ -74,10 +77,12 @@ bool        ParserServer::doUnserializeContent(const QByteArray &data, quint64 &
     if (this->contentLength > 0)
     {
         // The first time a content is received, we determine if it has to be stored in a temporary file or in the memory
-        if (this->request.getContent().size() == 0 && this->contentLength > Plugin::getConfiguration().maxContentInMemory)
+        // If keepInMemory is defined in the clients informations, a plugin will store itself the content from IOnUnserialize
+        if (this->contentStored == 0 && this->contentLength > Plugin::getConfiguration().maxContentInMemory
+            && !this->client.getInformations().contains("keepInMemory"))
             this->request.getContent().setStorage(LightBird::IContent::TEMPORARYFILE);
         // Calculates the size of the remaining content to receive
-        rest = this->contentLength - this->request.getContent().size();
+        rest = this->contentLength - this->contentStored;
         // All the data are used
         if ((quint64)data.size() <= rest)
         {
@@ -90,8 +95,9 @@ bool        ParserServer::doUnserializeContent(const QByteArray &data, quint64 &
             this->request.getContent().setContent(data.left(rest));
             used = rest;
         }
+        this->contentStored += used;
         // All the content has been reveived
-        if (this->contentLength <= (quint64)this->request.getContent().size())
+        if (this->contentLength <= this->contentStored)
             return (true);
         // All the content has not been received yet
         return (false);

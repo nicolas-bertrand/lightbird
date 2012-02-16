@@ -57,7 +57,6 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     if ((this->wwwDir = this->_api->configuration(true).get("resources/resource")).isEmpty())
         this->wwwDir = "www";
     Medias::getInstance(this);
-    Uploads::getInstance(this);
     // This timer will remove the outdated data in this->attempts
     api->timers().setTimer("attempts", IDENTIFICATION_TIME * 1000);
     return (true);
@@ -90,44 +89,61 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "CC BY-NC-SA 3.0";
 }
 
-void    Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnserialize::Unserialize type)
+void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnserialize::Unserialize type)
 {
+    QString uri;
     LightBird::IRequest &request = client.getRequest();
 
-    if (!request.isError() && (request.getMethod() == "POST" || request.getMethod() == "PUT"))
+    // Checks the header and identify the client
+    if (type == LightBird::IOnUnserialize::IDoUnserializeHeader)
     {
-        if (type == LightBird::IOnUnserialize::IDoUnserializeHeader && request.getUri().path().contains("/StartUpload"))
-            Uploads::getInstance().start(client);
-        else if (type == LightBird::IOnUnserialize::IDoUnserializeContent)
-            Uploads::getInstance().progress(client);
+        // Sets the generic HTTP headers
+        client.getResponse().getHeader().insert("server", "LightBird");
+        client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
+        client.getResponse().getHeader().insert("cache-control", "no-cache");
+        // Gets the uri of the request
+        uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority |
+                                                    QUrl::RemoveQuery | QUrl::RemoveFragment);
+        uri = QDir::cleanPath(uri);
+        if (uri.at(0) == '/')
+            uri = uri.right(uri.size() - 1);
+        // Removes "Client" of the uri
+        uri.remove(QRegExp("^Client/"));
+        client.getInformations().insert("uri", uri);
+        // Manages the session cookie
+        this->_session(client, uri);
+    }
+    // If an error occured we don't execute the request
+    else if (type == LightBird::IOnUnserialize::IDoUnserialize && client.getResponse().getCode() >= 400)
+        request.setError(true);
+    // The client is uploading something
+    if (request.getMethod() == "POST")
+    {
+        // One must be identified to upload data
+        if (!client.getAccount().exists())
+            this->_api->network().disconnect(client.getId());
+        // Manages the upload of files
+        else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().contains("/Execute/Uploads"))
+        {
+            if (type == LightBird::IOnUnserialize::IDoUnserializeHeader)
+                this->uploads.onUnserializeHeader(client);
+            else if (type == LightBird::IOnUnserialize::IDoUnserializeContent)
+                this->uploads.onUnserializeContent(client);
+        }
     }
 }
 
 bool        Plugin::doExecution(LightBird::IClient &client)
 {
-    QString uri;
+    QString uri = client.getInformations().value("uri").toString();
     QString interface;
     QString path;
 
-    // Set the generic HTTP headers
-    client.getResponse().getHeader().insert("server", "LightBird");
-    client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
-    client.getResponse().getHeader().insert("cache-control", "no-cache");
-    // Get the uri of the request
-    uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority |
-                                                QUrl::RemoveQuery | QUrl::RemoveFragment);
-    uri = QDir::cleanPath(uri);
-    if (uri.at(0) == '/')
-        uri = uri.right(uri.size() - 1);
-    // Remove "Client" of the uri
-    uri.remove(QRegExp("^Client/"));
-    // Find the interface of the user
-    interface = this->_getInterface(client);
-    // Manage the session cookie
-    this->_session(client, uri);
     // The blank uri does nothing
     if (uri == "blank")
         return (true);
+    // Finds the interface of the user
+    interface = this->_getInterface(client);
     // The characters ".." and "~" are forbidden in the uri
     if (uri.contains("..") || uri.contains("~"))
         this->response(client, 403, "Forbidden", "The uri in the header must not contains \"..\" or \"~\".");
@@ -175,21 +191,21 @@ bool        Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerial
 void        Plugin::onFinish(LightBird::IClient &client)
 {
     Medias::getInstance().onFinish(client);
+    this->uploads.onFinish(client);
     // The session is destroyed and all the clients associated to it are disconnected
     if (client.getInformations().contains("disconnect") && !client.getSessions().isEmpty())
         this->_api->sessions().destroy(client.getSessions().first(), true);
 }
 
-bool    Plugin::onDisconnect(LightBird::IClient &client)
+void    Plugin::onDestroy(LightBird::IClient &client)
 {
     Medias::getInstance().disconnected(client);
-    Uploads::getInstance().disconnected(client);
-    return (true);
+    this->uploads.onDestroy(client);
 }
 
 bool    Plugin::timer(const QString &name)
 {
-    // Remove the outdated data in this->attempts
+    // Removes the outdated data in this->attempts
     if (name == "attempts")
     {
         this->mutex.lock();
@@ -202,6 +218,9 @@ bool    Plugin::timer(const QString &name)
         }
         this->mutex.unlock();
     }
+    // The uploads timer is used to identify the files
+    else if (name == "uploads")
+        return (this->uploads.timer());
     return (true);
 }
 
@@ -230,7 +249,7 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
     // Otherwise the client is identified
     else if (!token.isEmpty())
     {
-        // Ensure that it is associated to the session
+        // Ensures that it is associated to the session
         session->setClient(client.getId());
         if (client.getAccount().getId() != session->getAccount())
             client.getAccount().setId(session->getAccount());
@@ -250,7 +269,7 @@ bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Sessi
         token == this->_api->sha256(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii()))
         return (true);
     this->identificationFailed(client);
-    client.getRequest().setError(true);
+    client.getResponse().setError(true);
     // Tells the client that it is not identified
     if (uri == "blank")
         this->response(client, 403, "Forbidden");
@@ -261,15 +280,15 @@ QString     Plugin::_getInterface(LightBird::IClient &client)
 {
     QString interface;
 
-    // Get the name of the interface from the cookies
+    // Gets the name of the interface from the cookies
     if (!(interface = this->getCookie(client, "interface")).isEmpty())
         // The interface doesn't exists
         if (!this->interfaces.contains(interface))
             interface.clear();
-    // Save the interface in the client informations
+    // Saves the interface in the client informations
     if (!interface.isEmpty())
         client.getInformations().insert("interface", interface);
-    // Get the interface from the client informations
+    // Gets the interface from the client informations
     else if ((interface = client.getInformations().value("interface").toString()).isEmpty())
         interface = DEFAULT_INTERFACE_NAME;
     return (interface);
@@ -280,7 +299,7 @@ void    Plugin::_translation(LightBird::IClient &client, const QString &interfac
     QString path = this->_api->getPluginPath() + this->wwwDir + "/" + interface + "/languages/";
     QString language = this->getCookie(client, "language");
 
-    // Try to get the translation in the language asked by the client in the cookie
+    // Tries to get the translation in the language asked by the client in the cookie
     if (language.size() == 2 && QFileInfo(path + language + ".js").isFile())
         path += language + ".js";
     // Otherwise if there is a translation in the language of the server we use it
@@ -299,12 +318,12 @@ void    Plugin::_getFile(LightBird::IClient &client)
     QSharedPointer<LightBird::ITableFiles> file(this->_api->database().getFiles(client.getRequest().getUri().queryItemValue("id")));
     QString path;
 
-    // Check that the user can access to the file
+    // Checks that the user can access to the file
     if (client.getRequest().getUri().queryItemValue("token").isEmpty() ||
         !file->isAllowed(client.getAccount().getId(), "read"))
         return (this->response(client, 403, "Forbidden", "Access denied."));
     path = file->getFullPath();
-    // Check that the file exists on the disk
+    // Checks that the file exists on the disk
     if (!QFileInfo(path).isFile())
         return (this->response(client, 404, "Not Found", "File not found."));
     // If the file has to be downloaded by the browser, a special MIME is used
@@ -399,6 +418,11 @@ void    Plugin::identificationFailed(LightBird::IClient &client)
     this->attempts[client.getPeerAddress()].first = QDateTime::currentDateTime().addSecs(IDENTIFICATION_TIME);
     this->attempts[client.getPeerAddress()].second++;
     this->mutex.unlock();
+}
+
+Uploads &Plugin::getUploads()
+{
+    return (this->uploads);
 }
 
 Q_EXPORT_PLUGIN2(plugin, Plugin)

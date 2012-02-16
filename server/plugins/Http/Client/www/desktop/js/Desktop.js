@@ -1245,7 +1245,8 @@ Task.prototype.mouseUp = function ()
             this.addTaskParent.getPage().addTask(this, this.addTaskPosition, this.addTaskParent, this.addTaskParent.icon);
         else
             this.ghost.parentNode.object.addTask(this, this.addTaskPosition, this.addTaskParent, this.ghost);
-        hideAllWindows();
+        if (this.getPage().getContainer() instanceof Desktop)
+            hideAllWindows();
         this.getPage().display(true);
     }
     // If the page hasn't changed
@@ -1762,6 +1763,8 @@ TaskButtons.prototype.mouseDown = function (event, task)
     var button = (event.target || event.srcElement);
     var page = task.getPage();
     
+    if (getButton(event) != 0)
+        return ;
     // Closes the task
     if (button == this.close)
     {

@@ -200,7 +200,7 @@ QString     TableDirectories::getFile(const QString &name) const
     return (QString());
 }
 
-bool                    TableDirectories::createVirtualPath(const QString &virtualPath, const QString &id_account)
+QString                 TableDirectories::createVirtualPath(const QString &virtualPath, const QString &id_account)
 {
     TableDirectories    directory;
     QString             id;
@@ -214,9 +214,9 @@ bool                    TableDirectories::createVirtualPath(const QString &virtu
             if (!(id = directory.getDirectory(it.peekNext())).isEmpty())
                 directory.setId(id);
             else if (!directory.add(it.peekNext(), directory.getId(), id_account))
-                return (false);
+                return (QString());
         }
         it.next();
     }
-    return (true);
+    return (directory.getId());
 }

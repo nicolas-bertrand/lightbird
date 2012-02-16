@@ -31,7 +31,7 @@ namespace LightBird
         };
 
         /// @brief Get information on a file.
-        /// @param file : The name of the file that will be inspected.
+        /// @param file : The name of the file that will be probed.
         /// @param information : If true is returned, this parameter is filled
         /// with the information on the file.
         /// @return True if the extension has been able to get information on the file.

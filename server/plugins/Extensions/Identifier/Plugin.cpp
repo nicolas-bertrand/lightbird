@@ -9,8 +9,8 @@ Plugin::Plugin()
 
 Plugin::~Plugin()
 {
-    if (this->identifier)
-        delete this->identifier;
+    delete this->identifier;
+    this->identifier = NULL;
 }
 
 bool    Plugin::onLoad(LightBird::IApi *api)
@@ -22,6 +22,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
 
 void    Plugin::onUnload()
 {
+    delete this->identifier;
+    this->identifier = NULL;
 }
 
 bool    Plugin::onInstall(LightBird::IApi *api)

@@ -22,12 +22,13 @@ public:
 private:
     LightBird::IApi &api;         ///< The LightBird API.
     QList<QString>  mimeDocument; ///< List the possible MIME type of the documents.
-    qint64          maxSizeHash;  ///< The hashes is not calculated for files whose size exceeds this value.
+    qint64          maxSizeHash;  ///< The hashes are not computed for files whose size exceeds this value.
     typedef LightBird::IIdentify::Information Info;
 
     void    _identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
     bool    _add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
     void    _document(Info &result);
+    void    _typeFromMime(Info &result);
     void    _hash(const QString &file, Info &result);
 };
 

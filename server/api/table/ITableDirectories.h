@@ -68,8 +68,8 @@ namespace LightBird
         /// the current directory, or from the root if the directory is not set.
         /// @param path : The path to create from the current directory or the root.
         /// @param id_account : The owner of all the directories that will be created.
-        /// @return True if the path has been completely created or already exists.
-        virtual bool        createVirtualPath(const QString &virtualPath, const QString &id_account = "") = 0;
+        /// @return The id of the last directory of the path.
+        virtual QString     createVirtualPath(const QString &virtualPath, const QString &id_account = "") = 0;
     };
 }
 

@@ -11,7 +11,7 @@ namespace LightBird
     ///
     /// This extension is implemented by a plugin that will calls the IIdentify interface
     /// of each plugins that implements it. Then it will try to mix all the data gathered,
-    /// in order to return the final list of information on the file, and its type.
+    /// in order to return the final list of information on the file and its type.
     class IIdentifier
     {
     public:
@@ -19,7 +19,7 @@ namespace LightBird
 
         /// @brief Get information on a file.
         /// @param file : The name of the file that will be probed.
-        /// @return The information on the file, and its type.
+        /// @return The information on the file and its type.
         virtual LightBird::IIdentify::Information   identify(const QString &file) = 0;
     };
 }

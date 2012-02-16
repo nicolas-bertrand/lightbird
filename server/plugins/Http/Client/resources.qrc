@@ -3,22 +3,14 @@
         <file alias="queries">Queries.xml</file>
         <file alias="configuration">Configuration.xml</file>
 		<file alias="desktop/index.html">www/desktop/index.html</file>
-		<file alias="desktop/css/Explorer.css">www/desktop/css/Explorer.css</file>
 		<file alias="desktop/css/help.css">www/desktop/css/help.css</file>
 		<file alias="desktop/css/identification.css">www/desktop/css/identification.css</file>
 		<file alias="desktop/css/index.css">www/desktop/css/index.css</file>
-		<file alias="desktop/css/Information.css">www/desktop/css/Information.css</file>
-		<file alias="desktop/css/Player.css">www/desktop/css/Player.css</file>
-		<file alias="desktop/css/Upload.css">www/desktop/css/Upload.css</file>
 		<file alias="desktop/css/windows.css">www/desktop/css/windows.css</file>
 		<file alias="desktop/help/help/disconnection.html">www/desktop/help/help/disconnection.html</file>
 		<file alias="desktop/help/help/home.html">www/desktop/help/help/home.html</file>
 		<file alias="desktop/help/help/windows.html">www/desktop/help/help/windows.html</file>
 		<file alias="desktop/help/hint/lock.html">www/desktop/help/hint/lock.html</file>
-		<file alias="desktop/html/Explorer.html">www/desktop/html/Explorer.html</file>
-		<file alias="desktop/html/Information.html">www/desktop/html/Information.html</file>
-		<file alias="desktop/html/Player.html">www/desktop/html/Player.html</file>
-		<file alias="desktop/html/Upload.html">www/desktop/html/Upload.html</file>
 		<file alias="desktop/images/explorer.png">www/desktop/images/explorer.png</file>
 		<file alias="desktop/images/favicon.png">www/desktop/images/favicon.png</file>
 		<file alias="desktop/images/information.png">www/desktop/images/information.png</file>
@@ -69,14 +61,10 @@
 		<file alias="desktop/js/Configuration.js">www/desktop/js/Configuration.js</file>
 		<file alias="desktop/js/Context.js">www/desktop/js/Context.js</file>
 		<file alias="desktop/js/Desktop.js">www/desktop/js/Desktop.js</file>
-		<file alias="desktop/js/Explorer.js">www/desktop/js/Explorer.js</file>
 		<file alias="desktop/js/Help.js">www/desktop/js/Help.js</file>
 		<file alias="desktop/js/Index.js">www/desktop/js/Index.js</file>
-		<file alias="desktop/js/Information.js">www/desktop/js/Information.js</file>
-		<file alias="desktop/js/Player.js">www/desktop/js/Player.js</file>
 		<file alias="desktop/js/Resources.js">www/desktop/js/Resources.js</file>
 		<file alias="desktop/js/Selection.js">www/desktop/js/Selection.js</file>
-		<file alias="desktop/js/Upload.js">www/desktop/js/Upload.js</file>
 		<file alias="desktop/js/Window.js">www/desktop/js/Window.js</file>
 		<file alias="desktop/js/Windows.js">www/desktop/js/Windows.js</file>
 		<file alias="desktop/languages/en.js">www/desktop/languages/en.js</file>
@@ -112,5 +100,8 @@
 		<file alias="desktop/resources/files.css">www/desktop/resources/files.css</file>
 		<file alias="desktop/resources/files.html">www/desktop/resources/files.html</file>
 		<file alias="desktop/resources/files.js">www/desktop/resources/files.js</file>
+		<file alias="desktop/resources/uploads.css">www/desktop/resources/uploads.css</file>
+		<file alias="desktop/resources/uploads.html">www/desktop/resources/uploads.html</file>
+		<file alias="desktop/resources/uploads.js">www/desktop/resources/uploads.js</file>
     </qresource>
 </RCC>

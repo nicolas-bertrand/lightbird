@@ -28,8 +28,6 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     QList<void *>   extentions;
     QMap<LightBird::IIdentify::Type, QVariantMap> info;
 
-    QTime t;
-    t.start();
     result.type = LightBird::IIdentify::OTHER;
     // Check that the file exists
     if (!QFileInfo(file).isFile())
@@ -40,7 +38,7 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     {
         tmp.data.clear();
         tmp.type = LightBird::IIdentify::OTHER;
-        // If the plugin could identify the file, add it to the list
+        // If the plugin could identify the file, add it to the map
         if (static_cast<LightBird::IIdentify *>(it.peekNext())->identify(file, tmp))
             info.insertMulti(tmp.type, tmp.data);
         it.next();
@@ -48,7 +46,7 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     // Release the extensions
     this->api.extensions().release(extentions);
     // Put the data gathered in the result
-    if (info.size())
+    if (info.size() > 0)
         this->_identify(info, result);
     // Get the size and the extension of the file
     result.data.insert("size", QFileInfo(file).size());
@@ -60,6 +58,9 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     // Determine if the file is a document
     if (result.type == LightBird::IIdentify::OTHER)
         this->_document(result);
+    // If the type is still other, we try to guess it using the MIME
+    if (result.type == LightBird::IIdentify::OTHER)
+        this->_typeFromMime(result);
     // Compute the hashes of the file
     this->_hash(file, result);
     // Debug
@@ -79,7 +80,7 @@ QString     Identifier::getMime(const QString &file)
     QString                     extension;
     LightBird::IConfiguration   *configuration = NULL;
 
-    if (file.contains(".") && (configuration = this->api.configuration(this->api.getPluginPath() + "/" + "Mime.xml")))
+    if (file.contains(".") && (configuration = this->api.configuration(this->api.getPluginPath() + "/Mime.xml")))
     {
         extension = file.right(file.size() - file.lastIndexOf(".") - 1);
         if (!(extension = configuration->get(extension.toLower())).isEmpty())
@@ -119,7 +120,7 @@ bool    Identifier::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdent
     return (false);
 }
 
-void    Identifier::_document(Info &result)
+void        Identifier::_document(Info &result)
 {
     QString mime = result.data.value("mime").toString();
 
@@ -132,10 +133,22 @@ void    Identifier::_document(Info &result)
         }
 }
 
+void        Identifier::_typeFromMime(Info &result)
+{
+    QString mime = result.data.value("mime").toString();
+
+    if (mime.startsWith("image"))
+        result.type = LightBird::IIdentify::IMAGE;
+    else if (mime.startsWith("audio"))
+        result.type = LightBird::IIdentify::AUDIO;
+    else if (mime.startsWith("video"))
+        result.type = LightBird::IIdentify::VIDEO;
+}
+
 void    Identifier::_hash(const QString &fileName, Info &result)
 {
     QCryptographicHash  md5(QCryptographicHash::Md5);
-    //QCryptographicHash  sha1(QCryptographicHash::Sha1);
+    QCryptographicHash  sha1(QCryptographicHash::Sha1);
     QFile               file(fileName);
     QByteArray          data;
 
@@ -147,9 +160,9 @@ void    Identifier::_hash(const QString &fileName, Info &result)
         data.clear();
         data = file.read(READ_FILE_SIZE);
         md5.addData(data);
-        //sha1.addData(data);
+        sha1.addData(data);
     }
     while (data.size() == READ_FILE_SIZE);
-    result.data.insert("md5", md5.result().toHex());
-    //result.data.insert("sha1", sha1.result().toHex());
+    result.data.insert("md5", QString(md5.result().toHex()));
+    result.data.insert("sha1", QString(sha1.result().toHex()));
 }

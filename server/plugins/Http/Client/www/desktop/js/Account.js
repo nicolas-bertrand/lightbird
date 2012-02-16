@@ -274,3 +274,9 @@ function isDisplayed(node)
 		return (true);
 	return (false);
 }
+
+// Returns a valid token to communicate with the server.
+function getToken(location)
+{
+    return (SHA256(localStorage.getItem("identifiant") + ISODateString(new Date()) + location));
+}

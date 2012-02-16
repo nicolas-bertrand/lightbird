@@ -35,7 +35,7 @@ Execute::Execute(LightBird::IApi &a, LightBird::IClient &c, const QString &com) 
     commands["Identify"] = &Execute::_identify;
     commands["Preview"] = &Execute::_preview;
     commands["Select"] = &Execute::_select;
-    commands["StartUpload"] = &Execute::_startUpload;
+    commands["Uploads"] = &Execute::_uploads;
     commands["StateUpload"] = &Execute::_stateUpload;
     commands["StopUpload"] = &Execute::_stopUpload;
     commands["StopStream"] = &Execute::_stopStream;
@@ -123,7 +123,7 @@ void                        Execute::_identify()
     else if (!(token = this->request.getUri().queryItemValue("token")).isEmpty() &&
              !(sid = Plugin::getCookie(client, "sid")).isEmpty() &&
              !(session = this->api.sessions().getSession(sid)).isNull() &&
-             !this->request.isError() &&
+             !this->response.isError() &&
              client.getAccount().setId(session->getAccount()) &&
              client.getAccount().isActive())
     {
@@ -173,114 +173,20 @@ void        Execute::_select()
     this->response.setType("application/json");
 }
 
-void        Execute::_startUpload()
+void        Execute::_uploads()
 {
-    QSharedPointer<LightBird::ITableFiles> fileTable(this->api.database().getFiles());
-    QString         uri = this->request.getUri().path();
-    QString         fileName;
-    QString         realFileName;
-    QString         realPath;
-    QFile           file;
-    QList<void *>   extensions;
-    LightBird::IIdentify::Information information;
-
-    // Defines the real name of the file
-    fileName = QDir().cleanPath(this->request.getUri().queryItemValue("name").replace("\\", "/"));
-    fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-    if (fileName.contains("."))
-        realFileName = fileName.left(fileName.indexOf('.'));
-    else
-        realFileName = fileName;
-    realFileName += '.' + QUuid::createUuid().toString().remove(0, 1).remove(36, 1);
-    if (fileName.contains('.'))
-        realFileName += fileName.right(fileName.size() - fileName.indexOf('.'));
-    realPath = QDir().cleanPath(this->api.configuration().get("filesPath")) + "/" + realFileName;
-    // Add the file to the database
-    if (!fileTable->add(fileName, realFileName, "other", "", this->client.getAccount().getId()))
-    {
-        this->response.setCode(403);
-        this->response.setMessage("Forbidden");
-        return ;
-    }
-    // Copy the file in the files directory
-    // From a temporary file
-    if (this->request.getContent().getStorage() == LightBird::IContent::TEMPORARYFILE)
-    {
-        // Remove the multipart
-        QByteArray data = this->request.getContent().getContent(2000);
-        quint64 boundary = 0;
-        if (data.contains("\r\n\r\n"))
-        {
-            boundary = data.left(data.indexOf("\r\n")).size() + 6;
-            data.remove(0, data.indexOf("\r\n\r\n") + 4);
-        }
-        // Copy the file
-        file.setFileName(realPath);
-        file.open(QIODevice::WriteOnly);
-        while (data.size() > 0)
-        {
-            if (file.write(data) != data.size())
-            {
-                this->response.setCode(403);
-                this->response.setMessage("Forbidden");
-                file.remove();
-                fileTable->remove();
-                return ;
-            }
-            data = this->request.getContent().getContent(BUFFER_COPY_SIZE);
-        }
-        file.resize(file.size() - boundary);
-        file.close();
-    }
-    // From a byte array
-    else
-    {
-        // Remove the multipart
-        QByteArray *data = this->request.getContent().getByteArray();
-        if (data->contains("\r\n\r\n"))
-        {
-            int boundary = data->left(data->indexOf("\r\n")).size() + 6;
-            data->remove(0, data->indexOf("\r\n\r\n") + 4);
-            data->remove(data->size() - boundary, boundary);
-        }
-        // Save the file
-        file.setFileName(realPath);
-        if (!file.open(QIODevice::WriteOnly) || file.write(this->request.getContent().getContent()) != this->request.getContent().size())
-        {
-            this->response.setCode(403);
-            this->response.setMessage("Forbidden");
-            file.remove();
-            fileTable->remove();
-            return ;
-        }
-        file.close();
-    }
-    // Get information on the file
-    if (!(extensions = this->api.extensions().get("IIdentifier")).isEmpty())
-        information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(fileTable->getFullPath());
-    this->api.extensions().release(extensions);
-    if (information.type == LightBird::IIdentify::AUDIO)
-        fileTable->setType("audio");
-    else if (information.type == LightBird::IIdentify::DOCUMENT)
-        fileTable->setType("document");
-    else if (information.type == LightBird::IIdentify::IMAGE)
-        fileTable->setType("image");
-    else if (information.type == LightBird::IIdentify::VIDEO)
-        fileTable->setType("video");
-    else
-        fileTable->setType("other");
-    fileTable->setInformations(information.data);
+    Plugin::getInstance().getUploads().doExecution(this->client);
 }
 
 void        Execute::_stateUpload()
 {
-    Uploads::Upload state = Uploads::getInstance().state(client);
-    client.getResponse().getContent().setContent("{\"size\":" + QByteArray::number(state.size) + ",\"progress\":" + QByteArray::number(state.progress) + "}");
+    /*Uploads::Upload state = Uploads::getInstance().state(client);
+    client.getResponse().getContent().setContent("{\"size\":" + QByteArray::number(state.size) + ",\"progress\":" + QByteArray::number(state.progress) + "}");*/
 }
 
 void        Execute::_stopUpload()
 {
-    Uploads::getInstance().stop(client);
+    //Uploads::getInstance().stop(client);
 }
 
 void        Execute::_stopStream()

@@ -7,12 +7,14 @@
 # include <QObject>
 
 # include "IDoExecution.h"
-# include "IOnDisconnect.h"
+# include "IOnDestroy.h"
 # include "IOnFinish.h"
 # include "IOnSerialize.h"
 # include "IOnUnserialize.h"
 # include "IPlugin.h"
 # include "ITimer.h"
+
+# include "Uploads.h"
 
 # define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser may download the content.
 # define DEFAULT_INTERFACE_NAME  "desktop"
@@ -26,12 +28,12 @@ class Plugin : public QObject,
                public LightBird::IDoExecution,
                public LightBird::IOnSerialize,
                public LightBird::IOnFinish,
-               public LightBird::IOnDisconnect,
+               public LightBird::IOnDestroy,
                public LightBird::ITimer
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin LightBird::IOnUnserialize LightBird::IDoExecution LightBird::IOnSerialize
-                 LightBird::IOnFinish LightBird::IOnDisconnect LightBird::ITimer)
+                 LightBird::IOnFinish LightBird::IOnDestroy LightBird::ITimer)
 
 public:
     Plugin();
@@ -49,7 +51,7 @@ public:
     bool    doExecution(LightBird::IClient &client);
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
     void    onFinish(LightBird::IClient &client);
-    bool    onDisconnect(LightBird::IClient &client);
+    void    onDestroy(LightBird::IClient &client);
     bool    timer(const QString &name);
 
     // Other
@@ -73,6 +75,8 @@ public:
     bool            identificationAllowed(LightBird::IClient &client);
     /// @brief Called when a identification attempt failed.
     void            identificationFailed(LightBird::IClient &client);
+    /// @brief Returns the uploads manager.
+    Uploads         &getUploads();
 
 private:
     /// @brief Manages the session.
@@ -96,6 +100,7 @@ private:
     QMap<int, QString>  daysOfWeek; ///< The names of the days of the week in english in three letters.
     QMap<int, QString>  months;     ///< The names of the months in three letters.
     QHash<QHostAddress, QPair<QDateTime, quint32> > attempts; ///< Stores the number of failed connection attempts per ip and date.
+    Uploads             uploads;    ///< Manages the uploads.
     QMutex              mutex;      ///< Makes this class thread safe.
 };
 
