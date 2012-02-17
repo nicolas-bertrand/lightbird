@@ -17,7 +17,7 @@ var Translation =
     Menu :
     {
         files : "Fichiers",
-        uploads : "Ajouter",
+        uploads : "Envois",
         settings : "Paramêtres",
         help : "Aide",
         quit : "Quitter",

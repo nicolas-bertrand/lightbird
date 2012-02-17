@@ -353,7 +353,7 @@ function Page()
     gl_desktop.node.tasks_list.insertBefore(this.icon, gl_desktop.node.tasks_list.lastChild);
     addEvent(this.icon, "mousedown", function (event) { page.mouseDown(event); });
     addEvent(this.icon, "mouseover", function (event) { page.mouseOver(event); });
-    this.updateOddEven();
+    this.updateParity();
     
     // Creates the content
     this.content = document.createElement("div");
@@ -436,7 +436,7 @@ Page.prototype.close = function ()
     // Removes the page nodes
     this.icon.parentNode.removeChild(this.icon);
     this.content.parentNode.removeChild(this.content);
-    this.updateOddEven();
+    this.updateParity();
 }
 
 // Adds a task in the page.
@@ -782,7 +782,7 @@ Page.prototype.renderTree = function (node, left, top, width, height)
 }
 
 // Updates the odd/even class name of the pages icons.
-Page.prototype.updateOddEven = function ()
+Page.prototype.updateParity = function ()
 {
     var i;
 
@@ -1772,6 +1772,8 @@ TaskButtons.prototype.mouseDown = function (event, task)
         gl_desktop.node.top.appendChild(this.buttons);
         if (task.icon.nextSibling)
             task.icon.nextSibling.insertBefore(this.buttons, task.icon.nextSibling.firstChild);
+        else if (task.icon.parentNode.nextSibling && task.icon.parentNode.nextSibling.firstChild)
+            task.icon.parentNode.nextSibling.firstChild.insertBefore(this.buttons, task.icon.parentNode.nextSibling.firstChild.firstChild);
         task.getPage().removeTask(task);
     }
     // Hides / displays the page

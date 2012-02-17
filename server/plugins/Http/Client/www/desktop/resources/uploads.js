@@ -6,21 +6,41 @@ function Uploads(task)
     this.node.uploads = getElementsByClassName("uploads", task.content, true);
     this.node.form = getElementsByClassName("form", task.content, true);
     this.node.input = getElementsByClassName("file", task.content, true);
-    this.node.frame = getElementsByClassName("frame", task.content, true);
-    // Default values
-    this.id = "upload" + Math.floor(Math.random() * 1000000000);
-    this.path = "/";
-    this.node.form.target = this.id;
-    this.node.frame.innerHTML = "<iframe class=\"frame\" src=\"/Client/blank\" name=\"" + this.id + "\"></iframe>";
+    this.node.sessions = getElementsByClassName("sessions", task.content, true);
+    this.node.template = getElementsByClassName("session_template", task.content, true);
+    // Initialization
     addEvent(this.node.input, "change",  function () { upload.start(); });
+    this.path = "/";
+    this.prepare();
+}
+
+Uploads.prototype.prepare = function ()
+{
+    var session = document.createElement("div");
+    setClassName(session, "session");
+    setClassName(session, "hidden");
+    session.id = "upload" + Math.floor(Math.random() * 1000000000);
+    session.innerHTML = this.node.template.innerHTML;
+    this.node.form.target = session.id;
+    var frame = getElementsByClassName("frame", session, true);
+    frame.innerHTML = "<iframe class=\"frame\" src=\"/Client/blank\" name=\"" + session.id + "\"></iframe>";
+    if (this.node.sessions.firstChild)
+    {
+        removeClassName(this.node.sessions.firstChild, "hidden");
+        this.node.sessions.insertBefore(session, this.node.sessions.firstChild);
+    }
+    else
+        this.node.sessions.appendChild(session);
 }
 
 Uploads.prototype.start = function ()
 {
     var uri = "Execute/Uploads";
-    this.node.form.action = "/Client/" + uri + "?id=" + this.id + "&path=" + encodeURIComponent(this.path) + "&token=" + getToken(uri);
+    var id = this.node.sessions.firstChild.id;
+    var path = encodeURIComponent(this.path);
+    this.node.form.action = "/Client/" + uri + "?id=" + id + "&path=" + path + "&token=" + getToken(uri);
     this.node.form.submit();
-    console.log(this.node.form.action);
+    this.prepare();
 }
 
 Uploads.prototype.extractFilename = function (path)

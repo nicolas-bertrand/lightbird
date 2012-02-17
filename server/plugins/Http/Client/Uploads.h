@@ -61,7 +61,7 @@ private:
     /// @brief Insert the file in the database.
     void    _insert(LightBird::IClient &client, Upload &upload);
     void    _clean(Upload &upload);
-    void    _error(LightBird::IClient &client, Upload &upload);
+    void    _error(LightBird::IClient &client, Upload &upload, const QString &error);
 
     QMap<QString, Upload>   uploads;         ///< List of the upload requests being processed.
     qint64                  maxHeaderLength; ///< The maximum length of the headers in the content of the request.

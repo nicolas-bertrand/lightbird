@@ -7,7 +7,9 @@
     height: 100%;
 }
 
-.uploads .frame
+.uploads .frame,
+.uploads .session_template,
+.uploads .hidden
 {
     display: none;
 }

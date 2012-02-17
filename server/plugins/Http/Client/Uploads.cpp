@@ -42,6 +42,10 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     // Otherwise an upload is already using this id
     else
     {
+        QMap<QString, QString> properties;
+        properties["uploadId"] = id;
+        properties["clientId"] = client.getId();
+        Plugin::api().log().error("This upload id is already used. Upload canceled.", properties, "Uploads", "onUnserializeHeader");
         client.getRequest().setError(true);
         Plugin::api().network().disconnect(client.getId());
     }
@@ -49,6 +53,9 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     // Some browsers send a negative content length when there is too many files (firefox 10, safari 5)
     if (client.getRequest().getHeader().value("content-length").toLongLong() < 0)
     {
+        QMap<QString, QString> properties;
+        properties["clientId"] = client.getId();
+        Plugin::api().log().error("Negative content-length", properties, "Uploads", "onUnserializeHeader");
         client.getRequest().setError(true);
         Plugin::api().network().disconnect(client.getId());
     }
@@ -66,7 +73,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
     qint64      boundarySize;
 
     this->mutex.lock();
-    if (!this->uploads.contains(id))
+    if (!this->uploads.contains(id) || this->uploads[id].clientId != client.getId())
         return this->mutex.unlock();
     Upload &upload = this->uploads[id];
     // \r\n + boundary
@@ -82,7 +89,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
         {
             // Header not found
             if ((j = data.indexOf("\r\n\r\n", position)) < 0 && size > this->maxHeaderLength)
-                return this->_error(client, upload);
+                return this->_error(client, upload, "Header missing");
             // Extracts data from it
             else if (j >= 0)
             {
@@ -96,7 +103,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
                 position = j + 4;
                 // The header does not contains the required informations
                 if (file.name.isEmpty() || file.contentType.isEmpty())
-                    return this->_error(client, upload);
+                    return this->_error(client, upload, "The fileName or the content-type is missing in the header");
                 // Defines the real name of the file
                 file.name = QDir().cleanPath(file.name.replace('\\', '/').remove('~'));
                 file.name = file.name.right(file.name.size() - file.name.lastIndexOf('/') - 1);
@@ -163,7 +170,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
             }
             // The end of the content is missing
             else if (upload.progress + size == upload.size)
-                return this->_error(client, upload);
+                return this->_error(client, upload, "The end of content is missing");
             // Writes the content in the file and waits for more data
             else if (size - position > boundarySize)
             {
@@ -186,7 +193,12 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
 
 void        Uploads::doExecution(LightBird::IClient &client)
 {
-    Plugin::api().timers().setTimer("uploads", 0);
+    QString id = client.getInformations().value("uploadId").toString();
+
+    this->mutex.lock();
+    if (this->uploads.contains(id) && this->uploads[id].clientId == client.getId())
+        Plugin::api().timers().setTimer("uploads", 0);
+    this->mutex.unlock();
 }
 
 bool                Uploads::timer()
@@ -242,7 +254,8 @@ void        Uploads::onFinish(LightBird::IClient &client)
     QString id = client.getInformations().value("uploadId").toString();
 
     this->mutex.lock();
-    this->uploads.remove(id);
+    if (this->uploads.contains(id) && this->uploads[id].clientId == client.getId())
+        this->uploads.remove(id);
     this->mutex.unlock();
 }
 
@@ -251,7 +264,8 @@ void        Uploads::onDestroy(LightBird::IClient &client)
     QString id = client.getInformations().value("uploadId").toString();
 
     this->mutex.lock();
-    this->uploads.remove(id);
+    if (this->uploads.contains(id) && this->uploads[id].clientId == client.getId())
+        this->uploads.remove(id);
     this->mutex.unlock();
 }
 
@@ -275,6 +289,7 @@ void        Uploads::_insert(LightBird::IClient &client, Upload &upload)
         properties["name"] = file.name;
         properties["path"] = file.path;
         properties["directory"] = directory->getId();
+        properties["clientId"] = client.getId();
         Plugin::api().log().warning("Failed to add the uploaded file in the database", properties, "Uploads", "_insert");
         upload.file->close();
         upload.file->remove(Plugin::api().configuration().get("filesPath") + "/" + file.path);
@@ -287,7 +302,7 @@ void    Uploads::_clean(Upload &upload)
     upload.header = true;
 }
 
-void    Uploads::_error(LightBird::IClient &client, Upload &upload)
+void    Uploads::_error(LightBird::IClient &client, Upload &upload, const QString &error)
 {
     // If a file was downloading we remove it
     if (upload.file->isOpen())
@@ -297,4 +312,7 @@ void    Uploads::_error(LightBird::IClient &client, Upload &upload)
     client.getRequest().setError(true);
     client.getRequest().getContent().clear();
     Plugin::api().network().disconnect(client.getId());
+    QMap<QString, QString> properties;
+    properties["clientId"] = client.getId();
+    Plugin::api().log().error("An error occured in the upload: " + error, properties, "Uploads", "_error");
 }
