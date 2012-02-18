@@ -318,6 +318,9 @@
   <mime>message/rfc822</mime>
   <mjf>audio/x-vnd.audioexplosion.mjuicemediafile</mjf>
   <mjpg>video/x-motion-jpeg</mjpg>
+  <mka>audio/x-matroska</mka>
+  <mkv>video/x-matroska</mkv>
+  <mk3d>video/x-matroska-3d</mk3d>
   <mm>application/x-meme</mm>
   <mm>application/base64</mm>
   <mme>application/base64</mme>

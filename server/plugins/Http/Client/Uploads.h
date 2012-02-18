@@ -1,6 +1,7 @@
 #ifndef UPLOADS_H
 # define UPLOADS_H
 
+# include <QDateTime>
 # include <QFile>
 # include <QMap>
 # include <QMutex>
@@ -10,6 +11,7 @@
 # include "IClient.h"
 
 # define MAX_HEADER_LENGTH 4096 ///< The maximum length of a multipart/form-data header.
+# define REMOVE_COMPLETE_UPLOAD_TIME 3600 ///< The time after which the completed uploads are removed in second.
 
 /// @brief Manages the uploads.
 class Uploads : public QObject
@@ -36,10 +38,12 @@ public:
         QString     path;           ///< The virtual destination directory.
         QString     boundary;       ///< The boundary that separates the files in the content (multipart/form-data).
         QString     clientId;       ///< The id of the client that sends the data.
+        QString     accountId;      ///< The id of the account associated with the client.
         bool        header;         ///< If a header is being parsed. Otherwise a file content is being copied.
         bool        complete;       ///< If all the files have been received.
         QList<File> files;          ///< The list of the files received so far (the last one is not complete yet).
         QByteArray  oldData;        ///< A part of the previous piece of content received (boundary size).
+        QDateTime   finished;       ///< The date at which the upload has been completed.
         QSharedPointer<QFile> file; ///< The file currently writing.
     };
 
@@ -51,6 +55,8 @@ public:
     void    doExecution(LightBird::IClient &client);
     /// @brief Identifies the files in the identification queue.
     bool    timer();
+    /// @brief Returns the amount of data download so far, in JSON.
+    void    progress(LightBird::IClient &client);
     void    onFinish(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
 
@@ -58,6 +64,10 @@ private:
     Uploads(const Uploads &);
     Uploads &operator=(const Uploads &);
 
+    /// @brief Removes the uploads completed after REMOVE_COMPLETE_UPLOAD_TIME
+    /// seconds. This allows to keep their data accessible by the progress
+    /// method even after they are finished.
+    void    _removeCompleteUploads();
     /// @brief Insert the file in the database.
     void    _insert(LightBird::IClient &client, Upload &upload);
     void    _clean(Upload &upload);

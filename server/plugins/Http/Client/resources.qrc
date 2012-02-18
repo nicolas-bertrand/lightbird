@@ -70,6 +70,7 @@
 		<file alias="desktop/languages/en.js">www/desktop/languages/en.js</file>
 		<file alias="desktop/languages/fr.js">www/desktop/languages/fr.js</file>
 		<file alias="desktop/libs/jQuery/jquery.js">www/desktop/libs/jQuery/jquery.js</file>
+		<file alias="desktop/libs/jsonParse.js">www/desktop/libs/jsonParse.js</file>
 		<file alias="desktop/libs/SHA256.js">www/desktop/libs/SHA256.js</file>
 		<file alias="desktop/libs/SHJS/sh_c.js">www/desktop/libs/SHJS/sh_c.js</file>
 		<file alias="desktop/libs/SHJS/sh_caml.js">www/desktop/libs/SHJS/sh_caml.js</file>

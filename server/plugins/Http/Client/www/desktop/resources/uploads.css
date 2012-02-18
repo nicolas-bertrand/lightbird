@@ -5,6 +5,7 @@
 	padding: 0px;
     width: 100%;
     height: 100%;
+    overflow: auto;
 }
 
 .uploads .frame,
@@ -13,3 +14,91 @@
 {
     display: none;
 }
+
+.uploads form
+{
+    height: 30px;
+    background-color: #CCEEFF;
+    text-align: center;
+    padding: 20px;
+}
+
+.uploads input
+{
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.uploads .session
+{
+    height: 40px;
+    padding: 20px;
+}
+
+.uploads .session.odd
+{
+    background-color: #E7F2FF;
+}
+
+.uploads .session.even
+{
+    background-color: #CCEEFF;
+}
+
+/********** progress **********/
+.uploads .session .progress
+{
+    height: 40px;
+    overflow: hidden;
+    margin-right: 0px;
+}
+
+.uploads .session .progress table
+{
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+}
+
+.uploads .session .progress .odd
+{
+    background-color: #99CCFF;
+}
+
+.uploads .session .progress .even
+{
+    background-color: #77BBFF;
+}
+
+.uploads .session .progress .odd.uploaded
+{
+    background-color: #9AEF9A;
+}
+
+.uploads .session .progress .even.uploaded
+{
+    background-color: #77E077;
+}
+
+.uploads .session .progress .current_file,
+.uploads .session .progress .current_file.uploaded
+{
+    background-color: #FFCC55;
+}
+
+.uploads .session .progress .uploading
+{
+    height: 40px;
+    width: 100%;
+    float: right;
+    opacity: 0.5;
+    background-color: #F1F8FF;
+}
+
+.uploads .session .progress>.uploading
+{
+    display: none;
+}
+

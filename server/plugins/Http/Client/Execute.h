@@ -26,7 +26,7 @@ private:
     void                 _preview();
     void                 _select();
     void                 _uploads();
-    void                 _stateUpload();
+    void                 _uploadsProgress();
     void                 _stopUpload();
     void                 _stopStream();
     void                 _video();

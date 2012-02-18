@@ -36,7 +36,7 @@ Execute::Execute(LightBird::IApi &a, LightBird::IClient &c, const QString &com) 
     commands["Preview"] = &Execute::_preview;
     commands["Select"] = &Execute::_select;
     commands["Uploads"] = &Execute::_uploads;
-    commands["StateUpload"] = &Execute::_stateUpload;
+    commands["UploadsProgress"] = &Execute::_uploadsProgress;
     commands["StopUpload"] = &Execute::_stopUpload;
     commands["StopStream"] = &Execute::_stopStream;
     commands["Video"] = &Execute::_video;
@@ -178,10 +178,9 @@ void        Execute::_uploads()
     Plugin::getInstance().getUploads().doExecution(this->client);
 }
 
-void        Execute::_stateUpload()
+void        Execute::_uploadsProgress()
 {
-    /*Uploads::Upload state = Uploads::getInstance().state(client);
-    client.getResponse().getContent().setContent("{\"size\":" + QByteArray::number(state.size) + ",\"progress\":" + QByteArray::number(state.progress) + "}");*/
+    Plugin::getInstance().getUploads().progress(this->client);
 }
 
 void        Execute::_stopUpload()

@@ -1,16 +1,16 @@
 /* Stores the scripts related to the management of the user. */
 
-// Initialize the global variables
+// Initializes the global variables
 var gl_identified = false;		// If the user is identified on the server.
 var gl_identification = false;	// If the identification is in progress. Avoid multiple identifications at the same time.
 var gl_identificationTimer;		// If the user is not identified, a new session id is created every 30 seconds with this timer.
 var gl_identificationRemember = true;	// If the connection has to be remembered in order to identify the user directly at the next reload of the page.
-var gl_disconnecting = false;	// Ensure that there is only one disconnection at the same time.
+var gl_disconnecting = false;	// Ensures that there is only one disconnection at the same time.
 
-// Initialize the Account scripts
+// Initializes the Account scripts
 function initializeAccount()
 {
-	// Check if the user is identifies to an account
+	// Checks if the user is identifies to an account
 	checkIdentification();
 }
 
@@ -20,10 +20,10 @@ function checkIdentification()
 {
 	var identification = document.getElementById("identification");
     
-    // Translate the value of the user input
+    // Translates the value of the user input
     identification.getElementsByTagName("input")[0].value = T.Identification.user;
 	
-	// Check if the session has been remembered
+	// Checks if the session has been remembered
 	if (localStorage.getItem("remember") != "false")
 		localStorage.setItem("remember", "true");
 	if (localStorage.getItem("remember") == "false")
@@ -32,7 +32,7 @@ function checkIdentification()
 		// Tells the server that the session can be destroyed
         if (!gl_loaded)
             request("GET", "Execute/Disconnect");
-		// Delete the session cookie and the identifiant
+		// Deletes the session cookie and the identifiant
 		setCookie("sid", "", 0);
 		localStorage.removeItem("identifiant");
 		document.getElementById("identification_icon_blue_lock").style.display = "none";
@@ -40,7 +40,7 @@ function checkIdentification()
 	else
 		document.getElementById("identification_icon_blue_unlock").style.display = "none";
 	
-	// Get the value of the session cookie
+	// Gets the value of the session cookie
 	var sid = getCookie("sid");
 	var identifiant = localStorage.getItem("identifiant");
 	// If the sid and the identifiant cookies are defined, we try to identify the user
@@ -55,22 +55,22 @@ function checkIdentification()
 				animation(document.getElementById("desktop"), 2000, animationOpacity, true);
 				animation(document.getElementById("background"), 250, animationOpacity, true);
 			}
-			// Display the identification panel
+			// Displays the identification panel
 			else
 			{
 				animation(identification, 1000, animationOpacity, true, null, 250);
 				animation(document.getElementById("background"), 250, animationOpacity, false);
 			}
 		}
-		// Try to identify the user
+		// Tries to identify the user
 		request("GET", "blank", callback);
 	}
-	// Display the identification panel if the user is not connected
+	// Displays the identification panel if the user is not connected
 	else
 	{
 		animation(identification, 1000, animationOpacity, true, null, 250);
 		animation(document.getElementById("background"), 250, animationOpacity, false);
-		// Display the background the first time the page is loaded
+		// Displays the background the first time the page is loaded
 		if (!gl_loaded)
 			animation(document.getElementById("background_identification"), 500, animationOpacity, true, null, 0, 10);
 	}
@@ -95,7 +95,7 @@ function focusOnIdentificationForm(focus, value, form)
 	}
 }
 
-// Try to identify the user, using the input of the identification form
+// Tries to identify the user, using the input of the identification form
 function identification()
 {
 	// Only one identification can be performed at the same time
@@ -111,7 +111,7 @@ function identification()
 	var greenIcon = document.getElementById("identification_icon_green");
 	var redIcon = document.getElementById("identification_icon_red");
 	
-	// Display the loading image
+	// Displays the loading image
 	animation(yellowIcon, 500, animationOpacity, true);
 	// If the red button is displayed, it is hide before the identification
 	if (isDisplayed(redButton))
@@ -119,14 +119,14 @@ function identification()
 		animation(redButton, 500, animationOpacity, false);
 		animation(redIcon, 500, animationOpacity, false);
 	}
-	// Hide the blue button
+	// Hides the blue button
 	else
 	{
 		animation(blueButton, 500, animationOpacity, false);
 		identificationDisplayLock(false);
 	}
 	
-	// Get the values of the inputs
+	// Gets the values of the inputs
 	var inputs = document.getElementById("identification").getElementsByTagName("input");
 	var name = inputs[0].value;
 	var password = inputs[1].value;
@@ -138,11 +138,11 @@ function identification()
 		if (HttpRequest.status == 200)
 		{
 			gl_identified = true;
-			// Replace the yellow button by the green one
+			// Replaces the yellow button by the green one
 			animation(yellowButton, 500, animationOpacity, false);
 			animation(yellowIcon, 500, animationOpacity, false);
 			animation(greenIcon, 500, animationOpacity, true);
-			// Display the identification panel
+			// Displays the identification panel
 			animation(greenButton, 500, animationOpacity, true, function()
 			{
 				animation(document.getElementById("identification"), 500, animationOpacity, false, function()
@@ -165,7 +165,7 @@ function identification()
 		// Otherwise a wrong password has been gived
 		else
 		{
-			// Replace the yellow button by the red one
+			// Replaces the yellow button by the red one
 			animation(yellowButton, 500, animationOpacity, false);
 			animation(yellowIcon, 500, animationOpacity, false);
 			animation(redButton, 500, animationOpacity, true, function() { gl_identification = false; });
@@ -181,12 +181,12 @@ function identification()
 		request("GET", "Execute/Identify", identify);
 	}
 
-	// Get the salt from the account name, that will allow us to generate the identifiant
+	// Gets the salt from the account name, that will allow us to generate the identifiant
 	var salt = randomString(32);
 	animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);});
 }
 
-// Replace the error button by the connect button if the error is displayed
+// Replaces the error button by the connect button if the error is displayed
 function identificationCleanError()
 {
 	if (isDisplayed(document.getElementById("identification_submit_button_red")) && gl_identification == false)
@@ -198,10 +198,10 @@ function identificationCleanError()
 	}
 }
 
-// Disconnect the user from the current session
+// Disconnects the user from the current session
 function disconnection()
 {
-	// Check if the client is not already disconnecting
+	// Checks if the client is not already disconnecting
 	if (gl_disconnecting == true)
 		return ;
 	gl_disconnecting = true;
@@ -209,22 +209,22 @@ function disconnection()
 	gl_identified = false;
 	setCookie("sid", "", 0);
 	localStorage.removeItem("identifiant");
-	// Close the windows
+	// Closes the windows
 	for (id in gl_windows)
 		closeWindow(id);
-	// Hide the help
+	// Hides the help
 	if (document.getElementById("help").style.display == "block")
 		animation(document.getElementById("help"), 1000, animationOpacity, false);
-	// Hide the menu and the background
+	// Hides the menu and the background
 	animation(document.getElementById("desktop"), 1000, animationOpacity, false, function() {gl_disconnecting = false; checkIdentification();});
 	animation(document.getElementById("background"), 250, animationOpacity, false, null, 250);
-	// Display the identification background
+	// Displays the identification background
 	document.getElementById("background_identification").style.display = "block";
 	// Tells the server that the client want to disconnect
 	request("GET", "Execute/Disconnect");
 }
 
-// Handle the lock/unlock button that allows user to stay connected when the page is refreshed.
+// Handles the lock/unlock button that allows user to stay connected when the page is refreshed.
 function identificationChangeLock(displayLock)
 {
 	lock = document.getElementById("identification_icon_blue_lock");

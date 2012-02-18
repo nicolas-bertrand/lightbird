@@ -24,6 +24,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
 
     // Gets some data on the files to upload
     upload.clientId = client.getId();
+    upload.accountId = client.getAccount().getId();
     upload.file = QSharedPointer<QFile>(new QFile());
     upload.progress = 0;
     upload.path = QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii());
@@ -61,6 +62,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     }
     // Tells the parser to store the data in the memory and not in a temporary file
     client.getInformations().insert("keepInMemory", true);
+    this->_removeCompleteUploads();
 }
 
 void            Uploads::onUnserializeContent(LightBird::IClient &client)
@@ -88,7 +90,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
         if (upload.header)
         {
             // Header not found
-            if ((j = data.indexOf("\r\n\r\n", position)) < 0 && size > this->maxHeaderLength)
+            if ((j = data.indexOf("\r\n\r\n", position)) < 0 && size - position > this->maxHeaderLength)
                 return this->_error(client, upload, "Header missing");
             // Extracts data from it
             else if (j >= 0)
@@ -249,13 +251,33 @@ bool                Uploads::timer()
     return (false);
 }
 
+void        Uploads::progress(LightBird::IClient &client)
+{
+    QString id = client.getRequest().getUri().queryItemValue("id");
+
+    client.getResponse().setType("application/json");
+    this->mutex.lock();
+    if (this->uploads.contains(id) && this->uploads[id].accountId == client.getAccount().getId())
+        client.getResponse().getContent().setContent("{\"size\":" + QByteArray::number(this->uploads[id].size) +
+                                                     ",\"progress\":" + QByteArray::number(this->uploads[id].progress) +
+                                                     ",\"complete\":" + QVariant(this->uploads[id].complete).toString().toAscii() + "}");
+    // The upload request is not yet arrived.
+    else
+        client.getResponse().getContent().setContent("{\"complete\":false}");
+    this->mutex.unlock();
+}
+
 void        Uploads::onFinish(LightBird::IClient &client)
 {
     QString id = client.getInformations().value("uploadId").toString();
 
     this->mutex.lock();
     if (this->uploads.contains(id) && this->uploads[id].clientId == client.getId())
-        this->uploads.remove(id);
+    {
+        if (this->uploads[id].file->isOpen())
+            this->uploads[id].file->remove();
+        this->uploads[id].finished = QDateTime::currentDateTime();
+    }
     this->mutex.unlock();
 }
 
@@ -265,7 +287,24 @@ void        Uploads::onDestroy(LightBird::IClient &client)
 
     this->mutex.lock();
     if (this->uploads.contains(id) && this->uploads[id].clientId == client.getId())
-        this->uploads.remove(id);
+    {
+        if (this->uploads[id].file->isOpen())
+            this->uploads[id].file->remove();
+        this->uploads[id].finished = QDateTime::currentDateTime();
+    }
+    this->mutex.unlock();
+}
+
+void    Uploads::_removeCompleteUploads()
+{
+    this->mutex.lock();
+    QMutableMapIterator<QString, Upload> it(this->uploads);
+    while (it.hasNext())
+    {
+        it.next();
+        if (it.value().finished.isValid() && it.value().finished.addSecs(REMOVE_COMPLETE_UPLOAD_TIME) < QDateTime::currentDateTime())
+            it.remove();
+    }
     this->mutex.unlock();
 }
 
@@ -273,6 +312,7 @@ void        Uploads::_insert(LightBird::IClient &client, Upload &upload)
 {
     QSharedPointer<LightBird::ITableFiles> fileTable(Plugin::api().database().getFiles());
     QSharedPointer<LightBird::ITableDirectories> directory(Plugin::api().database().getDirectories());
+    QMap<QString, QString> properties;
     File    file = upload.files.last();
 
     // Adds the files to the database
@@ -282,10 +322,12 @@ void        Uploads::_insert(LightBird::IClient &client, Upload &upload)
     {
         fileTable->setInformation("mime", file.contentType);
         this->identify << (upload.path + "/" + file.name);
+        properties["id"] = fileTable->getId();
+        properties["name"] = file.name;
+        Plugin::api().log().info("File uploaded", properties, "Uploads", "_insert");
     }
     else
     {
-        QMap<QString, QString> properties;
         properties["name"] = file.name;
         properties["path"] = file.path;
         properties["directory"] = directory->getId();
