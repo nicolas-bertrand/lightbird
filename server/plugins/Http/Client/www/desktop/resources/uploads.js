@@ -55,7 +55,7 @@ function UploadsSession(uploads)
     this.row = undefined; // The row of the table in the progress bar
     this.files = undefined; // The list of the files uploaded by the session
     this.numberFilesUploaded = 0; // The number of files uploaded so far
-    this.totalSize = 0; // The total size of the upload
+    this.size = 0; // The total size of the upload
     this.currentFile = undefined; // The file being uploaded
     
     // Creates the session using the template
@@ -96,23 +96,37 @@ UploadsSession.prototype.createProgressBar = function ()
     var files = this.uploads.node.input.files;
     var previous;
     
-    // Calculates the total size of the upload
-    for (var i = 0; i < files.length; ++i)
-        this.totalSize += files[i].size;
-    // Computes the percentage of each file in the upload
-    for (var i = 0; i < files.length; ++i)
+    // If multiple upload is supported by the browser
+    if (files)
+    {
+        // Calculates the total size of the upload
+        for (var i = 0; i < files.length; ++i)
+            this.size += files[i].size;
+        // Computes the percentage of each file in the upload
+        for (var i = 0; i < files.length; ++i)
+        {
+            this.row.insertCell(-1);
+            var file = this.files[this.files.length - 1];
+            var width = files[i].size / this.size * 100;
+            file.style.width = width + "%";
+            file.name = files[i].name;
+            file.size = files[i].size;
+            if (i > 0)
+                previous = this.files[this.files.length - 2];
+            file.length = (previous ? previous.length + previous.size : 0);
+            file.progress = width + (previous ? previous.progress : 0);
+            (i % 2) ? setClassName(file, "odd") : setClassName(file, "even");
+        }
+    }
+    // Internet explorer doesn't support this feature yet
+    else
     {
         this.row.insertCell(-1);
-        var file = this.files[this.files.length - 1];
-        var width = files[i].size / this.totalSize * 100;
-        file.style.width = width + "%";
-        file.name = files[i].name;
-        file.size = files[i].size;
-        if (i > 0)
-            previous = this.files[this.files.length - 2];
-        file.length = (previous ? previous.length + previous.size : 0);
-        file.progress = width + (previous ? previous.progress : 0);
-        (i % 2) ? setClassName(file, "odd") : setClassName(file, "even");
+        this.files[0].name = this.uploads.node.input.value;
+        this.files[0].size = 0;
+        this.files[0].length = 0;
+        this.files[0].progress = 100;
+        setClassName(this.files[0], "odd");
     }
     if (this.files.length == 1)
         this.files[0].appendChild(this.node.uploading);
@@ -131,7 +145,13 @@ UploadsSession.prototype.requestProgress = function ()
         if (HttpRequest.status == 200)
         {
             var result = jsonParse(HttpRequest.responseText);
-            var percentage = result.progress / session.totalSize * 100;
+            // If the browser doesn't support the multiple upload, we didn't have the upload size
+            if (!session.size)
+            {
+                session.size = result.size;
+                session.files[0].size = result.size;
+            }
+            var percentage = result.progress / session.size * 100;
             // Schedule another update in one second
             if (result.complete === false)
                 setTimeout(function () { session.requestProgress(); }, 1000);
@@ -148,7 +168,7 @@ UploadsSession.prototype.requestProgress = function ()
 // percentage: The progression to display.
 UploadsSession.prototype.updateProgress = function (percentage)
 {
-    var uploaded = percentage * this.totalSize / 100;
+    var uploaded = percentage * this.size / 100;
     
     for (var i = 0; i < this.files.length; ++i)
         if (this.files[i].progress >= percentage)
