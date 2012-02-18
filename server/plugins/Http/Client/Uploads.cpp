@@ -210,7 +210,7 @@ bool                Uploads::timer()
     LightBird::IIdentify::Information information;
     QSharedPointer<LightBird::ITableFiles> fileTable(Plugin::api().database().getFiles());
 
-    // Get the files to identify
+    // Gets the files to identify
     this->mutex.lock();
     files = this->identify;
     this->identify.clear();
@@ -226,16 +226,7 @@ bool                Uploads::timer()
                 if (!(extensions = Plugin::api().extensions().get("IIdentifier")).isEmpty())
                     information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(fileTable->getFullPath());
                 Plugin::api().extensions().release(extensions);
-                if (information.type == LightBird::IIdentify::AUDIO)
-                    fileTable->setType("audio");
-                else if (information.type == LightBird::IIdentify::DOCUMENT)
-                    fileTable->setType("document");
-                else if (information.type == LightBird::IIdentify::IMAGE)
-                    fileTable->setType("image");
-                else if (information.type == LightBird::IIdentify::VIDEO)
-                    fileTable->setType("video");
-                else
-                    fileTable->setType("other");
+                fileTable->setType(information.type_string);
                 if (information.data.value("mime").toString() == "application/octet-stream")
                     information.data.remove("mime");
                 fileTable->setInformations(information.data);

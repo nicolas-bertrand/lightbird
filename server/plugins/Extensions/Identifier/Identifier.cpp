@@ -29,10 +29,10 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     QMap<LightBird::IIdentify::Type, QVariantMap> info;
 
     result.type = LightBird::IIdentify::OTHER;
-    // Check that the file exists
+    // Checks that the file exists
     if (!QFileInfo(file).isFile())
         return (result);
-    // Get the extensions that implements IIdentify
+    // Gets the extensions that implements IIdentify
     QListIterator<void *> it(extentions = this->api.extensions().get("IIdentify"));
     while (it.hasNext())
     {
@@ -43,26 +43,37 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
             info.insertMulti(tmp.type, tmp.data);
         it.next();
     }
-    // Release the extensions
+    // Releases the extensions
     this->api.extensions().release(extentions);
-    // Put the data gathered in the result
+    // Puts the data gathered in the result
     if (info.size() > 0)
         this->_identify(info, result);
-    // Get the size and the extension of the file
+    // Gets the size and the extension of the file
     result.data.insert("size", QFileInfo(file).size());
     if (file.contains("."))
     {
         result.data.insert("extension", file.right(file.size() - file.lastIndexOf(".") - 1));
         result.data.insert("mime", this->getMime(file));
     }
-    // Determine if the file is a document
+    // Determines if the file is a document
     if (result.type == LightBird::IIdentify::OTHER)
         this->_document(result);
     // If the type is still other, we try to guess it using the MIME
     if (result.type == LightBird::IIdentify::OTHER)
         this->_typeFromMime(result);
-    // Compute the hashes of the file
+    // Computes the hashes of the file
     this->_hash(file, result);
+    // Sets the type in string
+    if (result.type == LightBird::IIdentify::AUDIO)
+        result.type_string = "audio";
+    else if (result.type == LightBird::IIdentify::DOCUMENT)
+        result.type_string = "document";
+    else if (result.type == LightBird::IIdentify::IMAGE)
+        result.type_string = "image";
+    else if (result.type == LightBird::IIdentify::VIDEO)
+        result.type_string = "video";
+    else
+        result.type_string = "other";
     // Debug
     /**this->api.log().debug("Type: " + QString::number(result.type));
     std::cout << "Type: " << QString::number(result.type).toStdString() << std::endl;

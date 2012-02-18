@@ -18,7 +18,7 @@ namespace LightBird
         virtual ~IIdentifier() {}
 
         /// @brief Get information on a file.
-        /// @param file : The name of the file that will be probed.
+        /// @param file : The path of the file that will be probed.
         /// @return The information on the file and its type.
         virtual LightBird::IIdentify::Information   identify(const QString &file) = 0;
     };
