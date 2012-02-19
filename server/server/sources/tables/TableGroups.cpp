@@ -1,6 +1,6 @@
 #include "Database.h"
+#include "LightBird.h"
 #include "TableGroups.h"
-#include "Tools.h"
 
 TableGroups::TableGroups(const QString &id)
 {
@@ -45,7 +45,7 @@ bool            TableGroups::add(const QString &name, const QString &id_group)
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableGroups", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -83,7 +83,7 @@ bool            TableGroups::addAccount(const QString &id_account)
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableGroups", "addAccount"));
     query.bindValue(":id", id);
     query.bindValue(":id_group", this->id);

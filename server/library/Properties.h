@@ -5,14 +5,17 @@
 # include <QString>
 # include <QVariant>
 
+# include "Export.h"
+
 /// @brief Stores keys/values paires that represents properties.
 /// @example Properties("key1", "value1").add("key2", "value2");
-class Properties
+class LIB Properties
 {
 public:
     Properties();
     /// @brief Add directly a property at the construction.
-    Properties(const QString &key, const QVariant &value);
+    /// @see add
+    Properties(const QString &key, const QVariant &value, bool empty = true);
     Properties(const QMap<QString, QString> &properties);
     Properties(const Properties &properties);
     Properties &operator=(const QMap<QString, QString> &properties);

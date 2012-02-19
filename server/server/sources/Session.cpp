@@ -1,9 +1,9 @@
 #include "ApiSessions.h"
 #include "Database.h"
 #include "Defines.h"
+#include "LightBird.h"
 #include "Session.h"
 #include "SmartMutex.h"
-#include "Tools.h"
 
 Session::Session(const QString &id) : destroyed(false)
 {
@@ -38,7 +38,7 @@ Session::Session(const QDateTime &e, const QString &a, const QStringList &c, con
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("Sessions", "add"));
     query.bindValue(":id", id);
     query.bindValue(":expiration", expiration.toString(DATE_FORMAT));
@@ -242,7 +242,7 @@ bool            Session::setInformation(const QString &name, const QVariant &val
     else
     {
         query.prepare(Database::instance()->getQuery("Sessions", "setInformation_insert"));
-        query.bindValue(":id", Tools::createUuid());
+        query.bindValue(":id", LightBird::createUuid());
         query.bindValue(":id_session", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);

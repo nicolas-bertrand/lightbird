@@ -37,8 +37,8 @@ public:
         qint64      progress;       ///< The number of bytes received so far.
         QString     path;           ///< The virtual destination directory.
         QString     boundary;       ///< The boundary that separates the files in the content (multipart/form-data).
-        QString     clientId;       ///< The id of the client that sends the data.
-        QString     accountId;      ///< The id of the account associated with the client.
+        QString     idClient;       ///< The id of the client that sends the data.
+        QString     idAccount;      ///< The id of the account associated with the client.
         bool        header;         ///< If a header is being parsed. Otherwise a file content is being copied.
         bool        complete;       ///< If all the files have been received.
         QList<File> files;          ///< The list of the files received so far (the last one is not complete yet).
@@ -57,6 +57,11 @@ public:
     bool    timer();
     /// @brief Returns the amount of data download so far, in JSON.
     void    progress(LightBird::IClient &client);
+    /// @brief Stops the upload and removes the current file.
+    void    stop(LightBird::IClient &client);
+    /// @brief Cancels the upload and removes all the files uploaded so far.
+    /// The files are removed even if the upload is already finished.
+    void    cancel(LightBird::IClient &client);
     void    onFinish(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
 

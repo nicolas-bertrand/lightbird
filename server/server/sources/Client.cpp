@@ -11,11 +11,11 @@
 #include "Client.h"
 #include "EngineClient.h"
 #include "EngineServer.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "SmartMutex.h"
 #include "Threads.h"
-#include "Tools.h"
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
@@ -24,7 +24,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
                peerPort(pp), peerName(pn), mode(m), readWriteInterface(r), socket(s)
 {
     // Generates the uuid of the client
-    this->id = Tools::createUuid();
+    this->id = LightBird::createUuid();
     this->readyRead = false;
     this->running = false;
     this->finish = false;
@@ -208,7 +208,7 @@ bool                    Client::_read()
 void        Client::write(QByteArray *data)
 {
     if (Log::instance()->isTrace())
-        Log::trace("Writing data", Properties("id", this->id).add("data", Tools::simplify(*data)).add("size", data->size()), "Client", "write");
+        Log::trace("Writing data", Properties("id", this->id).add("data", LightBird::simplify(*data)).add("size", data->size()), "Client", "write");
     else if (Log::instance()->isDebug())
         Log::debug("Writing data", Properties("id", this->id).add("size", data->size()), "Client", "write");
     // Writes the data if the client is still connected

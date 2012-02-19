@@ -1,9 +1,8 @@
 #include <QCryptographicHash>
 
 #include "Database.h"
-#include "Sha256.h"
+#include "LightBird.h"
 #include "TableAccounts.h"
-#include "Tools.h"
 
 TableAccounts::TableAccounts(const QString &id)
 {
@@ -88,7 +87,7 @@ QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifian
         // Check the identifiant of all the account
         for (i = 0, s = result.size(); i < s; ++i)
             // If the identifiant of the account match, it is connected
-            if (identifiant == Sha256::hash(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii()))
+            if (identifiant == LightBird::sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii()))
                 return (result[i]["id"].toString());
     return ("");
 }
@@ -109,7 +108,7 @@ bool            TableAccounts::add(const QString &name, const QVariantMap &infor
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableAccounts", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -243,7 +242,7 @@ bool            TableAccounts::setInformation(const QString &name, const QVarian
     else
     {
         query.prepare(Database::instance()->getQuery("TableAccounts", "setInformation_insert"));
-        query.bindValue(":id", Tools::createUuid());
+        query.bindValue(":id", LightBird::createUuid());
         query.bindValue(":id_account", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);
@@ -316,7 +315,7 @@ bool            TableAccounts::addGroup(const QString &id_group)
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableAccounts", "addGroup"));
     query.bindValue(":id", id);
     query.bindValue(":id_account", this->id);
@@ -339,6 +338,6 @@ QString         TableAccounts::passwordHash(const QString &password, const QStri
     if (password.isEmpty())
         return (QString());
     if (id.isEmpty())
-        return (Sha256::hash(password.toAscii()));
-    return (Sha256::hash(password.toAscii() + id.toAscii()));
+        return (LightBird::sha256(password.toAscii()));
+    return (LightBird::sha256(password.toAscii() + id.toAscii()));
 }

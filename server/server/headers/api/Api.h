@@ -41,7 +41,6 @@ public:
     QString                     getServerVersion() const;
     const QString               &getPluginPath() const;
     QString                     getLanguage() const;
-    QByteArray                  sha256(const QByteArray &data) const;
 
 private:
     Api();

@@ -1,12 +1,12 @@
 #include "Configurations.h"
 #include "Database.h"
+#include "LightBird.h"
 #include "TableAccounts.h"
 #include "TableGroups.h"
 #include "TableCollections.h"
 #include "TableDirectories.h"
 #include "TableFiles.h"
 #include "TablePermissions.h"
-#include "Tools.h"
 
 TablePermissions::TablePermissions(const QString &id)
 {
@@ -59,7 +59,7 @@ bool    TablePermissions::add(const QString &id_accessor, const QString &id_obje
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TablePermissions", "add"));
     query.bindValue(":id", id);
     query.bindValue(":id_accessor", id_accessor);

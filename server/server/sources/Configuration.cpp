@@ -4,9 +4,9 @@
 #include "Configurations.h"
 #include "Defines.h"
 #include "Events.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "SmartMutex.h"
-#include "Tools.h"
 
 Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent) : QObject(parent)
 {
@@ -69,7 +69,7 @@ bool        Configuration::_load(const QString &configurationPath, const QString
             return (false);
         }
         // Creates the configuration file using the alternative file
-        if (Tools::copy(alternative, this->file.fileName()) == false)
+        if (LightBird::copy(alternative, this->file.fileName()) == false)
         {
             Log::error("Cannot creates the configuration file from the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
             return (false);

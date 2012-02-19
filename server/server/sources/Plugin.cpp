@@ -7,11 +7,11 @@
 #include "ITimer.h"
 
 #include "Configurations.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
 #include "SmartMutex.h"
-#include "Tools.h"
 
 Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
                                                              id(identifier)
@@ -398,7 +398,7 @@ void            Plugin::_loadResources()
         {
             nodeName = dom.nodeName().toLower().trimmed();
             nodeValue = dom.toElement().text().trimmed();
-            nodeValue = Tools::cleanPath(this->path + nodeValue);
+            nodeValue = LightBird::cleanPath(this->path + nodeValue);
             alias = dom.toElement().attribute("alias");
             // Copy the file
             if (nodeName == "resource" && !alias.isEmpty() && !QFileInfo(nodeValue).isFile())
@@ -411,7 +411,7 @@ void            Plugin::_loadResources()
                 nodeName = resourcesPath + "/" + dom.toElement().attribute("alias");
                 Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
                            .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
-                if (!Tools::copy(nodeName, nodeValue))
+                if (!LightBird::copy(nodeName, nodeValue))
                     Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
                                  .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
             }
@@ -450,7 +450,7 @@ void            Plugin::_copyAllResources(const QString &resourcesPath, const QS
             // Copy the resource
             Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
                        .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
-            if (!Tools::copy(source, destination))
+            if (!LightBird::copy(source, destination))
                 Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
                              .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
         }

@@ -1,6 +1,6 @@
 #include "Database.h"
+#include "LightBird.h"
 #include "TableTags.h"
-#include "Tools.h"
 
 TableTags::TableTags(const QString &id)
 {
@@ -29,7 +29,7 @@ bool    TableTags::add(const QString &id_object, const QString &name)
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableTags", "add"));
     query.bindValue(":id", id);
     query.bindValue(":id_object", id_object);

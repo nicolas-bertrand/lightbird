@@ -5,12 +5,14 @@
 # include <QReadWriteLock>
 # include <QString>
 
-# include "Defines.h"
+# include "Export.h"
+
+# define MAXTRYLOCK -1 ///< Maximum time to wait in a tryLock in milliseconds. After that, an error is logged.
 
 /// @brief The equivalent of a smart pointer for the mutex.
 /// Ensures that the mutex is unlock when the object goes out of scope.
 /// Avoids dead locks by using tryLock instead of lock, with a timeout.
-class SmartMutex
+class LIB SmartMutex
 {
 public:
     /// @brief List the possible types of lock.
@@ -23,13 +25,16 @@ public:
     /// @brief Tries to lock the mutex. The parameters object and function are
     /// used to log a message if the lock fail after the time out.
     SmartMutex(QMutex &mutex, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
+    SmartMutex(QMutex &mutex, const QString &plugin, const QString &object, const QString &function, int wait = MAXTRYLOCK);
     /// @brief Tries to lock the mutex for write. The parameters object and
     /// function are used to log a message if the lock fail after the time out.
     SmartMutex(QReadWriteLock &readWriteLock, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
+    SmartMutex(QReadWriteLock &readWriteLock, const QString &plugin, const QString &object, const QString &function, int wait = MAXTRYLOCK);
     /// @brief Tries to lock the mutex. The parameters object and function are
     /// used to log a message if the lock fail after the time out.
     /// @param lock : If the mutex have to be lock for read or for write.
     SmartMutex(QReadWriteLock &readWriteLock, SmartMutex::ReadWriteLock lock, const QString &object = "", const QString &function = "", int wait = MAXTRYLOCK);
+    SmartMutex(QReadWriteLock &readWriteLock, SmartMutex::ReadWriteLock lock, const QString &plugin, const QString &object, const QString &function, int wait = MAXTRYLOCK);
     /// @brief Unlock the mutex if it is locked.
     ~SmartMutex();
 
@@ -56,6 +61,7 @@ private:
     QMutex          *mutex;
     QReadWriteLock  *readWriteLock;
     bool            isLock;
+    QString         plugin;
     QString         object;
     QString         function;
 };

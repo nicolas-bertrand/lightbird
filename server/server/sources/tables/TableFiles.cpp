@@ -2,9 +2,9 @@
 
 #include "Configurations.h"
 #include "Database.h"
+#include "LightBird.h"
 #include "TableFiles.h"
 #include "TableDirectories.h"
-#include "Tools.h"
 
 TableFiles::TableFiles(const QString &id)
 {
@@ -41,7 +41,7 @@ QString TableFiles::getIdFromVirtualPath(const QString &virtualPath) const
     QString                 path;
     QString                 id_directory = "";
 
-    path = Tools::cleanPath(virtualPath);
+    path = LightBird::cleanPath(virtualPath);
     name = path;
     // If the virtual path has directories, get the id of the parent directory
     if (name.contains('/'))
@@ -75,7 +75,7 @@ bool    TableFiles::add(const QString &name, const QString &path, const QVariant
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableFiles", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -221,7 +221,7 @@ bool    TableFiles::setInformation(const QString &name, const QVariant &value)
     if (result.size() < 1)
     {
         query.prepare(Database::instance()->getQuery("TableFiles", "setInformation_insert"));
-        query.bindValue(":id", Tools::createUuid());
+        query.bindValue(":id", LightBird::createUuid());
         query.bindValue(":id_file", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);
@@ -303,7 +303,7 @@ bool    TableFiles::setVirtualPath(const QString &virtualPath)
     QString id_directory;
     QString path;
 
-    path = Tools::cleanPath(virtualPath);
+    path = LightBird::cleanPath(virtualPath);
     // The file is an the root of the virtual path
     if (path.count('/') == path.size())
         return (this->setIdDirectory(""));
@@ -334,7 +334,7 @@ bool            TableFiles::addCollection(const QString &id_collection)
     QSqlQuery   query;
 
     query.prepare(Database::instance()->getQuery("TableFiles", "addCollection"));
-    query.bindValue(":id", Tools::createUuid());
+    query.bindValue(":id", LightBird::createUuid());
     query.bindValue(":id_file", this->id);
     query.bindValue(":id_collection", id_collection);
     return (Database::instance()->query(query));

@@ -6,9 +6,9 @@
 
 #include "IGui.h"
 
+#include "LightBird.h"
 #include "Log.h"
 #include "Server.h"
-#include "Tools.h"
 
 Server  *Server::_instance = NULL;
 
@@ -179,12 +179,12 @@ bool        Server::_temporaryDirectory()
     QString path;
     QDir    directory;
 
-    path = Tools::cleanPath(Configurations::instance()->get("temporaryPath"));
+    path = LightBird::cleanPath(Configurations::instance()->get("temporaryPath"));
     // If the temporary directory is not the working directory
     if (!path.isEmpty() && path != ".")
     {
         // Removes all the files in the temporary directory if needed
-        if (Tools::cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true" && QFileInfo(path).isDir())
+        if (LightBird::cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true" && QFileInfo(path).isDir())
         {
             Log::debug("Cleaning the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
             directory.setPath(path);

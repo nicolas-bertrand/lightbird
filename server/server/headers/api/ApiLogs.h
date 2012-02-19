@@ -14,22 +14,25 @@ class ApiLogs : public QObject,
     Q_INTERFACES(LightBird::ILogs)
 
 public:
-    ApiLogs(const QString &id);
+    /// @param plugin : True if the instance is dedicated to a plugin. If false,
+    /// the "plugin" value of the properties is used to determine the plugin
+    /// that emits the log.
+    ApiLogs(const QString &id, bool plugin = true);
     ~ApiLogs();
 
-    void    write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method);
-    void    fatal(const QString &message, const QString &className = "", const QString &method = "");
-    void    fatal(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    void    error(const QString &message, const QString &className = "", const QString &method = "");
-    void    error(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    void    warning(const QString &message, const QString &className = "", const QString &method = "");
-    void    warning(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    void    info(const QString &message, const QString &className = "", const QString &method = "");
-    void    info(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    void    debug(const QString &message, const QString &className = "", const QString &method = "");
-    void    debug(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
-    void    trace(const QString &message, const QString &className = "", const QString &method = "");
-    void    trace(const QString &message, QMap<QString, QString> &properties, const QString &className = "", const QString &method = "");
+    void    write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const;
+    void    fatal(const QString &message, const QString &className = "", const QString &method = "") const;
+    void    fatal(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
+    void    error(const QString &message, const QString &className = "", const QString &method = "") const;
+    void    error(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
+    void    warning(const QString &message, const QString &className = "", const QString &method = "") const;
+    void    warning(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
+    void    info(const QString &message, const QString &className = "", const QString &method = "") const;
+    void    info(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
+    void    debug(const QString &message, const QString &className = "", const QString &method = "") const;
+    void    debug(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
+    void    trace(const QString &message, const QString &className = "", const QString &method = "") const;
+    void    trace(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
     LightBird::ILogs::Level getLevel() const;
     void    setLevel(LightBird::ILogs::Level level);
     bool    isDisplay() const;
@@ -45,7 +48,8 @@ private:
     ApiLogs(const ApiLogs &);
     ApiLogs &operator=(const ApiLogs &);
 
-    QString id; ///< The id of the plugin for which the object has been created.
+    QString id;     ///< The id of the plugin for which the object has been created.
+    bool    plugin; /// True if the instance is dedicated to a plugin.
 };
 
 #endif // APILOGS_H

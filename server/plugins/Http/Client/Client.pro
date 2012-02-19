@@ -7,10 +7,12 @@ INCLUDEPATH += . \
     ../../../api \
     ../../../api/table \
     ../../../api/network \
-    ../../../extensions
+    ../../../extensions \
+    ../../../library
 
 TARGET = HttpClient
 DESTDIR = ../../../build/plugins/Http/Client
+LIBS += -L../../../build -lLightBird
 
 HEADERS = Plugin.h \
     Audio.h \

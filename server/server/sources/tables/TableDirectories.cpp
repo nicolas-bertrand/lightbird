@@ -1,8 +1,8 @@
 #include "Configurations.h"
 #include "Database.h"
+#include "LightBird.h"
 #include "TableDirectories.h"
 #include "TablePermissions.h"
-#include "Tools.h"
 
 TableDirectories::TableDirectories(const QString &id)
 {
@@ -33,7 +33,7 @@ QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
     QString                 path;
     QString                 id_directory = "";
 
-    path = Tools::cleanPath(virtualPath);
+    path = LightBird::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
     while (it.hasNext())
     {
@@ -67,7 +67,7 @@ bool    TableDirectories::add(const QString &name, const QString &id_directory, 
     QVector<QVariantMap>    result;
     QString                 id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableDirectories", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -130,7 +130,7 @@ bool        TableDirectories::setVirtualPath(const QString &virtualPath)
     QString id_directory;
     QString path;
 
-    path = Tools::cleanPath(virtualPath);
+    path = LightBird::cleanPath(virtualPath);
     if (path.count('/') == path.size())
         return (this->setIdDirectory(""));
     if ((id_directory = TableDirectories().getIdFromVirtualPath(path)).isEmpty())
@@ -206,7 +206,7 @@ QString                 TableDirectories::createVirtualPath(const QString &virtu
     QString             id;
 
     directory.setId(this->getId());
-    QStringListIterator it(Tools::cleanPath(virtualPath).split('/'));
+    QStringListIterator it(LightBird::cleanPath(virtualPath).split('/'));
     while (it.hasNext())
     {
         if (!it.peekNext().isEmpty())

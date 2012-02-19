@@ -32,43 +32,43 @@ namespace LightBird
         /// @param properties : A map of properties that can give additional informations on the log entry.
         /// @param object : The name of the class from which the log is written.
         /// @param method : The name of the method from which the log is written.
-        virtual void        write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &object, const QString &method) = 0;
+        virtual void        write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &object, const QString &method) const = 0;
         /// @brief Writes a fatal log level
         /// @see write
-        virtual void        fatal(const QString &message, const QString &object = "", const QString &method = "") = 0;
+        virtual void        fatal(const QString &message, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a fatal log level
         /// @see write
-        virtual void        fatal(const QString &message, QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") = 0;
+        virtual void        fatal(const QString &message, const QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes an error log level
         /// @see write
-        virtual void        error(const QString &message, const QString &object = "", const QString &method = "") = 0;
+        virtual void        error(const QString &message, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes an error log level
         /// @see write
-        virtual void        error(const QString &message, QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") = 0;
+        virtual void        error(const QString &message, const QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a warning log level
         /// @see write
-        virtual void        warning(const QString &message, const QString &object = "", const QString &method = "") = 0;
+        virtual void        warning(const QString &message, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a warning log level
         /// @see write
-        virtual void        warning(const QString &message, QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") = 0;
+        virtual void        warning(const QString &message, const QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes an info log level
         /// @see write
-        virtual void        info(const QString &message, const QString &object = "", const QString &method = "") = 0;
+        virtual void        info(const QString &message, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes an info log level
         /// @see write
-        virtual void        info(const QString &message, QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") = 0;
+        virtual void        info(const QString &message, const QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a debug log level
         /// @see write
-        virtual void        debug(const QString &message, const QString &object = "", const QString &method = "") = 0;
+        virtual void        debug(const QString &message, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a debug log level
         /// @see write
-        virtual void        debug(const QString &message, QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") = 0;
+        virtual void        debug(const QString &message, const QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a trace log level
         /// @see write
-        virtual void        trace(const QString &message, const QString &object = "", const QString &method = "") = 0;
+        virtual void        trace(const QString &message, const QString &object = "", const QString &method = "") const = 0;
         /// @brief Writes a trace log level
         /// @see write
-        virtual void        trace(const QString &message, QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") = 0;
+        virtual void        trace(const QString &message, const QMap<QString, QString> &properties, const QString &object = "", const QString &method = "") const = 0;
         /// @brief The current log level. The logs below this level are not saved.
         /// For example, WARNING is below ERROR, and INFO is below WARNING...
         /// @return The current log level.

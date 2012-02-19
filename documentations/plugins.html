@@ -431,16 +431,24 @@
         </table>
         <p>Pour des informations plus précises sur ces interfaces, consultez leurs commentaires.</p>
         
-        <h2>XI. TCP et UDP</h2>
+        <h2>XI. Bibliothèque LightBird</h2>
+        <p>En plus de l'API, le serveur fournit une Shared Library à laquelle les plugins peuvent se lier. Elle contient divers fonctionnalités destinées à faciliter l'implémentation des plugin, tels que la class <strong>Properties</strong> qui permet d'émettre des logs détaillés en une ligne, les <strong>SmartMutex</strong>...</p>
+        <p>Pour utiliser cette bibliothèque un plugin doit insérer les lignes suivantes dans son .pro et inclure le fichier <strong>LightBird.h</strong> :</p>
+        <div class="quote">
+            <span class="key">INCLUDEPATH</span> += ../../library<br />
+            <span class="key">LIBS</span> += -L../../build -lLightBird
+        </div>
+        
+        <h2>XII. TCP et UDP</h2>
         <p>Le serveur abstrait totalement la gestion des protocoles de transport TCP et UDP. Quelque soit le protocole utilisé, cela n’a pas d’impact directe sur les plugins, ce qui signifie qu’un plugin développé et testé avec TCP marchera en UDP (s’il on ignore les pertes possibles de paquets en UDP).</p>
         <p>Notez tout de même que les interfaces IDoRead et IDoWrite ne sont appelés qu’en TCP.</p>
         
-        <h2>XII. Abstraction de la base de données</h2>
+        <h2>XIII. Abstraction de la base de données</h2>
         <p>L’abstraction de la base de données est un ensemble complet de classes facilitant l’usage de la base de données. Chaque interface représente une table, et chaque instance une entrée. Il est ainsi possible d’utiliser la base de données sans avoir à utiliser de requête SQL. Seules les opérations complexes, telles que les jointures, peuvent nécessiter des requêtes fournies par les plugins.</p>
         <p>La gestion des droits, ou de l’arborescence des fichiers et des dossiers sont également implémentés, ainsi que le support des concepts d’accessors et d’objects.</p>
         <p>Les instances sont créées à partir de la méthode getTable de l’API de la base de données. Consultez ses commentaires pour obtenir un exemple de création  d’instance.</p>
         
-        <h2 id="events">XIII. Evénements</h2>
+        <h2 id="events">XIV. Evénements</h2>
         <p>En plus des événements générés par l’API décrit dans la partie <a href="#api_events">VI</a>, le serveur propose aux plugins un système plus souple qui leur permet d’échanger des événements entre eux simplement. Un événement est constitué d’un nom et d’une propriété optionnelle. Leur gestion se fait via l’API d’événements. Les plugins doivent déclarer les événements qu’ils souhaitent recevoir et utiliser l’une de ces deux méthodes pour les récupérer :</p>
         <ul class="list">
             <li><strong>Push</strong> : Implémenter IEvent qui sera appelée dans un thread dédié pour chaque nouvel événement.</li>
@@ -490,11 +498,11 @@
             </tr>
         </table>
         
-        <h2>XIV. Implémentation</h2>
+        <h2>XV. Implémentation</h2>
         <p>Les plugins sont composés d’une classe principale, qui hérite de toutes les interfaces dont ils ont besoins. Cette classe doit impérativement être <strong>thread safe</strong>, car le serveur peut appeler les méthodes implémentées par un plugin dans de multiples threads simultanément. C’est donc aux plugins de protéger leurs données communes à plusieurs threads, tels que les variables membres, afin d’éviter que deux thread y accèdent en même temps.</p>
         <p>Les plugins situés dans le dossier <strong>Example</strong> montre divers implémentations simples. Le plugin <strong>Example/Basic</strong> peut être utilisé comme base pour créer n’importe quel plugin.</p>
         
-        <h2 id="extensions">XV. Extensions</h2>
+        <h2 id="extensions">XVI. Extensions</h2>
         <p>Les extensions sont des plugins dont le but est d’étendre l’API du serveur, et donc de proposer des services aux autres plugins. Une extension pourrait par exemple proposer de convertir des images dans d’autres formats (jpeg à png), et serait utilisé par tous les plugins ayant besoin de cette fonctionnalité.</p>
         <p>Concrètement, les plugins extensions sont des plugins normaux, mais qui implémentent l’interface <strong>IExtension</strong>, en plus des autres interfaces. Cette dernière permet de déclarer les extensions que le plugin implémente. Une extension est une partie de ce plugin, qui implémente une interface présente dans le dossier <strong>extensions</strong> du serveur. Ce sont les plugins qui installent des interfaces dans ce dossier.</p>
         <p>Un système de compteur interne au serveur permet de savoir quelles extensions sont utilisées par d’autres plugins à tout moment. Ceci permet d’éviter le déchargement d’un plugin dont les extensions sont utilisées ailleurs. Le plugin sera déchargé lorsque toutes ses extensions seront relâchées.</p>

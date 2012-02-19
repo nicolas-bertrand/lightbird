@@ -5,12 +5,12 @@
 #include "Configurations.h"
 #include "Events.h"
 #include "Extensions.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Server.h"
 #include "SmartMutex.h"
 #include "Threads.h"
-#include "Tools.h"
 
 Plugins::Plugins()
 {
@@ -330,7 +330,7 @@ QString     Plugins::checkId(const QString &identifier)
     QString result;
 
     path = Configurations::instance()->get("pluginsPath");
-    QStringListIterator dir(Tools::cleanPath(identifier).split("/"));
+    QStringListIterator dir(LightBird::cleanPath(identifier).split("/"));
     // Iterates over each directory of the id of the plugin
     while (dir.hasNext())
     {

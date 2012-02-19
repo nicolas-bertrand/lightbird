@@ -3,11 +3,11 @@
 #include "ApiConfiguration.h"
 #include "Configurations.h"
 #include "Defines.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Server.h"
 #include "SmartMutex.h"
-#include "Tools.h"
 
 Configurations::Configurations(const QString &configurationPath, QObject *parent) : QObject(parent),
                                                                                     mutex(QMutex::Recursive)
@@ -109,7 +109,7 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     // Otherwise it can be the id of a plugin
     else if (QFileInfo(this->configurations[""]->get("pluginsPath") + "/" + cleaned).isDir())
     {
-        path = Plugins::checkId(Tools::cleanPath(cleaned));
+        path = Plugins::checkId(LightBird::cleanPath(cleaned));
         // Creates the configuration of the plugin if it doesn't exists
         if (!this->configurations.contains(path) && !*(instance = new ApiConfiguration(path)))
         {
@@ -120,7 +120,7 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     }
     // Cleans the path
     if (path.isEmpty())
-        path = Tools::cleanPath(cleaned);
+        path = LightBird::cleanPath(cleaned);
     // Creates the configuration if it doesn't exists
     if (instance == NULL && !this->configurations.contains(path) &&
         !*(instance = new Configuration(path, alternative)))

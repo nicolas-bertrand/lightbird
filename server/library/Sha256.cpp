@@ -2,12 +2,12 @@
 #include <QByteArray>
 #include <QtGlobal>
 
-#include "Sha256.h"
+#include "LightBird.h"
 
 #define shr(x,n) ((x & 0xFFFFFFFF) >> n)
 #define rotr(x,n) (shr(x,n) | (x << (32 - n)))
 
-namespace Sha256
+namespace LightBird
 {
     quint32 K[]=
     {   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -101,7 +101,7 @@ namespace Sha256
         return rotr(x, 17) ^ rotr(x, 19) ^ shr(x, 10);
     }
 
-    QByteArray      hash(QByteArray msg_arr)
+    QByteArray      sha256(QByteArray msg_arr)
     {
         QByteArray  msg;
         msg=msg_arr;

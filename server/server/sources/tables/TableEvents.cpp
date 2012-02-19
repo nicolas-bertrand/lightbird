@@ -1,7 +1,7 @@
 #include "Database.h"
 #include "Defines.h"
+#include "LightBird.h"
 #include "TableEvents.h"
-#include "Tools.h"
 
 TableEvents::TableEvents(const QString &id)
 {
@@ -56,7 +56,7 @@ bool            TableEvents::add(const QString &name, const QVariantMap &informa
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableEvents", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -191,7 +191,7 @@ bool        TableEvents::setInformation(const QString &name, const QVariant &val
     else
     {
         query.prepare(Database::instance()->getQuery("TableEvents", "setInformation_insert"));
-        query.bindValue(":id", Tools::createUuid());
+        query.bindValue(":id", LightBird::createUuid());
         query.bindValue(":id_event", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);

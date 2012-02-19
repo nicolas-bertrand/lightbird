@@ -1,16 +1,26 @@
-#ifndef TOOLS_H
-# define TOOLS_H
+#ifndef LIGHTBIRD_H
+# define LIGHTBIRD_H
 
+# include <QByteArray>
+# include <QObject>
 # include <QString>
 
-namespace Tools
+# include "Export.h"
+# include "Properties.h"
+# include "SmartMutex.h"
+
+namespace LightBird
 {
     /// @brief LightBird's implementation of Qt::copy.
-    bool        copy(const QString &source, const QString &destination);
+    LIB bool        copy(const QString &source, const QString &destination);
     /// @brief Does the same job as QDir::cleanPath but removes also the "\" under Linux.
-    QString     cleanPath(const QString &path);
+    LIB QString     cleanPath(const QString &path);
     /// @brief Returns a new Universally Unique Identifier.
-    QString     createUuid();
+    LIB QString     createUuid();
+    /// @brief Implementation of SHA-256.
+    /// @author jagatsastry.nitk@gmail.com
+    /// @return The hash of data in hex.
+    LIB QByteArray  sha256(QByteArray data);
     /// @brief Replaces the unprintable ascii characteres of data by a dot (by default)
     /// and truncates the data if necessary.
     /// @param data : The data to simplify.
@@ -18,7 +28,7 @@ namespace Tools
     /// @param maxSize : If the data size exceeds maxSize it is truncated. If the
     /// value is zero the data are not truncated.
     /// @return The simplified data.
-    QByteArray  simplify(QByteArray data, char replace = '.', quint64 maxSize = 2000);
-};
+    LIB QByteArray  simplify(QByteArray data, char replace = '.', quint64 maxSize = 2000);
+}
 
-#endif // TOOLS_H
+#endif // LIGHTBIRD_H

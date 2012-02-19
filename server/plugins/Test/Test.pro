@@ -7,10 +7,12 @@ INCLUDEPATH += . \
     ../../api \
     ../../api/table \
     ../../api/network \
-    ../../extensions
+    ../../extensions \
+    ../../library
 
 TARGET = Test
 DESTDIR = ../../build/plugins/Test
+LIBS += -L../../build -lLightBird
 
 HEADERS = Plugin.h \
     UnitTests.h

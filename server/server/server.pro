@@ -8,13 +8,18 @@ CONFIG += qt \
 DEPENDPATH += sources \
     headers \
     headers/api \
-    headers/tables
+    headers/tables \
+    ../api \
+    ../api/table \
+    ../api/network \
+    ../library
 INCLUDEPATH += headers \
     headers/api \
     headers/tables \
     ../api \
     ../api/table \
-    ../api/network
+    ../api/network \
+    ../library
 
 # Qt Modules
 QT += xml \
@@ -24,13 +29,14 @@ QT += xml \
 # Build
 TARGET = LightBird
 DESTDIR = ../build
+LIBS += -L../build -lLightBird
 
 # Resources
 RESOURCES = resources/resources.qrc
 
 # Icons
-RC_FILE = resources/images/logo.rc  # Windows
-ICON = resources/images/logo.icns   # Mac OS X
+RC_FILE = resources/images/logo.rc # Windows
+ICON = resources/images/logo.icns  # Mac OS X
 
 # Translations
 TRANSLATIONS = resources/languages/en.ts \
@@ -66,18 +72,14 @@ HEADERS += headers/Arguments.h \
     headers/Port.h \
     headers/PortTcp.h \
     headers/PortUdp.h \
-    headers/Properties.h \
     headers/Request.h \
     headers/Response.h \
     headers/Server.h \
     headers/Session.h \
-    headers/Sha256.h \
-    headers/SmartMutex.h \
     headers/Thread.h \
     headers/ThreadPool.h \
     headers/Threads.h \
     headers/Timer.h \
-    headers/Tools.h \
     headers/api/Api.h \
     headers/api/ApiConfiguration.h \
     headers/api/ApiDatabase.h \
@@ -122,18 +124,14 @@ SOURCES += sources/main.cpp \
     sources/Port.cpp \
     sources/PortTcp.cpp \
     sources/PortUdp.cpp \
-    sources/Properties.cpp \
     sources/Request.cpp \
     sources/Response.cpp \
     sources/Server.cpp \
     sources/Session.cpp \
-    sources/Sha256.cpp \
-    sources/SmartMutex.cpp \
     sources/Thread.cpp \
     sources/ThreadPool.cpp \
     sources/Threads.cpp \
     sources/Timer.cpp \
-    sources/Tools.cpp \
     sources/api/Api.cpp \
     sources/api/ApiConfiguration.cpp \
     sources/api/ApiDatabase.cpp \

@@ -2,7 +2,9 @@
 
 #include "ILog.h"
 
+#include "ApiLogs.h"
 #include "Configurations.h"
+#include "Library.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Threads.h"
@@ -26,7 +28,6 @@ Log::Log(QObject *parent) : mutex(QMutex::Recursive)
     QObject::connect(this, SIGNAL(writeLog(LightBird::ILogs::Level,QDateTime,QString,Properties,QString,QString,QString,QString)),
                      this, SLOT(_write(LightBird::ILogs::Level,QDateTime,QString,Properties,QString,QString,QString,QString)),
                      Qt::QueuedConnection);
-
     // Map the names of the log levels
     this->levels[LightBird::ILogs::FATAL] = "Fatal";
     this->levels[LightBird::ILogs::ERROR] = "Error";
@@ -35,6 +36,8 @@ Log::Log(QObject *parent) : mutex(QMutex::Recursive)
     this->levels[LightBird::ILogs::DEBUG] = "Debug";
     this->levels[LightBird::ILogs::TRACE] = "Trace";
     this->level = LightBird::ILogs::TRACE;
+    // Allows the library to use the logs
+    LightBird::Library::setLogs(new ApiLogs("LightBird", false));
 }
 
 Log::~Log()
@@ -216,18 +219,18 @@ void    Log::_initializeWrite()
 {
     QString level;
 
-    // Ensure that the write has not already been initialized
+    // Ensures that the write has not already been initialized
     if (this->isRunning() || this->isFinished())
         return ;
-    // Load the current log level
+    // Loads the current log level
     level = Configurations::instance()->get("log/level").toLower();
-    // Put the first letter in upper case, to match the values of the map
+    // Puts the first letter in upper case, to match the values of the map
     level = level.left(1).toUpper() + level.right(level.size() - 1);
     this->level = this->levels.key(level, LightBird::ILogs::INFO);
     this->display = false;
     if (Configurations::instance()->get("log/display") == "true")
         this->display = true;
-    // Write the buffered logs
+    // Writes the buffered logs
     this->mutex.lock();
     QListIterator<Log::LogInformations> log(this->buffer);
     while (log.hasNext())
@@ -241,7 +244,7 @@ void    Log::_initializeWrite()
     this->awake = false;
     // Starts the log thread
     Threads::instance()->newThread(this, false);
-    // Wait that the thread is started
+    // Waits that the thread is started
     this->waitMutex.lock();
     if (!this->awake)
         this->waitRun.wait(&waitMutex);
@@ -282,7 +285,7 @@ void    Log::_write(LightBird::ILogs::Level level, const QDateTime &date, const 
 {
     QMap<QString, LightBird::ILog *> plugins;
 
-    // Ensure that the mode is correct before getting the plugins
+    // Ensures that the mode is correct before getting the plugins
     this->mutex.lock();
     if (this->mode == Log::WRITE)
         plugins = Plugins::instance()->getInstances<LightBird::ILog>();

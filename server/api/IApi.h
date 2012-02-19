@@ -74,8 +74,6 @@ namespace LightBird
         virtual QString                     getServerVersion() const = 0;
         /// @brief Returns the server language (en for english, fr for france...).
         virtual QString                     getLanguage() const = 0;
-        /// @brief Returns the SHA-256 of data in hex.
-        virtual QByteArray                  sha256(const QByteArray &data) const = 0;
     };
 }
 

@@ -1,6 +1,6 @@
 #include "Database.h"
+#include "LightBird.h"
 #include "TableLimits.h"
-#include "Tools.h"
 
 TableLimits::TableLimits(const QString &id)
 {
@@ -29,7 +29,7 @@ bool    TableLimits::add(const QString &name, const QString &value, const QStrin
     QSqlQuery   query;
     QString     id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableLimits", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);

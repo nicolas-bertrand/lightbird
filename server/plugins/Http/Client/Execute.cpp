@@ -10,6 +10,7 @@
 
 #include "Audio.h"
 #include "Execute.h"
+#include "LightBird.h"
 #include "Medias.h"
 #include "Plugin.h"
 #include "Preview.h"
@@ -37,7 +38,8 @@ Execute::Execute(LightBird::IApi &a, LightBird::IClient &c, const QString &com) 
     commands["Select"] = &Execute::_select;
     commands["Uploads"] = &Execute::_uploads;
     commands["UploadsProgress"] = &Execute::_uploadsProgress;
-    commands["StopUpload"] = &Execute::_stopUpload;
+    commands["UploadsStop"] = &Execute::_uploadsStop;
+    commands["UploadsCancel"] = &Execute::_uploadsCancel;
     commands["StopStream"] = &Execute::_stopStream;
     commands["Video"] = &Execute::_video;
     commands["DeleteFile"] = &Execute::_deleteFile;
@@ -94,7 +96,7 @@ void                        Execute::_identify()
         query.prepare(database.getQuery("HttpClient", "select_all_accounts"));
         if (database.query(query, result))
             for (i = 0, s = result.size(); i < s && id.isEmpty(); ++i)
-                if (name == this->api.sha256(result[i]["name"].toByteArray() + salt.toAscii()))
+                if (name == LightBird::sha256(result[i]["name"].toByteArray() + salt.toAscii()))
                 {
                     id = result[i]["id"].toString();
                     break;
@@ -106,7 +108,7 @@ void                        Execute::_identify()
             // Create a new session. The client has 30 seconds to generate the identifiant.
             session = this->api.sessions().create(QDateTime::currentDateTime().addSecs(30), id, QStringList() << client.getId());
             // Compute the identifiant of the client
-            session->setInformation("identifiant", this->api.sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + session->getId().toAscii()));
+            session->setInformation("identifiant", LightBird::sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + session->getId().toAscii()));
             Plugin::addCookie(client, "sid", session->getId());
             // Return the id of the account, which is the salt of the password
             this->response.getContent().setContent(id.toAscii());
@@ -114,8 +116,8 @@ void                        Execute::_identify()
         // Otherwise we return a fake salt and sid (the user shouldn't know that the name doesn't exists).
         else
         {
-            Plugin::addCookie(client, "sid", QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
-            this->response.getContent().setContent(QUuid::createUuid().toString().remove(0, 1).remove(36, 1).toAscii());
+            Plugin::addCookie(client, "sid", LightBird::createUuid());
+            this->response.getContent().setContent(LightBird::createUuid().toAscii());
             Plugin::getInstance().identificationFailed(client);
         }
     }
@@ -183,9 +185,14 @@ void        Execute::_uploadsProgress()
     Plugin::getInstance().getUploads().progress(this->client);
 }
 
-void        Execute::_stopUpload()
+void        Execute::_uploadsStop()
 {
-    //Uploads::getInstance().stop(client);
+    Plugin::getInstance().getUploads().stop(this->client);
+}
+
+void        Execute::_uploadsCancel()
+{
+    Plugin::getInstance().getUploads().cancel(this->client);
 }
 
 void        Execute::_stopStream()

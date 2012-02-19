@@ -50,6 +50,8 @@ function UploadsSession(uploads)
     this.node = new Object(); // Some nodes in the session
     this.node.progress = undefined; // The progress bar of the upload
     this.node.uploading = undefined; // Show the progress of an uploading file
+    this.node.cancel = undefined; // Allows to cancel an upload session
+    this.node.stop = undefined; // Allows to stop an upload session
     this.path = uploads.path; // The virtual directory where the file will be uploaded
     this.id = "upload" + Math.floor(Math.random() * 1000000000); // The id is used to send commands to the server
     this.row = undefined; // The row of the table in the progress bar
@@ -57,6 +59,8 @@ function UploadsSession(uploads)
     this.numberFilesUploaded = 0; // The number of files uploaded so far
     this.size = 0; // The total size of the upload
     this.currentFile = undefined; // The file being uploaded
+    this.complete = false; // True if all the files have been uploaded
+    var session = this;
     
     // Creates the session using the template
     this.session = document.createElement("div");
@@ -65,13 +69,16 @@ function UploadsSession(uploads)
     this.session.innerHTML = this.uploads.node.template.innerHTML;
     this.node.progress = getElementsByClassName("progress", this.session, true);
     this.node.uploading = getElementsByClassName("uploading", this.session, true);
+    this.node.cancel = getElementsByClassName("cancel", this.session, true);
+    this.node.stop = getElementsByClassName("stop", this.session, true);
     this.row = this.session.getElementsByTagName("table")[0].rows[0];
     this.files = this.row.cells;
+    addEvent(this.node.cancel, "mousedown",  function () { session.cancel(); });
+    addEvent(this.node.stop, "mousedown",  function () { session.stop(); });
     // Creates a new input
     this.uploads.node.form.target = this.id;
     this.uploads.node.form.innerHTML = "<input class=\"file\" type=\"file\" name=\"file\" multiple=\"true\" />";
     this.uploads.node.input = this.uploads.node.form.getElementsByTagName("input")[0];
-    var session = this;
     addEvent(this.uploads.node.input, "change",  function () { session.start(); });
     // Creates the frame of the session
     var frame = getElementsByClassName("frame", this.session, true);
@@ -157,6 +164,7 @@ UploadsSession.prototype.requestProgress = function ()
                 setTimeout(function () { session.requestProgress(); }, 1000);
             else
                 percentage = 100;
+            session.complete = result.complete;
             session.updateProgress(percentage);
         }
     }
@@ -191,6 +199,26 @@ UploadsSession.prototype.updateProgress = function (percentage)
         setClassName(this.files[this.files.length - 1], "uploaded");
         this.node.uploading.parentNode.removeChild(this.node.uploading);
     }
+}
+
+// Stop an upload session.
+UploadsSession.prototype.stop = function ()
+{
+    if (!this.complete)
+        request("GET", "Execute/UploadsStop?id=" + this.id);
+    this.session.parentNode.removeChild(this.session);
+}
+
+// Cancels an upload session. All the uploaded files are removed.
+UploadsSession.prototype.cancel = function ()
+{
+    var files = "[" + this.path + "/" + this.files[0].name;
+    for (var i = 1; i < this.files.length; ++i)
+        files += "," + this.path + "/" + this.files[i].name;
+    files += "]";
+    console.log(files);
+    request("POST", "Execute/UploadsCancel?id=" + this.id, undefined, files);
+    this.session.parentNode.removeChild(this.session);
 }
 
 function initialize_uploads(task) { return new Uploads(task); }

@@ -6,6 +6,7 @@
 #include "Configurations.h"
 #include "Database.h"
 #include "Defines.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "SmartMutex.h"
@@ -20,7 +21,6 @@
 #include "TableLimits.h"
 #include "TablePermissions.h"
 #include "TableTags.h"
-#include "Tools.h"
 
 Database::Database(QObject *parent) : QObject(parent)
 {
@@ -319,7 +319,7 @@ bool        Database::_name(QString &name)
             return (false);
         }
         // Copy the resource file to the database file
-        if (Tools::copy(databaseResource, file) == false)
+        if (LightBird::copy(databaseResource, file) == false)
         {
             Log::error("Cannot creates the database file from the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_name");
             return (false);

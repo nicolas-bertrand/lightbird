@@ -4,9 +4,10 @@ Properties::Properties()
 {
 }
 
-Properties::Properties(const QString &key, const QVariant &value)
+Properties::Properties(const QString &key, const QVariant &value, bool empty)
 {
-    this->add(key, value.toString());
+    if (empty || !value.toString().isEmpty())
+        this->add(key, value.toString());
 }
 
 Properties::Properties(const QMap<QString, QString> &properties)
@@ -27,7 +28,7 @@ Properties  &Properties::operator=(const QMap<QString, QString> &properties)
 
 Properties  &Properties::add(const QString &key, const QVariant &value, bool empty)
 {
-    if (empty == true || !value.toString().isEmpty())
+    if (empty || !value.toString().isEmpty())
         this->properties.insertMulti(key, value.toString());
     return (*this);
 }

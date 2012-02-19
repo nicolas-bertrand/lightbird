@@ -300,14 +300,19 @@ div.quote ul
     list-style-type: disc;
 }
 
-.allowed
+div.quote .allowed
 {
     color: #00A030;
 }
 
-.denied
+div.quote .denied
 {
     color: red;
+}
+
+div.quote .key
+{
+    color: #800080;
 }
 
 /*////////////////////////////////////////////////////////////////////////////

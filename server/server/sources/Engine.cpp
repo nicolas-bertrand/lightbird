@@ -1,8 +1,9 @@
-#include "Engine.h"
 #include "IOnRead.h"
 #include "IOnWrite.h"
+
+#include "Engine.h"
+#include "LightBird.h"
 #include "Plugins.hpp"
-#include "Tools.h"
 
 Engine::Engine(Client &c) : client(c)
 {
@@ -66,7 +67,7 @@ void    Engine::_onRead(QByteArray &data)
     QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
 
     if (Log::instance()->isTrace())
-        Log::trace("Data received", Properties("id", this->client.getId()).add("data", Tools::simplify(data)).add("size", data.size()), "Engine", "_onRead");
+        Log::trace("Data received", Properties("id", this->client.getId()).add("data", LightBird::simplify(data)).add("size", data.size()), "Engine", "_onRead");
     else if (Log::instance()->isDebug())
         Log::debug("Data received", Properties("id", this->client.getId()).add("size", data.size()), "Engine", "_onRead");
     while (it.hasNext())

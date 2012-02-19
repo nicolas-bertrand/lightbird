@@ -1,8 +1,8 @@
 #include "Configurations.h"
 #include "Database.h"
+#include "LightBird.h"
 #include "TableCollections.h"
 #include "TablePermissions.h"
-#include "Tools.h"
 
 TableCollections::TableCollections(const QString &id)
 {
@@ -34,7 +34,7 @@ QString TableCollections::getIdFromVirtualPath(const QString &virtualPath, const
     QString                 id_collection = "";
     int                     row;
 
-    path = Tools::cleanPath(virtualPath);
+    path = LightBird::cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
     while (it.hasNext())
     {
@@ -73,7 +73,7 @@ bool    TableCollections::add(const QString &name, const QString &id_collection,
     QVector<QVariantMap>    result;
     QString                 id;
 
-    id = Tools::createUuid();
+    id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("TableCollections", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
@@ -136,7 +136,7 @@ bool    TableCollections::setVirtualPath(const QString &virtualPath)
     QString id_collection;
     QString path;
 
-    path = Tools::cleanPath(virtualPath);
+    path = LightBird::cleanPath(virtualPath);
     if (path.count('/') == path.size())
         return (this->setIdCollection(""));
     if ((id_collection = TableCollections().getIdFromVirtualPath(path)).isEmpty())

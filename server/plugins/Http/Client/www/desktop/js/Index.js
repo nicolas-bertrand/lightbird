@@ -7,47 +7,47 @@ var gl_browserSize;
 // A number used to get an unique id across the session. Use getUid() to get one.
 var gl_uid = 0;
 
-// Initialize the page (called by onload)
+// Initializes the page (called by onload)
 function load()
 {
 	if (gl_loaded)
 		return ;
-	// Initialize the resources
+	// Initializes the resources
 	gl_resources = new Resources();
-	// Initialize the desktop
+	// Initializes the desktop
 	gl_desktop = new Desktop();
-	// Initialize the browser size
+	// Initializes the browser size
 	onResize();
 	// onResize is called every time the browser is resized
 	window.onresize = onResize;
-	// Initialize the Account management system
+	// Initializes the Account management system
 	initializeAccount();
 	// The right click is disabled in order to replace the normal contextual menu of the browser.
 	//document.oncontextmenu = function() { return (false); };
 	document.getElementById("loading_client").style.display = "none";
-	// Ensure that the load function will not be called twice
+	// Ensures that the load function will not be called twice
 	gl_loaded = true;
 }
 
 // This function is called when the size of the browser change
 function onResize()
 {
-	// Get the new browser size
+	// Gets the new browser size
 	gl_browserSize = getBrowserSize();
-	// Update the background
+	// Updates the background
 	adjustBackgroundSize();
-    // Resize the desktop
+    // Resizes the desktop
     gl_desktop.onResize();
-	// Call the resize function of all the windows that implements it
+	// Calls the resize function of all the windows that implements it
 	for (var id in gl_windows)
 		if (gl_windows[id].onResize != undefined)
 			gl_windows[id].onResize();
 }
 
-// Ajust the background size according to the size of the browser
+// Ajusts the background size according to the size of the browser
 function adjustBackgroundSize()
 {
-	// Set the background size to the screen size
+	// Sets the background size to the screen size
 	var background = document.getElementById("background");
 	background.style.width = gl_browserSize.width + "px";
 	background.style.height = gl_browserSize.height + "px";
@@ -56,7 +56,7 @@ function adjustBackgroundSize()
 	background_identification.style.height = gl_browserSize.height + "px";
 }
 
-// Find the size of the browser window
+// Finds the size of the browser window
 function getBrowserSize()
 {
 	var width = 1280;
@@ -84,13 +84,13 @@ function getBrowserSize()
 			height : height};
 }
 
-// Execute a Http Request on the server.
+// Executes a Http Request on the server.
 // @method : The Http method to execute (GET or POST).
 // @url : The url of the Http request.
 // @callback : A function that will be called once the responce has been received.
 // @data : The data that has to be sent with the POST method.
 // The response may be invalid.
-function request(method, url, callback, cache, data)
+function request(method, url, callback, data)
 {
 	var HttpRequest;
 
@@ -102,7 +102,7 @@ function request(method, url, callback, cache, data)
 		// code for IE6, IE5
 		HttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
 
-	// Set the ready state anonym function
+	// Sets the ready state anonym function
 	HttpRequest.onreadystatechange = function()
 	{
 		if (HttpRequest.readyState == 4)
@@ -110,17 +110,17 @@ function request(method, url, callback, cache, data)
 				callback(HttpRequest);
 	}
 
-	// Add a random string in the uri to prevent the result being cached
+	// Adds a random string in the uri to prevent the result being cached
 	url += (url.indexOf("?") == -1 ? "?" : "&");
 	url += "r=" + Math.random();
-	// Add the token that identify the client : SHA256(identifiant + date + url)
+	// Adds the token that identify the client : SHA256(identifiant + date + url)
 	if (localStorage.getItem("identifiant") != undefined)
 	{
 		var location = url.substring(0, (url.indexOf("?") != -1 ? url.indexOf("?") : url.length));
 		url += "&token=" + getToken(location);
 	}
 
-	// Execute the request
+	// Executes the request
 	HttpRequest.open(method, "/Client/" + url, true);
 	if (method.toUpperCase() == "POST")
 	{
@@ -148,7 +148,7 @@ function nl2br(text)
 		return unescape(text.replace(renlchar, '<br />'));
 }
 
-// Create a cookie using the parameters.
+// Creates a cookie using the parameters.
 // @name : The name of the cookie.
 // @value : The value of the cookie.
 // @expireDays : The number of days after which the cookie will be destroyed.
@@ -182,7 +182,7 @@ function getCookie(name)
 	return ("");
 }
 
-// Change the opacity of the node, if the browser support it.
+// Changes the opacity of the node, if the browser support it.
 function changeOpacity(node, value)
 {
 	if (node.style.opacity != undefined)
@@ -217,7 +217,7 @@ function elementCoordinates(element)
 	return {x:left, y:top};
 }
 
-// Add an event to an element.
+// Adds an event to an element.
 // @ element : The element on which the event will be applied.
 // @ event : The name of the event to apply (without the "on").
 // @ fct : A function to call when the event occured.
@@ -231,7 +231,7 @@ function addEvent(element, event, fct)
 		element.addEventListener(event, fct, true);
 }
 
-// Remove an event to an element.
+// Removes an event to an element.
 // @ element : The element on which the event will be removed.
 // @ event : The name of the event to remove (without the "on").
 // @ fct : A function to call when the event occured.
@@ -286,7 +286,7 @@ function removeClassName(node, className)
     node.className = node.className.replace("  ", " ");
 }
 
-// Compare too strings
+// Compares too strings
 function compare(str1, str2)
 {
 	for (var i = 0, s = str1.length; i < s; ++i)
@@ -301,7 +301,7 @@ function compare(str1, str2)
 	return (-1);
 }
 
-// Find the target of the event in a cross browser way.
+// Finds the target of the event in a cross browser way.
 function getEventTarget(event, name, depth)
 {
 	target = (event.target || event.srcElement);
@@ -318,7 +318,7 @@ function getEventTarget(event, name, depth)
 	}
 }
 
-// Find the related target of the event in a cross browser way.
+// Finds the related target of the event in a cross browser way.
 function getEventRelatedTarget(event, name, depth)
 {
     var target;
@@ -429,7 +429,7 @@ function randomString(size)
     return (text);
 }
 
-// Translate the text in the correct language
+// Translates the text in the correct language
 function tr(text)
 {
     if (text)

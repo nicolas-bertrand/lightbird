@@ -8,6 +8,7 @@
 #include "ITableFiles.h"
 
 #include "Execute.h"
+#include "LightBird.h"
 #include "Medias.h"
 #include "Plugin.h"
 #include "Uploads.h"
@@ -123,7 +124,7 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
         if (!client.getAccount().exists())
             this->_api->network().disconnect(client.getId());
         // Manages the upload of files
-        else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().contains("/Execute/Uploads"))
+        else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().endsWith("/Execute/Uploads"))
         {
             if (type == LightBird::IOnUnserialize::IDoUnserializeHeader)
                 this->uploads.onUnserializeHeader(client);
@@ -265,8 +266,8 @@ bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Sessi
     QDateTime   date = QDateTime::currentDateTime().toUTC();
 
     // The token is the combination of the identifiant, the current date (+/- 1 minute), and a part of the URI
-    if (token == this->_api->sha256(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii()) ||
-        token == this->_api->sha256(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii()))
+    if (token == LightBird::sha256(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii()) ||
+        token == LightBird::sha256(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii()))
         return (true);
     this->identificationFailed(client);
     client.getResponse().setError(true);
