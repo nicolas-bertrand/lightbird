@@ -89,8 +89,9 @@ function getBrowserSize()
 // @url : The url of the Http request.
 // @callback : A function that will be called once the responce has been received.
 // @data : The data that has to be sent with the POST method.
+// @type : The content-type of the data. The default is "application/x-www-form-urlencoded".
 // The response may be invalid.
-function request(method, url, callback, data)
+function request(method, url, callback, data, type)
 {
 	var HttpRequest;
 
@@ -124,7 +125,7 @@ function request(method, url, callback, data)
 	HttpRequest.open(method, "/Client/" + url, true);
 	if (method.toUpperCase() == "POST")
 	{
-		HttpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		HttpRequest.setRequestHeader("Content-type", (type ? type : "application/x-www-form-urlencoded"));
 		HttpRequest.send(data);
 	}
 	else

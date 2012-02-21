@@ -28,6 +28,8 @@ private:
     bool    _parseHeaderFirstLine();
     /// @brief Check that the properties are correct.
     bool    _parseHeaderProperties();
+    /// @brief Parse the content-type and its parameters.
+    void    _parseContentType(const QByteArray &value);
 
     quint64 contentLength;  ///< The length of the content of the request.
 };

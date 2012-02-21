@@ -7,10 +7,12 @@ INCLUDEPATH += . \
     ../../../api \
     ../../../api/table \
     ../../../api/network \
-    ../../../extensions
+    ../../../extensions \
+    ../../../library
 
 TARGET = Plugin
 DESTDIR = ../../../build/plugins/Example/Basic
+LIBS += -L../../../build -lLightBird
 
 HEADERS = Plugin.h
 SOURCES = Plugin.cpp

@@ -1,5 +1,6 @@
 #include <QtPlugin>
 
+#include "LightBird.h"
 #include "Plugin.h"
 
 Plugin::Plugin()

@@ -247,7 +247,7 @@ bool                    Plugin::_loadLibrary()
     }
     if (!this->loader)
     {
-        Log::error("Unable to find a valid plugin library", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
+        Log::warning("Unable to find a valid plugin library", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
         return (false);
     }
     Log::trace("Plugin library found", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
@@ -283,13 +283,13 @@ bool    Plugin::_load()
 {
     if (!this->loader)
     {
-        Log::error("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
+        Log::debug("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
         return (false);
     }
     this->instanceObject = this->loader->instance();
     if (!(this->instance = qobject_cast<LightBird::IPlugin *>(this->instanceObject)))
     {
-        Log::error("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
+        Log::debug("The plugin does not implement IPlugin", Properties("id", this->id), "Plugin", "_load");
         return (false);
     }
     if (Plugins::isInstalled(this->id))

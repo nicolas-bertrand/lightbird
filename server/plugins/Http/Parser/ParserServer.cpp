@@ -217,9 +217,9 @@ bool            ParserServer::_parseHeaderFirstLine()
 
 bool    ParserServer::_parseHeaderProperties()
 {
-    QString                     line;
-    QString                     key;
-    QString                     value;
+    QByteArray                  line;
+    QByteArray                  key;
+    QByteArray                  value;
     int                         l;
     QMap<QString, QStringList>  multiMap;
     QMap<QString, QString>      &header = this->request.getHeader();
@@ -242,7 +242,7 @@ bool    ParserServer::_parseHeaderProperties()
         else
             multiMap[key].push_front(value);
         if (key == "content-type")
-            this->request.setType(value);
+            this->_parseContentType(value);
     }
     // Adds the values that have the same key to the header
     // This is done to ensure that the order of the values is kept
@@ -265,6 +265,24 @@ bool    ParserServer::_parseHeaderProperties()
         !Plugin::getConfiguration().methodContent.contains(this->request.getMethod()))
         return (this->_error(400, "Bad Request", "This method doesn't require a content."));
     return (true);
+}
+
+void            ParserServer::_parseContentType(const QByteArray &value)
+{
+    QVariantMap parameters;
+    int         i;
+
+    QListIterator<QByteArray> it(value.split(';'));
+    while (it.hasNext())
+        if ((i = it.next().indexOf('=')) > 0)
+            parameters.insert(it.peekPrevious().left(i).trimmed(), it.peekPrevious().right(it.peekPrevious().size() - i - 1));
+    // Saves the parameters of the media type
+    this->request.getInformations().insert("media-type", parameters);
+    // Gets the content-type
+    if ((i = value.indexOf(';')) < 0)
+        this->request.setType(value);
+    else
+        this->request.setType(value.left(i));
 }
 
 bool    ParserServer::_error(int code, const QString &message, const QByteArray &content)

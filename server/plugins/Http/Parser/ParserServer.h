@@ -29,6 +29,8 @@ private:
     bool    _parseHeaderFirstLine();
     /// @brief Check that the properties are correct.
     bool    _parseHeaderProperties();
+    /// @brief Parse the content-type and its parameters.
+    void    _parseContentType(const QByteArray &value);
     /// @brief Send an error to the client.
     bool    _error(int code, const QString &message, const QByteArray &content = "");
 

@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/Http/Get">
+    <qresource prefix="/plugins/Json">
         <file alias="configuration">Configuration.xml</file>
     </qresource>
 </RCC>

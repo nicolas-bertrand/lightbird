@@ -1,7 +1,9 @@
-TEMPLATE    =   subdirs
+TEMPLATE = subdirs
 
-SUBDIRS     =   Example \
-                Extensions \
-                Http \
-                Log \
-                Test
+SUBDIRS = Example \
+    Extensions \
+    Http \
+    Json/QJson \
+    Json \
+    Log \
+    Test

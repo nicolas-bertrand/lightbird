@@ -52,7 +52,7 @@ function checkIdentification()
 			if (HttpRequest.status == 200)
 			{
 				gl_identified = true;
-				animation(document.getElementById("desktop"), 2000, animationOpacity, true);
+				animation(document.getElementById("desktop"), 250, animationOpacity, true);
 				animation(document.getElementById("background"), 250, animationOpacity, true);
 			}
 			// Displays the identification panel

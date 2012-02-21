@@ -1,7 +1,7 @@
-TEMPLATE    =   subdirs
+TEMPLATE = subdirs
 
-SUBDIRS     =   api \
-                extensions \
-                library \
-                plugins \
-                server
+SUBDIRS = api \
+    extensions \
+    library \
+    plugins \
+    server

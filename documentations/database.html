@@ -18,6 +18,7 @@
         </div>
         <p>Afin de simplifier le schéma, les champs <strong>created</strong> et <strong>modified</strong> dont toutes les tables disposent à l’exception de deleted, ne sont pas représentés. De même, toutes les tables sauf deleted ont un champ <strong>id</strong>, mais seuls les id utilisés par d’autres tables, c'est-à-dire qui sont utilisés par des clés externes, sont affichés sur ce schéma.</p>
         <p>Le nom des tables et des champs est en minuscule. La valeur des champs en <em>italique</em> peut être vide, mais aucun champ ne peut être NULL.</p>
+        <p>Tous les champs de type texte doivent être encodés en <strong>UTF-8</strong>.</p>
         
         <h2>II. Accessors et Objects</h2>
         <p>Le terme « <strong>accessor</strong> » regroupe les tables <strong>accounts</strong> et <strong>groups</strong>. Le terme « <strong>object</strong> » regroupe les tables <strong>files</strong>, <strong>directories</strong>, et <strong>collections</strong>. L’idée générale de cette représentation est qu’un accessor est une entité qui peut effectuer des opérations sur un object. Ceci est pratique par exemple pour la gestion des droits où un accessor est lié à un object via leurs id. Un compte peut ainsi avoir des droits sur un fichier, et un groupe peut en avoir sur une collection.</p>

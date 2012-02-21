@@ -1,4 +1,4 @@
-function Uploads(task)
+﻿function Uploads(task)
 {
     // Nodes
     this.node = new Object();
@@ -116,7 +116,7 @@ UploadsSession.prototype.createProgressBar = function ()
             var file = this.files[this.files.length - 1];
             var width = files[i].size / this.size * 100;
             file.style.width = width + "%";
-            file.name = files[i].name;
+            file.name = this.extractFilename(files[i].name);
             file.size = files[i].size;
             if (i > 0)
                 previous = this.files[this.files.length - 2];
@@ -129,7 +129,7 @@ UploadsSession.prototype.createProgressBar = function ()
     else
     {
         this.row.insertCell(-1);
-        this.files[0].name = this.uploads.node.input.value;
+        this.files[0].name = this.extractFilename(this.uploads.node.input.value);
         this.files[0].size = 0;
         this.files[0].length = 0;
         this.files[0].progress = 100;
@@ -212,13 +212,38 @@ UploadsSession.prototype.stop = function ()
 // Cancels an upload session. All the uploaded files are removed.
 UploadsSession.prototype.cancel = function ()
 {
-    var files = "[" + this.path + "/" + this.files[0].name;
-    for (var i = 1; i < this.files.length; ++i)
-        files += "," + this.path + "/" + this.files[i].name;
-    files += "]";
-    console.log(files);
-    request("POST", "Execute/UploadsCancel?id=" + this.id, undefined, files);
+    var files;
+
+    if (this.complete)
+        files = this.filesToJson();
+    request("POST", "Execute/UploadsCancel?id=" + this.id, undefined, files, "application/json");
     this.session.parentNode.removeChild(this.session);
+}
+
+// Returns the files in the session as a json list.
+UploadsSession.prototype.filesToJson = function ()
+{
+    var json = "[";
+    
+    if (json.length > 0)
+        json = "[\"" + (this.path + "/" + this.files[0].name).replace(/\\/g, "\\\\").replace(/\"/g, "\\\"") + "\"";
+    for (var i = 1; i < this.files.length; ++i)
+        json += ",\"" + (this.path + "/" + this.files[i].name).replace(/\\/g, "\\\\").replace(/\"/g, "\\\"") + "\"";
+    return (json + "]")
+}
+
+// Cleans the name of the file.
+UploadsSession.prototype.extractFilename = function (path)
+{
+    if (path.substr(0, 12) == "C:\\fakepath\\")
+        return path.substr(12); // modern browser
+    var x = path.lastIndexOf('/');
+    if (x >= 0) // Unix-based path
+        return (path.substr(x + 1));
+    x = path.lastIndexOf('\\');
+    if (x >= 0) // Windows-based path
+        return (path.substr(x + 1));
+    return (path); // just the filename
 }
 
 function initialize_uploads(task) { return new Uploads(task); }

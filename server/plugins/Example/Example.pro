@@ -1,3 +1,3 @@
-TEMPLATE    =   subdirs
+TEMPLATE = subdirs
 
-SUBDIRS     =   Basic
+SUBDIRS = Basic

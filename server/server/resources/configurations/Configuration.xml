@@ -49,6 +49,7 @@
     <plugin>Extensions/Identifier</plugin>
     <plugin>Http/Client</plugin>
     <plugin>Http/Parser</plugin>
+    <plugin>Json</plugin>
     <plugin>Log/File</plugin>
     <!--plugin>Test</plugin-->
   </plugins>
@@ -56,6 +57,7 @@
     <plugin id="Extensions/Identifier"/>
     <plugin id="Http/Client"/>
     <plugin id="Http/Parser"/>
+    <plugin id="Json"/>
     <plugin id="Log/File"/>
     <plugin id="Test"/>
   </configurations>
