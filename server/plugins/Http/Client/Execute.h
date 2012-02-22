@@ -26,6 +26,7 @@ private:
     void                 _preview();
     void                 _select();
     void                 _uploads();
+    void                 _uploadsCheck();
     void                 _uploadsProgress();
     void                 _uploadsStop();
     void                 _uploadsCancel();

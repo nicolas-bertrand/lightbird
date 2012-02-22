@@ -16,7 +16,7 @@ public:
     ~Content();
 
     LightBird::IContent::Storage getStorage() const;
-    void            setStorage(LightBird::IContent::Storage storage, const QString &fileName = "");
+    LightBird::IContent &setStorage(LightBird::IContent::Storage storage, const QString &fileName = "");
     QByteArray      getContent(quint64 size = 0);
     void            setContent(const QByteArray &content, bool append = true);
     QByteArray      *getByteArray();

@@ -55,6 +55,8 @@ public:
     void    doExecution(LightBird::IClient &client);
     /// @brief Identifies the files in the identification queue.
     bool    timer();
+    /// @brief Checks if the files in the content can be uploaded by the user.
+    void    check(LightBird::IClient &client);
     /// @brief Returns the amount of data download so far, in JSON.
     void    progress(LightBird::IClient &client);
     /// @brief Stops the upload and removes the current file.

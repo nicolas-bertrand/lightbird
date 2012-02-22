@@ -32,7 +32,7 @@ LightBird::IContent::Storage Content::getStorage() const
     return (this->storage);
 }
 
-void    Content::setStorage(LightBird::IContent::Storage storage, const QString &fileName)
+LightBird::IContent &Content::setStorage(LightBird::IContent::Storage storage, const QString &fileName)
 {
     this->clear();
     this->storage = storage;
@@ -54,6 +54,7 @@ void    Content::setStorage(LightBird::IContent::Storage storage, const QString 
         this->temporaryFile = new QTemporaryFile(filePath + "/" + fileName);
         this->temporaryFile->open();
     }
+    return (*this);
 }
 
 QByteArray  Content::getContent(quint64 size)

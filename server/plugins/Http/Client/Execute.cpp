@@ -37,6 +37,7 @@ Execute::Execute(LightBird::IApi &a, LightBird::IClient &c, const QString &com) 
     commands["Preview"] = &Execute::_preview;
     commands["Select"] = &Execute::_select;
     commands["Uploads"] = &Execute::_uploads;
+    commands["UploadsCheck"] = &Execute::_uploadsCheck;
     commands["UploadsProgress"] = &Execute::_uploadsProgress;
     commands["UploadsStop"] = &Execute::_uploadsStop;
     commands["UploadsCancel"] = &Execute::_uploadsCancel;
@@ -178,6 +179,11 @@ void        Execute::_select()
 void        Execute::_uploads()
 {
     Plugin::getInstance().getUploads().doExecution(this->client);
+}
+
+void        Execute::_uploadsCheck()
+{
+    Plugin::getInstance().getUploads().check(this->client);
 }
 
 void        Execute::_uploadsProgress()

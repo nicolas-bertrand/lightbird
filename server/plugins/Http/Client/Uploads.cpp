@@ -28,7 +28,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     upload.idAccount = client.getAccount().getId();
     upload.file = QSharedPointer<QFile>(new QFile());
     upload.progress = 0;
-    upload.path = QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii()).toAscii();
+    upload.path = QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii());
     upload.size = client.getRequest().getHeader().value("content-length").toULongLong();
     upload.boundary = client.getRequest().getInformations().value("media-type").toMap().value("boundary").toByteArray();
     upload.boundary = "--" + upload.boundary.right(upload.boundary.size() - upload.boundary.indexOf('=') - 1);
@@ -245,6 +245,27 @@ bool                Uploads::timer()
         this->mutex.unlock();
     }
     return (false);
+}
+
+void        Uploads::check(LightBird::IClient &client)
+{
+    QSharedPointer<LightBird::ITableFiles> fileTable(Plugin::api().database().getFiles());
+    QString         path = QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii());
+    QVariantList    files;
+    QVariantList    denied;
+
+    if (client.getRequest().getContent().getStorage() == LightBird::IContent::VARIANT
+        && !(files = client.getRequest().getContent().getVariant()->toList()).isEmpty())
+    {
+        // Generates the list of the files that can't be uploaded
+        QListIterator<QVariant> it(files);
+        while (it.hasNext())
+            if (!it.next().toString().isEmpty() && fileTable->setIdFromVirtualPath(path + "/" + it.peekPrevious().toByteArray()))
+                denied << it.peekPrevious().toByteArray();
+        // Send the list
+        (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = denied;
+        client.getResponse().setType(client.getRequest().getType());
+    }
 }
 
 void        Uploads::progress(LightBird::IClient &client)
