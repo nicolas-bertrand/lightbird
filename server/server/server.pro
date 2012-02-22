@@ -8,14 +8,12 @@ CONFIG += qt \
 DEPENDPATH += sources \
     headers \
     headers/api \
-    headers/tables \
     ../api \
     ../api/table \
     ../api/network \
     ../library
 INCLUDEPATH += headers \
     headers/api \
-    headers/tables \
     ../api \
     ../api/table \
     ../api/network \
@@ -56,7 +54,6 @@ HEADERS += headers/Arguments.h \
     headers/Content.h \
     headers/Context.h \
     headers/Database.h \
-    headers/Defines.h \
     headers/Engine.h \
     headers/EngineClient.h \
     headers/EngineServer.h \
@@ -89,19 +86,7 @@ HEADERS += headers/Arguments.h \
     headers/api/ApiNetwork.h \
     headers/api/ApiPlugins.h \
     headers/api/ApiSessions.h \
-    headers/api/ApiTimers.h \
-    headers/tables/Table.h \
-    headers/tables/TableAccessors.h \
-    headers/tables/TableAccounts.h \
-    headers/tables/TableCollections.h \
-    headers/tables/TableDirectories.h \
-    headers/tables/TableEvents.h \
-    headers/tables/TableFiles.h \
-    headers/tables/TableGroups.h \
-    headers/tables/TableLimits.h \
-    headers/tables/TableObjects.h \
-    headers/tables/TablePermissions.h \
-    headers/tables/TableTags.h
+    headers/api/ApiTimers.h
 SOURCES += sources/main.cpp \
     sources/Arguments.cpp \
     sources/Client.cpp \
@@ -141,19 +126,7 @@ SOURCES += sources/main.cpp \
     sources/api/ApiNetwork.cpp \
     sources/api/ApiPlugins.cpp \
     sources/api/ApiSessions.cpp \
-    sources/api/ApiTimers.cpp \
-    sources/tables/Table.cpp \
-    sources/tables/TableAccessors.cpp \
-    sources/tables/TableAccounts.cpp \
-    sources/tables/TableCollections.cpp \
-    sources/tables/TableDirectories.cpp \
-    sources/tables/TableEvents.cpp \
-    sources/tables/TableFiles.cpp \
-    sources/tables/TableGroups.cpp \
-    sources/tables/TableLimits.cpp \
-    sources/tables/TableObjects.cpp \
-    sources/tables/TablePermissions.cpp \
-    sources/tables/TableTags.cpp
+    sources/api/ApiTimers.cpp
 OTHER_FILES = resources/configurations/Configuration.xml \
     resources/databases/queries.xml \
     resources/databases/foreign_keys.sql \

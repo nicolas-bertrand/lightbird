@@ -470,7 +470,7 @@ QVariantMap     &Client::getInformations()
     return (this->informations);
 }
 
-LightBird::ITableAccounts &Client::getAccount()
+LightBird::TableAccounts &Client::getAccount()
 {
     return (this->account);
 }

@@ -432,21 +432,22 @@
         <p>Pour des informations plus précises sur ces interfaces, consultez leurs commentaires.</p>
         
         <h2>XI. Bibliothèque LightBird</h2>
-        <p>En plus de l'API, le serveur fournit une Shared Library à laquelle les plugins peuvent se lier. Elle contient divers fonctionnalités destinées à faciliter l'implémentation des plugin, tels que la class <strong>Properties</strong> qui permet d'émettre des logs détaillés en une ligne, les <strong>SmartMutex</strong>...</p>
+        <p>En plus de l'API, le serveur fournit une bibliothèque partagée à laquelle les plugins doivent se lier. Elle contient divers fonctionnalités destinées à faciliter l'implémentation des plugin, tels que l'abstraction de la base de données, la class <strong>Properties</strong> qui permet d'émettre des logs détaillés en une ligne, les <strong>SmartMutex</strong>...</p>
         <p>Pour utiliser cette bibliothèque un plugin doit insérer les lignes suivantes dans son .pro et inclure le fichier <strong>LightBird.h</strong> :</p>
         <div class="quote">
             <span class="key">INCLUDEPATH</span> += ../../library<br />
             <span class="key">LIBS</span> += -L../../build -lLightBird
         </div>
+        <p>Le nombre de répertoire "</strong>../</strong>" dépend de la position du plugin la hiérarchie.</p>
         
-        <h2>XII. TCP et UDP</h2>
+        <h2>XII. Abstraction de la base de données</h2>
+        <p>L’abstraction de la base de données est un ensemble complet de classes facilitant l’usage de la base de données. Chaque class représente une table, et chaque instance une entrée. Il est ainsi possible d’utiliser la base de données sans avoir à utiliser de requête SQL. Seules les opérations complexes, telles que les jointures, peuvent nécessiter des requêtes fournies par les plugins.</p>
+        <p>La gestion des droits, ou de l’arborescence des fichiers et des dossiers sont également implémentés, ainsi que le support des concepts d’accessors et d’objects.</p>
+        <p>Ces classes se trouvent dans la bibliothèque LightBird, mais peuvent également être créées via l'API de la base de données.</p>
+        
+        <h2>XIII. TCP et UDP</h2>
         <p>Le serveur abstrait totalement la gestion des protocoles de transport TCP et UDP. Quelque soit le protocole utilisé, cela n’a pas d’impact directe sur les plugins, ce qui signifie qu’un plugin développé et testé avec TCP marchera en UDP (s’il on ignore les pertes possibles de paquets en UDP).</p>
         <p>Notez tout de même que les interfaces IDoRead et IDoWrite ne sont appelés qu’en TCP.</p>
-        
-        <h2>XIII. Abstraction de la base de données</h2>
-        <p>L’abstraction de la base de données est un ensemble complet de classes facilitant l’usage de la base de données. Chaque interface représente une table, et chaque instance une entrée. Il est ainsi possible d’utiliser la base de données sans avoir à utiliser de requête SQL. Seules les opérations complexes, telles que les jointures, peuvent nécessiter des requêtes fournies par les plugins.</p>
-        <p>La gestion des droits, ou de l’arborescence des fichiers et des dossiers sont également implémentés, ainsi que le support des concepts d’accessors et d’objects.</p>
-        <p>Les instances sont créées à partir de la méthode getTable de l’API de la base de données. Consultez ses commentaires pour obtenir un exemple de création  d’instance.</p>
         
         <h2 id="events">XIV. Evénements</h2>
         <p>En plus des événements générés par l’API décrit dans la partie <a href="#api_events">VI</a>, le serveur propose aux plugins un système plus souple qui leur permet d’échanger des événements entre eux simplement. Un événement est constitué d’un nom et d’une propriété optionnelle. Leur gestion se fait via l’API d’événements. Les plugins doivent déclarer les événements qu’ils souhaitent recevoir et utiliser l’une de ces deux méthodes pour les récupérer :</p>

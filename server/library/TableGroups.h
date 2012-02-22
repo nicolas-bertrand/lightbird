@@ -1,45 +1,46 @@
-#ifndef ITABLEGROUPS_H
-# define ITABLEGROUPS_H
+#ifndef LIGHTBIRD_TABLEGROUPS_H
+# define LIGHTBIRD_TABLEGROUPS_H
 
 # include <QString>
 # include <QStringList>
 
-# include "ITableAccessors.h"
+# include "TableAccessors.h"
 
 namespace LightBird
 {
-    /// @brief Handle the transactions with the database relating to a group.
+    /// @brief Handles the transactions with the database relating to a group.
     /// Each modifications done in this object is immediatly saved in the database.
-    class ITableGroups : virtual public LightBird::ITableAccessors
+    class LIB TableGroups : public LightBird::TableAccessors
     {
     public:
-        virtual ~ITableGroups() {}
+        TableGroups(const QString &id = "");
+        ~TableGroups();
+        TableGroups(const TableGroups &table);
+        TableGroups &operator=(const TableGroups &table);
 
         /// @brief Returns the id of the groups with this name.
-        virtual QStringList getIdFromName(const QString &name) const = 0;
+        QStringList getIdFromName(const QString &name) const;
         /// @brief Creates a new group.
         /// @param name : The name of the new account. It must be unique.
         /// @param id_group : The id of the parent group.
         /// @return True if the group has been created.
-        virtual bool        add(const QString &name, const QString &id_group = "") = 0;
+        bool        add(const QString &name, const QString &id_group = "");
 
         // Fields
         /// @brief Returns the id of the parent of the group, or empty if
         /// it is at the root.
-        virtual QString     getIdGroup() const = 0;
+        QString     getIdGroup() const;
         /// @brief Modifies the id of the parent of the group.
-        virtual bool        setIdGroup(const QString &id_group = "") = 0;
+        bool        setIdGroup(const QString &id_group = "");
 
         // Accounts
         /// @brief Add the group to the account in parameter.
-        virtual bool        addAccount(const QString &id_account) = 0;
+        bool        addAccount(const QString &id_account);
         /// @brief Remove the group from the account in parameter.
-        virtual bool        removeAccount(const QString &id_account) = 0;
+        bool        removeAccount(const QString &id_account);
         /// @brief Returns the id of the accounts of the group.
-        virtual QStringList getAccounts() const = 0;
+        QStringList getAccounts() const;
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::ITableGroups, "cc.lightbird.ITableGroups");
-
-#endif // ITABLEGROUPS_H
+#endif // LIGHTBIRD_TABLEGROUPS_H

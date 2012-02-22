@@ -1,10 +1,9 @@
 #include "ApiLogs.h"
 #include "Log.h"
 
-ApiLogs::ApiLogs(const QString &id, bool plugin)
+ApiLogs::ApiLogs(const QString &id)
 {
     this->id = id;
-    this->plugin = plugin;
 }
 
 ApiLogs::~ApiLogs()
@@ -13,7 +12,7 @@ ApiLogs::~ApiLogs()
 
 void    ApiLogs::write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(level, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(level, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 void    ApiLogs::fatal(const QString &message, const QString &className, const QString &method) const
@@ -23,7 +22,7 @@ void    ApiLogs::fatal(const QString &message, const QString &className, const Q
 
 void    ApiLogs::fatal(const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(LightBird::ILogs::FATAL, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(LightBird::ILogs::FATAL, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 void    ApiLogs::error(const QString &message, const QString &className, const QString &method) const
@@ -33,7 +32,7 @@ void    ApiLogs::error(const QString &message, const QString &className, const Q
 
 void    ApiLogs::error(const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(LightBird::ILogs::ERROR, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(LightBird::ILogs::ERROR, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 void    ApiLogs::warning(const QString &message, const QString &className, const QString &method) const
@@ -43,7 +42,7 @@ void    ApiLogs::warning(const QString &message, const QString &className, const
 
 void    ApiLogs::warning(const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(LightBird::ILogs::WARNING, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(LightBird::ILogs::WARNING, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 void    ApiLogs::info(const QString &message, const QString &className, const QString &method) const
@@ -53,7 +52,7 @@ void    ApiLogs::info(const QString &message, const QString &className, const QS
 
 void    ApiLogs::info(const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(LightBird::ILogs::INFO, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(LightBird::ILogs::INFO, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 void    ApiLogs::debug(const QString &message, const QString &className, const QString &method) const
@@ -63,7 +62,7 @@ void    ApiLogs::debug(const QString &message, const QString &className, const Q
 
 void    ApiLogs::debug(const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(LightBird::ILogs::DEBUG, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(LightBird::ILogs::DEBUG, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 void    ApiLogs::trace(const QString &message, const QString &className, const QString &method) const
@@ -73,7 +72,7 @@ void    ApiLogs::trace(const QString &message, const QString &className, const Q
 
 void    ApiLogs::trace(const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const
 {
-    Log::instance()->write(LightBird::ILogs::TRACE, message, (this->plugin ? this->id : properties.value("plugin")), properties, className, method);
+    Log::instance()->write(LightBird::ILogs::TRACE, message, (!this->id.isEmpty() ? this->id : properties.value("plugin")), properties, className, method);
 }
 
 LightBird::ILogs::Level ApiLogs::getLevel() const

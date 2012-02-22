@@ -1,11 +1,12 @@
-#include "Database.h"
+#include "Library.h"
 #include "LightBird.h"
-#include "TableTags.h"
+
+using namespace LightBird;
 
 TableTags::TableTags(const QString &id)
 {
     this->tableName = "tags";
-    this->tableId = LightBird::ITable::Tags;
+    this->tableId = Table::Tags;
     this->setId(id);
 }
 
@@ -29,12 +30,12 @@ bool    TableTags::add(const QString &id_object, const QString &name)
     QSqlQuery   query;
     QString     id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TableTags", "add"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TableTags", "add"));
     query.bindValue(":id", id);
     query.bindValue(":id_object", id_object);
     query.bindValue(":name", name);
-    if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
+    if (!Library::database().query(query) || query.numRowsAffected() == 0)
         return (false);
     this->id = id;
     return (true);
@@ -45,9 +46,9 @@ QString TableTags::getIdObject() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableTags", "getIdObject"));
+    query.prepare(Library::database().getQuery("TableTags", "getIdObject"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_object"].toString());
     return ("");
 }
@@ -56,10 +57,10 @@ bool    TableTags::setIdObject(const QString &id_object)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableTags", "setIdObject"));
+    query.prepare(Library::database().getQuery("TableTags", "setIdObject"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_object", id_object);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString TableTags::getName() const
@@ -67,9 +68,9 @@ QString TableTags::getName() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableTags", "getName"));
+    query.prepare(Library::database().getQuery("TableTags", "getName"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["name"].toString());
     return ("");
 }
@@ -78,8 +79,8 @@ bool    TableTags::setName(const QString &name)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableTags", "setName"));
+    query.prepare(Library::database().getQuery("TableTags", "setName"));
     query.bindValue(":id", this->id);
     query.bindValue(":name", name);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }

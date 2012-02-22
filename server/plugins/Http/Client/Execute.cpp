@@ -5,8 +5,6 @@
 #include <QUuid>
 
 #include "IIdentifier.h"
-#include "ITableFiles.h"
-#include "ITableTags.h"
 
 #include "Audio.h"
 #include "Execute.h"
@@ -153,12 +151,12 @@ void        Execute::_preview()
 
 void        Execute::_select()
 {
-    QSharedPointer<LightBird::ITableFiles>  file(this->api.database().getFiles());
-    QSqlQuery                               query;
-    QVector<QVariantMap>                    result;
-    int                                     s = 0;
-    QVariantMap                             row;
-    QList<QVariant>                         rows;
+    LightBird::TableFiles file;
+    QSqlQuery             query;
+    QVector<QVariantMap>  result;
+    int                   s = 0;
+    QVariantMap           row;
+    QList<QVariant>       rows;
 
     query.prepare(this->api.database().getQuery("HttpClient", "select_all_files"));
     if (!this->api.database().query(query, result))
@@ -166,8 +164,8 @@ void        Execute::_select()
     s = s;
     for (int i = 0, s = result.size(); i < s; ++i)
     {
-        file->setId(result[i]["id"].toString());
-        row = file->getInformations();
+        file.setId(result[i]["id"].toString());
+        row = file.getInformations();
         row.unite(result[i]);
         rows.push_back(row);
     }
@@ -213,14 +211,14 @@ void        Execute::_video()
 
 void    Execute::_deleteFile()
 {
-    QSharedPointer<LightBird::ITableFiles> file(this->api.database().getFiles(request.getUri().queryItemValue("id")));
+    LightBird::TableFiles file(request.getUri().queryItemValue("id"));
 
-    if (file->exists())
+    if (file.exists())
     {
-        if (file->isAllowed(this->client.getAccount().getId(), "delete"))
+        if (file.isAllowed(this->client.getAccount().getId(), "delete"))
         {
-            QString path = file->getFullPath();
-            file->remove();
+            QString path = file.getFullPath();
+            file.remove();
             QFile::remove(path);
         }
         else

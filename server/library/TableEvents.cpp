@@ -1,12 +1,13 @@
-#include "Database.h"
 #include "Defines.h"
+#include "Library.h"
 #include "LightBird.h"
-#include "TableEvents.h"
+
+using namespace LightBird;
 
 TableEvents::TableEvents(const QString &id)
 {
     this->tableName = "events";
-    this->tableId = LightBird::ITable::Events;
+    this->tableId = Table::Events;
     this->setId(id);
 }
 
@@ -35,7 +36,7 @@ QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, cons
     QString                 begin;
     QString                 end;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "getEvents"));
+    query.prepare(Library::database().getQuery("TableEvents", "getEvents"));
     begin = b.toString(DATE_FORMAT);
     if (begin.isEmpty())
         begin = "1970-01-01 00:00:00";
@@ -43,7 +44,7 @@ QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, cons
     query.bindValue(":name", name);
     query.bindValue(":begin", begin);
     query.bindValue(":end", end);
-    if (!Database::instance()->query(query, response))
+    if (!Library::database().query(query, response))
         return (result);
     for (i = 0, s = response.size(); i < s; ++i)
         result << response[i]["id"].toString();
@@ -56,13 +57,13 @@ bool            TableEvents::add(const QString &name, const QVariantMap &informa
     QSqlQuery   query;
     QString     id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TableEvents", "add"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TableEvents", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
     query.bindValue(":id_accessor", id_accessor);
     query.bindValue(":id_object", id_object);
-    if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
+    if (!Library::database().query(query) || query.numRowsAffected() == 0)
         return (false);
     this->id = id;
     if (!informations.isEmpty())
@@ -80,9 +81,9 @@ QString     TableEvents::getName() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "getName"));
+    query.prepare(Library::database().getQuery("TableEvents", "getName"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["name"].toString());
     return ("");
 }
@@ -93,10 +94,10 @@ bool            TableEvents::setName(const QString &name)
 
     if (name.isEmpty())
         return (false);
-    query.prepare(Database::instance()->getQuery("TableEvents", "setName"));
+    query.prepare(Library::database().getQuery("TableEvents", "setName"));
     query.bindValue(":id", this->id);
     query.bindValue(":name", name);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString     TableEvents::getIdAccessor() const
@@ -104,9 +105,9 @@ QString     TableEvents::getIdAccessor() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "getIdAccessor"));
+    query.prepare(Library::database().getQuery("TableEvents", "getIdAccessor"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_accessor"].toString());
     return ("");
 }
@@ -115,10 +116,10 @@ bool            TableEvents::setIdAccessor(const QString &id_accessor)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "setIdAccessor"));
+    query.prepare(Library::database().getQuery("TableEvents", "setIdAccessor"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_accessor", id_accessor);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString     TableEvents::getIdObject() const
@@ -126,9 +127,9 @@ QString     TableEvents::getIdObject() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "getIdObject"));
+    query.prepare(Library::database().getQuery("TableEvents", "getIdObject"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_object"].toString());
     return ("");
 }
@@ -137,10 +138,10 @@ bool            TableEvents::setIdObject(const QString &id_object)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "setIdObject"));
+    query.prepare(Library::database().getQuery("TableEvents", "setIdObject"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_object", id_object);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QVariant    TableEvents::getInformation(const QString &name) const
@@ -148,10 +149,10 @@ QVariant    TableEvents::getInformation(const QString &name) const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "getInformation"));
+    query.prepare(Library::database().getQuery("TableEvents", "getInformation"));
     query.bindValue(":id_event", this->id);
     query.bindValue(":name", name);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result.value(0).value("value").toString());
     return ("");
 }
@@ -164,9 +165,9 @@ QMap<QString, QVariant> TableEvents::getInformations() const
     int                     i;
     int                     s;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "getInformations"));
+    query.prepare(Library::database().getQuery("TableEvents", "getInformations"));
     query.bindValue(":id_event", this->id);
-    if (Database::instance()->query(query, result))
+    if (Library::database().query(query, result))
         for (i = 0, s = result.size(); i < s; ++i)
             informations.insert(result[i]["name"].toString(), result[i]["value"]);
     return (informations);
@@ -177,26 +178,26 @@ bool        TableEvents::setInformation(const QString &name, const QVariant &val
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "setInformation_select"));
+    query.prepare(Library::database().getQuery("TableEvents", "setInformation_select"));
     query.bindValue(":id_event", this->id);
     query.bindValue(":name", name);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     if (result.size() > 0)
     {
-        query.prepare(Database::instance()->getQuery("TableEvents", "setInformation_update"));
+        query.prepare(Library::database().getQuery("TableEvents", "setInformation_update"));
         query.bindValue(":value", value);
         query.bindValue(":id_event", this->id);
         query.bindValue(":name", name);
     }
     else
     {
-        query.prepare(Database::instance()->getQuery("TableEvents", "setInformation_insert"));
-        query.bindValue(":id", LightBird::createUuid());
+        query.prepare(Library::database().getQuery("TableEvents", "setInformation_insert"));
+        query.bindValue(":id", createUuid());
         query.bindValue(":id_event", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);
     }
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool        TableEvents::setInformations(const QVariantMap &informations)
@@ -217,10 +218,10 @@ bool        TableEvents::removeInformation(const QString &name)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableEvents", "removeInformation"));
+    query.prepare(Library::database().getQuery("TableEvents", "removeInformation"));
     query.bindValue(":id_event", this->id);
     query.bindValue(":name", name);
-    return (Database::instance()->query(query) && query.numRowsAffected() > 0);
+    return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
 bool            TableEvents::removeInformations(const QStringList &informations)
@@ -230,9 +231,9 @@ bool            TableEvents::removeInformations(const QStringList &informations)
 
     if (informations.isEmpty())
     {
-        query.prepare(Database::instance()->getQuery("TableEvents", "removeInformations"));
+        query.prepare(Library::database().getQuery("TableEvents", "removeInformations"));
         query.bindValue(":id_event", this->id);
-        result = Database::instance()->query(query);
+        result = Library::database().query(query);
     }
     else
     {

@@ -8,6 +8,15 @@
 # include "Export.h"
 # include "Properties.h"
 # include "SmartMutex.h"
+# include "TableAccounts.h"
+# include "TableCollections.h"
+# include "TableDirectories.h"
+# include "TableEvents.h"
+# include "TableFiles.h"
+# include "TableGroups.h"
+# include "TableLimits.h"
+# include "TablePermissions.h"
+# include "TableTags.h"
 
 namespace LightBird
 {

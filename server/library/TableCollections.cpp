@@ -1,13 +1,12 @@
-#include "Configurations.h"
-#include "Database.h"
+#include "Library.h"
 #include "LightBird.h"
-#include "TableCollections.h"
-#include "TablePermissions.h"
+
+using namespace LightBird;
 
 TableCollections::TableCollections(const QString &id)
 {
     this->tableName = "collections";
-    this->tableId = LightBird::ITable::Collections;
+    this->tableId = Table::Collections;
     this->setId(id);
 }
 
@@ -15,7 +14,7 @@ TableCollections::~TableCollections()
 {
 }
 
-TableCollections::TableCollections(const TableCollections &table) : Table(), TableObjects()
+TableCollections::TableCollections(const TableCollections &table) : TableObjects()
 {
     *this = table;
 }
@@ -34,16 +33,16 @@ QString TableCollections::getIdFromVirtualPath(const QString &virtualPath, const
     QString                 id_collection = "";
     int                     row;
 
-    path = LightBird::cleanPath(virtualPath);
+    path = cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
     while (it.hasNext())
     {
         if (!it.peekNext().isEmpty())
         {
-            query.prepare(Database::instance()->getQuery("TableCollections", "getIdFromVirtualPath"));
+            query.prepare(Library::database().getQuery("TableCollections", "getIdFromVirtualPath"));
             query.bindValue(":id_collection", id_collection);
             query.bindValue(":name", it.peekNext());
-            if (!Database::instance()->query(query, result) || result.size() <= 0)
+            if (!Library::database().query(query, result) || result.size() <= 0)
                 return ("");
             row = 0;
             for (int i = 1; i < result.size() && row == 0; ++i)
@@ -73,13 +72,13 @@ bool    TableCollections::add(const QString &name, const QString &id_collection,
     QVector<QVariantMap>    result;
     QString                 id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TableCollections", "add"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TableCollections", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
     query.bindValue(":id_collection", id_collection);
     query.bindValue(":id_account", id_account);
-    if (!Database::instance()->query(query))
+    if (!Library::database().query(query))
         return (false);
     this->id = id;
     return (true);
@@ -90,9 +89,9 @@ QString TableCollections::getIdCollection() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableCollections", "getIdCollection"));
+    query.prepare(Library::database().getQuery("TableCollections", "getIdCollection"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_collection"].toString());
     return ("");
 }
@@ -101,10 +100,10 @@ bool    TableCollections::setIdCollection(const QString &id_collection)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableCollections", "setIdCollection"));
+    query.prepare(Library::database().getQuery("TableCollections", "setIdCollection"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_collection", id_collection);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString TableCollections::getVirtualPath(bool initialSlash, bool finalSlash) const
@@ -136,7 +135,7 @@ bool    TableCollections::setVirtualPath(const QString &virtualPath)
     QString id_collection;
     QString path;
 
-    path = LightBird::cleanPath(virtualPath);
+    path = cleanPath(virtualPath);
     if (path.count('/') == path.size())
         return (this->setIdCollection(""));
     if ((id_collection = TableCollections().getIdFromVirtualPath(path)).isEmpty())
@@ -153,9 +152,9 @@ QStringList TableCollections::getCollections(const QString &id_accessor, const Q
     int                     s;
     TablePermissions        p;
 
-    query.prepare(Database::instance()->getQuery("TableCollections", "getCollections"));
+    query.prepare(Library::database().getQuery("TableCollections", "getCollections"));
     query.bindValue(":id_collection", this->id);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     for (i = 0, s = result.size(); i < s; ++i)
         if (id_accessor.isEmpty() || p.isAllowed(id_accessor, result[i]["id"].toString(), right))
             collections << result[i]["id"].toString();
@@ -171,9 +170,9 @@ QStringList TableCollections::getFiles(const QString &id_accessor, const QString
     int                     s;
     TablePermissions        p;
 
-    query.prepare(Database::instance()->getQuery("TableCollections", "getFiles"));
+    query.prepare(Library::database().getQuery("TableCollections", "getFiles"));
     query.bindValue(":id_collection", this->id);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     for (i = 0, s = result.size(); i < s; ++i)
         if (id_accessor.isEmpty() || p.isAllowed(id_accessor, result[i]["id_file"].toString(), right))
             files << result[i]["id_file"].toString();

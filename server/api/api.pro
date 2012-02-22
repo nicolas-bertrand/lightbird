@@ -46,16 +46,4 @@ HEADERS = IApi.h \
     network/IOnUnserialize.h \
     network/IOnWrite.h \
     network/IRequest.h \
-    network/IResponse.h \
-    table/ITable.h \
-    table/ITableAccessors.h \
-    table/ITableAccounts.h \
-    table/ITableCollections.h \
-    table/ITableDirectories.h \
-    table/ITableEvents.h \
-    table/ITableFiles.h \
-    table/ITableGroups.h \
-    table/ITableLimits.h \
-    table/ITableObjects.h \
-    table/ITablePermissions.h \
-    table/ITableTags.h
+    network/IResponse.h

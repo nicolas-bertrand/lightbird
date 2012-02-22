@@ -7,10 +7,12 @@ INCLUDEPATH += . \
     ../../../api \
     ../../../api/table \
     ../../../api/network \
-    ../../../extensions
+    ../../../extensions \
+    ../../../library
 
 TARGET = LogFile
 DESTDIR = ../../../build/plugins/Log/File
+LIBS += -L../../../build -lLightBird
 
 HEADERS = File.h
 SOURCES = File.cpp

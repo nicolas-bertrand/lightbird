@@ -10,6 +10,7 @@
 # include "IResponse.h"
 
 # include "Plugin.h"
+# include "TableFiles.h"
 
 class Preview
 {
@@ -28,7 +29,7 @@ private:
     LightBird::IApi      &api;           ///< The LightBird's Api.
     LightBird::IClient   &client;        ///< The client that requested the preview.
     QUrl                 uri;            ///< The uri of the request.
-    QSharedPointer<LightBird::ITableFiles> file; ///< The file pointed by the uri.
+    LightBird::TableFiles file;          ///< The file pointed by the uri.
     LightBird::IResponse &response;      ///< The response that will be sent.
     QString              previewFileName;///< The name of the preview file.
     unsigned int         width;          ///< The width of the preview.

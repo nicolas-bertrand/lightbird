@@ -30,11 +30,9 @@ public:
     /// @see LightBird::IDatabase::query
     bool            query(QSqlQuery &query, QVector<QVariantMap> &result);
     /// @see LightBird::IDatabase::getTable
-    LightBird::ITable *getTable(LightBird::ITable::Table table, const QString &id = "");
+    LightBird::Table *getTable(LightBird::Table::Id table, const QString &id = "");
     /// @see LightBird::IDatabase::getQuery
-    QString         getQuery(const QString &group, const QString &name);
-    /// @see LightBird::IDatabase::getQuery
-    QString         getQuery(const QString &group, const QString &name, const QString &id);
+    QString         getQuery(const QString &group, const QString &name, const QString &id = "");
     /// @see LightBird::IDatabase::updates
     bool            updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());
     /// @brief Returns the instance of this class created by the Server.

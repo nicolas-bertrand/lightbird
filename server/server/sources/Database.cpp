@@ -3,24 +3,16 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+#include "ApiDatabase.h"
 #include "Configurations.h"
 #include "Database.h"
 #include "Defines.h"
+#include "Library.h"
 #include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "SmartMutex.h"
 #include "Server.h"
-#include "Table.h"
-#include "TableAccounts.h"
-#include "TableCollections.h"
-#include "TableDirectories.h"
-#include "TableEvents.h"
-#include "TableFiles.h"
-#include "TableGroups.h"
-#include "TableLimits.h"
-#include "TablePermissions.h"
-#include "TableTags.h"
 
 Database::Database(QObject *parent) : QObject(parent)
 {
@@ -33,6 +25,8 @@ Database::Database(QObject *parent) : QObject(parent)
         this->isInitialized();
     else
         Log::error("Connection to the database failed", "Database", "Database");
+    // Allows the library to use the database
+    LightBird::Library::setDatabase(new ApiDatabase());
 }
 
 Database::~Database()
@@ -86,7 +80,7 @@ bool            Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
     return (error);
 }
 
-LightBird::ITable           *Database::getTable(LightBird::ITable::Table table, const QString &id)
+LightBird::Table            *Database::getTable(LightBird::Table::Id table, const QString &id)
 {
     QStringList             tables;
     QString                 name;
@@ -94,12 +88,12 @@ LightBird::ITable           *Database::getTable(LightBird::ITable::Table table, 
     QVector<QVariantMap>    result;
 
     // If the table is unknow, tries to find it using the id of the row
-    if (!id.isEmpty() && (table == LightBird::ITable::Unknow || table == LightBird::ITable::Accessor || table == LightBird::ITable::Object))
+    if (!id.isEmpty() && (table == LightBird::Table::Unknow || table == LightBird::Table::Accessor || table == LightBird::Table::Object))
     {
         // Defines the names of the tables where the existance of the id will be checked
-        if (table == LightBird::ITable::Accessor)
+        if (table == LightBird::Table::Accessor)
             tables << "accounts" << "groups";
-        else if (table == LightBird::ITable::Object)
+        else if (table == LightBird::Table::Object)
             tables << "files" << "directories" << "collections";
         else
             tables = this->tablesNames;
@@ -120,30 +114,25 @@ LightBird::ITable           *Database::getTable(LightBird::ITable::Table table, 
         if (name.isEmpty())
             return (NULL);
     }
-    if (table == LightBird::ITable::Accounts || name == "accounts")
-        return (new TableAccounts(id));
-    if (table == LightBird::ITable::Collections || name == "collections")
-        return (new TableCollections(id));
-    if (table == LightBird::ITable::Directories || name == "directories")
-        return (new TableDirectories(id));
-    if (table == LightBird::ITable::Events || name == "events")
-        return (new TableEvents(id));
-    if (table == LightBird::ITable::Files || name == "files")
-        return (new TableFiles(id));
-    if (table == LightBird::ITable::Groups || name == "groups")
-        return (new TableGroups(id));
-    if (table == LightBird::ITable::Limits || name == "limits")
-        return (new TableLimits(id));
-    if (table == LightBird::ITable::Permissions || name == "permissions")
-        return (new TablePermissions(id));
-    if (table == LightBird::ITable::Tags || name == "tags")
-        return (new TableTags(id));
+    if (table == LightBird::Table::Accounts || name == "accounts")
+        return (new LightBird::TableAccounts(id));
+    if (table == LightBird::Table::Collections || name == "collections")
+        return (new LightBird::TableCollections(id));
+    if (table == LightBird::Table::Directories || name == "directories")
+        return (new LightBird::TableDirectories(id));
+    if (table == LightBird::Table::Events || name == "events")
+        return (new LightBird::TableEvents(id));
+    if (table == LightBird::Table::Files || name == "files")
+        return (new LightBird::TableFiles(id));
+    if (table == LightBird::Table::Groups || name == "groups")
+        return (new LightBird::TableGroups(id));
+    if (table == LightBird::Table::Limits || name == "limits")
+        return (new LightBird::TableLimits(id));
+    if (table == LightBird::Table::Permissions || name == "permissions")
+        return (new LightBird::TablePermissions(id));
+    if (table == LightBird::Table::Tags || name == "tags")
+        return (new LightBird::TableTags(id));
     return (NULL);
-}
-
-QString Database::getQuery(const QString &group, const QString &name)
-{
-    return (this->getQuery(group, name, ""));
 }
 
 QString         Database::getQuery(const QString &group, const QString &name, const QString &id)

@@ -7,10 +7,12 @@ INCLUDEPATH += . \
     ../../../api \
     ../../../api/table \
     ../../../api/network \
-    ../../../extensions
+    ../../../extensions \
+    ../../../library
 
 TARGET = Identifier
 DESTDIR = ../../../build/plugins/Extensions/Identifier
+LIBS += -L../../../build -lLightBird
 
 HEADERS = Plugin.h \
     Identifier.h

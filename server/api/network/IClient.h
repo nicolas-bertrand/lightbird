@@ -10,10 +10,11 @@
 # include <QVariant>
 
 # include "INetwork.h"
-# include "ITableAccounts.h"
 # include "IRequest.h"
 # include "IResponse.h"
 # include "ISessions.h"
+
+# include "TableAccounts.h"
 
 namespace LightBird
 {
@@ -60,7 +61,7 @@ namespace LightBird
         /// @brief Allows to store informations on the client.
         virtual QVariantMap          &getInformations() = 0;
         /// @brief This account is used to identified the client.
-        virtual LightBird::ITableAccounts &getAccount() = 0;
+        virtual LightBird::TableAccounts &getAccount() = 0;
         /// @brief The request sent by the client.
         virtual LightBird::IRequest  &getRequest() = 0;
         /// @brief The response of the request made by the client.

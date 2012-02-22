@@ -5,12 +5,12 @@
 Video::Video(LightBird::IClient &client) : Media(client)
 {
     QString format;
-    qint32  width = this->file->getInformation("width").toInt();
+    qint32  width = this->file.getInformation("width").toInt();
     quint32 quality = this->uri.queryItemValue("quality").toUInt();
     quint32 seek = this->uri.queryItemValue("seek").toUInt();
 
     this->video = NULL;
-    this->response.getHeader().insert("content-length", QString::number((quint64)(QFileInfo(this->file->getFullPath()).size() * 1.2)));
+    this->response.getHeader().insert("content-length", QString::number((quint64)(QFileInfo(this->file.getFullPath()).size() * 1.2)));
     // Get the extensions that can transcode the file
     if (!(extensions = this->api.extensions().get("IVideo")).isEmpty())
     {
@@ -43,8 +43,8 @@ Video::Video(LightBird::IClient &client) : Media(client)
             options["x264"] = "faster";
             video->setOptions(options);
             // Ensure that the size of the video is not odd
-            int w = this->file->getInformation("width").toUInt();
-            int h = this->file->getInformation("height").toUInt();
+            int w = this->file.getInformation("width").toUInt();
+            int h = this->file.getInformation("height").toUInt();
             if (w && h)
             {
                 h = (h * 480) / w;
@@ -63,7 +63,7 @@ Video::Video(LightBird::IClient &client) : Media(client)
                 video->setVideoBitRate(300000);
             this->response.getHeader().insert("content-type", "video/ogg");
         }
-        this->video->start(this->file->getFullPath(), "", format);
+        this->video->start(this->file.getFullPath(), "", format);
     }
 }
 

@@ -14,10 +14,7 @@ class ApiLogs : public QObject,
     Q_INTERFACES(LightBird::ILogs)
 
 public:
-    /// @param plugin : True if the instance is dedicated to a plugin. If false,
-    /// the "plugin" value of the properties is used to determine the plugin
-    /// that emits the log.
-    ApiLogs(const QString &id, bool plugin = true);
+    ApiLogs(const QString &id = "");
     ~ApiLogs();
 
     void    write(LightBird::ILogs::Level level, const QString &message, const QMap<QString, QString> &properties, const QString &className, const QString &method) const;
@@ -44,12 +41,10 @@ public:
     bool    isTrace() const;
 
 private:
-    ApiLogs();
     ApiLogs(const ApiLogs &);
     ApiLogs &operator=(const ApiLogs &);
 
-    QString id;     ///< The id of the plugin for which the object has been created.
-    bool    plugin; /// True if the instance is dedicated to a plugin.
+    QString id; ///< The id of the plugin for which the object has been created.
 };
 
 #endif // APILOGS_H

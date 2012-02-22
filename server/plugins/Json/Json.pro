@@ -8,10 +8,12 @@ INCLUDEPATH += . \
     ../../api/table \
     ../../api/network \
     ../../extensions \
+    ../../library \
     ./QJson
 
 TARGET = Json
 DESTDIR = ../../build/plugins/Json
+LIBS += -L../../build -lLightBird
 
 # Builds the plugin with QJson, which allows it to unserialize a request in Json.
 # Without QJson the plugin can only serialize QVariant objects into json.

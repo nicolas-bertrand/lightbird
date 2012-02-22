@@ -5,13 +5,11 @@
 #include <QUrl>
 
 #include "IMime.h"
-#include "ITableFiles.h"
 
 #include "Execute.h"
 #include "LightBird.h"
 #include "Medias.h"
 #include "Plugin.h"
-#include "Uploads.h"
 
 Plugin  *Plugin::instance = NULL;
 
@@ -266,8 +264,8 @@ bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Sessi
     QDateTime   date = QDateTime::currentDateTime().toUTC();
 
     // The token is the combination of the identifiant, the current date (+/- 1 minute), and a part of the URI
-    if (token == LightBird::sha256(identifiant + date.toString(DATE_FORMAT).toAscii() + uri.toAscii()) ||
-        token == LightBird::sha256(identifiant + date.addSecs(-60).toString(DATE_FORMAT).toAscii() + uri.toAscii()))
+    if (token == LightBird::sha256(identifiant + date.toString(TOKEN_DATE_FORMAT).toAscii() + uri.toAscii()) ||
+        token == LightBird::sha256(identifiant + date.addSecs(-60).toString(TOKEN_DATE_FORMAT).toAscii() + uri.toAscii()))
         return (true);
     this->identificationFailed(client);
     client.getResponse().setError(true);
@@ -316,14 +314,14 @@ void    Plugin::_translation(LightBird::IClient &client, const QString &interfac
 
 void    Plugin::_getFile(LightBird::IClient &client)
 {
-    QSharedPointer<LightBird::ITableFiles> file(this->_api->database().getFiles(client.getRequest().getUri().queryItemValue("id")));
+    LightBird::TableFiles   file(client.getRequest().getUri().queryItemValue("id"));
     QString path;
 
     // Checks that the user can access to the file
     if (client.getRequest().getUri().queryItemValue("token").isEmpty() ||
-        !file->isAllowed(client.getAccount().getId(), "read"))
+        !file.isAllowed(client.getAccount().getId(), "read"))
         return (this->response(client, 403, "Forbidden", "Access denied."));
-    path = file->getFullPath();
+    path = file.getFullPath();
     // Checks that the file exists on the disk
     if (!QFileInfo(path).isFile())
         return (this->response(client, 404, "Not Found", "File not found."));

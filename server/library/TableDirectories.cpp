@@ -1,13 +1,12 @@
-#include "Configurations.h"
-#include "Database.h"
+#include "Library.h"
 #include "LightBird.h"
-#include "TableDirectories.h"
-#include "TablePermissions.h"
+
+using namespace LightBird;
 
 TableDirectories::TableDirectories(const QString &id)
 {
     this->tableName = "directories";
-    this->tableId = LightBird::ITable::Directories;
+    this->tableId = Table::Directories;
     this->setId(id);
 }
 
@@ -15,7 +14,7 @@ TableDirectories::~TableDirectories()
 {
 }
 
-TableDirectories::TableDirectories(const TableDirectories &table) : Table(), TableObjects()
+TableDirectories::TableDirectories(const TableDirectories &table) : TableObjects()
 {
     *this = table;
 }
@@ -33,16 +32,16 @@ QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
     QString                 path;
     QString                 id_directory = "";
 
-    path = LightBird::cleanPath(virtualPath);
+    path = cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
     while (it.hasNext())
     {
         if (!it.peekNext().isEmpty())
         {
-            query.prepare(Database::instance()->getQuery("TableDirectories", "getIdFromVirtualPath"));
+            query.prepare(Library::database().getQuery("TableDirectories", "getIdFromVirtualPath"));
             query.bindValue(":id_directory", id_directory);
             query.bindValue(":name", it.peekNext());
-            if (!Database::instance()->query(query, result) || result.size() <= 0)
+            if (!Library::database().query(query, result) || result.size() <= 0)
                 return ("");
             id_directory = result[0]["id"].toString();
         }
@@ -67,13 +66,13 @@ bool    TableDirectories::add(const QString &name, const QString &id_directory, 
     QVector<QVariantMap>    result;
     QString                 id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TableDirectories", "add"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TableDirectories", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
     query.bindValue(":id_directory", id_directory);
     query.bindValue(":id_account", id_account);
-    if (!Database::instance()->query(query))
+    if (!Library::database().query(query))
         return (false);
     this->id = id;
     return (true);
@@ -84,9 +83,9 @@ QString TableDirectories::getIdDirectory() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableDirectories", "getIdDirectory"));
+    query.prepare(Library::database().getQuery("TableDirectories", "getIdDirectory"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_directory"].toString());
     return ("");
 }
@@ -95,10 +94,10 @@ bool    TableDirectories::setIdDirectory(const QString &id_directory)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableDirectories", "setIdDirectory"));
+    query.prepare(Library::database().getQuery("TableDirectories", "setIdDirectory"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_directory", id_directory);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString TableDirectories::getVirtualPath(bool initialSlash, bool finalSlash) const
@@ -130,7 +129,7 @@ bool        TableDirectories::setVirtualPath(const QString &virtualPath)
     QString id_directory;
     QString path;
 
-    path = LightBird::cleanPath(virtualPath);
+    path = cleanPath(virtualPath);
     if (path.count('/') == path.size())
         return (this->setIdDirectory(""));
     if ((id_directory = TableDirectories().getIdFromVirtualPath(path)).isEmpty())
@@ -147,9 +146,9 @@ QStringList TableDirectories::getDirectories(const QString &id_accessor, const Q
     int                     s;
     TablePermissions        p;
 
-    query.prepare(Database::instance()->getQuery("TableDirectories", "getDirectories"));
+    query.prepare(Library::database().getQuery("TableDirectories", "getDirectories"));
     query.bindValue(":id_directory", this->id);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     for (i = 0, s = result.size(); i < s; ++i)
         if (id_accessor.isEmpty() || p.isAllowed(id_accessor, result[i]["id"].toString(), right))
             directories << result[i]["id"].toString();
@@ -165,9 +164,9 @@ QStringList TableDirectories::getFiles(const QString &id_accessor, const QString
     int                     s;
     TablePermissions        p;
 
-    query.prepare(Database::instance()->getQuery("TableDirectories", "getFiles"));
+    query.prepare(Library::database().getQuery("TableDirectories", "getFiles"));
     query.bindValue(":id_directory", this->id);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     for (i = 0, s = result.size(); i < s; ++i)
         if (id_accessor.isEmpty() || p.isAllowed(id_accessor, result[i]["id"].toString(), right))
             files << result[i]["id"].toString();
@@ -179,10 +178,10 @@ QString     TableDirectories::getDirectory(const QString &name) const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableDirectories", "getDirectory"));
+    query.prepare(Library::database().getQuery("TableDirectories", "getDirectory"));
     query.bindValue(":id_directory", this->id);
     query.bindValue(":name", name);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id"].toString());
     return (QString());
 }
@@ -192,10 +191,10 @@ QString     TableDirectories::getFile(const QString &name) const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableDirectories", "getFile"));
+    query.prepare(Library::database().getQuery("TableDirectories", "getFile"));
     query.bindValue(":id_directory", this->id);
     query.bindValue(":name", name);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id"].toString());
     return (QString());
 }
@@ -206,7 +205,7 @@ QString                 TableDirectories::createVirtualPath(const QString &virtu
     QString             id;
 
     directory.setId(this->getId());
-    QStringListIterator it(LightBird::cleanPath(virtualPath).split('/'));
+    QStringListIterator it(cleanPath(virtualPath).split('/'));
     while (it.hasNext())
     {
         if (!it.peekNext().isEmpty())

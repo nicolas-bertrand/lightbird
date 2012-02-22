@@ -10,7 +10,6 @@
 # include "IReadWrite.h"
 
 # include "Future.hpp"
-# include "TableAccounts.h"
 # include "ThreadPool.h"
 
 class Engine;
@@ -86,7 +85,7 @@ public:
     LightBird::IClient::Mode getMode() const;
     QAbstractSocket         &getSocket();
     QVariantMap             &getInformations();
-    LightBird::ITableAccounts &getAccount();
+    LightBird::TableAccounts &getAccount();
     LightBird::IRequest     &getRequest();
     LightBird::IResponse    &getResponse();
     QStringList             getSessions(const QString &id_account = QString()) const;
@@ -159,7 +158,7 @@ private:
     QDateTime                connectionDate;      ///< The date of the connection.
     QVariantMap              informations;        ///< Contains information on the client.
     QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
-    TableAccounts            account;             ///< Allows the client to be identified as a know account.
+    LightBird::TableAccounts account;             ///< Allows the client to be identified as a know account.
     QList<QByteArray *>      data;                ///< The list of all the data read from the network.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.

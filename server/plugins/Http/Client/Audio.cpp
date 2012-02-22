@@ -5,7 +5,7 @@
 Audio::Audio(LightBird::IClient &client) : Media(client)
 {
     QString format = "mp3";
-    qint32  bitrate = this->file->getInformation("bit rate").toInt();
+    qint32  bitrate = this->file.getInformation("bit rate").toInt();
     quint32 quality = this->uri.queryItemValue("quality").toUInt();
     quint32 seek = this->uri.queryItemValue("seek").toUInt();
 
@@ -18,7 +18,7 @@ Audio::Audio(LightBird::IClient &client) : Media(client)
     }
     else
         this->response.getHeader().insert("content-type", "audio/mpeg3");
-    this->response.getHeader().insert("content-length", QString::number((quint64)(QFileInfo(this->file->getFullPath()).size() * 1.2)));
+    this->response.getHeader().insert("content-length", QString::number((quint64)(QFileInfo(this->file.getFullPath()).size() * 1.2)));
     // Get the extensions that can transcode the file
     if (!(extensions = this->api.extensions().get("IAudio")).isEmpty())
     {
@@ -38,7 +38,7 @@ Audio::Audio(LightBird::IClient &client) : Media(client)
         // Set the format
         if (format == "ogg")
             this->audio->setCodec("libvorbis");
-        this->audio->start(this->file->getFullPath(), "", format);
+        this->audio->start(this->file.getFullPath(), "", format);
     }
 }
 

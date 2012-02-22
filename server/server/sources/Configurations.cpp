@@ -3,6 +3,7 @@
 #include "ApiConfiguration.h"
 #include "Configurations.h"
 #include "Defines.h"
+#include "Library.h"
 #include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
@@ -65,6 +66,8 @@ Configurations::Configurations(const QString &configurationPath, QObject *parent
     if (instance->get("permissions/groupInheritance").isEmpty())
         instance->set("permissions/groupInheritance", DEFAULT_PERMISSIONS_GROUPINHERITANCE);
     this->isInitialized();
+    // Allows the library to use the configuration
+    LightBird::Library::setConfiguration(instance);
 }
 
 Configurations::~Configurations()

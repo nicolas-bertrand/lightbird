@@ -5,9 +5,8 @@
 # include <QReadWriteLock>
 # include <QString>
 
+# include "Defines.h"
 # include "Export.h"
-
-# define MAXTRYLOCK -1 ///< Maximum time to wait in a tryLock in milliseconds. After that, an error is logged.
 
 /// @brief The equivalent of a smart pointer for the mutex.
 /// Ensures that the mutex is unlock when the object goes out of scope.

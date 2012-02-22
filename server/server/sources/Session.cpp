@@ -13,7 +13,7 @@ Session::Session(const QString &id) : destroyed(false)
     int                     s;
 
     this->tableName = "sessions";
-    this->tableId = LightBird::ITable::Unknow;
+    this->tableId = LightBird::Table::Unknow;
     if (!this->setId(id))
         return ;
     // Get the details of the session
@@ -54,7 +54,7 @@ Session::~Session()
 {
 }
 
-Session::Session(const Session &session) : Table()
+Session::Session(const Session &session) : LightBird::Table()
 {
     *this = session;
 }
@@ -63,7 +63,7 @@ Session &Session::operator=(const Session &session)
 {
     if (this != &session)
     {
-        Table::operator=(session);
+        LightBird::Table::operator=(session);
         this->expiration = session.expiration;
         this->id_account = session.id_account;
         this->creation = session.creation;

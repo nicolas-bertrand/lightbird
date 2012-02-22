@@ -1,6 +1,7 @@
-#include "Database.h"
-#include "TableAccessors.h"
-#include "TablePermissions.h"
+#include "Library.h"
+#include "LightBird.h"
+
+using namespace LightBird;
 
 TableAccessors::TableAccessors()
 {
@@ -21,14 +22,14 @@ TableAccessors &TableAccessors::operator=(const TableAccessors &table)
     return (*this);
 }
 
-QString     TableAccessors::getName() const
+QString         TableAccessors::getName() const
 {
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccessors", "getName").replace(":table", this->tableName));
+    query.prepare(Library::database().getQuery("TableAccessors", "getName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["name"].toString());
     return ("");
 }
@@ -39,23 +40,23 @@ bool            TableAccessors::setName(const QString &name)
 
     if (name.isEmpty())
         return (false);
-    query.prepare(Database::instance()->getQuery("TableAccessors", "setName").replace(":table", this->tableName));
+    query.prepare(Library::database().getQuery("TableAccessors", "setName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
     query.bindValue(":name", name);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
-bool        TableAccessors::isAllowed(const QString &id_object, const QString &right) const
+bool            TableAccessors::isAllowed(const QString &id_object, const QString &right) const
 {
     return (TablePermissions().isAllowed(this->id, id_object, right));
 }
 
-bool        TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const
+bool            TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
     return (TablePermissions().getRights(this->id, id_object, allowed, denied));
 }
 
-QStringList TableAccessors::getLimits() const
+QStringList     TableAccessors::getLimits() const
 {
     QSqlQuery               query;
     QVector<QVariantMap>    result;
@@ -63,9 +64,9 @@ QStringList TableAccessors::getLimits() const
     int                     i;
     int                     s;
 
-    query.prepare(Database::instance()->getQuery("TableAccessors", "getLimits"));
+    query.prepare(Library::database().getQuery("TableAccessors", "getLimits"));
     query.bindValue(":id_accessor", this->id);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     for (i = 0, s = result.size(); i < s; ++i)
         tags << result[i]["id"].toString();
     return (tags);

@@ -3,6 +3,8 @@
 
 # include <QObject>
 
+# include "IConfiguration.h"
+# include "IDatabase.h"
 # include "ILogs.h"
 
 # include "Export.h"
@@ -13,12 +15,18 @@ namespace LightBird
     class Library
     {
     public:
-        static LightBird::ILogs &log();
+        static LightBird::IConfiguration &configuration();
+        static LightBird::IDatabase      &database();
+        static LightBird::ILogs          &log();
 
-        LIB static void         setLogs(LightBird::ILogs *logs);
+        LIB static void setConfiguration(LightBird::IConfiguration *configuration);
+        LIB static void setDatabase(LightBird::IDatabase *database);
+        LIB static void setLog(LightBird::ILogs *log);
 
     private:
-        static LightBird::ILogs *logs;
+        static LightBird::IConfiguration *_configuration;
+        static LightBird::IDatabase      *_database;
+        static LightBird::ILogs          *_log;
     };
 }
 

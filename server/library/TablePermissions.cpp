@@ -1,17 +1,12 @@
-#include "Configurations.h"
-#include "Database.h"
+#include "Library.h"
 #include "LightBird.h"
-#include "TableAccounts.h"
-#include "TableGroups.h"
-#include "TableCollections.h"
-#include "TableDirectories.h"
-#include "TableFiles.h"
-#include "TablePermissions.h"
+
+using namespace LightBird;
 
 TablePermissions::TablePermissions(const QString &id)
 {
     this->tableName = "permissions";
-    this->tableId = LightBird::ITable::Permissions;
+    this->tableId = Table::Permissions;
     Table::setId(id);
 }
 
@@ -35,11 +30,11 @@ QString TablePermissions::getId(const QString &id_accessor, const QString &id_ob
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "getId"));
+    query.prepare(Library::database().getQuery("TablePermissions", "getId"));
     query.bindValue(":id_accessor", id_accessor);
     query.bindValue(":id_object", id_object);
     query.bindValue(":right", right);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id"].toString());
     return ("");
 }
@@ -59,14 +54,14 @@ bool    TablePermissions::add(const QString &id_accessor, const QString &id_obje
     QSqlQuery   query;
     QString     id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TablePermissions", "add"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TablePermissions", "add"));
     query.bindValue(":id", id);
     query.bindValue(":id_accessor", id_accessor);
     query.bindValue(":id_object", id_object);
     query.bindValue(":right", right);
     query.bindValue(":granted", QString::number(granted));
-    if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
+    if (!Library::database().query(query) || query.numRowsAffected() == 0)
         return (false);
     this->id = id;
     return (true);
@@ -77,9 +72,9 @@ QString TablePermissions::getIdAccessor() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "getIdAccessor"));
+    query.prepare(Library::database().getQuery("TablePermissions", "getIdAccessor"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_accessor"].toString());
     return ("");
 }
@@ -88,10 +83,10 @@ bool    TablePermissions::setIdAccessor(const QString &id_accessor)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "setIdAccessor"));
+    query.prepare(Library::database().getQuery("TablePermissions", "setIdAccessor"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_accessor", id_accessor);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString TablePermissions::getIdObject() const
@@ -99,9 +94,9 @@ QString TablePermissions::getIdObject() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "getIdObject"));
+    query.prepare(Library::database().getQuery("TablePermissions", "getIdObject"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["id_object"].toString());
     return ("");
 }
@@ -110,10 +105,10 @@ bool    TablePermissions::setIdObject(const QString &id_object)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "setIdObject"));
+    query.prepare(Library::database().getQuery("TablePermissions", "setIdObject"));
     query.bindValue(":id", this->id);
     query.bindValue(":id_object", id_object);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QString TablePermissions::getRight() const
@@ -121,9 +116,9 @@ QString TablePermissions::getRight() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "getRight"));
+    query.prepare(Library::database().getQuery("TablePermissions", "getRight"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["right"].toString());
     return ("");
 }
@@ -132,10 +127,10 @@ bool    TablePermissions::setRight(const QString &right)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "setRight"));
+    query.prepare(Library::database().getQuery("TablePermissions", "setRight"));
     query.bindValue(":id", this->id);
     query.bindValue(":right", right);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool    TablePermissions::isGranted() const
@@ -143,9 +138,9 @@ bool    TablePermissions::isGranted() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "getGranted"));
+    query.prepare(Library::database().getQuery("TablePermissions", "getGranted"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["granted"].toBool());
     return (false);
 }
@@ -154,45 +149,45 @@ bool    TablePermissions::isGranted(bool granted)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "setGranted"));
+    query.prepare(Library::database().getQuery("TablePermissions", "setGranted"));
     query.bindValue(":id", this->id);
     query.bindValue(":granted", QString::number(granted));
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &id_object, const QString &right) const
 {
-    LightBird::ITableAccounts   *account = NULL;
-    LightBird::ITableFiles      *file = NULL;
-    LightBird::ITableDirectories *directory = NULL;
-    LightBird::ITableCollections *collection = NULL;
-    TableGroups                 group;
-    bool                        inheritance = false;
-    bool                        ownerInheritance = false;
-    bool                        checked = false;
-    int                         granted = 0;
-    QString                     id;
-    TableDirectories            dir;
-    TableCollections            col;
-    QStringList                 accessors;
-    QList<QStringList>          groups;
+    TableAccounts       *account = NULL;
+    TableFiles          *file = NULL;
+    TableDirectories    *directory = NULL;
+    TableCollections    *collection = NULL;
+    TableGroups         group;
+    bool                inheritance = false;
+    bool                ownerInheritance = false;
+    bool                checked = false;
+    int                 granted = 0;
+    QString             id;
+    TableDirectories    dir;
+    TableCollections    col;
+    QStringList         accessors;
+    QList<QStringList>  groups;
 
     // If the permissions system is not activated, we don't need to check the rights
-    if (Configurations::instance()->get("permissions/activate") != "true")
+    if (Library::configuration().get("permissions/activate") != "true")
         return (true);
-    if (Configurations::instance()->get("permissions/ownerInheritance") == "true")
+    if (Library::configuration().get("permissions/ownerInheritance") == "true")
         ownerInheritance = true;
-    if (Configurations::instance()->get("permissions/inheritance") == "true")
+    if (Library::configuration().get("permissions/inheritance") == "true")
         inheritance = true;
-    QSharedPointer<LightBird::ITableAccessors> accessor(dynamic_cast<LightBird::ITableAccessors *>(Database::instance()->getTable(LightBird::ITable::Accessor, id_accessor)));
+    QSharedPointer<TableAccessors> accessor(dynamic_cast<TableAccessors *>(Library::database().getTable(Table::Accessor, id_accessor)));
     if (accessor.isNull())
         return (false);
-    if (accessor->isTable(LightBird::ITable::Accounts))
-        account = dynamic_cast<LightBird::ITableAccounts *>(accessor.data());
+    if (accessor->isTable(Table::Accounts))
+        account = dynamic_cast<TableAccounts *>(accessor.data());
     // If the accessor is an account, and the account is administrator, he has all the rights on all the objects
     if (account && account->isAdministrator())
         return (true);
-    QSharedPointer<LightBird::ITableObjects> object(dynamic_cast<LightBird::ITableObjects *>(Database::instance()->getTable(LightBird::ITable::Object, id_object)));
+    QSharedPointer<TableObjects> object(dynamic_cast<TableObjects *>(Library::database().getTable(Table::Object, id_object)));
     if (object.isNull())
         return (false);
     // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
@@ -229,28 +224,28 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
         }
         accessors.removeDuplicates();
         // If groupInheritance is disables, we don't need to keep the groups hierarchy
-        if (Configurations::instance()->get("permissions/groupInheritance") != "true")
+        if (Library::configuration().get("permissions/groupInheritance") != "true")
             groups.clear();
     }
     accessors.push_front(accessor->getId());
     // Get the id of the first object in the hierarchy
-    if (object->isTable(LightBird::ITable::Files))
+    if (object->isTable(Table::Files))
     {
         // Check the permission of the file
-        file = dynamic_cast<LightBird::ITableFiles *>(object.data());
+        file = dynamic_cast<TableFiles *>(object.data());
         if ((granted = this->_idAllowed(accessors, groups, file->getId(), right)) == 2)
             return (true);
         id = file->getIdDirectory();
         checked = true;
     }
-    if (object->isTable(LightBird::ITable::Directories))
+    if (object->isTable(Table::Directories))
     {
-        directory = dynamic_cast<LightBird::ITableDirectories *>(object.data());
+        directory = dynamic_cast<TableDirectories *>(object.data());
         id = directory->getId();
     }
-    if (object->isTable(LightBird::ITable::Collections))
+    if (object->isTable(Table::Collections))
     {
-        collection = dynamic_cast<LightBird::ITableCollections *>(object.data());
+        collection = dynamic_cast<TableCollections *>(object.data());
         id = collection->getId();
     }
     // Run through the objects hierarchy to find the permissions
@@ -283,51 +278,51 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (!granted && inheritance && (granted = this->_idAllowed(accessors, groups, "", right)) == 2)
         return (true);
     // If there is no permissions for the accessor on the object, the default is applied
-    if (!granted && Configurations::instance()->get("permissions/default") == "true")
+    if (!granted && Library::configuration().get("permissions/default") == "true")
         return (true);
     return (false);
 }
 
 bool    TablePermissions::getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
-    LightBird::ITableAccounts   *account = NULL;
-    LightBird::ITableFiles      *file = NULL;
-    LightBird::ITableDirectories *directory = NULL;
-    LightBird::ITableCollections *collection = NULL;
-    TableGroups                 group;
-    bool                        inheritance = false;
-    bool                        ownerInheritance = false;
-    bool                        checked = false;
-    QString                     id;
-    TableDirectories            dir;
-    TableCollections            col;
-    QStringList                 accessors;
-    QList<QStringList>          groups;
+    TableAccounts       *account = NULL;
+    TableFiles          *file = NULL;
+    TableDirectories    *directory = NULL;
+    TableCollections    *collection = NULL;
+    TableGroups         group;
+    bool                inheritance = false;
+    bool                ownerInheritance = false;
+    bool                checked = false;
+    QString             id;
+    TableDirectories    dir;
+    TableCollections    col;
+    QStringList         accessors;
+    QList<QStringList>  groups;
 
     allowed.clear();
     denied.clear();
     // If the permissions system is not activated, all the rights are granted
-    if (Configurations::instance()->get("permissions/activate") != "true")
+    if (Library::configuration().get("permissions/activate") != "true")
     {
         allowed.push_back("");
         return (true);
     }
-    if (Configurations::instance()->get("permissions/ownerInheritance") == "true")
+    if (Library::configuration().get("permissions/ownerInheritance") == "true")
         ownerInheritance = true;
-    if (Configurations::instance()->get("permissions/inheritance") == "true")
+    if (Library::configuration().get("permissions/inheritance") == "true")
         inheritance = true;
-    QSharedPointer<LightBird::ITableAccessors> accessor(dynamic_cast<LightBird::ITableAccessors *>(Database::instance()->getTable(LightBird::ITable::Accessor, id_accessor)));
+    QSharedPointer<TableAccessors> accessor(dynamic_cast<TableAccessors *>(Library::database().getTable(Table::Accessor, id_accessor)));
     if (accessor.isNull())
         return (false);
-    if (accessor->isTable(LightBird::ITable::Accounts))
-        account = dynamic_cast<LightBird::ITableAccounts *>(accessor.data());
+    if (accessor->isTable(Table::Accounts))
+        account = dynamic_cast<TableAccounts *>(accessor.data());
     // If the accessor is an account, and the account is administrator, he has all the rights on all the objects
     if (account && account->isAdministrator())
     {
         allowed.push_back("");
         return (true);
     }
-    QSharedPointer<LightBird::ITableObjects> object(dynamic_cast<LightBird::ITableObjects *>(Database::instance()->getTable(LightBird::ITable::Object, id_object)));
+    QSharedPointer<TableObjects> object(dynamic_cast<TableObjects *>(Library::database().getTable(Table::Object, id_object)));
     if (object.isNull())
         return (false);
     // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
@@ -367,26 +362,26 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
         }
         accessors.removeDuplicates();
         // If groupInheritance is disables, we don't need to keep the groups hierarchy
-        if (Configurations::instance()->get("permissions/groupInheritance") != "true")
+        if (Library::configuration().get("permissions/groupInheritance") != "true")
             groups.clear();
     }
     accessors.push_front(accessor->getId());
     // Get the id of the first object in the hierarchy
-    if (object->isTable(LightBird::ITable::Files))
+    if (object->isTable(Table::Files))
     {
-        file = dynamic_cast<LightBird::ITableFiles *>(object.data());
+        file = dynamic_cast<TableFiles *>(object.data());
         id = file->getIdDirectory();
         this->_getRights(accessors, groups, file->getId(), allowed, denied);
         checked = true;
     }
-    if (object->isTable(LightBird::ITable::Directories))
+    if (object->isTable(Table::Directories))
     {
-        directory = dynamic_cast<LightBird::ITableDirectories *>(object.data());
+        directory = dynamic_cast<TableDirectories *>(object.data());
         id = directory->getId();
     }
-    if (object->isTable(LightBird::ITable::Collections))
+    if (object->isTable(Table::Collections))
     {
-        collection = dynamic_cast<LightBird::ITableCollections *>(object.data());
+        collection = dynamic_cast<TableCollections *>(object.data());
         id = collection->getId();
     }
     // Run through the objects hierarchy to find the permissions
@@ -428,7 +423,7 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     // If there is no global permission, the default is applied
     if (!allowed.contains("") && !denied.contains(""))
     {
-        if (Configurations::instance()->get("permissions/default") == "true")
+        if (Library::configuration().get("permissions/default") == "true")
         {
             allowed.clear();
             allowed.push_back("");
@@ -456,11 +451,11 @@ unsigned int    TablePermissions::_idAllowed(const QStringList &accessors, const
     // Someone who can delete can modify
     if (rights.contains("modify"))
         rights.push_back("delete");
-    query.prepare(Database::instance()->getQuery("TablePermissions", "_idAllowed")
+    query.prepare(Library::database().getQuery("TablePermissions", "_idAllowed")
                   .replace(":accessors", "'" + accessors.join("','") + "'")
                   .replace(":rights", "'" + rights.join("','") + "'"));
     query.bindValue(":id_object", id_object);
-    if (!Database::instance()->query(query, result) || result.size() <= 0)
+    if (!Library::database().query(query, result) || result.size() <= 0)
         return (0);
     // Check the right of the accessor
     if ((granted = this->_checkRights(result, QStringList() << accessors.front(), right)))
@@ -540,10 +535,10 @@ void    TablePermissions::_getRights(const QStringList &accessors, const QList<Q
     QStringList             deniedTmp;
     QString                 right;
 
-    query.prepare(Database::instance()->getQuery("TablePermissions", "_getRights")
+    query.prepare(Library::database().getQuery("TablePermissions", "_getRights")
                   .replace(":accessors", "'" + accessors.join("','") + "'"));
     query.bindValue(":id_object", id_object);
-    if (!Database::instance()->query(query, result) || result.size() <= 0)
+    if (!Library::database().query(query, result) || result.size() <= 0)
         return ;
     // Check the right of the accessor
     for (i = 0, s = result.size(); i < s; ++i)

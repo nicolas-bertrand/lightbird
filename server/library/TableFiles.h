@@ -1,26 +1,29 @@
-#ifndef ITABLEFILES_H
-# define ITABLEFILES_H
+#ifndef LIGHTBIRD_TABLEFILES_H
+# define LIGHTBIRD_TABLEFILES_H
 
 # include <QMap>
 # include <QString>
 # include <QStringList>
 # include <QVariant>
 
-# include "ITableObjects.h"
+# include "TableObjects.h"
 
 namespace LightBird
 {
-    /// @brief Handle the transactions with the database relating to a file.
+    /// @brief Handles the transactions with the database relating to a file.
     /// Each modifications done in this object is immediatly saved in the database.
-    class ITableFiles : virtual public LightBird::ITableObjects
+    class LIB TableFiles : public LightBird::TableObjects
     {
     public:
-        virtual ~ITableFiles() {}
+        TableFiles(const QString &id = "");
+        ~TableFiles();
+        TableFiles(const TableFiles &table);
+        TableFiles  &operator=(const TableFiles &table);
 
         /// @brief Returns the id of a file, using its virtual path.
-        virtual QString     getIdFromVirtualPath(const QString &virtualPath) const = 0;
+        QString     getIdFromVirtualPath(const QString &virtualPath) const;
         /// @brief Set the id of a file, using its virtual path.
-        virtual bool        setIdFromVirtualPath(const QString &virtualPath) = 0;
+        bool        setIdFromVirtualPath(const QString &virtualPath);
         /// @brief Add a new file.
         /// @param name : The name of the file.
         /// @param path : The path of the file.
@@ -30,76 +33,77 @@ namespace LightBird
         /// it is at the root.
         /// @param id_account : The id of account that owns the file.
         /// @return True if the file has been created.
-        virtual bool        add(const QString &name, const QString &path, const QVariantMap &informations,
-                                const QString &type = "", const QString &id_directory = "", const QString &id_account = "") = 0;
+        bool        add(const QString &name, const QString &path, const QVariantMap &informations,
+                        const QString &type = "", const QString &id_directory = "", const QString &id_account = "");
         /// @see add
-        virtual bool        add(const QString &name, const QString &path, const QString &type = "",
-                                const QString &id_directory = "", const QString &id_account = "") = 0;
+        bool        add(const QString &name, const QString &path, const QString &type = "",
+                        const QString &id_directory = "", const QString &id_account = "");
 
         // Fields
         /// @brief Returns the path of the file.
-        virtual QString     getPath() const = 0;
+        QString     getPath() const;
         /// @brief If the path is relative, getPath() returns the path from the
         /// filesPath directory, which is not the working directory of the server.
         /// The path returned by getFullPath() contains the filesPath if it is
         /// relative, or just the path if it is absolute. Nothing is returned
         /// if the file has not been found.
-        virtual QString     getFullPath() const = 0;
+        QString     getFullPath() const;
         /// @brief Modifies the path of the file.
-        virtual bool        setPath(const QString &path) = 0;
+        bool        setPath(const QString &path);
         /// @brief Returns the type of the file, which can be image, audio, video,
         /// document, or other.
-        virtual QString     getType() const = 0;
+        QString     getType() const;
         /// @brief Modifies the type of the file.
-        virtual bool        setType(const QString &type = "") = 0;
+        bool        setType(const QString &type = "");
         /// @brief Returns the id of the directory of the file.
-        virtual QString     getIdDirectory() const = 0;
+        QString     getIdDirectory() const;
         /// @brief Modifies the id of the directory of the file.
-        virtual bool        setIdDirectory(const QString &id_directory = "") = 0;
+        bool        setIdDirectory(const QString &id_directory = "");
 
         // Informations
         /// @brief Returns the value of an information of the file.
         /// @param name : The name of the information to return.
-        virtual QVariant    getInformation(const QString &name) const = 0;
+        QVariant    getInformation(const QString &name) const;
         /// @brief Returns all the informations of the file.
-        virtual QVariantMap getInformations() const = 0;
-        /// @brief Modify the value of an information of the file, or create it
-        /// if it doesn't exists.
+        QVariantMap getInformations() const;
+        /// @brief Modifies the value of an information of the file, or create
+        /// it if it doesn't exists.
         /// @param name : The name of the information to create or modify.
         /// @brief value : The new value of the information.
-        virtual bool        setInformation(const QString &name, const QVariant &value) = 0;
+        bool        setInformation(const QString &name, const QVariant &value);
         /// @brief Modifies or creates multiple informations for the file.
         /// @param informations : The informations to modify or create.
         /// The keys of the map are the keys of the informations, and
         /// the values of the map are the values of the informations.
-        virtual bool        setInformations(const QVariantMap &informations) = 0;
+        bool        setInformations(const QVariantMap &informations);
         /// @brief Removes an information of the file.
         /// @param name : The name of the information to remove.
-        virtual bool        removeInformation(const QString &name) = 0;
+        bool        removeInformation(const QString &name);
         /// @brief Removes multiple informations of the file.
         /// @param informations : This list contains the name of each
         /// informations to remove. If empty all the informations are removed.
-        virtual bool        removeInformations(const QStringList &informations = QStringList()) = 0;
+        bool        removeInformations(const QStringList &informations = QStringList());
 
         // Directories
         /// @brief Returns the virtual path of the file.
         /// @param initialSlash : If true, the first char of the result will be "/".
         /// @param fileName : If true, the file name is included in the result.
-        virtual QString     getVirtualPath(bool initialSlash = false, bool fileName = false) const = 0;
+        QString     getVirtualPath(bool initialSlash = false, bool fileName = false) const;
         /// @brief Moves the file to the directory localized by the virtual
         /// path in parameter.
-        virtual bool        setVirtualPath(const QString &virtualPath) = 0;
+        bool        setVirtualPath(const QString &virtualPath);
 
         // Collections
         /// @brief Returns the list of the id collection of the file.
-        virtual QStringList getCollections() const = 0;
+        QStringList getCollections() const;
         /// @brief Add the file to the given collection.
-        virtual bool        addCollection(const QString &id_collection) = 0;
+        bool        addCollection(const QString &id_collection);
         /// @brief Removes the file from the given collection.
-        virtual bool        removeCollection(const QString &id_collection) = 0;
+        bool        removeCollection(const QString &id_collection);
+
+    private:
+        QStringList types; ///< The list of the possible types.
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::ITableFiles, "cc.lightbird.ITableFiles");
-
-#endif // ITABLEFILES_H
+#endif // LIGHTBIRD_TABLEFILES_H

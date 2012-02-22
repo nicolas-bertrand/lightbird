@@ -5,7 +5,7 @@
 
 # include "IApi.h"
 # include "IClient.h"
-# include "ITableFiles.h"
+# include "TableFiles.h"
 
 # define MAX_READ   1000000 ///< The Maximum amoung of data read each time from the transcoded stream.
 
@@ -29,7 +29,7 @@ protected:
     LightBird::IApi     &api;           ///< The LightBird's Api.
     LightBird::IClient  &client;        ///< The client that requested the preview.
     QUrl                uri;            ///< The uri of the request.
-    QSharedPointer<LightBird::ITableFiles> file; ///< The file pointed by the uri.
+    LightBird::TableFiles file;         ///< The file pointed by the uri.
     LightBird::IResponse &response;     ///< The response that will be sent.
     QMap<QString, QString> properties;  ///< Properties used for the logs.
     QString             destination;    ///< The name of the temporary destination file.

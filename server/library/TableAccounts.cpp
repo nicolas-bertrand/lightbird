@@ -1,13 +1,12 @@
-#include <QCryptographicHash>
-
-#include "Database.h"
+#include "Library.h"
 #include "LightBird.h"
-#include "TableAccounts.h"
+
+using namespace LightBird;
 
 TableAccounts::TableAccounts(const QString &id)
 {
     this->tableName = "accounts";
-    this->tableId = LightBird::ITable::Accounts;
+    this->tableId = Table::Accounts;
     this->setId(id);
 }
 
@@ -15,7 +14,7 @@ TableAccounts::~TableAccounts()
 {
 }
 
-TableAccounts::TableAccounts(const TableAccounts &t) : Table(), TableAccessors()
+TableAccounts::TableAccounts(const TableAccounts &t) : TableAccessors()
 {
     *this = t;
 }
@@ -27,21 +26,14 @@ TableAccounts &TableAccounts::operator=(const TableAccounts &table)
     return (*this);
 }
 
-bool        TableAccounts::setId(const QString &id)
-{
-    if (!Table::setId(id))
-        return (false);
-    return (true);
-}
-
 QString     TableAccounts::getIdFromName(const QString &name) const
 {
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getIdFromName"));
+    query.prepare(Library::database().getQuery("TableAccounts", "getIdFromName"));
     query.bindValue(":name", name);
-    if (!Database::instance()->query(query, result) || result.size() != 1)
+    if (!Library::database().query(query, result) || result.size() != 1)
         return ("");
     return (result[0]["id"].toString());
 }
@@ -82,12 +74,12 @@ QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifian
     int                     i;
     int                     s;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getIdFromIdentifiantAndSalt"));
-    if (Database::instance()->query(query, result))
+    query.prepare(Library::database().getQuery("TableAccounts", "getIdFromIdentifiantAndSalt"));
+    if (Library::database().query(query, result))
         // Check the identifiant of all the account
         for (i = 0, s = result.size(); i < s; ++i)
             // If the identifiant of the account match, it is connected
-            if (identifiant == LightBird::sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii()))
+            if (identifiant == sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii()))
                 return (result[i]["id"].toString());
     return ("");
 }
@@ -103,19 +95,19 @@ bool        TableAccounts::setIdFromIdentifiantAndSalt(const QString &identifian
 }
 
 bool            TableAccounts::add(const QString &name, const QVariantMap &informations,
-                                   const QString &password, bool administrator, bool active)
+                                              const QString &password, bool administrator, bool active)
 {
     QSqlQuery   query;
     QString     id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TableAccounts", "add"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TableAccounts", "add"));
     query.bindValue(":id", id);
     query.bindValue(":name", name);
     query.bindValue(":password", this->passwordHash(password, id));
     query.bindValue(":administrator", QString::number(administrator));
     query.bindValue(":active", QString::number(active));
-    if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
+    if (!Library::database().query(query) || query.numRowsAffected() == 0)
         return (false);
     this->id = id;
     if (!informations.isEmpty())
@@ -133,9 +125,9 @@ QString         TableAccounts::getPassword() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getPassword"));
+    query.prepare(Library::database().getQuery("TableAccounts", "getPassword"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result[0]["password"].toString());
     return ("");
 }
@@ -144,10 +136,10 @@ bool            TableAccounts::setPassword(const QString &password)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "setPassword"));
+    query.prepare(Library::database().getQuery("TableAccounts", "setPassword"));
     query.bindValue(":password", this->passwordHash(password, this->id));
     query.bindValue(":id", this->id);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool            TableAccounts::isAdministrator() const
@@ -155,9 +147,9 @@ bool            TableAccounts::isAdministrator() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "isAdministrator_select"));
+    query.prepare(Library::database().getQuery("TableAccounts", "isAdministrator_select"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0 && result[0]["administrator"] == "1")
+    if (Library::database().query(query, result) && result.size() > 0 && result[0]["administrator"] == "1")
         return (true);
     return (false);
 }
@@ -166,10 +158,10 @@ bool            TableAccounts::isAdministrator(bool administrator)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "isAdministrator_update"));
+    query.prepare(Library::database().getQuery("TableAccounts", "isAdministrator_update"));
     query.bindValue(":administrator", QString::number(administrator));
     query.bindValue(":id", this->id);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool            TableAccounts::isActive() const
@@ -177,9 +169,9 @@ bool            TableAccounts::isActive() const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "isActive_select"));
+    query.prepare(Library::database().getQuery("TableAccounts", "isActive_select"));
     query.bindValue(":id", this->id);
-    if (Database::instance()->query(query, result) && result.size() > 0 && result[0]["active"] == "1")
+    if (Library::database().query(query, result) && result.size() > 0 && result[0]["active"] == "1")
         return (true);
     return (false);
 }
@@ -188,10 +180,10 @@ bool            TableAccounts::isActive(bool active)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "isActive_update"));
+    query.prepare(Library::database().getQuery("TableAccounts", "isActive_update"));
     query.bindValue(":active", QString::number(active));
     query.bindValue(":id", this->id);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 QVariant        TableAccounts::getInformation(const QString &name) const
@@ -199,10 +191,10 @@ QVariant        TableAccounts::getInformation(const QString &name) const
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getInformation"));
+    query.prepare(Library::database().getQuery("TableAccounts", "getInformation"));
     query.bindValue(":id_account", this->id);
     query.bindValue(":name", name);
-    if (Database::instance()->query(query, result) && result.size() > 0)
+    if (Library::database().query(query, result) && result.size() > 0)
         return (result.value(0).value("value").toString());
     return ("");
 }
@@ -215,9 +207,9 @@ QVariantMap     TableAccounts::getInformations() const
     int                     i;
     int                     s;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getInformations"));
+    query.prepare(Library::database().getQuery("TableAccounts", "getInformations"));
     query.bindValue(":id_account", this->id);
-    if (Database::instance()->query(query, result))
+    if (Library::database().query(query, result))
         for (i = 0, s = result.size(); i < s; ++i)
             informations.insert(result[i]["name"].toString(), result[i]["value"]);
     return (informations);
@@ -228,26 +220,26 @@ bool            TableAccounts::setInformation(const QString &name, const QVarian
     QSqlQuery               query;
     QVector<QVariantMap>    result;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "setInformation_select"));
+    query.prepare(Library::database().getQuery("TableAccounts", "setInformation_select"));
     query.bindValue(":id_account", this->id);
     query.bindValue(":name", name);
-    Database::instance()->query(query, result);
+    Library::database().query(query, result);
     if (result.size() > 0)
     {
-        query.prepare(Database::instance()->getQuery("TableAccounts", "setInformation_update"));
+        query.prepare(Library::database().getQuery("TableAccounts", "setInformation_update"));
         query.bindValue(":value", value);
         query.bindValue(":id_account", this->id);
         query.bindValue(":name", name);
     }
     else
     {
-        query.prepare(Database::instance()->getQuery("TableAccounts", "setInformation_insert"));
-        query.bindValue(":id", LightBird::createUuid());
+        query.prepare(Library::database().getQuery("TableAccounts", "setInformation_insert"));
+        query.bindValue(":id", createUuid());
         query.bindValue(":id_account", this->id);
         query.bindValue(":name", name);
         query.bindValue(":value", value);
     }
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool            TableAccounts::setInformations(const QVariantMap &informations)
@@ -268,10 +260,10 @@ bool            TableAccounts::removeInformation(const QString &name)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "removeInformation"));
+    query.prepare(Library::database().getQuery("TableAccounts", "removeInformation"));
     query.bindValue(":id_account", this->id);
     query.bindValue(":name", name);
-    return (Database::instance()->query(query) && query.numRowsAffected() > 0);
+    return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
 bool            TableAccounts::removeInformations(const QStringList &informations)
@@ -281,9 +273,9 @@ bool            TableAccounts::removeInformations(const QStringList &information
 
     if (informations.isEmpty())
     {
-        query.prepare(Database::instance()->getQuery("TableAccounts", "removeInformations"));
+        query.prepare(Library::database().getQuery("TableAccounts", "removeInformations"));
         query.bindValue(":id_account", this->id);
-        result = Database::instance()->query(query);
+        result = Library::database().query(query);
     }
     else
     {
@@ -302,9 +294,9 @@ QStringList     TableAccounts::getGroups() const
     int                     i;
     int                     s;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "getGroups"));
+    query.prepare(Library::database().getQuery("TableAccounts", "getGroups"));
     query.bindValue(":id_account", this->id);
-    if (Database::instance()->query(query, result))
+    if (Library::database().query(query, result))
         for (i = 0, s = result.size(); i < s; ++i)
             groups << result[i]["id_group"].toString();
     return (groups);
@@ -315,22 +307,22 @@ bool            TableAccounts::addGroup(const QString &id_group)
     QSqlQuery   query;
     QString     id;
 
-    id = LightBird::createUuid();
-    query.prepare(Database::instance()->getQuery("TableAccounts", "addGroup"));
+    id = createUuid();
+    query.prepare(Library::database().getQuery("TableAccounts", "addGroup"));
     query.bindValue(":id", id);
     query.bindValue(":id_account", this->id);
     query.bindValue(":id_group", id_group);
-    return (Database::instance()->query(query));
+    return (Library::database().query(query));
 }
 
 bool            TableAccounts::removeGroup(const QString &id_group)
 {
     QSqlQuery   query;
 
-    query.prepare(Database::instance()->getQuery("TableAccounts", "removeGroup"));
+    query.prepare(Library::database().getQuery("TableAccounts", "removeGroup"));
     query.bindValue(":id_account", this->id);
     query.bindValue(":id_group", id_group);
-    return (Database::instance()->query(query) && query.numRowsAffected() > 0);
+    return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
 QString         TableAccounts::passwordHash(const QString &password, const QString &id) const
@@ -338,6 +330,6 @@ QString         TableAccounts::passwordHash(const QString &password, const QStri
     if (password.isEmpty())
         return (QString());
     if (id.isEmpty())
-        return (LightBird::sha256(password.toAscii()));
-    return (LightBird::sha256(password.toAscii() + id.toAscii()));
+        return (sha256(password.toAscii()));
+    return (sha256(password.toAscii() + id.toAscii()));
 }

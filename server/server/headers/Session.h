@@ -9,7 +9,7 @@
 
 /// @brief The server implementation of ISession. All the data of this class
 /// are stored in the database, except the clients list.
-class Session : public Table,
+class Session : public LightBird::Table,
                 public LightBird::ISession
 {
 public:

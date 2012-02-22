@@ -1,11 +1,8 @@
 #include <QFileInfo>
 
-#include "ITableFiles.h"
-
 #include "Preview.h"
 
-Preview::Preview(LightBird::IApi &a, LightBird::IClient &cl) : api(a), client(cl), uri(client.getRequest().getUri()),
-                 file(api.database().getFiles()), response(client.getResponse())
+Preview::Preview(LightBird::IApi &a, LightBird::IClient &cl) : api(a), client(cl), uri(client.getRequest().getUri()), response(client.getResponse())
 {
 }
 
@@ -19,12 +16,12 @@ void    Preview::go()
     unsigned int    position;
 
     // Extract the file id from the uri
-    this->file->setId(this->uri.queryItemValue("id"));
+    this->file.setId(this->uri.queryItemValue("id"));
     // If the file doesn't exists, an error occured
-    if (!this->file->exists() || !QFileInfo(this->file->getFullPath()).isFile())
+    if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
         return this->_error("Preview", 404, "Not Found", "File not found.");
     // If the client has not the right to read the file
-    if (!this->file->isAllowed(this->client.getAccount().getId(), "read"))
+    if (!this->file.isAllowed(this->client.getAccount().getId(), "read"))
         return this->_error("Preview", 403, "Forbidden", "Access to the file denied.");
     // Defines the width and the height of the image
     this->_size();
@@ -32,7 +29,7 @@ void    Preview::go()
     position = this->uri.queryItemValue("position").toUInt();
     // Get the extensions that can generates a preview of the file
     if ((extensions = this->api.extensions().get("IPreviews")).size() > 0)
-        this->previewFileName = static_cast<LightBird::IPreviews *>(extensions.first())->previews(this->file->getId(), LightBird::IImage::JPEG, this->width, this->height, position);
+        this->previewFileName = static_cast<LightBird::IPreviews *>(extensions.first())->previews(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position);
     // Release the extensions
     this->api.extensions().release(extensions);
     // No extensions has been able to generate the preview

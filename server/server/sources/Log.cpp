@@ -37,7 +37,7 @@ Log::Log(QObject *parent) : mutex(QMutex::Recursive)
     this->levels[LightBird::ILogs::TRACE] = "Trace";
     this->level = LightBird::ILogs::TRACE;
     // Allows the library to use the logs
-    LightBird::Library::setLogs(new ApiLogs("LightBird", false));
+    LightBird::Library::setLog(new ApiLogs());
 }
 
 Log::~Log()
