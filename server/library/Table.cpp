@@ -60,6 +60,11 @@ bool            Table::exists(const QString &id)
     return (false);
 }
 
+Table::operator bool()
+{
+    return (this->exists());
+}
+
 void            Table::clear()
 {
     this->id.clear();

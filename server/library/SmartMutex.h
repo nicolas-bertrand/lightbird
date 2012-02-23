@@ -1,5 +1,5 @@
-#ifndef SMARTMUTEX_H
-# define SMARTMUTEX_H
+#ifndef LIGHTBIRD_SMARTMUTEX_H
+# define LIGHTBIRD_SMARTMUTEX_H
 
 # include <QMutex>
 # include <QReadWriteLock>
@@ -65,4 +65,4 @@ private:
     QString         function;
 };
 
-#endif // SMARTMUTEX_H
+#endif // LIGHTBIRD_SMARTMUTEX_H

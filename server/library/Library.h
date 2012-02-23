@@ -1,5 +1,5 @@
-#ifndef LIBRARY_H
-# define LIBRARY_H
+#ifndef LIGHTBIRD_LIBRARY_H
+# define LIGHTBIRD_LIBRARY_H
 
 # include <QObject>
 
@@ -30,4 +30,4 @@ namespace LightBird
     };
 }
 
-#endif // LIBRARY_H
+#endif // LIGHTBIRD_LIBRARY_H

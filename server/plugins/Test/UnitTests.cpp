@@ -83,8 +83,11 @@ bool            UnitTests::_accounts()
         ASSERT(!a2.exists());
         ASSERT(a2.getId().isEmpty());
         ASSERT(!a1.exists());
+        ASSERT(!a1);
         ASSERT(a1.getId().isEmpty());
         ASSERT(a1.setId(id1));
+        ASSERT(a1.exists());
+        ASSERT(a1);
         ASSERT(a2.remove(id2));
         ASSERT(!a2.remove(id2));
         ASSERT(!a2.remove());

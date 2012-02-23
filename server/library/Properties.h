@@ -1,5 +1,5 @@
-#ifndef PROPERTIES_H
-# define PROPERTIES_H
+#ifndef LIGHTBIRD_PROPERTIES_H
+# define LIGHTBIRD_PROPERTIES_H
 
 # include <QMap>
 # include <QString>
@@ -35,4 +35,4 @@ private:
     QMap<QString, QString>          properties;
 };
 
-#endif // PROPERTIES_H
+#endif // LIGHTBIRD_PROPERTIES_H

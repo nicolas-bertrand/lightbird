@@ -1,7 +1,7 @@
-#ifndef DEFINES_H
-# define DEFINES_H
+#ifndef LIGHTBIRD_DEFINES_H
+# define LIGHTBIRD_DEFINES_H
 
-/// This header defines the macro used in the server.
+/// This header defines the macro used by the server.
 
 # define VERSION                              "11.11"               ///< The version of the server
 # define DATE_FORMAT                          "yyyy-MM-dd hh:mm:ss" ///< The database date format, used through QDateTime.
@@ -31,4 +31,4 @@
 # define DEFAULT_CLEAN_TEMPORARY_PATH         "true"                ///< Defines if the temporary directory must be emptied every time the server is started.
 # define DEFAULT_LANGUAGES_PATH               "languages"           ///< The name of the default languages directory.
 
-#endif // DEFINES_H
+#endif // LIGHTBIRD_DEFINES_H

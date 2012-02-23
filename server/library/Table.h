@@ -60,6 +60,9 @@ namespace LightBird
         /// represented by its id still exists in the database. Otherwise
         /// check if the given id exists.
         bool            exists(const QString &id = "");
+        /// @brief Returns true if the current row represented by its id still
+        /// exists in the database.
+        operator        bool();
         /// @brief Clears the id of the instance.
         void            clear();
         /// @brief Removes the current row if the parameter is empty, or the
