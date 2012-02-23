@@ -546,6 +546,9 @@ bool            UnitTests::_files()
         ASSERT(f1.getIdFromVirtualPath("/////").isEmpty());
         ASSERT(f1.getPath() == "/");
         ASSERT(f2.getPath() == "f2.xml");
+        ASSERT(f2.getId() == f2.getIdFromPath(f2.getPath()));
+        ASSERT(f2.setIdFromPath(f2.getPath()) && f2.getPath() == "f2.xml");
+        ASSERT(f2.getIdFromPath("f9.xml").isEmpty());
         ASSERT(f1.setPath("f1.xml"));
         ASSERT(f1.getPath() == "f1.xml");
         ASSERT(f2.setPath("f1"));

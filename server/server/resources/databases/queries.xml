@@ -92,6 +92,7 @@
     </TableEvents>
     <TableFiles>
         <getIdFromVirtualPath>SELECT id FROM files WHERE id_directory=:id_directory AND name=:name</getIdFromVirtualPath>
+        <getIdFromPath>SELECT id FROM files WHERE path=:path</getIdFromPath>
         <add>INSERT INTO files (id, name, type, path, id_directory, id_account) VALUES (:id, :name, :type, :path, :id_directory, :id_account)</add>
         <getPath>SELECT path FROM files WHERE id=:id</getPath>
         <setPath>UPDATE files SET path=:path WHERE id=:id</setPath>

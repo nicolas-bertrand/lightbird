@@ -68,6 +68,28 @@ bool        TableFiles::setIdFromVirtualPath(const QString &virtualPath)
     return (true);
 }
 
+QString     TableFiles::getIdFromPath(const QString &path) const
+{
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+
+    query.prepare(Library::database().getQuery("TableFiles", "getIdFromPath"));
+    query.bindValue(":path", path);
+    if (!Library::database().query(query, result) || result.size() <= 0)
+        return ("");
+    return (result[0]["id"].toString());
+}
+
+bool        TableFiles::setIdFromPath(const QString &path)
+{
+    QString id;
+
+    if ((id = this->getIdFromPath(path)).isEmpty())
+        return (false);
+    this->id = id;
+    return (true);
+}
+
 bool    TableFiles::add(const QString &name, const QString &path, const QVariantMap &informations,
                         const QString &type, const QString &id_directory, const QString &id_account)
 {
@@ -96,6 +118,30 @@ bool    TableFiles::add(const QString &name, const QString &path, const QString 
     return (this->add(name, path, QVariantMap(), type, id_directory, id_account));
 }
 
+bool    TableFiles::remove(const QString &id)
+{
+    return (Table::remove(id));
+}
+
+bool            TableFiles::remove(bool removeFile)
+{
+    QString     path;
+    TableEvents event;
+
+    if (removeFile)
+        path = this->getFullPath();
+    if (!Table::remove() || (removeFile && !QFileInfo(path).isFile()))
+        return (false);
+    // If we can't remove the file now, an event is stored in the database in order to remove it later
+    if (removeFile && !QFile::remove(path))
+    {
+        event.add("remove_file_later");
+        event.setInformation("path", path);
+        return (false);
+    }
+    return (true);
+}
+
 QString TableFiles::getPath() const
 {
     QSqlQuery               query;
@@ -113,8 +159,8 @@ QString TableFiles::getFullPath() const
     QString path = this->getPath();
 
     // Relative path
-    if (QFileInfo(Library::configuration().get("filesPath") + "/" + path).isFile())
-        return (Library::configuration().get("filesPath") + "/" + path);
+    if (QFileInfo(this->getFilesPath() + path).isFile())
+        return (this->getFilesPath() + path);
     // Absolute path
     if (QFileInfo(path).isFile())
         return (path);
@@ -347,4 +393,11 @@ bool            TableFiles::removeCollection(const QString &id_collection)
     query.bindValue(":id_file", this->id);
     query.bindValue(":id_collection", id_collection);
     return (Library::database().query(query));
+}
+
+QString  TableFiles::getFilesPath(bool finalSlash)
+{
+    if (finalSlash)
+        return (Library::configuration().get("filesPath") + "/");
+    return (Library::configuration().get("filesPath"));
 }

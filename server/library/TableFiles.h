@@ -20,10 +20,16 @@ namespace LightBird
         TableFiles(const TableFiles &table);
         TableFiles  &operator=(const TableFiles &table);
 
-        /// @brief Returns the id of a file, using its virtual path.
+        /// @brief Returns the id of a file using its virtual path in the database.
         QString     getIdFromVirtualPath(const QString &virtualPath) const;
-        /// @brief Set the id of a file, using its virtual path.
+        /// @brief Set the id of a file using its virtual path in the database.
         bool        setIdFromVirtualPath(const QString &virtualPath);
+        /// @brief Returns the id of a file using its path in the file system.
+        /// The path must match exactly the path in the database.
+        QString     getIdFromPath(const QString &path) const;
+        /// @brief Sets the id of a file using its path in the file system.
+        /// The path must match exactly the path in the database.
+        bool        setIdFromPath(const QString &path);
         /// @brief Add a new file.
         /// @param name : The name of the file.
         /// @param path : The path of the file.
@@ -38,15 +44,27 @@ namespace LightBird
         /// @see add
         bool        add(const QString &name, const QString &path, const QString &type = "",
                         const QString &id_directory = "", const QString &id_account = "");
+        /// @see LightBird::Table::remove
+        bool        remove(const QString &id = "");
+        /// @brief Removes the file in the database and from the file system.
+        /// @param removeFile : If true, the file is removed from the database
+        /// and the file system. Otherwise it is only removed from the database.
+        /// @return True if the file has been removed. If the file can't be removed
+        /// immediatly from the file system, false is returned but it is removed
+        /// from the database and the file will be deleted later.
+        bool        remove(bool removeFile);
 
         // Fields
-        /// @brief Returns the path of the file.
+        /// @brief Returns the path of the file in the file system. This path
+        /// can be relative to the filesPath or absolute.
+        /// @see getFilesPath
         QString     getPath() const;
         /// @brief If the path is relative, getPath() returns the path from the
         /// filesPath directory, which is not the working directory of the server.
         /// The path returned by getFullPath() contains the filesPath if it is
         /// relative, or just the path if it is absolute. Nothing is returned
         /// if the file has not been found.
+        /// @see getFilesPath
         QString     getFullPath() const;
         /// @brief Modifies the path of the file.
         bool        setPath(const QString &path);
@@ -100,6 +118,13 @@ namespace LightBird
         bool        addCollection(const QString &id_collection);
         /// @brief Removes the file from the given collection.
         bool        removeCollection(const QString &id_collection);
+
+        // Static
+        /// @brief Returns the filesPath, which is the relative path to the
+        /// directory that stores the files managed by the server. The filesPath
+        /// is defined by the configuration node "filesPath".
+        /// @param finalSlash : If true, a "/" is added at the end of the filesPath.
+        static QString getFilesPath(bool finalSlash = true);
 
     private:
         QStringList types; ///< The list of the possible types.

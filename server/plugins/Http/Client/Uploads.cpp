@@ -121,7 +121,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
                 file.path += '.' + LightBird::createUuid();
                 if (file.name.contains('.'))
                     file.path += file.name.right(file.name.size() - file.name.indexOf('.'));
-                upload.file->setFileName(QDir().cleanPath(Plugin::api().configuration().get("filesPath")) + "/" + file.path);
+                upload.file->setFileName(LightBird::TableFiles::getFilesPath() + file.path);
                 upload.files.push_back(file);
                 upload.header = false;
                 // Opens the file
@@ -204,7 +204,7 @@ void        Uploads::doExecution(LightBird::IClient &client)
 
     this->mutex.lock();
     if (this->uploads.contains(id) && this->uploads[id].idClient == client.getId())
-        Plugin::api().timers().setTimer("uploads", 0);
+        Plugin::api().timers().setTimer("uploads");
     this->mutex.unlock();
 }
 
@@ -295,7 +295,7 @@ void        Uploads::stop(LightBird::IClient &client)
         if (!this->uploads[id].complete)
             Plugin::api().network().disconnect(this->uploads[id].idClient);
         this->uploads[id].complete = true;
-        Plugin::api().timers().setTimer("uploads", 0);
+        Plugin::api().timers().setTimer("uploads");
     }
     this->mutex.unlock();
 }
@@ -315,11 +315,8 @@ void                Uploads::cancel(LightBird::IClient &client)
             if (file.setIdFromVirtualPath(this->uploads[id].path + "/" + it.next().name)
                 && file.getIdAccount() == client.getAccount().getId())
             {
-                if (QFile::remove(file.getFullPath()))
-                    Plugin::api().log().debug("File removed", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
-                else
-                    Plugin::api().log().warning("Failed to remove the uploaded file", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
-                file.remove();
+                file.remove(true);
+                Plugin::api().log().debug("File removed", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
             }
         Plugin::api().log().info("Upload canceled", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).toMap(), "Uploads", "cancel");
         if (!this->uploads[id].complete)
@@ -330,17 +327,14 @@ void                Uploads::cancel(LightBird::IClient &client)
     else if (client.getRequest().getContent().getStorage() == LightBird::IContent::VARIANT
              && !(files = client.getRequest().getContent().getVariant()->toList()).isEmpty())
     {
-       QListIterator<QVariant> it(files);
-       while (it.hasNext())
-           if (!it.next().toString().isEmpty() && file.setIdFromVirtualPath(it.peekPrevious().toByteArray())
-               && file.getIdAccount() == client.getAccount().getId())
-           {
-               if (QFile::remove(file.getFullPath()))
-                   Plugin::api().log().debug("File removed", Properties("idClient", client.getId()).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
-               else
-                   Plugin::api().log().warning("Failed to remove the uploaded file", Properties("idClient", client.getId()).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
-               file.remove();
-           }
+        QListIterator<QVariant> it(files);
+        while (it.hasNext())
+            if (!it.next().toString().isEmpty() && file.setIdFromVirtualPath(it.peekPrevious().toByteArray())
+                && file.getIdAccount() == client.getAccount().getId())
+            {
+                file.remove(true);
+                Plugin::api().log().debug("File removed", Properties("idClient", client.getId()).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
+            }
     }
     this->mutex.unlock();
 }
@@ -404,7 +398,7 @@ void        Uploads::_insert(LightBird::IClient &client, Upload &upload)
     else
     {
         upload.file->close();
-        upload.file->remove(Plugin::api().configuration().get("filesPath") + "/" + file.path);
+        upload.file->remove(LightBird::TableFiles::getFilesPath() + file.path);
         Plugin::api().log().warning("Failed to add the uploaded file in the database", Properties("idDirectory", directory.getId()).add("path", file.path).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "_insert");
     }
 }
