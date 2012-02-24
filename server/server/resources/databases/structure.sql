@@ -81,7 +81,8 @@ CREATE TABLE files (
   "modified" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
   "created" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
   PRIMARY KEY(id),
-  UNIQUE(name, id_directory)
+  UNIQUE(name, id_directory),
+  UNIQUE(path)
 );
 CREATE TABLE files_collections (
   "id" VARCHAR(36) NOT NULL,
