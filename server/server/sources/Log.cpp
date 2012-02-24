@@ -64,7 +64,10 @@ void    Log::write(LightBird::ILogs::Level level, const QString &message, const 
             break;
         case Log::BUFFER:
             this->mutex.lock();
-            this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method));
+            if (this->mode == Log::BUFFER)
+                this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method));
+            else
+                this->write(level, message, plugin, properties, object, method);
             this->mutex.unlock();
             break;
         default:
@@ -249,6 +252,7 @@ void    Log::_initializeWrite()
     if (!this->awake)
         this->waitRun.wait(&waitMutex);
     this->waitMutex.unlock();
+    this->mode = Log::WRITE;
     this->mutex.unlock();
 }
 
