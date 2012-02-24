@@ -33,9 +33,12 @@ bool            LightBird::copy(const QString &sourceName, const QString &destin
     return (true);
 }
 
-QString     LightBird::cleanPath(const QString &p)
+QString     LightBird::cleanPath(const QString &p, bool removeFirstSlash)
 {
-    return (QDir::cleanPath(QString(p).replace('\\', '/')).replace("//", "/"));
+    QString result = QDir::cleanPath(QString(p).replace('\\', '/')).replace("//", "/").remove('~');
+    if (removeFirstSlash && result.startsWith('/'))
+        result.remove(0, 1);
+    return (result);
 }
 
 QString LightBird::createUuid()

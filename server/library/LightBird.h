@@ -23,7 +23,8 @@ namespace LightBird
     /// @brief LightBird's implementation of Qt::copy.
     LIB bool        copy(const QString &source, const QString &destination);
     /// @brief Does the same job as QDir::cleanPath but removes also the "\" under Linux.
-    LIB QString     cleanPath(const QString &path);
+    /// @param removeFirstSlash : Removes the first char if it is "/".
+    LIB QString     cleanPath(const QString &path, bool removeFirstSlash = false);
     /// @brief Returns a new Universally Unique Identifier.
     LIB QString     createUuid();
     /// @brief Implementation of SHA-256.

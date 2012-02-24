@@ -215,12 +215,12 @@ bool            UnitTests::_collections()
         ASSERT(c2.getIdCollection() == c1.getIdFromVirtualPath("///\\images///france\\"));
         ASSERT(c2.setVirtualPath("images"));
         ASSERT(c2.getIdCollection() == c1.getId());
-        ASSERT(f.add("toto.xml", "/", ""));
+        ASSERT(f.add("toto.xml", "toto.xml", ""));
         ASSERT(!f.getCollections().size());
         ASSERT(f.addCollection(c1.getId()));
         ASSERT((l = f.getCollections()).size() == 1);
         ASSERT(l.contains(c1.getId()));
-        ASSERT(f.add("titi.xml", "/", ""));
+        ASSERT(f.add("titi.xml", "titi.xml", ""));
         ASSERT(f.addCollection(c1.getId()));
         ASSERT((l = c1.getCollections()).size() == 3);
         ASSERT(l.contains(c1.getIdFromVirtualPath("images/france")));
@@ -387,8 +387,8 @@ bool            UnitTests::_directories()
         ASSERT(d2.getIdDirectory() == d1.getIdFromVirtualPath("///\\images///france\\"));
         ASSERT(d2.setVirtualPath("images"));
         ASSERT(d2.getIdDirectory() == d1.getId());
-        ASSERT(f.add("toto.png", "/", "", d1.getId()));
-        ASSERT(f.add("titi.png", "/", "", d1.getId()));
+        ASSERT(f.add("toto.png", "toto.png", "", d1.getId()));
+        ASSERT(f.add("titi.png", "titi.png", "", d1.getId()));
         ASSERT(a.add("a"));
         ASSERT((l = d1.getDirectories()).size() == 3);
         ASSERT(l.contains(d1.getIdFromVirtualPath("images/france")));
@@ -524,7 +524,7 @@ bool            UnitTests::_files()
     {
         ASSERT(d1.add("d1"));
         ASSERT(a1.add("a1"));
-        ASSERT(f1.add("f3", "/"));
+        ASSERT(f1.add("f3", "f3.xml"));
         ASSERT(f2.add("f8", "f2.xml", "document", d1.getId(), a1.getId()));
         ASSERT(f2.getIdAccount() == a1.getId());
         ASSERT(f2.setIdAccount());
@@ -544,7 +544,7 @@ bool            UnitTests::_files()
         ASSERT(f1.getIdFromVirtualPath("////f1////") == f1.getId());
         ASSERT(f1.getIdFromVirtualPath("").isEmpty());
         ASSERT(f1.getIdFromVirtualPath("/////").isEmpty());
-        ASSERT(f1.getPath() == "/");
+        ASSERT(f1.getPath() == "f3.xml");
         ASSERT(f2.getPath() == "f2.xml");
         ASSERT(f2.getId() == f2.getIdFromPath(f2.getPath()));
         ASSERT(f2.setIdFromPath(f2.getPath()) && f2.getPath() == "f2.xml");

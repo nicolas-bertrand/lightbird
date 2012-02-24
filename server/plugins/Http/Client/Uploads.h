@@ -26,7 +26,7 @@ public:
     struct File
     {
         QString name;        ///< The name of the file as it will appear in the database.
-        QString path;        ///< The real path of the file including its real name.
+        QString path;        ///< The path of the file in the file system including its name (without the filesPath).
         QString contentType; ///< The content type of the file.
     };
 

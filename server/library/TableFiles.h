@@ -40,9 +40,9 @@ namespace LightBird
         /// @param id_account : The id of account that owns the file.
         /// @return True if the file has been created.
         bool        add(const QString &name, const QString &path, const QVariantMap &informations,
-                        const QString &type = "", const QString &id_directory = "", const QString &id_account = "");
+                        const QString &type = "other", const QString &id_directory = "", const QString &id_account = "");
         /// @see add
-        bool        add(const QString &name, const QString &path, const QString &type = "",
+        bool        add(const QString &name, const QString &path, const QString &type = "other",
                         const QString &id_directory = "", const QString &id_account = "");
         /// @see LightBird::Table::remove
         bool        remove(const QString &id = "");

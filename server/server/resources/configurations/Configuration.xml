@@ -47,6 +47,7 @@
   </ports>
   <plugins>
     <plugin>Extensions/Identifier</plugin>
+    <plugin>Files</plugin>
     <plugin>Http/Client</plugin>
     <plugin>Http/Parser</plugin>
     <plugin>Json</plugin>
@@ -55,6 +56,7 @@
   </plugins>
   <configurations>
     <plugin id="Extensions/Identifier"/>
+    <plugin id="Files"/>
     <plugin id="Http/Client"/>
     <plugin id="Http/Parser"/>
     <plugin id="Json"/>

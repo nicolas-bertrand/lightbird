@@ -28,7 +28,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     upload.idAccount = client.getAccount().getId();
     upload.file = QSharedPointer<QFile>(new QFile());
     upload.progress = 0;
-    upload.path = QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii());
+    upload.path = LightBird::cleanPath(QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii()), true) + "/";
     upload.size = client.getRequest().getHeader().value("content-length").toULongLong();
     upload.boundary = client.getRequest().getInformations().value("media-type").toMap().value("boundary").toByteArray();
     upload.boundary = "--" + upload.boundary.right(upload.boundary.size() - upload.boundary.indexOf('=') - 1);
@@ -41,7 +41,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     // If the id is valid, insert it in the map
     if (!id.isEmpty() && !this->uploads.contains(id))
     {
-        Plugin::api().log().info("Upload started", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeHeader");
+        Plugin::api().log().debug("Upload started", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeHeader");
         this->uploads.insert(id, upload);
     }
     // Otherwise an upload is already using this id
@@ -67,6 +67,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
 void            Uploads::onUnserializeContent(LightBird::IClient &client)
 {
     QString     id = client.getInformations().value("idUpload").toString();
+    QString     filesPath = LightBird::TableFiles::getFilesPath();
     QByteArray  &data = *client.getRequest().getContent().getByteArray();
     qint64      size = data.size();
     qint64      position = 0;
@@ -112,20 +113,24 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
                 if (file.name.isEmpty() || file.contentType.isEmpty())
                     return this->_error(client, upload, "The fileName or the content-type is missing in the header");
                 // Defines the real name of the file
-                file.name = QDir().cleanPath(file.name.replace('\\', '/').remove('~'));
+                file.name = LightBird::cleanPath(file.name);
                 file.name = file.name.right(file.name.size() - file.name.lastIndexOf('/') - 1);
-                if (file.name.contains("."))
-                    file.path = file.name.left(file.name.indexOf('.'));
+                if (file.name.contains('.'))
+                    file.path = file.name.left(file.name.lastIndexOf('.'));
                 else
                     file.path = file.name;
                 file.path += '.' + LightBird::createUuid();
                 if (file.name.contains('.'))
-                    file.path += file.name.right(file.name.size() - file.name.indexOf('.'));
-                upload.file->setFileName(LightBird::TableFiles::getFilesPath() + file.path);
+                    file.path += file.name.right(file.name.size() - file.name.lastIndexOf('.'));
+                upload.file->setFileName(filesPath + file.path);
                 upload.files.push_back(file);
                 upload.header = false;
-                // Opens the file
-                upload.file->open(QIODevice::WriteOnly);
+                // Creates the filesPath if it doesn't exist
+                if (!QFileInfo(filesPath).isDir())
+                    QDir().mkpath(filesPath);
+                // And opens the file
+                if (!upload.file->open(QIODevice::WriteOnly))
+                    Plugin::api().log().warning("Failed to open the uploaded file", Properties("idUpload", id).add("file", file.path).toMap(), "Uploads", "onUnserializeContent");
             }
             // The header is not complete yet, so we wait for more data
             else
@@ -312,7 +317,7 @@ void                Uploads::cancel(LightBird::IClient &client)
         // Removes all the files uploaded so far
         QListIterator<File> it(this->uploads[id].files);
         while (it.hasNext())
-            if (file.setIdFromVirtualPath(this->uploads[id].path + "/" + it.next().name)
+            if (file.setIdFromVirtualPath(this->uploads[id].path + it.next().name)
                 && file.getIdAccount() == client.getAccount().getId())
             {
                 file.remove(true);
@@ -386,13 +391,16 @@ void        Uploads::_insert(LightBird::IClient &client, Upload &upload)
     LightBird::TableFiles fileTable;
     LightBird::TableDirectories directory;
 
+    // The file could not be opened
+    if (!upload.file->isOpen())
+        return ;
     // Adds the files to the database
     if (!directory.setIdFromVirtualPath(upload.path))
         directory.setId(directory.createVirtualPath(upload.path));
     if (fileTable.add(file.name, file.path, "other", directory.getId(), client.getAccount().getId()))
     {
         fileTable.setInformation("mime", file.contentType);
-        this->identify << (upload.path + "/" + file.name);
+        this->identify << (upload.path + file.name);
         Plugin::api().log().info("File uploaded", Properties("idFile", fileTable.getId()).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "_insert");
     }
     else
