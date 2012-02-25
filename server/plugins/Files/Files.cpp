@@ -13,7 +13,7 @@ Files::Files(LightBird::IApi &a, const QString &t) : api(a), timerName(t)
     // Starts to watch the filesPath
     if (this->api.configuration(true).get("filesPathWatcher") == "true")
     {
-        this->fileSystemWatcher.addPath(LightBird::TableFiles::getFilesPath());
+        this->fileSystemWatcher.addPath(LightBird::getFilesPath());
         this->connect(&this->fileSystemWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(_directoryChanged(QString)), Qt::QueuedConnection);
     }
     // Initializes the addFiles timer
@@ -39,7 +39,7 @@ void    Files::_directoryChanged(const QString &)
 void    Files::_addFiles()
 {
     LightBird::TableFiles   file;
-    QDir                    directory(LightBird::TableFiles::getFilesPath());
+    QDir                    directory(LightBird::getFilesPath());
     QStringList             removeFilesList;
     QString                 fileName;
     QList<void *>           extensions;

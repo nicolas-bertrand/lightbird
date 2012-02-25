@@ -46,6 +46,13 @@ QString LightBird::createUuid()
     return (QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
 }
 
+QString LightBird::getFilesPath(bool finalSlash)
+{
+    if (finalSlash)
+        return (Library::configuration().get("filesPath") + "/");
+    return (Library::configuration().get("filesPath"));
+}
+
 QByteArray LightBird::simplify(QByteArray data, char replace, quint64 maxSize)
 {
     if (maxSize)

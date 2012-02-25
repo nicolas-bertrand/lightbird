@@ -119,13 +119,6 @@ namespace LightBird
         /// @brief Removes the file from the given collection.
         bool        removeCollection(const QString &id_collection);
 
-        // Static
-        /// @brief Returns the filesPath, which is the relative path to the
-        /// directory that stores the files managed by the server. The filesPath
-        /// is defined by the configuration node "filesPath".
-        /// @param finalSlash : If true, a "/" is added at the end of the filesPath.
-        static QString getFilesPath(bool finalSlash = true);
-
     private:
         QStringList types; ///< The list of the possible types.
     };

@@ -159,8 +159,8 @@ QString TableFiles::getFullPath() const
     QString path = this->getPath();
 
     // Relative path
-    if (QFileInfo(this->getFilesPath() + path).isFile())
-        return (this->getFilesPath() + path);
+    if (QFileInfo(LightBird::getFilesPath() + path).isFile())
+        return (LightBird::getFilesPath() + path);
     // Absolute path
     if (QFileInfo(path).isFile())
         return (path);
@@ -393,11 +393,4 @@ bool            TableFiles::removeCollection(const QString &id_collection)
     query.bindValue(":id_file", this->id);
     query.bindValue(":id_collection", id_collection);
     return (Library::database().query(query));
-}
-
-QString  TableFiles::getFilesPath(bool finalSlash)
-{
-    if (finalSlash)
-        return (Library::configuration().get("filesPath") + "/");
-    return (Library::configuration().get("filesPath"));
 }

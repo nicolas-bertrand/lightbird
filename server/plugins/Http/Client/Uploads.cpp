@@ -367,7 +367,7 @@ void    Uploads::_removeCompleteUploads()
 
 void        Uploads::_createFile(LightBird::IClient &client, Upload &upload, File &file)
 {
-    QString filesPath = LightBird::TableFiles::getFilesPath();
+    QString filesPath = LightBird::getFilesPath();
     QString idDirectory;
     LightBird::TableDirectories directory;
 

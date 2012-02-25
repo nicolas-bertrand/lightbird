@@ -27,6 +27,11 @@ namespace LightBird
     LIB QString     cleanPath(const QString &path, bool removeFirstSlash = false);
     /// @brief Returns a new Universally Unique Identifier.
     LIB QString     createUuid();
+    /// @brief Returns the filesPath, which is the relative path to the
+    /// directory that stores the files managed by the server. The filesPath
+    /// is defined by the configuration node "filesPath".
+    /// @param finalSlash : If true, a "/" is added at the end of the filesPath.
+    LIB QString     getFilesPath(bool finalSlash = true);
     /// @brief Implementation of SHA-256.
     /// @author jagatsastry.nitk@gmail.com
     /// @return The hash of data in hex.

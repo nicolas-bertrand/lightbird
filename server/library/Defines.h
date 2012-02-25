@@ -22,7 +22,7 @@
 # define DEFAULT_PERMISSIONS_DEFAULT          "false"               ///< The default permissions.
 # define DEFAULT_PERMISSIONS_INHERITANCE      "true"                ///< If the inheritance of the rights is activated.
 # define DEFAULT_PERMISSIONS_OWNERINHERITANCE "true"                ///< If the inheritance of the owner rights is activated.
-# define DEFAULT_PERMISSIONS_GROUPINHERITANCE "true"                ///< If the inheritance of the owner rights is activated.
+# define DEFAULT_PERMISSIONS_GROUPINHERITANCE "true"                ///< If the inheritance of the group rights is activated.
 
 # define DEFAULT_PLUGINS_PATH                 "plugins"             ///< The name of the default plugins directory.
 # define DEFAULT_QT_PLUGINS_PATH              "QtPlugins"           ///< The default path to the plugins of Qt. Used to distrubute the server.
