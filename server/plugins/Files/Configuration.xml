@@ -3,10 +3,6 @@
   <!-- If true the files put in the filesPath of the server are automatically
        added to the database. -->
   <filesPathWatcher>true</filesPathWatcher>
-  <!-- The time in seconds to wait before a file added in the filesPath is
-       added to the database. Ensures that an uploading file is not added to the
-       database by this plugin. -->
-  <directoryChangedTimer>15</directoryChangedTimer>
   <!-- The time in minutes to check and remove the files that could not be
        removed before from the filesPath. -->
   <removeFileTimer>60</removeFileTimer>

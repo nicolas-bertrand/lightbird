@@ -1,5 +1,7 @@
 #include <QDir>
 
+#include "IIdentifier.h"
+
 #include "LightBird.h"
 #include "Plugin.h"
 
@@ -8,14 +10,14 @@ Files::Files(LightBird::IApi &a, const QString &t) : api(a), timerName(t)
     // Reads the configuration
     if (!(this->removeFileTimer = this->api.configuration(true).get("removeFileTimer").toUInt() * 60000))
         this->removeFileTimer = 3600000;
-    if (!(this->directoryChangedTimer = this->api.configuration(true).get("directoryChangedTimer").toUInt() * 1000))
-        this->directoryChangedTimer = 15000;
     // Starts to watch the filesPath
     if (this->api.configuration(true).get("filesPathWatcher") == "true")
     {
         this->fileSystemWatcher.addPath(LightBird::TableFiles::getFilesPath());
         this->connect(&this->fileSystemWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(_directoryChanged(QString)), Qt::QueuedConnection);
     }
+    // Initializes the addFiles timer
+    this->connect(&this->addFiles, SIGNAL(timeout()), this, SLOT(_addFiles()), Qt::QueuedConnection);
     this->api.timers().setTimer(this->timerName, this->removeFileTimer);
 }
 
@@ -25,73 +27,65 @@ Files::~Files()
 
 void    Files::timer()
 {
-    LightBird::TableEvents  event;
-    LightBird::TableFiles   file;
-    QString                 path;
-    QString                 filesPath = LightBird::TableFiles::getFilesPath();
-
-    // Checks if some files need to be removed
-    if (this->removeFileDate < QDateTime::currentDateTime())
-    {
-        QStringListIterator it(event.getEvents("remove_file_later"));
-        while (it.hasNext())
-        {
-            event.setId(it.next());
-            if (QFile::remove((path = event.getInformation("path").toString())))
-                this->api.log().trace("File removed", Properties("path", path).toMap(), "Files", "timer");
-            if (!QFileInfo(path).isFile())
-                event.remove();
-        }
-        this->removeFileDate = QDateTime::currentDateTime().addMSecs(this->removeFileTimer);
-    }
-    // Checks if some files can be added to the database
-    if (!this->newFiles.isEmpty())
-    {
-        QMutableMapIterator<QString, File> it(this->newFiles);
-        while (it.hasNext())
-        {
-            it.next();
-            // The file is already in the database or doesn't exists
-            if (!file.getIdFromPath(it.key()).isEmpty() || !QFileInfo(filesPath + it.key()).isFile())
-                it.remove();
-            // If the file has not been modified since directoryChangedTimer we can add it
-            else if (it.value().date < QDateTime::currentDateTime() && it.value().size == QFileInfo(filesPath + it.key()).size())
-            {
-                file.add(it.key(), it.key());
-                this->api.log().debug("File added", Properties("name", it.key()).add("idFile", file.getId()).toMap(), "Files", "timer");
-                it.remove();
-            }
-            // The file has been modified
-            else
-            {
-                it.value().size = QFileInfo(filesPath + it.key()).size();
-                it.value().date = QDateTime::currentDateTime().addMSecs(this->directoryChangedTimer);
-            }
-        }
-        if (this->newFiles.isEmpty())
-            this->api.timers().setTimer(this->timerName, this->removeFileTimer);
-    }
+    this->_removeFiles();
 }
 
-void    Files::_directoryChanged(const QString &path)
+void    Files::_directoryChanged(const QString &)
+{
+    // We wait 2 seconds before adding the new files
+    this->addFiles.start(2000);
+}
+
+void    Files::_addFiles()
 {
     LightBird::TableFiles   file;
-    QDir                    directory(path);
+    QDir                    directory(LightBird::TableFiles::getFilesPath());
+    QStringList             removeFilesList;
+    QString                 fileName;
+    QList<void *>           extensions;
+    LightBird::IIdentify::Information information;
 
+    removeFilesList = this->_removeFiles();
+    // Adds the new files to the database
     QListIterator<QFileInfo> it(directory.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::Readable | QDir::Writable, QDir::Time));
     while (it.hasNext())
     {
-        // A file not in the database has been added to the directory
-        if (!file.setIdFromPath(it.peekNext().fileName()) && !file.setIdFromVirtualPath(it.peekNext().fileName()))
+        fileName = it.peekNext().fileName();
+        // A file not in the database has been added to the filesPath
+        if (!removeFilesList.contains(fileName) && !file.setIdFromPath(fileName) && !file.setIdFromVirtualPath(fileName))
         {
-            if (!this->newFiles.contains(it.peekNext().fileName()))
-            {
-                if (this->newFiles.isEmpty())
-                    this->api.timers().setTimer(this->timerName, this->directoryChangedTimer);
-                this->newFiles[it.peekNext().fileName()].size = it.peekNext().size();
-            }
-            this->newFiles[it.peekNext().fileName()].date = QDateTime::currentDateTime().addMSecs(this->directoryChangedTimer);
+            file.add(fileName, fileName);
+            this->api.log().info("File added", Properties("name", fileName).add("idFile", file.getId()).toMap(), "Files", "_addFiles");
+            // Identify the file
+            if (!(extensions = this->api.extensions().get("IIdentifier")).isEmpty())
+                information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(file.getFullPath());
+            this->api.extensions().release(extensions);
+            file.setType(information.type_string);
+            file.setInformations(information.data);
+            information.data.clear();
         }
         it.next();
     }
+    this->addFiles.stop();
+}
+
+QStringList Files::_removeFiles()
+{
+    LightBird::TableEvents  event;
+    QStringList             remainingFiles;
+    QString                 fileName;
+
+    QStringListIterator ev(event.getEvents("remove_file_later"));
+    while (ev.hasNext())
+    {
+        event.setId(ev.next());
+        if (QFile::remove((fileName = event.getInformation("path").toString())))
+            this->api.log().debug("File removed", Properties("path", fileName).toMap(), "Files", "_removeFiles");
+        QFileInfo file(fileName);
+        if (!file.isFile())
+            event.remove();
+        else
+            remainingFiles << file.fileName();
+    }
+    return (remainingFiles);
 }

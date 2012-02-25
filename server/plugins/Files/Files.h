@@ -6,6 +6,7 @@
 # include <QMap>
 # include <QMutex>
 # include <QObject>
+# include <QTimer>
 
 # include "IApi.h"
 
@@ -18,28 +19,25 @@ public:
     ~Files();
 
     /// @brief Called periodically to check if some file can be removed from the
-    /// file system or added to the database.
-    void    timer();
+    /// file system.
+    void        timer();
 
 private slots:
-    /// @brief Called when a file is added in the filesPath.
-    void    _directoryChanged(const QString &path);
+    /// @brief Called when something changed in the filesPath.
+    void        _directoryChanged(const QString &path);
+    /// @brief Adds the files added in the filesPath to the database.
+    void        _addFiles();
 
 private:
-    struct File
-    {
-        unsigned int    size; ///< The size of the file.
-        QDateTime       date; ///< The date of the size.
-    };
+    /// @brief Removes the files that could not be removed before.
+    /// @return The list of the files that could not be removed this time.
+    QStringList _removeFiles();
 
     LightBird::IApi     &api;
-    QMutex              mutex;             ///< Makes this class thread safe.
-    QFileSystemWatcher  fileSystemWatcher; ///< Tells when a file is modified in the files directory.
+    QFileSystemWatcher  fileSystemWatcher; ///< Tells when something has changed in the filesPath.
     QString             timerName;         ///< The name of the timer that manages the thread of this class.
-    QMap<QString, File> newFiles;          ///< The list of the new files that may be added to the database if their size don't change.
-    QDateTime           removeFileDate;    ///< The last time we checked for files to remove.
     unsigned int        removeFileTimer;   ///< The time to check and remove the files that could not be removed before from the filesPath.
-    unsigned int        directoryChangedTimer; ///< The time to wait before a file added in the filesPath is added to the database.
+    QTimer              addFiles;          ///< Delays the call to _addFiles so that the files removed in the filesPath are not added.
 };
 
 #endif // FILES_H
