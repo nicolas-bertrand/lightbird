@@ -101,13 +101,8 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
         client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
         client.getResponse().getHeader().insert("cache-control", "no-cache");
         // Gets the uri of the request
-        uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority |
-                                                    QUrl::RemoveQuery | QUrl::RemoveFragment);
-        uri = QDir::cleanPath(uri);
-        if (uri.at(0) == '/')
-            uri = uri.right(uri.size() - 1);
-        // Removes "Client" of the uri
-        uri.remove(QRegExp("^Client/"));
+        uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority | QUrl::RemoveQuery | QUrl::RemoveFragment);
+        uri = LightBird::cleanPath(uri.remove(".."), true).remove(QRegExp("^Client/"));
         client.getInformations().insert("uri", uri);
         // Manages the session cookie
         this->_session(client, uri);
@@ -143,13 +138,10 @@ bool        Plugin::doExecution(LightBird::IClient &client)
         return (true);
     // Finds the interface of the user
     interface = this->_getInterface(client);
-    // The characters ".." and "~" are forbidden in the uri
-    if (uri.contains("..") || uri.contains("~"))
-        this->response(client, 403, "Forbidden", "The uri in the header must not contains \"..\" or \"~\".");
     // The client wants to execute something
-    else if (uri.left(8) == "Execute/")
+    if (uri.startsWith("Execute/"))
         Execute(*this->_api, client, uri.right(uri.size() - uri.indexOf('/') - 1));
-    else if (uri.left(14) == "Translation.js")
+    else if (uri == "Translation.js")
         this->_translation(client, interface);
     // The client wants to download a file
     else

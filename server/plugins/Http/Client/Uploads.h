@@ -10,6 +10,8 @@
 
 # include "IClient.h"
 
+# include "TableFiles.h"
+
 # define MAX_HEADER_LENGTH 4096 ///< The maximum length of a multipart/form-data header.
 # define REMOVE_COMPLETE_UPLOAD_TIME 3600 ///< The time after which the completed uploads are removed in second.
 
@@ -33,7 +35,8 @@ public:
     /// @brief Stores the information of an upload.
     struct Upload
     {
-        qint64      size;           ///< The total size of the upload (content-length)
+        QString     id;             ///< The id of the upload.
+        qint64      size;           ///< The total size of the upload (content-length).
         qint64      progress;       ///< The number of bytes received so far.
         QString     path;           ///< The virtual destination directory.
         QString     boundary;       ///< The boundary that separates the files in the content (multipart/form-data).
@@ -45,6 +48,7 @@ public:
         QByteArray  oldData;        ///< A part of the previous piece of content received (boundary size).
         QDateTime   finished;       ///< The date at which the upload has been completed.
         QSharedPointer<QFile> file; ///< The file currently writing.
+        LightBird::TableFiles fileTable; ///< The file in the database.
     };
 
     /// @brief Starts the download of the files.
@@ -75,9 +79,13 @@ private:
     /// seconds. This allows to keep their data accessible by the progress
     /// method even after they are finished.
     void    _removeCompleteUploads();
-    /// @brief Insert the file in the database.
-    void    _insert(LightBird::IClient &client, Upload &upload);
+    /// @brief Inserts the file in the database and creates it in the file system.
+    void    _createFile(LightBird::IClient &client, Upload &upload, File &file);
+    /// @brief The file has been completly uploaded.
+    void    _fileComplete(LightBird::IClient &client, Upload &upload);
+    /// @brief Get ready for the next file.
     void    _clean(Upload &upload);
+    /// @brief An error occured during the upload and the client is disconnected.
     void    _error(LightBird::IClient &client, Upload &upload, const QString &error);
 
     QMap<QString, Upload>   uploads;         ///< List of the upload requests being processed.

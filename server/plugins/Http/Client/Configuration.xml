@@ -5,7 +5,6 @@
       <mode>Server</mode>
       <transport>TCP</transport>
       <protocol>HTTP</protocol>
-      <method>GET</method>
     </context>
   </contexts>
   <resources>

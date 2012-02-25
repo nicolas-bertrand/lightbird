@@ -74,9 +74,14 @@ bool            Table::remove(const QString &id)
 {
     QSqlQuery   query;
 
+    if (this->id.isEmpty() && id.isEmpty())
+        return (false);
     query.prepare(Library::database().getQuery("Table", "remove").replace(":table", this->tableName));
     if (id.isEmpty())
+    {
         query.bindValue(":id", this->id);
+        this->clear();
+    }
     else
         query.bindValue(":id", id);
     return (Library::database().query(query) && query.numRowsAffected() > 0);

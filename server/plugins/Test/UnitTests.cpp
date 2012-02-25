@@ -431,7 +431,7 @@ bool            UnitTests::_directories()
         ASSERT(d1.setIdFromVirtualPath("videos/d2/d3"));
         ASSERT(d1.createVirtualPath("//") == d1.getId());
         ASSERT(d1.createVirtualPath("") == d1.getId());
-        ASSERT(d1.remove());
+        ASSERT(d1.remove(d1.getIdFromVirtualPath("videos")));
     }
     catch (QMap<QString, QString> properties)
     {
