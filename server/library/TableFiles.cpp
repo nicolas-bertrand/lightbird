@@ -47,14 +47,15 @@ QString TableFiles::getIdFromVirtualPath(const QString &virtualPath) const
     {
         path = path.left(name.lastIndexOf('/'));
         name = name.right(name.size() - path.size() - 1);
-        id_directory = TableDirectories().getIdFromVirtualPath(path);
+        if ((id_directory = TableDirectories().getIdFromVirtualPath(path)).isEmpty() && !path.isEmpty())
+            return (QString());
     }
     // Find the id of the file using its name, and the id of its parent directory, if it has one
     query.prepare(Library::database().getQuery("TableFiles", "getIdFromVirtualPath"));
     query.bindValue(":id_directory", id_directory);
     query.bindValue(":name", name);
     if (!Library::database().query(query, result) || result.size() <= 0)
-        return ("");
+        return (QString());
     return (result[0]["id"].toString());
 }
 

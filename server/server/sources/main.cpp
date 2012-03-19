@@ -32,8 +32,6 @@ int                     main(int argc, char **argv)
     }
     Server::shutdown();
     delete application;
-    while (true)
-        ;
     return (result);
 }
 
