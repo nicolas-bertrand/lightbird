@@ -145,7 +145,7 @@ CREATE TABLE sessions_informations (
   "id" VARCHAR(36) NOT NULL,
   "id_session" VARCHAR(36) NOT NULL,
   "name" VARCHAR(255) NOT NULL,
-  "value" VARCHAR(255) NOT NULL,
+  "value" VARCHAR(255) DEFAULT "" NOT NULL,
   "modified" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
   "created" DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) NOT NULL,
   PRIMARY KEY(id)

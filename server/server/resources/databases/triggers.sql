@@ -276,13 +276,13 @@ END;
 -----------------------------
 CREATE TRIGGER "insert_sessions_informations" AFTER INSERT ON sessions_informations
 BEGIN
-    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
+    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
     UPDATE sessions_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_sessions_informations" AFTER UPDATE ON sessions_informations
 BEGIN
-    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
+    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
     UPDATE sessions_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
 END;
 
