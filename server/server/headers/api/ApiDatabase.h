@@ -18,6 +18,7 @@ public:
 
     bool                query(QSqlQuery &query);
     bool                query(QSqlQuery &query, QVector<QVariantMap> &result);
+    bool                query(QSqlQuery &query, QVariantMap &result);
     LightBird::Table    *getTable(LightBird::Table::Id table, const QString &id = "");
     QString             getQuery(const QString &group, const QString &name);
     bool                updates(LightBird::IDatabase::Updates &updates, const QDateTime &date = QDateTime(), const QStringList &tables = QStringList());

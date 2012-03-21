@@ -2,8 +2,8 @@
 #include <QApplication>
 
 #include "Arguments.h"
-#include "Server.h"
 #include "Log.h"
+#include "Server.h"
 
 QCoreApplication        *loadQt(Arguments &arguments);
 

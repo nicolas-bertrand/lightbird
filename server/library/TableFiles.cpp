@@ -107,9 +107,9 @@ bool    TableFiles::add(const QString &name, const QString &path, const QVariant
     query.bindValue(":id_account", id_account);
     if (!Library::database().query(query))
         return (false);
+    this->id = id;
     if (!informations.isEmpty())
         this->setInformations(informations);
-    this->id = id;
     return (true);
 }
 

@@ -141,7 +141,7 @@
     </TableObjects>
     <TablePermissions>
         <getId>SELECT id FROM permissions WHERE id_accessor=:id_accessor AND id_object=:id_object AND right=:right</getId>
-        <add>INSERT INTO permissions (id, id_accessor, id_object, right, granted) VALUES (:id, :id_accessor, :id_object, :right, :granted)</add>E�
+        <add>INSERT INTO permissions (id, id_accessor, id_object, right, granted) VALUES (:id, :id_accessor, :id_object, :right, :granted)</add>
         <getIdAccessor>SELECT id_accessor FROM permissions WHERE id=:id</getIdAccessor>
         <setIdAccessor>UPDATE permissions SET id_accessor=:id_accessor WHERE id=:id</setIdAccessor>
         <getIdObject>SELECT id_object FROM permissions WHERE id=:id</getIdObject>
@@ -160,4 +160,10 @@
         <getName>SELECT name FROM tags WHERE id=:id</getName>
         <setName>UPDATE tags SET name=:name WHERE id=:id</setName>
     </TableTags>
+    <VFS>
+        <select_node>SELECT id, name, id_directory FROM :table WHERE id=:id</select_node>
+        <select_child_node>SELECT id, name FROM :table WHERE id_directory=:id</select_child_node>
+        <select_node_by_name_parent>SELECT id, name FROM :table WHERE id_directory=:parent AND name=:name</select_node_by_name_parent>
+        <select_node_owner>SELECT u.id, u.name FROM users u JOIN :table f ON u.id = f.id_account WHERE f.id=:id</select_node_owner>
+    </VFS>
 </queries>

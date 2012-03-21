@@ -39,6 +39,7 @@ public:
     bool            removeClients(const QStringList &clients = QStringList());
 
     // Informations
+    bool            hasInformation(const QString &name) const;
     QVariant        getInformation(const QString &name) const;
     QVariantMap     getInformations() const;
     bool            setInformation(const QString &name, const QVariant &value);

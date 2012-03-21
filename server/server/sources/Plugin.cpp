@@ -237,8 +237,13 @@ bool                    Plugin::_loadLibrary()
             if ((instance = qobject_cast<LightBird::IPlugin *>(loader->instance())) != NULL &&
                 loader->isLoaded() == true)
                 delete instance;
+            // The library is not a valid plugin
             else
             {
+                if (!loader->isLoaded())
+                    Log::debug("The plugin could not be loaded", Properties("id", this->id).add("file", this->path + this->libraryName).add("message", loader->errorString()), "Plugin", "_load");
+                else
+                    Log::debug("The plugin does not implement LightBird::IPlugin", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
                 delete this->loader;
                 this->loader = NULL;
             }

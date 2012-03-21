@@ -49,6 +49,12 @@ namespace LightBird
         /// But first, plugins have to test that the row 1 exists.
         /// @return False if an error occured, true otherwise.
         virtual bool    query(QSqlQuery &query, QVector<QVariantMap> &result) = 0;
+        /// @brief Executes the SELECT statement of a SQL query, and returns the first result.
+        /// @param request : The SQL query.
+        /// @param result : The first result of the query is stored in this variable (only for SELECT).
+        /// The map represents the fields. Plugins can access to a value like this : result["field"]. 
+        /// @return False if an error occured or no result was found, true otherwise.
+        virtual bool    query(QSqlQuery &query, QVariantMap &result) = 0;
         /// @brief Returns an instance of the table requested in parameter. Users
         /// MUST delete themself the instance returned, or a memory leak will occure.
         /// @param table : The table to get. If the table is accessor, object or unknow

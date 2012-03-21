@@ -20,6 +20,11 @@ bool    ApiDatabase::query(QSqlQuery &query, QVector<QVariantMap> &result)
     return (Database::instance()->query(query, result));
 }
 
+bool    ApiDatabase::query(QSqlQuery &query, QVariantMap &result)
+{
+    return (Database::instance()->query(query, result));
+}
+
 LightBird::Table    *ApiDatabase::getTable(LightBird::Table::Id table, const QString &id)
 {
     return (Database::instance()->getTable(table, id));

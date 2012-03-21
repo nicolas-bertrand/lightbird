@@ -80,6 +80,32 @@ bool            Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
     return (error);
 }
 
+bool        Database::query(QSqlQuery &query, QVariantMap &result)
+{
+    bool    error;
+    int     count;
+
+    this->_checkBoundValues(query);
+    // Execute the query
+    if ((error = query.exec()) == false)
+        Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
+    // Put the result in the reference
+    else
+    {
+        result.clear();
+        count = query.record().count();
+        if (query.next())
+            for (int r = 0; r < count; ++r)
+                result.insert(query.record().fieldName(r), query.value(r));
+        else
+            error = false;
+        // If the log is in trace, all the informations on the query are saved
+        if (Log::instance()->isTrace())
+            Log::trace("SQL query executed", Properties("query", query.lastQuery()).add(query.boundValues()).add("rows", result.size()), "Database", "query");
+    }
+    return (error);
+}
+
 LightBird::Table            *Database::getTable(LightBird::Table::Id table, const QString &id)
 {
     QStringList             tables;

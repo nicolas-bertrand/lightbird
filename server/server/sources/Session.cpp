@@ -207,6 +207,15 @@ bool    Session::removeClients(const QStringList &clients)
     return (true);
 }
 
+bool            Session::hasInformation(const QString &name) const
+{
+    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "hasInformation");
+
+    if (!mutex)
+        return (false);
+    return (this->informations.contains(name));
+}
+
 QVariant        Session::getInformation(const QString &name) const
 {
     SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getInformation");

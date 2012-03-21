@@ -3,7 +3,6 @@ QT += sql xml
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    tables \
     ../api
 
 TARGET = LightBird
@@ -27,7 +26,10 @@ HEADERS = Defines.h \
     TableLimits.h \
     TableObjects.h \
     TablePermissions.h \
-    TableTags.h
+    TableTags.h \
+    Dir.h \
+    File.h \
+    Node.h
 SOURCES = Library.cpp \
     LightBird.cpp \
     Properties.cpp \
@@ -44,7 +46,10 @@ SOURCES = Library.cpp \
     TableLimits.cpp \
     TableObjects.cpp \
     TablePermissions.cpp \
-    TableTags.cpp
+    TableTags.cpp \
+    Dir.cpp \
+    File.cpp \
+    Node.cpp
 
 OBJECTS_DIR = tmp
 RCC_DIR = tmp

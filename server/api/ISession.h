@@ -58,6 +58,9 @@ namespace LightBird
         virtual bool        removeClients(const QStringList &clients = QStringList()) = 0;
 
         // Informations
+        /// @brief Returns true if the session has the paramater.
+        /// @param name : The name of the information to look for.
+        virtual bool        hasInformation(const QString &name) const = 0;
         /// @brief Returns the value of an information of the session.
         /// @param name : The name of the information to return.
         virtual QVariant    getInformation(const QString &name) const = 0;
