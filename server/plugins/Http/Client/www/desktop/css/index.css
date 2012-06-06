@@ -10,14 +10,13 @@
 
 body
 {
-	font-family: Calibri, Arial, Helvetica, sans-serif;
+	font-family: Helvetica, Arial, Verdana, sans-serif;
 	font-size: 12px;
 	color: #333333;
 	text-align: justify;
 	cursor: auto;
 	overflow: hidden;
 	background-color: #31b9f5;
-    height: 0px;
 }
 
 a, a:active, a:visited, a:hover, a img
@@ -41,21 +40,19 @@ a:visited
 //                                BACKGROUND                                //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#background
-{
-	z-index: -998;
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	display: none;
-}
-
-#background_identification
+#background>img
 {
 	z-index: -999;
 	position: absolute;
 	top: 0px;
 	left: 0px;
+}
+
+#background>.desktop,
+#background>.identification
+{
+    width: 100%;
+    height: 100%;
 	display: none;
 }
 
@@ -74,295 +71,654 @@ a:visited
     min-height: 400px; /* C.Desktop.minHeight */
 	display: none;
 	opacity: 0;
-}
-
-#desktop>.top>.menu
-{
-	width: 150px; /* T.Menu.width */
-    height: 100%;
-	background-color: #dddddd;
-    float: left;
-}
-
-#desktop>.top>.menu ul
-{
-	list-style-type: none;
-}
-
-#desktop>.top>.menu li
-{
-    display: block;
-	height: 33px;
-	padding-left: 15px;
-	padding-top: 10px;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 19px;
-	color: #555555;
-}
-#desktop>.top>.menu li:hover
-{
-	color: #444444;
-	background-color: #eeeeee;
-}
-
-#desktop>.top>.middle
-{
-    height: 100%;
-    margin-left: 190px; /* menu width + tasks list width + resize tasks list width */
-}
-
-#desktop>.top>.middle>.player_document
-{
-    height: 100px; /* C.Desktop.playerDocumentHeight */
-	background-color: #0000bb;
-}
-
-#desktop>.top>.middle>.pages>.page
-{
-    height: 0px;
-    width: 0px;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-}
-
-#desktop>.top>.middle>.pages>.page>.resize
-{
-    position: absolute;
-    background-color: #0044FF;
-    opacity: 0.3;
-}
-#desktop>.top>.middle>.pages>.page>.resize.horizontal
-{
-    cursor: s-resize;
-}
-#desktop>.top>.middle>.pages>.page>.resize.vertical
-{
-    cursor: e-resize;
-}
-
-#desktop>.top>.middle>.tasks>.task
-{
-    position: absolute;
-    background-color: #FFFFFF;
     overflow: hidden;
 }
 
-#desktop>.top>.middle .preview
-{
-    position: absolute;
-    opacity: 0.5;
-    background-color: #88BBFF;
-    display: none;
-}
-
-#desktop>.player_media
-{
-    height: 100px; /* C.Desktop.playerMediaHeight */
-	background-color: #2277bb;
-}
+#desktop>.top .line.blue, #desktop>.bottom .line.blue { background-color: #00a2ff; }
+#desktop>.top .line.green, #desktop>.bottom .line.green { background-color: #46da57; }
+#desktop>.top .line.yellow, #desktop>.bottom .line.yellow { background-color: #ffd600; }
+#desktop>.top .line.red, #desktop>.bottom .line.red { background-color: #ff5500; }
 
 /*////////////////////////////////////////////////////////////////////////////
-//                                TASKS LIST                                //
+//                                   TOP                                    //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#desktop>.top>.tasks_list
+#desktop>.top
 {
-    width: 40px; /* C.Desktop.tasksListWidth */
-    height: 100%;
-    float: left;
-    overflow: hidden;
-	background-color: #00dd22;
+    width: 100%;
+    height: 40px; /* C.Desktop.topHeight */
+    background-image: linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -moz-linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -webkit-linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -o-linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -ms-linear-gradient(top, #303030 0%, #202020 100%);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.33);
+    position: relative;
+    z-index: 1000000;
 }
 
-#desktop>.top>.resize_tasks_list
+#desktop>.top>.menu>div
 {
-    width: 1px; /* C.Desktop.resizeTasksListWidth */
-    height: 100%;
     float: left;
-	background-color: #FF0000;
-    cursor: e-resize;
-}
-
-#desktop>.top>.tasks_list .page
-{
-    padding: 7px; /* C.Desktop.tasksListPadding */
-	background-color: red;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding: 10px 15px 0px 15px;
+    height: 30px;
     cursor: pointer;
 }
 
-#desktop>.top>.tasks_list .task
+#desktop>.top>.icons
 {
-    width: 36px; /* C.Desktop.tasksListWidth - 2 * C.Desktop.tasksListPadding */
-    height: 30px; /* width * C.Desktop.taskHeightRatio */
-    text-align: center;
-	font-weight: bold;
-    font-size: 23px;
-	background-color: #eeeeee;
+    float: right;
+    height: 100%;
 }
 
-#desktop>.top>.tasks_list .ghost
+#desktop>.top>.icons>.icon
 {
-    height: 30px; /* task height */
+    width: 46px;
+    height: 100%;
+    float: left;
+    cursor: pointer;
 }
 
-#desktop>.top>.tasks_list .task:hover
+#desktop>.top>.icons>.icon>div
 {
-	background-color: #ffffff;
+    width: 46px;
+    height: 30px;
+    margin-top: 7px;
 }
 
-#desktop>.top>.tasks_list .drag
+#desktop>.top>.icons>.icon>.search
 {
-    z-index: 999999;
+    background-image: url("/Client/images/icons.png");
+    background-position: 0px -420px;
 }
 
-#desktop>.top>.tasks_list .new
+#desktop>.top>.icons>.icon>.settings
 {
-    height: 40px; /* C.Desktop.newTaskHeight */
+    background-image: url("/Client/images/icons.png");
+    background-position: 0px -450px;
 }
 
-#desktop>.top>.tasks_list>.page.odd
+#desktop>.top>.icons>.icon>.help
 {
-    background-color: #88CCFF;
+    background-image: url("/Client/images/icons.png");
+    background-position: 0px -480px;
 }
 
-#desktop>.top>.tasks_list>.page.even
+#desktop>.top>.icons>.icon>.disconnect
 {
-    background-color: #88AAFF;
+    background-image: url("/Client/images/icons.png");
+    background-position: 0px -510px;
 }
 
-/********** task_buttons **********/
-#desktop>.top>.tasks_list .task_buttons
+/* Hover */
+
+#desktop>.top>.menu>div:hover,
+#desktop>.top>.icons>div:hover
+{
+    color: #444444;
+    background-image: linear-gradient(top, #FFFFFF 0%, #f2f2f2 100%);
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #f2f2f2 100%);
+    background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #f2f2f2 100%);
+    background-image: -o-linear-gradient(top, #FFFFFF 0%, #f2f2f2 100%);
+    background-image: -ms-linear-gradient(top, #FFFFFF 0%, #f2f2f2 100%);
+}
+
+#desktop>.top>.menu>div>.line,
+#desktop>.top>.icons>.icon>.line
+{
+    width: 100%;
+    height: 10px;
+    position: relative;
+    top: 10px;
+    display: none;
+    z-index: 1;
+}
+
+#desktop>.top>.icons>.icon>.line
+{
+    top: -4px;
+}
+
+#desktop>.top>.menu>div>.line
+{
+    padding: 0px 15px;
+    left: -15px;
+}
+
+#desktop>.top>.icons>.icon:hover>.search { background-position: 50px -420px; }
+#desktop>.top>.icons>.icon:hover>.settings { background-position: 50px -450px; }
+#desktop>.top>.icons>.icon:hover>.help { background-position: 50px -480px; }
+#desktop>.top>.icons>.icon:hover>.disconnect { background-position: 50px -510px; }
+
+#desktop>.top>.menu>div:hover>.line,
+#desktop>.top>.icons>.icon:hover>.line
+{
+    display: block;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                 MIDDLE                                   //
+////////////////////////////////////////////////////////////////////////////*/
+
+#desktop>.middle
+{
+    width: 100%;
+}
+
+/* Tasks list */
+
+#desktop>.middle>.tasks_list
+{
+    width: 130px; /* border_left + tasks_list */
+    height: 100%;
+    display: none;
+    float: left;
+}
+#desktop>.middle>.tasks_list.display
+{
+    display: block;
+}
+
+#desktop>.middle>.tasks_list>.border_left
+{
+    width: 10px;
+    height: 100%;
+    float: left;
+    background-color: #FFFFFF;
+    opacity: 0.30;
+    position: relative;
+    left: -120px;
+    z-index: -1;
+}
+
+#desktop>.middle>.tasks_list>.icons
+{
+    height: 100%;
+    width: 120px; /* C.Desktop.tasksListWidth */
+    overflow: hidden;
+    float: left;
+    background-image: linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+    background-image: -o-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+#desktop>.middle>.tasks_list>.icons>.top
+{
+    height: 10px;
+}
+
+#desktop>.middle>.tasks_list>.icons>.page
+{
+    width: 10px;
+    margin-bottom: 10px;
+    background-image: linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
+    background-image: -moz-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
+    background-image: -o-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
+    background-image: -ms-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
+    cursor: move;
+}
+#desktop>.middle>.tasks_list>.icons>.page.window
+{
+    background-image: linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
+    background-image: -moz-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
+    background-image: -o-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
+    background-image: -ms-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
+}
+#desktop>.middle>.tasks_list>.icons>.page.focus
+{
+    background-image: linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
+    background-image: -moz-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
+    background-image: -o-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
+    background-image: -ms-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
+}
+#desktop>.middle>.tasks_list>.icons>.page.empty
+{
+    height: 10px;
+    margin-bottom: 0px;
+    background-image: none;
+}
+
+#desktop>.middle>.tasks_list>.icons>.page>.task
+{
+    width: 110px;
+    height: 75px;
+    margin-left: 10px;
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+#desktop>.middle>.tasks_list>.icons>.page>.task.drag
 {
     position: absolute;
-    width: 120px;
-    height: 0px;
     z-index: 999999;
-    opacity: 0.3;
-}
-#desktop>.top>.task_buttons,
-#desktop>.top>.tasks_list .task_buttons.hide,
-#desktop>.top>.tasks_list .task_buttons.scroll
-{
-    display: none;
+    margin-left: 0px;
 }
 
-#desktop>.top>.tasks_list .task_buttons:hover
+#desktop>.middle>.tasks_list>.icons>.page>.task>.content
+{
+    height: 46px;
+    width: 100px;
+    padding-top: 29px;
+    text-align: center;
+    color: #222222;
+    font-weight: bold;
+    font-size: 15px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+}
+
+#desktop>.middle>.tasks_list>.icons>.page>.task.over,
+#desktop>.middle>.tasks_list>.icons>.page>.task.drag
 {
     opacity: 1;
 }
 
-#desktop>.top>.tasks_list .task_buttons>div
+#desktop>.middle>.tasks_list>.icons>.page>.task.drag,
+#desktop>.middle>.tasks_list>.icons>.page>.task.drag>.content
 {
-    position: relative;
-    left: -36px;
-    top: 0px;
+    cursor: move;
 }
 
-#desktop>.top>.tasks_list .task_buttons>div>div
+#desktop>.middle>.tasks_list>.icons>.page>.task.drag>.content
+{
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.33);
+    opacity: 0.75;
+}
+
+#desktop>.middle>.tasks_list>.icons>.page>.ghost
+{
+    height: 75px;
+    width: 100px;
+    margin-left: 10px;
+	opacity: 0.9;
+    background-image: linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
+    background-image: -moz-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
+    background-image: -webkit-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
+    background-image: -o-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
+    background-image: -ms-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
+}
+
+/* Task buttons */
+
+#desktop>.middle>.tasks_list .buttons
+{
+    position: absolute;
+    left: 110px;
+    cursor: pointer;
+    display: none;
+    z-index: 1;
+}
+
+#desktop>.middle>.tasks_list .buttons.display
+{
+    display: block;
+}
+
+#desktop>.middle>.tasks_list .buttons.display.scroll
+{
+    display: none;
+}
+
+#desktop>.middle>.tasks_list .buttons>div>.line
+{
+    height: 100%;
+    width: 5px;
+    float: left;
+}
+
+#desktop>.middle>.tasks_list .buttons>div>.icon
 {
     width: 20px;
-    height: 30px;
-}
-
-#desktop>.top>.tasks_list .task_buttons .full_screen
-{
-    background-color: blue;
-    float: left;
-}
-#desktop>.top>.tasks_list .task_buttons .window
-{
-    background-color: green;
-    float: left;
-}
-#desktop>.top>.tasks_list .task_buttons .hide
-{
-    background-color: yellow;
-    float: right;
-}
-#desktop>.top>.tasks_list .task_buttons .close
-{
-    background-color: red;
+    height: 100%;
     float: right;
 }
 
+#desktop>.middle>.tasks_list .buttons>.close>.line { background-color: #ff5500; }
+#desktop>.middle>.tasks_list .buttons>.hide>.line { background-color: #ffd600; }
+#desktop>.middle>.tasks_list .buttons>.window>.line { background-color: #46da57; }
+#desktop>.middle>.tasks_list .buttons>.fullscreen>.line { background-color: #00a2ff; }
+
+#desktop>.middle>.tasks_list .buttons>div
+{
+    height: 19px;
+    background-image: linear-gradient(top, #373737 0%, #282828 100%);
+    background-image: -moz-linear-gradient(top, #373737 0%, #282828 100%);
+    background-image: -webkit-linear-gradient(top, #373737 0%, #282828 100%);
+    background-image: -o-linear-gradient(top, #373737 0%, #282828 100%);
+    background-image: -ms-linear-gradient(top, #373737 0%, #282828 100%);
+}
+#desktop>.middle>.tasks_list .buttons>.fullscreen
+{
+    height: 18px;
+}
+
+#desktop>.middle>.tasks_list .buttons>div:hover
+{
+    background-image: linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
+    background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
+    background-image: -o-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
+    background-image: -ms-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
+}
+
+/* Pages */
+
+#desktop>.middle>.pages>.page
+{
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    display: none;
+}
+
+#desktop>.middle>.pages>.page.display
+{
+    display: block;
+}
+
+#desktop>.middle>.pages>.page>.resize
+{
+    position: absolute;
+    background-color: #FFFFFF;
+    opacity: 0;
+}
+#desktop>.middle>.pages>.page>.resize.horizontal
+{
+    cursor: s-resize;
+}
+#desktop>.middle>.pages>.page>.resize.vertical
+{
+    cursor: e-resize;
+}
+
+/* Tasks */
+
+#desktop>.middle>.tasks>.task
+{
+    position: absolute;
+    background-color: #FFFFFF;
+    overflow: hidden;
+    display: none;
+    border: 1px solid #c4d1e0;
+}
+
+#desktop>.middle>.tasks>.task.window
+{
+    border: 1px solid rgba(139, 161, 190, 0.5);
+    background-clip: padding-box;
+
+}
+
+#desktop>.middle>.tasks>.task.display
+{
+    display: block;
+}
+
+#desktop>.middle>.tasks>.task.hide_border
+{
+    border: none;
+}
+
+/* Collections */
+
+#desktop>.middle>.collections
+{
+    width: 10px; /* C.Desktop.collectionsWidth */
+    height: 100%;
+    float: right;
+    background-color: #FFFFFF;
+    opacity: 0.25;
+    position: relative;
+    z-index: -1;
+}
+
 /*////////////////////////////////////////////////////////////////////////////
-//                              CONTEXT MENU                                //
+//                                  BOTTOM                                  //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#context
+#desktop>.bottom
 {
-	z-index: 1000000000;
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	width: 100px;
-	height: 0px;
-	list-style-type: none;
-	display: none;
-	opacity: 0;
+    width: 100%;
+    height: 45px; /* C.Desktop.bottomHeight */
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.33);
+    position: relative;
+    z-index: 1000000;
 }
 
-#context li
+#desktop>.bottom>.timeline
 {
-	height: 20px;
-	padding-top: 7px;
-	padding-left: 15px;
-	background-color: #dddddd;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 1em;
-	opacity: 0.5;
+    height: 5px;
 }
 
-#context li:hover
+#desktop>.bottom>.timeline div
 {
-	opacity: 0.8;
+    height: 100%;
+    float: left;
 }
 
-/*////////////////////////////////////////////////////////////////////////////
-//                              MISCELLANEOUS                               //
-////////////////////////////////////////////////////////////////////////////*/
-
-#load_images
+#desktop>.bottom>.timeline>.before,
+#desktop>.bottom>.timeline>.after
 {
-	position: relative;
-	top: -10000px;
-	left: -10000px;
-	visibility: hidden;
-	z-index: -1000;
+    width: 0%;
+    background-color: black;
+    opacity: 0.33;
 }
-#load_images img
+
+#desktop>.bottom>.timeline>.played
 {
-	width: 1px;
-	height: 1px;
+    width: 30%;
+    background-color: #00a2ff;
+}
+
+#desktop>.bottom>.timeline>.buffered
+{
+    width: 25%;
+    background-color: white;
+    opacity: 0.66;
+}
+
+#desktop>.bottom>.timeline>.after
+{
+    width: 45%;
+}
+
+#desktop>.bottom>.player
+{
+    height: 40px;
+    background-image: linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -moz-linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -webkit-linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -o-linear-gradient(top, #303030 0%, #202020 100%);
+    background-image: -ms-linear-gradient(top, #303030 0%, #202020 100%);
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+#desktop>.bottom>.player span.secondary
+{
+    color: #aaaaaa;
+}
+
+#desktop>.bottom>.player>.play
+{
+    float: left;
+    height: 100%;
+}
+
+#desktop>.bottom>.player>.play>div
+{
+    height: 100%;
+    float: left;
+    cursor: pointer;
+}
+
+#desktop>.bottom>.player>.play>div>div
+{
+    height: 20px;
+    margin: 10px;
+    background-image: url("/Client/images/icons.png");
+}
+
+#desktop>.bottom>.player>.play>.play>div
+{
+    width: 16px;
+    background-position: 0px 0px;
+}
+
+#desktop>.bottom>.player>.play>.previous>div
+{
+    width: 14px;
+    margin-right: 5px;
+    background-position: 0px -60px;
+}
+
+#desktop>.bottom>.player>.play>.number>div
+{
+    margin: 0px;
+    padding: 11px 5px 0px 5px;
+    background-image: none;
+}
+
+#desktop>.bottom>.player>.play>.next>div
+{
+    width: 14px;
+    margin-left: 5px;
+    background-position: 0px -90px;
+}
+
+#desktop>.bottom>.player>.play>.time>div
+{
+    margin: 0px;
+    padding: 11px 10px 0px 10px;
+    background-image: none;
+}
+
+#desktop>.bottom>.player>.name
+{
+    padding-top: 11px;
+}
+
+#desktop>.bottom>.player>.controls
+{
+    float: right;
+    height: 100%;
+}
+
+#desktop>.bottom>.player>.controls>div
+{
+    height: 100%;
+    float: left;
+    cursor: pointer;
+}
+
+#desktop>.bottom>.player>.controls>div>div
+{
+    height: 20px;
+    margin: 10px;
+    background-image: url("/Client/images/icons.png");
+}
+
+#desktop>.bottom>.player>.controls>.volume>div
+{
+    width: 25px;
+    background-position: 0px -120px;
+}
+
+#desktop>.bottom>.player>.controls>.settings>div
+{
+    width: 21px;
+    background-position: 0px -180px;
+}
+
+#desktop>.bottom>.player>.controls>.repeat>div
+{
+    width: 27px;
+    background-position: 0px -240px;
+}
+
+#desktop>.bottom>.player>.controls>.random>div
+{
+    width: 27px;
+    background-position: 0px -330px;
+}
+
+#desktop>.bottom>.player>.controls>.fullscreen>div
+{
+    width: 25px;
+    background-position: 0px -360px;
+}
+
+/* Hover */
+
+#desktop>.bottom>.player>.play>div:hover,
+#desktop>.bottom>.player>.controls>div:hover
+{
+    color: #222222;
+    background-image: linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
+    background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
+    background-image: -o-linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
+    background-image: -ms-linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
+}
+
+#desktop>.bottom>.player>.play>div:hover span.secondary
+{
+    color: #666666;
+}
+
+#desktop>.bottom>.player>.play>.play:hover>div { background-position: -30px 0px; }
+#desktop>.bottom>.player>.play>.previous:hover>div { background-position: -30px -60px; }
+#desktop>.bottom>.player>.play>.next:hover>div { background-position: -30px -90px; }
+
+#desktop>.bottom>.player>.controls>.volume:hover>div { background-position: -30px -120px; }
+#desktop>.bottom>.player>.controls>.settings:hover>div { background-position: -30px -180px; }
+#desktop>.bottom>.player>.controls>.repeat:hover>div { background-position: -30px -240px; }
+#desktop>.bottom>.player>.controls>.random:hover>div { background-position: -30px -330px; }
+#desktop>.bottom>.player>.controls>.fullscreen:hover>div { background-position: -30px -360px; }
+
+#desktop>.bottom>.player>.play>div>.line,
+#desktop>.bottom>.player>.controls>div>.line
+{
+    width: 100%;
+    height: 10px;
+    margin: 0px;
+    position: relative;
+    top: -50px;
+    display: none;
+    background-image: none;
+    z-index: 1;
+}
+
+#desktop>.bottom>.player>.play>.number>.line,
+#desktop>.bottom>.player>.play>.time>.line
+{
+    top: -41px;
+    padding: 0px;
+}
+
+#desktop>.bottom>.player>.play>div:hover>.line,
+#desktop>.bottom>.player>.controls>div:hover>.line
+{
+    display: block;
 }
 
 /*////////////////////////////////////////////////////////////////////////////
 //                                  STYLES                                  //
 ////////////////////////////////////////////////////////////////////////////*/
-
-#windows h2, #windows h3
-{
-	margin-bottom: 10px;
-}
-
-#windows .textContent, #windows .imageContent, #windows .videoContent, #windows .audioContent
-{
-	border: 1px dashed #55AA55;
-	padding: 10px;
-	margin: 5px;
-	background-color: #EEEEEE;
-	height: 100%;
-	overflow: auto;
-	font-size: 1.1em;
-}
-
-#windows .imageContent, #windows .videoContent, #windows .audioContent
-{
-	text-align: center;
-}
 
 a.action
 {

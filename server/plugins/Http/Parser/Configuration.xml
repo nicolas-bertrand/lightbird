@@ -14,7 +14,6 @@
   <maxContentInMemory>1000000</maxContentInMemory>
   <!-- The name of the methods that can have a content in the request. -->
   <methodContent>
-    <PUT />
     <POST />
   </methodContent>
 </configuration>

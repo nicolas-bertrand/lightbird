@@ -53,13 +53,16 @@ public:
 
     /// @brief Starts the download of the files.
     void    onUnserializeHeader(LightBird::IClient &client);
-    /// @brief Download the files one by one by reading the multipart/form-data of the content of the request.
+    /// @brief Download the files one by one by reading the multipart/form-data
+    /// of the content of the request.
     void    onUnserializeContent(LightBird::IClient &client);
     /// @brief Starts the identification of the files in a timer thread.
     void    doExecution(LightBird::IClient &client);
     /// @brief Identifies the files in the identification queue.
     bool    timer();
-    /// @brief Checks if the files in the content can be uploaded by the user.
+    /// @brief Returns the list of the files in the directory in order to allow
+    /// the client to check that the files that will be uploaded are not already
+    /// on the server.
     void    check(LightBird::IClient &client);
     /// @brief Returns the amount of data download so far, in JSON.
     void    progress(LightBird::IClient &client);

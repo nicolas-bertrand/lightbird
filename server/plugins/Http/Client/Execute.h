@@ -25,6 +25,7 @@ private:
     void                 _identify();
     void                 _preview();
     void                 _select();
+    void                 _filesGet();
     void                 _uploads();
     void                 _uploadsCheck();
     void                 _uploadsProgress();

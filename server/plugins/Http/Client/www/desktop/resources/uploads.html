@@ -1,18 +1,28 @@
 <div class="uploads">
     <form class="form" method="post" enctype="multipart/form-data">
-        <input class="file" type="file" name="file" multiple="true" />
+        <div class="file">
+            <script>tr(T.Uploads.choose_files)</script>
+            <input type="file" name="file" multiple="true" />
+        </div>
+        <div class="path">
+            <div><input type="text" name="path" /></div>
+        </div>
+        <input class="submit" type="submit" />
     </form>
     <div class="sessions"></div>
     <div class="session_template">
-        <div class="cancel"></div>
-        <div class="stop"></div>
-        <div class="progress">
-            <table>
-                <tr>
-                </tr>
-            </table>
-            <div class="uploading"></div>
+        <div class="progress_container">
+            <div class="cancel"></div>
+            <div class="stop"></div>
+            <div class="progress">
+                <table>
+                    <tr>
+                    </tr>
+                </table>
+                <div class="uploading"></div>
+            </div>
         </div>
+        <table class="files_list"></table>
         <div class="frame"></div>
     </div>
 </div>

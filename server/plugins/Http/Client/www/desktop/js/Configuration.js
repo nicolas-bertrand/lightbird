@@ -1,99 +1,64 @@
 // The configuration of the Client.
 var Configuration =
 {
-	newWindowWidth : 600, // The default width of the new windows.
-	newWindowHeight : 300, // The default height of the new windows.
 	animationFPS : 20, // Default animation FPS.
     // The configuration of the desktop.
     Desktop :
     {
         minWidth : 600, // The minimum width of the desktop.
-        minHeight : 400, // The minimum height of the desktop.
-        playerDocumentHeight : 50, // The height of the document player.
-        playerMediaHeight : 100, // The height of the media player.
-        tasksListWidth : 50, // The width of the tasks list.
-        resizeTasksListWidth : 1, // The width of the div that allows to resize the tasks list.
-        taskHeightRatio : 5 / 6, // The height of the task icon in the tasks list is : task width * taskHeightRatio
-        tasksListPadding : 7, // The padding of the page icons in the tasks list.
-        taskResistance : 3, // Number of pixels a task have to be dragged vertically before actually moving.
+        minHeight : 300, // The minimum height of the desktop.
+        topHeight : 40, // THe height of the top menu.
+        bottomHeight : 45, // The height of the bottom area.
+        collectionsWidth : 10, // The width of the collections list.
+        pageMargin : 10, // The height of the bottom margin between the pages.
+        tasksListWidth : 120, // The width of the tasks list.
+        tasksListMargin : 10, // The width of the left margin of the tasks list.
+        taskIconHeight : 75, // The height of a task icon.
+        taskResistance : 3, // Number of pixels a task icon have to be dragged before actually moving.
+        taskDragShift : { x : 10, y : 10 }, // The shift of the dragged task when when it is out of the tasks list.
         tasksListScrollHeight : 50, // Height of the scrolling areas of the tasks list.
-        scrollSpeed : 12, // The speed of the scroll areas of the tasks list.
-        mouseWheelScrollSpeed : 13, // The number of pixels scrolled by each mouse wheel click.
-        movePageWheelSpeed : 8, // The speed at which the pages are changed with the mouse wheel when a task is dragged ouside the tasks list.
-        newTaskHeight : 20, // Height of the new task area.
-        pagePreviewDelay : 500, // The delay to display a page when the mouse enters the tasks list.
-        taskMargin : 20, // The margin between the tasks of a page. It is also the size of the resize task bars.
-        freeDragTashShift : { x : 10, y : 10 }, // The shift of the dragged task when we are in free drag.
+        tasksListScrollSpeed : 20, // The speed of the scroll areas of the tasks list.
+        mouseWheelMultiplier : 50, // Used to normalize the mouse wheel delta. Increases the delta of each click.
         defaultPosition : "e", // The default position of a task moved (n s e w).
-        insertTaskAreaSize : 50, // The size of the page border areas that allows to insert a task.
+        taskMargin : 5, // The margin between the tasks of a page. It is also the size of the resize task bars.
+        taskBorder : 1, // The size of the border of the tasks content.
         resizeTaskLimitMin : 0, // The minimum ratio by which a task can be resized. Between 0 and 1.
         resizeTaskLimitMax : 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
         resizeResistance : 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
-        stabilizeTaskResize : true, // If true, the ratio of the tasks being resized is stabilized.
-        resizeTasksListMin : 30, // The minimum size of the tasks list.
-        resizeTasksListMax : 200, // The maximum size of the tasks list.
-        taskIconMinWidth : 15, // The minimum width if a task icon.
-        mouseWheelMultiplier : 2, // Used to normalize the mouse wheel delta. Increases the delta of each click.
-        taskButtonsWidth : 20, // The width of the buttons in the task icon.
+        resizeDeltaDivisor : 20, // Reduce the delta of the mouse wheel that resize the task margin.
     },
 	// The size of the window
 	Window :
 	{
-		// The minimum number of pixels of a window that can be out of the screen
-		minOutX : -18, // $1
-		minOutY : -13, // $2
-		// The minimum size of a window
-		minWidth : 300,
-		minHeight : 0,
-		// The size of the shadow
-		shadowLeft : 18, // $1
-		shadowRight : 18,
-		shadowTop : 13, // $2
-		shadowBottom : 23,
-		// The size of the borders
-		borderLeft : 29,
-		borderRight : 29,
-		borderTop : 49,
-		borderBottom : 34,
+        default : // The default position of the window
+        {
+            left : 200,
+            top : 100,
+            width : 600,
+            height : 400
+        },
+        limit : // The limits of the window when it is moved or resized
+        {
+            top : 8,
+            bottom : 28,
+        },
+        minWidth : 162,
+        minHeight : 35,
+        border : 5, // The size of the border of the window.
+        topHeight : 35, // The height of the top of the window.
+        bottomHeight : 30, // The height of the bottom of the window.
 	},
-	// The explorer settings
-	Explorer :
+    Uploads :
+    {
+        requestProgressInterval : 1000, // The number of milliseconds between each progress request.
+    },
+	Files :
 	{
-		// Some elements size
-		buttons : 27,
-		headers : 30,
-		types : 29,
+        headerSeparatorWidth : 1, // The width of the header separators.
+        headerMinWidth : 40, // The default minimum width of the columns of the header.
+        headerTextPadding : 5, // The padding between the separator and the header columns.
+        headerDefaultWidth : 200, // The default width of the coulmns of the header.
 	},
-	Information :
-	{
-		// The height of the button bar
-		buttonsHeight : 62,
-		// The maximum height of the preview image
-		previewMaxHeight : 600,
-	},
-	Player :
-	{
-		playlistWidth : 200,
-		playlistText : 197,
-		playlistNoText : 150,
-		dragWidth : 5,
-		controlsHeight : 31,
-		// The width of the controls without the seek bar
-		controlsWidth : 349,
-		// The width of the left side of the seek bar (with the position in second)
-		controlsWidthLeft : 141,
-		// The width of the borders of the seek bar
-		controlSeekBordersWidth : 5,
-		playerMinWidth : 450,
-		// A preview displayed on the seek bar
-		previewWidth : 200,
-		previewHeight : 40,
-		// The number of previews generated for each video
-		previews : 15,
-		// The offset of the quality button
-		qualityRightOffset : 62,
-		qualityBottomOffset : 37,
-	}
 };
 var C = Configuration;
 var DOMWindow = window;

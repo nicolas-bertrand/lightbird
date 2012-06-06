@@ -17,6 +17,7 @@ LIBS += -L../../../build -lLightBird
 HEADERS = Plugin.h \
     Audio.h \
     Execute.h \
+    Files.h \
     Media.h \
     Medias.h \
     Preview.h \
@@ -25,6 +26,7 @@ HEADERS = Plugin.h \
 SOURCES = Plugin.cpp \
     Audio.cpp \
     Execute.cpp \
+    Files.cpp \
     Media.cpp \
     Medias.cpp \
     Preview.cpp \

@@ -34,6 +34,7 @@ Execute::Execute(LightBird::IApi &a, LightBird::IClient &c, const QString &com) 
     commands["Identify"] = &Execute::_identify;
     commands["Preview"] = &Execute::_preview;
     commands["Select"] = &Execute::_select;
+    commands["FilesGet"] = &Execute::_filesGet;
     commands["Uploads"] = &Execute::_uploads;
     commands["UploadsCheck"] = &Execute::_uploadsCheck;
     commands["UploadsProgress"] = &Execute::_uploadsProgress;
@@ -172,6 +173,11 @@ void        Execute::_select()
     this->response.getContent().setStorage(LightBird::IContent::VARIANT);
     *this->response.getContent().getVariant() = rows;
     this->response.setType("application/json");
+}
+
+void        Execute::_filesGet()
+{
+    Plugin::getInstance().getFiles().get(this->client);
 }
 
 void        Execute::_uploads()

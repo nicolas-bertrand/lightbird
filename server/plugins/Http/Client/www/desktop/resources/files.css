@@ -1,8 +1,241 @@
-﻿.files
+﻿.tasks>.task>.files
 {
 	border: 0px;
 	margin: 0px;
 	padding: 0px;
     width: 100%;
     height: 100%;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                 CONTROLS                                 //
+////////////////////////////////////////////////////////////////////////////*/
+
+.tasks>.task>.files>.controls
+{
+    height: 40px;
+    background-image: linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
+    background-image: -moz-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
+    background-image: -webkit-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
+    background-image: -o-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
+    background-image: -ms-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
+    overflow: hidden;
+}
+
+.tasks>.task>.files>.controls>.image,
+.tasks>.task>.files>.controls>.music,
+.tasks>.task>.files>.controls>.video,
+.tasks>.task>.files>.controls>.document,
+.tasks>.task>.files>.controls>.other
+{
+    float: left;
+    cursor: pointer;
+}
+
+.tasks>.task>.files>.controls>.folder,
+.tasks>.task>.files>.controls>.resize,
+.tasks>.task>.files>.controls>.list,
+.tasks>.task>.files>.controls>.hierarchy,
+.tasks>.task>.files>.controls>.split,
+.tasks>.task>.files>.controls>.block
+{
+    float: right;
+    padding: 0px 10px 0px 10px;
+    cursor: pointer;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                  HEADER                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+.tasks>.task>.files>.header
+{
+    width: 10000%;
+    height: 28px;
+    border-top: 1px solid #c4d1e0;
+    border-bottom: 1px solid #c4d1e0;
+    background-clip: border-box;
+    background-image: linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -moz-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -webkit-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -o-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -ms-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    box-shadow: inset 0px 1px #ffffff;
+    overflow: hidden;
+}
+
+.tasks>.task>.files>.header>div
+{
+    float: left;
+    height: 100%;
+}
+
+.tasks>.task>.files>.header>.type
+{
+    width: 10px;
+    border-right: 1px solid #c4d1e0;
+    box-shadow: inset -1px 0px rgba(255, 255, 255, 0.33), 1px 0px rgba(255, 255, 255, 0.33);
+    cursor: pointer;
+}
+
+.tasks>.task>.files>.header>.separator
+{
+    width: 1px;
+    background-color: #c4d1e0;
+    box-shadow: -1px 0px rgba(255, 255, 255, 0.33), 1px 0px  rgba(255, 255, 255, 0.33);
+    position: relative;
+}
+
+.tasks>.task>.files>.header>.separator>div
+{
+    width: 11px;
+    height: 28px;
+    position: absolute;
+    left: -5px;
+    cursor: e-resize;
+}
+
+.tasks>.task>.files>.header>.column
+{
+    width: 200px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.tasks>.task>.files>.header>.column>div
+{
+    margin: 6px 5px 0px 5px;
+    color: #3c4855;
+    text-shadow: 0px 0px 2px #fff, 1px 1px 1px #fff;
+    font-size: 14px;
+    width: 10000%;
+}
+
+.tasks>.task>.files>.header>.column.right>div
+{
+    float: right;
+    text-align: right;
+}
+
+.tasks>.task>.files>.header>.add
+{
+    width: 20px;
+    height: 28px;
+    float: right;
+    border-left: 1px solid #c4d1e0;
+    box-shadow: -1px 0px rgba(255, 255, 255, 0.33), inset 1px 0px rgba(255, 255, 255, 0.33), inset 0px 1px #ffffff;
+    background-image: linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -moz-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -webkit-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -o-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    background-image: -ms-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
+    cursor: pointer;
+    position: absolute;
+    right: 0px;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
+//                                    LIST                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+.tasks>.task>.files>.list
+{
+}
+
+.tasks>.task>.files>.list>table
+{
+    width: 100%;
+    border: none;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+    color: #47525f;
+}
+
+.tasks>.task>.files>.list>table tr
+{
+    height: 30px;
+}
+
+.tasks>.task>.files>.list>table tr.odd
+{
+    background-color: #ffffff;
+}
+
+.tasks>.task>.files>.list>table tr.even
+{
+    background-color: #f2f7fa;
+}
+
+.tasks>.task>.files>.list>table td
+{
+    padding-left: 5px;
+    padding-right: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Types */
+
+.tasks>.task>.files>.list>table td.type
+{
+    width: 10px;
+    height: 30px;
+    padding: 0px;
+}
+
+.tasks>.task>.files>.list>table td.type>div
+{
+    width: 5px;
+    height: 100%;
+}
+
+.tasks>.task>.files>.list>table td.type>.image
+{
+    background-image: linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
+    background-image: -moz-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
+    background-image: -webkit-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
+    background-image: -o-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
+    background-image: -ms-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
+}
+
+.tasks>.task>.files>.list>table td.type>.audio
+{
+    background-image: linear-gradient(top, #6be179 0%, #47da58 100%);
+    background-image: -moz-linear-gradient(top, #6be179 0%, #47da58 100%);
+    background-image: -webkit-linear-gradient(top, #6be179 0%, #47da58 100%);
+    background-image: -o-linear-gradient(top, #6be179 0%, #47da58 100%);
+    background-image: -ms-linear-gradient(top, #6be179 0%, #47da58 100%);
+}
+
+.tasks>.task>.files>.list>table td.type>.video
+{
+    background-image: linear-gradient(top, #ff925c 0%, #ff7834 100%);
+    background-image: -moz-linear-gradient(top, #ff925c 0%, #ff7834 100%);
+    background-image: -webkit-linear-gradient(top, #ff925c 0%, #ff7834 100%);
+    background-image: -o-linear-gradient(top, #ff925c 0%, #ff7834 100%);
+    background-image: -ms-linear-gradient(top, #ff925c 0%, #ff7834 100%);
+}
+
+.tasks>.task>.files>.list>table td.type>.document
+{
+    background-image: linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
+    background-image: -moz-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
+    background-image: -webkit-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
+    background-image: -o-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
+    background-image: -ms-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
+}
+
+.tasks>.task>.files>.list>table td.type>.other
+{
+    background-image: linear-gradient(top, #999999 0%, #808080 100%);
+    background-image: -moz-linear-gradient(top, #999999 0%, #808080 100%);
+    background-image: -webkit-linear-gradient(top, #999999 0%, #808080 100%);
+    background-image: -o-linear-gradient(top, #999999 0%, #808080 100%);
+    background-image: -ms-linear-gradient(top, #999999 0%, #808080 100%);
+}
+
+.tasks>.task>.files>.list>table col.type
+{
+    width: 10px;
 }

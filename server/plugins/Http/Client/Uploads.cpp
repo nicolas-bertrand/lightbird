@@ -46,7 +46,6 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     else
     {
         Plugin::api().log().error("This upload id is already used", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeHeader");
-        client.getRequest().setError(true);
         Plugin::api().network().disconnect(client.getId());
     }
     this->mutex.unlock();
@@ -54,7 +53,6 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     if (client.getRequest().getHeader().value("content-length").toLongLong() < 0)
     {
         Plugin::api().log().error("Negative content-length", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeHeader");
-        client.getRequest().setError(true);
         Plugin::api().network().disconnect(client.getId());
     }
     // Tells the parser to store the data in the memory and not in a temporary file
@@ -101,15 +99,17 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
                 File file;
                 position = data.indexOf("filename=\"", position);
                 i = position + 10;
-                file.name = QString::fromUtf8(data.mid(i, data.indexOf("\"\r\n", i) - i));
+                if (position >= 0)
+                    file.name = QString::fromUtf8(data.mid(i, data.indexOf("\"\r\n", i) - i));
                 position = data.indexOf("Content-Type: ", position);
                 i = position + 14;
-                file.contentType = data.mid(i, j - i);
+                if (position >= 0)
+                    file.contentType = data.mid(i, j - i);
                 position = j + 4;
-                // The header does not contains the required informations
-                if (file.name.isEmpty() || file.contentType.isEmpty())
-                    return this->_error(client, upload, "The fileName or the content-type is missing in the header");
-                this->_createFile(client, upload, file);
+                // If the content is a file we create it
+                if (!file.name.isEmpty() && !file.contentType.isEmpty())
+                    this->_createFile(client, upload, file);
+                upload.header = false;
             }
             // The header is not complete yet, so we wait for more data
             else
@@ -232,23 +232,20 @@ bool                Uploads::timer()
 
 void                Uploads::check(LightBird::IClient &client)
 {
-    QString         path = QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii());
-    QVariantList    files;
-    QVariantList    denied;
+    QVariantList    result;
     LightBird::TableFiles file;
+    LightBird::TableDirectories directory;
 
-    if (client.getRequest().getContent().getStorage() == LightBird::IContent::VARIANT
-        && !(files = client.getRequest().getContent().getVariant()->toList()).isEmpty())
+    // Gets the names if the files in the directory
+    QStringListIterator it(directory.getFiles());
+    while (it.hasNext())
     {
-        // Generates the list of the files that can't be uploaded
-        QListIterator<QVariant> it(files);
-        while (it.hasNext())
-            if (!it.next().toString().isEmpty() && file.setIdFromVirtualPath(path + "/" + it.peekPrevious().toByteArray()))
-                denied << it.peekPrevious().toByteArray();
-        // Send the list
-        (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = denied;
-        client.getResponse().setType(client.getRequest().getType());
+        file.setId(it.next());
+        result << file.getName();
     }
+    // Sends the list
+    client.getResponse().setType("application/json");
+    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = result;
 }
 
 void        Uploads::progress(LightBird::IClient &client)
@@ -383,7 +380,6 @@ void        Uploads::_createFile(LightBird::IClient &client, Upload &upload, Fil
         file.path += file.name.right(file.name.size() - file.name.lastIndexOf('.'));
     upload.file->setFileName(filesPath + file.path);
     upload.files.push_back(file);
-    upload.header = false;
     // Creates the virtual path if it doesn't exist
     if (upload.path == "/" || !(idDirectory = directory.createVirtualPath(upload.path)).isEmpty())
     {
@@ -434,7 +430,6 @@ void    Uploads::_error(LightBird::IClient &client, Upload &upload, const QStrin
     if (upload.file->isOpen())
         upload.file->remove();
     // Disconnects the client
-    client.getRequest().setError(true);
     client.getRequest().getContent().clear();
     Plugin::api().network().disconnect(client.getId());
     Plugin::api().log().error("An error occured in the upload: " + error, Properties("idClient", client.getId()).add("idUpload", upload.id).toMap(), "Uploads", "_error");

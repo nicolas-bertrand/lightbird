@@ -18,10 +18,30 @@ var Translation =
     {
         files : "Fichiers",
         uploads : "Envois",
-        settings : "Paramêtres",
-        help : "Aide",
-        quit : "Quitter",
-        width : 125,
-    }
+        collections : "Collections",
+        sessions : "Sessions",
+    },
+    Tasks :
+    {
+        files : "Fichiers",
+        uploads : "Envois",
+    },
+    Files :
+    {
+        name : "Nom",
+        size : "Taille",
+        created : "Date",
+        dateFormat : "d/M/y h:m",
+    },
+    Uploads :
+    {
+        choose_files : "Choisir les fichiers",
+        destination_folder : "Dossier de destination",
+        upload : "Envoyer",
+        ignore : "Ignorer",
+        replace : "Remplacer",
+        rename : "Renommer",
+    },
+    sizeUnits : [ "bytes", "Kb", "Mb", "Gb", "Tb" ],
 };
 var T = Translation;

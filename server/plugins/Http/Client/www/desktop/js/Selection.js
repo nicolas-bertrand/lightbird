@@ -35,5 +35,5 @@ function disableSelection(enable, element)
 			element.style.WebkitUserSelect = "none";
 		done = true;
 	}
-    element.onmousedown = function(event) { contextMenu(event); return (enable); };
+    element.onmousedown = function(event) { return (enable); };
 }

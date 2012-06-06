@@ -14,6 +14,7 @@
 # include "IPlugin.h"
 # include "ITimer.h"
 
+# include "Files.h"
 # include "Uploads.h"
 
 # define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser may download the content.
@@ -75,6 +76,8 @@ public:
     bool            identificationAllowed(LightBird::IClient &client);
     /// @brief Called when a identification attempt failed.
     void            identificationFailed(LightBird::IClient &client);
+    /// @brief Returns the files manager.
+    Files           &getFiles();
     /// @brief Returns the uploads manager.
     Uploads         &getUploads();
 
@@ -100,6 +103,7 @@ private:
     QMap<int, QString>  daysOfWeek; ///< The names of the days of the week in english in three letters.
     QMap<int, QString>  months;     ///< The names of the months in three letters.
     QHash<QHostAddress, QPair<QDateTime, quint32> > attempts; ///< Stores the number of failed connection attempts per ip and date.
+    Files               files;      ///< Manages the files.
     Uploads             uploads;    ///< Manages the uploads.
     QMutex              mutex;      ///< Makes this class thread safe.
 };

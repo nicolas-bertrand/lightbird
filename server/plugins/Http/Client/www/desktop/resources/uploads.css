@@ -15,25 +15,81 @@
     display: none;
 }
 
+/********** form **********/
 .uploads form
 {
     height: 30px;
     background-color: #CCEEFF;
     text-align: center;
-    padding: 20px;
+    padding: 10px;
+    overflow: hidden;
 }
 
-.uploads input
+.uploads form .file
 {
-    display: block;
+    height: 100%;
+    width: 34%;
+    float: left;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    font-weight: bold;
+    font-size: 18px;
+    padding-top: 5px;
+}
+
+.uploads form .file input
+{
+    position: absolute;
+    height: 100%;
+    width: auto;
+    opacity: 0;
+    cursor: pointer;
+    min-width: 200px;
+}
+
+.uploads form .path
+{
+    height: 100%;
+    width: 33%;
+    float: left;
+}
+
+.uploads form .path div
+{
+    height: 100%;
+    width: auto;
+    padding: 0px 10px 0px 10px;
+}
+
+.uploads form .path input
+{
     height: 100%;
     width: 100%;
+    text-align: center;
+    font-weight: bold;
+    color: grey;
 }
 
+.uploads form .path input.focus
+{
+    color: inherit;
+}
+
+.uploads form .submit
+{
+    height: 100%;
+    width: 33%;
+    display: block;
+    float: left;
+    text-align: center;
+    font-weight: bold;
+}
+
+/********** session **********/
 .uploads .session
 {
-    height: 40px;
-    padding: 20px;
+    padding: 0px;
 }
 
 .uploads .session.odd
@@ -90,7 +146,6 @@
 {
     background-color: #99CCFF;
 }
-
 .uploads .session .progress .even
 {
     background-color: #77BBFF;
@@ -100,10 +155,18 @@
 {
     background-color: #9AEF9A;
 }
-
 .uploads .session .progress .even.uploaded
 {
     background-color: #77E077;
+}
+
+.uploads .session .progress .odd.conflict
+{
+    background-color: #FFBBAA;
+}
+.uploads .session .progress .even.conflict
+{
+    background-color: #FFAA99;
 }
 
 .uploads .session .progress .current_file,
@@ -126,3 +189,95 @@
     display: none;
 }
 
+/********** files_list **********/
+.uploads .session .files_list
+{
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+}
+
+.uploads .session .files_list td
+{
+    padding: 5px;
+    font-size: 15px;
+}
+
+.uploads .session .files_list td.size
+{
+    text-align: center;
+    min-width: 55px;
+    padding: 5px 10px 5px 10px;
+}
+
+.uploads .session .files_list td.action
+{
+    text-align: center;
+    cursor: pointer;
+    padding: 5px 10px 5px 10px;
+}
+.uploads .session .files_list td.action.selected
+{
+    font-weight: bold;
+}
+
+.uploads .session .files_list .odd
+{
+    background-color: #BBE1FF;
+}
+.uploads .session .files_list .even
+{
+    background-color: #CCEEFF;
+}
+
+.uploads .session .files_list .odd.conflict
+{
+    background-color: #FFCCBB;
+}
+.uploads .session .files_list .even.conflict
+{
+    background-color: #FFDDCC;
+}
+
+.uploads .session .files_list .odd.change
+{
+    background-color: #ffe39d;
+}
+.uploads .session .files_list .even.change
+{
+    background-color: #feecbd;
+}
+
+.uploads .session .files_list .odd.renameConflict.change
+{
+    background-color: #FFCCBB;
+}
+.uploads .session .files_list .even.renameConflict.change
+{
+    background-color: #FFDDCC;
+}
+
+.uploads .session .files_list td.rename
+{
+    padding: 0px;
+}
+
+.uploads .session .files_list td.rename input
+{
+    width: 100%;
+    border: 0px none;
+    padding: 5px 4px 5px 4px;
+    background-color: transparent;
+    font: inherit;
+    opacity: 0.8;
+}
+.uploads .session .files_list td.rename input.rename
+{
+    font-weight: bold;
+}
+
+.uploads .session .files_list td.rename input:focus,
+.uploads .session .files_list td.rename input:hover
+{
+    background-color: #FFFFFF;
+}

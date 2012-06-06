@@ -3,1951 +3,1679 @@
 // The desktop singleton
 var gl_desktop;
 
-/********** Desktop **********/{
-function Desktop()
+function Desktop(task)
 {
-    // Stores the nodes of the desktop
-    this.node = new Object();
-    this.node.desktop = document.getElementById("desktop");
-    this.node.top = getElementsByClassName("top", this.node.desktop, true);
-    this.node.menu = getElementsByClassName("menu", this.node.top, true);
-    this.node.tasks_list = removeTextNodes(getElementsByClassName("tasks_list", this.node.top, true));
-    this.node.resize_tasks_list = getElementsByClassName("resize_tasks_list", this.node.top, true);
-    this.node.middle = getElementsByClassName("middle", this.node.top, true);
-    this.node.player_document = getElementsByClassName("player_document", this.node.middle, true);
-    this.node.pages = getElementsByClassName("pages", this.node.middle, true);
-    this.node.tasks = getElementsByClassName("tasks", this.node.middle, true);
-    this.node.preview = getElementsByClassName("preview", this.node.middle, true);
-    this.node.player_media = getElementsByClassName("player_media", this.node.desktop, true);
-    // Sets the default values
-    this.node.desktop.style.minHeight = C.Desktop.minHeight + "px";
-    this.node.desktop.style.minWidth = C.Desktop.minWidth + "px";
-    this.node.player_document.style.height = C.Desktop.playerDocumentHeight + "px";
-    this.node.player_media.style.height = C.Desktop.playerMediaHeight + "px";
-    this.node.menu.style.width = T.Menu.width + "px";
-    this.node.tasks_list.style.width = C.Desktop.tasksListWidth + "px";
-    this.node.resize_tasks_list.style.width = C.Desktop.resizeTasksListWidth + "px";
-    this.updateMiddleMarginLeft();
-    this.node.tasks_list.lastChild.style.height = C.Desktop.newTaskHeight + "px";
-    this.setTaskIconHeight((C.Desktop.tasksListWidth - C.Desktop.tasksListPadding * 2) * C.Desktop.taskHeightRatio);
-    // Members
-    gl_desktop = this;
-    // Allows to drag elements
-    this.drag = new Drag();
-    // Manages the tasks list
-    this.tasksList = new TasksList();
-    // Manages the buttons on the tasks of the tasks list
-    this.taskButtons = new TaskButtons();
-    // True if the mouse is over the tasks list
-    this.overTasksList = undefined;
-    // The height of the "top" node of the desktop
-    this.topHeight = undefined;
-    // The position of the mouse in the desktop
-    this.mouse = undefined;
-    // The size of the menu + the tasks list + its resize bar
-    this.middleMarginLeft;
-    // The height of the tasks icons
-    this.taskIconHeight;
-    // The coordinates of the main area of the desktop
-    this.left = undefined;
-    this.top = undefined;
-    this.width = undefined;
-    this.height = undefined;
-    // The page currently displayed by the desktop
-    this.currentPage = undefined;
-    // The main page is automatically displayed when the mouse move out of the tasks list
-    this.mainPage = undefined;
-    // When the mouse is over the tasks list for a short time, we don't display the page under it immediatly
-    this.delayedPage = undefined;
-    // The timeout used to delay the display of a page
-    this.delayTimeout = undefined;
-    // If the page display is delayed
-    this.isDelayed = undefined;
-    // Helps to normalize the mouse wheel delta
-    this.baseWheelDelta = 2000;
-    // Events
-    var mouseWheelEvent = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel";
-    addEvent(document.body, mouseWheelEvent, function (event) { gl_desktop.mouseWheel(event); });
-    addEvent(document.body, "mousemove", function (event) { gl_desktop.mouseMove(event); });
-    addEvent(document.body, "mouseup", function (event) { gl_desktop.mouseUp(event); });
-}
-
-// Opens a new task in a new page.
-// @param resource : The name of the resource that will be loaded in the task.
-// @param event : The event that triggered the call.
-Desktop.prototype.open = function (resource, event)
-{
-	if (getButton(event) != 0)
-		return ;
-    // Loads the task from the resources
-	gl_resources.load(resource, function (content)
-    {
-        // Creates the page and the task
-        var page = new Page();
-        var task = new Task(resource, content);
-        page.addTask(task);
-        hideAllWindows();
-        page.display(true);
-        gl_resources.callJs(resource, task);
-        // Scrolls to the bottom of the tasks list
-        gl_desktop.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollHeight - gl_desktop.topHeight - C.Desktop.newTaskHeight;
-    });
-}
-
-// Resizes the desktop.
-Desktop.prototype.onResize = function ()
-{
-    var width = (gl_browserSize.width > C.Desktop.minWidth) ? gl_browserSize.width : C.Desktop.minWidth;
-    var height = (gl_browserSize.height > C.Desktop.minHeight) ? gl_browserSize.height : C.Desktop.minHeight;
-    this.topHeight = height - C.Desktop.playerMediaHeight;
-    this.node.top.style.height = this.topHeight + "px";
-    this.left = this.middleMarginLeft;
-    this.top = C.Desktop.playerDocumentHeight;
-    this.width = width - this.middleMarginLeft;
-    this.height = this.topHeight - C.Desktop.playerDocumentHeight;
-    // Resizes the page currently displayed
-    if (this.getCurrentPage())
-        this.getCurrentPage().onResize();
-}
-
-// Called each time the mouse move.
-// @param event : The event that triggered the call.
-Desktop.prototype.mouseMove = function (event)
-{
-	this.mouse = mouseCoordinates(event);
-    // If we are on the tasks list
-    if (this.mouse.x < this.middleMarginLeft && this.mouse.x > T.Menu.width && this.mouse.y < this.topHeight)
-        this.mouseOverTasksList(this.mouse);
-    else
-        this.mouseOutTasksList();
-    this.drag.mouseMove(event);
-    moveWindow(event);
-}
-
-// Called when the mouse is up.
-// @param event : The event that triggered the call.
-Desktop.prototype.mouseUp = function (event)
-{
-    this.drag.mouseUp(event);
-    stopWindow(event);
-}
-
-// Called each time the mouse wheel is used on the tasks list.
-Desktop.prototype.mouseWheel = function (event)
-{
-    // Normalizes the delta (should be improved)
-    var delta = event.detail ? -event.detail : event.wheelDelta;
-    if (Math.abs(delta) < this.baseWheelDelta)
-        this.baseWheelDelta = Math.abs(delta);
-    delta = Math.round(delta / this.baseWheelDelta * C.Desktop.mouseWheelMultiplier);
-    // Scrolls the tasks list if we are on it
-    if (this.overTasksList)
-    {
-        this.node.tasks_list.scrollTop -= delta * C.Desktop.mouseWheelScrollSpeed;
-        this.taskButtons.hideButtons();
-    }
-    this.drag.mouseWheel(delta);
-}
-
-// The mouse is over the task list.
-Desktop.prototype.mouseOverTasksList = function (mouse)
-{
-    // If the mouse just came on the tasks list
-    if (!this.overTasksList)
-    {
-        this.overTasksList = true;
-        /*// We will wait pagePreviewDelay ms before displaying the page undes the cursor
-        this.delayTimeout = setTimeout("gl_desktop.mouseOverTasksListTimeout()", C.Desktop.pagePreviewDelay);
-        this.isDelayed = false;
-        // Ensures that the preview is correctly displayed
-        if (this.drag.isDragging("Task") && this.getCurrentPage())
-            this.getCurrentPage().preview();*/
-    }
-    // The top scrolling area of the tasks list
-    if (mouse.y <= C.Desktop.tasksListScrollHeight)
-        this.tasksList.scroll(1 - (mouse.y / C.Desktop.tasksListScrollHeight));
-    // The bottom scrolling area of the tasks list
-    else if (mouse.y > this.topHeight - C.Desktop.tasksListScrollHeight && mouse.y <= this.topHeight)
-        this.tasksList.scroll((this.topHeight - C.Desktop.tasksListScrollHeight - mouse.y) / C.Desktop.tasksListScrollHeight);
-    // Ensures that the scrolling is stopped outside of the scrolling areas
-    else
-        this.tasksList.stopScroll();
-}
-/*Desktop.prototype.mouseOverTasksListTimeout = function ()
-{
-    delete this.delayTimeout;
-    if (!this.isDisplayed(this.delayedPage))
-        this.display(this.delayedPage);
-    this.delayedPage = undefined;
-    this.isDelayed = true;
-}*/
-
-// The mouse is out the tasks list.
-Desktop.prototype.mouseOutTasksList = function ()
-{
-    if (this.overTasksList)
-    {
-        this.overTasksList = false;
-        /*if (!this.drag.isDragging())
-        {
-            // Displays the main page
-            if (!this.isDisplayed(this.mainPage))
-                this.display(this.mainPage);
-            // No preview is going to be displayed since we are out of the tasks list
-            if (this.delayTimeout)
-            {
-                clearTimeout(this.delayTimeout);
-                delete this.delayTimeout;
-                this.delayedPage = undefined;
-            }
-            this.isDelayed = false;
-        }*/
-        this.tasksList.stopScroll();
-    }
-}
-
-// Changes the page displayed by the desktop.
-// @param page : The page to display.
-// @param main : If the page displayed should be kept as the main page.
-Desktop.prototype.display = function(page, main)
-{
-    if (!page)
-        return ;
-    // Sets the page as the main
-    /*if (main)
-        this.mainPage = page;*/
-    // Hides the old page
-    this.hide();
-    // Displays the new page
-    this.currentPage = page;
-    page._display();
-}
-
-// If the current page is undefined, this method display the next page available in the desktop.
-// @param page : If defined, it will search from this page.
-Desktop.prototype.displayNext = function(page)
-{
-    var ignore = undefined;
+    var self = this;
+    gl_desktop = self;
     
-    if (this.currentPage)
-        return ;
-    if (!page && this.node.tasks_list.firstChild.object)
-        page = this.node.tasks_list.firstChild.object;
-    else
-        ignore = page.icon;
-    // Searches the next page to display
-    var found = false;
-    for (var p = page.icon; p && !found; p = p.nextSibling)
-        if (p != ignore && getClassName(p, "page") && p.object.getContainer() instanceof Desktop)
-        {
-            p.object.display(!this.mainPage);
-            found = true;
-        }
-    // Otherwise searches the previous page
-    for (var p = page.icon; p && !found; p = p.previousSibling)
-        if (p != ignore && getClassName(p, "page") && p.object.getContainer() instanceof Desktop)
-        {
-            p.object.display(!this.mainPage);
-            found = true;
-        }
-}
-
-// Displays the page later if the mouse is on the tasks list for too little time.
-/*Desktop.prototype.delayedDisplay = function(page)
-{
-    // The display of the page is delayed
-    if (!this.isDelayed)
-        this.delayedPage = page;
-    else if (!this.isDisplayed(page))
-        this.display(page);
-}*/
-
-// Hides the page currently displayed by the desktop.
-Desktop.prototype.hide = function ()
-{
-    if (this.getCurrentPage())
+    self.init = function ()
     {
-        var page = this.getCurrentPage();
-        this.currentPage = undefined;
-        page.hide();
+        // Nodes
+        self.node = new Object();
+        self.node.desktop = $("#desktop");
+        self.node.top = $("#desktop>.top")[0];
+        self.node.middle = $("#desktop>.middle")[0];
+        self.node.bottom = $("#desktop>.bottom")[0];
+        self.node.tasks_list = $(self.node.middle).children(".tasks_list").children(".icons")[0];
+        self.node.tasks_list.container = $(self.node.middle).children(".tasks_list")[0];
+        self.node.tasks_list.top = $(self.node.tasks_list).children(".top")[0];
+        self.node.tasks_list.bottom = $(self.node.tasks_list).children(".bottom")[0];
+        self.node.pages = $(self.node.middle).children(".pages")[0];
+        self.node.tasks = $(self.node.middle).children(".tasks")[0];
+
+        // Members
+        self.middleHeight; // The height of the middle area
+        self.drag = new Drag(); // Allows to drag elements
+        self.taskButtons = new TaskButtons(); // Manages the buttons of the tasks
+        self.tasksList = new TasksList(); // Manages the scroll of the tasks list
+        self.mouse = { x : 0, y : 0 }; // The position of the mouse on the desktop
+        self.currentPage = undefined; // The page currently displayed by the desktop
+        // The coordinates of the main area of the desktop
+        self.left;
+        self.top;
+        self.width;
+        self.height;
+        
+        // Sets the default values
+        $(self.node.top).height(C.Desktop.topHeight);
+        $(self.node.bottom).height(C.Desktop.bottomHeight);
+        
+        // Events
+        $(document.body).mousewheel(function (e, delta) { self.mouseWheel(e, delta); });
+        $(document.body).mousemove(function (e) { self.mouseMove(e); });
+        $(document.body).mouseup(function (e) { self.mouseUp(e); });
     }
+    
+    // Called when the browser is resized. Updates the size of the desktop.
+    self.onResize = function ()
+    {
+        var width = (gl_browserSize.width > C.Desktop.minWidth) ? gl_browserSize.width : C.Desktop.minWidth;
+        var height = (gl_browserSize.height > C.Desktop.minHeight) ? gl_browserSize.height : C.Desktop.minHeight;
+        self.middleHeight = height - C.Desktop.topHeight - C.Desktop.bottomHeight;
+        $(self.node.middle).height(self.middleHeight);
+        self.left = C.Desktop.tasksListWidth;
+        self.top = C.Desktop.topHeight - C.Desktop.taskBorder;
+        self.width = width - C.Desktop.tasksListWidth - C.Desktop.taskBorder;
+        self.height = self.middleHeight - C.Desktop.taskBorder;
+        if (self.currentPage)
+            self.currentPage.onResize();
+    }
+    
+    // Opens a task in a new page.
+    // @param resource : The name of the resource that will be loaded in the task.
+    self.openPage = function (resource, event)
+    {
+        if ($.Event(event).originalEvent.which != 1)
+            return ;
+        // Loads the task from the resources
+        gl_resources.load(resource, function (html)
+        {
+            // Creates the page and the task
+            var page = new Page();
+            var task = new Task(resource, html);
+            page.addTask(task);
+            gl_resources.callJs(resource, task);
+            page.display();
+            // Ensures that the tasks list is displayed
+            $(self.node.tasks_list.container).addClass("display");
+            // Scrolls to the bottom of the tasks list
+            self.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollHeight - gl_desktop.middleHeight - C.Desktop.pageMargin;
+        });
+    }
+    
+    // Called each time the mouse wheel is used.
+    // @param delta : The direction and velocity of the movement.
+    self.mouseWheel = function(e, delta)
+    {
+        delta = Math.round(delta * C.Desktop.mouseWheelMultiplier);
+        self.tasksList.mouseWheel(delta);
+        self.drag.mouseWheel(e, delta);
+    }
+    
+    // Called each time the mouse moves over the desktop.
+    self.mouseMove = function (e)
+    {
+        self.mouse = { pageX : e.pageX, pageY : e.pageY }
+        self.drag.mouseMove(e);
+    }
+
+    // Called when the mouse is up.
+    self.mouseUp = function (e)
+    {
+        self.drag.mouseUp(e);
+    }
+
+    // If the current page is undefined this method displays the next page available on the desktop.
+    // @param page : If defined, it will search from this page.
+    self.displayNext = function(page)
+    {
+        page = page.icon;
+        var newPage;
+        // Displays the first page
+        if (!page && (newPage = $(self.node.tasks_list).children(".page:first")).length)
+            newPage[0].object.display();
+        else if (page)
+        {
+            // Or the next page
+            if (page.nextSibling && $(page.nextSibling).hasClass("page"))
+                page.nextSibling.object.display();
+            // Or the previous page
+            else if (page.previousSibling && $(page.previousSibling).hasClass("page"))
+                page.previousSibling.object.display();
+        }
+    }
+    
+// Container interface
+    
+    // Changes the page displayed by the desktop.
+    // @param page : The page to display.
+    self.display = function(page)
+    {
+        // Hides the old page and the windows
+        self.hide();
+        gl_windows.hide();
+        // Sets the new page
+        self.currentPage = page;
+        $(self.currentPage.icon).removeClass("window");
+        self.currentPage.setZIndex(0);
+    }
+
+    // Hides the page currently displayed by the desktop.
+    self.hide = function ()
+    {
+        if (self.currentPage)
+        {
+            if (!self.currentPage.isHidden())
+                self.currentPage.hide();
+            self.currentPage = undefined;
+        }
+    }
+    
+    // Notifies the desktop that a page has been closed.
+    // Cleans its references and displays another page.
+    // @parem page : The closed page.
+    self.close = function (page)
+    {
+        if (self.currentPage && self.currentPage == page)
+        {
+            self.currentPage = undefined;
+            self.displayNext(page);
+        }
+    }
+    
+    // Notifies that the desktop is no longer the container of the page.
+    // @parem page : The page concerned.
+    self.containerChanged = function(page)
+    {
+        if (self.currentPage && self.currentPage == page)
+            self.currentPage = undefined;
+    }
+    
+    self.init();
+    return (self);
 }
 
-// Notifies the desktop that a page has been closed.
-// Cleans its references and displays another page if necessary.
-// @parem page : The closed page.
-Desktop.prototype.close = function (page)
-{
-    var old = this.currentPage;
-    // Removes the page of the main area
-    if (this.currentPage && this.currentPage == page)
-        this.currentPage = undefined;
-    /*if (this.mainPage && this.mainPage == page)
-        this.mainPage = undefined;
-    if (this.delayedPage && this.delayedPage == page)
-        this.delayedPage = undefined;*/
-    /*if (page.icon.nextSibling && getClassName(page.icon.nextSibling, "page"))
-        this.display(page.icon.nextSibling.object, !this.mainPage);
-    else if (this.mainPage)
-        this.display(this.mainPage);
-    else if (page.icon.previousSibling)
-        this.display(page.icon.previousSibling.object, page);*/
-    // If a page was displayed, we replace it
-    if (old)
-        this.displayNext(page);
-}
-
-// Updates the width of the margin left of the middle div.
-Desktop.prototype.updateMiddleMarginLeft = function ()
-{
-    this.middleMarginLeft = T.Menu.width + C.Desktop.tasksListWidth + C.Desktop.resizeTasksListWidth;
-    this.node.middle.style.marginLeft = this.middleMarginLeft + "px";
-}
-
-// Returns the page currently displayed by the desktop. If no page is displayed, nothing is ruturned.
-Desktop.prototype.getCurrentPage = function () { return (this.currentPage); }
-// Returns true if the page in parameter is currently displayed by the desktop.
-Desktop.prototype.isDisplayed = function (page) { return (page && this.currentPage && this.currentPage == page); }
-// Returns true if the page in parameter is the main page
-/*Desktop.prototype.isMainPage = function (page) { return (page && this.mainPage && this.mainPage == page); }*/
-Desktop.prototype.setTaskIconHeight = function (height) { this.taskIconHeight = Math.round(height); }
-// Returns true if the mouse is over the tasks list.
-Desktop.prototype.isOverTasksList = function () { return (this.overTasksList); }
-// Puts the focus on the desktop, i.e hides all the windows.
-Desktop.prototype.focus = function () { hideAllWindows(); }
-// Sets the desktop as the container of the page.
-Desktop.prototype.setPage = function (page) {
-    page.setContainer(gl_desktop);
-    page.setZIndex(0);
-    this.display(page, true);
-}
-
-} /*! Desktop !*/
-
-/********** Page **********/{
 // A page is a container that can store multiple tasks.
 function Page()
 {
-    // The number of tasks in the page
-    this.numberTasks = 0;
-    // The icon of the page in the tasks list
-    this.icon = undefined;
-    // The content of the page. Stores some element of the page, like the resize bars.
-    this.content = undefined;
-    // The coordinates of the page
-    this.left = undefined;
-    this.top = undefined;
-    this.width = undefined;
-    this.height = undefined;
-    // The tree allows to render the tasks of the page. It consists of TaskTreeNode objects.
-    this.tree = undefined;
-    // The container that displays the page.
-    this.container = gl_desktop;
-    var page = this;
+    var self = this;
     
-    // Creates the icon and insert it in the tasks list
-    this.icon = document.createElement("div");
-    this.icon.className = "page";
-    this.icon.object = this;
-    this.icon.style.padding = C.Desktop.tasksListPadding + "px";
-    gl_desktop.node.tasks_list.insertBefore(this.icon, gl_desktop.node.tasks_list.lastChild);
-    addEvent(this.icon, "mousedown", function (event) { page.mouseDown(event); });
-    addEvent(this.icon, "mouseover", function (event) { page.mouseOver(event); });
-    this.updateParity();
+    self.init = function ()
+    {
+        self.numberTasks = 0; // The number of tasks in the page
+        self.icon; // The icon of the page in the tasks list
+        self.tree; // The tree allows to render the tasks of the page. It consists of TaskTreeNode objects.
+        self.container = gl_desktop; // The container that displays the page
+        self.zIndex = 0; // THe z-index of the content of the page
+        // The coordinates of the page
+        self.left;
+        self.top;
+        self.width;
+        self.height;
     
-    // Creates the content
-    this.content = document.createElement("div");
-    this.content.className = "page";
-    this.content.style.display = "none";
-    this.content.object = this;
-    // Puts the focus on the page when we click on the content (the resize bars)
-    addEvent(this.content, "mousedown", function (event) { page.mouseDownContent(event); });
-    gl_desktop.node.pages.appendChild(this.content);
-}
-
-// The mouse goes down on a page icon.
-Page.prototype.mouseDown = function (event)
-{
-    // The mouse have to be directly on the page icon
-    if (!getClassName((event.target || event.srcElement), "page"))
-        return ;
-    // Sets the page as the main
-    if (getButton(event) == 0/* && !gl_desktop.isMainPage(this)*/)
-        this.display(true);
-    // Closes the page
-    else if (getButton(event) == 1)
-        this.close();
-}
-
-// Displays the page when the mouse is over it.
-Page.prototype.mouseOver = function (event)
-{
-    // If we are dragging something, do nothing
-    /*if (gl_desktop.drag.isDragging())
-        return ;
-    gl_desktop.delayedDisplay(this);*/
-}
-
-// Puts the focus on the page when we click on the content (the resize bars)
-Page.prototype.mouseDownContent = function ()
-{
-    this.container.focus();
-}
-
-// Asks the container of the page to display it.
-// @param main : If the page is the main.
-Page.prototype.display = function (main)
-{
-    this.container.display(this, main);
-}
-
-// Displays the page and its tasks.
-Page.prototype._display = function ()
-{
-    // Updates the coordinates
-    this.onResize();
-    // Display the page
-    this.content.style.display = "block";
-    // Displays the tasks of the page
-    for (var task = this.icon.firstChild; task; task = task.nextSibling)
-        if (getClassName(task, "task"))
-            task.object.display();
-}
-
-// Hides the page and its tasks.
-Page.prototype.hide = function ()
-{
-    this.content.style.display = "none";
-    // Hides the tasks of the page.
-    for (var task = this.icon.firstChild; task; task = task.nextSibling)
-        if (getClassName(task, "task"))
-            task.object.hide();
-}
-
-// Closes the page.
-Page.prototype.close = function ()
-{
-    // Notifies the desktop that the page has been closed
-    this.container.close(this);
-    // Removes the tasks of the page
-    for (var task = this.icon.firstChild; task; task = task.nextSibling)
-        if (getClassName(task, "task"))
-            task.object.close();
-    // Removes the page nodes
-    this.icon.parentNode.removeChild(this.icon);
-    this.content.parentNode.removeChild(this.content);
-    this.updateParity();
-}
-
-// Adds a task in the page.
-// @param task : The task to add.
-// @param position : The position of the new task in the page or the parent (n s e w).
-// @param parent : If defined, the parent task is cut in half and the task take a half.
-// @param beforeIcon : The icon before which the task will be added in the tasks list.
-Page.prototype.addTask = function (task, position, parent, beforeIcon)
-{
-    this.addNode(task, position, parent);
-    task.content.style.zIndex = this.content.style.zIndex;
-    // Puts the new task in the tasks list
-    if (beforeIcon)
-        beforeIcon.parentNode.insertBefore(task.icon, beforeIcon);
-    else
-        this.icon.appendChild(task.icon);
-    this.numberTasks++;
-}
-
-// Removes a task from the page.
-// @param task : The task to remove.
-// @param move : If the task is moved its content is not removed.
-Page.prototype.removeTask = function (task, move)
-{
-    task.icon.parentNode.removeChild(task.icon);
-    if (!move)
-        task.close();
-    this.numberTasks--;
-    // If the page is empty we close it
-    if (this.numberTasks == 0)
-        this.close();
-    // Otherwise we resize its tasks
-    else
-    {
-        this.removeNode(task.node);
-        this.onResize();
+        // Creates the icon and insert it in the tasks list
+        self.icon = $("<div></div>")[0];
+        $(self.icon).addClass("page");
+        self.icon.object = self;
+        $(self.icon).mousedown(function (e) { self.mouseDown(e); });
+        $(self.icon).mouseup(function (e) { self.mouseUpClose(e) });
+        $(self.icon).insertBefore(gl_desktop.node.tasks_list.bottom);
+        
+        // Creates the content of the page
+        self.content = $("<div></div>")[0];
+        $(self.content).addClass("page");
+        self.content.object = self;
+        $(self.content).appendTo(gl_desktop.node.pages);
     }
-}
-
-// Resizes the tasks of the page.
-Page.prototype.onResize = function ()
-{
-    this.left = this.container.left;
-    this.top = this.container.top;
-    this.width = this.container.width;
-    this.height = this.container.height;
-    // Renders the tasks tree
-    this.renderTree();
-}
-
-// When a task is dragged over a page or an other task, this method displays a preview of its future position.
-// @param task : The task on which the preview is applied. If undefined, the preview is shown on the page.
-// @param position : The future position of the task (n s e w).
-Page.prototype.preview = function (task, position)
-{
-    var drag = gl_desktop.drag.getObject();
     
-    // We don't display a preview when we are on a new page
-    if (drag.isOnNewPage())
-        return ;
-    // Hides the content of the dragged task if we are not on its page
-    if (drag.getPage() != this && this.container instanceof Desktop && drag.getPage() instanceof Desktop)
-        drag.hide();
-    // The default position
-    if (!position)
-        position = C.Desktop.defaultPosition;
-    var preview = gl_desktop.node.preview;
-    // No preview is needed if the task or the page are the same
-    if ((task && drag == task) || (!task && drag.getPage() == this))
-        preview.style.display = "none";
-    // Displays the preview on a task
-    else if (task)
+    // Adds a task in the page.
+    // @param task : The task to add.
+    // @param beforeIcon : The icon before which the task will be added in the tasks list.
+    // @param position : The position of the new task in the page or the parent (n s e w).
+    // @param parent : If defined, the parent task is cut in half and the task take a half.
+    self.addTask = function (task, beforeIcon, position, parent)
     {
-        // Moves the preview in the task in order to receive the mousemove events
-        preview.parentNode.removeChild(preview);
-        task.content.appendChild(preview);
-        // Displays the preview based on the position of the mouse in the task
-        preview.style.top = 0 + "px";
-        preview.style.left = 0 + "px";
-        preview.style.width = task.width + "px";
-        preview.style.height = task.height + "px";
-        preview.style.zIndex = task.content.style.zIndex;
-        preview.style.display = "block";
-        if (position == "n" || position == "s")
-            preview.style.height = Math.ceil(task.height / 2) + "px";
-        if (position == "s")
-            preview.style.top = Math.floor(task.height / 2) + "px";
-        if (position == "w" || position == "e")
-            preview.style.width = Math.ceil(task.width / 2) + "px";
-        if (position == "e")
-            preview.style.left = Math.floor(task.width / 2) + "px";
-    }
-    // Displays the preview on the page
-    else
-    {
-        // Moves the preview to a node in static position
-        preview.parentNode.removeChild(preview);
-        gl_desktop.node.middle.appendChild(preview);
-        // Displays the preview
-        preview.style.top = this.top + "px";
-        preview.style.left = this.left + "px";
-        preview.style.width = this.width + "px";
-        preview.style.height = this.height + "px";
-        preview.style.zIndex = this.content.style.zIndex;
-        preview.style.display = "block";
-        // The number of horizontal and vertical branches in the tree helps to compute the size
-        var h = (this.countNode(this.tree, "h") + 2);
-        var v = (this.countNode(this.tree, "v") + 2);
-        // The size of the preview is based on the position of the mouse in the page
-        if (position == "n" || position == "s")
-            preview.style.height = this.height / v + "px";
-        if (position == "s")
-            preview.style.top = this.top + this.height * (v - 1) / v + "px";
-        if (position == "w" || position == "e")
-            preview.style.width = this.width / h + "px";
-        if (position == "e")
-            preview.style.left = this.left + this.width * (h - 1) / h + "px";
-    }
-}
-
-// Adds a node to the tree that represents the hierarchy of the tasks in the page.
-// @param task : The task of the node.
-// @param position : The position of the task relative to the parent (n s e w).
-// @param parent : If defined, the parent is cut in half and both of the tasks takes one part.
-Page.prototype.addNode = function (task, position, parent)
-{
-    // The default position
-    if (!position)
-        position = C.Desktop.defaultPosition;
-    // Creates the tree
-    if (!this.tree)
-    {
-        this.tree = new TaskTreeNode({ task : task });
-        task.node = this.tree;
-    }
-    // There is only one node in the tree
-    else if (!parent && this.tree.task)
-        this._addNode(task, position, this.tree);
-    // Adds a node at the root of the tree
-    else if (!parent)
-    {
-        // Changes the root of the tree (the old tree becomes a leaf)
-        if (position == "s" || position == "e")
-        {
-            this.tree = new TaskTreeNode({ first : this.tree });
-            this.tree.second = new TaskTreeNode({ task : task });
-            task.node = this.tree.second;
-        }
-        // The order changes depending on the position
+        self.addNode(task, position, parent);
+        if (beforeIcon)
+            $(task.icon).insertBefore(beforeIcon);
         else
-        {
-            this.tree = new TaskTreeNode({ second : this.tree });
-            this.tree.first = new TaskTreeNode({ task : task });
-            task.node = this.tree.first;
-        }
-        // Sets the ratio depending on the position, and the number of nodes already in that position in the tree
-        this.tree.h = -1;
-        this.tree.v = -1;
-        if (position == "w")
-            this.tree.h = 1 / (this.countNode(this.tree, "h") + 2);
-        else if (position == "e")
-            this.tree.h = 1 - 1 / (this.countNode(this.tree, "h") + 2);
-        else if (position == "n")
-            this.tree.v = 1 / (this.countNode(this.tree, "v") + 2);
-        else
-            this.tree.v = 1 - 1 / (this.countNode(this.tree, "v") + 2);
-        // Sets the parents of the leafs
-        this.tree.first.parent = this.tree;
-        this.tree.second.parent = this.tree;
+            $(self.icon).append(task.icon);
+        self.numberTasks++;
+        task.setContainer(self.container);
+        task.setZIndex(self.zIndex);
     }
-    // Adds a node after the parent
-    else
-        this._addNode(task, position, parent.node);
-}
-// Helper method of Page.addNode.
-Page.prototype._addNode = function (task, position, node)
-{
-    // The horizontal and vertical ratios
-    node.h = -1;
-    node.v = -1;
-    // Depending of the position, one is cut in half
-    (position == "w" || position == "e") ? node.h = 0.5 : node.v = 0.5;
-    // Builds the first and second leaf of the node
-    var set = function (first, second)
-    {
-        node.first = new TaskTreeNode({ task : first });
-        first.node = node.first;
-        node.second = new TaskTreeNode({ task : second });
-        second.node = node.second;
-    }
-    // The order of the first and second leaf changes depending on the position
-    if (position == "n" || position == "w")
-        set(task, node.task);
-    else
-        set(node.task, task);
-    // Sets the parent node of the leafs
-    node.first.parent = node;
-    node.second.parent = node;
-    // The node is no longer a leaf
-    node.task = undefined;
-}
-
-// Counts recursively the number of leafs that are horizontal or vertical.
-// @param node : The current node of the tree.
-// @param ratio : "h" or "v".
-Page.prototype.countNode = function (node, ratio)
-{
-    var result = 0;
     
-    // If the node has one leaf and the good ratio
-    if (node[ratio] >= 0 && ((node.first && node.first.task) || (node.second && node.second.task)))
-        result = 1;
-    // Continues the counting on the first branch
-    if (node.first)
-        result += this.countNode(node.first, ratio);
-    // Same on the second branch
-    if (node.first)
-        result += this.countNode(node.second, ratio);
-    return (result);
-}
-
-// Removes a node from the tasks tree.
-// @param node : The node to remove.
-Page.prototype.removeNode = function (node)
-{
-    var parent = node.parent;
-    // Gets the branch to keep
-    var keep = (parent.first != node) ? parent.first : parent.second;
-    // Removes the resize div
-    if (node.resize)
-        node.resize.parentNode.removeChild(node.resize);
-    if (parent.resize)
-        parent.resize.parentNode.removeChild(parent.resize);
-    // The remaining branch of the parent node become the parent
-    keep.parent = undefined;
-    if (parent.parent)
+    // Displays the page and its tasks.
+    self.display = function ()
     {
-        if (parent.parent.first == parent)
-            parent.parent.first = keep;
-        else
-            parent.parent.second = keep;
-        keep.parent = parent.parent;
-    }
-    // Otherwise the branch to keep become the root of the tree
-    else
-        this.tree = keep;
-}
-
-// Displays the tasks tree recursively.
-// @param node : The current node.
-// @param left, top, width, height : The remaining area to be filled by the tasks.
-Page.prototype.renderTree = function (node, left, top, width, height)
-{
-    if (!this.tree)
-        return ;
-    // If all the parameters are empty, we are at the root of the tree
-    if (!node && !left && !top && !width && !height)
-    {
-        node = this.tree;
-        left = this.left;
-        top = this.top;
-        width = this.width;
-        height = this.height;
-    }
-    // The node is a leaf, so we display its task
-    if (node.task)
-        node.task.setCoordinates(left, top, width, height);
-    // Otherwise we split the area based on the ratios, and we dive deeper into the tree
-    else if (node.first && node.second)
-    {
-        var margin = C.Desktop.taskMargin / 2;
-        // Creates the resize node that allows to resize the tasks
-        if (!node.resize)
-        {
-            node.resize = document.createElement("div");
-            node.resize.className = "resize";
-            node.resize.taskNode = node;
-            addEvent(node.resize, "mousedown", function (event) { node.mouseDown(event); });
-            this.content.appendChild(node.resize);
-        }
-        // Splits vertically
-        if (node.h >= 0)
-        {
-            // Computes the width of the two childs of the current node
-            var first = Math.round(width * node.h - margin);
-            var second = width - first - C.Desktop.taskMargin;
-            var l = left + first + C.Desktop.taskMargin;
-            // Ensures that the result is in the range of the node
-            if (l < left + C.Desktop.taskMargin)
-            {
-                l = left + C.Desktop.taskMargin;
-                second = width - C.Desktop.taskMargin;
-            }
-            else if (l > left + width)
-            {
-                l = left + width;
-                first = width - C.Desktop.taskMargin;
-            }
-            // Renders the next two branches
-            this.renderTree(node.first, left, top, Math.max(first, 0), height);
-            this.renderTree(node.second, l, top, Math.max(second, 0), height);
-            // Positions the vertical resize bar
-            setClassName(node.resize, "vertical");
-            node.resize.style.left = Math.max(l - C.Desktop.taskMargin, left) + "px";
-            node.resize.style.top = top + "px";
-            node.resize.style.width = Math.min(C.Desktop.taskMargin, width) + "px";
-            node.resize.style.height = height + "px";
-        }
-        // Splits horizontally
-        else
-        {
-            // Computes the height of the two childs of the current node
-            var first = Math.round(height * node.v - margin);
-            var second = height - first - C.Desktop.taskMargin;
-            var t = top + first + C.Desktop.taskMargin;
-            // Ensures that the result is in the range of the node
-            if (t < top + C.Desktop.taskMargin)
-            {
-                t = top + C.Desktop.taskMargin;
-                second = height - C.Desktop.taskMargin;
-            }
-            else if (t > top + height)
-            {
-                t = top + height;
-                first = height - C.Desktop.taskMargin;
-            }
-            // Render the next two branches
-            this.renderTree(node.first, left, top, width, Math.max(first, 0));
-            this.renderTree(node.second, left, t, width, Math.max(second, 0));
-            // Positions the horizontal resize bar
-            setClassName(node.resize, "horizontal");
-            node.resize.style.left = left + "px";
-            node.resize.style.top = Math.max(t - C.Desktop.taskMargin, top) + "px";
-            node.resize.style.width = width + "px";
-            node.resize.style.height = Math.min(C.Desktop.taskMargin, height) + "px";
-        }
-    }
-    // Saves the coordinates of the node
-    node.left = left;
-    node.top = top;
-    node.width = width;
-    node.height = height;
-}
-
-// Updates the odd/even class name of the pages icons.
-Page.prototype.updateParity = function ()
-{
-    var i;
-
-    for (var page = gl_desktop.node.tasks_list.firstChild, i = 1; page; page = page.nextSibling, i++)
-        if (getClassName(page, "page"))
-        {
-            removeClassName(page, "odd");
-            removeClassName(page, "even");
-            if (i % 2)
-                setClassName(page, "odd");
-            else
-                setClassName(page, "even");
-        }
-}
-
-// Returns the number of tasks in the page.
-Page.prototype.getNumberTasks = function () { return (this.numberTasks); }
-Page.prototype.getContainer = function () { return (this.container); }
-Page.prototype.setContainer = function (container) { this.container = container; }
-Page.prototype.setZIndex = function (zIndex) {
-    this.content.style.zIndex = zIndex;
-    for (var task = this.icon.firstChild; task; task = task.nextSibling)
-        if (getClassName(task, "task"))
-            task.object.content.style.zIndex = zIndex;
-}
-
-} /*! Page !*/
-
-/********** Task **********/{
-var tmptoto = 1;
-// A task holds a resource and is stored in a page.
-// @param resource : The name of the resource loaded in the task.
-// @param content : The HTML content of the resource.
-function Task(resource, content)
-{
-    // The icon element of the task in the tasks list, inside the icon of the page of the task
-    this.icon = undefined;
-    // The content of the task, which stores its resource
-    this.content = undefined;
-    // The coordinates of the content of the task
-    this.left = undefined;
-    this.top = undefined;
-    this.width = undefined;
-    this.height = undefined;
-    // The following members are used when the task icon is being dragged
-    // The position of the mouse in the element {x, y}
-    this.mouse = undefined;
-    // The initial position of the element {x, y}
-    this.element = undefined;
-    // The position of the task's page in tha tasks list
-    this.page = undefined;
-    // Applies a resistance before starting to drag a task icon
-    this.resistance = undefined;
-    // Keeps various data in a cache so that we dont have to calculate them each time the cursor moves
-    // {position, limit, number_page, number_task, page, task, createPage}
-    this.taskCache = undefined;
-    // Allows to change the page using the mouse wheel when the mouse is outside the tasks list and a task is being dragged.
-    // Contains the current y position of the ghost in the tasks list.
-    this.movePageWheel = undefined;
-    // True if the preview in the border of a page has already been displayed.
-    // Prevents the preview to be displayed inside a task in this case.
-    this.pagePreviewDisplayed = undefined;
-    // If defined, this is the task that will be splitted to host the dragged task.
-    // Otherwise the dragged task will be inserted in the border of the page.
-    this.addTaskParent;
-    // The position (n s e w) in which the task being dragged will be placed in the parent
-    this.addTaskPosition;
-    // The ghost is an empty div with the same size as a task that allows to show where the dragged task will be landed when the mouse up.
-    this.ghost = undefined;
-    // The last page on which the preview has been displayed. Ensures that we don't display the preview on the same page.
-    this.lastPagePreview = undefined;
-    // The page displayed on the desktop when we start to drag the task icon.
-    this.originalDesktopPage = undefined;
-    var task = this;
-    
-    // Creates the tasks list icon
-    this.icon = document.createElement("div");
-    this.icon.className = "task";
-    this.icon.object = this;
-    this.icon.style.width = C.Desktop.tasksListWidth - 2 * C.Desktop.tasksListPadding + "px";
-    this.icon.style.height = gl_desktop.taskIconHeight + "px";
-    this.icon.innerHTML = tmptoto++;//resource.charAt(0).toUpperCase();######################
-    // Adds the buttons system on the task icon
-    gl_desktop.taskButtons.addTask(this);
-    // This event start to move the task icon or close it
-    addEvent(this.icon, "mousedown", (this.mouseDownEvent = function (event) { task.mouseDown(event); }));
-    
-    // Creates the content of the task
-    this.content = document.createElement("div");
-    this.content.className = "task";
-    this.content.style.display = "none";
-    this.content.object = this;
-    this.content.innerHTML = content;
-    // This event displays a preview of the position of a task dragged over the content of the current task
-    addEvent(this.content, "mousemove", (this.mouseMoveEvent = function (event) { if (gl_desktop.drag.isDragging("Task")) task.mouseMovePreview(event); }));
-    // Puts the focus on the page of the task
-    addEvent(this.content, "mousedown", (this.mouseDownContentEvent = function (event) { task.mouseDownContent(event); }));
-    gl_desktop.node.tasks.appendChild(this.content);
-}
-
-// Starts to move the task icon or close it, depending on the mouse button pressed.
-Task.prototype.mouseDown = function (event)
-{
-    var mouse = mouseCoordinates(event);
-    
-    // Ensures that we didn't click on a task icon button
-    if (getEventTarget(event, "task_buttons", 5))
-        return ;
-    // Starts to drag the task icon
-    if (getButton(event) == 0)
-    {
-        // Displays the page if it is hidden
-        if (!this.getPage().getContainer().isDisplayed() || this.getPage().getContainer() instanceof Window)
-            this.getPage().getContainer().display(this.getPage(), true);
-        gl_desktop.drag.start(event, this.icon, this, "mouseMoveTask", "mouseWheel", "mouseUp");
-        this.mouse = gl_desktop.drag.getMouse();
-        this.mouse.y += gl_desktop.node.tasks_list.scrollTop;
-        this.element = gl_desktop.drag.getElement();
-        // Moves the task icon to the position of the mouse
-        this.icon.style.position = "absolute";
-        this.icon.style.top = mouse.y - this.mouse.y + "px";
-        this.icon.style.left = (T.Menu.width + C.Desktop.tasksListPadding) + "px";
-        // Gets the position of the task's page in the tasks list
-        this.page = 0;
-        for (var page = this.icon.parentNode; page; page = page.previousSibling)
-            this.page++;
-        // There is a little resistance before the task begins to move
-        this.resistance = true;
-        // This class name has a hight z-index, in order to always see the icon of the task
-        setClassName(this.icon, "drag");
-        // Updates the size of the new page div, otherwise the tasks list may scroll
-        gl_desktop.node.tasks_list.lastChild.style.height = C.Desktop.newTaskHeight + gl_desktop.taskIconHeight + "px";
-        this.lastPagePreview = undefined;
-        // If there is several tasks in the page and it is on the desktop, hides all the windows
-        if (this.getPage().getNumberTasks() > 1 && this.getPage().getContainer() instanceof Desktop)
-            hideAllWindows();
-        // Saves the windows states in order to restore them if necessary
-        saveWindows();
-        this.originalDesktopPage = gl_desktop.getCurrentPage();
-        this.movePageWheel = mouse.y;
-        this.updateTasksList(mouse.y);
-    }
-    // Closes the task
-    else if (getButton(event) == 1)
-        this.getPage().removeTask(this);
-}
-
-// The mouse moved over the content of a task, while a task icon is being dragged.
-// Displays a preview of the future position of the dragged task in the content.
-Task.prototype.mouseMovePreview = function (event)
-{
-    var mouse = mouseCoordinates(event);
-    var x = mouse.x - this.left;
-    var y = mouse.y - this.top;
-    var ratio = this.width / this.height;
-    var task = gl_desktop.drag.getObject();
-    var oldPosition = task.addTaskPosition;
-    var oldParent = task.addTaskParent;
-    
-    // If the preview has already been displayed by Task::mouseMoveTask, we do nothing
-    if (task.pagePreviewDisplayed)
-        return ;
-    // In the corner of the task we use the diagonal to get the position
-    if (!task.addTaskPosition || y < this.height / 3 && x < this.width / 3 || y < this.height / 3 && x > this.width * 2 / 3
-                                    || y > this.height * 2 / 3 && x < this.width / 3 || y > this.height * 2 / 3 && x > this.width * 2 / 3)
-    {
-        if (x > y * ratio && (this.width - x) > y * ratio)
-            task.addTaskPosition = "n";
-        else if (x > y * ratio)
-            task.addTaskPosition = "e";
-        else if ((this.width - x) > y * ratio)
-            task.addTaskPosition = "w";
-        else
-            task.addTaskPosition = "s";
-    }
-    // Facilitates the transition east/west
-    else if (task.addTaskPosition == "e" || task.addTaskPosition == "w")
-    {
-        if (y >= this.height / 3 && y <= this.height * 2 / 3 && x <= this.width / 2)
-            task.addTaskPosition = "w";
-        else if (y >= this.height / 3 && y <= this.height * 2 / 3 && x >= this.width / 2)
-            task.addTaskPosition = "e";
-        else if (y < this.height / 2)
-            task.addTaskPosition = "n";
-        else
-            task.addTaskPosition = "s";
-    }
-    // Facilitates the transition north/south
-    else
-    {
-        if (x >= this.width / 3 && x <= this.width * 2 / 3 && y <= this.height / 2)
-            task.addTaskPosition = "n";
-        else if (x >= this.width / 3 && x <= this.width * 2 / 3 && y >= this.height / 2)
-            task.addTaskPosition = "s";
-        else if (x < this.width / 2)
-            task.addTaskPosition = "w";
-        else
-            task.addTaskPosition = "e";
-    }
-    task.addTaskParent = this;
-    // If the position has changed, the preview is displayed
-    if (oldPosition != task.addTaskPosition || oldParent != task.addTaskParent)
-        this.getPage().preview(task.addTaskParent, task.addTaskPosition);
-}
-
-// Moves the task according to the mouse position.
-Task.prototype.mouseMoveTask = function (event)
-{
-    var mouse = mouseCoordinates(event);
-    var y = mouse.y - this.mouse.y;
-    
-    // Top limit
-    if (y < 0)
-        this.icon.style.top = "0px";
-    // Bottom limit
-    else if (y > gl_desktop.topHeight - gl_desktop.taskIconHeight)
-        this.icon.style.top = (gl_desktop.topHeight - gl_desktop.taskIconHeight) + "px";
-    // The task has a little resistance before starting the drag
-    else if (y >= this.element.y - gl_desktop.node.tasks_list.scrollTop - C.Desktop.taskResistance
-             && y <= this.element.y - gl_desktop.node.tasks_list.scrollTop + C.Desktop.taskResistance && this.resistance)
-        this.icon.style.top = this.element.y - gl_desktop.node.tasks_list.scrollTop + "px";
-    // Starts the dragging
-    else if (this.resistance)
-        y = this.startDrag(y);
-    // Moves the dragged task vertically
-    else
-        this.icon.style.top = y + "px";
-    // Moves the dragged task horizontally if the mouse is outside of the tasks list
-    if (mouse.x >= gl_desktop.middleMarginLeft)
-    {
-        this.icon.style.left = (mouse.x + C.Desktop.freeDragTashShift.x) + "px";
-        this.icon.style.top = Math.min(gl_desktop.topHeight - gl_desktop.taskIconHeight, Math.max(C.Desktop.playerDocumentHeight, mouse.y + C.Desktop.freeDragTashShift.y)) + "px";
-    }
-    // Otherwise updates the tasks list
-    else
-    {
-        this.icon.style.left = (T.Menu.width + C.Desktop.tasksListPadding) + "px";
-        if (!this.resistance)
-            this.updateTasksList(mouse.y);
-    }
-    // These variables must be undefined in the tasks list
-    if (gl_desktop.isOverTasksList() && (this.addTaskParent || this.addTaskPosition))
-    {
-        this.addTaskPosition = undefined;
-        this.addTaskParent = undefined;
-    }
-    // If we are on the tasks list update the mouse y position for the wheel
-    if (gl_desktop.isOverTasksList())
-        this.movePageWheel = mouse.y;
-    // Allows to add a task in the border of the page
-    var page = this.taskCache.page.object;
-    this.pagePreviewDisplayed = false;
-    if (!this.taskCache.createPage && page.getNumberTasks() > 1 && mouse.x - page.left > 0
-        && mouse.x - page.left < page.width && mouse.y - page.top > 0 && mouse.y - page.top < page.height)
-    {
-        // Gets the position of the mouse in the page (n s e w)
-        if (mouse.x - page.left < C.Desktop.insertTaskAreaSize)
-            this.addTaskPosition = "w";
-        else if (mouse.x - page.left > page.width - C.Desktop.insertTaskAreaSize)
-            this.addTaskPosition = "e";
-        else if (mouse.y - page.top < C.Desktop.insertTaskAreaSize)
-            this.addTaskPosition = "n";
-        else if (mouse.y - page.top > page.height - C.Desktop.insertTaskAreaSize)
-            this.addTaskPosition = "s";
-        else
-            return ;
-        var position = this.addTaskPosition;
-        var preview = gl_desktop.node.preview;
-        // Displays the preview
-        preview.parentNode.removeChild(preview);
-        gl_desktop.node.middle.appendChild(preview);
-        preview.style.top = page.top + "px";
-        preview.style.left = page.left + "px";
-        preview.style.width = page.width + "px";
-        preview.style.height = page.height + "px";
-        preview.style.zIndex = page.content.style.zIndex;
-        preview.style.display = "block";
-        if (position == "n" || position == "s")
-            preview.style.height = C.Desktop.insertTaskAreaSize + "px";
-        if (position == "s")
-            preview.style.top = page.top + (page.height - C.Desktop.insertTaskAreaSize) + "px";
-        if (position == "w" || position == "e")
-            preview.style.width = C.Desktop.insertTaskAreaSize + "px";
-        if (position == "e")
-            preview.style.left = page.left + (page.width - C.Desktop.insertTaskAreaSize) + "px";
-        this.addTaskParent = undefined;
-        // Ensures that Task::mouseMove doesn't display a preview
-        this.pagePreviewDisplayed = true;
-    }
-}
-
-// Called when the mouse wheel and we drag a task.
-Task.prototype.mouseWheel = function (delta)
-{
-    // Changes the displayed page if we are not on the tasks list
-    if (gl_desktop.mouse.x >= gl_desktop.middleMarginLeft)
-    {
-        var tasksList = gl_desktop.node.tasks_list;
-        // Gets the position of the ghost task
-        if (delta > 0 || !this.taskCache.createPage)
-            this.movePageWheel = Math.max(this.movePageWheel - delta * C.Desktop.movePageWheelSpeed, -tasksList.scrollTop);
-        // Scrolls the tasks list up to ensure that the ghost of the task icon is always visible
-        if (this.movePageWheel < gl_desktop.taskIconHeight && tasksList.scrollTop)
-        {
-            tasksList.scrollTop += this.movePageWheel - gl_desktop.taskIconHeight;
-            this.movePageWheel = gl_desktop.taskIconHeight;
-        }
-        // Scrolls the tasks list down to ensure that the ghost of the task icon is always visible
-        else if (this.movePageWheel > gl_desktop.topHeight - gl_desktop.taskIconHeight * 2 && tasksList.scrollHeight - tasksList.scrollTop > gl_desktop.topHeight)
-        {
-            tasksList.scrollTop += this.movePageWheel - gl_desktop.topHeight + gl_desktop.taskIconHeight * 2;
-            this.movePageWheel = gl_desktop.topHeight - gl_desktop.taskIconHeight * 2;
-        }
-        var oldPage = gl_desktop.getCurrentPage();
-        // Moves the ghost according to the new position
-        this.updateTasksList(this.movePageWheel);
-        // Displays the preview of the task in the page if it has changed
-        if (gl_desktop.getCurrentPage() && !gl_desktop.isDisplayed(oldPage))
-        {
-            this.addTaskPosition = C.Desktop.defaultPosition;
-            this.addTaskParent = undefined;
-            gl_desktop.getCurrentPage().preview();
-        }
-    }
-    else
-        this.updateTasksList(gl_desktop.mouse.y);
-}
-
-// Puts the focus on the page of the task.
-Task.prototype.mouseDownContent = function ()
-{
-    this.getPage().getContainer().focus();
-}
-
-// Puts a ghost task under the cursor to show the place where the dragged task will be moved.
-// @param y : The y position of the mouse.
-Task.prototype.updateTasksList = function (y)
-{
-    // Changes the reference y depending if the task has been dragged up or down
-    y = y - this.mouse.y + gl_desktop.node.tasks_list.scrollTop;
-    if (y > this.element.y)
-        y += gl_desktop.taskIconHeight;
-    this.removeGhostTask();
-    // Gets the position of the task under the cursor
-    var data = this.getCursorPosition(y);
-    var page = data.page;
-    var task = data.task;
-    // If we want to create a page, the ghost is not required
-    if (this.taskCache.createPage)
-    {
-        gl_desktop.node.tasks_list.lastChild.style.height = C.Desktop.newTaskHeight + gl_desktop.taskIconHeight + "px";
-        this.previewNewPage();
-        return ;
-    }
-    // Creates a ghost task in the current page
-    this.ghost = document.createElement("div");
-    this.ghost.className = "ghost";
-    this.ghost.style.height = gl_desktop.taskIconHeight + "px";
-    // The current page is above the original page
-    if (data.number_page <= this.page)
-    {
-        if (!task.nextSibling && y > data.position - C.Desktop.tasksListPadding - gl_desktop.taskIconHeight / 2)
-            page.appendChild(this.ghost);
-        else if (task.nextSibling && y > data.position - gl_desktop.taskIconHeight / 2)
-            page.insertBefore(this.ghost, task.nextSibling);
-        else
-            page.insertBefore(this.ghost, task);
-    }
-    // The current page is below the original page
-    else
-    {
-        if (!task.nextSibling && y < data.position - C.Desktop.tasksListPadding - gl_desktop.taskIconHeight / 2)
-            page.insertBefore(this.ghost, task);
-        else if (task.nextSibling && y < data.position - gl_desktop.taskIconHeight / 2)
-            page.insertBefore(this.ghost, task);
-        else if (task.nextSibling)
-            page.insertBefore(this.ghost, task.nextSibling);
-        else
-            page.appendChild(this.ghost);
-    }
-    // Displays the page under which the cursor is
-    // If the page is different or the mouse just came over the tasks list
-    if (this.lastPagePreview != page.object || (this.addTaskParent || this.addTaskPosition))
-    {
-        // Hides the task displayed in previewNewPage
-        if (!this.lastPagePreview)
-            this.hide();
-        // Hides all the windows if we are on an other page
-        if (this.getPage() != page.object)
-            hideAllWindows();
-        // Otherwise displays the windows displayed at the beginning of the drag
-        else
-            restoreWindows();
-        // Displays the preview
-        page.object.preview();
         // Displays the page
-        page.object.display();
-        // Ensures that a page is always displayed on the desktop
-        if (!this.originalDesktopPage && data.number_page == this.page)
-            gl_desktop.hide();
-        else
-            gl_desktop.displayNext(page.object);
-        // Remembers the page on which the preview is so we don't display it twice
-        this.lastPagePreview = page.object;
-    }
-    gl_desktop.node.tasks_list.lastChild.style.height = C.Desktop.newTaskHeight + "px";
-}
-
-// Gets the position of the task under the cursor and some other data.
-// @param y : The y position of the mouse
-Task.prototype.getCursorPosition = function (y)
-{
-    var position = 0;
-    var number_page = 0;
-    var number_task = 0;
-    var page, task;
-    
-    // If the position have already been calculated for this interval, we return the cache
-    if (this.taskCache && y < this.taskCache.position && y > this.taskCache.limit && !this.taskCache.createPage)
-        return (this.taskCache);
-    // Runs through the tasks in order to find the position of the task under the cursor
-    for (page = gl_desktop.node.tasks_list.firstChild; page && getClassName(page, "page") && (position < y || !number_page); page = page.nextSibling, number_page++)
-    {
-        position += C.Desktop.tasksListPadding;
-        for (task = page.firstChild, number_task = 0; task && (position < y || !number_task); task = task.nextSibling, number_task++)
-            position += gl_desktop.taskIconHeight;
-        if (!task)
-            position += C.Desktop.tasksListPadding;
-    }
-    // Gets the correct nodes
-    page = page.previousSibling;
-    (task) ? task = task.previousSibling : task = page.lastChild;
-    // Calculates the upper limit
-    var limit = position - gl_desktop.taskIconHeight;
-    if (!task.previousSibling && !task.nextSibling)
-        limit -= C.Desktop.tasksListPadding * 2;
-    else if (!task.previousSibling || !task.nextSibling)
-        limit -= C.Desktop.tasksListPadding;
-    // Saves the data in a cache, so that we dont have to calculate it each time the cursor moves
-    this.taskCache = {position : position, limit : limit, number_page : number_page, number_task : number_task, page : page, task : task, createPage : (y > position)}
-    return (this.taskCache);
-}
-
-// Moves the dragged task to the page under the cursor.
-Task.prototype.mouseUp = function ()
-{
-    // Ensures that a new page is only created if necessary
-    if (!this.icon.nextSibling && !this.icon.previousSibling && !getClassName(this.icon.parentNode.nextSibling, "page"))
-        this.taskCache.createPage = false;
-    // If the dragged task has been moved in a new page
-    if (this.taskCache.number_page != this.page || this.taskCache.createPage || (this.addTaskParent && this.addTaskParent.getPage() != this.getPage()))
-    {
-        // Removes the old task
-        this.getPage().removeTask(this, true);
-        // Puts the task in a new page
-        if (this.taskCache.createPage)
-            (new Page()).addTask(this);
-        // Adds the task to the its new page
-        else if (this.addTaskParent)
-            this.addTaskParent.getPage().addTask(this, this.addTaskPosition, this.addTaskParent, this.addTaskParent.icon);
-        else
-            this.ghost.parentNode.object.addTask(this, this.addTaskPosition, this.addTaskParent, this.ghost);
-        if (this.getPage().getContainer() instanceof Desktop)
-            hideAllWindows();
-        this.getPage().display(true);
-    }
-    // If the page hasn't changed
-    else if (this.taskCache.number_page == this.page && this.ghost)
-    {
-        var page = this.getPage();
-        if (this.addTaskParent)
-            page = this.addTaskParent.getPage();
-        // Changes the position of the task in the tree
-        if (gl_desktop.node.preview.style.display == "block")
+        self.container.display(self);
+        if (!$(self.content).hasClass("display"))
         {
-            page.removeNode(this.node);
-            page.addNode(this, this.addTaskPosition, this.addTaskParent);
-            page.onResize();
+            // Updates the coordinates
+            self.onResize();
+            // Display the page
+            $(self.content).addClass("display");
+            // Displays the tasks of the page
+            var tasks = $(self.icon).children(".task");
+            for (var i = 0; i < tasks.length; ++i)
+                tasks[i].object.display();
         }
-        // Moves the task in the tasks list
-        this.icon.parentNode.removeChild(this.icon);
-        this.ghost.parentNode.insertBefore(this.icon, this.ghost);
-        // If the page is on the desktop and the task has not been dragged, hides all the windows (its a simple click)
-        if (page.getContainer() instanceof Desktop && this.resistance)
-            hideAllWindows();
+        // Puts the focus on it
+        $(gl_desktop.node.tasks_list).children(".page.focus").removeClass("focus");
+        $(self.icon).addClass("focus");
     }
-    this.removeGhostTask();
-    gl_desktop.node.tasks_list.lastChild.style.height = C.Desktop.newTaskHeight + "px";
-    this.taskCache = undefined;
-    this.icon.style.position = "static";
-    removeClassName(this.icon, "drag");
-    gl_desktop.node.preview.style.display = "none";
-}
 
-// Removes the resistance and start to drag the task.
-Task.prototype.startDrag = function (y)
-{
-    this.resistance = false;
-    // Updates the position of the mouse in the task
-    if (y < this.element.y - gl_desktop.node.tasks_list.scrollTop)
+    // Hides the page and its tasks.
+    self.hide = function ()
     {
-        this.mouse.y -= C.Desktop.taskResistance;
-        y += C.Desktop.taskResistance;
+        $(self.content).removeClass("display");
+        // Hides the tasks of the page.
+        var tasks = $(self.icon).children(".task");
+        for (var i = 0; i < tasks.length; ++i)
+            tasks[i].object.hide();
+        self.container.hide(self);
     }
-    else if (y > this.element.y - gl_desktop.node.tasks_list.scrollTop)
+    
+    // Removes a task from the page.
+    // @param task : The task to remove.
+    // @param move : If the task is moved its content is not removed.
+    self.removeTask = function (task, move)
     {
-        this.mouse.y += C.Desktop.taskResistance;
-        y -= C.Desktop.taskResistance;
+        if (!move)
+            task.close();
+        else
+            $(task.icon).detach();
+        self.numberTasks--;
+        // If the page is empty we close it
+        if (self.numberTasks == 0)
+            self.close();
+        // Otherwise we resize its tasks
+        else
+        {
+            self.removeNode(task.node);
+            self.onResize();
+        }
     }
-    // The mouse is outside the task
-    if (this.mouse.y < 0)
+    
+    // Closes the page.
+    self.close = function ()
     {
-        y -= 2 - this.mouse.y;
-        this.mouse.y = 2;
+        // Notifies the desktop that the page has been closed
+        self.container.close(self);
+        // Removes the tasks of the page
+        var tasks = $(self.icon).children(".task");
+        for (var i = 0; i < tasks.length; ++i)
+            tasks[i].object.close();
+        // Removes the page nodes
+        $(self.icon).remove();
+        $(self.content).remove();
+        // Hides the tasks list if there is no page remaining
+        if (!$(gl_desktop.node.tasks_list).children(".page").length)
+            $(gl_desktop.node.tasks_list.container).removeClass("display");
     }
-    else if (this.mouse.y > gl_desktop.taskIconHeight)
+    
+    // Puts the focus on the page when we click on it.
+    self.mouseDown = function (e)
     {
-        y += this.mouse.y - gl_desktop.taskIconHeight + 2;
-        this.mouse.y = gl_desktop.taskIconHeight - 2;
+        if (e.which == 1)
+            self.display();
     }
-    // Moves the task
-    this.icon.style.top = y + "px";
-    return (y);
-}
-
-// Displays a preview of a new page.
-// @param task : The task of the future new page.
-Task.prototype.previewNewPage = function ()
-{
-    // Hides the page currently displayed and all the windows
-    gl_desktop.hide();
-    hideAllWindows();
-    // The new task is displayed as a full page
-    this.setCoordinates(gl_desktop.left, gl_desktop.top, gl_desktop.width, gl_desktop.height);
-    this.display();
-    // Hides the preview
-    gl_desktop.node.preview.style.display = "none";
-    // Ensures that the preview of the page before the new page will be displayed again when we come back on it
-    this.lastPagePreview = undefined;
-}
-
-// Displays the content of the task.
-Task.prototype.display = function ()
-{
-    this.content.style.display = "block";
-}
-
-// Hides the content of the task.
-Task.prototype.hide = function ()
-{
-    this.content.style.display = "none";
-}
-
-// Closes the task.
-Task.prototype.close = function ()
-{
-    if (this.content.parentNode)
-        this.content.parentNode.removeChild(this.content);
-    removeEvent(this.icon, "mousedown", this.mouseDownEvent);
-    removeEvent(this.content, "mousemove", this.mouseMoveEvent);
-    removeEvent(this.content, "mousedown", this.mouseDownContentEvent);
-}
-
-// Removes the ghost task of the tasks list.
-Task.prototype.removeGhostTask = function ()
-{
-    if (this.ghost)
+    
+    // Closes the page with the middle mouse.
+    self.mouseUpClose = function (e)
     {
-        this.ghost.parentNode.removeChild(this.ghost);
-        this.ghost = undefined;
+        if (e.which == 2 && e.target == self.icon && !gl_desktop.drag.isDragging())
+            self.close();
     }
+
+    // Resizes the tasks of the page.
+    self.onResize = function ()
+    {
+        self.left = self.container.left;
+        self.top = self.container.top;
+        self.width = Math.max(self.container.width, 0);
+        self.height = Math.max(self.container.height, 0);
+        // Renders the tasks tree
+        self.renderTree();
+    }
+
+    // Adds a node to the tree that represents the hierarchy of the tasks in the page.
+    // @param task : The task of the node.
+    // @param position : The position of the task relative to the parent (n s e w).
+    // @param parent : If defined, the parent is cut in half and both of the tasks takes one part.
+    self.addNode = function (task, position, parent)
+    {
+        // The default position
+        if (!position)
+            position = C.Desktop.defaultPosition;
+        // Creates the tree
+        if (!self.tree)
+        {
+            self.tree = new TaskTreeNode({ task : task });
+            task.node = self.tree;
+        }
+        // There is only one node in the tree
+        else if (!parent && self.tree.task)
+            self._addNode(task, position, self.tree);
+        // Adds a node at the root of the tree
+        else if (!parent)
+        {
+            // Changes the root of the tree (the old tree becomes a leaf)
+            if (position == "s" || position == "e")
+            {
+                self.tree = new TaskTreeNode({ first : self.tree });
+                self.tree.second = new TaskTreeNode({ task : task });
+                task.node = self.tree.second;
+            }
+            // The order changes depending on the position
+            else
+            {
+                self.tree = new TaskTreeNode({ second : self.tree });
+                self.tree.first = new TaskTreeNode({ task : task });
+                task.node = self.tree.first;
+            }
+            // Sets the ratio depending on the position, and the number of nodes already in that position in the tree
+            self.tree.h = -1;
+            self.tree.v = -1;
+            if (position == "w")
+                self.tree.h = 1 / (self.countNode(self.tree, "h") + 2);
+            else if (position == "e")
+                self.tree.h = 1 - 1 / (self.countNode(self.tree, "h") + 2);
+            else if (position == "n")
+                self.tree.v = 1 / (self.countNode(self.tree, "v") + 2);
+            else
+                self.tree.v = 1 - 1 / (self.countNode(self.tree, "v") + 2);
+            // Sets the parents of the leafs
+            self.tree.first.parent = self.tree;
+            self.tree.second.parent = self.tree;
+        }
+        // Adds a node after the parent
+        else
+            self._addNode(task, position, parent.node);
+    }
+    // Helper method of Page.addNode.
+    self._addNode = function (task, position, node)
+    {
+        // The horizontal and vertical ratios
+        node.h = -1;
+        node.v = -1;
+        // Depending of the position, one is cut in half
+        (position == "w" || position == "e") ? node.h = 0.5 : node.v = 0.5;
+        // Builds the first and second leaf of the node
+        var set = function (first, second)
+        {
+            node.first = new TaskTreeNode({ task : first });
+            first.node = node.first;
+            node.second = new TaskTreeNode({ task : second });
+            second.node = node.second;
+        }
+        // The order of the first and second leaf changes depending on the position
+        if (position == "n" || position == "w")
+            set(task, node.task);
+        else
+            set(node.task, task);
+        // Sets the parent node of the leafs
+        node.first.parent = node;
+        node.second.parent = node;
+        // The node is no longer a leaf
+        node.task = undefined;
+    }
+
+    // Counts recursively the number of leafs that are horizontal or vertical.
+    // @param node : The current node of the tree.
+    // @param ratio : "h" or "v".
+    self.countNode = function (node, ratio)
+    {
+        var result = 0;
+        
+        // If the node has one leaf and the good ratio
+        if (node[ratio] >= 0 && ((node.first && node.first.task) || (node.second && node.second.task)))
+            result = 1;
+        // Continues the counting on the first branch
+        if (node.first)
+            result += self.countNode(node.first, ratio);
+        // Same on the second branch
+        if (node.second)
+            result += self.countNode(node.second, ratio);
+        return (result);
+    }
+
+    // Removes a node from the tasks tree.
+    // @param node : The node to remove.
+    self.removeNode = function (node)
+    {
+        var parent = node.parent;
+        // Gets the branch to keep
+        var keep = (parent.first != node) ? parent.first : parent.second;
+        // Removes the resize div
+        if (node.resize)
+            $(node.resize).remove();
+        if (parent.resize)
+            $(parent.resize).remove();
+        // The remaining branch of the parent node become the parent
+        keep.parent = undefined;
+        if (parent.parent)
+        {
+            if (parent.parent.first == parent)
+                parent.parent.first = keep;
+            else
+                parent.parent.second = keep;
+            keep.parent = parent.parent;
+        }
+        // Otherwise the branch to keep become the root of the tree
+        else
+            self.tree = keep;
+    }
+    
+    // Displays the tasks tree recursively.
+    // @param node : The current node.
+    // @param left, top, width, height : The remaining area to be filled by the tasks.
+    self.renderTree = function (node, left, top, width, height)
+    {
+        if (!self.tree)
+            return ;
+        // If all the parameters are empty, we are at the root of the tree
+        if (!node && !left && !top && !width && !height)
+        {
+            node = self.tree;
+            left = self.left;
+            top = self.top;
+            width = self.width;
+            height = self.height;
+        }
+        // The node is a leaf, so we display its task
+        if (node.task)
+            node.task.setCoordinates(left, top, width, height);
+        // Otherwise we split the area based on the ratios, and we dive deeper into the tree
+        else if (node.first && node.second)
+        {
+            var taskMargin = C.Desktop.taskMargin + C.Desktop.taskBorder * 2;
+            var margin = taskMargin / 2;
+            // Creates the resize node that allows to resize the tasks
+            if (!node.resize)
+            {
+                node.resize = document.createElement("div");
+                node.resize.className = "resize";
+                node.resize.taskNode = node;
+                $(node.resize).mousedown(function (e) { node.mouseDown(e); });
+                self.content.appendChild(node.resize);
+            }
+            // Splits vertically
+            if (node.h >= 0)
+            {
+                // Computes the width of the two childs of the current node
+                var first = Math.round(width * node.h - margin);
+                var second = width - first - taskMargin;
+                var l = left + first + taskMargin;
+                // Ensures that the result is in the range of the node
+                if (l < left + taskMargin)
+                {
+                    l = left + taskMargin;
+                    second = width - taskMargin;
+                }
+                else if (l > left + width)
+                {
+                    l = left + width;
+                    first = width - taskMargin;
+                }
+                // Renders the next two branches
+                self.renderTree(node.first, left, top, Math.max(first, 0), height);
+                self.renderTree(node.second, l, top, Math.max(second, 0), height);
+                // Positions the vertical resize bar
+                setClassName(node.resize, "vertical");
+                node.resize.style.left = Math.max(l - taskMargin, left) + "px";
+                node.resize.style.top = top + "px";
+                node.resize.style.width = Math.min(taskMargin, width) + "px";
+                node.resize.style.height = height + "px";
+            }
+            // Splits horizontally
+            else
+            {
+                // Computes the height of the two childs of the current node
+                var first = Math.round(height * node.v - margin);
+                var second = height - first - taskMargin;
+                var t = top + first + taskMargin;
+                // Ensures that the result is in the range of the node
+                if (t < top + taskMargin)
+                {
+                    t = top + taskMargin;
+                    second = height - taskMargin;
+                }
+                else if (t > top + height)
+                {
+                    t = top + height;
+                    first = height - taskMargin;
+                }
+                // Render the next two branches
+                self.renderTree(node.first, left, top, width, Math.max(first, 0));
+                self.renderTree(node.second, left, t, width, Math.max(second, 0));
+                // Positions the horizontal resize bar
+                setClassName(node.resize, "horizontal");
+                node.resize.style.left = left + "px";
+                node.resize.style.top = Math.max(t - taskMargin, top) + "px";
+                node.resize.style.width = width + "px";
+                node.resize.style.height = Math.min(taskMargin, height) + "px";
+            }
+        }
+        // Saves the coordinates of the node
+        node.left = left;
+        node.top = top;
+        node.width = width;
+        node.height = height;
+    }
+    
+    // Changes the container that displays the page.
+    self.setContainer = function (container)
+    {
+        self.container.containerChanged(self);
+        self.container = container;
+        var tasks = $(self.icon).children(".task");
+        for (var i = 0; i < tasks.length; ++i)
+            tasks[i].object.setContainer(container);
+    }
+    
+    // Puts the focus on the page elements.
+    self.setZIndex = function (zIndex)
+    {
+        var resize = $(self.content).children(".resize");
+        for (var i = 0; i < resize.length; ++i)
+            resize[i].style.zIndex = zIndex;
+        var task = $(self.icon).children(".task");
+        for (var i = 0; i < task.length; ++i)
+            task[i].object.setZIndex(zIndex);
+        self.zIndex = zIndex;
+    }
+    
+    // Returns true is the page is hidden.
+    self.isHidden = function ()
+    {
+        return (!$(self.content).hasClass("display"));
+    }
+    
+    // Returns the container of the page.
+    self.getContainer = function () { return (self.container); }
+
+    self.init();
+    return (self);
 }
 
-// Sets the coordinates of the content of the task.
-Task.prototype.setCoordinates = function(left, top, width, height)
+// A task holds a resource and is stored in a page.
+// @param resource : The name of the resource displayed by the task.
+// @param content : The HTML content of the resource.
+function Task(resource, html)
 {
-    this.left = left;
-    this.content.style.left = left + "px";
-    this.top = top;
-    this.content.style.top = top + "px";
-    this.width = width;
-    this.content.style.width = width + "px";
-    this.height = height;
-    this.content.style.height = height + "px";
+    var self = this;
+    
+    self.init = function ()
+    {
+        self.icon; // The icon element of the task in the tasks list, inside the icon of the page
+        self.content; // The content of the task, which stores its resource
+        self.resource; // The instance of the resource that manages the content.
+        // The following members are used when the task icon is being dragged
+        self.mouse; // The position of the mouse in the icon {x, y}
+        self.element; // The initial position of the element {x, y}
+        self.resistance; // Applies a resistance before starting to drag the task icon
+        self.ghost; // A div that shows the future position of the task while it is dragged
+        self.page; // The position of the task's page in tha tasks list
+        self.node; // The node of the task in the tree
+        // Keeps various data in a cache so that we dont have to calculate them each time the cursor moves
+        // {position, limit, number_page, number_task, page, task, createPage}
+        self.taskCache;
+        // The coordinates of the content of the task
+        self.left;
+        self.top;
+        self.width;
+        self.height;
+        
+        // Creates the tasks list icon
+        self.icon = $("<div></div>")[0];
+        $(self.icon).addClass("task");
+        self.icon.object = self;
+        $(self.icon).mousedown(function (e) { self.mouseDown(e); });
+        $(self.icon).mouseup(function (e) { self.mouseUpClose(e); });
+        // Adds the content of the icon
+        var content = $("<div></div>")[0];
+        $(content).addClass("content");
+        content.innerHTML = T.Tasks[resource];
+        $(content).appendTo(self.icon);
+        // Register the task in order to display its buttons
+        gl_desktop.taskButtons.addTask(self);
+        
+        // Creates the content of the task
+        self.content = $("<div></div>")[0];
+        $(self.content).addClass("task");
+        self.content.object = self;
+        self.content.innerHTML = html;
+        translate(self.content);
+        // Puts the focus on the page of the task
+        $(self.content).mousedown(function (e) { self.mouseDownContent(e); });
+        // This event displays a preview of the position of a task dragged over the content of the current task
+//        addEvent(self.content, "mousemove", (self.mouseMoveEvent = function (event) { if (gl_desktop.drag.isDragging("Task")) task.mouseMovePreview(event); }));
+        $(self.content).appendTo(gl_desktop.node.tasks);
+    }
+    
+    // Starts to move the task icon
+    self.mouseDown = function (e)
+    {
+        if (e.which == 1)
+        {
+            // Handles the case where the mouse is released outside the browser
+            if (gl_desktop.drag.isDragging())
+                return ;
+            gl_desktop.drag.start(e, self.icon, self, "mouseMoveTask", "mouseWheel", "mouseUp");
+            self.mouse = gl_desktop.drag.getMouse();
+            self.element = gl_desktop.drag.getElement();
+            // Takes the scroll into account
+            self.mouse.y += gl_desktop.node.tasks_list.scrollTop;
+            self.element.y += gl_desktop.node.tasks_list.scrollTop;
+            // There is a little resistance before the task begins to move
+            self.resistance = true;
+            // Gets the position of the task's page in the tasks list
+            self.page = 0;
+            for (var page = self.icon.parentNode; page; page = page.previousSibling)
+                if ($(page).hasClass("page"))
+                    self.page++;
+        }
+    }
+    
+    // Puts the focus on the page of the task.
+    self.mouseDownContent = function (e)
+    {
+        self.getPage().display();
+    }
+    
+    // Moves the task icon according to the mouse position.
+    self.mouseMoveTask = function (e)
+    {
+        // The new position of the task icon
+        var y = e.pageY - self.mouse.y;
+        var x = e.pageX - self.mouse.x;
+        var elementY = self.element.y - gl_desktop.node.tasks_list.scrollTop;
+        
+        // Top limit
+        if (y < C.Desktop.topHeight && !self.resistance)
+            self.icon.style.top = C.Desktop.topHeight + "px";
+        // Bottom limit
+        else if (y > C.Desktop.topHeight + gl_desktop.middleHeight - C.Desktop.taskIconHeight && !self.resistance)
+            self.icon.style.top = (C.Desktop.topHeight + gl_desktop.middleHeight - C.Desktop.taskIconHeight) + "px";
+        // If the resistance is broken, we start to drag the task
+        else if (self.resistance && (y < elementY - C.Desktop.taskResistance || y > elementY + C.Desktop.taskResistance
+                 || x < self.element.x - C.Desktop.taskResistance || x > self.element.x + C.Desktop.taskResistance))
+            self.startDrag(y);
+        // Moves the task vertically
+        else if (!self.resistance)
+            self.icon.style.top = y + "px";
+        // Moves the dragged task horizontally if the mouse is outside of the tasks list
+        if (e.pageX >= C.Desktop.tasksListWidth)
+        {
+            self.icon.style.left = e.pageX + C.Desktop.taskDragShift.x + "px";
+            self.icon.style.top = Math.min(Math.max(e.pageY + C.Desktop.taskDragShift.y, C.Desktop.topHeight), C.Desktop.topHeight + gl_desktop.middleHeight - C.Desktop.taskIconHeight) + "px";
+        }
+        // Otherwise updates the tasks list
+        else
+        {
+            self.icon.style.left = C.Desktop.tasksListMargin + "px";
+            if (!self.resistance)
+                self.updateTasksList(e.pageY);
+        }
+    }
+    
+    // Changes the displayed page if we are not on the tasks list and a page is being dragged.
+    self.mouseWheel = function (e, delta)
+    {
+        // We are outside the tasks list
+        if (e.pageX >= C.Desktop.tasksListWidth)
+        {
+            var numberTasks = self.getPage().numberTasks;
+            // Moves the ghost up
+            if (delta > 0)
+            {
+                if (!self.ghost.parentNode)
+                    $(self.ghost).appendTo($(gl_desktop.node.tasks_list).children(".page:last"));
+                else if (self.ghost.previousSibling && self.ghost.previousSibling != self.icon)
+                    $(self.ghost).insertBefore(self.ghost.previousSibling);
+                else if (self.ghost.previousSibling && self.ghost.previousSibling.previousSibling && numberTasks != 1)
+                    $(self.ghost).insertBefore(self.ghost.previousSibling.previousSibling);
+                else if ($(self.ghost.parentNode.previousSibling).hasClass("page"))
+                    $(self.ghost).appendTo(self.ghost.parentNode.previousSibling);
+            }
+            // Down
+            else
+            {
+                if (self.ghost.nextSibling && self.ghost.nextSibling != self.icon)
+                    $(self.ghost).insertAfter(self.ghost.nextSibling);
+                else if (self.ghost.nextSibling && self.ghost.nextSibling.nextSibling && numberTasks != 1)
+                    $(self.ghost).insertAfter(self.ghost.nextSibling.nextSibling);
+                else if (self.ghost.parentNode && $(self.ghost.parentNode.nextSibling).hasClass("page"))
+                    $(self.ghost).prependTo(self.ghost.parentNode.nextSibling);
+                else if (self.ghost.parentNode != self.icon.parentNode || numberTasks != 1)
+                    $(self.ghost).detach();
+            }
+            // If the original page of the task is empty, we ensure that the bottom margin is displayed
+            if (self.ghost.parentNode != self.icon.parentNode && numberTasks == 1)
+                $(self.icon.parentNode).addClass("empty");
+            else
+                $(self.icon.parentNode).removeClass("empty");
+             // Updates the cache
+            self.taskCache.number_page = 0;
+            for (var page = self.ghost.parentNode; page; page = page.previousSibling)
+                if ($(page).hasClass("page"))
+                    self.taskCache.number_page++;
+            if (self.ghost.parentNode)
+                self.taskCache.createPage = false;
+            else
+            {
+                self.taskCache.createPage = true;
+                $(gl_desktop.node.tasks_list.bottom).height(C.Desktop.taskIconHeight);
+                gl_desktop.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollHeight;
+                return ;
+            }
+            // Scrolls to the ghost if necessary
+            if ($(self.ghost).offset().top < C.Desktop.topHeight)
+                gl_desktop.node.tasks_list.scrollTop += $(self.ghost).offset().top - C.Desktop.topHeight;
+            else if ($(self.ghost).offset().top + C.Desktop.taskIconHeight > C.Desktop.topHeight + gl_desktop.middleHeight)
+                gl_desktop.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollTop + $(self.ghost).offset().top - C.Desktop.topHeight - gl_desktop.middleHeight + C.Desktop.taskIconHeight;
+        }
+    }
+        
+    // Puts a ghost task under the cursor to show the place where the dragged task will be moved.
+    // @param y : The y position of the mouse.
+    self.updateTasksList = function (y)
+    {
+        // Changes the reference y depending if the task has been dragged up or down
+        y = y - self.mouse.y + gl_desktop.node.tasks_list.scrollTop;
+        if (y > self.element.y)
+            y += C.Desktop.taskIconHeight;
+        
+        $(self.ghost).detach();
+        // Gets the position of the task under the cursor
+        var data = self.getCursorPosition(y);
+        var page = data.page;
+        var task = data.task;
+        var position = data.position;
+        // If we want to create a page, the ghost is not required
+        if (data.createPage)
+        {
+            $(gl_desktop.node.tasks_list.bottom).height(C.Desktop.taskIconHeight);
+            $(gl_desktop.node.tasks_list).children(".page.focus").removeClass("focus");
+            return ;
+        }
+        // The current page is above the original page
+        if (data.number_page <= self.page)
+        {
+            if (data.number_page == self.page && $(self.icon.parentNode.nextSibling).hasClass("page"))
+                position -= C.Desktop.pageMargin + 1;
+            if (!task.nextSibling && y > position - C.Desktop.taskIconHeight / 2)
+                page.appendChild(self.ghost);
+            else if (task.nextSibling && y > position - C.Desktop.taskIconHeight / 2)
+                page.insertBefore(self.ghost, task.nextSibling);
+            else
+                page.insertBefore(self.ghost, task);
+        }
+        // The current page is below the original page
+        else
+        {
+            if (!$(data.page.nextSibling).hasClass("page"))
+                position += C.Desktop.pageMargin;
+            if (!task.nextSibling && y < position - C.Desktop.pageMargin - C.Desktop.taskIconHeight / 2)
+                page.insertBefore(self.ghost, task);
+            else if (task.nextSibling && y < position - C.Desktop.pageMargin - C.Desktop.taskIconHeight / 2)
+                page.insertBefore(self.ghost, task);
+            else if (task.nextSibling)
+                page.insertBefore(self.ghost, task.nextSibling);
+            else
+                page.appendChild(self.ghost);
+        }
+        // Displays the current page
+        if (!$(page).hasClass("focus"))
+            page.object.display();
+        // If the original page of the task is empty, we ensure that the bottom margin is displayed
+        if (self.ghost.parentNode != self.icon.parentNode && self.getPage().numberTasks == 1)
+            $(self.icon.parentNode).addClass("empty");
+        else
+            $(self.icon.parentNode).removeClass("empty");
+        $(gl_desktop.node.tasks_list.bottom).height(0);
+    }
+
+    // Gets the position of the task under the cursor and some other data.
+    // @param y : The y position of the mouse
+    self.getCursorPosition = function (y)
+    {
+        var position;
+        var pages, tasks;
+        var p, t;
+        var margin;
+        var createPage = false;
+        
+        // If the position have already been calculated for this interval, we return the cache
+        if (self.taskCache && y < self.taskCache.position && y > self.taskCache.limit && !self.taskCache.createPage)
+            return (self.taskCache);
+        // Runs through the tasks in order to find the position of the task under the cursor
+        pages = $(gl_desktop.node.tasks_list).children(".page");
+        position = C.Desktop.topHeight;
+        for (p = 0; p < pages.length && (position <= y || !p); p++)
+        {
+            position += C.Desktop.pageMargin;
+            tasks = $(pages[p]).children(".task");
+            for (t = 0; t < tasks.length && (position <= y || !t); t++)
+                position += C.Desktop.taskIconHeight;
+            if (self.page == p + 1)
+                position += C.Desktop.pageMargin + 1;
+        }
+        // Gets the correct nodes
+        var page = pages[p - 1];
+        var task = tasks[t - 1];
+        // Calculates the upper limit
+        var limit = position - C.Desktop.taskIconHeight;
+        if (!task.previousSibling && !task.nextSibling)
+            limit -= C.Desktop.pageMargin;
+        else if (!task.previousSibling || !task.nextSibling)
+            limit -= C.Desktop.pageMargin / 2;
+        if (p == pages.length)
+            position -= (C.Desktop.pageMargin + 1);
+        // Determines if a new page have to be created
+        if (pages.length == p && tasks.length == t && y > position && (p != self.page || self.getPage().numberTasks != 1))
+            createPage = true;
+        // Saves the result in a cache, so that we dont have to calculate it each time the cursor moves
+        self.taskCache = {position : position, limit : limit, number_page : p, number_task : t, page : page, task : task, createPage : createPage}
+        return (self.taskCache);
+    }
+    
+    // Moves the dragged task to the page under the cursor.
+    self.mouseUp = function (e)
+    {
+        // If the task has been dragged
+        if (!self.resistance)
+        {
+            // The task has been moved in a new page
+            if (self.taskCache.number_page != self.page || self.taskCache.createPage)
+            {
+                // Removes the old task
+                self.getPage().removeTask(self, true);
+                // Puts the task in a new page
+                if (self.taskCache.createPage)
+                    (new Page()).addTask(self);
+                // Adds the task to the its new page
+                else
+                    self.ghost.parentNode.object.addTask(self, self.ghost);
+                self.getPage().hide();
+                self.getPage().display();
+            }
+            // The page hasn't changed
+            else if (self.taskCache.number_page == self.page)
+                $(self.icon).insertBefore(self.ghost);
+        }
+        // Clears the context
+        self.taskCache = undefined;
+        $(self.icon).removeClass("drag");
+        $(self.icon.parentNode).removeClass("empty");
+        $(self.ghost).remove();
+        $(gl_desktop.node.tasks_list.bottom).height(0);
+        gl_desktop.taskButtons.stopDrag(e);
+    }
+    
+    // Closes the task with the middle mouse.
+    self.mouseUpClose = function (e)
+    {
+        if (e.which == 2 && !gl_desktop.drag.isDragging())
+        {
+            gl_desktop.taskButtons.hideButtons();
+            self.getPage().removeTask(self);
+        }
+    }
+    
+    // Displays the content of the task.
+    self.display = function ()
+    {
+        $(self.content).addClass("display");
+    }
+
+    // Hides the content of the task.
+    self.hide = function ()
+    {
+        $(self.content).removeClass("display");
+    }
+
+    // Closes the task.
+    self.close = function ()
+    {
+        self.resource.close();
+        $(self.icon).remove();
+        $(self.content).remove();
+        self.icon.object = undefined;
+        self.content.object = undefined;
+        for (var key in self)
+            self[key] = undefined;
+    }
+    
+    // Removes the resistance and starts to drag the task.
+    self.startDrag = function (y)
+    {
+        var elementY = self.element.y - gl_desktop.node.tasks_list.scrollTop
+
+        self.resistance = false;
+        // Updates the position of the mouse in the task
+        if (y < elementY)
+        {
+            var delta = elementY - y;
+            self.mouse.y -= delta;
+            y += delta;
+        }
+        else if (y > elementY)
+        {
+            var delta = y - elementY;
+            self.mouse.y += delta;
+            y -= delta;
+        }
+        // The mouse is outside the task
+        if (self.mouse.y < 0)
+        {
+            y -= 2 - self.mouse.y;
+            self.mouse.y = 2;
+        }
+        else if (self.mouse.y > C.Desktop.taskIconHeight)
+        {
+            y += self.mouse.y - C.Desktop.taskIconHeight + 2;
+            self.mouse.y = C.Desktop.taskIconHeight - 2;
+        }
+        // Moves the task
+        self.icon.style.top = y + "px";
+        $(self.icon).addClass("drag");
+        // Creates the ghost
+        self.ghost = $("<div></div>")[0];
+        $(self.ghost).addClass("ghost");
+        $(self.ghost).insertAfter(self.icon);
+        gl_desktop.taskButtons.startDrag();
+        return (y);
+    }
+    
+    // Sets the coordinates of the content of the task.
+    self.setCoordinates = function(left, top, width, height)
+    {
+        self.left = left;
+        self.top = top;
+        self.width = width;
+        self.height = height;
+        $(self.content).css("left", left);
+        $(self.content).css("top", top);
+        self.content.style.width = width + "px";
+        self.content.style.height = height + "px";
+        // Hides the borders when the height is null
+        if (self.height <= 0)
+            $(self.content).addClass("hide_border");
+        else
+            $(self.content).removeClass("hide_border");
+        // Calls the onResize method of the resource
+        if (self.resource.onResize)
+            self.resource.onResize(left, top, width, height);
+    }
+    
+    // Changes the container that displays the task.
+    self.setContainer = function (container)
+    {
+        if (container != gl_desktop)
+            $(self.content).addClass("window");
+        else
+            $(self.content).removeClass("window");
+    }
+    
+    // Sets the z-indes of the content of the task.
+    self.setZIndex = function (zIndex)
+    {
+        self.content.style.zIndex = zIndex;
+    }
+    
+    // Sets the instance of the resource that manages the content.
+    self.setResource = function (resource)
+    {
+        self.resource = resource;
+    }
+
+    // Returns the page of the task.
+    self.getPage = function () { return (self.icon.parentNode.object); }
+
+    self.init();
+    return (self);
 }
 
-// Returns true if the task dragged is over the new page area (the bottom of the tasks list).
-Task.prototype.isOnNewPage = function() { return (this.taskCache && this.taskCache.createPage); }
-// Returns the page of the task.
-Task.prototype.getPage = function () { return (this.icon.parentNode.object); }
-
-} /*! Task !*/
-
-/********** TaskTreeNode **********/{
 // Represents a node of the tasks tree that allows to display the tasks in a page.
-// @param node : Construct the object's properties.
-// h : If positive the node is split horizontally (the separation bar is vertical).
-// Represents the ratio between 0 and 1 of the space taken by its first child.
-// Thus the space taken by the second child is (1 - h).
-// v : If positive the node is split vertically (the separation bar is horizontal).
-// The details are the same as h. h and v can't be positive at the same time.
-// task : If defined, the node is a leaf of the tree (it has no child) and this
-// property represents the Task to display in the node. h and v are ignored in the leafs.
-// first : The first child of the node (left is h, top if v).
-// second : The second child of the node (right if h, bottom if v).
-// left top width height : The coordinates of the node the last time it has been rendered.
 function TaskTreeNode(node)
 {
-    for (var key in node)
-        this[key] = node[key];
-    this.mouse = undefined;
-    this.element = undefined;
-    this.leftNode = undefined;
-    this.rightNode = undefined;
-    this.topNode = undefined;
-    this.bottomNode = undefined;
-    this.startResize = undefined;
-}
-
-// Starts to resize the node.
-TaskTreeNode.prototype.mouseDown = function (event)
-{
-    gl_desktop.drag.start(event, this.resize, this, "mouseMove", "mouseWheel", "mouseUp");
-    this.mouse = gl_desktop.drag.getMouse();
-    this.element = gl_desktop.drag.getElement();
-    // Searches nodes that are in the edge of the current node and save their properties
-    var previous, level;
-    for (var node = this.parent, previous = this, level = 1; node; previous = node, node = node.parent, level++)
-        if (this.h == -1 && node.h != -1 && node.second == previous && !this.leftNode)
-            this.leftNode = { parent : node, h : node.h, width : node.width, level : level };
-        else if (this.h == -1 && node.h != -1 && node.first == previous && !this.rightNode)
-            this.rightNode = { parent : node, h : node.h, width : node.width, level : level };
-        else if (this.v == -1 && node.v != -1 && node.second == previous && !this.topNode)
-            this.topNode = { parent : node, v : node.v, height : node.height, level : level };
-        else if (this.v == -1 && node.v != -1 && node.first == previous && !this.bottomNode)
-            this.bottomNode = { parent : node, v : node.v, height : node.height, level : level };
-}
-
-// Resizes the node according to the mouse position.
-TaskTreeNode.prototype.mouseMove = function (event)
-{
-    var m = mouseCoordinates(event);
-    var x = m.x;
-    var y = m.y;
-
-    // Resizes horizontally
-    if (this.h >= 0)
+    var self = this;
+    
+    // @param node : Construct the object's properties.
+    // h : If positive the node is split horizontally (the separation bar is vertical).
+    // Represents the ratio between 0 and 1 of the space taken by its first child.
+    // Thus the space taken by the second child is (1 - h).
+    // v : If positive the node is split vertically (the separation bar is horizontal).
+    // The details are the same as h. h and v can't be positive at the same time.
+    // task : If defined, the node is a leaf of the tree (it has no child) and this
+    // property represents the Task to display in the node. h and v are ignored in the leafs.
+    // first : The first child of the node (left is h, top if v).
+    // second : The second child of the node (right if h, bottom if v).
+    // left top width height : The coordinates of the node the last time it has been rendered.
+    self.init = function ()
     {
-        // Takes into account where the user clicked in the resize bar
-        x += C.Desktop.taskMargin / 2 - this.mouse.x;
-        // Computes the horizontal resize
-        this.h = (x - this.left) / Math.max(this.width, 1);
-        this.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, this.h));
-        // The number of pixels the mouse moved vertically from the click position
-        var diff = y - this.mouse.y - this.element.y;
-        // Applies a little resistance before starting to resize vertically
-        if (!this.startResize && Math.abs(diff) < C.Desktop.resizeResistance)
-            diff = 0;
+        for (var key in node)
+            self[key] = node[key];
+        self.resize; // The resize bar managed by the node
+        self.mouse; // The position of the mouse in resize
+        self.element; // The original position of the element
+        self.leftNode;
+        self.rightNode;
+        self.topNode;
+        self.bottomNode;
+        self.startResize;
+    }
+
+    // Starts to resize the node.
+    self.mouseDown = function (e)
+    {
+        if (e.which != 1 || gl_desktop.drag.isDragging())
+            return ;
+        gl_desktop.drag.start(e, self.resize, self, "mouseMove", "mouseWheel", "mouseUp");
+        self.mouse = gl_desktop.drag.getMouse();
+        self.element = gl_desktop.drag.getElement();
+        // Searches nodes that are in the edge of the current node and save their properties
+        var previous, level;
+        for (var node = self.parent, previous = self, level = 1; node; previous = node, node = node.parent, level++)
+            if (self.h == -1 && node.h != -1 && node.second == previous && !self.leftNode)
+                self.leftNode = { parent : node, h : node.h, width : node.width, level : level };
+            else if (self.h == -1 && node.h != -1 && node.first == previous && !self.rightNode)
+                self.rightNode = { parent : node, h : node.h, width : node.width, level : level };
+            else if (self.v == -1 && node.v != -1 && node.second == previous && !self.topNode)
+                self.topNode = { parent : node, v : node.v, height : node.height, level : level };
+            else if (self.v == -1 && node.v != -1 && node.first == previous && !self.bottomNode)
+                self.bottomNode = { parent : node, v : node.v, height : node.height, level : level };
+        // Ensures that the page has the focus
+        self.resize.parentNode.object.display();
+    }
+
+    // Resizes the node according to the mouse position.
+    self.mouseMove = function (e)
+    {
+        var taskMargin = C.Desktop.taskMargin + C.Desktop.taskBorder * 2;
+        var m = mouseCoordinates(e);
+        var x = m.x;
+        var y = m.y;
+
+        // Resizes horizontally
+        if (self.h >= 0)
+        {
+            // Takes into account where the user clicked in the resize bar
+            x += taskMargin / 2 - self.mouse.x;
+            // Computes the horizontal resize
+            self.h = (x - self.left) / Math.max(self.width, 1);
+            self.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, self.h));
+            // The number of pixels the mouse moved vertically from the click position
+            var diff = y - self.mouse.y - self.element.y;
+            // Applies a little resistance before starting to resize vertically
+            if (!self.startResize && Math.abs(diff) < C.Desktop.resizeResistance)
+                diff = 0;
+            else
+            {
+                // Starts to resize vertically
+                if (!self.startResize)
+                    self.startResize = diff;
+                (self.startResize > 0) ? diff -= C.Desktop.resizeResistance : diff += C.Desktop.resizeResistance;
+            }
+            if (self.topNode)
+                self.topNode.parent.v = self.topNode.v;
+            if (self.bottomNode)
+                self.bottomNode.parent.v = self.bottomNode.v;
+            // Resizes vertically the top node
+            if (self.topNode && (!self.bottomNode || diff < 0))
+            {
+                var v = self.topNode.v + (1 - (self.topNode.height - diff) / Math.max(self.topNode.height, 1));
+                self.topNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, v));
+                // Adjusts the bottom node to the new top node ratio, so that the bottom node doesn't move
+                if (self.bottomNode && self.topNode.level > self.bottomNode.level && C.Desktop.stabilizeTaskResize)
+                {
+                    // Old size of the bottom node second, divided by the new size of the bottom node
+                    var a = 1 - (1 - self.bottomNode.v) / ((1 - self.topNode.parent.v) / (1 - self.topNode.v));
+                    if (self.topNode.parent.v * self.topNode.height <= taskMargin / 2)
+                        a = 1 - (self.bottomNode.height * (1 - self.bottomNode.v)) / ((self.bottomNode.height / (1 - self.topNode.v)) - taskMargin / 2);
+                    self.bottomNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
+                }
+            }
+            // Resizes vertically the bottom node
+            if (self.bottomNode && (!self.topNode || diff > 0))
+            {
+                var v = self.bottomNode.v + (1 - (self.bottomNode.height - diff) / Math.max(self.bottomNode.height, 1));
+                self.bottomNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, v));
+                // Adapts the top node to the new bottom node ratio, so that the top node doesn't move
+                if (self.topNode && self.bottomNode.level > self.topNode.level && C.Desktop.stabilizeTaskResize)
+                {
+                    // Old size of the top node first, divided by the new size of the top node
+                    var a = self.topNode.v / (self.bottomNode.parent.v / self.bottomNode.v);
+                    if ((1 - self.bottomNode.parent.v) * self.bottomNode.height <= taskMargin / 2)
+                        a = (self.topNode.height * self.topNode.v) / ((self.topNode.height / self.bottomNode.v) - taskMargin / 2);
+                    self.topNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
+                }
+            }
+        }
+        // Resizes vertically
         else
         {
-            // Starts to resize vertically
-            if (!this.startResize)
-                this.startResize = diff;
-            (this.startResize > 0) ? diff -= C.Desktop.resizeResistance : diff += C.Desktop.resizeResistance;
-        }
-        if (this.topNode)
-            this.topNode.parent.v = this.topNode.v;
-        if (this.bottomNode)
-            this.bottomNode.parent.v = this.bottomNode.v;
-        // Resizes vertically the top node
-        if (this.topNode && (!this.bottomNode || diff < 0))
-        {
-            var v = this.topNode.v + (1 - (this.topNode.height - diff) / Math.max(this.topNode.height, 1));
-            this.topNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, v));
-            // Adjusts the bottom node to the new top node ratio, so that the bottom node doesn't move
-            if (this.bottomNode && this.topNode.level > this.bottomNode.level && C.Desktop.stabilizeTaskResize)
+            // Takes into account where the user clicked in the resize bar
+            y += taskMargin / 2 - self.mouse.y;
+            // Computes the vertical resize
+            self.v = (y - self.top) / Math.max(self.height, 1);
+            self.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, self.v));
+            // The number of pixels the mouse moved horizontally from the click position
+            var diff = x - self.mouse.x - self.element.x;
+            // Applies a little resistance before starting to resize horizontally
+            if (!self.startResize && Math.abs(diff) < C.Desktop.resizeResistance)
+                diff = 0;
+            else
             {
-                // Old size of the bottom node second, divided by the new size of the bottom node
-                var a = 1 - (1 - this.bottomNode.v) / ((1 - this.topNode.parent.v) / (1 - this.topNode.v));
-                if (this.topNode.parent.v * this.topNode.height <= C.Desktop.taskMargin / 2)
-                    a = 1 - (this.bottomNode.height * (1 - this.bottomNode.v)) / ((this.bottomNode.height / (1 - this.topNode.v)) - C.Desktop.taskMargin / 2);
-                this.bottomNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
+                // Starts to resize horizontally
+                if (!self.startResize)
+                    self.startResize = diff;
+                (self.startResize > 0) ? diff -= C.Desktop.resizeResistance : diff += C.Desktop.resizeResistance;
+            }
+            if (self.leftNode)
+                self.leftNode.parent.h = self.leftNode.h;
+            if (self.rightNode)
+                self.rightNode.parent.h = self.rightNode.h;
+            // Resizes horitontally the left node
+            if (self.leftNode && (!self.rightNode || diff < 0))
+            {
+                var h = self.leftNode.h + (1 - (self.leftNode.width - diff) / Math.max(self.leftNode.width, 1));
+                self.leftNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, h));
+                // Adjusts the right node to the new left node ratio, so that the right node doesn't move
+                if (self.rightNode && self.leftNode.level > self.rightNode.level && C.Desktop.stabilizeTaskResize)
+                {
+                    // Old size of the right node second, divided by the new size of the right node
+                    var a = 1 - (1 - self.rightNode.h) / ((1 - self.leftNode.parent.h) / (1 - self.leftNode.h));
+                    if (self.leftNode.parent.h * self.leftNode.width <= taskMargin / 2)
+                        a = 1 - (self.rightNode.width * (1 - self.rightNode.h)) / ((self.rightNode.width / (1 - self.leftNode.h)) - taskMargin / 2);
+                    self.rightNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
+                }
+            }
+            // Resizes horitontally the right node
+            if (self.rightNode && (!self.leftNode || diff > 0))
+            {
+                var h = self.rightNode.h + (1 - (self.rightNode.width - diff) / Math.max(self.rightNode.width, 1));
+                self.rightNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, h));
+                // Adapts the left node to the new right node ratio, so that the left node doesn't move
+                if (self.leftNode && self.rightNode.level > self.leftNode.level && C.Desktop.stabilizeTaskResize)
+                {
+                    // Old size of the left node first, divided by the new size of the left node
+                    var a = self.leftNode.h / (self.rightNode.parent.h / self.rightNode.h);
+                    if ((1 - self.rightNode.parent.h) * self.rightNode.width <= taskMargin / 2)
+                        a = (self.leftNode.width * self.leftNode.h) / ((self.leftNode.width / self.rightNode.h) - taskMargin / 2);
+                    self.leftNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
+                }
             }
         }
-        // Resizes vertically the bottom node
-        if (this.bottomNode && (!this.topNode || diff > 0))
-        {
-            var v = this.bottomNode.v + (1 - (this.bottomNode.height - diff) / Math.max(this.bottomNode.height, 1));
-            this.bottomNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, v));
-            // Adapts the top node to the new bottom node ratio, so that the top node doesn't move
-            if (this.topNode && this.bottomNode.level > this.topNode.level && C.Desktop.stabilizeTaskResize)
-            {
-                // Old size of the top node first, divided by the new size of the top node
-                var a = this.topNode.v / (this.bottomNode.parent.v / this.bottomNode.v);
-                if ((1 - this.bottomNode.parent.v) * this.bottomNode.height <= C.Desktop.taskMargin / 2)
-                    a = (this.topNode.height * this.topNode.v) / ((this.topNode.height / this.bottomNode.v) - C.Desktop.taskMargin / 2);
-                this.topNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
-            }
-        }
+        // Retreives the page of the node
+        for (var node = self.first; node; node = node.first)
+            if (node.task)
+                // Displays the modifications
+                node.task.getPage().renderTree();
     }
-    // Resizes vertically
-    else
+
+    // Resizes the tasks margin and the resize bar.
+    self.mouseWheel = function (e, delta)
     {
-        // Takes into account where the user clicked in the resize bar
-        y += C.Desktop.taskMargin / 2 - this.mouse.y;
-        // Computes the vertical resize
-        this.v = (y - this.top) / Math.max(this.height, 1);
-        this.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, this.v));
-        // The number of pixels the mouse moved horizontally from the click position
-        var diff = x - this.mouse.x - this.element.x;
-        // Applies a little resistance before starting to resize horizontally
-        if (!this.startResize && Math.abs(diff) < C.Desktop.resizeResistance)
-            diff = 0;
+        // Changes the margin between the tasks
+        C.Desktop.taskMargin += delta / C.Desktop.resizeDeltaDivisor;
+        C.Desktop.taskMargin = Math.max(Math.round(C.Desktop.taskMargin), 1);
+        // Takes into account the position of the mouse in the bar
+        if (self.h != -1)
+            self.mouse.x = C.Desktop.taskMargin / 2;
         else
-        {
-            // Starts to resize horizontally
-            if (!this.startResize)
-                this.startResize = diff;
-            (this.startResize > 0) ? diff -= C.Desktop.resizeResistance : diff += C.Desktop.resizeResistance;
-        }
-        if (this.leftNode)
-            this.leftNode.parent.h = this.leftNode.h;
-        if (this.rightNode)
-            this.rightNode.parent.h = this.rightNode.h;
-        // Resizes horitontally the left node
-        if (this.leftNode && (!this.rightNode || diff < 0))
-        {
-            var h = this.leftNode.h + (1 - (this.leftNode.width - diff) / Math.max(this.leftNode.width, 1));
-            this.leftNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, h));
-            // Adjusts the right node to the new left node ratio, so that the right node doesn't move
-            if (this.rightNode && this.leftNode.level > this.rightNode.level && C.Desktop.stabilizeTaskResize)
-            {
-                // Old size of the right node second, divided by the new size of the right node
-                var a = 1 - (1 - this.rightNode.h) / ((1 - this.leftNode.parent.h) / (1 - this.leftNode.h));
-                if (this.leftNode.parent.h * this.leftNode.width <= C.Desktop.taskMargin / 2)
-                    a = 1 - (this.rightNode.width * (1 - this.rightNode.h)) / ((this.rightNode.width / (1 - this.leftNode.h)) - C.Desktop.taskMargin / 2);
-                this.rightNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
-            }
-        }
-        // Resizes horitontally the right node
-        if (this.rightNode && (!this.leftNode || diff > 0))
-        {
-            var h = this.rightNode.h + (1 - (this.rightNode.width - diff) / Math.max(this.rightNode.width, 1));
-            this.rightNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, h));
-            // Adapts the left node to the new right node ratio, so that the left node doesn't move
-            if (this.leftNode && this.rightNode.level > this.leftNode.level && C.Desktop.stabilizeTaskResize)
-            {
-                // Old size of the left node first, divided by the new size of the left node
-                var a = this.leftNode.h / (this.rightNode.parent.h / this.rightNode.h);
-                if ((1 - this.rightNode.parent.h) * this.rightNode.width <= C.Desktop.taskMargin / 2)
-                    a = (this.leftNode.width * this.leftNode.h) / ((this.leftNode.width / this.rightNode.h) - C.Desktop.taskMargin / 2);
-                this.leftNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, a));
-            }
-        }
+            self.mouse.y = C.Desktop.taskMargin / 2;
+        // Retreives the page of the node
+        for (var node = self.first; node; node = node.first)
+            if (node.task)
+                // Displays the modifications
+                node.task.getPage().renderTree();
     }
-    // Retreives the page of the node
-    for (var node = this.first; node; node = node.first)
-        if (node.task)
-            // Displays the modifications
-            node.task.getPage().renderTree();
-}
 
-// Resizes the tasks margin and the resize bar.
-TaskTreeNode.prototype.mouseWheel = function (delta)
-{
-    // Changes the margin between the tasks
-    C.Desktop.taskMargin += delta;
-    C.Desktop.taskMargin = Math.max(C.Desktop.taskMargin, 1);
-    // Takes into account the position of the mouse in the bar
-    if (this.h != -1)
-        this.mouse.x = C.Desktop.taskMargin / 2;
-    else
-        this.mouse.y = C.Desktop.taskMargin / 2;
-    // Retreives the page of the node
-    for (var node = this.first; node; node = node.first)
-        if (node.task)
-            // Displays the modifications
-            node.task.getPage().renderTree();
-}
-
-// Stops the resize.
-TaskTreeNode.prototype.mouseUp = function ()
-{
-    delete this.leftNode;
-    delete this.rightNode;
-    delete this.topNode;
-    delete this.bottomNode;
-    delete this.startResize;
-}
-
-} /*! TaskTreeNode !*/
-
-/********** TasksList **********/{
-// Manages the tasks list.
-function TasksList()
-{
-    this.mouse = undefined;
-    this.interval = undefined;
-    this.delta = undefined;
-    var tasksList = this;
-    addEvent(gl_desktop.node.resize_tasks_list, "mousedown", function (event) { tasksList.mouseDown(event); });
-}
-
-// Starts to resize the tasks list.
-TasksList.prototype.mouseDown = function (event)
-{
-    gl_desktop.drag.start(event, gl_desktop.node.resize_tasks_list, this, "mouseMove", "mouseWheel");
-    this.mouse = gl_desktop.drag.getMouse();
-}
-
-// Resizes the tasks list.
-TasksList.prototype.mouseMove = function (event)
-{
-    var mouse = mouseCoordinates(event);
-    
-    // Updates the width of the tasks list according to the position of the mouse
-    C.Desktop.tasksListWidth = Math.max(C.Desktop.resizeTasksListMin, Math.min(C.Desktop.resizeTasksListMax, mouse.x - this.mouse.x - T.Menu.width));
-    gl_desktop.node.tasks_list.style.width = C.Desktop.tasksListWidth + "px";
-    gl_desktop.updateMiddleMarginLeft();
-    // Resizes the tasks and pages icons
-    this._resize();
-    // Applies the changes on the desktop
-    gl_desktop.onResize();
-}
-
-// Changes the padding of the pages in the tasks list using the mouse wheel.
-TasksList.prototype.mouseWheel = function (delta)
-{
-    // Changes the padding
-    C.Desktop.tasksListPadding = Math.max(1, C.Desktop.tasksListPadding + delta);
-    // Resizes the tasks and pages icons
-    this._resize();
-    // Applies the changes on the desktop
-    gl_desktop.onResize();
-}
-
-// Updates the pages and tasks icons sizes.
-TasksList.prototype._resize = function ()
-{
-    // Ensures that the padding respect the minimum width of a task
-    if (C.Desktop.tasksListWidth - 2 * C.Desktop.tasksListPadding < C.Desktop.taskIconMinWidth)
-        C.Desktop.tasksListPadding = Math.round((C.Desktop.tasksListWidth - C.Desktop.taskIconMinWidth) / 2);
-    // The width is based on the tasks list width and the padding of the pages
-    var width = C.Desktop.tasksListWidth - 2 * C.Desktop.tasksListPadding;
-    // The height is computed using the width and a ratio
-    gl_desktop.setTaskIconHeight(width * C.Desktop.taskHeightRatio);
-    for (var page = gl_desktop.node.tasks_list.firstChild; page; page = page.nextSibling)
-        if (getClassName(page, "page"))
-        {
-            page.style.padding = C.Desktop.tasksListPadding + "px";
-            for (var task = page.firstChild; task; task = task.nextSibling)
-            {
-                task.style.width = width + "px";
-                task.style.height = gl_desktop.taskIconHeight + "px";
-            }
-        }
-}
-
-// Scrolls the tasks list up or down, depending on the delta.
-// @param delta : The speed of the scroll. Scroll top if positive, down if negative.
-// Should be between 1 and -1.
-TasksList.prototype.scroll = function (delta)
-{
-    var tasks_list = gl_desktop.node.tasks_list;
-    var height = tasks_list.scrollHeight - gl_desktop.topHeight;
-    
-    this.delta = delta;
-    // Nothing to scroll
-    if (!height || !delta || (delta > 0 && tasks_list.scrollTop == 0) || (delta < 0 && tasks_list.scrollTop == height))
-        this.stopScroll();
-    // Creates the interval that will scroll the tasks
-    else if (!this.interval)
-        this.interval = setInterval("gl_desktop.tasksList.scrollInterval()", 1000 / 30);
-    gl_desktop.taskButtons.startScroll();
-}
-// This method is called by setInterval and scrolls the tasks list according to the delta.
-TasksList.prototype.scrollInterval = function ()
-{
-    var tasks_list = gl_desktop.node.tasks_list;
-    
-    if (!this.interval)
-        return ;
-    // Calculate the number of pixels to scroll
-    if (this.delta > 0)
-        tasks_list.scrollTop -= (Math.exp(Math.abs(this.delta)) - 1) * C.Desktop.scrollSpeed;
-    else
-        tasks_list.scrollTop += (Math.exp(Math.abs(this.delta)) - 1) * C.Desktop.scrollSpeed;
-    if (gl_desktop.drag.isDragging("Task"))
-        gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.y);
-    // Scroll top finished
-    if (tasks_list.scrollTop <= 0)
+    // Stops the resize.
+    self.mouseUp = function ()
     {
-        tasks_list.scrollTop = 0;
-        clearInterval(this.interval);
-        delete this.interval;
-        gl_desktop.taskButtons.stopScroll();
+        delete self.leftNode;
+        delete self.rightNode;
+        delete self.topNode;
+        delete self.bottomNode;
+        delete self.startResize;
     }
-    // Scroll down finished
-    else if (tasks_list.scrollTop >= tasks_list.scrollHeight - gl_desktop.topHeight)
-    {
-        tasks_list.scrollTop = tasks_list.scrollHeight - gl_desktop.topHeight;
-        this.stopScroll();
-    }
+
+    self.init();
+    return (self);
 }
 
-// Stops the scrolling of the tasks list.
-TasksList.prototype.stopScroll = function ()
-{
-    if (this.interval)
-    {
-        clearInterval(this.interval);
-        delete this.interval;
-        delete this.delta;
-    }
-    gl_desktop.taskButtons.stopScroll();
-}
-
-} /*! TasksList !*/
-
-/********** TaskButtons **********/{
-// Manages the buttons on the task icons.
+// Manages the buttons of the tasks icons
 function TaskButtons()
 {
-    // The task buttons
-    this.buttons = removeTextNodes(getElementsByClassName("task_buttons", gl_desktop.node.top, true));
-    // The buttons
-    this.close = getElementsByClassName("close", this.buttons, true);
-    this.hide = getElementsByClassName("hide", this.buttons, true);
-    this.window = getElementsByClassName("window", this.buttons, true);
-    this.full_screen = getElementsByClassName("full_screen", this.buttons, true);
-    this.buttons.firstChild.style.left = -C.Desktop.taskButtonsWidth * 2 + "px";
-    // Events
-    var object = this;
-    addEvent(document.body, "mouseup", function (event) { object.mouseUp(event); });
-}
-
-// Register the events that allows to display the buttons of the task.
-TaskButtons.prototype.addTask = function (task)
-{
-    var object = this;
-    addEvent(task.icon, "mouseover", function (event) { object.mouseOver(event, task.icon); });
-    addEvent(task.icon, "mouseout", function (event) { object.mouseOut(event, task.icon); });
-    addEvent(task.icon, "mousedown", function (event) { object.mouseDown(event, task); });
-}
-
-// Displays the buttons while we are on the task icon.
-TaskButtons.prototype.mouseOver = function (event, task)
-{
-    if (getEventRelatedTarget(event, "task", 5) != task)
-    {
-        // Puts the buttons in the task icon
-        this.buttons.parentNode.removeChild(this.buttons);
-        task.insertBefore(this.buttons, task.firstChild);
-        // Update the size of the buttons
-        var taskWidth = C.Desktop.tasksListWidth - 2 * C.Desktop.tasksListPadding;
-        this.buttons.style.width = (C.Desktop.taskButtonsWidth * 4 + taskWidth) + "px";
-        this.buttons.firstChild.style.top = -gl_desktop.node.tasks_list.scrollTop + "px";
-        this.close.style.height = gl_desktop.taskIconHeight + "px";
-        this.hide.style.height = gl_desktop.taskIconHeight + "px";
-        this.window.style.height = gl_desktop.taskIconHeight + "px";
-        this.full_screen.style.height = gl_desktop.taskIconHeight + "px";
-    }
-}
-
-// Hides the buttons.
-TaskButtons.prototype.mouseOut = function (event, task)
-{
-    if (getEventRelatedTarget(event, "task", 5) != task)
-    {
-        this.buttons.parentNode.removeChild(this.buttons);
-        gl_desktop.node.top.appendChild(this.buttons);
-    }
-}
-
-// Execute the action of a button
-TaskButtons.prototype.mouseDown = function (event, task)
-{
-    var button = (event.target || event.srcElement);
-    var page = task.getPage();
+    var self = this;
     
-    if (getButton(event) != 0)
-        return ;
-    // Closes the task
-    if (button == this.close)
+    self.init = function ()
     {
-        this.buttons.parentNode.removeChild(this.buttons);
-        gl_desktop.node.top.appendChild(this.buttons);
-        if (task.icon.nextSibling)
-            task.icon.nextSibling.insertBefore(this.buttons, task.icon.nextSibling.firstChild);
-        else if (task.icon.parentNode.nextSibling && task.icon.parentNode.nextSibling.firstChild)
-            task.icon.parentNode.nextSibling.firstChild.insertBefore(this.buttons, task.icon.parentNode.nextSibling.firstChild.firstChild);
-        task.getPage().removeTask(task);
+        self.buttons = $(gl_desktop.node.tasks_list.container).children(".buttons")[0];
+        // The buttons
+        self.close = $(self.buttons).children(".close")[0];
+        self.hide = $(self.buttons).children(".hide")[0];
+        self.window = $(self.buttons).children(".window")[0];
+        self.fullscreen = $(self.buttons).children(".fullscreen")[0];
+        self.task; // The last task on which the mouse entered.
+        
+        // Generates the SVG icons
+        self._addIcon($(self.close).children(".icon")[0], 9.5, "M4.468,2.94L2.942,4.466L0,1.523l-2.942,2.942L-4.468,2.94l2.942-2.942l-2.938-2.939l1.525-1.525L0-1.527l2.938-2.938l1.525,1.525L1.525-0.002L4.468,2.94z");
+        self._addIcon($(self.hide).children(".icon")[0], 9.5, "M-5.003-1.523H5.003v3.045H-5.003V-1.523z");
+        self._addIcon($(self.window).children(".icon")[0], 9.5, "M-5,4.505v-9.011H5v9.011H-5z M2.992-2.506h-5.978v5.021h5.978V-2.506z");
+        self._addIcon($(self.fullscreen).children(".icon")[0], 9, "M4.002,1.052l-3-0.006v2.951h-2V1.042l-3.004-0.006v-2.063l3.004,0.006v-2.977h2v2.98l3,0.006V1.052z");
+        
+        // Events
+        $(self.close).click(function (e) { self.click(e); });
+        $(self.hide).click(function (e) { self.click(e); });
+        $(self.window).click(function (e) { self.click(e); });
+        $(self.fullscreen).click(function (e) { self.click(e); });
     }
-    // Hides / displays the page
-    else if (button == this.hide)
+    
+    // Creates an icon and adds it to the destination.
+    self._addIcon = function (destination, top, path)
     {
-        if (page.getContainer().isDisplayed(page) && (page.getContainer() instanceof Window || !isWindowsDisplay()))
-            page.getContainer().hide();
-        else
+        element = Raphael(destination, 20, 18).path(path);
+        element.translate(10, top);
+        element.attr("fill", "#dddddd");
+        element.attr("stroke", "none");
+        // Changes the color when the mouse is over the icon
+        destination.parentNode.svg = element;
+        $(destination.parentNode).mouseenter(function (e)
         {
-            page.getContainer().display(page, true);
-            if (page.getContainer() instanceof Desktop)
-                hideAllWindows();
+            e.currentTarget.svg.attr("fill", "#333333");
+        });
+        $(destination.parentNode).mouseleave(function (e)
+        {
+            e.currentTarget.svg.attr("fill", "#dddddd");
+        });
+    }
+    
+    
+    // Registers the events that allow to display the buttons of the task.
+    self.addTask = function (task)
+    {
+        $(task.icon).mouseenter(function (e) { self.mouseEnter(e, task); });
+        $(task.icon).mouseleave(function (e) { self.mouseLeave(e, task); });
+    }
+
+    // Activate a button
+    self.click = function (e)
+    {
+        var page = self.task.getPage();
+        
+        if (e.which != 1)
+            return ;
+        if (e.currentTarget == self.close)
+        {
+            // Gets the next task
+            var task = $(self.task.icon).next(".task")[0];
+            if (!task)
+                task = $(self.task.icon.parentNode.nextSibling).children(".task:first")[0];
+            // Or the previous task
+            if (!task)
+                task = $(self.task.icon).prev(".task")[0];
+            if (!task)
+                task = $(self.task.icon.parentNode.previousSibling).children(".task:last")[0];
+            // Removes the old task
+            self.task.getPage().removeTask(self.task);
+            // Puts the focus on the new task
+            if (task)
+            {
+                $(task).addClass("over");
+                self.task = task.object;
+            }
+            else
+                $(self.buttons).removeClass("display");
+        }
+        else if (e.currentTarget == self.hide)
+        {
+            if (!page.isHidden())
+                self.task.getPage().hide();
+            else
+                self.task.getPage().display();
+        }
+        else if (e.currentTarget == self.window)
+        {
+            if (page.getContainer() == gl_desktop)
+                gl_windows.open(page);
+            else
+                page.setContainer(gl_desktop);
+            page.onResize();
+            page.display();
         }
     }
-    // Moves the page to the desktop / window
-    else if (button == this.window)
+    
+    // Displays the buttons while the mouse is on the task icon.
+    self.mouseEnter = function (e, task)
     {
-        page.getContainer().close(page);
-        if (page.getContainer() instanceof Desktop)
-            openWindow(page);
-        else
+        if (!gl_desktop.drag.isDragging())
         {
-            gl_desktop.setPage(page);
-            hideAllWindows();
+            self.buttons.style.top = $(task.icon).offset().top + "px";
+            $(self.buttons).addClass("display");
+            $(task.icon).addClass("over");
+            self.task = task;
         }
     }
-    // Displays the page in full screen
-    else if (button == this.full_screen)
-        console.log("full_screen");
-    // Otherwise we hide the buttons because the task is going to be dragged
-    else
-        setClassName(this.buttons, "hide");
-}
 
-// Displays the buttons if the mouse is still on the icon.
-TaskButtons.prototype.mouseUp = function (event)
-{
-    removeClassName(this.buttons, "hide");
-}
-
-// These methods ensure that the buttons are not displayed while the tasks list is scrolling.
-TaskButtons.prototype.hideButtons = function ()
-{
-    var tasks_list = gl_desktop.node.tasks_list;
-    if (tasks_list.scrollTop > 0 && tasks_list.scrollTop < tasks_list.scrollHeight - gl_desktop.topHeight)
+    // Hides the buttons when the mouse leaves the task icon.
+    self.mouseLeave = function (e, task)
     {
-        this.buttons.parentNode.removeChild(this.buttons);
-        gl_desktop.node.top.appendChild(this.buttons);
+        // If the mouse has not entered the buttons area
+        if (!$(self.buttons).has(e.relatedTarget).length)
+        {
+            $(self.buttons).removeClass("display");
+            $(task.icon).removeClass("over");
+        }
+        // Otherwise we will hide the buttons when the mouse leaves it
+        else
+            $(self.buttons).mouseleave(function (e)
+            {
+                // If we are not on the task icon
+                if (!$(task.icon).has(e.relatedTarget).length)
+                {
+                    $(self.buttons).removeClass("display");
+                    $(task.icon).removeClass("over");
+                }
+                // The event must be removed
+                $(self.buttons).off("mouseleave");
+            });
     }
+        
+    // Hides the buttons while the task is being dragged.
+    self.startDrag = function ()
+    {
+        $(self.buttons).removeClass("display");
+    }
+    
+    // When the drag is finished, we display the buttons if the mouse is over the task
+    self.stopDrag = function (e)
+    {
+        var offset = $(self.task.icon).offset();
+        if (e.pageY > offset.top && e.pageY < offset.top + C.Desktop.taskIconHeight
+            && e.pageX > offset.left && e.pageX < offset.left + $(self.task.icon).width())
+        {
+            self.buttons.style.top = $(self.task.icon).offset().top + "px";
+            $(self.buttons).addClass("display");
+            $(self.task.icon).addClass("over");
+        }
+        else
+            $(self.task.icon).removeClass("over");
+    }
+
+    // Updates the position of the buttons according to the task icon.
+    self.updatePosition = function ()
+    {
+        self.buttons.style.top = $(self.task.icon).offset().top + "px";
+    }
+
+    // Ensures that the buttons are not displayed while the tasks list is scrolling.
+    self.startScroll = function ()
+    {
+        var tasks_list = gl_desktop.node.tasks_list;
+        if (tasks_list.scrollTop > 0 && tasks_list.scrollTop < tasks_list.scrollHeight - gl_desktop.middleHeight)
+            $(self.buttons).addClass("scroll");
+        else
+            self.stopScroll();
+    }
+
+    // Displays the buttons when the scroll is finished
+    self.stopScroll = function ()
+    {
+        var task;
+        var offset;
+        var mouse = gl_desktop.mouse;
+        
+        $(self.buttons).removeClass("scroll");
+        // If we are on the scrolling top limit, gets the first task
+        if (gl_desktop.node.tasks_list.scrollTop <= 0 && mouse.y < C.Desktop.topHeight + C.Desktop.tasksListScrollHeight)
+            task = $(gl_desktop.node.tasks_list).children(".page:first").children(".task:first")[0];
+        // If we are on the scrolling bottom limit, gets the last task
+        else if (gl_desktop.node.tasks_list.scrollTop >= gl_desktop.node.tasks_list.scrollHeight - gl_desktop.middleHeight && mouse.y > C.Desktop.topHeight + gl_desktop.middleHeight - C.Desktop.tasksListScrollHeight)
+            task = $(gl_desktop.node.tasks_list).children(".page:last").children(".task:last")[0];
+        // Then displays its buttons
+        if (task && !gl_desktop.drag.isDragging())
+        {
+            $(self.task.icon).removeClass("over");
+            self.task = task.object;
+            var offset = $(self.task.icon).offset();
+            // If the mouse is on the task
+            if (mouse.y > offset.top && mouse.y < offset.top + C.Desktop.taskIconHeight
+                && mouse.x > offset.left && mouse.x < offset.left + $(self.task.icon).width())
+            {
+                $(self.buttons).addClass("display");
+                $(self.task.icon).addClass("over");
+            }
+        }
+        self.buttons.style.top = $(self.task.icon).offset().top + "px";
+    }
+    
+    // Hides the buttons
+    self.hideButtons = function ()
+    {
+        $(self.buttons).removeClass("display");
+    }
+    
+    self.init();
+    return (self);
 }
 
-TaskButtons.prototype.startScroll = function ()
+// Manages the scroll of the tasks list
+function TasksList()
 {
-    var tasks_list = gl_desktop.node.tasks_list;
-    if (tasks_list.scrollTop > 0 && tasks_list.scrollTop < tasks_list.scrollHeight - gl_desktop.topHeight)
-        setClassName(this.buttons, "scroll");
-    else
-        this.stopScroll();
+    var self = this;
+    
+    self.init = function ()
+    {
+        self.tasks_list = gl_desktop.node.tasks_list;
+        self.over = false; // True while the mouse is over the tasks list
+        self.delta; // The position of the mouse in the scrolling area
+        self.interval; // The interval that actually scroll the tasks list
+        
+        // Events
+        $(self.tasks_list).mouseenter(function (e) { self.mouseEnter(e); });
+        $(self.tasks_list).mouseleave(function (e) { self.mouseLeave(e); });
+        $(self.tasks_list).mousemove(function (e) { self.mouseMove(e); });
+    }
+    
+    // The mouse entered the tasks list.
+    self.mouseEnter = function (e)
+    {
+        self.over = true;
+    }
+    
+    // The mouse leaved the tasks list.
+    self.mouseLeave = function (e)
+    {
+        self.over = false;
+        self.stopScroll();
+    }
+    
+    // Manages the scrolling areas at the top and the bottom of the tasks list.
+    self.mouseMove = function (e)
+    {
+        // The top scrolling area of the tasks list
+        if (e.pageY > C.Desktop.topHeight && e.pageY <= C.Desktop.topHeight + C.Desktop.tasksListScrollHeight)
+            self.scroll(1 - (e.pageY - C.Desktop.topHeight) / C.Desktop.tasksListScrollHeight);
+        // The bottom scrolling area of the tasks list
+        else if (e.pageY >= C.Desktop.topHeight + gl_desktop.middleHeight - C.Desktop.tasksListScrollHeight && e.pageY < C.Desktop.topHeight + gl_desktop.middleHeight)
+            self.scroll((C.Desktop.topHeight + gl_desktop.middleHeight - C.Desktop.tasksListScrollHeight - e.pageY) / C.Desktop.tasksListScrollHeight);
+        // Ensures that the scrolling is stopped outside of the scrolling areas
+        else if (self.interval)
+            self.stopScroll();
+    }
+
+    // Scrolls the tasks list using the mouse wheel.
+    self.mouseWheel = function (delta)
+    {
+        if (self.over)
+        {
+            gl_desktop.node.tasks_list.scrollTop -= delta;
+            gl_desktop.taskButtons.updatePosition();
+            if (gl_desktop.drag.isDragging("Task"))
+                gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.pageY);
+        }
+    }
+    
+    // Scrolls the tasks list up or down, depending on the delta.
+    // @param delta : The speed of the scroll. Scroll top if positive, down if negative.
+    // Should be between 1 and -1.
+    self.scroll = function (delta)
+    {
+        var height = self.tasks_list.scrollHeight - gl_desktop.middleHeight;
+        
+        self.delta = delta;
+        // Nothing to scroll
+        if (!height || !delta || (delta > 0 && self.tasks_list.scrollTop == 0) || (delta < 0 && self.tasks_list.scrollTop == height))
+            self.stopScroll();
+        // Creates the interval that will scroll the tasks
+        else if (!self.interval)
+            self.interval = setInterval("gl_desktop.tasksList.scrollInterval()", 1000 / 30);
+        if (self.interval)
+            gl_desktop.taskButtons.startScroll();
+    }
+    // This method is called by setInterval and scrolls the tasks list according to the delta.
+    self.scrollInterval = function ()
+    {
+        var height = self.tasks_list.scrollHeight - gl_desktop.middleHeight;
+
+        if (!self.interval)
+            return ;
+        // Calculates the number of pixels to scroll
+        if (self.delta > 0)
+            self.tasks_list.scrollTop -= (Math.exp(Math.abs(self.delta)) - 1) * C.Desktop.tasksListScrollSpeed;
+        else
+            self.tasks_list.scrollTop += (Math.exp(Math.abs(self.delta)) - 1) * C.Desktop.tasksListScrollSpeed;
+        if (gl_desktop.drag.isDragging("Task"))
+            gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.pageY);
+        // Scroll up finished
+        if (self.tasks_list.scrollTop <= 0)
+        {
+            self.tasks_list.scrollTop = 0;
+            self.stopScroll();
+        }
+        // Scroll down finished
+        else if (self.tasks_list.scrollTop >= height)
+        {
+            self.tasks_list.scrollTop = height;
+            self.stopScroll();
+        }
+    }
+
+    // Stops the scrolling of the tasks list.
+    self.stopScroll = function ()
+    {
+        if (self.interval)
+        {
+            clearInterval(self.interval);
+            delete self.interval;
+            delete self.delta;
+            gl_desktop.taskButtons.stopScroll();
+        }
+    }
+    
+    self.init();
+    return (self);
 }
 
-TaskButtons.prototype.stopScroll = function ()
-{
-    removeClassName(this.buttons, "scroll");
-    this.buttons.firstChild.style.top = -gl_desktop.node.tasks_list.scrollTop + "px";
-}
-
-} /*! TaskButtons !*/
-
-/********** Drag **********/{
 // Helps to drag an object (only one at a time).
 function Drag()
 {
-    // The dragged object
-    this.object = undefined;
-    // The name of its class
-    this.objectName = undefined;
-    // Callbacks
-    this.mouseMoveCallback = undefined;
-    this.mouseUpCallback = undefined;
-    this.mouseWheelCallback = undefined;
-    // The position of the mouse in the element
-    this.mouse = { x : 0, y : 0 };
-    // The initial position of the element
-    this.element = { x : 0, y : 0 };
-}
-
-// Starts to drag an object.
-// @param event : The event that triggered the drag.
-// @param node : The html node to drag.
-// @param object : The object to drag.
-// @param mouseMove : The name of a method in the object to call when the mouse moves.
-// @param mouseWheel : The name of a method in the object to call when the mouse wheel clicks. Optional.
-// @param mouseUp : The name of a method in the object to call when the drag is finished. Optional.
-Drag.prototype.start = function (event, node, object, mouseMove, mouseWheel, mouseUp)
-{
-    var mouse = mouseCoordinates(event);
-    var element = elementCoordinates(node);
+    var self = this;
     
-    // If something was already being dragged, we stop it
-    if (this.isDragging())
-        this._stop();
-    // The coordinates of the mouse inside the node
-    this.mouse = {x : mouse.x - element.x,
-                  y : mouse.y - element.y};
-    // The absolute coordinates of the node
-    this.element = {x : element.x,
-                    y : element.y};
-    this.object = object;
-    this.objectName = getObjectName(object);
-    this.mouseMoveCallback = mouseMove;
-    this.mouseUpCallback = mouseUp;
-    this.mouseWheelCallback = mouseWheel;
-    // The selection is disabled during the drag
-    disableSelection(false);
-}
+    self.init = function ()
+    {
+        self.object; // The dragged object
+        self.objectName; // The name of its class
+        self.mouse = { x : 0, y : 0 }; // The position of the mouse in the element
+        self.element = { x : 0, y : 0 }; // The initial position of the element
+        // Callbacks
+        self.mouseMoveCallback;
+        self.mouseUpCallback;
+        self.mouseWheelCallback;
+        self.parameter;
+    }
 
-// Called when the mouse moves.
-Drag.prototype.mouseMove = function (event)
-{
-    if (this.object && this.mouseMoveCallback)
-        this.object[this.mouseMoveCallback](event);
-}
+    // Starts to drag an object.
+    // @param e : The event that triggered the drag.
+    // @param node : The html node to drag.
+    // @param object : The object to drag.
+    // @param mouseMove : The name of a method in the object to call when the mouse moves.
+    // @param mouseWheel : The name of a method in the object to call when the mouse wheel clicks. Optional.
+    // @param mouseUp : The name of a method in the object to call when the drag is finished. Optional.
+    // @param parameter : A parameter that will be passed to the callbacks. Optional.
+    self.start = function (e, node, object, mouseMove, mouseWheel, mouseUp, parameter)
+    {
+        var mouse = { x : e.pageX, y : e.pageY };
+        var element = $(node).offset();
+        
+        // If something was already being dragged, we stop it
+        if (self.isDragging())
+            self._stop();
+        // The coordinates of the mouse inside the node
+        self.mouse = {x : mouse.x - element.left,
+                      y : mouse.y - element.top};
+        // The absolute coordinates of the node
+        self.element = {x : element.left,
+                        y : element.top};
+        self.object = object;
+        self.objectName = getObjectName(object);
+        self.mouseMoveCallback = mouseMove;
+        self.mouseUpCallback = mouseUp;
+        self.mouseWheelCallback = mouseWheel;
+        self.parameter = parameter;
+        // The selection is disabled during the drag
+        disableSelection(false);
+    }
 
-// Called when the mouse wheel clicks.
-Drag.prototype.mouseWheel = function (delta)
-{
-    if (this.object && this.mouseWheelCallback)
-        this.object[this.mouseWheelCallback](delta);
-}
+    // Called when the mouse moves.
+    self.mouseMove = function (e)
+    {
+        if (self.object && self.mouseMoveCallback)
+            self.object[self.mouseMoveCallback](e, self.parameter);
+    }
 
-// Called when the mouse is up (the drag is finished).
-Drag.prototype.mouseUp = function (event)
-{
-    if (this.object && this.mouseUpCallback)
-        this.object[this.mouseUpCallback](event);
-    this._stop();
-}
+    // Called when the mouse wheel clicks.
+    self.mouseWheel = function (e, delta)
+    {
+        if (self.object && self.mouseWheelCallback)
+            self.object[self.mouseWheelCallback](e, delta, self.parameter);
+    }
 
-// Stops the dragging of the object.
-Drag.prototype._stop = function ()
-{
-    this.object = undefined;
-    this.objectName = undefined;
-    this.mouseMoveCallback = undefined;
-    this.mouseUpCallback = undefined;
-    this.mouseWheelCallback = undefined;
-    this.mouse = { x : 0, y : 0 };
-    this.element = { x : 0, y : 0 };
-    disableSelection(true);
-}
+    // Called when the mouse is up (the drag is finished).
+    self.mouseUp = function (e)
+    {
+        if (e.which != 1)
+            return ;
+        if (self.object && self.mouseUpCallback)
+            stop = self.object[self.mouseUpCallback](e, self.parameter);
+         self._stop();
+    }
 
-// True if the object is being dragged
-// @param object : If object is a string, returns true if the dragged object is the same type.
-// If it is an object, returns true if the dragged object is the same.
-// Otherwise returns true if something is being dragged.
-Drag.prototype.isDragging = function (object)
-{
-    if (!object && this.object)
-        return (true);
-    else if (!this.object)
+    // Stops the dragging of the object.
+    self._stop = function ()
+    {
+        self.object = undefined;
+        self.objectName = undefined;
+        self.mouseMoveCallback = undefined;
+        self.mouseUpCallback = undefined;
+        self.mouseWheelCallback = undefined;
+        self.parameter = undefined;
+        self.mouse = { x : 0, y : 0 };
+        self.element = { x : 0, y : 0 };
+        disableSelection(true);
+    }
+
+    // True if the object is being dragged
+    // @param object : If object is a string, returns true if the dragged object is the same type.
+    // If it is an object, returns true if the dragged object is the same.
+    // Otherwise returns true if something is being dragged.
+    self.isDragging = function (object)
+    {
+        if (!object && self.object)
+            return (true);
+        else if (!self.object)
+            return (false);
+        else if (self.object === object)
+            return (true);
+        else if (self.objectName === object)
+            return (true);
         return (false);
-    else if (this.object === object)
-        return (true);
-    else if (this.objectName === object)
-        return (true);
-    return (false);
-}
-// The position of the mouse inside the dragged element.
-// @return : { x, y }
-Drag.prototype.getMouse = function () { return (this.mouse); }
-// The initial position of the dragged element.
-// @return : { x, y }
-Drag.prototype.getElement = function () { return (this.element); }
-// Returns the instance of the object being dragged.
-Drag.prototype.getObject = function () { return (this.object); }
+    }
+    // The position of the mouse inside the dragged element.
+    // @return : { x, y }
+    self.getMouse = function () { return (self.mouse); }
+    // The initial position of the dragged element.
+    // @return : { x, y }
+    self.getElement = function () { return (self.element); }
+    // Returns the instance of the object being dragged.
+    self.getObject = function () { return (self.object); }
 
-} /*! Drag !*/
+    self.init();
+    return (self);
+}

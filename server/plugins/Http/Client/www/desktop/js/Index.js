@@ -10,21 +10,25 @@ var gl_uid = 0;
 // Initializes the page (called by onload)
 function load()
 {
-	if (gl_loaded)
-		return ;
 	// Initializes the resources
 	gl_resources = new Resources();
-	// Initializes the desktop
-	gl_desktop = new Desktop();
+	// Initializes the desktop and the windows singletons
+	new Desktop();
+	new Windows();
 	// Initializes the browser size
 	onResize();
 	// onResize is called every time the browser is resized
 	window.onresize = onResize;
 	// Initializes the Account management system
-	initializeAccount();
+	gl_account = new Account();
 	// The right click is disabled in order to replace the normal contextual menu of the browser.
 	//document.oncontextmenu = function() { return (false); };
 	document.getElementById("loading_client").style.display = "none";
+    // Disables the text selection
+    $(document.body).mousedown(function (e) { disableSelection(false); });
+    $(document.body).mouseup(function () { disableSelection(true); });
+    // Asks a confirmation when the user is about to leave the page.
+    //window.onbeforeunload = function() { return ("Leaving now will save the current session."); }
 	// Ensures that the load function will not be called twice
 	gl_loaded = true;
 }
@@ -49,11 +53,8 @@ function adjustBackgroundSize()
 {
 	// Sets the background size to the screen size
 	var background = document.getElementById("background");
-	background.style.width = gl_browserSize.width + "px";
-	background.style.height = gl_browserSize.height + "px";
-	var background_identification = document.getElementById("background_identification");
-	background_identification.style.width = gl_browserSize.width + "px";
-	background_identification.style.height = gl_browserSize.height + "px";
+	$("#background").width(gl_browserSize.width > C.Desktop.minWidth ? gl_browserSize.width : C.Desktop.minWidth);
+	$("#background").height(gl_browserSize.height > C.Desktop.minHeight ? gl_browserSize.height : C.Desktop.minHeight);
 }
 
 // Finds the size of the browser window
@@ -225,7 +226,7 @@ function elementCoordinates(element)
 function addEvent(element, event, fct)
 {
 	// IE
-	if(element.attachEvent)
+	if (element.attachEvent)
 		element.attachEvent('on' + event, fct);
 	// Others
 	else
@@ -373,6 +374,16 @@ function getUid()
     return (gl_uid++);
 }
 
+// Generates a universally unique identifier.
+function getUuid()
+{
+    var S4 = function()
+    {
+       return (((1 + Math.random()) * 0x10000)|0).toString(16).substring(1);
+    };
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4()+"-" + S4() + S4() + S4());
+}
+
 // Returns the number of a button in a cross browser way.
 // 0 is the left button
 // 1 is the middle button
@@ -418,6 +429,12 @@ function ISODateString(d)
       + pad(d.getUTCMinutes());
 }
 
+// Returns a valid token to communicate with the server.
+function getToken(location)
+{
+    return (SHA256(localStorage.getItem("identifiant") + ISODateString(new Date()) + location));
+}
+
 // Generate a random string.
 // @param size : The size of the string returned.
 function randomString(size)
@@ -430,6 +447,26 @@ function randomString(size)
     return (text);
 }
 
+// Converts the size to a string like 5,42 Mb
+function sizeToString(size)
+{
+    size = new String(size);
+    if (!size)
+        return ("0 " + T.sizeUnits[0]);
+    var n = Number(size);
+    n = n / Math.pow(1024, parseInt((size.length - 1) / 3));
+    var unit = T.sizeUnits[parseInt((size.length - 1) / 3)];
+    n = (new String(n)).replace(".", ",").substr(0, 4);
+    var c = n.indexOf(",");
+    if (c == 3)
+        n = n.substr(0, 3);
+    if (!Number(n.substr(c + 1, 3)))
+        n = n.substr(0, c);
+    if (!n)
+        n = 0;
+    return (n + " " + unit);
+}
+
 // Translates the text in the correct language
 function tr(text)
 {
@@ -439,3 +476,26 @@ function tr(text)
         document.write("Untranslated");
 }
 
+// Translates an entire resource.
+// The elements to translate are in the node <script>tr(T.text)</script>.
+// This method replaces these nodes by their translation.
+// @brief resource : The html node of the resource to translate.
+function translate(resource)
+{
+    var scripts = resource.getElementsByTagName("script");
+    
+    for (var i = 0; i < scripts.length; ++i)
+    {
+        var tr = scripts[i].innerHTML;
+        if (tr.indexOf("tr(") == 0)
+        {
+            tr = tr.substring(5, tr.length - 1).split('.');
+            var t = T;
+            for (var j = 0; j < tr.length; ++j)
+                t = t[tr[j]];
+            var text = document.createElement("span");
+            text.innerHTML = t;
+            scripts[i].parentNode.insertBefore(text, scripts[i]);
+        }
+    }
+}

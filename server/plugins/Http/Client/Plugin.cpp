@@ -111,7 +111,7 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
     else if (type == LightBird::IOnUnserialize::IDoUnserialize && client.getResponse().getCode() >= 400)
         request.setError(true);
     // The client is uploading something
-    if (request.getMethod() == "POST")
+    if (request.getHeader().contains("content-length"))
     {
         // One must be identified to upload data
         if (!client.getAccount().exists())
@@ -124,6 +124,8 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
             else if (type == LightBird::IOnUnserialize::IDoUnserializeContent)
                 this->uploads.onUnserializeContent(client);
         }
+        else if (!request.getUri().path().contains("/Execute/Uploads"))
+            this->_api->network().disconnect(client.getId());
     }
 }
 
@@ -409,6 +411,11 @@ void    Plugin::identificationFailed(LightBird::IClient &client)
     this->attempts[client.getPeerAddress()].first = QDateTime::currentDateTime().addSecs(IDENTIFICATION_TIME);
     this->attempts[client.getPeerAddress()].second++;
     this->mutex.unlock();
+}
+
+Files &Plugin::getFiles()
+{
+    return (this->files);
 }
 
 Uploads &Plugin::getUploads()
