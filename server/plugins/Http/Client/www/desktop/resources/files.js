@@ -370,7 +370,7 @@ function Icons()
     // Generates the type icons.
     self.typeIcons = function (destination, icon)
     {
-        var height = $(destination.parentNode).height();
+        var height = C.Files.controlsHeight;
         var paper = Raphael(destination, icon.width, height);
         var path = paper.path(icon.path);
         path.attr("fill", "90-#8596ab-#a4b0c0");
@@ -399,7 +399,7 @@ function Icons()
     // Generates the control icons.
     self.controlIcons = function (destination, icon)
     {
-        var height = $(destination.parentNode).height();
+        var height = C.Files.controlsHeight;
         var path = Raphael(destination, icon.width, height).path(icon.path);
         var color = "90-#8596ab-#a4b0c0";
         if (icon.selected)
@@ -424,7 +424,7 @@ function Icons()
     // Generates the header icon.
     self.headerIcon = function (destination, icon)
     {
-        var height = $(destination.parentNode).height();
+        var height = C.Files.headerHeight;
         var path = Raphael(destination, icon.width, height).path(icon.path);
         path.attr("fill", "#8b9db2");
         path.attr("stroke", "none");

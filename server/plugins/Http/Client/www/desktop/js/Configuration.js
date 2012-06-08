@@ -54,6 +54,8 @@ var Configuration =
     },
 	Files :
 	{
+        controlsHeight : 40,
+        headerHeight : 28,
         headerSeparatorWidth : 1, // The width of the header separators.
         headerMinWidth : 40, // The default minimum width of the columns of the header.
         headerTextPadding : 5, // The padding between the separator and the header columns.

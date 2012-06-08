@@ -348,22 +348,20 @@ a:visited
     width: 100px;
     margin-left: 10px;
 	opacity: 0.9;
-    background-image: linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -moz-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -o-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -ms-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
+    background-image: linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
+    background-image: -moz-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
+    background-image: -webkit-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
+    background-image: -o-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
+    background-image: -ms-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
 }
-
 #desktop>.middle>.tasks_list>.icons>.page.window>.ghost
 {
-    background-image: linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -moz-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -o-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -ms-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
+    background-image: linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
+    background-image: -moz-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
+    background-image: -webkit-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
+    background-image: -o-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
+    background-image: -ms-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
 }
-
 #desktop>.middle>.tasks_list>.icons>.page.focus>.ghost
 {
     background-image: linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
@@ -371,6 +369,25 @@ a:visited
     background-image: -webkit-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
     background-image: -o-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
     background-image: -ms-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
+}
+
+/* Mouse over task content */
+
+#desktop>.middle>.tasks_list>.icons>.page>.task.over_content
+{
+    opacity: 0.95;
+}
+#desktop>.middle>.tasks_list>.icons>.page>.task.over_content>.content
+{
+    color: #222222;
+}
+#desktop.drag>.middle>.tasks_list>.icons>.page>.task.over_content
+{
+    opacity: 0.85;
+}
+#desktop.drag>.middle>.tasks_list>.icons>.page>.task.over_content>.content
+{
+    color: #555555;
 }
 
 /* Task buttons */
@@ -494,6 +511,20 @@ a:visited
 #desktop>.middle>.tasks>.task.hide_border
 {
     border: none;
+}
+
+/* Resize_layer */
+
+#desktop>.middle>.resize_layer
+{
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.33);
+    display: none;
+}
+
+#desktop>.middle>.resize_layer.display
+{
+    display: block;
 }
 
 /* Collections */
@@ -743,8 +774,35 @@ a:visited
 }
 
 /*////////////////////////////////////////////////////////////////////////////
-//                                  STYLES                                  //
+//                                  OTHER                                   //
 ////////////////////////////////////////////////////////////////////////////*/
+
+#desktop #preview
+{
+    position: absolute;
+    z-index: 999998;
+    background-color: rgba(89, 202, 255, 0.33);
+    border: 1px solid rgba(89, 202, 255, 1);
+    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
+    display: none;
+}
+#desktop #preview.window
+{
+    background-color: rgba(77, 255, 97, 0.33);
+    border: 1px solid rgba(77, 255, 97, 1);
+    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
+}
+#desktop #preview.focus
+{
+    background-color: rgba(255, 193, 0, 0.33);
+    border: 1px solid rgba(255, 193, 0, 1);
+    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
+}
+
+#desktop #preview.display
+{
+    display: block;
+}
 
 a.action
 {
