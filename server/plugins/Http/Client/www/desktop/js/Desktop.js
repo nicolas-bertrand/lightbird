@@ -1271,7 +1271,7 @@ function TaskTreeNode(node)
                 var v = self.topNode.v + (1 - (self.topNode.height - diff) / Math.max(self.topNode.height, 1));
                 self.topNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, v));
                 // Adjusts the bottom node to the new top node ratio, so that the bottom node doesn't move
-                if (self.bottomNode && self.topNode.level > self.bottomNode.level && C.Desktop.stabilizeTaskResize)
+                if (self.bottomNode && self.topNode.level > self.bottomNode.level)
                 {
                     // Old size of the bottom node second, divided by the new size of the bottom node
                     var a = 1 - (1 - self.bottomNode.v) / ((1 - self.topNode.parent.v) / (1 - self.topNode.v));
@@ -1286,7 +1286,7 @@ function TaskTreeNode(node)
                 var v = self.bottomNode.v + (1 - (self.bottomNode.height - diff) / Math.max(self.bottomNode.height, 1));
                 self.bottomNode.parent.v = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, v));
                 // Adapts the top node to the new bottom node ratio, so that the top node doesn't move
-                if (self.topNode && self.bottomNode.level > self.topNode.level && C.Desktop.stabilizeTaskResize)
+                if (self.topNode && self.bottomNode.level > self.topNode.level)
                 {
                     // Old size of the top node first, divided by the new size of the top node
                     var a = self.topNode.v / (self.bottomNode.parent.v / self.bottomNode.v);
@@ -1326,7 +1326,7 @@ function TaskTreeNode(node)
                 var h = self.leftNode.h + (1 - (self.leftNode.width - diff) / Math.max(self.leftNode.width, 1));
                 self.leftNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, h));
                 // Adjusts the right node to the new left node ratio, so that the right node doesn't move
-                if (self.rightNode && self.leftNode.level > self.rightNode.level && C.Desktop.stabilizeTaskResize)
+                if (self.rightNode && self.leftNode.level > self.rightNode.level)
                 {
                     // Old size of the right node second, divided by the new size of the right node
                     var a = 1 - (1 - self.rightNode.h) / ((1 - self.leftNode.parent.h) / (1 - self.leftNode.h));
@@ -1341,7 +1341,7 @@ function TaskTreeNode(node)
                 var h = self.rightNode.h + (1 - (self.rightNode.width - diff) / Math.max(self.rightNode.width, 1));
                 self.rightNode.parent.h = Math.max(C.Desktop.resizeTaskLimitMin, Math.min(C.Desktop.resizeTaskLimitMax, h));
                 // Adapts the left node to the new right node ratio, so that the left node doesn't move
-                if (self.leftNode && self.rightNode.level > self.leftNode.level && C.Desktop.stabilizeTaskResize)
+                if (self.leftNode && self.rightNode.level > self.leftNode.level)
                 {
                     // Old size of the left node first, divided by the new size of the left node
                     var a = self.leftNode.h / (self.rightNode.parent.h / self.rightNode.h);
