@@ -7,7 +7,7 @@ var Configuration =
     {
         minWidth : 600, // The minimum width of the desktop.
         minHeight : 300, // The minimum height of the desktop.
-        topHeight : 40, // THe height of the top menu.
+        topHeight : 40, // The height of the top menu.
         bottomHeight : 45, // The height of the bottom area.
         collectionsWidth : 10, // The width of the collections list.
         pageMargin : 10, // The height of the bottom margin between the pages.
@@ -20,7 +20,8 @@ var Configuration =
         tasksListScrollSpeed : 20, // The speed of the scroll areas of the tasks list.
         mouseWheelMultiplier : 50, // Used to normalize the mouse wheel delta. Increases the delta of each click.
         defaultPosition : "e", // The default position of a task moved (n s e w).
-        taskMargin : 5, // The margin between the tasks of a page. It is also the size of the resize task bars.
+        insertTaskAreaSize : 50, // The size of the page border areas that allows to insert a task.
+        taskMargin : 5, // The margin between the tasks content in a page. It is also the size of the resize task bars.
         taskBorder : 1, // The size of the border of the tasks content.
         resizeTaskLimitMin : 0, // The minimum ratio by which a task can be resized. Between 0 and 1.
         resizeTaskLimitMax : 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
