@@ -289,6 +289,18 @@ a:visited
     background-image: none;
 }
 
+#desktop>.middle>.tasks_list>.icons>.page.drag
+{
+    position: absolute;
+    z-index: 999999;
+}
+
+#desktop>.middle>.tasks_list>.icons>.ghost
+{
+    width: 100px;
+    margin-bottom: 10px;
+}
+
 #desktop>.middle>.tasks_list>.icons>.page>.task
 {
     width: 110px;
@@ -506,6 +518,24 @@ a:visited
 #desktop>.middle>.tasks>.task.display
 {
     display: block;
+}
+
+#desktop>.middle>.tasks>.task.over
+{
+    border: 1px solid rgba(89, 202, 255, 1);
+    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
+}
+
+#desktop>.middle>.tasks>.task.window.over
+{
+    border: 1px solid rgba(77, 255, 97, 1);
+    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
+}
+
+#desktop>.middle>.tasks>.task.focus.over
+{
+    border: 1px solid rgba(255, 193, 0, 1);
+    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
 #desktop>.middle>.tasks>.task.hide_border

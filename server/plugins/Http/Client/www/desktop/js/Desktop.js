@@ -179,6 +179,11 @@ function Page()
         self.tree; // The tree allows to render the tasks of the page. It consists of TaskTreeNode objects.
         self.container = gl_desktop; // The container that displays the page
         self.zIndex = 0; // THe z-index of the content of the page
+        self.justFocused = false; // True if the page was not focused before the mouse down event
+        // Drag properties
+        self.element; // The initial position of the icon {x, y}
+        self.mouse; // The position of the mouse in the icon {x, y}
+        self.ghost; // A div that shows the future position of the page while it is dragged
         // The coordinates of the page
         self.left;
         self.top;
@@ -189,6 +194,7 @@ function Page()
         self.icon = $("<div></div>")[0];
         $(self.icon).addClass("page");
         self.icon.object = self;
+        self.icon.height; // The height of the icon
         $(self.icon).mousedown(function (e) { self.mouseDown(e); });
         $(self.icon).mouseup(function (e) { self.mouseUpClose(e) });
         $(self.icon).insertBefore(gl_desktop.node.tasks_list.bottom);
@@ -213,6 +219,7 @@ function Page()
         else
             $(self.icon).append(task.icon);
         self.numberTasks++;
+        self.icon.height = C.Desktop.taskIconHeight * self.numberTasks;
         task.setContainer(self.container);
         task.setZIndex(self.zIndex);
     }
@@ -232,8 +239,10 @@ function Page()
             $(self.icon).children(".task").each(function () { this.object.display(); });
         }
         // Puts the focus on it
-        $(gl_desktop.node.tasks_list).children(".page.focus").removeClass("focus");
+        var pages = $(gl_desktop.node.tasks_list).children(".page.focus").removeClass("focus");
+        pages.each(function () { $(this).children(".task").each(function () { $(this.object.content).removeClass("focus"); }); });
         $(self.icon).addClass("focus");
+        $(self.icon).children(".task").each(function () { $(this.object.content).addClass("focus"); });
     }
 
     // Hides the page and its tasks.
@@ -257,6 +266,7 @@ function Page()
         else
             $(task.icon).detach();
         self.numberTasks--;
+        self.icon.height = C.Desktop.taskIconHeight * self.numberTasks;
         // If the page is empty we close it
         if (self.numberTasks == 0)
             self.close();
@@ -283,11 +293,82 @@ function Page()
             $(gl_desktop.node.tasks_list.container).removeClass("display");
     }
     
-    // Puts the focus on the page when we click on it.
+    // Puts the focus on the page when we click on it, and starts to drag it if necessary.
     self.mouseDown = function (e)
     {
         if (e.which == 1)
-            self.display();
+        {
+            // Displays the page
+            if (!$(self.icon).hasClass("focus"))
+            {
+                self.justFocused = true;
+                self.display();
+            }
+            else
+                self.justFocused = false;
+            // Starts to drag the icon if we clicked directly on it (not on the task)
+            if ($(e.target).hasClass("page") && !gl_desktop.drag.isDragging())
+            {
+                gl_desktop.drag.start(e, self.icon, self, "mouseMove", "mouseWheel", "mouseUp");
+                self.element = gl_desktop.drag.getElement();
+                self.mouse = gl_desktop.drag.getMouse();
+                // Takes the scroll into account
+                self.element.y +=  gl_desktop.node.tasks_list.scrollTop;
+                // Moves the icon to the mouse position
+                $(self.icon).addClass("drag");
+                self.icon.style.top = (e.pageY - self.mouse.y) + "px";
+                // Creates the ghost
+                self.ghost = $("<div></div>");
+                self.ghost.addClass("ghost");
+                self.ghost.height(self.icon.height);
+                self.ghost.insertBefore($(self.icon));
+            }
+        }
+    }
+    
+    // Moves the page icon while it is dragged.
+    // @parem mouseY : If "e" is not defined, mouseY is used instead of e.pageY.
+    self.mouseMove = function (e, mouseY)
+    {
+        // Moves the icon
+        if (e)
+            mouseY = e.pageY;
+        self.icon.style.top = mouseY - self.mouse.y + "px";
+        // The reference y changes if we are above or below the original position of the page
+        var y = mouseY - self.mouse.y - C.Desktop.topHeight + gl_desktop.node.tasks_list.scrollTop - C.Desktop.pageMargin / 2;
+        if (self.element.y < y)
+            y += self.icon.height + C.Desktop.pageMargin;
+        var h = C.Desktop.pageMargin;
+        var element;
+        var pages = $(gl_desktop.node.tasks_list).children(".page");
+        // Searches the page under which we are
+        for (var i = 0; i < pages.length; ++i)
+        {
+            h += pages[i].height / 2;
+            element = pages[i];
+            if (y < h)
+                break ;
+            h += pages[i].height / 2 + C.Desktop.pageMargin;
+        }
+        // And moves the ghost accordingly
+        if (i == pages.length)
+            self.ghost.insertAfter(element);
+        else
+            self.ghost.insertBefore(element);
+    }
+    
+    // Updates the position of the icon.
+    self.mouseWheel = function (e)
+    {
+        self.mouseMove(e);
+    }
+    
+    // Drops the page icon at the ghost position.
+    self.mouseUp = function (e)
+    {
+        $(self.icon).removeClass("drag");
+        $(self.icon).insertBefore(self.ghost);
+        self.ghost.remove();
     }
     
     // Closes the page with the middle mouse.
@@ -631,7 +712,7 @@ function Task(resource, html)
             // Handles the case where the mouse is released outside the browser
             if (gl_desktop.drag.isDragging())
                 return ;
-            gl_desktop.drag.start(e, self.icon, self, "mouseMoveTask", "mouseWheel", "mouseUp");
+            gl_desktop.drag.start(e, self.icon, self, "mouseMove", "mouseWheel", "mouseUp");
             self.mouse = gl_desktop.drag.getMouse();
             self.element = gl_desktop.drag.getElement();
             // Takes the scroll into account
@@ -650,7 +731,7 @@ function Task(resource, html)
     }
     
     // Moves the task icon according to the mouse position.
-    self.mouseMoveTask = function (e)
+    self.mouseMove = function (e)
     {
         // The new position of the task icon
         var y = e.pageY - self.mouse.y;
@@ -944,6 +1025,9 @@ function Task(resource, html)
                 }
             }
         }
+        // Otherwise the page is hidden if it was already focused before the mouse down event
+        else if (!self.getPage().justFocused)
+            self.getPage().hide();
         // Clears the context
         self.taskCache = undefined;
         $(self.icon).removeClass("drag");
@@ -1353,7 +1437,6 @@ function TaskButtons()
         });
     }
     
-    
     // Registers the events that allow to display the buttons of the task.
     self.addTask = function (task)
     {
@@ -1416,6 +1499,7 @@ function TaskButtons()
             self.buttons.style.top = $(task.icon).offset().top + "px";
             $(self.buttons).addClass("display");
             $(task.icon).addClass("over");
+            $(task.content).addClass("over");
             self.task = task;
         }
     }
@@ -1428,6 +1512,7 @@ function TaskButtons()
         {
             $(self.buttons).removeClass("display");
             $(task.icon).removeClass("over");
+            $(task.content).removeClass("over");
         }
         // Otherwise we will hide the buttons when the mouse leaves it
         else
@@ -1438,6 +1523,7 @@ function TaskButtons()
                 {
                     $(self.buttons).removeClass("display");
                     $(task.icon).removeClass("over");
+                    $(task.content).removeClass("over");
                 }
                 // The event must be removed
                 $(self.buttons).off("mouseleave");
@@ -1621,8 +1707,11 @@ function TasksList()
             self.tasks_list.scrollTop -= (Math.exp(Math.abs(self.delta)) - 1) * C.Desktop.tasksListScrollSpeed;
         else
             self.tasks_list.scrollTop += (Math.exp(Math.abs(self.delta)) - 1) * C.Desktop.tasksListScrollSpeed;
+        // Updates the position of the dragged task or page
         if (gl_desktop.drag.isDragging("Task"))
             gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.pageY);
+        else if (gl_desktop.drag.isDragging("Page"))
+            gl_desktop.drag.getObject().mouseMove(undefined, gl_desktop.mouse.pageY);
         // Scroll up finished
         if (self.tasks_list.scrollTop <= 0)
         {
