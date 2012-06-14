@@ -1169,6 +1169,7 @@ function Task(resource, html)
             $(self.content).addClass("window");
         else
             $(self.content).removeClass("window");
+        $(self.content).removeClass("focus");
     }
     
     // Sets the z-indes of the content of the task.
@@ -1788,7 +1789,7 @@ function TaskPreview()
             return ;
         if (e.currentTarget != gl_desktop.node.preview)
             self.currentTask = e.currentTarget.object;
-        if (!self.currentTask)
+        if (!self.currentTask && !self._searchCurrentTask(e))
             return self.hide();
         var width = self.currentTask.width;
         var height = self.currentTask.height;
@@ -1820,6 +1821,7 @@ function TaskPreview()
             // If we are on the content of the dragged task the preview is not displayed
             if (self.currentTask == gl_desktop.drag.getObject())
                 return self.hide();
+            self.position = oldPosition;
             self.task = self.currentTask;
             self.page = undefined;
             // In the corner of the task we use the diagonal to get the position
@@ -1878,7 +1880,7 @@ function TaskPreview()
             page = task.getPage();
         // No preview is needed if the task or the page are the same
         if ((task && drag == task) || (((!task && !position) || page.numberTasks == 1) && drag.getPage() == page) || drag.isOnCreatePage())
-            self.hide();
+            return self.hide();
         // Displays the preview on a task
         else if (task)
         {
@@ -1959,7 +1961,10 @@ function TaskPreview()
         // Updates the state of the preview
         self.position = position;
         self.task = task;
+        self.currentTask = task;
         self.page = page;
+        if (task)
+            self.page = undefined;
     }
     
     // The mouse leaved the task content.
@@ -2022,6 +2027,26 @@ function TaskPreview()
         delete self.position;
         delete self.page;
         delete self.currentTask;
+    }
+    
+    // Searches the task over which the mouse is.
+    self._searchCurrentTask = function (e)
+    {
+        if (!self.page)
+            return (false);
+        var tasks = $(self.page.icon).children(".task");
+        for (var i = 0; i < tasks.length; ++i)
+        {
+            var task = tasks[i].object;
+            if (task.left <= e.pageX && task.top <= e.pageY
+                && task.left + task.width + 2 >= e.pageX && task.top + task.height + 2 >= e.pageY)
+            {
+                self.currentTask = task;
+                self.page = undefined;
+                return (true);
+            }
+        }
+        return (false);
     }
     
     self.init();
