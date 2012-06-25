@@ -231,12 +231,12 @@ function Page()
         self.container.display(self);
         if (!$(self.content).hasClass("display"))
         {
-            // Updates the coordinates
-            self.onResize();
             // Display the page
             $(self.content).addClass("display");
             // Displays the tasks of the page
             $(self.icon).children(".task").each(function () { this.object.display(); });
+            // Updates the coordinates
+            self.onResize();
         }
         // Puts the focus on it
         var pages = $(gl_desktop.node.tasks_list).children(".page.focus").removeClass("focus");

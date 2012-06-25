@@ -9,10 +9,10 @@ function Files(task)
         resource.node.element = $(task.content).children(".files")[0];
         resource.node.controls = $(resource.node.element).children(".controls")[0];
         resource.node.header = $(resource.node.element).children(".header")[0];
-        resource.node.list = $(resource.node.element).children(".list").children(".files")[0];
+        resource.node.list = $(resource.node.element).children(".list")[0];
         
         // Members
-        resource.files; // The list of the files to display.
+        resource.files = new Array(); // The list of the files to display.
         resource.icons = new Icons(); // Generates the SVG icons
         resource.layout = new Layout(); // Manages the layout of the columns
         resource.header = new Header(); // The header of the files list
@@ -35,7 +35,7 @@ function Files(task)
             if (HttpRequest.status == 200)
             {
                 resource.files = jsonParse(HttpRequest.responseText);
-                resource.container.addFiles(resource.files);
+                resource.container.initialize();
             }
         });
     }
@@ -176,70 +176,106 @@ function List()
     
     self.init = function ()
     {
-        self.list = resource.node.list.parentNode;
+        // Nodes
+        self.list = resource.node.list;
+        self.table = $(self.list).children(".files")[0];
+        self.top = $(self.list).children(".top")[0];
+        self.bottom = $(self.list).children(".bottom")[0];
+        
+        // Members
+        self.listHeight;
+        self.topHeight = 0;
+        self.bottomHeight = 0;
+        
+        $(self.list).scroll(function (e) { self.updateFiles(e); });
         self.updateColumns();
     }
     
-    // Add the files to the list.
-    self.addFiles = function (files)
+    // Initializes the files list.
+    self.initialize = function ()
     {
-        // Gets the list of the columns to display
-        var columns = resource.header.getColumns();
-        for (var i = 0; i < files.length; ++i)
+        // Hides the scroll if all the files can be seen at the same time
+        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+            $(self.list).removeClass("scroll");
+        else
+            $(self.list).addClass("scroll");
+        self.list.scrollTop = 0;
+        // Displays the first files
+        for (var i = 0; i < self.table.rows.length; i++)
         {
-            // Creates the row
-            var row = resource.node.list.insertRow(-1);
-            row.file = files[i];
-            $(row).addClass(i % 2 ? "odd" : "even");
-            // Adds the type cell
-            var cell = row.insertCell(-1);
-            $(cell).addClass("type");
-            var type = $("<div></div>")[0];
-            $(type).addClass(row.file.type);
-            $(type).appendTo(cell);
-            // Inserts the columns
-            for (var j = 0; j < columns.length; ++j)
-            {
-                cell = row.insertCell(-1);
-                cell.name = columns[j].originalName;
-                cell.originalText = resource.layout.convert(columns[j].originalName, row.file[columns[j].originalName]);
-                cell.innerHTML = cell.originalText;
-                if (columns[j].align != "left")
-                    cell.align = columns[j].align;
-            }
-            // The last cell is used as a border
-            cell = row.insertCell(-1);
+            self.addRow(-1, self.topHeight / C.Files.listRowHeight + i);
+            self.table.deleteRow(0);
         }
+        self.updateFiles();
     }
     
-    // Removes a column from the list.
-    self.removeColumn = function (column)
+    // Updates the files list.
+    self.updateFiles = function ()
     {
-        // Removes the col element
-        var colgroup = $(resource.node.list).children("colgroup");
-        var cols = colgroup.children("col");
-        for (var i = 0; i < cols.length; ++i)
-            if (cols[i].name == column.originalName)
-                $(cols[i]).remove();
-        // Removes the column
-        var rows = resource.node.list.rows;
-        var cells;
-        for (var i = 0; i < rows.length; ++i)
-            for (var j = 0, cells = rows[i].cells; j < cells.length; ++j)
-                if (cells[j].name == column.originalName)
-                    $(cells[j]).remove();
+        // The table must always have enough rows to fill the list height
+        var r = Math.max(self.listHeight / C.Files.listRowHeight, 0);
+        // Adds some rows bellow the list so that the new rows does not pop
+        var newRows = Math.min(Math.max(Math.floor(resource.files.length - (self.topHeight + self.listHeight) / C.Files.listRowHeight), 1), 8);
+        if (self.listHeight / C.Files.listRowHeight + newRows < resource.files.length)
+            r += newRows;
+        // Adds the missing rows
+        if (self.table.rows.length < r)
+            while (self.table.rows.length < r)
+                self.addRow(-1, self.topHeight / C.Files.listRowHeight + self.table.rows.length);
+        // Removes the unnecessary rows
+        else if (self.table.rows.length > r + 1)
+            while (self.table.rows.length > r + 1)
+                self.table.deleteRow(-1);
+        
+        // Computes the new top and bottom height, depending on the current scroll
+        var oldTopHeight = self.topHeight;
+        var oldBottomHeight = self.bottomHeight;
+        self.topHeight = Math.max(Math.min(Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight), 0);
+        self.bottomHeight = resource.files.length * C.Files.listRowHeight - self.topHeight - self.table.rows.length * C.Files.listRowHeight;
+        // If some new row have to be displayed
+        if (self.topHeight != oldTopHeight || self.bottomHeight != oldBottomHeight)
+        {
+            // Resize the top and bottom padding
+            $(self.top).height(self.topHeight);
+            $(self.bottom).height(self.bottomHeight);
+            // Calculates the number of rows to create
+            var diff = (self.topHeight - oldTopHeight) / C.Files.listRowHeight;
+            // All the rows to display are new, so we redraw completly the list
+            if (Math.abs(diff) > self.table.rows.length)
+            {
+                for (var i = 0; i < self.table.rows.length; i++)
+                {
+                    self.addRow(-1, self.topHeight / C.Files.listRowHeight + i);
+                    self.table.deleteRow(0);
+                }
+            }
+            // Adds the rows at the end of the list
+            else if (diff > 0)
+                for (var i = 0; diff-- > 0; i++)
+                {
+                    self.addRow(-1, oldTopHeight / C.Files.listRowHeight + self.table.rows.length + i);
+                    self.table.deleteRow(0);
+                }
+            // Adds the rows on the top of the list
+            else if (diff < 0)
+                for (var i = 1; diff++ < 0; i++)
+                {
+                    self.addRow(0, oldTopHeight / C.Files.listRowHeight - i);
+                    self.table.deleteRow(-1);
+                }
+        }
     }
     
     // Updates the width of the columns.
     self.updateColumns = function ()
     {
         var columns = resource.header.getColumns();
-        var colgroup = $(resource.node.list).children("colgroup");
+        var colgroup = $(self.table).children("colgroup");
         var cols = colgroup.children("col");
         for (var i = 0; i < columns.length; ++i)
         {
             var col;
-            // THe columns doesn't exists yet
+            // The columns doesn't exists yet
             if (cols.length <= i + 1)
             {
                 col = $("<col></col>");
@@ -248,7 +284,7 @@ function List()
             }
             else
                 col = $(cols[i + 1]);
-            // Updates the widfh
+            // Updates the width
             if (i != 0)
                 col.width($(columns[i]).width() + C.Files.headerSeparatorWidth);
             else
@@ -256,9 +292,70 @@ function List()
         }
     }
     
-    // Resizes the list to fit into the task content.
+    // Removes a column from the list.
+    self.removeColumn = function (column)
+    {
+        // Removes the col element
+        var colgroup = $(self.table).children("colgroup");
+        var cols = colgroup.children("col");
+        for (var i = 0; i < cols.length; ++i)
+            if (cols[i].name == column.originalName)
+                $(cols[i]).remove();
+        // Removes the column
+        var rows = self.table.rows;
+        var cells;
+        for (var i = 0; i < rows.length; ++i)
+            for (var j = 0, cells = rows[i].cells; j < cells.length; ++j)
+                if (cells[j].name == column.originalName)
+                    $(cells[j]).remove();
+    }
+    
+    // Resizes the list to fit into the task content height.
     self.onResize = function (left, top, width, height)
     {
+        self.listHeight = height - C.Files.controlsHeight - C.Files.headerHeight - 2; // -2 is the border of the header
+        self.list.style.height = self.listHeight + "px";
+        // Updates the files list
+        self.updateFiles();
+        // Hides the scroll when all the files can be seen at the same time
+        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+        {
+            $(self.list).removeClass("scroll");
+            self.list.scrollTop = 0;
+        }
+        else
+            $(self.list).addClass("scroll");
+    }
+    
+    // Adds a row at the given position.
+    // @param relative : The position of the new row in the table (-1 for the end of the list).
+    // @param absolute : The absolute position of the row in the list, which includes the rows that are not visible.
+    self.addRow = function (relative, absolute)
+    {
+        // Creates the row
+        var row = self.table.insertRow(relative);
+        $(row).addClass(absolute % 2 ? "even" : "odd");
+        // The first cell is the type of the file
+        var type = row.insertCell(-1);
+        $(type).addClass("type");
+        $("<div></div>").appendTo(type);
+        // Builds the other cells
+        var columns = resource.header.getColumns();
+        for (var i = 0; i <= columns.length; ++i)
+            row.insertCell(-1);
+        // If the row represents a file we fill its cells
+        if (absolute >= resource.files.length)
+            return ;
+        $(row).addClass(resource.files[absolute].type);
+        for (var i = 0; i < columns.length; ++i)
+        {
+            var cell = row.cells[i + 1];
+            cell.name = columns[i].originalName;
+            cell.originalText = resource.layout.convert(columns[i].originalName, resource.files[absolute][columns[i].originalName]);
+            cell.innerHTML = cell.originalText;
+            if (columns[i].align != "left")
+                cell.align = columns[i].align;
+        }
     }
 
     self.init();
@@ -365,6 +462,7 @@ function Icons()
         for (var control in self.icons.controls)
             self.controlIcons($(resource.node.controls).children("." + control)[0], self.icons.controls[control]);
         self.headerIcon($(resource.node.header).children(".add")[0], self.icons.add);
+        
     }
     
     // Generates the type icons.
@@ -372,27 +470,44 @@ function Icons()
     {
         var height = C.Files.controlsHeight;
         var paper = Raphael(destination, icon.width, height);
+        var background = paper.rect(0, 0, icon.width, height - 5);
+        background.attr("fill", icon.background);
+        background.attr("stroke", "none");
+        background.hide();
         var path = paper.path(icon.path);
-        path.attr("fill", "90-#8596ab-#a4b0c0");
+        path.attr("fill", "90-#6e7d8f-#929daa");
         path.attr("stroke", "none");
         path.translate(icon.width / 2, height / 2);
-        var rect = paper.rect(0, height - 5, icon.width, 5);
-        rect.attr("fill", icon.line);
-        rect.attr("stroke", "none");
-        rect.hide();
+        var line = paper.rect(0, height - 5, icon.width, 5);
+        line.attr("fill", icon.line);
+        line.attr("stroke", "none");
+        line.hide();
+        if (icon == self.icons.types.image)
+        {
+            icon.border = paper.rect(0, 0, 1, height - 5);
+            icon.border.attr("fill", "#bee8fd");
+            icon.border.attr("stroke", "none");
+            icon.border.hide();
+        }
         $(destination).mouseenter(function ()
         {
             path.translate(-icon.width / 2, - height / 2);
             path.attr("fill", icon.gradient);
             path.translate(icon.width / 2, height / 2);
-            rect.show();
+            background.show();
+            line.show();
+            if (icon.border)
+                icon.border.show();
         });
         $(destination).mouseleave(function ()
         {
             path.translate(-icon.width / 2, - height / 2);
-            path.attr("fill", "90-#8596ab-#a4b0c0");
+            path.attr("fill", "90-#6e7d8f-#929daa");
             path.translate(icon.width / 2, height / 2);
-            rect.hide();
+            background.hide();
+            line.hide();
+            if (icon.border)
+                icon.border.hide();
         });
     }
     
@@ -401,7 +516,7 @@ function Icons()
     {
         var height = C.Files.controlsHeight;
         var path = Raphael(destination, icon.width, height).path(icon.path);
-        var color = "90-#8596ab-#a4b0c0";
+        var color = "90-#6e7d8f-#929daa";
         if (icon.selected)
             color = "90-#4cc3ff-#4cd8ff";
         path.attr("fill", color);
@@ -426,7 +541,7 @@ function Icons()
     {
         var height = C.Files.headerHeight;
         var path = Raphael(destination, icon.width, height).path(icon.path);
-        path.attr("fill", "#8b9db2");
+        path.attr("fill", "#8191a5 ");
         path.attr("stroke", "none");
         path.translate(icon.width / 2, height / 2);
         path.glow({ width : 5, color : "white" });
@@ -451,6 +566,7 @@ function Icons()
                 width : 47,
                 gradient : "90-#33bbff-#66ccff",
                 line : "#33bbff",
+                background : "90-#d6f1ff-#edf9ff",
             },
             music : 
             {
@@ -458,6 +574,7 @@ function Icons()
                 width : 40,
                 gradient : "90-#46da57-#73e380",
                 line : "#46da57",
+                background : "90-#daf8dd-#effcf0",
             },
             video : 
             {
@@ -465,13 +582,15 @@ function Icons()
                 width : 41,
                 gradient : "90-#ff7733-#ff9865",
                 line : "#ff7733",
+                background : "90-#ffe4d6 -#fff3ed",
             },
             document : 
             {
                 path : "M8.003,9.966L-8.003,9.974l0-12.943l7.06-7.005l8.947,0.04L8.003,9.966z M6.005-8.042H0.017l-0.038,6.063L-6.017-2.01v9.994H6.005V-8.042z",
                 width : 36,
-                gradient : "90-#ffdd33-#ffe666",
-                line : "#ffdd33",
+                gradient : "90-#ffc000-#ffd040",
+                line : "#ffc000",
+                background : "90-#fff2cc-#fff9e8",
             },
             other : 
             {
@@ -479,6 +598,7 @@ function Icons()
                 width : 40,
                 gradient : "90-#808080-#9e9e9e",
                 line : "#808080",
+                background : "90-#e2e5e9-#f2f4f5",
             },
         },
         controls :

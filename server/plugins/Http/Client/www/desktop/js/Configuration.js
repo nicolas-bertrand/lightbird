@@ -61,6 +61,7 @@ var Configuration =
         headerMinWidth : 40, // The default minimum width of the columns of the header.
         headerTextPadding : 5, // The padding between the separator and the header columns.
         headerDefaultWidth : 200, // The default width of the coulmns of the header.
+        listRowHeight : 30, // The height of the rows of the files list.
 	},
 };
 var C = Configuration;

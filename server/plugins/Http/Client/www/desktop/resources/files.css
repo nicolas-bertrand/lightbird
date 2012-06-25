@@ -31,6 +31,11 @@
     float: left;
     cursor: pointer;
 }
+.tasks>.task>.files>.controls>.image:hover { box-shadow: 0px 0px 5px #33bbff; }
+.tasks>.task>.files>.controls>.music:hover { box-shadow: 0px 0px 5px #46da57; }
+.tasks>.task>.files>.controls>.video:hover { box-shadow: 0px 0px 5px #ff7733; }
+.tasks>.task>.files>.controls>.document:hover { box-shadow: 0px 0px 5px #ffc000; }
+.tasks>.task>.files>.controls>.other:hover { box-shadow: 0px 0px 5px #808080; }
 
 .tasks>.task>.files>.controls>.folder,
 .tasks>.task>.files>.controls>.resize,
@@ -105,7 +110,7 @@
 .tasks>.task>.files>.header>.column>div
 {
     margin: 6px 5px 0px 5px;
-    color: #3c4855;
+    color: #252c35;
     text-shadow: 0px 0px 2px #fff, 1px 1px 1px #fff;
     font-size: 14px;
     width: 10000%;
@@ -140,6 +145,12 @@
 
 .tasks>.task>.files>.list
 {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.tasks>.task>.files>.list.scroll
+{
+    overflow-y: auto;
 }
 
 .tasks>.task>.files>.list>table
@@ -149,7 +160,7 @@
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 12px;
-    color: #47525f;
+    color: #252c35;
 }
 
 .tasks>.task>.files>.list>table tr
@@ -164,7 +175,7 @@
 
 .tasks>.task>.files>.list>table tr.even
 {
-    background-color: #f2f7fa;
+    background-color: #f2f6fa;
 }
 
 .tasks>.task>.files>.list>table td
@@ -190,7 +201,7 @@
     height: 100%;
 }
 
-.tasks>.task>.files>.list>table td.type>.image
+.tasks>.task>.files>.list>table tr.image td.type>div
 {
     background-image: linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
     background-image: -moz-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
@@ -199,7 +210,7 @@
     background-image: -ms-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
 }
 
-.tasks>.task>.files>.list>table td.type>.audio
+.tasks>.task>.files>.list>table tr.audio td.type>div
 {
     background-image: linear-gradient(top, #6be179 0%, #47da58 100%);
     background-image: -moz-linear-gradient(top, #6be179 0%, #47da58 100%);
@@ -208,7 +219,7 @@
     background-image: -ms-linear-gradient(top, #6be179 0%, #47da58 100%);
 }
 
-.tasks>.task>.files>.list>table td.type>.video
+.tasks>.task>.files>.list>table tr.video td.type>div
 {
     background-image: linear-gradient(top, #ff925c 0%, #ff7834 100%);
     background-image: -moz-linear-gradient(top, #ff925c 0%, #ff7834 100%);
@@ -217,7 +228,7 @@
     background-image: -ms-linear-gradient(top, #ff925c 0%, #ff7834 100%);
 }
 
-.tasks>.task>.files>.list>table td.type>.document
+.tasks>.task>.files>.list>table tr.document td.type>div
 {
     background-image: linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
     background-image: -moz-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
@@ -226,7 +237,7 @@
     background-image: -ms-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
 }
 
-.tasks>.task>.files>.list>table td.type>.other
+.tasks>.task>.files>.list>table tr.other td.type>div
 {
     background-image: linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -moz-linear-gradient(top, #999999 0%, #808080 100%);
