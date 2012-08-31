@@ -12,17 +12,15 @@ function Files(task)
         resource.node.list = $(resource.node.element).children(".list")[0];
         
         // Members
-        resource.files = new Array(); // The list of the files to display.
+        resource.files = new Array(); // The list of the files on the server
         resource.icons = new Icons(); // Generates the SVG icons
         resource.layout = new Layout(); // Manages the layout of the columns
         resource.header = new Header(); // The header of the files list
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
-        resource.controlsHeight = $(resource.node.controls).height();
-        resource.headerHeight = $(resource.node.header).height();
         
         // Download the files list
         resource.getFiles();
-        // Sets the resource instance to the task, so that it can call close and onResize.
+        // Sets the resource instance to the task, so that it can call close and onResize
         task.setResource(resource);
     }
     
@@ -178,16 +176,19 @@ function List()
     {
         // Nodes
         self.list = resource.node.list;
-        self.table = $(self.list).children(".files")[0];
+        self.table = $(self.list).children("table")[0];
         self.top = $(self.list).children(".top")[0];
         self.bottom = $(self.list).children(".bottom")[0];
         
         // Members
-        self.listHeight;
-        self.topHeight = 0;
-        self.bottomHeight = 0;
+        self.listHeight; // The height of the file list
+        self.selectedFiles = new Object(); // The list of the files selected by the user
+        self.lastFileSelected; // The last file selected or deselected
+        self.index = 0; // Used to add an element at the end of the selectedFiles list
         
-        $(self.list).scroll(function (e) { self.updateFiles(e); });
+        // Events
+        $(self.table).mousedown(function (e) { self.mouseDown(e); });
+        
         self.updateColumns();
     }
     
@@ -200,70 +201,8 @@ function List()
         else
             $(self.list).addClass("scroll");
         self.list.scrollTop = 0;
-        // Displays the first files
-        for (var i = 0; i < self.table.rows.length; i++)
-        {
-            self.addRow(-1, self.topHeight / C.Files.listRowHeight + i);
-            self.table.deleteRow(0);
-        }
-        self.updateFiles();
-    }
-    
-    // Updates the files list.
-    self.updateFiles = function ()
-    {
-        // The table must always have enough rows to fill the list height
-        var r = Math.max(self.listHeight / C.Files.listRowHeight, 0);
-        // Adds some rows bellow the list so that the new rows does not pop
-        var newRows = Math.min(Math.max(Math.floor(resource.files.length - (self.topHeight + self.listHeight) / C.Files.listRowHeight), 1), 8);
-        if (self.listHeight / C.Files.listRowHeight + newRows < resource.files.length)
-            r += newRows;
-        // Adds the missing rows
-        if (self.table.rows.length < r)
-            while (self.table.rows.length < r)
-                self.addRow(-1, self.topHeight / C.Files.listRowHeight + self.table.rows.length);
-        // Removes the unnecessary rows
-        else if (self.table.rows.length > r + 1)
-            while (self.table.rows.length > r + 1)
-                self.table.deleteRow(-1);
-        
-        // Computes the new top and bottom height, depending on the current scroll
-        var oldTopHeight = self.topHeight;
-        var oldBottomHeight = self.bottomHeight;
-        self.topHeight = Math.max(Math.min(Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight), 0);
-        self.bottomHeight = resource.files.length * C.Files.listRowHeight - self.topHeight - self.table.rows.length * C.Files.listRowHeight;
-        // If some new row have to be displayed
-        if (self.topHeight != oldTopHeight || self.bottomHeight != oldBottomHeight)
-        {
-            // Resize the top and bottom padding
-            $(self.top).height(self.topHeight);
-            $(self.bottom).height(self.bottomHeight);
-            // Calculates the number of rows to create
-            var diff = (self.topHeight - oldTopHeight) / C.Files.listRowHeight;
-            // All the rows to display are new, so we redraw completly the list
-            if (Math.abs(diff) > self.table.rows.length)
-            {
-                for (var i = 0; i < self.table.rows.length; i++)
-                {
-                    self.addRow(-1, self.topHeight / C.Files.listRowHeight + i);
-                    self.table.deleteRow(0);
-                }
-            }
-            // Adds the rows at the end of the list
-            else if (diff > 0)
-                for (var i = 0; diff-- > 0; i++)
-                {
-                    self.addRow(-1, oldTopHeight / C.Files.listRowHeight + self.table.rows.length + i);
-                    self.table.deleteRow(0);
-                }
-            // Adds the rows on the top of the list
-            else if (diff < 0)
-                for (var i = 1; diff++ < 0; i++)
-                {
-                    self.addRow(0, oldTopHeight / C.Files.listRowHeight - i);
-                    self.table.deleteRow(-1);
-                }
-        }
+        for (var i = 0; i < resource.files.length; i++)
+            self.addRow(-1, i);
     }
     
     // Updates the width of the columns.
@@ -315,8 +254,6 @@ function List()
     {
         self.listHeight = height - C.Files.controlsHeight - C.Files.headerHeight - 2; // -2 is the border of the header
         self.list.style.height = self.listHeight + "px";
-        // Updates the files list
-        self.updateFiles();
         // Hides the scroll when all the files can be seen at the same time
         if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
         {
@@ -336,9 +273,16 @@ function List()
         var row = self.table.insertRow(relative);
         $(row).addClass(absolute % 2 ? "even" : "odd");
         // The first cell is the type of the file
-        var type = row.insertCell(-1);
-        $(type).addClass("type");
-        $("<div></div>").appendTo(type);
+        var type = resource.files[absolute].type;
+        var firstCell = 0;
+        if (!row.previousSibling || !$(row.previousSibling).hasClass(type))
+        {
+            var cell = $(row.insertCell(-1)).addClass("type")[0];
+            for (var i = absolute; i < resource.files.length && resource.files[i].type == type; ++i)
+                ;
+            cell.rowSpan = i - absolute;
+            firstCell = 1;
+        }
         // Builds the other cells
         var columns = resource.header.getColumns();
         for (var i = 0; i <= columns.length; ++i)
@@ -347,9 +291,10 @@ function List()
         if (absolute >= resource.files.length)
             return ;
         $(row).addClass(resource.files[absolute].type);
+        $(row.cells[firstCell]).addClass("first");
         for (var i = 0; i < columns.length; ++i)
         {
-            var cell = row.cells[i + 1];
+            var cell = row.cells[i + firstCell];
             cell.name = columns[i].originalName;
             cell.originalText = resource.layout.convert(columns[i].originalName, resource.files[absolute][columns[i].originalName]);
             cell.innerHTML = cell.originalText;
@@ -358,6 +303,82 @@ function List()
         }
     }
 
+    // Adds / removes a file from the selection, depending if the keys shift or ctrl are pressed.
+    self.mouseDown = function (e)
+    {
+        if (e.which != 1)
+            return ;
+        // Gets the selected file by the user
+        var file = e.target;
+        for (var i = 0; i < 3 && file.tagName.toLowerCase() != "tr"; ++i, file = file.parentNode)
+            ;
+        console.log(i);
+        // If the event is directly on the table we use an other way to get the selected file
+        if (e.target == self.table)
+        {
+            var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.Files.listRowHeight));
+            if (n < self.table.rows.length)
+                file = self.table.rows[n];
+            else
+                return ;
+        }
+        // Selects or deselects a file
+        if (e.ctrlKey == true)
+        {
+            for (i in self.selectedFiles)
+                if (self.selectedFiles[i] == file)
+                {
+                    delete self.selectedFiles[i];
+                    $(file).removeClass("selected");
+                    self.lastFileSelected = file;
+                    return ;
+                }
+            self.selectedFiles[self.index++] = file;
+            $(file).addClass("selected");
+        }
+        // Selects multiple files
+        else if (e.shiftKey == true)
+        {
+            // No file selected
+            for (var f in self.selectedFiles)
+                break ;
+            if (!f)
+            {
+                self.selectedFiles[self.index++] = file;
+                $(file).addClass("selected");
+            }
+            // Selects all the files between the selected file and the last file
+            else
+            {
+                var start = self.lastFileSelected;
+                var end = file;
+                if (self.lastFileSelected.rowIndex > file.rowIndex)
+                {
+                    start = file;
+                    end = self.lastFileSelected;
+                }
+                for (var row = start; row != end.nextSibling; row = row.nextSibling)
+                    if (!$(row).hasClass("selected"))
+                        {
+                            self.selectedFiles[self.index++] = row;
+                            $(row).addClass("selected");
+                        }
+            }
+        }
+        // Selects one file
+        else
+        {
+            // Deselects all the files
+            for (var i in self.selectedFiles)
+                $(self.selectedFiles[i]).removeClass("selected");
+            self.selectedFiles = new Object();
+            // Selects the file
+            self.selectedFiles[self.index++] = file;
+            $(file).addClass("selected");
+        }
+        self.lastFileSelected = file;
+    }
+    
     self.init();
     return (self);
 }
@@ -462,7 +483,6 @@ function Icons()
         for (var control in self.icons.controls)
             self.controlIcons($(resource.node.controls).children("." + control)[0], self.icons.controls[control]);
         self.headerIcon($(resource.node.header).children(".add")[0], self.icons.add);
-        
     }
     
     // Generates the type icons.
@@ -555,7 +575,7 @@ function Icons()
         });
     }
     
-    // Stores all the icons.
+    // Stores the icons data.
     self.icons = 
     {
         types :

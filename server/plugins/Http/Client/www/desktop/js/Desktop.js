@@ -659,7 +659,7 @@ function Task(resource, html)
     {
         self.icon; // The icon element of the task in the tasks list, inside the icon of the page
         self.content; // The content of the task, which stores its resource
-        self.resource; // The instance of the resource that manages the content.
+        self.resource = new Object(); // The instance of the resource that manages the content
         // The following members are used when the task icon is being dragged
         self.mouse; // The position of the mouse in the icon {x, y}
         self.element; // The initial position of the element {x, y}
@@ -1091,7 +1091,8 @@ function Task(resource, html)
     // Closes the task.
     self.close = function ()
     {
-        self.resource.close();
+        if (self.resource.close)
+            self.resource.close();
         $(self.icon).remove();
         $(self.content).remove();
         self.icon.object = undefined;

@@ -243,11 +243,11 @@ a:visited
     width: 120px; /* C.Desktop.tasksListWidth */
     overflow: hidden;
     float: left;
-    background-image: linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
-    background-image: -moz-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
-    background-image: -o-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
-    background-image: -ms-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+    background-image: linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
+    background-image: -o-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
 }
 
 #desktop>.middle>.tasks_list>.icons>.top

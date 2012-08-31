@@ -178,6 +178,11 @@
     background-color: #f2f6fa;
 }
 
+.tasks>.task>.files>.list>table tr.selected
+{
+    background-color: #FFEB7E;
+}
+
 .tasks>.task>.files>.list>table td
 {
     padding-left: 5px;
@@ -186,22 +191,21 @@
     white-space: nowrap;
 }
 
+.tasks>.task>.files>.list>table td.first
+{
+    padding-left: 10px;
+}
+
 /* Types */
 
 .tasks>.task>.files>.list>table td.type
 {
-    width: 10px;
+    width: 5px;
     height: 30px;
     padding: 0px;
 }
 
-.tasks>.task>.files>.list>table td.type>div
-{
-    width: 5px;
-    height: 100%;
-}
-
-.tasks>.task>.files>.list>table tr.image td.type>div
+.tasks>.task>.files>.list>table tr.image td.type
 {
     background-image: linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
     background-image: -moz-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
@@ -210,7 +214,7 @@
     background-image: -ms-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
 }
 
-.tasks>.task>.files>.list>table tr.audio td.type>div
+.tasks>.task>.files>.list>table tr.audio td.type
 {
     background-image: linear-gradient(top, #6be179 0%, #47da58 100%);
     background-image: -moz-linear-gradient(top, #6be179 0%, #47da58 100%);
@@ -219,7 +223,7 @@
     background-image: -ms-linear-gradient(top, #6be179 0%, #47da58 100%);
 }
 
-.tasks>.task>.files>.list>table tr.video td.type>div
+.tasks>.task>.files>.list>table tr.video td.type
 {
     background-image: linear-gradient(top, #ff925c 0%, #ff7834 100%);
     background-image: -moz-linear-gradient(top, #ff925c 0%, #ff7834 100%);
@@ -228,7 +232,7 @@
     background-image: -ms-linear-gradient(top, #ff925c 0%, #ff7834 100%);
 }
 
-.tasks>.task>.files>.list>table tr.document td.type>div
+.tasks>.task>.files>.list>table tr.document td.type
 {
     background-image: linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
     background-image: -moz-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
@@ -237,16 +241,11 @@
     background-image: -ms-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
 }
 
-.tasks>.task>.files>.list>table tr.other td.type>div
+.tasks>.task>.files>.list>table tr.other td.type
 {
     background-image: linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -moz-linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -webkit-linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -o-linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -ms-linear-gradient(top, #999999 0%, #808080 100%);
-}
-
-.tasks>.task>.files>.list>table col.type
-{
-    width: 10px;
 }
