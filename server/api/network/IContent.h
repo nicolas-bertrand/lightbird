@@ -57,7 +57,7 @@ namespace LightBird
         virtual qint64          size() const = 0;
         /// @brief Returns the current position of the read pointer.
         virtual qint64          getSeek() const = 0;
-        /// @brief Set the position of the read pointer.
+        /// @brief Sets the position of the read pointer.
         virtual void            setSeek(qint64 position) = 0;
         /// @brief Removes all the contents, and put the instance in its initial state.
         virtual void            clear() = 0;

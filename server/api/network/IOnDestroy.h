@@ -6,7 +6,7 @@
 namespace LightBird
 {
     /// @brief This interface is called just before a disconnected client is
-    /// destroyed, after IOnDisconnect, and allows plugins to cleans all the data
+    /// destroyed, after IOnDisconnect, and allows plugins to clean all the data
     /// they gathered during its connection. Indeed, if IOnDisconnect returned
     /// false, the client is not deleted until all its data has been processed,
     /// so this interface allows plugins to know when the client is actually

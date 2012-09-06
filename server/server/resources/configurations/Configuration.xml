@@ -57,6 +57,7 @@
   <configurations>
     <plugin id="Extensions/Identifier"/>
     <plugin id="Files"/>
+    <plugin id="Ftp"/>
     <plugin id="Http/Client"/>
     <plugin id="Http/Parser"/>
     <plugin id="Json"/>
