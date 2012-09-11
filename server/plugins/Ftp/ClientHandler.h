@@ -1,41 +1,32 @@
-#ifndef CLIENT_HANDLER_H
-# define CLIENT_HANDLER_H
+#ifndef CLIENTHANDLER_H
+# define CLIENTHANDLER_H
+
+# include <QString>
 
 # include "ISessions.h"
+
 # include "Execute.h"
-
-namespace LightBird
-{
-    class IApi;
-    class IClient;
-    class IRequest;
-    class IResponse;
-}
-
-class QString;
 
 class ClientHandler
 {
-    public:
-        ClientHandler(LightBird::IApi *api);
-        ~ClientHandler();
-        bool onConnect(LightBird::IClient *client);
-        bool onDataConnect(LightBird::IClient *client);
-        bool doControlExecute(LightBird::IClient *client);
-        bool doDataExecute(LightBird::IClient *client);
+public:
+    ClientHandler(LightBird::IApi *api);
+    ~ClientHandler();
 
-    private:
-        LightBird::IApi *api;
-        Execute *execute;
+    bool    onConnect(LightBird::IClient *client);
+    bool    onDataConnect(LightBird::IClient *client);
+    bool    doControlExecute(LightBird::IClient *client);
+    bool    doDataExecute(LightBird::IClient *client);
 
-        QMap<QString,Execute::ControlMethod> controlMethods;
-        QMap<QString,QPair<bool,Execute::TransferMethod> > transferMethods; // The bool of the pair is true if the methods sends data on transfer connection, false if it receives some
+private:
+    void    _sendControlMessage(QString id, Execute::MethodResult message);
+    Execute::MethodResult   _prepareTransferMethod(QString verb, QString parameter, LightBird::Session session);
 
-        void _sendControlMessage(QString id, Execute::MethodResult message);
-
-        Execute::MethodResult _prepareTransferMethod(QString verb, QString parameter, LightBird::Session session);
-
+    LightBird::IApi *api;
+    Execute         *execute;
+    QMap<QString, Execute::ControlMethod> controlMethods;
+    QMap<QString, QPair<bool, Execute::TransferMethod> > transferMethods; ///< The bool of the pair is true if the methods sends data on transfer connection, false if it receives some
 };
 
 
-#endif // CLIENT_HANDLER_H
+#endif // CLIENTHANDLER_H

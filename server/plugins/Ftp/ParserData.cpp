@@ -1,10 +1,14 @@
-#include "DataParser.h"
+#include "ParserData.h"
 
-DataParser::DataParser(LightBird::IApi *api, LightBird::IClient *client) : Parser(api, client)
+ParserData::ParserData(LightBird::IApi *api, LightBird::IClient *client) : Parser(api, client)
 {
 }
 
-bool DataParser::doUnserializeContent(const QByteArray &data, quint64 &used)
+ParserData::~ParserData()
+{
+}
+
+bool ParserData::doUnserializeContent(const QByteArray &data, quint64 &used)
 {
     // Make sure we upload to a file as the content might be big
     client->getRequest().getContent().setStorage(LightBird::IContent::TEMPORARYFILE);
@@ -15,19 +19,19 @@ bool DataParser::doUnserializeContent(const QByteArray &data, quint64 &used)
     return (client->isDisconnecting());
 }
 
-bool DataParser::doSerializeContent(QByteArray &data)
+bool ParserData::doSerializeContent(QByteArray &data)
 {
     data.append(client->getResponse().getContent().getContent());
     return (true);
 }
 
-void DataParser::onFinish()
+void ParserData::onFinish()
 {
     api->log().trace("Disconnect");
     api->network().disconnect(client->getId());
 }
 
-bool DataParser::onSerialize(LightBird::IOnSerialize::Serialize type)
+bool ParserData::onSerialize(LightBird::IOnSerialize::Serialize type)
 {
     if (type == LightBird::IOnSerialize::IDoSerialize)
         return (false);
@@ -35,7 +39,7 @@ bool DataParser::onSerialize(LightBird::IOnSerialize::Serialize type)
         return (true);
 }
 
-bool DataParser::onDisconnect()
+bool ParserData::onDisconnect()
 {
     return (false);
 }

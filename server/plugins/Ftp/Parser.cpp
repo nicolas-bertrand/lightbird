@@ -4,12 +4,16 @@ Parser::Parser(LightBird::IApi *api, LightBird::IClient *client) : api(api), cli
 {
 }
 
+Parser::~Parser()
+{
+}
+
 bool Parser::onExecution()
 {
     return (true);
 }
 
-bool Parser::onSerialize(LightBird::IOnSerialize::Serialize type)
+bool Parser::onSerialize(LightBird::IOnSerialize::Serialize)
 {
     return (true);
 }

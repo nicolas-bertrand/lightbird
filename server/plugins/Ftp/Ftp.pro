@@ -16,14 +16,14 @@ LIBS += -L../../build -lLightBird
 
 HEADERS = Plugin.h \
     Parser.h \
-    ControlParser.h \
-    DataParser.h \
+    ParserControl.h \
+    ParserData.h \
     ClientHandler.h \
     Execute.h
 SOURCES = Plugin.cpp \
     Parser.cpp \
-    ControlParser.cpp \
-    DataParser.cpp \
+    ParserControl.cpp \
+    ParserData.cpp \
     ClientHandler.cpp \
     Execute.cpp
 OTHER_FILES = Configuration.xml \

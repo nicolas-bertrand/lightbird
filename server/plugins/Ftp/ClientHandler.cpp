@@ -1,9 +1,6 @@
 #include "ClientHandler.h"
 
 #include "IClient.h"
-#include "IApi.h"
-
-#include <QString>
 
 ClientHandler::ClientHandler(LightBird::IApi *api) : api(api)
 {
@@ -32,17 +29,17 @@ ClientHandler::~ClientHandler()
 bool ClientHandler::onConnect(LightBird::IClient *client)
 {
     // Initialize a new session for this control connection
-    LightBird::Session sess = this->api->sessions().create();
-    sess->setClient(client->getId());
-    sess->setInformation("control-id", client->getId());
-    sess->setInformation("data-id", QString());
-    sess->setInformation("working-dir", ""); // Id of the working directory. Empty if at root
-    sess->setInformation("binary-flag", false);
-    sess->setInformation("transfer-mode", (int)Execute::TransferModeNone);
-    sess->setInformation("transfer-ip", "");
-    sess->setInformation("transfer-port", 0);
+    LightBird::Session session = this->api->sessions().create();
+    session->setClient(client->getId());
+    session->setInformation("control-id", client->getId());
+    session->setInformation("data-id", QString());
+    session->setInformation("working-dir", "/");
+    session->setInformation("binary-flag", false);
+    session->setInformation("transfer-mode", (int)Execute::TransferModeNone);
+    session->setInformation("transfer-ip", client->getPeerAddress().toString());
+    session->setInformation("transfer-port", 0);
     // Be polite and welcome the user
-    this->_sendControlMessage(client->getId(), execute->doGreeting(QString(), sess));
+    this->_sendControlMessage(client->getId(), execute->doGreeting(QString(), session));
     return (true);
 }
 

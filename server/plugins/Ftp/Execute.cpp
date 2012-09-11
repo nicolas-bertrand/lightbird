@@ -174,13 +174,12 @@ Execute::MethodResult Execute::doList(QString parameter, LightBird::Session sess
 
         if (!node)
             continue;
-
         response->getContent().setContent(
                 QString(
                     "%1rwx------ 1 %2 nogroup %3 %4 %5\r\n"
                     ).arg(
                         ((node->getNodeType() == LightBird::Node::DirNode)?"d":"-"),
-                        node->getOwner(),
+                        "user",
                         "0", //QString::number(table->getInformation("size").toInt()),
                         "Jan 20 15:36", //row["modified"].toDateTime().toString("MMM dd hh:mm"),
                         node->getName()
@@ -267,7 +266,7 @@ Execute::MethodResult Execute::doStor(QString parameter, LightBird::Session sess
 
     LightBird::copy(upload.file->fileName(), file.getPath());
 
-    return MethodResult(226, "File successfully transferred\r\n");
+    return (MethodResult(226, "File successfully transferred\r\n"));
 }
 
 
