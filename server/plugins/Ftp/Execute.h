@@ -55,6 +55,7 @@ class Execute
         MethodResult doList(QString parameter, LightBird::Session session, LightBird::IRequest *request, LightBird::IResponse *response);
         MethodResult doRetr(QString parameter, LightBird::Session session, LightBird::IRequest *request, LightBird::IResponse *response);
         MethodResult doStor(QString parameter, LightBird::Session session, LightBird::IRequest *request, LightBird::IResponse *response);
+
     private:
         LightBird::IApi *api;
 };

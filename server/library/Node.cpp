@@ -21,7 +21,7 @@ void            Node::setId(const QString &id)
     QSqlQuery   sqlQuery = db.getQuery("VFS", "select_node").replace(":table", getTableName());
     QVariantMap result;
 
-    sqlQuery.bindValue(":id", this->getId());
+    sqlQuery.bindValue(":id", id);
     if (db.query(sqlQuery, result))
     {
         this->id = id;

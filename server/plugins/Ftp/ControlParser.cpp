@@ -4,21 +4,18 @@ ControlParser::ControlParser(LightBird::IApi *api, LightBird::IClient *client) :
 {
 }
 
-bool ControlParser::doUnserializeContent(const QByteArray &data, quint64 &used)
+bool        ControlParser::doUnserializeContent(const QByteArray &data, quint64 &used)
 {
-    bool    ret = false;
+    bool    result = false;
     QString command = QString::fromUtf8(data.constData(), data.size());
     int     i = command.indexOf("\r\n");
 
-    if (i>=0)
+    if (i >= 0)
     {
-        ret = true;
+        result = true;
         used = i + 2;
-
         command.truncate(i); // Keep only the first line of data
-        
         QString verb = command, parameter;
-
         int j = -1;
         if ((j = command.indexOf(' ')) >= 0)
         {
@@ -26,13 +23,11 @@ bool ControlParser::doUnserializeContent(const QByteArray &data, quint64 &used)
             parameter = command;
             parameter.remove(0,j+1);
         }
-
         this->client->getRequest().setMethod(verb);
         this->client->getRequest().getContent().setStorage(LightBird::IContent::VARIANT);
         *this->client->getRequest().getContent().getVariant() = parameter;
     }
-
-    return ret;
+    return (result);
 }
 
 bool ControlParser::doSerializeContent(QByteArray &data)
@@ -48,10 +43,8 @@ bool ControlParser::doSerializeContent(QByteArray &data)
         line.prepend(QString::number(client->getResponse().getCode()) + (it.hasNext() ? "-" : " "));
         line.append("\r\n");
     }
-
     data.append(lines.join(""));
-
-    return true;
+    return (true);
 }
 
 bool ControlParser::onExecution()

@@ -1,16 +1,16 @@
-#include "Execute.h"
-#include "LightBird.h"
-#include "Properties.h"
+#include <QDir>
+#include <QSqlQuery>
+
 #include "IIdentify.h"
 #include "IIdentifier.h"
 
-#include "File.h"
 #include "Dir.h"
-
+#include "Execute.h"
+#include "File.h"
+#include "LightBird.h"
+#include "Properties.h"
+#include "TableAccounts.h"
 #include "TableFiles.h"
-
-#include <QDir>
-#include <QSqlQuery>
 
 Execute::Execute(LightBird::IApi *api) : api(api)
 {
@@ -22,73 +22,45 @@ Execute::~Execute()
 
 Execute::MethodResult Execute::doGreeting(QString, LightBird::Session)
 {
-    return MethodResult(
-            220,
-            "Welcome to Lightbird's FTP server\r\n"
-            "Please authenticate\r\n"
-            "And of course, have fun !\r\n"
-            );
+    return (MethodResult(220, "Welcome to Lightbird's FTP server\r\n"
+                              "Please authenticate\r\n"
+                              "And of course, have fun !\r\n"));
 }
 
-Execute::MethodResult Execute::doUser(QString parameter, LightBird::Session session)
+Execute::MethodResult Execute::doUser(QString user, LightBird::Session session)
 {
-    MethodResult ret;
-    QString username = parameter;
-    if(!username.trimmed().isEmpty()) // If the string is not blank
+    MethodResult      result;
+
+    if(!user.trimmed().isEmpty())
     {
-        session->setInformation("username", username);
-        ret.first = 331;
-        ret.second = QString("User %1 OK. Password required.\r\n").arg(username);
+        session->setInformation("user", user);
+        result = MethodResult(331, QString("User %1 OK. Password required.\r\n").arg(user));
     }
     else
-    {
-        ret.first = 530;
-        ret.second = "Anonymous login not alowed.\r\n";
-    }
-    return ret;
+        result = MethodResult(530, "Anonymous login not alowed.\r\n");
+    return (result);
 }
 
-Execute::MethodResult Execute::doPass(QString parameter, LightBird::Session session)
+Execute::MethodResult Execute::doPass(QString pass, LightBird::Session session)
 {
-    MethodResult ret;
-    if (session->hasInformation("username"))
+    LightBird::TableAccounts account;
+    QString                  user;
+    MethodResult             result;
+
+    if (session->hasInformation("user"))
     {
-        QString username = session->getInformation("username").toString();
-        QString password = parameter;
-        QSqlQuery query;
-        QVector<QVariantMap>    result;
-
-        LightBird::IDatabase &database = this->api->database();
-        query.prepare(database.getQuery("FtpExecute", "select_account"));
-        query.bindValue(":name", username);
-
-        api->log().trace("FTP AUTH", Properties("user", username).add("pass", password).toMap(), "Execute", "doPass");
-        
-        if (database.query(query, result) && result.size() >= 1 && result[0]["password"].toByteArray() == LightBird::sha256(password.toAscii() + result[0]["id"].toByteArray()))
+        user = session->getInformation("user").toString();
+        if (account.setIdFromNameAndPassword(user, pass))
         {
-            ret.first = 230;
-            ret.second = "Login authentification OK.\r\n";
-
-            session->setAccount(result[0]["id"].toString());
+            result = MethodResult(230, "Login authentification OK.\r\n");
+            session->setAccount(account.getId());
         }
         else
-        {
-            ret.first = 530;
-            ret.second = "Login authentification failed.\r\n";
-            api->log().trace("FTP AUTH FAILED", Properties("count", result.size()).toMap(), "Execute", "doPass");
-            if (result.size() >= 1)
-            {
-                api->log().trace("Ftp password mismatch", Properties("computed", LightBird::sha256(password.toAscii() + result[0]["id"].toByteArray())).add("stored", result[0]["password"]).toMap(), "Execute", "doPass");
-            }
-        }
+            result = MethodResult(530, "Login authentification failed.\r\n");
     }
     else
-    {
-        ret.first = 530;
-        ret.second = "Please tell me who you are first.\r\n";
-    }
-
-    return ret;
+        result = MethodResult(530, "Please tell me who you are first.\r\n");
+    return (result);
 }
 
 Execute::MethodResult Execute::doSyst(QString, LightBird::Session)
@@ -101,42 +73,35 @@ Execute::MethodResult Execute::doSyst(QString, LightBird::Session)
 # warning Please add your system type here
     QString syst = "UNKNOWN";
 #endif
-
-    return MethodResult(215, syst + " Type: L8\r\n");
+    return (MethodResult(215, syst + " Type: L8\r\n"));
 }
 
 Execute::MethodResult Execute::doPwd(QString, LightBird::Session session)
 {
     LightBird::Dir wd = LightBird::Dir::byId(session->getInformation("working-dir").toString());
     
-    return MethodResult(257, QString("\"%1\" is your current location\r\n").arg(wd.getPath()));
+    return (MethodResult(257, QString("\"%1\" is your current location\r\n").arg(wd.getPath())));
 }
 
-Execute::MethodResult Execute::doType(QString parameter, LightBird::Session session)
+Execute::MethodResult Execute::doType(QString type, LightBird::Session session)
 {
-    QString type = parameter;
-    int code = 200;
+    int     code = 200;
     QString message;
-    bool binary = session->getInformation("binary-flag").toBool();
-    if (type.size() > 0) // We have a type appended
+    bool    binary = session->getInformation("binary-flag").toBool();
+
+    if (!type.isEmpty()) // We have a type appended
     {
         QString first = type.at(0);
         if (QString::compare(first, "A", Qt::CaseInsensitive) == 0)
-        {
             binary = false;
-        }
         else if (QString::compare(first, "I", Qt::CaseInsensitive) == 0)
-        {
             binary = true;
-        }
         else if (QString::compare(first, "L", Qt::CaseInsensitive) == 0)
         {
             if (type.size() > 1 && type.at(1).isDigit())
             {
                 if (type.at(1) != '8')
-                {
                     message += "Only 8-bit bytes are supported\r\n";
-                }
             }
             else
                 message += "Missing argument\r\n";
@@ -152,41 +117,30 @@ Execute::MethodResult Execute::doType(QString parameter, LightBird::Session sess
     {
         code  = 501;
         message += "Missing argument\r\n"
-            "A(scii) I(mage) L(ocal)\r\n";
+                   "A(scii) I(mage) L(ocal)\r\n";
     }
-
-    message += QString("TYPE is now %1\r\n").arg(binary?"8-bit binary":"ASCII");
+    message += QString("TYPE is now %1\r\n").arg(binary ? "8-bit binary" : "ASCII");
     session->setInformation("binary-flag", binary);
-    return MethodResult(code, message);
+    return (MethodResult(code, message));
 }
 
 Execute::MethodResult Execute::doPort(QString parameter, LightBird::Session session)
 {
-    MethodResult ret;
-    QRegExp reg("(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d+),(\\d+)"); // Regex matching a port parameter
+    MethodResult result;
+    QRegExp      reg("(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d+),(\\d+)"); // Regex matching a port parameter
 
     if (reg.indexIn(parameter) >= 0)
     {
         QString address = QString("%1.%2.%3.%4").arg(reg.cap(1)).arg(reg.cap(2)).arg(reg.cap(3)).arg(reg.cap(4));
         int port = reg.cap(5).toInt() << 8 | reg.cap(6).toInt();
-
-        //this->api->log().trace("Port command " + address + " " + QString::number(port));
-
         session->setInformation("transfer-mode", TransferModePort);
         session->setInformation("transfer-ip", address);
         session->setInformation("transfer-port", port);
-
-        ret.first = 200;
-        ret.second = "PORT command successful\r\n";
-
-
+        result = MethodResult(200, "PORT command successful\r\n");
     }
     else
-    {
-        ret.first = 501;
-        ret.second = "Syntax error in IP address\r\n";
-    }
-    return ret;
+        result = MethodResult(501, "Syntax error in IP address\r\n");
+    return (result);
 }
 
 Execute::MethodResult Execute::doCwd(QString parameter, LightBird::Session session)
@@ -197,12 +151,10 @@ Execute::MethodResult Execute::doCwd(QString parameter, LightBird::Session sessi
     if (cwd)
     {
         session->setInformation("working-dir", cwd.getId());
-        return MethodResult(250, QString("OK. Current directory is \"%1\"\r\n").arg(cwd.getPath()));
+        return (MethodResult(250, QString("OK. Current directory is \"%1\"\r\n").arg(cwd.getPath())));
     }
     else
-        return MethodResult(550, QString("Can't change directory to %1\r\n").arg(parameter));
-
-    
+        return (MethodResult(550, QString("Can't change directory to %1\r\n").arg(parameter)));
 }
 
 Execute::MethodResult Execute::doCdup(QString, LightBird::Session session)
@@ -214,13 +166,12 @@ Execute::MethodResult Execute::doList(QString parameter, LightBird::Session sess
 {
     LightBird::Dir wd = LightBird::Dir::byId(session->getInformation("working-dir").toString());
     LightBird::DirIterator it(wd);
-
     int count = 0;
 
     while(it.hasNext())
     {
         LightBird::Node *node = it.next();
-        
+
         if (!node)
             continue;
 
@@ -237,7 +188,6 @@ Execute::MethodResult Execute::doList(QString parameter, LightBird::Session sess
         count ++;
         delete node;
     }
-
     return MethodResult(226,
             QString(
                 "Options: -a -l\r\n"
@@ -248,22 +198,20 @@ Execute::MethodResult Execute::doList(QString parameter, LightBird::Session sess
 
 Execute::MethodResult Execute::doRetr(QString parameter, LightBird::Session session, LightBird::IRequest *request, LightBird::IResponse *response)
 {
-    MethodResult ret;
+    MethodResult result;
     LightBird::Dir wd = LightBird::Dir::byId(session->getInformation("working-dir").toString());
-    LightBird::Node *node = LightBird::Node::byPath(parameter, wd);
+    //LightBird::Node *node = LightBird::Node::byPath(parameter, wd);
+    LightBird::TableFiles file;
 
-    if (node)
+    file.setIdFromVirtualPath(parameter);
+    if (file)
     {
-        // TODO: set storage
-        //response->getContent().setStorage(LightBird::IContent::FILE, table->getFullPath());
-        ret = MethodResult(226, 
-            "File successfully transferred\r\n"
-            );
+        response->getContent().setStorage(LightBird::IContent::FILE, file.getFullPath());
+        result = MethodResult(226, "File successfully transferred\r\n");
     }
     else
-        ret = MethodResult(550, QString("Can't open %1: No such file or directory").arg(parameter));
-
-    return ret;
+        result = MethodResult(550, QString("Can't open %1: No such file or directory").arg(parameter));
+    return (result);
 }
 
 Execute::MethodResult Execute::doStor(QString parameter, LightBird::Session session, LightBird::IRequest *request, LightBird::IResponse *response)

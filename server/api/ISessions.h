@@ -33,7 +33,7 @@ namespace LightBird
                                            const QString &id_account = QString(),
                                            const QStringList &clients = QStringList(),
                                            const QVariantMap &informations = QVariantMap()) = 0;
-        /// @brief Destroy a session.
+        /// @brief Destroys a session.
         /// @param id : The id of the session.
         /// @param disconnect : If the clients associated with the session have
         /// to be disconnected. Keep in mind that a client can be associated with

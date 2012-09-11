@@ -9,26 +9,30 @@
 
 # include "IDoSerializeContent.h"
 # include "IDoSerializeHeader.h"
+# include "IDoExecution.h"
 # include "IDoUnserializeContent.h"
-# include "IDoUnserializeHeader.h"
+# include "IDoSend.h"
 # include "IOnConnect.h"
 # include "IOnExecution.h"
 # include "IOnSerialize.h"
 # include "IOnDisconnect.h"
 # include "IOnDestroy.h"
 # include "IOnFinish.h"
-# include "IOnProtocol.h"
 # include "IPlugin.h"
+
+# include "ClientHandler.h"
 
 class Parser;
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
                public LightBird::IOnConnect,
+               public LightBird::IDoSend,
                public LightBird::IDoUnserializeContent,
-               public LightBird::IDoSerializeContent,
+               public LightBird::IDoExecution,
                public LightBird::IOnExecution,
                public LightBird::IOnSerialize,
+               public LightBird::IDoSerializeContent,
                public LightBird::IOnFinish,
                public LightBird::IOnDisconnect,
                public LightBird::IOnDestroy
@@ -36,10 +40,12 @@ class Plugin : public QObject,
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
+                 LightBird::IDoSend
                  LightBird::IDoUnserializeContent
-                 LightBird::IDoSerializeContent
+                 LightBird::IDoExecution
                  LightBird::IOnExecution
                  LightBird::IOnSerialize
+                 LightBird::IDoSerializeContent
                  LightBird::IOnFinish
                  LightBird::IOnDisconnect
                  LightBird::IOnDestroy)
@@ -72,8 +78,11 @@ public:
     // Serialize
     bool    doSerializeContent(LightBird::IClient &client, QByteArray &data);
 
-    // IOnExecution
+    // Execution
+    bool    doExecution(LightBird::IClient &client);
     bool    onExecution(LightBird::IClient &client);
+
+    bool     doSend(LightBird::IClient &client);
 
     // IOnSerialize
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
@@ -85,11 +94,11 @@ public:
     static Configuration    &getConfiguration();
 
 private:
-    LightBird::IApi         *api;           ///< The LightBird's Api.
-    QReadWriteLock          mutex;          ///< Make parsers thread-safe.
-    static Configuration    configuration;  ///< The configuration of the plugin.
-
+    LightBird::IApi          *api;          ///< The LightBird's Api.
+    QReadWriteLock           mutex;         ///< Make parsers thread-safe.
+    static Configuration     configuration; ///< The configuration of the plugin.
     QHash<QString, Parser *> parsers;
+    ClientHandler            *handler;      ///< This single object handles all the connections.
 
 };
 

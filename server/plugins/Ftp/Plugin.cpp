@@ -21,11 +21,14 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
+    this->handler = new ClientHandler(api);
     return (true);
 }
 
 void    Plugin::onUnload()
 {
+    delete this->handler;
+    this->handler = NULL;
 }
 
 bool    Plugin::onInstall(LightBird::IApi *api)
@@ -41,9 +44,9 @@ void    Plugin::onUninstall(LightBird::IApi *api)
 
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
-    metadata.name = "Parser FTP";
-    metadata.brief = "The FTP parser.";
-    metadata.description = "Handles and parses FTP requests.";
+    metadata.name = "FTP";
+    metadata.brief = "The FTP server.";
+    metadata.description = "A minimalist FTP server.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
@@ -57,9 +60,15 @@ bool     Plugin::onConnect(LightBird::IClient &client)
 
     this->mutex.lockForWrite();
     if (client.getProtocols().first() == "FTP")
+    {
         this->parsers.insert(client.getId(), new ControlParser(this->api, &client));
+        result = this->handler->onConnect(&client);
+    }
     else if (client.getProtocols().first() == "FTP-DATA")
+    {
         this->parsers.insert(client.getId(), new DataParser(this->api, &client));
+        result = this->handler->onDataConnect(&client);
+    }
     else
         result = false;
     this->mutex.unlock();
@@ -99,6 +108,17 @@ bool     Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data
     return (result);
 }
 
+bool     Plugin::doExecution(LightBird::IClient &client)
+{
+    bool result = false;
+
+    if (client.getRequest().getProtocol() == "FTP")
+        result = this->handler->doControlExecute(&client);
+    else if (client.getRequest().getProtocol() == "FTP-DATA")
+        result = this->handler->doDataExecute(&client);
+    return (result);
+}
+
 bool     Plugin::onExecution(LightBird::IClient &client)
 {
     bool result = false;
@@ -106,6 +126,17 @@ bool     Plugin::onExecution(LightBird::IClient &client)
     this->mutex.lockForWrite();
     if (this->parsers.contains(client.getId()))
         result = this->parsers.value(client.getId())->onExecution();
+    this->mutex.unlock();
+    return (result);
+}
+
+bool     Plugin::doSend(LightBird::IClient &client)
+{
+    bool result = false;
+
+    this->mutex.lockForWrite();
+    if (client.getRequest().getProtocol() == "FTP-DATA")
+        result = this->handler->doDataExecute(&client);
     this->mutex.unlock();
     return (result);
 }
@@ -126,6 +157,8 @@ void    Plugin::onFinish(LightBird::IClient &client)
     this->mutex.lockForWrite();
     if (this->parsers.contains(client.getId()))
         this->parsers.value(client.getId())->onFinish();
+    if (client.getRequest().isError() || client.getResponse().isError())
+        this->api->network().disconnect(client.getId());
     this->mutex.unlock();
 }
 

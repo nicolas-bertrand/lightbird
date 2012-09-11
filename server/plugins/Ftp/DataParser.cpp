@@ -9,18 +9,16 @@ bool DataParser::doUnserializeContent(const QByteArray &data, quint64 &used)
     // Make sure we upload to a file as the content might be big
     client->getRequest().getContent().setStorage(LightBird::IContent::TEMPORARYFILE);
     client->getRequest().getContent().getTemporaryFile()->setAutoRemove(false);
-    
     client->getRequest().getContent().setContent(data, true);
     used += data.size();
     api->log().trace("New data");
-    return client->isDisconnecting();
+    return (client->isDisconnecting());
 }
 
 bool DataParser::doSerializeContent(QByteArray &data)
 {
     data.append(client->getResponse().getContent().getContent());
-
-    return true;
+    return (true);
 }
 
 void DataParser::onFinish()
@@ -32,12 +30,12 @@ void DataParser::onFinish()
 bool DataParser::onSerialize(LightBird::IOnSerialize::Serialize type)
 {
     if (type == LightBird::IOnSerialize::IDoSerialize)
-        return false;
+        return (false);
     else
-        return true;
+        return (true);
 }
 
 bool DataParser::onDisconnect()
 {
-    return false;
+    return (false);
 }

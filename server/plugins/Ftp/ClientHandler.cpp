@@ -36,33 +36,28 @@ bool ClientHandler::onConnect(LightBird::IClient *client)
     sess->setClient(client->getId());
     sess->setInformation("control-id", client->getId());
     sess->setInformation("data-id", QString());
-    
     sess->setInformation("working-dir", ""); // Id of the working directory. Empty if at root
     sess->setInformation("binary-flag", false);
-
     sess->setInformation("transfer-mode", (int)Execute::TransferModeNone);
     sess->setInformation("transfer-ip", "");
     sess->setInformation("transfer-port", 0);
-
     // Be polite and welcome the user
     this->_sendControlMessage(client->getId(), execute->doGreeting(QString(), sess));
-
-    return true;
+    return (true);
 }
 
 bool ClientHandler::doControlExecute(LightBird::IClient *client)
 {
-    Execute::MethodResult ret(0,"");
-    LightBird::IRequest &request = client->getRequest();
-    LightBird::IResponse &response = client->getResponse();
-    LightBird::Session session = client->getSession();
-
-    QVariantMap &info = request.getInformations();
+    Execute::MethodResult result(0,"");
+    LightBird::IRequest   &request = client->getRequest();
+    LightBird::IResponse  &response = client->getResponse();
+    LightBird::Session    session = client->getSession();
+    QVariantMap           &info = request.getInformations();
 
     if (info.contains("send-message") && info.value("send-message").toBool())
     {
-        ret.first = info.value("code").toInt();
-        ret.second = info.value("message").toString();
+        result.first = info.value("code").toInt();
+        result.second = info.value("message").toString();
     }
     else
     {
@@ -70,31 +65,19 @@ bool ClientHandler::doControlExecute(LightBird::IClient *client)
         {
             request.getContent().setStorage(LightBird::IContent::VARIANT);
             *request.getContent().getVariant() = QString();
-
         }
-
         QString verb = request.getMethod().toUpper(); // Make sure we capitalize it, as we do case insensitive matching
         QString param = request.getContent().getVariant()->toString();
-
         if (this->controlMethods.contains(verb))
-        {
-            ret = (execute->*(this->controlMethods.value(verb)))(param, session);
-        }
+            result = (execute->*(this->controlMethods.value(verb)))(param, session);
         else if (this->transferMethods.contains(verb))
-        {
-            ret = this->_prepareTransferMethod(verb, param, session);
-        }
+            result = this->_prepareTransferMethod(verb, param, session);
         else
-        {
-            ret.first = 500;
-            ret.second = "Unknown command";
-        }
+            result = Execute::MethodResult(500, "Unknow command");
     }
-
-    response.setCode(ret.first);
-    response.setMessage(ret.second);
-
-    return true;
+    response.setCode(result.first);
+    response.setMessage(result.second);
+    return (true);
 }
 
 void ClientHandler::_sendControlMessage(QString id, Execute::MethodResult message)
@@ -109,38 +92,36 @@ void ClientHandler::_sendControlMessage(QString id, Execute::MethodResult messag
 Execute::MethodResult ClientHandler::_prepareTransferMethod(QString verb, QString parameter, LightBird::Session session) 
 {
     Execute::TransferMode mode = (Execute::TransferMode)session->getInformation("transfer-mode").toInt();
-    Execute::MethodResult ret;
+    Execute::MethodResult result;
     QString address = session->getInformation("transfer-ip").toString();
     int port = session->getInformation("transfer-port").toInt();
+
     if (mode == Execute::TransferModeNone)
-        ret = Execute::MethodResult(425, "No Data Connection");
+        result = Execute::MethodResult(425, "No Data Connection");
     else
     {
         session->setInformation("pending-transfer-verb", verb);
         session->setInformation("pending-transfer-param", parameter);
-
         if (mode == Execute::TransferModePort)
         {
             QString dataId = api->network().connect(QHostAddress(address), port, QStringList("FTP-DATA"), LightBird::INetwork::TCP)->getResult();
             session->setClient(dataId);
             if (dataId.isEmpty())
+                result = Execute::MethodResult(425, "Could not open data connection");
+            else
             {
-                ret = Execute::MethodResult(425, "Could not open data connection");
-            }
-            else {
                 // The connection was successful
 //                session->setClient(dataId);
                 session->setInformation("data-id", dataId);
-   //             ret = Execute::MethodResult(150, "Accepted data connection");
+   //             result = Execute::MethodResult(150, "Accepted data connection");
             }
-
         }
         else // TODO: implement Passive mode
         {
         }
 
     }
-    return ret;
+    return (result);
 }
 
 bool ClientHandler::onDataConnect(LightBird::IClient *client)
@@ -148,46 +129,32 @@ bool ClientHandler::onDataConnect(LightBird::IClient *client)
     LightBird::Session session = client->getSession();
 
     if (session == NULL)
-        return false;
-    
+        return (false);
     QString verb = session->getInformation("pending-transfer-verb").toString();
     QPair<bool, Execute::TransferMethod> method = transferMethods.value(verb);
-    
-    
     if (method.first)
-    {
         api->network().send(client->getId(), "FTP-DATA");
-    }
     else // TODO: implement receiving data
-    {
         api->network().receive(client->getId(), "FTP-DATA");
-    }
-
     this->_sendControlMessage(session->getInformation("control-id").toString(), Execute::MethodResult(150, "Accepted data connection\r\n"));
-    return true;
+    return (true);
 }
 
 bool ClientHandler::doDataExecute(LightBird::IClient *client)
 {
     LightBird::Session session = client->getSession();
+    Execute::MethodResult controlOut;
 
     if (session == NULL)
-        return false;
-
+        return (false);
     QString verb = session->getInformation("pending-transfer-verb").toString();
     QString param = session->getInformation("pending-transfer-param").toString();
     QString control = session->getInformation("control-id").toString();
-
-    Execute::MethodResult controlOut;
-
     if (!transferMethods.contains(verb))
-        return false;
+        return (false);
     QPair<bool, Execute::TransferMethod> method = transferMethods.value(verb);
-
     controlOut = (execute->*(method.second))(param, session, &client->getRequest(), &client->getResponse());
-
     this->_sendControlMessage(control, controlOut);
-
-    return true;
+    return (true);
 }
 
