@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- The list of the tests to run and their configuration -->
-    <unitTests />
+    <unitTests/>
     <ftp>
         <port>21</port>
     </ftp>

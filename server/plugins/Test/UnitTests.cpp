@@ -431,6 +431,18 @@ bool            UnitTests::_directories()
         ASSERT(d1.setIdFromVirtualPath("videos/d2/d3"));
         ASSERT(d1.createVirtualPath("//") == d1.getId());
         ASSERT(d1.createVirtualPath("") == d1.getId());
+        ASSERT(d1.cd("/") && !d1.exists());
+        ASSERT(d1.cd("/videos/d2/d3") && d1.getVirtualPath() == "videos/d2/d3");
+        ASSERT(d1.cd("..") && d1.getVirtualPath() == "videos/d2");
+        ASSERT(d1.cd("../d2/d3") && d1.getVirtualPath() == "videos/d2/d3");
+        ASSERT(d1.cd("../..") && d1.getVirtualPath() == "videos");
+        ASSERT(!d1.cd("../..") && d1.getVirtualPath() == "videos");
+        ASSERT(d1.cd("..") && !d1.exists());
+        ASSERT(!d1.cd("d2"));
+        ASSERT(d1.cd("videos/d2/../d2/../d2/d3") && d1.getVirtualPath() == "videos/d2/d3");
+        ASSERT(d1.cd("/videos/d2") && d1.getVirtualPath() == "videos/d2");
+        d1.clear();
+        ASSERT(d1.cd("videos/d2") && d1.getVirtualPath() == "videos/d2");
         ASSERT(d1.remove(d1.getIdFromVirtualPath("videos")));
     }
     catch (QMap<QString, QString> properties)

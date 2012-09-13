@@ -28,7 +28,7 @@ namespace LightBird
         /// @param client : The client that has sent the request.
         /// @param type : Used to know which of the IDoSerialize interfaces is going
         /// to be called.
-        /// @return In CLIENT mode, false is returned if the request doesn't needs
+        /// @return In CLIENT mode, false is returned if the request doesn't need
         /// a response, for Serialize::IDoSerialize. In SERVER mode the returned
         /// value is ignored.
         virtual bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type) = 0;

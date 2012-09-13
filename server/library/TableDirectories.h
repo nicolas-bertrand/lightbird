@@ -73,6 +73,12 @@ namespace LightBird
         /// @param id_account : The owner of all the directories that will be created.
         /// @return The id of the last directory of the path.
         QString     createVirtualPath(const QString &virtualPath, const QString &id_account = "");
+        /// @brief Changes the current directory based on the path.
+        /// @param path : The path to the new directory, relative to the current
+        /// directory. "/" can be used at the beginning to specify an absolute path.
+        /// ".." is also understood.
+        /// @return True if the path is valid.
+        bool        cd(const QString &path);
     };
 }
 

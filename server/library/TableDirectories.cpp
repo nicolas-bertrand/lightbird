@@ -219,3 +219,36 @@ QString                 TableDirectories::createVirtualPath(const QString &virtu
     }
     return (directory.getId());
 }
+
+bool                    TableDirectories::cd(const QString &path)
+{
+    TableDirectories    directory(this->id);
+
+    if (LightBird::cleanPath(path).startsWith('/'))
+        directory.clear();
+    QStringListIterator it(LightBird::cleanPath(path, true).split("/"));
+    while (it.hasNext())
+    {
+        // Nothing to do
+        if (it.peekNext().isEmpty() || it.peekNext() == ".")
+            ;
+        // Go to the parent directory
+        else if (it.peekNext() == "..")
+        {
+            if (!directory.setId(directory.getIdDirectory()))
+                return (false);
+        }
+        // We are at the root
+        else if (!directory.exists())
+        {
+            if (!directory.setIdFromVirtualPath(it.peekNext()))
+                return (false);
+        }
+        // Go to the children
+        else if (!directory.setId(directory.getDirectory(it.peekNext())))
+            return (false);
+        it.next();
+    }
+    this->id = directory.getId();
+    return (true);
+}
