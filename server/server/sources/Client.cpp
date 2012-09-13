@@ -27,10 +27,12 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->id = LightBird::createUuid();
     this->readyRead = false;
     this->running = false;
+    this->writing = false;
     this->finish = false;
     this->disconnecting = false;
     this->disconnected = false;
     this->state = Client::NONE;
+    this->oldTask = Client::NONE;
     // Set the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
     // Creates the engine
@@ -98,6 +100,14 @@ void        Client::run()
             // Otherwise we try to get more data
             else
                 this->readyRead = true;
+            // The processing is paused while data are being written on the network
+            if (this->writing)
+                return (void)(this->resume = newTask);
+            break;
+
+        case Client::RESUME :
+            // Resumes the workflow where it had stopped in Client::RUN
+            newTask = this->resume;
             break;
 
         case Client::DISCONNECT :
@@ -107,6 +117,7 @@ void        Client::run()
                 return this->_finish();
             // Otherwise it will be destroyed when all the data have been processed
             this->disconnecting = true;
+            newTask = this->oldTask;
             break;
 
         default:
@@ -122,7 +133,10 @@ void        Client::run()
         this->_getInformations();
     // The client must be disconnected
     if (this->finish)
+    {
+        this->oldTask = newTask;
         newTask = Client::DISCONNECT;
+    }
     // A new task has already been assigned
     else if (newTask != Client::NONE)
         newTask = newTask;
@@ -211,12 +225,18 @@ void        Client::write(QByteArray *data)
         Log::trace("Writing data", Properties("id", this->id).add("data", LightBird::simplify(*data)).add("size", data->size()), "Client", "write");
     else if (Log::instance()->isDebug())
         Log::debug("Writing data", Properties("id", this->id).add("size", data->size()), "Client", "write");
-    // Writes the data if the client is still connected
-    if (!this->disconnecting)
-        this->readWriteInterface->write(data, this);
-    // Otherwise we have to destroy them
-    else
-        delete data;
+    // Writes the data
+    this->readWriteInterface->write(data, this);
+    this->writing = true;
+}
+
+void        Client::written()
+{
+    if (this->writing)
+    {
+        this->writing = false;
+        this->_newTask(Client::RESUME);
+    }
 }
 
 bool            Client::send(const QString &protocol, const QVariantMap &informations, const QString &id)

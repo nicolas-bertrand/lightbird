@@ -43,6 +43,7 @@ public:
     /// @brief Performs the actions of the client in a thread of the ThreadPool.
     void                    run();
     /// @brief Write the data to the client. This method takes ownership of the data.
+    /// The processing of the Client is paused until written() is called.
     void                    write(QByteArray *data);
     /// @brief Asks the engine to generate a new request.
     /// @see LightBird::INetwork::send
@@ -97,6 +98,9 @@ public slots:
     /// After being read, these data will ultimately feed the engine. The client takes
     /// ownership of the data.
     void                    read(QByteArray *data = NULL);
+    /// @brief Tells the Client that the data have been written on the network, and that
+    /// it can resume its processing.
+    void                    written();
 
 signals:
     /// @brief The client has been disconnected and can be safely destroyed.
@@ -115,6 +119,7 @@ private:
         SEND,       ///< Data have to be sent to the client.
         RECEIVE,    ///< Data have to be received without sending a request.
         RUN,        ///< The engine is running.
+        RESUME,     ///< Allows to resume the processing of the Client after the data have been written on the network.
         DISCONNECT, ///< The client is going to be disconnected.
         NONE        ///< The client is idle.
     };
@@ -162,8 +167,11 @@ private:
     QList<QByteArray *>      data;                ///< The list of all the data read from the network.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
+    State                    oldTask;             ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
+    State                    resume;              ///< The state to resume after the date have been written on the network.
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     readyRead;           ///< Data are available on the network.
+    bool                     writing;             ///< The client's task is paused while the data are being written on the network.
     bool                     finish;              ///< If true, the client is going to be disconnected.
     bool                     disconnecting;       ///< The client is disconnected from the server, but there is still data to process.
     bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.

@@ -57,7 +57,7 @@ public:
 signals:
     /// @brief Connects a TCP client to the server.
     void            connectSignal(QString id);
-    /// @brief Emited when new data have to be write on the network, in order to
+    /// @brief Emited when new data have to be written on the network, in order to
     /// write these data from the thread (where the sockets lives).
     void            writeSignal();
 

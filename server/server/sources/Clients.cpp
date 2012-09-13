@@ -54,6 +54,8 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
         // When new data are received on this socket, Client::read is called
         QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
+        // When the data have been written on this socket, Client::written is called
+        QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(written()), Qt::QueuedConnection);
         // When the client is disconnected, _disconnected is called
         QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(_disconnected()), Qt::QueuedConnection);
         // Keeps the future in order to set its result in IReadWrite::connect
@@ -82,6 +84,8 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         client->moveToThread(this);
         // When new data are received on this socket, Client::read is called
         QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
+        // When the data have been written on this socket, Client::written is called
+        QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(written()), Qt::QueuedConnection);
         // When the client thread is finished, _finished is called
         QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
         return (Future<QString>(client->getId()));

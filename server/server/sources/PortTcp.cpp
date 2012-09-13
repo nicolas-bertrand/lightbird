@@ -131,6 +131,8 @@ void            PortTcp::_newConnection()
             this->sockets[socket] = client;
             // When new data are received on this socket, read() is called on the client
             QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
+            // When the data have been written on this socket, Client::written is called
+            QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(written()), Qt::QueuedConnection);
             // When the client is disconnected, _disconnected() is called
             QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(_disconnected()), Qt::QueuedConnection);
             // Read the data received between the creation of the client and the connection of the read signal

@@ -62,6 +62,7 @@ bool            PortUdp::write(QByteArray *data, Client *client)
 {
     SmartMutex  mutex(this->mutex, "PortUdp", "write");
     int         wrote;
+    bool        result = true;
 
     if (!mutex)
         return (false);
@@ -69,9 +70,12 @@ bool            PortUdp::write(QByteArray *data, Client *client)
     if ((wrote = this->socket.writeDatagram(*data, client->getPeerAddress(), client->getPeerPort())) != data->size())
     {
         Log::debug("All data has not been written", Properties("wrote", wrote).add("toWrite", data->size()).add("id", client->getId()), "PortUdp", "write");
-        return (false);
+        result = false;
     }
-    return (true);
+    // Notifies the Client that the data have been written
+    client->written();
+    delete data;
+    return (result);
 }
 
 void            PortUdp::close()
