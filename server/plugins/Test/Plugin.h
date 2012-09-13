@@ -32,4 +32,14 @@ private:
     LightBird::IApi *api;
 };
 
+// Throws an exception if the assertion is false
+# define ASSERT(a)\
+if (!(a))\
+{\
+    QMap<QString, QString> properties;\
+    properties.insert("line", QString::number(__LINE__));\
+    throw (properties);\
+}\
+else (void)0
+
 #endif // PLUGIN_H

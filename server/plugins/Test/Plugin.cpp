@@ -1,6 +1,7 @@
 #include <QStringList>
 #include <QtPlugin>
 
+#include "Ftp.h"
 #include "Plugin.h"
 #include "UnitTests.h"
 
@@ -48,9 +49,14 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 
 void    Plugin::event(const QString &event, const QVariant &)
 {
-    // Launch the unit tests
+    // Launch the tests
     if (event == "server_started")
-        UnitTests(*this->api);
+    {
+        if (this->api->configuration(true).count("unitTests"))
+            UnitTests(*this->api);
+        if (this->api->configuration(true).count("ftp"))
+            Ftp(*this->api);
+    }
 }
 
 Q_EXPORT_PLUGIN2(Plugin, Plugin)
