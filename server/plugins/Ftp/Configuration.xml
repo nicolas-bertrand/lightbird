@@ -10,4 +10,6 @@
       <protocol>FTP-DATA</protocol>
     </context>
   </contexts>
+  <!-- The maximum size send at a time to the client. -->
+  <maxPacketSize>10000000</maxPacketSize>
 </configuration>

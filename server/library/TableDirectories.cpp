@@ -223,6 +223,7 @@ QString                 TableDirectories::createVirtualPath(const QString &virtu
 bool                    TableDirectories::cd(const QString &path)
 {
     TableDirectories    directory(this->id);
+    QString             id;
 
     if (LightBird::cleanPath(path).startsWith('/'))
         directory.clear();
@@ -245,7 +246,7 @@ bool                    TableDirectories::cd(const QString &path)
                 return (false);
         }
         // Go to the children
-        else if (!directory.setId(directory.getDirectory(it.peekNext())))
+        else if ((id = directory.getDirectory(it.peekNext())).isEmpty() || !directory.setId(id))
             return (false);
         it.next();
     }

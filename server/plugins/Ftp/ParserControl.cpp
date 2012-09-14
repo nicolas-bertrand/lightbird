@@ -1,6 +1,6 @@
 #include "ParserControl.h"
 
-ParserControl::ParserControl(LightBird::IApi *api, LightBird::IClient *client) : Parser(api, client)
+ParserControl::ParserControl(LightBird::IApi *api, LightBird::IClient &client) : Parser(api, client)
 {
 }
 
@@ -38,19 +38,26 @@ bool        ParserControl::doUnserializeContent(const QByteArray &data, quint64 
             command.truncate(j);
         }
         command = command.toUpper();
-        this->client->getRequest().setMethod(command);
-        this->client->getRequest().getInformations()["parameter"] = parameter;
+        this->client.getRequest().setMethod(command);
+        this->client.getRequest().getInformations()["parameter"] = parameter;
         this->buffer.clear();
     }
-    // The line is too long
+    // The command line is too long
     else if (this->buffer.size() > MAX_LINE_SIZE)
+    {
         this->buffer.clear();
+        used = data.size();
+        QVariantMap &informations = this->client.getRequest().getInformations();
+        informations["send-message"] = true;
+        informations["code"] = 500;
+        informations["message"] = "Command line too long";
+    }
     return (used != 0);
 }
 
 bool    ParserControl::doSerializeContent(QByteArray &data)
 {
-    QString message = this->client->getResponse().getMessage();
+    QString message = this->client.getResponse().getMessage();
     if (message.endsWith("\r\n"))
         message.chop(2);
     QStringList lines = message.split("\r\n");
@@ -58,16 +65,16 @@ bool    ParserControl::doSerializeContent(QByteArray &data)
     while (it.hasNext())
     {
         QString &line = it.next();
-        line.prepend(QString::number(this->client->getResponse().getCode()) + (it.hasNext() ? "-" : " "));
+        line.prepend(QString::number(this->client.getResponse().getCode()) + (it.hasNext() ? "-" : " "));
         line.append("\r\n");
     }
-    data.append(lines.join(""));
+    data = lines.join("").toUtf8();
     return (true);
 }
 
 bool    ParserControl::onExecution()
 {
     // If the code is zero, don't send a response
-    return (this->client->getResponse().getCode() != 0);
+    return (this->client.getResponse().getCode() != 0);
 }
 

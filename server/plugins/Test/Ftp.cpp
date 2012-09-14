@@ -44,6 +44,37 @@ bool            Ftp::_tests()
         COMMAND("USER user", "331");
         COMMAND("PASS pass", "230");
         COMMAND("PASS pass", "503");
+        COMMAND("PWD", "257 \"/\"");
+        COMMAND("RMD testFtp", "");
+        COMMAND("CWD testFtp", "550");
+        COMMAND("MKD testFtp/d1", "257");
+        COMMAND("PWD", "257 \"/\"");
+        COMMAND("CWD testFtp/d1", "250");
+        COMMAND("PWD", "257 \"/testFtp/d1\"");
+        COMMAND("CWD testFtp", "550");
+        COMMAND("CWD /testFtp", "250");
+        COMMAND("MKD d1", "257");
+        COMMAND("CWD d1", "250");
+        COMMAND("MKD /testFtp/d1/d2", "257");
+        COMMAND("CWD /../d1/d2", "550");
+        COMMAND("CWD ../d1/d2", "250");
+        COMMAND("PWD", "257 \"/testFtp/d1/d2\"");
+        COMMAND("TYPE I", "200");
+        COMMAND("TYPE A", "200");
+        COMMAND("TYPE A N", "200");
+        COMMAND("TYPE A T", "504");
+        COMMAND("TYPE", "501");
+        COMMAND("TYPE L", "501");
+        COMMAND("TYPE L8", "200");
+        COMMAND("STRU F", "200");
+        COMMAND("STRU", "504");
+        COMMAND("STRU R", "504");
+        COMMAND("MODE S", "200");
+        COMMAND("MODE", "504");
+        COMMAND("MODE C", "504");
+        COMMAND("RMD /testFtp", "250");
+        COMMAND("PWD", "257 \"/\"");
+        COMMAND("ABOR", "225");
         COMMAND("QUIT", "221");
     }
     catch (QMap<QString, QString> properties)

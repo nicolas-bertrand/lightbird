@@ -7,6 +7,8 @@
 #include "ParserData.h"
 #include "ParserControl.h"
 
+Plugin::Configuration   Plugin::configuration;
+
 Plugin::Plugin()
 {
 }
@@ -19,6 +21,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
     this->handler = new ClientHandler(api);
+    if (!(this->configuration.maxPacketSize = api->configuration(true).get("maxPacketSize").toUInt()))
+        this->configuration.maxPacketSize = 10000000;
     return (true);
 }
 
@@ -58,13 +62,13 @@ bool     Plugin::onConnect(LightBird::IClient &client)
     this->mutex.lockForWrite();
     if (client.getProtocols().first() == "FTP")
     {
-        this->parsers.insert(client.getId(), new ParserControl(this->api, &client));
-        result = this->handler->onConnect(&client);
+        this->parsers.insert(client.getId(), new ParserControl(this->api, client));
+        result = this->handler->onConnect(client);
     }
     else if (client.getProtocols().first() == "FTP-DATA")
     {
-        this->parsers.insert(client.getId(), new ParserData(this->api, &client));
-        result = this->handler->onDataConnect(&client);
+        this->parsers.insert(client.getId(), new ParserData(this->api, client));
+        result = this->handler->onDataConnect(client);
     }
     else
         result = false;
@@ -110,9 +114,9 @@ bool     Plugin::doExecution(LightBird::IClient &client)
     bool result = false;
 
     if (client.getRequest().getProtocol() == "FTP")
-        result = this->handler->doControlExecute(&client);
+        result = this->handler->doControlExecute(client);
     else if (client.getRequest().getProtocol() == "FTP-DATA")
-        result = this->handler->doDataExecute(&client);
+        result = this->handler->doDataExecute(client);
     return (result);
 }
 
@@ -133,7 +137,7 @@ bool     Plugin::doSend(LightBird::IClient &client)
 
     this->mutex.lockForWrite();
     if (client.getRequest().getProtocol() == "FTP-DATA")
-        result = this->handler->doDataExecute(&client);
+        result = this->handler->doDataExecute(client);
     this->mutex.unlock();
     return (result);
 }
@@ -154,8 +158,6 @@ void    Plugin::onFinish(LightBird::IClient &client)
     this->mutex.lockForWrite();
     if (this->parsers.contains(client.getId()))
         this->parsers.value(client.getId())->onFinish();
-    if (client.getRequest().isError() || client.getResponse().isError())
-        this->api->network().disconnect(client.getId());
     this->mutex.unlock();
 }
 
@@ -168,6 +170,11 @@ bool     Plugin::onDisconnect(LightBird::IClient &client)
         result = this->parsers.value(client.getId())->onDisconnect();
     this->mutex.unlock();
     return (result);
+}
+
+Plugin::Configuration   &Plugin::getConfiguration()
+{
+    return (Plugin::configuration);
 }
 
 Q_EXPORT_PLUGIN2(Plugin, Plugin)

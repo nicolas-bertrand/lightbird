@@ -50,6 +50,12 @@ class Plugin : public QObject,
                  LightBird::IOnFinish)
 
 public:
+    /// Stores the configuration of the plugin.
+    struct      Configuration
+    {
+        quint32 maxPacketSize; ///< The maximum size send at a time to the client.
+    };
+
     Plugin();
     ~Plugin();
 
@@ -75,11 +81,15 @@ public:
     /// @brief Disconnect the client if there is an error in its request
     void    onFinish(LightBird::IClient &client);
 
+    /// @brief Returns the configuration of the plugin
+    static Configuration     &getConfiguration();
+
 private:
     LightBird::IApi          *api;          ///< The LightBird's Api.
     QReadWriteLock           mutex;         ///< Make parsers thread-safe.
     QHash<QString, Parser *> parsers;       ///< Parses the FTP control and data connections.
     ClientHandler            *handler;      ///< This single object handles all the connections.
+    static Configuration     configuration; ///< The configuration of the plugin.
 };
 
 #endif // PLUGIN_H

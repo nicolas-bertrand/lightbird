@@ -8,7 +8,7 @@
 # include "Plugin.h"
 
 # define MSEC 5000
-# define COMMAND(A, B) ASSERT(_command(s, A, B));
+# define COMMAND(WRITE, READ) ASSERT(_command(s, WRITE, READ));
 
 /// @brief Tests the Ftp plugin.
 class Ftp

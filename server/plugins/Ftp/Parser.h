@@ -7,7 +7,7 @@
 class Parser
 {
 public:
-    Parser(LightBird::IApi *api, LightBird::IClient *client);
+    Parser(LightBird::IApi *api, LightBird::IClient &client);
     virtual ~Parser();
 
     virtual bool doUnserializeContent(const QByteArray &data, quint64 &used) = 0;
@@ -19,7 +19,7 @@ public:
 
 protected:
     LightBird::IApi     *api;
-    LightBird::IClient  *client;
+    LightBird::IClient  &client;
 };
 
 #endif // PARSER_H

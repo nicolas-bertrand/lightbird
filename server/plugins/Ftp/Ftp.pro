@@ -14,18 +14,18 @@ TARGET = Ftp
 DESTDIR = ../../build/plugins/Ftp
 LIBS += -L../../build -lLightBird
 
-HEADERS = Plugin.h \
+HEADERS =  ClientHandler.h \
+    Commands.h \
     Parser.h \
     ParserControl.h \
     ParserData.h \
-    ClientHandler.h \
-    Execute.h
-SOURCES = Plugin.cpp \
+    Plugin.h
+SOURCES = ClientHandler.cpp \
+    Commands.cpp \
     Parser.cpp \
     ParserControl.cpp \
     ParserData.cpp \
-    ClientHandler.cpp \
-    Execute.cpp
+    Plugin.cpp
 OTHER_FILES = Configuration.xml \
     Queries.xml
 
