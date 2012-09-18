@@ -55,7 +55,7 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         // When new data are received on this socket, Client::read is called
         QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
         // When the data have been written on this socket, Client::written is called
-        QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(written()), Qt::QueuedConnection);
+        QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(bytesWritten()), Qt::QueuedConnection);
         // When the client is disconnected, _disconnected is called
         QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(_disconnected()), Qt::QueuedConnection);
         // Keeps the future in order to set its result in IReadWrite::connect
@@ -279,6 +279,8 @@ void            Clients::_write()
         }
         delete data;
         this->writeBuffer.dequeue();
+        // Notifies the Client that the data are being written
+        client->bytesWriting();
     }
     this->writeBufferClients.clear();
 }

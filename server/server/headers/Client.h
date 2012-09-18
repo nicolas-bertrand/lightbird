@@ -98,9 +98,13 @@ public slots:
     /// After being read, these data will ultimately feed the engine. The client takes
     /// ownership of the data.
     void                    read(QByteArray *data = NULL);
-    /// @brief Tells the Client that the data have been written on the network, and that
-    /// it can resume its processing.
-    void                    written();
+    /// @brief Tells the Client that the data are being written on the network.
+    /// At this point the Client can be safely disconnected. This event is
+    /// followed by bytesWritten.
+    void                    bytesWriting();
+    /// @brief Tells the Client that the data have been written on the network,
+    /// and that it can resume its processing.
+    void                    bytesWritten();
 
 signals:
     /// @brief The client has been disconnected and can be safely destroyed.
@@ -172,6 +176,7 @@ private:
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     readyRead;           ///< Data are available on the network.
     bool                     writing;             ///< The client's task is paused while the data are being written on the network.
+    bool                     written;             ///< The data have been written on the socket but not sent on the network yet (bytesWriting).
     bool                     finish;              ///< If true, the client is going to be disconnected.
     bool                     disconnecting;       ///< The client is disconnected from the server, but there is still data to process.
     bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.

@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QTimer>
 
 #include "Log.h"
 #include "PortUdp.h"
@@ -73,7 +74,7 @@ bool            PortUdp::write(QByteArray *data, Client *client)
         result = false;
     }
     // Notifies the Client that the data have been written
-    client->written();
+    QTimer::singleShot(0, client, SLOT(bytesWritten()));
     delete data;
     return (result);
 }

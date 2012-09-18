@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QHostAddress>
+#include <QTimer>
 
 #include "IOnConnect.h"
 #include "IDoRead.h"
@@ -28,6 +29,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->readyRead = false;
     this->running = false;
     this->writing = false;
+    this->written = false;
     this->finish = false;
     this->disconnecting = false;
     this->disconnected = false;
@@ -221,20 +223,38 @@ bool                    Client::_read()
 
 void        Client::write(QByteArray *data)
 {
+    if (data->size() == 0)
+        return (delete data);
     if (Log::instance()->isTrace())
         Log::trace("Writing data", Properties("id", this->id).add("data", LightBird::simplify(*data)).add("size", data->size()), "Client", "write");
     else if (Log::instance()->isDebug())
         Log::debug("Writing data", Properties("id", this->id).add("size", data->size()), "Client", "write");
     // Writes the data
-    this->readWriteInterface->write(data, this);
     this->writing = true;
+    this->readWriteInterface->write(data, this);
 }
 
-void        Client::written()
+void        Client::bytesWriting()
 {
-    if (this->writing)
+    SmartMutex  mutex(this->mutex, "Client", "bytesWriting");
+
+    if (mutex && this->writing)
+    {
+        this->written = true;
+        // If the client is already disconnected the bytesWritten slot will not be called, so we do it ourself.
+        if (this->socket->state() != QAbstractSocket::ConnectedState && this->socket->state() != QAbstractSocket::BoundState)
+            QTimer::singleShot(0, this, SLOT(bytesWritten()));
+    }
+}
+
+void        Client::bytesWritten()
+{
+    SmartMutex  mutex(this->mutex, "Client", "bytesWritten");
+
+    if (mutex && this->writing)
     {
         this->writing = false;
+        this->written = false;
         this->_newTask(Client::RESUME);
     }
 }
@@ -343,6 +363,12 @@ void            Client::disconnect()
     this->finish = true;
     if (!this->running)
         this->_newTask(Client::DISCONNECT);
+    // If the client is already disconnected and we are writing on it, the bytesWritten
+    // slot will not be called, so we do it ourself.
+    if (this->socket->state() != QAbstractSocket::ConnectedState
+        && this->socket->state() != QAbstractSocket::BoundState
+        && this->writing && this->written)
+        QTimer::singleShot(0, this, SLOT(bytesWritten()));
 }
 
 bool        Client::doRead(QByteArray &data)
