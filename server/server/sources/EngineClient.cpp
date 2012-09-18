@@ -144,11 +144,11 @@ bool    EngineClient::_doSerializeHeader()
         Log::trace("Calling IDoSerializeHeader::doSerializeHeader()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doSerializeHeader");
         instance.second->doSerializeHeader(this->client, *data);
         Plugins::instance()->release(instance.first);
+        this->done = true;
         if (data->size())
         {
             this->_onWrite(*data);
             this->client.write(data);
-            this->done = true;
         }
         else
             delete data;
@@ -172,11 +172,11 @@ bool    EngineClient::_doSerializeContent()
         if ((result = instance.second->doSerializeContent(this->client, *data)))
             Log::trace("Content serialized", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doSerializeContent");
         Plugins::instance()->release(instance.first);
+        this->done = true;
         if (data->size())
         {
             this->_onWrite(*data);
             this->client.write(data);
-            this->done = true;
         }
         // There is no content to serialize
         else
@@ -207,11 +207,11 @@ bool    EngineClient::_doSerializeFooter()
         Log::trace("Calling IDoSerializeFooter::doSerializeFooter()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doSerializeFooter");
         instance.second->doSerializeFooter(this->client, *data);
         Plugins::instance()->release(instance.first);
+        this->done = true;
         if (data->size())
         {
             this->_onWrite(*data);
             this->client.write(data);
-            this->done = true;
         }
         else
             delete data;
