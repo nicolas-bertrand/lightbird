@@ -46,3 +46,21 @@ bool ParserData::onSerialize(LightBird::IOnSerialize::Serialize type)
     else
         return (true);
 }
+
+bool ParserData::onDisconnect()
+{
+    LightBird::Session  session = this->client.getSession();
+    bool                result = false;
+
+    // Destroy the session if there is no control connection
+    if (session)
+    {
+        result = session->getInformation("disconnect-data").toBool();
+        session->removeInformation("disconnect-data");
+        session->removeInformation("data-id");
+        session->removeClient(this->client.getId());
+        if (!session->hasInformation("control-id"))
+            session->destroy();
+    }
+    return (result);
+}

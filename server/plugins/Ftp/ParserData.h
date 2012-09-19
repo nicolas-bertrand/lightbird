@@ -13,6 +13,7 @@ public:
     bool    doSerializeContent(QByteArray &data);
     void    onFinish();
     bool    onSerialize(LightBird::IOnSerialize::Serialize type);
+    bool    onDisconnect();
 };
 
 #endif // PARSERDATA_H

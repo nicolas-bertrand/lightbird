@@ -18,7 +18,6 @@ bool ClientHandler::onConnect(LightBird::IClient &client)
     LightBird::Session session = this->api->sessions().create();
     session->setClient(client.getId());
     session->setInformation("control-id", client.getId());
-    session->setInformation("data-id", QString());
     session->setInformation("working-dir", "");
     session->setInformation("binary-flag", false);
     session->setInformation("transfer-mode", (int)Commands::TransferModeNone);

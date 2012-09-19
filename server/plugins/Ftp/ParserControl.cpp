@@ -86,3 +86,18 @@ bool    ParserControl::onExecution()
     return (!this->client.getResponse().getMessage().isEmpty());
 }
 
+bool    ParserControl::onDisconnect()
+{
+    LightBird::Session  session = this->client.getSession();
+
+    // Destroy the session if there is no data connection
+    if (session)
+    {
+        session->removeInformation("control-id");
+        session->removeClient(this->client.getId());
+        if (!session->hasInformation("data-id"))
+            session->destroy();
+    }
+    return (false);
+}
+
