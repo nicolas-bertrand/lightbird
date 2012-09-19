@@ -23,9 +23,11 @@ private:
 
     /// @brief Runs the tests.
     bool    _tests();
+    bool    _data();
     /// @brief Sends a FTP command to the server and returns true if the response
     /// is correct.
     bool    _command(QTcpSocket &s, const QString &write, const QString &read);
+    QString _print(QTcpSocket &s, const QString &write);
 
     LightBird::IApi      &api;
     LightBird::IDatabase &database;

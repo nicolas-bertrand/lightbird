@@ -77,11 +77,14 @@ private:
 
     /// @brief Double-quotes in the path are escaped by double-quotes.
     QString _escapePath(const QString &path);
+    /// @brief Converts the date in the "ls -l" format.
+    QString _listDate(const QDateTime &datetime);
 
-    LightBird::IApi *api;
-    QStringList     anonymousCommands; ///< The list of the commands that can be used without being identified.
+    LightBird::IApi   *api;
     QMap<QString, Commands::ControlMethod> controlCommands; ///< The list of the control commands.
     QMap<QString, QPair<bool, Commands::TransferMethod> > transferCommands; ///< The bool of the pair is true if the command sends data on transfer connection, false if it receives some.
+    QStringList       anonymousCommands; ///< The list of the commands that can be used without being identified.
+    static const char *months[]; ///< Ensures that the months are not localized when using QDate::toString.
 };
 
 #endif // COMMANDS_H

@@ -58,23 +58,31 @@ bool        ParserControl::doUnserializeContent(const QByteArray &data, quint64 
 bool    ParserControl::doSerializeContent(QByteArray &data)
 {
     QString message = this->client.getResponse().getMessage();
-    if (message.endsWith("\r\n"))
-        message.chop(2);
-    QStringList lines = message.split("\r\n");
-    QMutableStringListIterator it(lines);
-    while (it.hasNext())
+    int code = this->client.getResponse().getCode();
+
+    if (code != 0)
     {
-        QString &line = it.next();
-        line.prepend(QString::number(this->client.getResponse().getCode()) + (it.hasNext() ? "-" : " "));
-        line.append("\r\n");
+        if (message.endsWith("\r\n"))
+            message.chop(2);
+        QStringList lines = message.split("\r\n");
+        QMutableStringListIterator it(lines);
+        while (it.hasNext())
+        {
+            QString &line = it.next();
+            line.prepend(QString::number(this->client.getResponse().getCode()) + (it.hasNext() ? "-" : " "));
+            line.append("\r\n");
+        }
+        data = lines.join("").toUtf8();
     }
-    data = lines.join("").toUtf8();
+    // Send the message as it is. May be empty for the transfert methods.
+    else
+        data = message.toUtf8();
     return (true);
 }
 
 bool    ParserControl::onExecution()
 {
-    // If the code is zero, don't send a response
-    return (this->client.getResponse().getCode() != 0);
+    // Ensures that a response is needed
+    return (!this->client.getResponse().getMessage().isEmpty());
 }
 

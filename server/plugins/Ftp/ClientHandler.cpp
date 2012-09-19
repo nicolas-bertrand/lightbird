@@ -77,8 +77,10 @@ Commands::Result ClientHandler::_prepareTransferMethod(QString command, QString 
     QString address = session->getInformation("transfer-ip").toString();
     int port = session->getInformation("transfer-port").toInt();
 
-    if (mode == Commands::TransferModeNone)
-        result = Commands::Result(425, "No Data Connection");
+    if (session->getAccount().isEmpty())
+        result = Commands::Result(530, "Please login with USER and PASS.");
+    else if (mode == Commands::TransferModeNone)
+        result = Commands::Result(425, "No Data Connection.");
     else
     {
         session->setInformation("pending-transfer-command", command);
@@ -87,20 +89,14 @@ Commands::Result ClientHandler::_prepareTransferMethod(QString command, QString 
         {
             QString dataId = this->api->network().connect(QHostAddress(address), port, QStringList("FTP-DATA"), LightBird::INetwork::TCP)->getResult();
             session->setClient(dataId);
-            if (dataId.isEmpty())
-                result = Commands::Result(425, "Could not open data connection");
-            else
-            {
-                // The connection was successful
-//                session->setClient(dataId);
+            if (!dataId.isEmpty())
                 session->setInformation("data-id", dataId);
-   //             result = Commands::MethodResult(150, "Accepted data connection");
-            }
+            else
+                result = Commands::Result(425, "Could not open data connection.");
         }
         else // TODO: implement Passive mode
         {
         }
-
     }
     return (result);
 }

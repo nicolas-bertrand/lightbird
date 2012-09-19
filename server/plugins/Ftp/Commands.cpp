@@ -13,6 +13,8 @@
 #include "TableDirectories.h"
 #include "TableFiles.h"
 
+const char *Commands::months[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
 Commands::Commands(LightBird::IApi *api) : api(api)
 {
     this->controlCommands["USER"] = &Commands::_user;
@@ -73,12 +75,7 @@ Commands::Result Commands::executeControl(const QString &command, const QString 
 
 Commands::Result Commands::executeTransfert(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
 {
-    Result  result;
-
-    if (!session->getAccount().isEmpty() || this->anonymousCommands.contains(command))
-        result = (this->*(this->transferCommands.value(command).second))(parameter, session, client);
-    else
-        result = Result(530, "Please login with USER and PASS.");
+    Result result = (this->*(this->transferCommands.value(command).second))(parameter, session, client);
     session->setInformation("last-command", command);
     return (result);
 }
@@ -272,8 +269,9 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session)
     if (dataId.isEmpty())
         return (Result(225, "No transfer in progress."));
     this->api->network().disconnect(dataId);
-    session->removeInformation("data-id");
-    return (Result(226, "Transfert aborted. Data connection closed."));
+    session->getClients();
+    session->setInformation("disconnect-data", true);
+    return (Result(0, "426 Data connection closed.\r\n226 Transfert aborted.\r\n"));
 }
 
 Commands::Result Commands::_quit(const QString &, LightBird::Session &session)
@@ -283,37 +281,68 @@ Commands::Result Commands::_quit(const QString &, LightBird::Session &session)
     return (Result(221, "Goodbye."));
 }
 
-Commands::Result Commands::_list(const QString &, LightBird::Session &session, LightBird::IClient &client)
+Commands::Result Commands::_list(const QString &path, LightBird::Session &session, LightBird::IClient &client)
 {
-    LightBird::Dir wd = LightBird::Dir::byId(session->getInformation("working-dir").toString());
-    LightBird::DirIterator it(wd);
-    int count = 0;
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::IContent         &content = client.getResponse().getContent();
+    QStringList                 files;
+    QStringList                 directories;
+    QString                     pattern("%1rwx------ %2 %3 nogroup %4 %5 %6\r\n");
+    QString                     line;
+    QString                     name;
+    QString                     subDirectories;
+    QString                     date;
 
-    while(it.hasNext())
+    // Changes the directory to the argument if possible
+    if (!path.isEmpty() && !directory.cd(path))
     {
-        LightBird::Node *node = it.next();
-
-        if (!node)
-            continue;
-        client.getResponse().getContent().setContent(
-                QString(
-                    "%1rwx------ 1 %2 nogroup %3 %4 %5\r\n"
-                    ).arg(
-                        ((node->getNodeType() == LightBird::Node::DirNode)?"d":"-"),
-                        "user",
-                        "0", //QString::number(table->getInformation("size").toInt()),
-                        "Jan 20 15:36", //row["modified"].toDateTime().toString("MMM dd hh:mm"),
-                        node->getName()
-                    ).toUtf8(), true);
-        count ++;
-        delete node;
+        // The argument might by a path to a file
+        if (path.contains('/'))
+        {
+            directory.cd(name = path.left(path.lastIndexOf('/') + 1));
+            if (!(name = directory.getFile(path.right(path.size() - name.size()))).isEmpty())
+                files.append(name);
+        }
+        // Otherwise it is a file name
+        else if (!(name = directory.getFile(path)).isEmpty())
+            files.append(name);
     }
-    return Result(226,
-            QString(
-                "Options: -a -l\r\n"
-                "%1 matches total\r\n"
-            ).arg(QString::number(count))
-            );
+    // List the content of the directory
+    else
+    {
+        directories = directory.getDirectories();
+        files = directory.getFiles();
+        QStringListIterator d(directories);
+        while(d.hasNext())
+        {
+            LightBird::TableDirectories directory(d.next());
+            name = LightBird::TableAccounts(directory.getIdAccount()).getName();
+            subDirectories = QString::number(directory.getDirectories().size() + 1);
+            date = this->_listDate(directory.getModified());
+            line = pattern.arg("d", subDirectories, (name.isEmpty() ? "nouser" : name), QString::number(4096), date, directory.getName());
+            content.setContent(line.toUtf8());
+        }
+    }
+    // List the files
+    QStringListIterator f(files);
+    while(f.hasNext())
+    {
+        LightBird::TableFiles file(f.next());
+        name = LightBird::TableAccounts(file.getIdAccount()).getName();
+        date = this->_listDate(file.getModified());
+        line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), file.getInformation("size").toString(), date, file.getName());
+        content.setContent(line.toUtf8());
+    }
+    return (Result(226, QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size()))));
+}
+
+QString     Commands::_listDate(const QDateTime &datetime)
+{
+    QDate   date(datetime.date());
+
+    if (date.year() == QDate::currentDate().year())
+        return (Commands::months[date.month()] + datetime.toString(" dd hh:mm"));
+    return (Commands::months[date.month()] + datetime.toString(" dd yyyy"));
 }
 
 Commands::Result Commands::_retr(const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
@@ -381,7 +410,6 @@ Commands::Result Commands::_stor(const QString &parameter, LightBird::Session &s
     }
     else // Create a new one
     {
-
         file.add(upload.name, path, information.data, information.type_string, upload.parent, session->getAccount());
     }
 
