@@ -3,6 +3,7 @@
 
 # include "Parser.h"
 
+/// @brief Parses the data connection.
 class ParserData : public Parser
 {
 public:

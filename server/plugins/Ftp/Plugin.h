@@ -53,7 +53,9 @@ public:
     /// Stores the configuration of the plugin.
     struct      Configuration
     {
-        quint32 maxPacketSize; ///< The maximum size send at a time to the client.
+        quint32 maxPacketSize;      ///< The maximum size send at a time to the client.
+        QString dataProtocolName;   ///< The name of the data connection protocol.
+        unsigned short passivePort; ///< The port on which the clients can etablish a passive connection.
     };
 
     Plugin();
@@ -81,6 +83,8 @@ public:
     /// @brief Disconnect the client if there is an error in its request
     void    onFinish(LightBird::IClient &client);
 
+    /// @brief Returns the parser that is in charge of the client, in a thread safe way.
+    Parser  *_getParser(const LightBird::IClient &client);
     /// @brief Returns the configuration of the plugin
     static Configuration     &getConfiguration();
 

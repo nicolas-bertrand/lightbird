@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <queries>
-    <FtpExecute>
-        <select_account>SELECT id, name, password FROM accounts WHERE name=:name</select_account>
-        <select_all_files>SELECT f.id, f.name, f.modified, a.name AS owner FROM files f JOIN accounts a ON a.id = f.id_account AND f.id_directory=:parent</select_all_files>
-        <select_file>SELECT f.id, f.name, f.modified, a.name AS owner FROM files f JOIN accounts a ON a.id = f.id_account WHERE f.name = :name AND f.id_directory = :parent</select_file>
-    </FtpExecute>
+  <Ftp>
+    <select_session>SELECT s.id AS id, COUNT(s.id) AS count FROM sessions s JOIN sessions_informations i ON s.id = i.id_session
+                    WHERE (i.name="data-id" AND i.value="") OR (i.name="transfer-ip" AND i.value=:ip)
+                    GROUP BY s.id ORDER BY count DESC, i.modified LIMIT 1</select_session>
+    <select_file>SELECT f.id, f.name, f.modified, a.name AS owner FROM files f JOIN accounts a ON a.id = f.id_account WHERE f.name = :name AND f.id_directory = :parent</select_file>
+  </Ftp>
 </queries>
 

@@ -8,6 +8,7 @@
 #include "Commands.h"
 #include "File.h"
 #include "LightBird.h"
+#include "Plugin.h"
 #include "Properties.h"
 #include "TableAccounts.h"
 #include "TableDirectories.h"
@@ -30,6 +31,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["TYPE"] = &Commands::_type;
     this->controlCommands["STRU"] = &Commands::_stru;
     this->controlCommands["MODE"] = &Commands::_mode;
+    this->controlCommands["PASV"] = &Commands::_pasv;
     this->controlCommands["PORT"] = &Commands::_port;
     this->controlCommands["NOOP"] = &Commands::_noop;
     this->controlCommands["ABOR"] = &Commands::_abor;
@@ -49,7 +51,7 @@ bool    Commands::isControl(const QString &command)
     return (this->controlCommands.contains(command));
 }
 
-bool    Commands::isTransfert(const QString &command)
+bool    Commands::isTransfer(const QString &command)
 {
     return (this->transferCommands.contains(command));
 }
@@ -73,7 +75,7 @@ Commands::Result Commands::executeControl(const QString &command, const QString 
     return (result);
 }
 
-Commands::Result Commands::executeTransfert(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
+Commands::Result Commands::executeTransfer(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
 {
     Result result = (this->*(this->transferCommands.value(command).second))(parameter, session, client);
     session->setInformation("last-command", command);
@@ -238,6 +240,26 @@ Commands::Result Commands::_mode(const QString &mode, LightBird::Session &)
     return (Result(200, QString("Mode set to %1.").arg(mode)));
 }
 
+Commands::Result Commands::_pasv(const QString &, LightBird::Session &session)
+{
+    LightBird::INetwork::Client client;
+    QString         protocol = Plugin::getConfiguration().dataProtocolName;
+    QStringList     protocols;
+    unsigned int    maxClients;
+    unsigned short  port = Plugin::getConfiguration().passivePort;
+
+    // Ensures that the passive port is opened
+    if (this->api->network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
+    {
+        this->api->network().getClient(session->getInformation("control-id").toString(), client);
+        session->setInformation("transfer-mode", Commands::PASSIVE);
+        session->setInformation("transfer-ip", client.peerAddress.toString());
+        session->setInformation("transfer-port", client.peerPort);
+        return (Result(0, QString("227 Entered Passive Mode (127,0,0,1,%1,%2)\r\n").arg(QString::number(port >> 8), QString::number(port & 0xFF))));
+    }
+    return (Result(502, "Data port not opened.\r\nUse active connection instead."));
+}
+
 Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &session)
 {
     Result  result;
@@ -247,7 +269,7 @@ Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &se
     {
         QString address = QString("%1.%2.%3.%4").arg(reg.cap(1)).arg(reg.cap(2)).arg(reg.cap(3)).arg(reg.cap(4));
         unsigned short port = reg.cap(5).toInt() << 8 | reg.cap(6).toInt();
-        session->setInformation("transfer-mode", TransferModePort);
+        session->setInformation("transfer-mode", Commands::ACTIVE);
         session->setInformation("transfer-ip", address);
         session->setInformation("transfer-port", port);
         result = Result(200, "PORT command successful.");
@@ -271,7 +293,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session)
     this->api->network().disconnect(dataId);
     session->getClients();
     session->setInformation("disconnect-data", true);
-    return (Result(0, "426 Data connection closed.\r\n226 Transfert aborted.\r\n"));
+    return (Result(0, "426 Data connection closed.\r\n226 Transfer aborted.\r\n"));
 }
 
 Commands::Result Commands::_quit(const QString &, LightBird::Session &session)
@@ -396,7 +418,7 @@ Commands::Result Commands::_stor(const QString &parameter, LightBird::Session &s
     LightBird::TableFiles file;
     QSqlQuery query;
     QVector<QVariantMap> result;
-    query.prepare(database.getQuery("FtpExecute", "select_file"));
+    query.prepare(database.getQuery("Ftp", "select_file"));
     query.bindValue(":name", upload.name);
     query.bindValue(":parent", upload.parent);
 

@@ -2,12 +2,12 @@
 # define COMMANDS_H
 
 # include <QPair>
-# include <QString>
 
 # include "IApi.h"
 # include "ISessions.h"
 # include "IClient.h"
 
+/// @brief Executes the commands of the clients.
 class Commands
 {
 public:
@@ -16,9 +16,9 @@ public:
 
     enum TransferMode
     {
-        TransferModeNone,
-        TransferModePort,
-        TransferModePasv
+        NONE,    ///< Mode not set yet.
+        ACTIVE,  ///< Active mode. Defined by PORT.
+        PASSIVE  ///< Passive mode. Defined by PASV.
     };
 
     struct Upload
@@ -34,22 +34,22 @@ public:
     /// as well as the session corresponding to the connection,
     /// and returns a pair with a code and a message to send on the control connection.
     typedef Result (Commands::*ControlMethod)(const QString &parameter, LightBird::Session &session);
-    /// A transfer method is similar to a control method
-    /// However if either uses a IRequest or fills in a IResponse with the contents of the data connection,
-    /// depending if it is  a in or out transfer.
+    /// A transfer method is similar to a control method.
+    /// However it either uses a IRequest or fills in a IResponse with the contents of the data connection,
+    /// depending if it is a in or out transfer.
     typedef Result (Commands::*TransferMethod)(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
     /// @brief Returns true if the parameter is a control command.
     bool    isControl(const QString &command);
-    /// @brief Returns true if the parameter is a transfert command.
-    bool    isTransfert(const QString &command);
-    /// @brief Returns true if the transfert command is going to send data on
-    /// the transfert connection. Otherwise it will receive data from the client.
+    /// @brief Returns true if the parameter is a transfer command.
+    bool    isTransfer(const QString &command);
+    /// @brief Returns true if the transfer command is going to send data on
+    /// the transfer connection. Otherwise it will receive data from the client.
     bool    isSender(const QString &command);
     /// @brief Executes a control command, and return its response.
     Result  executeControl(const QString &command, const QString parameter, LightBird::Session &session);
     /// @brief Executes a control command, and return its response.
-    Result  executeTransfert(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  executeTransfer(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
 private:
     // Control methods
@@ -66,6 +66,7 @@ private:
     Result  _type(const QString &parameter, LightBird::Session &session);
     Result  _stru(const QString &parameter, LightBird::Session &session);
     Result  _mode(const QString &parameter, LightBird::Session &session);
+    Result  _pasv(const QString &parameter, LightBird::Session &session);
     Result  _port(const QString &parameter, LightBird::Session &session);
     Result  _noop(const QString &parameter, LightBird::Session &session);
     Result  _abor(const QString &parameter, LightBird::Session &session);

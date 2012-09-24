@@ -36,15 +36,12 @@ bool ParserData::doSerializeContent(QByteArray &data)
 
 void ParserData::onFinish()
 {
-    api->network().disconnect(this->client.getId());
+    this->api->network().disconnect(this->client.getId());
 }
 
-bool ParserData::onSerialize(LightBird::IOnSerialize::Serialize type)
+bool ParserData::onSerialize(LightBird::IOnSerialize::Serialize)
 {
-    if (type == LightBird::IOnSerialize::IDoSerialize)
-        return (false);
-    else
-        return (true);
+    return (false);
 }
 
 bool ParserData::onDisconnect()
@@ -59,7 +56,7 @@ bool ParserData::onDisconnect()
         session->removeInformation("disconnect-data");
         session->removeInformation("data-id");
         session->removeClient(this->client.getId());
-        if (!session->hasInformation("control-id"))
+        if (session->getInformation("control-id").toString().isEmpty())
             session->destroy();
     }
     return (result);

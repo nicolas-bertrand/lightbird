@@ -5,6 +5,7 @@
 
 # define MAX_LINE_SIZE 10000
 
+/// @brief Parses the control connection.
 class ParserControl : public Parser
 {
 public:

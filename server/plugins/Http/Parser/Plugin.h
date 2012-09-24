@@ -88,7 +88,7 @@ private:
     QReadWriteLock          mutex;          ///< Make parsers thread-safe.
     static Configuration    configuration;  ///< The configuration of the plugin.
 
-    /// @brief Returns the parser that is in charge of the client, in thread safe way.
+    /// @brief Returns the parser that is in charge of the client, in a thread safe way.
     Parser  *_getParser(const LightBird::IClient &client);
 };
 

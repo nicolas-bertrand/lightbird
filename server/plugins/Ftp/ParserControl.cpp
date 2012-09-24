@@ -74,7 +74,7 @@ bool    ParserControl::doSerializeContent(QByteArray &data)
         }
         data = lines.join("").toUtf8();
     }
-    // Send the message as it is. May be empty for the transfert methods.
+    // Send the message as it is. May be empty for the transfer methods.
     else
         data = message.toUtf8();
     return (true);
@@ -95,9 +95,8 @@ bool    ParserControl::onDisconnect()
     {
         session->removeInformation("control-id");
         session->removeClient(this->client.getId());
-        if (!session->hasInformation("data-id"))
+        if (session->getInformation("data-id").toString().isEmpty())
             session->destroy();
     }
     return (false);
 }
-

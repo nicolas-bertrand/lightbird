@@ -4,12 +4,11 @@
     <context>
       <transport>TCP</transport>
       <protocol>FTP</protocol>
-    </context>
-    <context>
-      <transport>TCP</transport>
       <protocol>FTP-DATA</protocol>
     </context>
   </contexts>
+  <!-- Enables the passive mode on this port. The plugin will open this port for the passive data connections. -->
+  <passive>20</passive>
   <!-- The maximum size send at a time to the client. -->
   <maxPacketSize>10000000</maxPacketSize>
 </configuration>

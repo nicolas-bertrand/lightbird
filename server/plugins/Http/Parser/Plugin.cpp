@@ -124,6 +124,7 @@ Plugin::Configuration   &Plugin::getConfiguration()
 Parser      *Plugin::_getParser(const LightBird::IClient &client)
 {
     Parser  *parser;
+
     this->mutex.lockForRead();
     parser = this->parsers[client.getId()];
     this->mutex.unlock();
