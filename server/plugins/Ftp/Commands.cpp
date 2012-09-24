@@ -367,21 +367,23 @@ QString     Commands::_listDate(const QDateTime &datetime)
     return (Commands::months[date.month()] + datetime.toString(" dd yyyy"));
 }
 
-Commands::Result Commands::_retr(const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
+Commands::Result Commands::_retr(const QString &path, LightBird::Session &session, LightBird::IClient &client)
 {
-    Result result;
-    LightBird::Dir wd = LightBird::Dir::byId(session->getInformation("working-dir").toString());
-    //LightBird::Node *node = LightBird::Node::byPath(parameter, wd);
-    LightBird::TableFiles file;
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::TableFiles       file;
+    Result                      result;
 
-    file.setIdFromVirtualPath(parameter);
+    if (!path.contains('/'))
+        file.setIdFromVirtualPath(path);
+    else if (directory.cd(path.left(path.lastIndexOf('/') + 1)))
+        file.setId(directory.getFile(path.right(path.size() - path.lastIndexOf('/') - 1)));
     if (file)
     {
         client.getResponse().getContent().setStorage(LightBird::IContent::FILE, file.getFullPath());
         result = Result(226, "File successfully transferred.");
     }
     else
-        result = Result(550, QString("Can't open %1: No such file or directory.").arg(parameter));
+        result = Result(550, QString("Can't open %1: No such file or directory.").arg(path));
     return (result);
 }
 
