@@ -18,12 +18,15 @@ public:
     PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0);
     ~PortTcp();
 
-    bool    read(QByteArray &data, Client *client);
+    void    read(Client *client);
     bool    write(QByteArray *data, Client *client);
     /// @brief Closes the TCP server. No new connections will be accepted.
     void    close();
 
 signals:
+    /// @brief Emited when the Client is ready to read data. They will be read
+    /// in the port thread via the _read method.
+    void    readSignal(Client *client);
     /// @brief Emited when new data have to be write on the network, in order to
     /// write these data from the port thread (where the tcp sockets live).
     void    writeSignal();
@@ -40,12 +43,15 @@ private:
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the tcpServer.
     void    _newConnection();
+    /// @brief Reads the data on the network from the port thread, then notifies
+    /// the Client that they are ready to be processed.
+    void    _read(Client *client);
     /// @brief Writes the data stored in writeBuffer on the network, from the port thread.
     void    _write();
     /// @brief Called when a QTcpSocket is disconnected, to remove its client.
     void    _disconnected();
     /// @brief Called when a client is finished.
-    bool    _finished(Client *client = NULL);
+    Client  *_finished(Client *client = NULL);
 
 private:
     QTcpServer                             tcpServer;     ///< The TCP server that listens on the network and waits new connections.

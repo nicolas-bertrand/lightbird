@@ -26,7 +26,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
 {
     // Generates the uuid of the client
     this->id = LightBird::createUuid();
-    this->readyRead = false;
+    this->reading = false;
     this->running = false;
     this->writing = false;
     this->written = false;
@@ -77,6 +77,12 @@ void        Client::run()
                 newTask = Client::DISCONNECT;
             break;
 
+        case Client::READING :
+            // The execution is paused while data are being read
+            this->reading = false;
+            this->readWriteInterface->read(this);
+            return ;
+
         case Client::READ :
             // If data are available, we try to execute them
             if (this->_read())
@@ -100,8 +106,8 @@ void        Client::run()
             if (this->engine->run())
                 newTask = Client::RUN;
             // Otherwise we try to get more data
-            else
-                this->readyRead = true;
+            else if (this->data.isEmpty())
+                this->reading = true;
             // The processing is paused while data are being written on the network
             if (this->writing)
                 return (void)(this->resume = newTask);
@@ -149,8 +155,8 @@ void        Client::run()
     else if (!this->receiveResponses.isEmpty() && receive)
         newTask = Client::RECEIVE;
     // Some data are available to be read on the network
-    else if (this->readyRead)
-        newTask = Client::READ;
+    else if (this->reading)
+        newTask = Client::READING;
     // The client is disconnecting and there is nothing left to do
     else if (this->disconnecting)
     {
@@ -168,56 +174,38 @@ void        Client::run()
         this->running = false;
 }
 
-void        Client::read(QByteArray *data)
+void            Client::readyRead()
 {
-    // If data is NULL they are read using readWriteInterface
-    if (data == NULL)
-    {
-        data = new QByteArray();
-        this->readWriteInterface->read(*data, this);
-    }
-    // Nothing has been read
-    if (data->isEmpty())
-    {
-        delete data;
-        return ;
-    }
-    SmartMutex mutex(this->mutex, "Client", "read");
+    SmartMutex  mutex(this->mutex, "Client", "readyRead");
+
     if (!mutex)
-    {
-        delete data;
         return ;
-    }
-    // Stores the new data
-    this->data.append(data);
-    this->readyRead = true;
-    // If the client is not running, a new task can be created for read the data.
-    // Otherwise the data will be read after the current task of the client is completed.
+    this->reading = true;
     if (!this->running)
-        this->_newTask(Client::READ);
+        this->_newTask(Client::READING);
 }
 
-bool                    Client::_read()
+void            Client::bytesRead()
 {
-    SmartMutex          mutex(this->mutex, "Client", "_read");
-    QList<QByteArray *> data;
+    SmartMutex  mutex(this->mutex, "Client", "bytesRead");
+
+    if (!mutex || !this->running || this->state != Client::READING)
+        return ;
+    this->_newTask(Client::READ);
+}
+
+bool            Client::_read()
+{
+    SmartMutex  mutex(this->mutex, "Client", "_read");
 
     if (!mutex)
         return (false);
-    this->readyRead = false;
-    // If there is no data, no processing are needed
+    // If there is no data, no processing is needed
     if (this->data.isEmpty())
         return (false);
-    // Copy the data in order to clear the list inside the mutex
-    data = this->data;
-    this->data.clear();
     mutex.unlock();
-    // Feed the engine outside the mutex
-    this->engine->read(data);
-    // Removes the data
-    QListIterator<QByteArray *> it(data);
-    while (it.hasNext())
-        delete it.next();
+    // Calls the IOnRead interface outside the mutex
+    this->engine->onRead();
     return (true);
 }
 
@@ -549,6 +537,11 @@ LightBird::Session      Client::getSession(const QString &id_account) const
 bool                    Client::isDisconnecting() const
 {
     return (this->disconnecting);
+}
+
+QByteArray  &Client::getData()
+{
+    return (this->data);
 }
 
 void    Client::setPort(unsigned short port)

@@ -24,7 +24,8 @@ void    Clients::run()
 {
     // Connects the TCP clients
     QObject::connect(this, SIGNAL(connectSignal(QString)), this, SLOT(_connect(QString)), Qt::QueuedConnection);
-    // Allows to write the data from this thread
+    // Allows to read and write data from this thread
+    QObject::connect(this, SIGNAL(readSignal(Client*)), this, SLOT(_read(Client*)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(writeSignal()), this, SLOT(_write()), Qt::QueuedConnection);
     this->threadStarted.setResult(true);
     this->exec();
@@ -53,7 +54,7 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         // When the client is finished, _finished is called
         QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
         // When new data are received on this socket, Client::read is called
-        QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
+        QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::QueuedConnection);
         // When the data have been written on this socket, Client::written is called
         QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(bytesWritten()), Qt::QueuedConnection);
         // When the client is disconnected, _disconnected is called
@@ -83,10 +84,10 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         socket->setParent(client);
         client->moveToThread(this);
         // When new data are received on this socket, Client::read is called
-        QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
+        QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::QueuedConnection);
         // When the data have been written on this socket, Client::written is called
         QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(written()), Qt::QueuedConnection);
-        // When the client thread is finished, _finished is called
+        // When the client is finished, _finished is called
         QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
         return (Future<QString>(client->getId()));
     }
@@ -217,24 +218,30 @@ void            Clients::shutdown()
     this->clients.clear();
 }
 
-bool    Clients::read(QByteArray &data, Client *client)
+void    Clients::read(Client *client)
 {
-    int read;
+    emit this->readSignal(client);
+}
+
+void            Clients::_read(Client *client)
+{
+    QByteArray  &data = client->getData();
+    int         read;
 
     data.clear();
     // Calls the IDoRead interface of the plugins
     if (!client->doRead(data))
     {
-        // If no plugins implements it, the server read the data itself
+        // If no plugin implements it, the server read the data itself
         data.resize(client->getSocket().size());
         if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
         {
             Log::warning("An error occured while reading the data", Properties("id", client->getId())
-                         .add("error", read).add("size", data.size()), "Clients", "read");
+                         .add("error", read).add("size", data.size()), "Clients", "_read");
             data.resize(read);
         }
     }
-    return (!data.isEmpty());
+    client->bytesRead();
 }
 
 bool            Clients::write(QByteArray *data, Client *client)

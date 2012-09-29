@@ -6,18 +6,20 @@
 
 class Client;
 
-/// @brief This interface allows a class to use an abstract read/write stream.
-/// For example, this is used by the network to abstract the reveive and send
-/// operations in TCP and UDP.
+/// @brief This interface allows to abstract the reveive and send operations
+/// in TCP and UDP between the Client and the network back-ends.
 class IReadWrite
 {
 public:
     virtual ~IReadWrite() {}
 
-    /// @brief Read from the stream. The data are stored in the parameter.
-    virtual bool    read(QByteArray &data, Client *client) = 0;
+    /// @brief Tells the network that the client is ready to read more data.
+    /// The data have to be filled in the reference returned by Client::getData,
+    /// from any thread. Client::bytesRead have to be called afterward.
+    virtual void    read(Client *client) = 0;
     /// @brief Write the data on the stream. This method takes ownership
     /// of the data, ie it takes the responsability to delete them.
+    /// Client::bytesWriting and bytesWritten have to be called afterward.
     virtual bool    write(QByteArray *data, Client *client) = 0;
     /// @brief This method can be reimplemented in order to connect the
     /// server to a client.

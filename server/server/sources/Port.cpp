@@ -16,7 +16,7 @@ Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const 
 
 Port::~Port()
 {
-    // Delete all the remaining clients
+    // Deletes all the remaining clients
     QListIterator<Client *> it(this->clients);
 
     while (it.hasNext())
@@ -102,7 +102,7 @@ bool            Port::send(const QString &id, const QString &p, const QVariantMa
     return (client->send(protocol, informations));
 }
 
-void            Port::close()
+void    Port::close()
 {
     QListIterator<Client *> it(this->clients);
 
@@ -116,9 +116,9 @@ void            Port::close()
         this->quit();
 }
 
-Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
+Client      *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
 {
-    Client      *client;
+    Client  *client;
 
     // Creates the client
     client = new Client(socket, this->transport, this->protocols, this->port,
@@ -126,12 +126,12 @@ Client          *Port::_addClient(QAbstractSocket *socket, const QHostAddress &p
                         socket->peerName(), LightBird::IClient::SERVER, this);
     // Adds the client
     this->clients.push_back(client);
-    // When the client thread is finished, _finished is called
+    // When the client is finished, _finished is called
     QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
     return (client);
 }
 
-void            Port::_removeClient(Client *client)
+void    Port::_removeClient(Client *client)
 {
     // Checks if the client is in the clients list
     if (this->clients.contains(client))
@@ -139,7 +139,7 @@ void            Port::_removeClient(Client *client)
         client->disconnect();
 }
 
-bool            Port::_finished(Client *client)
+Client  *Port::_finished(Client *client)
 {
     // Searches a finished client
     QListIterator<Client *> it(this->clients);
@@ -148,14 +148,14 @@ bool            Port::_finished(Client *client)
             client = it.peekPrevious();
     // No client found
     if (!client)
-        return (false);
+        return (NULL);
     // Deletes the client
     this->clients.removeAll(client);
     delete client;
     // If there are no more connected client and the server is no longer listening, the thread is quit
     if (this->clients.size() == 0 && !this->_isListening())
         this->quit();
-    return (true);
+    return (client);
 }
 
 unsigned short  Port::getPort() const

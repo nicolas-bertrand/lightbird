@@ -21,9 +21,6 @@ public:
     Engine(Client &client);
     virtual ~Engine();
 
-    /// @brief This method is called each time new data are available for the Engine.
-    /// @param data : The data to process.
-    void            read(const QList<QByteArray *> &data);
     /// @brief Run the engine. Process the data stored in this->data, of sent a
     /// new request/response.
     /// @return True while there is enough data to run the engine, and the client
@@ -35,6 +32,9 @@ public:
     LightBird::IResponse &getResponse();
     /// @brief Returns true if the engine has just been cleared and is not running.
     virtual bool    isIdle() = 0;
+    /// @brief This method is called each time new data are available for the Engine
+    /// and calls LightBird::IOnRead.
+    void            onRead();
 
 protected:
     Engine(const Engine &);
@@ -42,8 +42,6 @@ protected:
 
     /// @brief Prepares the Engine to execute an other request.
     virtual void    _clear();
-    /// @brief Calls LightBird::IOnRead.
-    void            _onRead(QByteArray &data);
     /// @brief Calls LightBird::IOnWrite.
     void            _onWrite(QByteArray &data);
     /// @brief Calls LightBird::IOnUnserialize.
@@ -52,7 +50,7 @@ protected:
     bool            _onSerialize(LightBird::IOnSerialize::Serialize type);
 
     Client          &client;  ///< The client for which the engine is running.
-    QByteArray      data;     ///< The raw data received from a client, waiting to be unserialized.
+    QByteArray      &data;    ///< The raw data received from a client, waiting to be unserialized.
     Request         request;  ///< The request.
     Response        response; ///< The response.
     bool            done;     ///< True if at least one plugin has implemented one of the IDoUnserialize or the IDoSerialize interfaces.

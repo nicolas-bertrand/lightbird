@@ -48,7 +48,7 @@ public:
     void            shutdown();
 
     // IReadWrite
-    bool            read(QByteArray &data, Client *client);
+    void            read(Client *client);
     bool            write(QByteArray *data, Client *client);
     /// @brief Emits the signal connectSignal that calls the slot _connect in the
     /// thread of the class Clients.
@@ -57,6 +57,9 @@ public:
 signals:
     /// @brief Connects a TCP client to the server.
     void            connectSignal(QString id);
+    /// @brief Emited when the Client is ready to read data on the network.
+    /// They will be read from the thread via the _read method.
+    void            readSignal(Client *client);
     /// @brief Emited when new data have to be written on the network, in order to
     /// write these data from the thread (where the sockets lives).
     void            writeSignal();
@@ -64,6 +67,9 @@ signals:
 private slots:
     /// @brief Connects a TCP client to the server.
     void            _connect(QString id);
+    /// @brief Reads the data on the network from the thread, then notifies the
+    /// Client that they are ready to be processed.
+    void            _read(Client *client);
     /// @brief Writes the data stored in writeBuffer on the network, from the thread.
     void            _write();
     /// @brief Called when a QTcpSocket is disconnected.

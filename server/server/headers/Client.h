@@ -42,6 +42,9 @@ public:
 
     /// @brief Performs the actions of the client in a thread of the ThreadPool.
     void                    run();
+    /// @brief Called by the readWriteInterface to notifity the Client that data
+    /// have been read and are ready to be processed.
+    void                    bytesRead();
     /// @brief Write the data to the client. This method takes ownership of the data.
     /// The processing of the Client is paused until written() is called.
     void                    write(QByteArray *data);
@@ -59,6 +62,9 @@ public:
     bool                    doWrite(QByteArray &data);
     /// @brief Returns true if the client is finished and can be safely destroyed.
     bool                    isFinished() const;
+    /// @brief Returns the data buffer of the client. This method should only be
+    /// used when the Client is in reading phase.
+    QByteArray              &getData();
     /// @brief Changes the port member of the client (doesn't affect the real port).
     void                    setPort(unsigned short port);
     /// @brief Checks if the client accepts the protocol in parameter. If it is
@@ -94,10 +100,11 @@ public:
     bool                    isDisconnecting() const;
 
 public slots:
-    /// @brief Calling this method tells the Client that new data are available to read.
-    /// After being read, these data will ultimately feed the engine. The client takes
-    /// ownership of the data.
-    void                    read(QByteArray *data = NULL);
+    /// @brief Calling this method tells the Client that new data are available,
+    /// and starts the reading phase: the READING state is set, then the data are
+    /// read in the appropriate thread via the readWriteInterface. Finally the
+    /// READ state is set, and the engine is RUN if any data have been read.
+    void                    readyRead();
     /// @brief Tells the Client that the data are being written on the network.
     /// At this point the Client can be safely disconnected. This event is
     /// followed by bytesWritten.
@@ -119,7 +126,8 @@ private:
     enum State
     {
         CONNECT,    ///< The client is still connecting.
-        READ,       ///< Data should be available to read on the network.
+        READING,    ///< Data should be available to read on the network.
+        READ,       ///< Data have been read and are ready to be processed.
         SEND,       ///< Data have to be sent to the client.
         RECEIVE,    ///< Data have to be received without sending a request.
         RUN,        ///< The engine is running.
@@ -132,8 +140,8 @@ private:
     /// if the parameter is different from NONE. This method returns immediatly, and
     /// the task will be executed in the ThreaPool.
     void    _newTask(Client::State state = Client::NONE);
-    /// @brief Get the data read by the method read() and feed the Engine.
-    /// @return True if there is some data waiting to be processed.
+    /// @brief Ends the reading phase and calls LightBird::IOnRead via the Engine.
+    /// @return True if there is data waiting to be processed.
     bool    _read();
     /// @brief Asks the Engine to generate a new request.
     /// @return True if the Engine is generating the request.
@@ -168,13 +176,13 @@ private:
     QVariantMap              informations;        ///< Contains information on the client.
     QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
     LightBird::TableAccounts account;             ///< Allows the client to be identified as a know account.
-    QList<QByteArray *>      data;                ///< The list of all the data read from the network.
+    QByteArray               data;                ///< The data read on the network, waiting to be processed.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
     State                    oldTask;             ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
     State                    resume;              ///< The state to resume after the date have been written on the network.
     bool                     running;             ///< A task is running in a thread of the threadpool.
-    bool                     readyRead;           ///< Data are available on the network.
+    bool                     reading;             ///< Data are available on the network.
     bool                     writing;             ///< The client's task is paused while the data are being written on the network.
     bool                     written;             ///< The data have been written on the socket but not sent on the network yet (bytesWriting).
     bool                     finish;              ///< If true, the client is going to be disconnected.

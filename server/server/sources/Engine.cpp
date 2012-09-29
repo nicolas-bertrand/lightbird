@@ -5,44 +5,12 @@
 #include "LightBird.h"
 #include "Plugins.hpp"
 
-Engine::Engine(Client &c) : client(c)
+Engine::Engine(Client &c) : client(c), data(c.getData())
 {
 }
 
 Engine::~Engine()
 {
-}
-
-void    Engine::read(const QList<QByteArray *> &data)
-{
-    // If there is only one data we can add it directly
-    if (data.size() == 1)
-    {
-        this->_onRead(*data.first());
-        this->data.append(*data.first());
-        return ;
-    }
-    // Otherwise the data must be aggregated
-    QListIterator<QByteArray *> it(data);
-    unsigned int                newSize = this->data.size();
-    unsigned int                oldSize = this->data.size();
-    // Get the new size of the data to aggregate
-    while (it.hasNext())
-    {
-        this->_onRead(*it.peekNext());
-        newSize += it.peekNext()->size();
-        it.next();
-    }
-    this->data.resize(newSize);
-    it.toFront();
-    // Aggregates the new data
-    while (it.hasNext())
-    {
-        newSize = it.peekNext()->size();
-        memcpy(this->data.data() + oldSize, it.peekNext()->data(), newSize);
-        oldSize += newSize;
-        it.next();
-    }
 }
 
 LightBird::IRequest &Engine::getRequest()
@@ -62,18 +30,18 @@ void    Engine::_clear()
     this->done = false;
 }
 
-void    Engine::_onRead(QByteArray &data)
+void    Engine::onRead()
 {
     QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
 
     if (Log::instance()->isTrace())
-        Log::trace("Data received", Properties("id", this->client.getId()).add("data", LightBird::simplify(data)).add("size", data.size()), "Engine", "_onRead");
+        Log::trace("Data received", Properties("id", this->client.getId()).add("data", LightBird::simplify(this->data)).add("size", this->data.size()), "Engine", "onRead");
     else if (Log::instance()->isDebug())
-        Log::debug("Data received", Properties("id", this->client.getId()).add("size", data.size()), "Engine", "_onRead");
+        Log::debug("Data received", Properties("id", this->client.getId()).add("size", this->data.size()), "Engine", "onRead");
     while (it.hasNext())
     {
-        Log::trace("Calling IOnRead::onRead()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "Engine", "_onRead");
-        it.peekNext().value()->onRead(this->client, data);
+        Log::trace("Calling IOnRead::onRead()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "Engine", "onRead");
+        it.peekNext().value()->onRead(this->client, this->data);
         Plugins::instance()->release(it.next().key());
     }
 }

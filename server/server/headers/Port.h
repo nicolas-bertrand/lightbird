@@ -51,7 +51,7 @@ public:
     /// @brief Returns true if the port is listening the network.
     bool            isListening() const;
     // IReadWrite
-    virtual bool    read(QByteArray &data, Client *client) = 0;
+    virtual void    read(Client *client) = 0;
     virtual bool    write(QByteArray *data, Client *client) = 0;
 
 protected:
@@ -78,8 +78,8 @@ protected slots:
     /// @brief Called when a client is finished.
     /// @param client : The finished client. If not provided, the first finished
     /// client will be used.
-    /// @return True if a client has been finished.
-    virtual bool    _finished(Client *client = NULL);
+    /// @return The address of the finished Client (no longer valid), or NULL.
+    virtual Client  *_finished(Client *client = NULL);
 
 private:
     Port(const Port &);

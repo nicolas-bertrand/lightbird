@@ -1,6 +1,7 @@
 #ifndef PORTUDP_H
 # define PORTUDP_H
 
+# include <QMultiHash>
 # include <QUdpSocket>
 
 # include "Future.hpp"
@@ -15,7 +16,7 @@ public:
     PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0);
     ~PortUdp();
 
-    bool    read(QByteArray &data, Client *client);
+    void    read(Client *client);
     bool    write(QByteArray *data, Client *client);
     /// @brief Closes the UDP socket. No new connections will be accepted.
     void    close();
@@ -33,11 +34,12 @@ private slots:
     /// @brief This slot is called when datagrams are ready to be read.
     void    _readPendingDatagrams();
     /// @brief Called when a client is finished.
-    bool    _finished(Client *client = NULL);
+    Client  *_finished(Client *client = NULL);
 
 private:
     QUdpSocket   socket;        ///< This UDP socket is bound on the port to receive all datagrams sent to it.
     Future<bool> threadStarted; ///< This future is unlocked when the thread is started.
+    QMultiHash<Client *, QByteArray *> readBuffer; ///< The list of the datagrams read, waiting to be processed by the Client.
 };
 
 #endif // PORTUDP_H

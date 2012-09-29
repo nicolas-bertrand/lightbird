@@ -36,7 +36,8 @@ void    PortTcp::run()
 {
     // When a client connects to the server, the slot _newConnection is called
     QObject::connect(&this->tcpServer, SIGNAL(newConnection()), this, SLOT(_newConnection()), Qt::QueuedConnection);
-    // Allows to write the data from this thread
+    // Allows to read and write data from this thread
+    QObject::connect(this, SIGNAL(readSignal(Client*)), this, SLOT(_read(Client*)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(writeSignal()), this, SLOT(_write()), Qt::QueuedConnection);
     // Listen on the given port
     if (!this->tcpServer.listen(QHostAddress::Any, this->getPort()))
@@ -63,24 +64,9 @@ void    PortTcp::run()
     Log::info("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
 }
 
-bool    PortTcp::read(QByteArray &data, Client *client)
+void    PortTcp::read(Client *client)
 {
-    int read;
-
-    data.clear();
-    // Calls the IDoRead interface of the plugins
-    if (!client->doRead(data))
-    {
-        //If no plugins implements it, the server read the data itself
-        data.resize(client->getSocket().size());
-        if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
-        {
-            Log::warning("An error occured while reading the data", Properties("id", client->getId())
-                         .add("error", read).add("size", data.size()), "PortTcp", "read");
-            data.resize(read);
-        }
-    }
-    return (!data.isEmpty());
+    emit this->readSignal(client);
 }
 
 bool            PortTcp::write(QByteArray *data, Client *client)
@@ -130,13 +116,13 @@ void            PortTcp::_newConnection()
             // Join the client and its socket
             this->sockets[socket] = client;
             // When new data are received on this socket, read() is called on the client
-            QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(read()), Qt::QueuedConnection);
+            QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::QueuedConnection);
             // When the data have been written on this socket, Client::written is called
             QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(bytesWritten()), Qt::QueuedConnection);
             // When the client is disconnected, _disconnected() is called
             QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(_disconnected()), Qt::QueuedConnection);
             // Read the data received between the creation of the client and the connection of the read signal
-            client->read();
+            client->readyRead();
         }
         else
         {
@@ -144,6 +130,27 @@ void            PortTcp::_newConnection()
             delete socket;
         }
     }
+}
+
+void            PortTcp::_read(Client *client)
+{
+    QByteArray  &data = client->getData();
+    int         read;
+
+    data.clear();
+    // Calls the IDoRead interface of the plugins
+    if (!client->doRead(data))
+    {
+        // If no plugin implements it, the server read the data itself
+        data.resize(client->getSocket().size());
+        if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
+        {
+            Log::warning("An error occured while reading the data", Properties("id", client->getId())
+                         .add("error", read).add("size", data.size()), "PortTcp", "_read");
+            data.resize(read);
+        }
+    }
+    client->bytesRead();
 }
 
 void            PortTcp::_write()
@@ -196,12 +203,12 @@ void                PortTcp::_disconnected()
             this->_removeClient(this->sockets.value(socket));
 }
 
-bool            PortTcp::_finished(Client *client)
+Client          *PortTcp::_finished(Client *client)
 {
     SmartMutex  mutex(this->mutex, "PortTcp", "_finished");
 
     if (!mutex)
-        return (false);
+        return (NULL);
     // Searches the clients that have been finished
     client = NULL;
     QListIterator<Client *> it(this->clients);
@@ -221,7 +228,7 @@ bool            PortTcp::_finished(Client *client)
         mutex.unlock();
         this->_newConnection();
     }
-    return (true);
+    return (NULL);
 }
 
 bool    PortTcp::_isListening() const
