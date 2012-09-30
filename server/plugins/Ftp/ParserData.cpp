@@ -9,17 +9,15 @@ ParserData::~ParserData()
 {
 }
 
-bool ParserData::doUnserializeContent(const QByteArray &data, quint64 &used)
+bool    ParserData::doUnserializeContent(const QByteArray &data, quint64 &)
 {
-    // Make sure we upload to a file as the content might be big
-    this->client.getRequest().getContent().setStorage(LightBird::IContent::TEMPORARYFILE);
-    this->client.getRequest().getContent().getTemporaryFile()->setAutoRemove(false);
-    this->client.getRequest().getContent().setContent(data, true);
-    used += data.size();
-    return (this->client.isDisconnecting());
+    // Upload in progress (otherwise the data received are just discarded)
+    if (this->client.getInformations().contains("upload"))
+        this->client.getRequest().getContent().setContent(data);
+    return (false);
 }
 
-bool ParserData::doSerializeContent(QByteArray &data)
+bool    ParserData::doSerializeContent(QByteArray &data)
 {
     LightBird::IContent &content = this->client.getResponse().getContent();
     quint32 maxPacketSize = Plugin::getConfiguration().maxPacketSize;
@@ -34,30 +32,40 @@ bool ParserData::doSerializeContent(QByteArray &data)
     return (true);
 }
 
-void ParserData::onFinish()
+void    ParserData::onFinish()
 {
     this->api->network().disconnect(this->client.getId());
 }
 
-bool ParserData::onSerialize(LightBird::IOnSerialize::Serialize)
+bool    ParserData::onSerialize(LightBird::IOnSerialize::Serialize)
 {
+    // The response to the client is not needed in CLIENT mode
     return (false);
 }
 
-bool ParserData::onDisconnect()
+bool    ParserData::onDisconnect()
 {
     LightBird::Session  session = this->client.getSession();
-    bool                result = false;
+
+    // The data connection has been aborted
+    if (session && session->getInformation("disconnect-data").toBool())
+        return (true);
+    // If the client is downloading data we can close the connection directly.
+    // Otherwise we have to wait that the upload is finished.
+    return (this->client.getInformations().contains("download"));
+}
+
+void    ParserData::onDestroy()
+{
+    LightBird::Session  session = this->client.getSession();
 
     // Destroy the session if there is no control connection
     if (session)
     {
-        result = session->getInformation("disconnect-data").toBool();
-        session->removeInformation("disconnect-data");
+        session->setInformation("disconnect-data", false);
         session->removeInformation("data-id");
         session->removeClient(this->client.getId());
         if (session->getInformation("control-id").toString().isEmpty())
             session->destroy();
     }
-    return (result);
 }

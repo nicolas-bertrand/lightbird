@@ -8,21 +8,25 @@ Parser::~Parser()
 {
 }
 
-bool Parser::onExecution()
+bool    Parser::onExecution()
 {
     return (true);
 }
 
-bool Parser::onSerialize(LightBird::IOnSerialize::Serialize)
+bool    Parser::onSerialize(LightBird::IOnSerialize::Serialize)
 {
     return (true);
 }
 
-void Parser::onFinish()
+void    Parser::onFinish()
 {
 }
 
-bool Parser::onDisconnect()
+bool    Parser::onDisconnect()
 {
     return (false);
+}
+
+void    Parser::onDestroy()
+{
 }

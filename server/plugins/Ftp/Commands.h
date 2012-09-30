@@ -62,6 +62,7 @@ private:
     Result  _cdup(const QString &parameter, LightBird::Session &session);
     Result  _mkd (const QString &parameter, LightBird::Session &session);
     Result  _rmd (const QString &parameter, LightBird::Session &session);
+    Result  _dele(const QString &parameter, LightBird::Session &session);
     Result  _syst(const QString &parameter, LightBird::Session &session);
     Result  _type(const QString &parameter, LightBird::Session &session);
     Result  _stru(const QString &parameter, LightBird::Session &session);

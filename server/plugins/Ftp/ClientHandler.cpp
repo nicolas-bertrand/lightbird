@@ -30,8 +30,8 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
     informations["binary-flag"] = false;         // Whether we are in Ascii or Image mode.
     informations["transfer-ip"] = QString();     // In active mode these two variables contains the information gived by the PORT command,
     informations["transfer-port"] = 0;           // however in passive mode they contains the control client informations.
-//  informations["transfer-command"] = QString(); // The command that initiated the transfert. Defined only during the transfert.
-//  informations["transfer-parameter"] = QString(); // The paramater of the command. Defined only during the transfert.
+//  informations["transfer-command"] = "";       // The command that initiated the transfert. Defined only during the transfert.
+//  informations["transfer-parameter"] = "";     // The paramater of the command. Defined only during the transfert.
     informations["transfer-mode"] = (int)Commands::NONE; // The selected transfer mode of the data.
     session->setInformations(informations);
     // Be polite and welcome the user
@@ -100,35 +100,42 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
         {
             this->mutex.lock();
             QMutableListIterator<QPair<QHostAddress, QString> > it(this->passiveClients);
-            while (it.hasNext() && it.peekNext().first != client.getPeerAddress())
-                it.next();
-            // A client with the same IP is already connected, so we initiate the transfer
-            if (it.hasNext())
-            {
-                dataId = it.peekNext().second;
-                session->setClient(dataId);
-                session->setInformation("data-id", dataId);
-                QString command = session->getInformation("transfer-command").toString();
-                if (this->commands->isSender(command))
-                    this->api->network().send(dataId);
-                else
-                    this->api->network().receive(dataId);
-                result = Commands::Result(150, "Accepted data connection.");
-                it.remove();
-            }
+            while (it.hasNext())
+                // A client with the same IP is already connected, so we initiate the transfer
+                if (it.next().first == client.getPeerAddress())
+                {
+                    dataId = it.peekPrevious().second;
+                    session->setClient(dataId);
+                    session->setInformation("data-id", dataId);
+                    QString command = session->getInformation("transfer-command").toString();
+                    // Starts the transfert
+                    if (this->commands->isSender(command))
+                        this->api->network().send(dataId);
+                    else
+                        this->api->network().receive(dataId);
+                    // Wakes the data connection up if it was waiting for the control connection
+                    if (this->wait.contains(dataId))
+                        this->wait.value(dataId)->wakeAll();
+                    result = Commands::Result(150, "Accepted data connection.");
+                    it.remove();
+                    break;
+                }
             // Otherwise we wait for a valid client
-            else
+            if (dataId.isEmpty())
                 session->setInformation("data-id", QString());
             this->mutex.unlock();
         }
         else if (mode == Commands::ACTIVE)
         {
+            // Connection to the client. The mutex guarantees the atomicity of assignment of the session.
+            this->mutex.lock();
             dataId = this->api->network().connect(QHostAddress(address), port, QStringList(Plugin::getConfiguration().dataProtocolName))->getResult();
             session->setClient(dataId);
             if (!dataId.isEmpty())
                 session->setInformation("data-id", dataId);
             else
                 result = Commands::Result(425, "Could not open data connection.");
+            this->mutex.unlock();
         }
     }
     return (result);
@@ -145,7 +152,7 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
     // Passive mode
     if (client.getMode() == LightBird::IClient::SERVER)
     {
-        SmartMutex mutex(this->mutex);
+        SmartMutex mutex(this->mutex, "ClientHandler", "onDataConnect");
         if (!mutex)
             return (false);
         // The first control connection with the same ip as the client is used
@@ -166,9 +173,13 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
         session->setInformation("data-id", client.getId());
         mutex.unlock();
     }
-    // Active mode
+    // Active mode. The mutex ensures that we have the time to assign the session to the client, in _prepareTransferMethod
     else if (client.getMode() == LightBird::IClient::CLIENT)
+    {
+        this->mutex.lock();
         session = client.getSession();
+        this->mutex.unlock();
+    }
     if (session == NULL)
         return (false);
     command = session->getInformation("transfer-command").toString();
@@ -187,12 +198,30 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
     Commands::Result   controlOut;
 
     if (session == NULL)
-        return (false);
+    {
+        SmartMutex mutex(this->mutex, "ClientHandler", "doDataExecute");
+        // If the control connection is still not ready, we have to wait
+        if (mutex && this->passiveClients.contains(QPair<QHostAddress, QString>(client.getPeerAddress(), client.getId()))
+            && client.getMode() == LightBird::IClient::SERVER)
+        {
+            QWaitCondition wait;
+            this->wait.insert(client.getId(), &wait);
+            wait.wait(&this->mutex, Plugin::getConfiguration().timeWaitControl);
+            session = client.getSession();
+            this->wait.remove(client.getId());
+        }
+        if (!session)
+            return (false);
+    }
     QString command = session->getInformation("transfer-command").toString();
     QString parameter = session->getInformation("transfer-parameter").toString();
     QString control = session->getInformation("control-id").toString();
     if (!this->commands->isTransfer(command))
         return (false);
+    if (this->commands->isSender(command))
+        client.getInformations().insert("download", true);
+    else
+        client.getInformations().insert("upload", true);
     controlOut = this->commands->executeTransfer(command, parameter, session, client);
     this->_sendControlMessage(control, controlOut);
     session->removeInformation("transfer-command");
@@ -200,9 +229,9 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
     return (true);
 }
 
-void    ClientHandler::onDataDisconnect(LightBird::IClient &client)
+void    ClientHandler::onDataDestroy(LightBird::IClient &client)
 {
-    SmartMutex  mutex(this->mutex);
+    SmartMutex  mutex(this->mutex, "ClientHandler", "onDataDestroyed");
 
     if (!mutex)
         return ;

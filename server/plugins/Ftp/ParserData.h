@@ -15,6 +15,7 @@ public:
     void    onFinish();
     bool    onSerialize(LightBird::IOnSerialize::Serialize type);
     bool    onDisconnect();
+    void    onDestroy();
 };
 
 #endif // PARSERDATA_H

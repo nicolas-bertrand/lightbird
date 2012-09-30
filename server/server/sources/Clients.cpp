@@ -102,7 +102,7 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
 
     if (!mutex)
         return (false);
-    // Search the client
+    // Searches the client
     QListIterator<Client *> it(this->clients);
     while (it.hasNext() && !client)
         if (it.next()->getId() == idClient)
@@ -128,7 +128,7 @@ bool            Clients::receive(const QString &id, const QString &p, const QVar
 
     if (!mutex)
         return (false);
-    // Search the client
+    // Searches the client
     QListIterator<Client *> it(this->clients);
     while (it.hasNext() && !client)
         if (it.next()->getId() == id)
@@ -364,7 +364,7 @@ void                Clients::_disconnected()
     // If the sender of the signal is a QAbstractSocket
     if ((socket = qobject_cast<QAbstractSocket *>(this->sender())))
     {
-        // Search the client associated with this socket
+        // Searches the client associated with this socket
         QListIterator<Client *> it(this->clients);
         while (it.hasNext())
             // And disconnect it
@@ -383,7 +383,7 @@ void            Clients::_finished()
 
     if (!mutex)
         return ;
-    // Delete the clients finished
+    // Deletes the clients finished
     QMutableListIterator<Client *> it(this->clients);
     while (it.hasNext())
         // The client is deleted only if there is no remaining data in the writeBuffer

@@ -16,6 +16,7 @@ public:
     virtual bool onSerialize(LightBird::IOnSerialize::Serialize type);
     virtual void onFinish();
     virtual bool onDisconnect();
+    virtual void onDestroy();
 
 protected:
     LightBird::IApi     *api;

@@ -24,6 +24,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     // Fills the configuration
     if (!(this->configuration.maxPacketSize = api->configuration(true).get("maxPacketSize").toUInt()))
         this->configuration.maxPacketSize = 10000000;
+    if (!(this->configuration.timeWaitControl = api->configuration(true).get("timeWaitControl").toUInt()) || this->configuration.timeWaitControl > 30000)
+        this->configuration.timeWaitControl = 5000;
     // Gets the data connection protocol name
     QDomElement element = this->api->configuration(true).readDom();
     element = element.firstChildElement("contexts").firstChildElement("context").firstChildElement("protocol");
@@ -98,15 +100,13 @@ bool        Plugin::onConnect(LightBird::IClient &client)
     return (result);
 }
 
-void    Plugin::onDestroy(LightBird::IClient &client)
+bool    Plugin::doUnserializeHeader(LightBird::IClient &client, const QByteArray &, quint64 &)
 {
-    this->mutex.lockForWrite();
-    if (this->parsers.contains(client.getId()))
-    {    
-        delete this->parsers.value(client.getId());
-        this->parsers.remove(client.getId());
-    }
-    this->mutex.unlock();
+    // ClientHandler::doDataExecute is only called here from the data connection
+    // when the client is sending data to us. It is used to initiate the upload.
+    if (client.getRequest().getProtocol() == this->configuration.dataProtocolName)
+        this->handler->doDataExecute(client);
+    return (true);
 }
 
 bool     Plugin::doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
@@ -151,14 +151,23 @@ bool     Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize
 
 void    Plugin::onFinish(LightBird::IClient &client)
 {
-    return (this->_getParser(client)->onFinish());
+    this->_getParser(client)->onFinish();
 }
 
 bool     Plugin::onDisconnect(LightBird::IClient &client)
 {
-    if (client.getProtocols().first() == this->configuration.dataProtocolName)
-        this->handler->onDataDisconnect(client);
     return (this->_getParser(client)->onDisconnect());
+}
+
+void    Plugin::onDestroy(LightBird::IClient &client)
+{
+    if (client.getProtocols().first() == this->configuration.dataProtocolName)
+        this->handler->onDataDestroy(client);
+    this->_getParser(client)->onDestroy();
+    this->mutex.lockForWrite();
+    delete this->parsers.value(client.getId());
+    this->parsers.remove(client.getId());
+    this->mutex.unlock();
 }
 
 Parser      *Plugin::_getParser(const LightBird::IClient &client)

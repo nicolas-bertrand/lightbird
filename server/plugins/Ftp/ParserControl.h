@@ -15,7 +15,7 @@ public:
     bool    doUnserializeContent(const QByteArray &data, quint64 &used);
     bool    doSerializeContent(QByteArray &data);
     bool    onExecution();
-    bool    onDisconnect();
+    void    onDestroy();
 
 private:
     QString buffer;

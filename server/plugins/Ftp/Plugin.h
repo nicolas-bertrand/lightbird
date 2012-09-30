@@ -12,9 +12,9 @@
 # include "IOnDisconnect.h"
 # include "IOnDestroy.h"
 # include "IDoSerializeContent.h"
-# include "IDoSerializeHeader.h"
 # include "IDoExecution.h"
 # include "IDoUnserializeContent.h"
+# include "IDoUnserializeHeader.h"
 # include "IDoSend.h"
 # include "IOnExecution.h"
 # include "IOnSerialize.h"
@@ -28,6 +28,7 @@ class Plugin : public QObject,
                public LightBird::IOnConnect,
                public LightBird::IOnDisconnect,
                public LightBird::IOnDestroy,
+               public LightBird::IDoUnserializeHeader,
                public LightBird::IDoUnserializeContent,
                public LightBird::IDoExecution,
                public LightBird::IOnExecution,
@@ -41,6 +42,7 @@ class Plugin : public QObject,
                  LightBird::IOnConnect
                  LightBird::IOnDisconnect
                  LightBird::IOnDestroy
+                 LightBird::IDoUnserializeHeader
                  LightBird::IDoUnserializeContent
                  LightBird::IDoExecution
                  LightBird::IOnExecution
@@ -54,6 +56,7 @@ public:
     struct      Configuration
     {
         quint32 maxPacketSize;      ///< The maximum size send at a time to the client.
+        quint32 timeWaitControl;    ///< The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready.
         QString dataProtocolName;   ///< The name of the data connection protocol.
         unsigned short passivePort; ///< The port on which the clients can etablish a passive connection.
     };
@@ -74,6 +77,7 @@ public:
     void    onDestroy(LightBird::IClient &client);
 
     // Execution
+    bool    doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
     bool    doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
     bool    doExecution(LightBird::IClient &client);
     bool    onExecution(LightBird::IClient &client);

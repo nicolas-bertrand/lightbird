@@ -24,9 +24,10 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["HELP"] = &Commands::_help;
     this->controlCommands["PWD"] =  &Commands::_pwd;
     this->controlCommands["CWD"] = &Commands::_cwd;
+    this->controlCommands["CDUP"] = &Commands::_cdup;
     this->controlCommands["MKD"] = &Commands::_mkd;
     this->controlCommands["RMD"] = &Commands::_rmd;
-    this->controlCommands["CDUP"] = &Commands::_cdup;
+    this->controlCommands["DELE"] = &Commands::_dele;
     this->controlCommands["SYST"] = &Commands::_syst;
     this->controlCommands["TYPE"] = &Commands::_type;
     this->controlCommands["STRU"] = &Commands::_stru;
@@ -162,26 +163,44 @@ Commands::Result Commands::_cdup(const QString &, LightBird::Session &session)
     return (this->_cwd("..", session));
 }
 
-Commands::Result Commands::_mkd(const QString &pathname, LightBird::Session &session)
+Commands::Result Commands::_mkd(const QString &pathName, LightBird::Session &session)
 {
     LightBird::TableDirectories   directory(session->getInformation("working-dir").toString());
 
     // The path is absolute
-    if (pathname.startsWith('/'))
+    if (pathName.startsWith('/'))
         directory.clear();
     // Creates the directories in the path
-    directory.setId(directory.createVirtualPath(pathname, session->getAccount()));
-    return (Result(257, QString("\%1\" directory created.").arg(this->_escapePath(directory.getVirtualPath(true)))));
+    directory.setId(directory.createVirtualPath(pathName, session->getAccount()));
+    return (Result(257, QString("\"%1\" directory created.").arg(this->_escapePath(directory.getVirtualPath(true)))));
 }
 
-Commands::Result Commands::_rmd(const QString &pathname, LightBird::Session &session)
+Commands::Result Commands::_rmd(const QString &pathName, LightBird::Session &session)
 {
     LightBird::TableDirectories   directory(session->getInformation("working-dir").toString());
 
-    if (!directory.cd(pathname))
-        return (Result(550, QString("Directory not found \"%1\".").arg(this->_escapePath(pathname))));
+    if (!directory.cd(pathName))
+        return (Result(550, QString("Directory not found \"%1\".").arg(this->_escapePath(pathName))));
     directory.remove();
-    return (Result(250, QString("\%1\" directory removed.").arg(this->_escapePath(pathname))));
+    return (Result(250, QString("\"%1\" directory removed.").arg(this->_escapePath(pathName))));
+}
+
+Commands::Result Commands::_dele(const QString &path, LightBird::Session &session)
+{
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::TableFiles       file;
+    QString                     name;
+
+    if (!path.contains('/'))
+        file.setId(directory.getFile(path));
+    else
+    {
+        if (directory.cd(name = path.left(path.lastIndexOf('/') + 1)))
+            file.setId(directory.getFile(path.right(path.size() - name.size())));
+    }
+    if (!file)
+        return (Result(550, QString("File not found \"%1\".").arg(path)));
+    return (Result(250, QString("\"%1\" file deleted.").arg(path)));
 }
 
 Commands::Result Commands::_syst(const QString &, LightBird::Session &)
@@ -314,6 +333,7 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
     QString                     name;
     QString                     subDirectories;
     QString                     date;
+    QString                     size;
 
     // Changes the directory to the argument if possible
     if (!path.isEmpty() && !directory.cd(path))
@@ -351,8 +371,9 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
     {
         LightBird::TableFiles file(f.next());
         name = LightBird::TableAccounts(file.getIdAccount()).getName();
+        size = QString::number(QFileInfo(file.getFullPath()).size());
         date = this->_listDate(file.getModified());
-        line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), file.getInformation("size").toString(), date, file.getName());
+        line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), size, date, file.getName());
         content.setContent(line.toUtf8());
     }
     return (Result(226, QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size()))));
@@ -387,59 +408,44 @@ Commands::Result Commands::_retr(const QString &path, LightBird::Session &sessio
     return (result);
 }
 
-Commands::Result Commands::_stor(const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
+Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &session, LightBird::IClient &client)
 {
-    Upload upload;
-    upload.file = client.getRequest().getContent().getTemporaryFile();
-    upload.name = parameter;
-    upload.parent = session->getInformation("working-dir").toString();
-    
-    
-    // TODO: do this in another thread
-    
-    QString path;
+    LightBird::IContent         &content = client.getRequest().getContent();
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::TableFiles       file;
+    QString                     filesPath = LightBird::getFilesPath();
+    QString                     fileName = pathName;
+    QString                     path;
 
-    if (upload.name.contains("."))
-        path = upload.name.left(upload.name.indexOf('.'));
+    // Checks if the file exists
+    if (fileName.contains('/'))
+        fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+    if (!pathName.contains('/'))
+        file.setIdFromVirtualPath(pathName);
+    else if (directory.cd(pathName.left(pathName.lastIndexOf('/') + 1)))
+        file.setId(directory.getFile(fileName));
     else
-        path = upload.name;
+        return (Result(501, QString("Directory \"%1\" not found.").arg(pathName.left(pathName.lastIndexOf('/')))));
+    // Removes the file if it already exists
+    if (file)
+    {
+        path = file.getFullPath();
+        if (QFileInfo(path).isFile() && (!QFile::remove(path) || !file.remove()))
+            return (Result(550, "Unable to replace the file."));
+    }
+    // Defines the real name of the file
+    path = filesPath + fileName;
+    if (path.contains('.'))
+        path = path.left(fileName.lastIndexOf('.'));
     path += '.' + LightBird::createUuid();
-    if (upload.name.contains("."))
-        path += upload.name.right(upload.name.size() - upload.name.indexOf('.'));
-    path = QDir().cleanPath(api->configuration().get("filesPath")) + "/" + path;
-    QList<void *>   extensions;
-    LightBird::IIdentify::Information information;
-
-    if (!(extensions = api->extensions().get("IIdentifier")).isEmpty())
-        information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(upload.file->fileName());
-    api->extensions().release(extensions);
-    if (information.data.value("mime").toString() == "application/octet-stream")
-        information.data.remove("mime"); 
-    
-    LightBird::IDatabase &database = this->api->database();
-    LightBird::TableFiles file;
-    QSqlQuery query;
-    QVector<QVariantMap> result;
-    query.prepare(database.getQuery("Ftp", "select_file"));
-    query.bindValue(":name", upload.name);
-    query.bindValue(":parent", upload.parent);
-
-
-    // Are we reuploading a file ?
-    if (database.query(query, result) && result.size() >= 1)
-    {
-        file.setId(result[0]["id"].toString());
-        file.setType(information.type_string);
-        file.setInformations(information.data);
-    }
-    else // Create a new one
-    {
-        file.add(upload.name, path, information.data, information.type_string, upload.parent, session->getAccount());
-    }
-
-    LightBird::copy(upload.file->fileName(), file.getPath());
-
-    return (Result(226, "File successfully transferred."));
+    if (fileName.contains('.'))
+        path += fileName.right(fileName.size() - fileName.lastIndexOf('.'));
+    // Creates the file
+    if (!QFile(fileName).open(QIODevice::WriteOnly)
+        || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
+        return (Result(550, "Unable to create the file."));
+    content.setStorage(LightBird::IContent::FILE, path);
+    return (Result(250, "File successfully transferred."));
 }
 
 QString Commands::_escapePath(const QString &path)
