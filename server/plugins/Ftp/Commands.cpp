@@ -31,6 +31,8 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["DELE"] = &Commands::_dele;
     this->controlCommands["SIZE"] = &Commands::_size;
     this->controlCommands["SYST"] = &Commands::_syst;
+    this->controlCommands["FEAT"] = &Commands::_feat;
+    this->controlCommands["OPTS"] = &Commands::_opts;
     this->controlCommands["TYPE"] = &Commands::_type;
     this->controlCommands["STRU"] = &Commands::_stru;
     this->controlCommands["MODE"] = &Commands::_mode;
@@ -241,6 +243,16 @@ Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBir
     return (Result(215, "UNIX Type: L8"));
 }
 
+Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBird::IClient &)
+{
+    return (Result(0, "211-Features:\r\n SIZE\r\n211 End\r\n"));
+}
+
+Commands::Result Commands::_opts(const QString &, LightBird::Session &, LightBird::IClient &)
+{
+    return (Result(501, "Option not understood."));
+}
+
 Commands::Result Commands::_type(const QString &parameter, LightBird::Session &session, LightBird::IClient &)
 {
     bool    binary = session->getInformation("binary-flag").toBool();
@@ -304,7 +316,7 @@ Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, L
         session->setInformation("transfer-mode", Commands::PASSIVE);
         session->setInformation("transfer-ip", client.getPeerAddress().toString());
         session->setInformation("transfer-port", client.getPeerPort());
-        return (Result(0, QString("227 Entered Passive Mode (127,0,0,1,%1,%2)\r\n").arg(QString::number(port >> 8), QString::number(port & 0xFF))));
+        return (Result(227, QString("Entered Passive Mode (127,0,0,1,%1,%2)").arg(QString::number(port >> 8), QString::number(port & 0xFF))));
     }
     return (Result(502, "Data port not opened.\r\nUse active connection instead."));
 }

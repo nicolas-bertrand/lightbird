@@ -62,14 +62,15 @@ bool    ClientHandler::doControlExecute(LightBird::IClient &client)
     }
     else
     {
-        QString command = request.getMethod().toUpper(); // Make sure we capitalize it, as we do case insensitive matching
+        // Make sure we capitalize it, as we do case insensitive matching
+        QString command = request.getMethod().toUpper();
         QString parameter = request.getInformations()["parameter"].toString();
         if (this->commands->isControl(command))
             result = this->commands->executeControl(command, parameter, session, client);
         else if (this->commands->isTransfer(command))
             result = this->_prepareTransferMethod(command, parameter, session, client);
         else
-            result = Commands::Result(500, "Unknow command");
+            result = Commands::Result(500, "Unknow command.");
     }
     response.setCode(result.first);
     response.setMessage(result.second);
