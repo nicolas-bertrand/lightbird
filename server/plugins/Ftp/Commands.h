@@ -7,6 +7,8 @@
 # include "ISessions.h"
 # include "IClient.h"
 
+#include "TableFiles.h"
+
 /// @brief Executes the commands of the clients.
 class Commands
 {
@@ -33,7 +35,7 @@ public:
     /// A control method takes in a FTP command and the corresponding parmater string (possibly empty),
     /// as well as the session corresponding to the connection,
     /// and returns a pair with a code and a message to send on the control connection.
-    typedef Result (Commands::*ControlMethod)(const QString &parameter, LightBird::Session &session);
+    typedef Result (Commands::*ControlMethod)(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     /// A transfer method is similar to a control method.
     /// However it either uses a IRequest or fills in a IResponse with the contents of the data connection,
     /// depending if it is a in or out transfer.
@@ -47,36 +49,41 @@ public:
     /// the transfer connection. Otherwise it will receive data from the client.
     bool    isSender(const QString &command);
     /// @brief Executes a control command, and return its response.
-    Result  executeControl(const QString &command, const QString parameter, LightBird::Session &session);
+    Result  executeControl(const QString &command, const QString parameter, LightBird::Session &session, LightBird::IClient &client);
     /// @brief Executes a control command, and return its response.
     Result  executeTransfer(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
 private:
     // Control methods
-    Result  _user(const QString &parameter, LightBird::Session &session);
-    Result  _pass(const QString &parameter, LightBird::Session &session);
-    Result  _acct(const QString &parameter, LightBird::Session &session);
-    Result  _help(const QString &parameter, LightBird::Session &session);
-    Result  _pwd (const QString &parameter, LightBird::Session &session);
-    Result  _cwd (const QString &parameter, LightBird::Session &session);
-    Result  _cdup(const QString &parameter, LightBird::Session &session);
-    Result  _mkd (const QString &parameter, LightBird::Session &session);
-    Result  _rmd (const QString &parameter, LightBird::Session &session);
-    Result  _dele(const QString &parameter, LightBird::Session &session);
-    Result  _syst(const QString &parameter, LightBird::Session &session);
-    Result  _type(const QString &parameter, LightBird::Session &session);
-    Result  _stru(const QString &parameter, LightBird::Session &session);
-    Result  _mode(const QString &parameter, LightBird::Session &session);
-    Result  _pasv(const QString &parameter, LightBird::Session &session);
-    Result  _port(const QString &parameter, LightBird::Session &session);
-    Result  _noop(const QString &parameter, LightBird::Session &session);
-    Result  _abor(const QString &parameter, LightBird::Session &session);
-    Result  _quit(const QString &parameter, LightBird::Session &session);
+    Result  _user(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _pass(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _acct(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _help(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _pwd (const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _cwd (const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _cdup(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _mkd (const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _rmd (const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _rnfr(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _rnto(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _dele(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _syst(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _type(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _stru(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _mode(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _pasv(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _port(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _noop(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _abor(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _quit(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     // Transfer methods
     Result  _list(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _retr(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _stor(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
+    /// @brief Returns the file pointed by path.
+    /// @param session : Used to get the working directory if the path is relative.
+    LightBird::TableFiles _getFile(const QString &path, LightBird::Session &session);
     /// @brief Double-quotes in the path are escaped by double-quotes.
     QString _escapePath(const QString &path);
     /// @brief Converts the date in the "ls -l" format.

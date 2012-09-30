@@ -18,14 +18,14 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
 {
     QVariantMap informations;
 
-    // Initialize a new session for this control connection
+    // Initializes a new session for this control connection. Only the informations
+    // used by both the control and data connections are stored here.
     LightBird::Session session = this->api->sessions().create();
     session->setClient(client.getId());
     informations["control-id"] = client.getId(); // The id of the control connection. Defined while it is opened.
 //  informations["data-id"] = QString();         // The id of the data connection. Defined while it is opened.
     informations["working-dir"] = QString();     // The id of the working directory. Empty for the root.
     informations["last-command"] = QString();    // The last command executed by the control connection.
-    informations["user"] = QString();            // The name of the account gived by the USER command.
     informations["disconnect-data"] = false;     // Allows to abort the data connection if true.
     informations["binary-flag"] = false;         // Whether we are in Ascii or Image mode.
     informations["transfer-ip"] = QString();     // In active mode these two variables contains the information gived by the PORT command,
@@ -34,6 +34,11 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
 //  informations["transfer-parameter"] = "";     // The paramater of the command. Defined only during the transfert.
     informations["transfer-mode"] = (int)Commands::NONE; // The selected transfer mode of the data.
     session->setInformations(informations);
+    // Initializes the control connection specific informations
+    informations.clear();
+//  informations["user"] = QString();    // The name of the account gived by the USER command.
+//  informations["oldName"] = QString(); // The name of the file to rename in RNTO.
+    client.getInformations() = informations;
     // Be polite and welcome the user
     Commands::Result greeting(220, "Welcome to Lightbird's FTP server.\r\n"
                                    "Please authenticate.\r\n"
@@ -60,7 +65,7 @@ bool    ClientHandler::doControlExecute(LightBird::IClient &client)
         QString command = request.getMethod().toUpper(); // Make sure we capitalize it, as we do case insensitive matching
         QString parameter = request.getInformations()["parameter"].toString();
         if (this->commands->isControl(command))
-            result = this->commands->executeControl(command, parameter, session);
+            result = this->commands->executeControl(command, parameter, session, client);
         else if (this->commands->isTransfer(command))
             result = this->_prepareTransferMethod(command, parameter, session, client);
         else

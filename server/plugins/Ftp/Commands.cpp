@@ -12,7 +12,6 @@
 #include "Properties.h"
 #include "TableAccounts.h"
 #include "TableDirectories.h"
-#include "TableFiles.h"
 
 const char *Commands::months[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
@@ -27,6 +26,8 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["CDUP"] = &Commands::_cdup;
     this->controlCommands["MKD"] = &Commands::_mkd;
     this->controlCommands["RMD"] = &Commands::_rmd;
+    this->controlCommands["RNFR"] = &Commands::_rnfr;
+    this->controlCommands["RNTO"] = &Commands::_rnto;
     this->controlCommands["DELE"] = &Commands::_dele;
     this->controlCommands["SYST"] = &Commands::_syst;
     this->controlCommands["TYPE"] = &Commands::_type;
@@ -64,12 +65,12 @@ bool    Commands::isSender(const QString &command)
     return (true);
 }
 
-Commands::Result Commands::executeControl(const QString &command, const QString parameter, LightBird::Session &session)
+Commands::Result Commands::executeControl(const QString &command, const QString parameter, LightBird::Session &session, LightBird::IClient &client)
 {
     Result  result;
 
     if (!session->getAccount().isEmpty() || this->anonymousCommands.contains(command))
-        result = (this->*(this->controlCommands.value(command)))(parameter, session);
+        result = (this->*(this->controlCommands.value(command)))(parameter, session, client);
     else
         result = Result(530, "Please login with USER and PASS.");
     session->setInformation("last-command", command);
@@ -83,13 +84,13 @@ Commands::Result Commands::executeTransfer(const QString &command, const QString
     return (result);
 }
 
-Commands::Result Commands::_user(const QString &user, LightBird::Session &session)
+Commands::Result Commands::_user(const QString &user, LightBird::Session &, LightBird::IClient &client)
 {
     Result  result;
 
     if(!user.trimmed().isEmpty())
     {
-        session->setInformation("user", user);
+        client.getInformations().insert("user", user);
         result = Result(331, QString("User %1 OK. Password required.").arg(user));
     }
     else
@@ -97,15 +98,15 @@ Commands::Result Commands::_user(const QString &user, LightBird::Session &sessio
     return (result);
 }
 
-Commands::Result Commands::_pass(const QString &pass, LightBird::Session &session)
+Commands::Result Commands::_pass(const QString &pass, LightBird::Session &session, LightBird::IClient &client)
 {
     LightBird::TableAccounts account;
     QString      user;
     Result       result;
 
-    if (session->getInformation("last-command") == "USER" && session->hasInformation("user"))
+    if (session->getInformation("last-command") == "USER" && client.getInformations().contains("user"))
     {
-        user = session->getInformation("user").toString();
+        user = client.getInformations().value("user").toString();
         if (account.setIdFromNameAndPassword(user, pass))
         {
             result = Result(230, QString("Welcome %1.\r\nMake yourself at home!").arg(user));
@@ -113,19 +114,19 @@ Commands::Result Commands::_pass(const QString &pass, LightBird::Session &sessio
         }
         else
             result = Result(530, "Login authentification failed.");
-        session->removeInformation("user");
+        client.getInformations().remove("user");
     }
     else
         result = Result(503, "Bad sequence of commands.");
     return (result);
 }
 
-Commands::Result Commands::_acct(const QString &, LightBird::Session &)
+Commands::Result Commands::_acct(const QString &, LightBird::Session &, LightBird::IClient &)
 {
     return (Result(202, "Command superfluous."));
 }
 
-Commands::Result Commands::_help(const QString &, LightBird::Session &)
+Commands::Result Commands::_help(const QString &, LightBird::Session &, LightBird::IClient &)
 {
     QStringList commands(this->controlCommands.keys() + this->transferCommands.keys());
     QString result;
@@ -138,14 +139,14 @@ Commands::Result Commands::_help(const QString &, LightBird::Session &)
     return (Result(214, "The following commands are recognized:\r\n" + result));
 }
 
-Commands::Result Commands::_pwd(const QString &, LightBird::Session &session)
+Commands::Result Commands::_pwd(const QString &, LightBird::Session &session, LightBird::IClient &)
 {
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     
     return (Result(257, QString("\"%1\" is your current location").arg(this->_escapePath(directory.getVirtualPath(true)))));
 }
 
-Commands::Result Commands::_cwd(const QString &path, LightBird::Session &session)
+Commands::Result Commands::_cwd(const QString &path, LightBird::Session &session, LightBird::IClient &)
 {
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
 
@@ -158,12 +159,12 @@ Commands::Result Commands::_cwd(const QString &path, LightBird::Session &session
         return (Result(550, QString("Can't change directory to \"%1\".").arg(this->_escapePath(path))));
 }
 
-Commands::Result Commands::_cdup(const QString &, LightBird::Session &session)
+Commands::Result Commands::_cdup(const QString &, LightBird::Session &session, LightBird::IClient &client)
 {
-    return (this->_cwd("..", session));
+    return (this->_cwd("..", session, client));
 }
 
-Commands::Result Commands::_mkd(const QString &pathName, LightBird::Session &session)
+Commands::Result Commands::_mkd(const QString &pathName, LightBird::Session &session, LightBird::IClient &)
 {
     LightBird::TableDirectories   directory(session->getInformation("working-dir").toString());
 
@@ -175,7 +176,7 @@ Commands::Result Commands::_mkd(const QString &pathName, LightBird::Session &ses
     return (Result(257, QString("\"%1\" directory created.").arg(this->_escapePath(directory.getVirtualPath(true)))));
 }
 
-Commands::Result Commands::_rmd(const QString &pathName, LightBird::Session &session)
+Commands::Result Commands::_rmd(const QString &pathName, LightBird::Session &session, LightBird::IClient &)
 {
     LightBird::TableDirectories   directory(session->getInformation("working-dir").toString());
 
@@ -185,31 +186,52 @@ Commands::Result Commands::_rmd(const QString &pathName, LightBird::Session &ses
     return (Result(250, QString("\"%1\" directory removed.").arg(this->_escapePath(pathName))));
 }
 
-Commands::Result Commands::_dele(const QString &path, LightBird::Session &session)
+Commands::Result Commands::_rnfr(const QString &oldName, LightBird::Session &session, LightBird::IClient &client)
 {
-    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
-    LightBird::TableFiles       file;
-    QString                     name;
+    if (!this->_getFile(oldName, session))
+        return (Result(550, QString("File not found.")));
+    client.getInformations().insert("oldName", oldName);
+    return (Result(350, QString("Waiting for the new name of the file \"%1\".").arg(this->_escapePath(oldName))));
+}
 
-    if (!path.contains('/'))
-        file.setId(directory.getFile(path));
-    else
-    {
-        if (directory.cd(name = path.left(path.lastIndexOf('/') + 1)))
-            file.setId(directory.getFile(path.right(path.size() - name.size())));
-    }
-    if (!file)
-        return (Result(550, QString("File not found \"%1\".").arg(path)));
+Commands::Result Commands::_rnto(const QString &newName, LightBird::Session &session, LightBird::IClient &client)
+{
+    LightBird::TableFiles   file;
+    QString                 oldName;
+
+    if (session->getInformation("last-command") != "RNFR" || !client.getInformations().contains("oldName"))
+        return (Result(503, "Bad sequence of commands."));
+    oldName = client.getInformations().value("oldName").toString();
+    client.getInformations().remove("oldName");
+    if (!(file = this->_getFile(oldName, session)))
+        return (Result(550, QString("File not found \"%1\".").arg(this->_escapePath(oldName))));
+    if (!file.setName(newName))
+        return (Result(553, QString("Unable to rename the file.")));
+    return (Result(250, QString("File renamed from \"%1\" to \"%2\".").arg(this->_escapePath(oldName), this->_escapePath(newName))));
+}
+
+Commands::Result Commands::_dele(const QString &path, LightBird::Session &session, LightBird::IClient &)
+{
+    LightBird::TableFiles   file;
+    QString                 realPath;
+
+    if (!(file = this->_getFile(path, session)))
+        return (Result(550, QString("File not found.")));
+    realPath = file.getFullPath();
+    if (QFileInfo(realPath).isFile() && !QFile(realPath).remove())
+        return (Result(450, QString("Unable to delete this file now. Try again later.")));
+    if (!file.remove())
+        return (Result(550, QString("Unable to delete the file.")));
     return (Result(250, QString("\"%1\" file deleted.").arg(path)));
 }
 
-Commands::Result Commands::_syst(const QString &, LightBird::Session &)
+Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBird::IClient &)
 {
     // As far as the clients are concerned, we are in a UNIX environment.
     return (Result(215, "UNIX Type: L8"));
 }
 
-Commands::Result Commands::_type(const QString &parameter, LightBird::Session &session)
+Commands::Result Commands::_type(const QString &parameter, LightBird::Session &session, LightBird::IClient &)
 {
     bool    binary = session->getInformation("binary-flag").toBool();
     QString type = parameter.toUpper();
@@ -245,23 +267,22 @@ Commands::Result Commands::_type(const QString &parameter, LightBird::Session &s
     return (Result(200, QString("TYPE is now %1.\r\n").arg(binary ? "8-bit binary" : "ASCII")));
 }
 
-Commands::Result Commands::_stru(const QString &structure, LightBird::Session &)
+Commands::Result Commands::_stru(const QString &structure, LightBird::Session &, LightBird::IClient &)
 {
     if (QString(structure).toUpper() != "F")
         return (Result(504, "Bad STRU command."));
     return (Result(200, QString("Structure set to %1.").arg(structure)));
 }
 
-Commands::Result Commands::_mode(const QString &mode, LightBird::Session &)
+Commands::Result Commands::_mode(const QString &mode, LightBird::Session &, LightBird::IClient &)
 {
     if (QString(mode).toUpper() != "S")
         return (Result(504, "Bad MODE command."));
     return (Result(200, QString("Mode set to %1.").arg(mode)));
 }
 
-Commands::Result Commands::_pasv(const QString &, LightBird::Session &session)
+Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, LightBird::IClient &client)
 {
-    LightBird::INetwork::Client client;
     QString         protocol = Plugin::getConfiguration().dataProtocolName;
     QStringList     protocols;
     unsigned int    maxClients;
@@ -270,16 +291,15 @@ Commands::Result Commands::_pasv(const QString &, LightBird::Session &session)
     // Ensures that the passive port is opened
     if (this->api->network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
     {
-        this->api->network().getClient(session->getInformation("control-id").toString(), client);
         session->setInformation("transfer-mode", Commands::PASSIVE);
-        session->setInformation("transfer-ip", client.peerAddress.toString());
-        session->setInformation("transfer-port", client.peerPort);
+        session->setInformation("transfer-ip", client.getPeerAddress().toString());
+        session->setInformation("transfer-port", client.getPeerPort());
         return (Result(0, QString("227 Entered Passive Mode (127,0,0,1,%1,%2)\r\n").arg(QString::number(port >> 8), QString::number(port & 0xFF))));
     }
     return (Result(502, "Data port not opened.\r\nUse active connection instead."));
 }
 
-Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &session)
+Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &session, LightBird::IClient &)
 {
     Result  result;
     QRegExp reg("(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3})"); // Regex matching the port parameter
@@ -298,12 +318,12 @@ Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &se
     return (result);
 }
 
-Commands::Result  Commands::_noop(const QString &, LightBird::Session &)
+Commands::Result  Commands::_noop(const QString &, LightBird::Session &, LightBird::IClient &)
 {
     return (Result(200, ":)"));
 }
 
-Commands::Result Commands::_abor(const QString &, LightBird::Session &session)
+Commands::Result Commands::_abor(const QString &, LightBird::Session &session, LightBird::IClient &)
 {
     QString dataId = session->getInformation("data-id").toString();
 
@@ -315,7 +335,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session)
     return (Result(0, "426 Data connection closed.\r\n226 Transfer aborted.\r\n"));
 }
 
-Commands::Result Commands::_quit(const QString &, LightBird::Session &session)
+Commands::Result Commands::_quit(const QString &, LightBird::Session &session, LightBird::IClient &)
 {
     session->destroy();
     this->api->network().disconnect(session->getInformation("control-id").toString());
@@ -446,6 +466,22 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
         return (Result(550, "Unable to create the file."));
     content.setStorage(LightBird::IContent::FILE, path);
     return (Result(250, "File successfully transferred."));
+}
+
+LightBird::TableFiles Commands::_getFile(const QString &path, LightBird::Session &session)
+{
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::TableFiles       file;
+    QString                     name;
+
+    if (!path.contains('/'))
+        file.setId(directory.getFile(path));
+    else
+    {
+        if (directory.cd(name = path.left(path.lastIndexOf('/') + 1)))
+            file.setId(directory.getFile(path.right(path.size() - name.size())));
+    }
+    return (file);
 }
 
 QString Commands::_escapePath(const QString &path)
