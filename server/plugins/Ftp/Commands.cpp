@@ -412,9 +412,10 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
     while(f.hasNext())
     {
         LightBird::TableFiles file(f.next());
+        QFileInfo fileInfo(file.getFullPath());
         name = LightBird::TableAccounts(file.getIdAccount()).getName();
-        size = QString::number(QFileInfo(file.getFullPath()).size());
-        date = this->_listDate(file.getModified());
+        size = QString::number(fileInfo.size());
+        date = this->_listDate(fileInfo.lastModified());
         line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), size, date, file.getName());
         content.setContent(line.toUtf8());
     }
