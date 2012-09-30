@@ -212,10 +212,9 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
             QWaitCondition wait;
             this->wait.insert(client.getId(), &wait);
             wait.wait(&this->mutex, Plugin::getConfiguration().timeWaitControl);
-            session = client.getSession();
             this->wait.remove(client.getId());
         }
-        if (!session)
+        if (!(session = client.getSession()))
             return (false);
     }
     QString command = session->getInformation("transfer-command").toString();
