@@ -29,6 +29,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["RNFR"] = &Commands::_rnfr;
     this->controlCommands["RNTO"] = &Commands::_rnto;
     this->controlCommands["DELE"] = &Commands::_dele;
+    this->controlCommands["SIZE"] = &Commands::_size;
     this->controlCommands["SYST"] = &Commands::_syst;
     this->controlCommands["TYPE"] = &Commands::_type;
     this->controlCommands["STRU"] = &Commands::_stru;
@@ -223,6 +224,15 @@ Commands::Result Commands::_dele(const QString &path, LightBird::Session &sessio
     if (!file.remove())
         return (Result(550, QString("Unable to delete the file.")));
     return (Result(250, QString("\"%1\" file deleted.").arg(path)));
+}
+
+Commands::Result Commands::_size(const QString &path, LightBird::Session &session, LightBird::IClient &)
+{
+    LightBird::TableFiles   file;
+
+    if (!(file = this->_getFile(path, session)))
+        return (Result(550, QString("File not found.")));
+    return (Result(213, QString::number(QFileInfo(file.getFullPath()).size())));
 }
 
 Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBird::IClient &)
