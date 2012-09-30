@@ -68,6 +68,7 @@ private:
     Result  _rnto(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _dele(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _size(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _mdtm(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _syst(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _feat(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _opts(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);

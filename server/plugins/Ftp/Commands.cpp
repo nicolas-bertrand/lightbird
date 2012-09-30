@@ -30,6 +30,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["RNTO"] = &Commands::_rnto;
     this->controlCommands["DELE"] = &Commands::_dele;
     this->controlCommands["SIZE"] = &Commands::_size;
+    this->controlCommands["MDTM"] = &Commands::_mdtm;
     this->controlCommands["SYST"] = &Commands::_syst;
     this->controlCommands["FEAT"] = &Commands::_feat;
     this->controlCommands["OPTS"] = &Commands::_opts;
@@ -237,6 +238,15 @@ Commands::Result Commands::_size(const QString &path, LightBird::Session &sessio
     return (Result(213, QString::number(QFileInfo(file.getFullPath()).size())));
 }
 
+Commands::Result Commands::_mdtm(const QString &path, LightBird::Session &session, LightBird::IClient &)
+{
+    LightBird::TableFiles   file;
+
+    if (!(file = this->_getFile(path, session)))
+        return (Result(550, QString("File not found.")));
+    return (Result(213, QFileInfo(file.getFullPath()).lastModified().toString("yyyyMMddhhmmss")));
+}
+
 Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBird::IClient &)
 {
     // As far as the clients are concerned, we are in a UNIX environment.
@@ -245,7 +255,7 @@ Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBir
 
 Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBird::IClient &)
 {
-    return (Result(0, "211-Features:\r\n SIZE\r\n211 End\r\n"));
+    return (Result(0, "211-Features:\r\n MDTM\r\n SIZE\r\n211 End\r\n"));
 }
 
 Commands::Result Commands::_opts(const QString &, LightBird::Session &, LightBird::IClient &)
