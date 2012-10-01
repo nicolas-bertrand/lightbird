@@ -36,6 +36,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnProtocol, "cc.lightbird.IOnProtocol");
+Q_DECLARE_INTERFACE(LightBird::IOnProtocol, "cc.lightbird.IOnProtocol")
 
 #endif // IONPROTOCOL_H

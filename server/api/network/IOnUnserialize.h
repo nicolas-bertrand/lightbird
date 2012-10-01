@@ -33,6 +33,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnUnserialize, "cc.lightbird.IOnUnserialize");
+Q_DECLARE_INTERFACE(LightBird::IOnUnserialize, "cc.lightbird.IOnUnserialize")
 
 #endif // IONUNSERIALIZE_H

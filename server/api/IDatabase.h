@@ -91,6 +91,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDatabase, "cc.lightbird.IDatabase");
+Q_DECLARE_INTERFACE(LightBird::IDatabase, "cc.lightbird.IDatabase")
 
 #endif // IDATABASE_H

@@ -35,6 +35,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoUnserializeFooter, "cc.lightbird.IDoUnserializeFooter");
+Q_DECLARE_INTERFACE(LightBird::IDoUnserializeFooter, "cc.lightbird.IDoUnserializeFooter")
 
 #endif // IDOUNSERIALIZEFOOTER_H

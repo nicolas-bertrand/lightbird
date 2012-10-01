@@ -34,6 +34,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoUnserializeHeader, "cc.lightbird.IDoUnserializeHeader");
+Q_DECLARE_INTERFACE(LightBird::IDoUnserializeHeader, "cc.lightbird.IDoUnserializeHeader")
 
 #endif // IDOUNSERIALIZEHEADER_H

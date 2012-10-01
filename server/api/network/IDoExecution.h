@@ -21,6 +21,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoExecution, "cc.lightbird.IDoExecution");
+Q_DECLARE_INTERFACE(LightBird::IDoExecution, "cc.lightbird.IDoExecution")
 
 #endif // IDOEXECUTION_H

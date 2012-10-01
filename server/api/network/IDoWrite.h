@@ -22,6 +22,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoWrite, "cc.lightbird.IDoWrite");
+Q_DECLARE_INTERFACE(LightBird::IDoWrite, "cc.lightbird.IDoWrite")
 
 #endif // IDOWRITE_H

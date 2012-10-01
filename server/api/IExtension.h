@@ -30,6 +30,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IExtension, "cc.lightbird.IExtension");
+Q_DECLARE_INTERFACE(LightBird::IExtension, "cc.lightbird.IExtension")
 
 #endif // IEXTENSION_H

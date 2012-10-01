@@ -35,6 +35,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnSerialize, "cc.lightbird.IOnSerialize");
+Q_DECLARE_INTERFACE(LightBird::IOnSerialize, "cc.lightbird.IOnSerialize")
 
 #endif // IONSERIALIZE_H

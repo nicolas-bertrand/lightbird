@@ -19,6 +19,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnExecution, "cc.lightbird.IOnExecution");
+Q_DECLARE_INTERFACE(LightBird::IOnExecution, "cc.lightbird.IOnExecution")
 
 #endif // IONEXECUTION_H

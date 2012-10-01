@@ -29,6 +29,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::ILog, "cc.lightbird.ILog");
+Q_DECLARE_INTERFACE(LightBird::ILog, "cc.lightbird.ILog")
 
 #endif // ILOG_H

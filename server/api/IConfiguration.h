@@ -63,6 +63,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IConfiguration, "cc.lightbird.IConfiguration");
+Q_DECLARE_INTERFACE(LightBird::IConfiguration, "cc.lightbird.IConfiguration")
 
 #endif // ICONFIGURATION_H

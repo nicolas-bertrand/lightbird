@@ -29,6 +29,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnDisconnect, "cc.lightbird.IOnDisconnect");
+Q_DECLARE_INTERFACE(LightBird::IOnDisconnect, "cc.lightbird.IOnDisconnect")
 
 # endif // IONDISCONNECT_H

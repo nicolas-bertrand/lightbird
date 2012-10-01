@@ -55,6 +55,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::ISessions, "cc.lightbird.ISessions");
+Q_DECLARE_INTERFACE(LightBird::ISessions, "cc.lightbird.ISessions")
 
 #endif // ISESSIONS_H

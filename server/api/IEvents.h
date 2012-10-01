@@ -47,6 +47,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IEvents, "cc.lightbird.IEvents");
+Q_DECLARE_INTERFACE(LightBird::IEvents, "cc.lightbird.IEvents")
 
 #endif // IEVENTS_H

@@ -22,6 +22,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnWrite, "cc.lightbird.IOnWrite");
+Q_DECLARE_INTERFACE(LightBird::IOnWrite, "cc.lightbird.IOnWrite")
 
 #endif // IONWRITE_H

@@ -93,6 +93,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::ILogs, "cc.lightbird.ILogs");
+Q_DECLARE_INTERFACE(LightBird::ILogs, "cc.lightbird.ILogs")
 
 #endif // ILOGS_H

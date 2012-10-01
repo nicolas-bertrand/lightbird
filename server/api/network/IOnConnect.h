@@ -20,6 +20,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnConnect, "cc.lightbird.IOnConnect");
+Q_DECLARE_INTERFACE(LightBird::IOnConnect, "cc.lightbird.IOnConnect")
 
 #endif // IONCONNECT_H

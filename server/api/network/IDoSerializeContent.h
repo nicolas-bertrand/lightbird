@@ -25,6 +25,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoSerializeContent, "cc.lightbird.IDoSerializeContent");
+Q_DECLARE_INTERFACE(LightBird::IDoSerializeContent, "cc.lightbird.IDoSerializeContent")
 
 #endif // IDOSERIALIZECONTENT_H

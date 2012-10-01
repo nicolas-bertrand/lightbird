@@ -21,6 +21,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnSend, "cc.lightbird.IOnSend");
+Q_DECLARE_INTERFACE(LightBird::IOnSend, "cc.lightbird.IOnSend")
 
 #endif // IONSEND_H

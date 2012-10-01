@@ -77,6 +77,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IApi, "cc.lightbird.IApi");
+Q_DECLARE_INTERFACE(LightBird::IApi, "cc.lightbird.IApi")
 
 #endif // IAPI_H

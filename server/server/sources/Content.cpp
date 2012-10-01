@@ -78,9 +78,7 @@ QByteArray  Content::getContent(quint64 size)
         else
         {
             if (size == 0)
-            {
                 content = this->file->readAll();
-            }
             else
             {
                 this->file->seek(this->seek);

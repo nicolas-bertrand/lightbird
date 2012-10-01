@@ -32,6 +32,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::ITimers, "cc.lightbird.ITimers");
+Q_DECLARE_INTERFACE(LightBird::ITimers, "cc.lightbird.ITimers")
 
 #endif // ITIMERS_H

@@ -24,6 +24,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnDestroy, "cc.lightbird.IOnDestroy");
+Q_DECLARE_INTERFACE(LightBird::IOnDestroy, "cc.lightbird.IOnDestroy")
 
 # endif // IONDESTROY_H

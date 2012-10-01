@@ -19,6 +19,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnFinish, "cc.lightbird.IOnFinish");
+Q_DECLARE_INTERFACE(LightBird::IOnFinish, "cc.lightbird.IOnFinish")
 
 #endif // IONFINISH_H

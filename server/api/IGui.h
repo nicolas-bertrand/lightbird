@@ -31,6 +31,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IGui, "cc.lightbird.IGui");
+Q_DECLARE_INTERFACE(LightBird::IGui, "cc.lightbird.IGui")
 
 #endif // IGUI_H

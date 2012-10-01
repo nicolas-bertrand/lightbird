@@ -20,6 +20,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IOnRead, "cc.lightbird.IOnRead");
+Q_DECLARE_INTERFACE(LightBird::IOnRead, "cc.lightbird.IOnRead")
 
 #endif // IONREAD_H

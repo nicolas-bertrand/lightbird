@@ -24,6 +24,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoRead, "cc.lightbird.IDoRead");
+Q_DECLARE_INTERFACE(LightBird::IDoRead, "cc.lightbird.IDoRead")
 
 #endif // IDOREAD_H

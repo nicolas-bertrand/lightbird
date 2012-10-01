@@ -23,6 +23,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoSend, "cc.lightbird.IDoSend");
+Q_DECLARE_INTERFACE(LightBird::IDoSend, "cc.lightbird.IDoSend")
 
 #endif // IDOSEND_H

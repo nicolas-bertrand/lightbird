@@ -82,6 +82,6 @@ namespace LightBird
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IPlugins, "cc.lightbird.IPlugins");
+Q_DECLARE_INTERFACE(LightBird::IPlugins, "cc.lightbird.IPlugins")
 
 #endif // IPLUGINS_H
