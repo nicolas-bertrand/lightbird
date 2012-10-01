@@ -3,18 +3,22 @@
 #include <QtPlugin>
 #include <QDomNode>
 
+#include "IIdentifier.h"
 #include "Plugin.h"
 #include "ParserData.h"
 #include "ParserControl.h"
 
 Plugin::Configuration   Plugin::configuration;
+Plugin                  *Plugin::instance = NULL;
 
 Plugin::Plugin()
 {
+    Plugin::instance = this;
 }
 
 Plugin::~Plugin()
 {
+    Plugin::instance = NULL;
 }
 
 bool    Plugin::onLoad(LightBird::IApi *api)
@@ -168,6 +172,55 @@ void    Plugin::onDestroy(LightBird::IClient &client)
     delete this->parsers.value(client.getId());
     this->parsers.remove(client.getId());
     this->mutex.unlock();
+}
+
+bool    Plugin::timer(const QString &name)
+{
+    QList<void *>   extensions;
+    QStringList     files;
+    LightBird::IIdentify::Information information;
+    LightBird::TableFiles file;
+
+    if (name != "identify")
+        return (false);
+    // Gets the files to identify
+    this->identifyMutex.lock();
+    files = this->identifyList;
+    this->identifyList.clear();
+    this->identifyMutex.unlock();
+    // While there are files to identify
+    while (!files.isEmpty())
+    {
+        QStringListIterator it(files);
+        while (it.hasNext())
+            // Identify the file
+            if (file.setId(it.next()))
+            {
+                if (!(extensions = this->api->extensions().get("IIdentifier")).isEmpty())
+                    information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(file.getFullPath());
+                this->api->extensions().release(extensions);
+                file.setType(information.type_string);
+                file.setInformations(information.data);
+                information.data.clear();
+            }
+        files.clear();
+        // If some files have been uploaded in the meantime, we continue the identification
+        this->identifyMutex.lock();
+        files = this->identifyList;
+        this->identifyList.clear();
+        this->identifyMutex.unlock();
+    }
+    return (false);
+}
+
+void    Plugin::identify(const QString &idFile)
+{
+    if (!Plugin::instance)
+        return ;
+    Plugin::instance->identifyMutex.lock();
+    Plugin::instance->identifyList << idFile;
+    Plugin::instance->identifyMutex.unlock();
+    Plugin::instance->api->timers().setTimer("identify");
 }
 
 Parser      *Plugin::_getParser(const LightBird::IClient &client)

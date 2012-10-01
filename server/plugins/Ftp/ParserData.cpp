@@ -62,6 +62,9 @@ void    ParserData::onDestroy()
     // Destroy the session if there is no control connection
     if (session)
     {
+        // If we just uploaded a file, we have to identify it
+        if (this->client.getInformations().contains("upload") && this->client.getInformations().contains("upload-id"))
+            Plugin::identify(this->client.getInformations().value("upload-id").toString());
         session->setInformation("disconnect-data", false);
         session->removeInformation("data-id");
         session->removeClient(this->client.getId());

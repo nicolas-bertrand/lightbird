@@ -19,6 +19,7 @@
 # include "IOnExecution.h"
 # include "IOnSerialize.h"
 # include "IOnFinish.h"
+# include "ITimer.h"
 
 # include "ClientHandler.h"
 # include "Parser.h"
@@ -35,7 +36,8 @@ class Plugin : public QObject,
                public LightBird::IOnSerialize,
                public LightBird::IDoSerializeContent,
                public LightBird::IDoSend,
-               public LightBird::IOnFinish
+               public LightBird::IOnFinish,
+               public LightBird::ITimer
 {
     Q_OBJECT
     Q_INTERFACES(LightBird::IPlugin
@@ -49,7 +51,8 @@ class Plugin : public QObject,
                  LightBird::IOnSerialize
                  LightBird::IDoSerializeContent
                  LightBird::IDoSend
-                 LightBird::IOnFinish)
+                 LightBird::IOnFinish
+                 LightBird::ITimer)
 
 public:
     /// Stores the configuration of the plugin.
@@ -87,17 +90,26 @@ public:
     /// @brief Disconnect the client if there is an error in its request
     void    onFinish(LightBird::IClient &client);
 
+    // ITimer
+    bool    timer(const QString &name);
+
     /// @brief Returns the parser that is in charge of the client, in a thread safe way.
     Parser  *_getParser(const LightBird::IClient &client);
+    /// @brief Adds a file to be identified in the timer thread.
+    /// @param idFile : The id of the file to identify.
+    static void identify(const QString &idFile);
     /// @brief Returns the configuration of the plugin
     static Configuration     &getConfiguration();
 
 private:
     LightBird::IApi          *api;          ///< The LightBird's Api.
-    QReadWriteLock           mutex;         ///< Make parsers thread-safe.
+    QReadWriteLock           mutex;         ///< Makes parsers thread safe.
     QHash<QString, Parser *> parsers;       ///< Parses the FTP control and data connections.
     ClientHandler            *handler;      ///< This single object handles all the connections.
+    QStringList              identifyList;  ///< The list of the id of the files to identify in the timer thread.
+    QMutex                   identifyMutex; ///< Makes identifyFiles thread safe.
     static Configuration     configuration; ///< The configuration of the plugin.
+    static Plugin            *instance;     ///< Allows to access the Plugin instance from a static method.
 };
 
 #endif // PLUGIN_H

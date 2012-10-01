@@ -425,10 +425,14 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
         QFileInfo fileInfo(file.getFullPath());
         name = LightBird::TableAccounts(file.getIdAccount()).getName();
         size = QString::number(fileInfo.size());
-        date = this->_listDate(fileInfo.lastModified());
+        if (fileInfo.isFile())
+            date = this->_listDate(fileInfo.lastModified());
+        else
+            date = this->_listDate(file.getModified());
         line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), size, date, file.getName());
         content.setContent(line.toUtf8());
     }
+
     return (Result(226, QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size()))));
 }
 
@@ -468,6 +472,7 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
     LightBird::TableFiles       file;
     QString                     filesPath = LightBird::getFilesPath();
     QString                     fileName = pathName;
+    QString                     realPath;
     QString                     path;
 
     // Checks if the file exists
@@ -479,25 +484,37 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
         file.setId(directory.getFile(fileName));
     else
         return (Result(501, QString("Directory \"%1\" not found.").arg(pathName.left(pathName.lastIndexOf('/')))));
-    // Removes the file if it already exists
-    if (file)
+    // Creates a new file
+    if (!file)
     {
-        path = file.getFullPath();
-        if (QFileInfo(path).isFile() && (!QFile::remove(path) || !file.remove()))
-            return (Result(550, "Unable to replace the file."));
+        // Defines the new name
+        path = fileName;
+        if (path.contains('.'))
+            path = path.left(fileName.lastIndexOf('.'));
+        path += '.' + LightBird::createUuid();
+        if (fileName.contains('.'))
+            path += fileName.right(fileName.size() - fileName.lastIndexOf('.'));
+        realPath = filesPath + path;
+        // Creates the file
+        if (!QFile(realPath).open(QIODevice::WriteOnly)
+            || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
+            return (Result(550, "Unable to create the file."));
     }
-    // Defines the real name of the file
-    path = filesPath + fileName;
-    if (path.contains('.'))
-        path = path.left(fileName.lastIndexOf('.'));
-    path += '.' + LightBird::createUuid();
-    if (fileName.contains('.'))
-        path += fileName.right(fileName.size() - fileName.lastIndexOf('.'));
-    // Creates the file
-    if (!QFile(fileName).open(QIODevice::WriteOnly)
-        || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
-        return (Result(550, "Unable to create the file."));
-    content.setStorage(LightBird::IContent::FILE, path);
+    // Removes the old file
+    else
+    {
+        path = file.getPath();
+        if ((realPath = file.getFullPath()).isEmpty())
+            realPath = filesPath + path;
+        if ((QFileInfo(realPath).isFile() && !QFile::remove(realPath))
+            || !QFile(realPath).open(QIODevice::WriteOnly))
+            return (Result(550, "Unable to replace the file."));
+        file.setIdAccount(session->getAccount());
+    }
+    // The file will be filled in the parser via the content
+    content.setStorage(LightBird::IContent::FILE, realPath);
+    // The id is stored here in order to identify the file at the end of the upload
+    client.getInformations().insert("upload-id", file.getId());
     return (Result(250, "File successfully transferred."));
 }
 
