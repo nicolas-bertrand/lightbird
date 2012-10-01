@@ -21,9 +21,9 @@ Session::Session(const QString &id) : destroyed(false)
     query.bindValue(":id", id);
     if (!Database::instance()->query(query, result) || result.size() <= 0)
         return ;
-    this->expiration = result[0]["expiration"].toDateTime();
+    this->expiration = result[0]["expiration"].toDateTime().toLocalTime();
     this->id_account = result[0]["id_account"].toString();
-    this->creation = result[0]["creation"].toDateTime();
+    this->creation = result[0]["creation"].toDateTime().toLocalTime();
     // Get the informations
     query.prepare(Database::instance()->getQuery("Sessions", "getInformations"));
     query.bindValue(":id_session", id);
@@ -41,7 +41,7 @@ Session::Session(const QDateTime &e, const QString &a, const QStringList &c, con
     id = LightBird::createUuid();
     query.prepare(Database::instance()->getQuery("Sessions", "add"));
     query.bindValue(":id", id);
-    query.bindValue(":expiration", expiration.toString(DATE_FORMAT));
+    query.bindValue(":expiration", expiration.toUTC().toString(DATE_FORMAT));
     query.bindValue(":id_account", id_account);
     if (!Database::instance()->query(query) || query.numRowsAffected() == 0)
         return ;
@@ -132,7 +132,7 @@ bool            Session::setExpiration(const QDateTime &expiration)
         return (false);
     query.prepare(Database::instance()->getQuery("Sessions", "setExpiration"));
     query.bindValue(":id", this->id);
-    query.bindValue(":expiration", expiration.toString(DATE_FORMAT));
+    query.bindValue(":expiration", expiration.toUTC().toString(DATE_FORMAT));
     if (!Database::instance()->query(query) || query.numRowsAffected() <= 0)
         return (false);
     this->expiration = expiration;

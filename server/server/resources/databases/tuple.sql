@@ -1,28 +1,28 @@
-INSERT INTO "accounts" VALUES('ab4bfbf0-9231-11de-8a39-0800200c9a66','jeff','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9401-9239-11de-8a39-0800200c9a66','yanis','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9402-9239-11de-8a39-0800200c9a66','nico','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9403-9239-11de-8a39-0800200c9a66','aurel','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9404-9239-11de-8a39-0800200c9a66','tonton','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9405-9239-11de-8a39-0800200c9a66','booba','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9406-9239-11de-8a39-0800200c9a66','pilu','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "accounts" VALUES('f2aa9407-9239-11de-8a39-0800200c9a66','pj','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "accounts" VALUES('ab4bfbf0-9231-11de-8a39-0800200c9a66','jeff','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9401-9239-11de-8a39-0800200c9a66','yanis','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9402-9239-11de-8a39-0800200c9a66','nico','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9403-9239-11de-8a39-0800200c9a66','aurel','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9404-9239-11de-8a39-0800200c9a66','tonton','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9405-9239-11de-8a39-0800200c9a66','booba','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9406-9239-11de-8a39-0800200c9a66','pilu','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
+INSERT INTO "accounts" VALUES('f2aa9407-9239-11de-8a39-0800200c9a66','pj','0b9c2625dc21ef05f6ad4ddf47c5f203837aa32c',1,1, datetime('now'), datetime('now'));
 
-INSERT INTO "groups" VALUES('f2aa93fa-9239-11de-8a39-0800200c9a66','Familly','', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "groups" VALUES('f2aa93fb-9239-11de-8a39-0800200c9a66','Friends-USA','', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "groups" VALUES('f2aa93fc-9239-11de-8a39-0800200c9a66','Friends-Bahrain','', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "groups" VALUES('f2aa93fe-9239-11de-8a39-0800200c9a66','Network','', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "groups" VALUES('f2aa93ff-9239-11de-8a39-0800200c9a66','Other','', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "groups" VALUES('f2aa93f8-9239-11de-8a39-0800200c9a66','Florida','f2aa93fb-9239-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "groups" VALUES('f2aa93f9-9239-11de-8a39-0800200c9a66','California','f2aa93fb-9239-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "groups" VALUES('f2aa93fa-9239-11de-8a39-0800200c9a66','Familly','', datetime('now'), datetime('now'));
+INSERT INTO "groups" VALUES('f2aa93fb-9239-11de-8a39-0800200c9a66','Friends-USA','', datetime('now'), datetime('now'));
+INSERT INTO "groups" VALUES('f2aa93fc-9239-11de-8a39-0800200c9a66','Friends-Bahrain','', datetime('now'), datetime('now'));
+INSERT INTO "groups" VALUES('f2aa93fe-9239-11de-8a39-0800200c9a66','Network','', datetime('now'), datetime('now'));
+INSERT INTO "groups" VALUES('f2aa93ff-9239-11de-8a39-0800200c9a66','Other','', datetime('now'), datetime('now'));
+INSERT INTO "groups" VALUES('f2aa93f8-9239-11de-8a39-0800200c9a66','Florida','f2aa93fb-9239-11de-8a39-0800200c9a66', datetime('now'), datetime('now'));
+INSERT INTO "groups" VALUES('f2aa93f9-9239-11de-8a39-0800200c9a66','California','f2aa93fb-9239-11de-8a39-0800200c9a66', datetime('now'), datetime('now'));
 
-INSERT INTO "accounts_groups" VALUES('idAccountGroup', 'ab4bfbf0-9231-11de-8a39-0800200c9a66','f2aa93fa-9239-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "accounts_groups" VALUES('idAccountGroup', 'ab4bfbf0-9231-11de-8a39-0800200c9a66','f2aa93fa-9239-11de-8a39-0800200c9a66', datetime('now'), datetime('now'));
 
-INSERT INTO "accounts_informations" VALUES('idAccountInformation', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', 'Mail', "team@lightbird.fr", STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "accounts_informations" VALUES('idAccountInformation', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', 'Mail', "team@lightbird.fr", datetime('now'), datetime('now'));
 
-INSERT INTO "collections" VALUES('94dfdce0-9233-11de-8a39-0800200c9a66','Playlist -Chilili-','','ab4bfbf0-9231-11de-8a39-0800200c9a66',STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "collections" VALUES('94dfdce0-9233-11de-8a39-0800200c9a66','Playlist -Chilili-','','ab4bfbf0-9231-11de-8a39-0800200c9a66',datetime('now'), datetime('now'));
 
-INSERT INTO "directories" VALUES('94dfdce1-9233-11de-8a39-0800200c9a66','blurp','','ab4bfbf0-9231-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
-INSERT INTO "directories" VALUES('94dfdce2-9233-11de-8a39-0800200c9a66','toto','94dfdce1-9233-11de-8a39-0800200c9a66','ab4bfbf0-9231-11de-8a39-0800200c9a66',STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "directories" VALUES('94dfdce1-9233-11de-8a39-0800200c9a66','blurp','','ab4bfbf0-9231-11de-8a39-0800200c9a66', datetime('now'), datetime('now'));
+INSERT INTO "directories" VALUES('94dfdce2-9233-11de-8a39-0800200c9a66','toto','94dfdce1-9233-11de-8a39-0800200c9a66','ab4bfbf0-9231-11de-8a39-0800200c9a66',datetime('now'), datetime('now'));
 
 INSERT INTO "files" VALUES('94dfdce3-9233-11de-8a39-0800200c9a66','toto','avi','/tutu/toto.avi','94dfdce2-9233-11de-8a39-0800200c9a66','f2aa9402-9239-11de-8a39-0800200c9a66','2010-09-15 19:34:09','2010-09-15 19:34:09');
 INSERT INTO "files" VALUES('94dfdce4-9233-11de-8a39-0800200c9a66','Begin.mp3','mp3','/home/yanis/Music/Begin.mp3','94dfdce2-9233-11de-8a39-0800200c9a66','f2aa9402-9239-11de-8a39-0800200c9a66','2010-09-15 19:34:09','2010-09-15 19:34:09');
@@ -45,7 +45,7 @@ INSERT INTO "files" VALUES('f61b5274-2d7c-4041-89ca-9ff4516e8439','music2.mp3','
 INSERT INTO "files" VALUES('92d5c945-2e7e-493e-aea6-ae661385a30c','music3.mp3','music3.mp3','audio','','f2aa9402-9239-11de-8a39-0800200c9a66','2010-10-15 18:35:08','2010-10-15 17:40:39');
 INSERT INTO "files" VALUES('448c4156-e340-4f4a-93a5-3cd06002f11b','music4.mp3','music4.mp3','audio','','f2aa9402-9239-11de-8a39-0800200c9a66','2010-10-15 18:35:19','2010-10-15 17:40:55');
 
-INSERT INTO "files_collections" VALUES('idFileCollection', '94dfdce3-9233-11de-8a39-0800200c9a66','94dfdce0-9233-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "files_collections" VALUES('idFileCollection', '94dfdce3-9233-11de-8a39-0800200c9a66','94dfdce0-9233-11de-8a39-0800200c9a66', datetime('now'), datetime('now'));
 
 INSERT INTO "files_informations" VALUES('idFI1','94dfdce5-9233-11de-8a39-0800200c9a66','Bitrate','2048Kbits/s','2010-09-15 19:34:09','2010-09-15 19:34:09');
 INSERT INTO "files_informations" VALUES('idFI2','94dfdce5-9233-11de-8a39-0800200c9a66','Artist','Daddy Yankee','2010-09-15 19:34:09','2010-09-15 19:34:09');
@@ -309,12 +309,12 @@ INSERT INTO "files_informations" VALUES('df9e4388-e4bd-4bde-bfe2-3fcb5bf1598c','
 INSERT INTO "files_informations" VALUES('921cc0d0-c814-4d57-8b21-3e76e9517311','448c4156-e340-4f4a-93a5-3cd06002f11b','streams','1','2010-10-15 17:40:55','2010-10-15 17:40:55');
 INSERT INTO "files_informations" VALUES('1ebd245b-e0c4-4f97-87c3-9118351357c1','448c4156-e340-4f4a-93a5-3cd06002f11b','title','Finary','2010-10-15 17:40:55','2010-10-15 17:40:55');
 
-INSERT INTO "events" VALUES('5aa12070-9233-11de-8a39-0800200c9a66', 'Event de Test', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', '94dfdce5-9233-11de-8a39-0800200c9a66', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "events" VALUES('5aa12070-9233-11de-8a39-0800200c9a66', 'Event de Test', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', '94dfdce5-9233-11de-8a39-0800200c9a66', datetime('now'), datetime('now'));
 
-INSERT INTO "events_informations" VALUES('idEventInformation', '5aa12070-9233-11de-8a39-0800200c9a66','Klef','Valeur', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "events_informations" VALUES('idEventInformation', '5aa12070-9233-11de-8a39-0800200c9a66','Klef','Valeur', datetime('now'), datetime('now'));
 
-INSERT INTO "limits" VALUES('idLimit', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', '', 'Regions', 'Bordeaux', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "limits" VALUES('idLimit', 'ab4bfbf0-9231-11de-8a39-0800200c9a66', '', 'Regions', 'Bordeaux', datetime('now'), datetime('now'));
 
-INSERT INTO "permissions" VALUES('idPermission', 'ab4bfbf0-9231-11de-8a39-0800200c9a66','94dfdce5-9233-11de-8a39-0800200c9a66','read', 1, STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "permissions" VALUES('idPermission', 'ab4bfbf0-9231-11de-8a39-0800200c9a66','94dfdce5-9233-11de-8a39-0800200c9a66','read', 1, datetime('now'), datetime('now'));
 
-INSERT INTO "tags" VALUES('idtag', '94dfdce3-9233-11de-8a39-0800200c9a66','Toto', STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'), STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime'));
+INSERT INTO "tags" VALUES('idtag', '94dfdce3-9233-11de-8a39-0800200c9a66','Toto', datetime('now'), datetime('now'));

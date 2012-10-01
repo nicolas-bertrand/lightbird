@@ -17,7 +17,7 @@ ApiSessions::ApiSessions(QObject *parent) : QObject(parent)
     this->timer.setSingleShot(true);
     // Delete the expired sessions
     query.prepare(Database::instance()->getQuery("Sessions", "deleteExpiredSessions"));
-    query.bindValue(":expiration", QDateTime::currentDateTime().toString(DATE_FORMAT));
+    query.bindValue(":expiration", QDateTime::currentDateTimeUtc().toString(DATE_FORMAT));
     Database::instance()->query(query);
     this->expiration();
     Log::trace("ApiSessions created", "ApiSessions", "ApiSessions");
@@ -143,7 +143,7 @@ void                        ApiSessions::expiration()
     }
     // Get the list of the expired sessions in order to destroy them
     query.prepare(Database::instance()->getQuery("Sessions", "getExpiredSessions"));
-    query.bindValue(":expiration", QDateTime::currentDateTime().addSecs(2).toString(DATE_FORMAT));
+    query.bindValue(":expiration", QDateTime::currentDateTimeUtc().addSecs(2).toString(DATE_FORMAT));
     if (Database::instance()->query(query, result))
         for (i = 0, s = result.size(); i < s; ++i)
             this->destroy(result[i]["id"].toString());
@@ -153,7 +153,7 @@ void                        ApiSessions::expiration()
     // The timer will call expiration the next time a session expire
     if (mutex && Database::instance()->query(query, result) && result.size() > 0)
     {
-        s = result[0]["expiration"].toDateTime().toMSecsSinceEpoch() - QDateTime::currentDateTime().toMSecsSinceEpoch();
+        s = result[0]["expiration"].toDateTime().toMSecsSinceEpoch() - QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
         // Avoid a possible int overflow
         s = (s < 0) ? 0 : (s > 2000000000) ? 2000000000 : s;
         this->timer.start(s);

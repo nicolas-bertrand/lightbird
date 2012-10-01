@@ -40,7 +40,7 @@ namespace LightBird
             QHostAddress    peerAddress;      ///< The address of the client.
             unsigned short  peerPort;         ///< The peer port through which the client is connected.
             QString         peerName;         ///< The name of the client's host (usually empty).
-            QDateTime       connectionDate;   ///< The date of the connection.
+            QDateTime       connectionDate;   ///< The date of the connection, in local time.
             QString         idAccount;        ///< The id of the account identified.
             QVariantMap     informations;     ///< Information on the client.
         };

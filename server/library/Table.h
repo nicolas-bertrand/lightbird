@@ -70,9 +70,9 @@ namespace LightBird
         bool            remove(const QString &id = "");
 
         // Dates
-        /// @brief Returns the date of the last modification of the row.
+        /// @brief Returns the date of the last modification of the row, in UTC.
         QDateTime       getModified() const;
-        /// @brief Returns the date of the creation of the row.
+        /// @brief Returns the date of the creation of the row, in UTC.
         QDateTime       getCreated() const;
 
         // Table

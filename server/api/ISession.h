@@ -28,17 +28,17 @@ namespace LightBird
         virtual bool        setAccount(const QString &id_account = "") = 0;
         /// @brief Returns true if the session has already expired.
         virtual bool        isExpired() const = 0;
-        /// @brief Returns the expiration date of the session. Once exceeded,
-        /// the session is automatically destroyed. If null, the session will
-        /// be destroyed during the server shutdown. The expiration has around
-        /// 10 seconds accuracy.
+        /// @brief Returns the expiration date of the session in local time.
+        /// Once exceeded, the session is automatically destroyed.
+        /// If null, the session will be destroyed during the server shutdown.
+        /// The expiration has around 10 seconds accuracy.
         virtual QDateTime   getExpiration() const = 0;
         /// @brief Modifies the expiration date of the session. Once exceeded,
         /// the session is automatically destroyed. If null, the session will
         /// be destroyed during the server shutdown. The expiration has around
-        /// 10 seconds accuracy.
+        /// 10 seconds accuracy and is expressed in local time.
         virtual bool        setExpiration(const QDateTime &expiration = QDateTime()) = 0;
-        /// @brief Returns the creation date of the session.
+        /// @brief Returns the creation date of the session in local time.
         virtual QDateTime   getCreation() const = 0;
         /// @see LightBird::ISessions::destroy
         virtual bool        destroy(bool disconnect = false) = 0;

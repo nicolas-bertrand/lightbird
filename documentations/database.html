@@ -18,7 +18,7 @@
         </div>
         <p>Afin de simplifier le schéma, les champs <strong>created</strong> et <strong>modified</strong> dont toutes les tables disposent à l’exception de deleted, ne sont pas représentés. De même, toutes les tables sauf deleted ont un champ <strong>id</strong>, mais seuls les id utilisés par d’autres tables, c'est-à-dire qui sont utilisés par des clés externes, sont affichés sur ce schéma.</p>
         <p>Le nom des tables et des champs est en minuscule. La valeur des champs en <em>italique</em> peut être vide, mais aucun champ ne peut être NULL.</p>
-        <p>Tous les champs de type texte doivent être encodés en <strong>UTF-8</strong>.</p>
+        <p>Tous les champs de type texte doivent être encodés en <strong>UTF-8</strong>, et toutes les dates de la base de données sont exprimées en <strong>UTC</strong>.</p>
         
         <h2>II. Accessors et Objects</h2>
         <p>Le terme « <strong>accessor</strong> » regroupe les tables <strong>accounts</strong> et <strong>groups</strong>. Le terme « <strong>object</strong> » regroupe les tables <strong>files</strong>, <strong>directories</strong>, et <strong>collections</strong>. L’idée générale de cette représentation est qu’un accessor est une entité qui peut effectuer des opérations sur un object. Ceci est pratique par exemple pour la gestion des droits où un accessor est lié à un object via leurs id. Un compte peut ainsi avoir des droits sur un fichier, et un groupe peut en avoir sur une collection.</p>
@@ -40,7 +40,7 @@
         <p>SQLite est une base de données basée sur un fichier. Elle est utilisée par défaut par le serveur et distribuée avec Qt. Les requêtes SQL nécessaires à la génération de la structure et des triggers de la base de données sont disponibles dans les resources du serveur.</p>
         
         <h3>2. Modification</h3>
-        <p>Lorsqu’une entrée est modifiée par la clause UPDATE, son champ <strong>modified</strong> est automatiquement mis à jour à la date courante.</p>
+        <p>Lorsqu’une entrée est modifiée par la clause UPDATE, son champ <strong>modified</strong> est automatiquement mis à jour à la date UTC courante.</p>
         <p>De plus, un trigger interdit la modification de l’id d’une entrée. L’uuid est définitivement défini lors de la création de l’entrée, ce qui évite de se retrouver avec des clés étrangères qui ne pointent sur rien.</p>
         <p>Enfin, un trigger vérifie que les champs qui ne sont pas en italique sur le schéma ne sont jamais vides.</p>
         
@@ -54,7 +54,7 @@
 
         <h2>VII. Tables</h2>
         <h3>1. Accounts</h3>
-        <p>Cette table contient les comptes enregistrés sur le serveur. La table <strong>accounts_informations</strong> stock quant à elle les informations d’un compte (adresse, téléphone, langue…).</p>
+        <p>Cette table contient les comptes enregistrés sur le serveur. La table <strong>accounts_informations</strong> stocke quant à elle les informations d’un compte (adresse, téléphone, langue…).</p>
         <table class="fields">
             <tr>
                 <th colspan="2">Champs</th>
@@ -138,7 +138,7 @@
         </table>
         
         <h3>5. Events</h3>
-        <p>Stock les événements qui se produisent sur le serveur. Le champ <strong>created</strong> est utilisé pour connaitre la date à laquelle un événement s’est produit. La <strong>table events_informations</strong> peut contenir des informations supplémentaires sur l’événement.</p>
+        <p>Stocke les événements qui se produisent sur le serveur. Le champ <strong>created</strong> est utilisé pour connaitre la date à laquelle un événement s’est produit. La <strong>table events_informations</strong> peut contenir des informations supplémentaires sur l’événement.</p>
         <table class="fields">
             <tr>
                 <th colspan="2">Champs</th>

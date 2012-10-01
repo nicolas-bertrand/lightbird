@@ -180,16 +180,15 @@ QString         Database::getQuery(const QString &group, const QString &name, co
 bool                            Database::updates(LightBird::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
 {
     LightBird::IDatabase::State state;
-    QString                     date;
+    QDateTime                   utc = d.toUTC();
+    QString                     date = utc.toString(DATE_FORMAT);
     QSqlQuery                   query;
     QVector<QVariantMap>        result;
-    QStringList                 tables;
+    QStringList                 tables = t;
     QString                     table;
     int                         i;
     int                         s;
 
-    date = d.toString(DATE_FORMAT);
-    tables = t;
     // If empty, all the tables are checked
     if (tables.isEmpty())
         tables = this->tablesNames;
@@ -198,7 +197,7 @@ bool                            Database::updates(LightBird::IDatabase::Updates 
     while (it.hasNext())
     {
         // If the date is not defined, all the rows are listed as ADDED
-        if (!d.isValid())
+        if (!utc.isValid())
             query.prepare(this->getQuery("Database", "update_select_all").replace(":table", it.peekNext()));
         // Otherwise, we take only the updated rows
         else
@@ -210,7 +209,7 @@ bool                            Database::updates(LightBird::IDatabase::Updates 
         this->query(query, result);
         for (i = 0, s = result.size(); i < s; ++i)
         {
-            if (result[i]["created"].toString() >= date || !d.isValid())
+            if (result[i]["created"].toString() >= date || !utc.isValid())
                 state = LightBird::IDatabase::ADDED;
             else
                 state = LightBird::IDatabase::MODIFIED;
@@ -220,7 +219,7 @@ bool                            Database::updates(LightBird::IDatabase::Updates 
         it.next();
     }
     // Get the deleted rows
-    if (d.isValid())
+    if (utc.isValid())
     {
         query.prepare(this->getQuery("Database", "update_select_deleted"));
         query.bindValue(":date", date);

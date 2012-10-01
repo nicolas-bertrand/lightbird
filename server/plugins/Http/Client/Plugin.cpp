@@ -98,7 +98,7 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
     {
         // Sets the generic HTTP headers
         client.getResponse().getHeader().insert("server", "LightBird");
-        client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTime().toUTC()));
+        client.getResponse().getHeader().insert("date", this->httpDate(QDateTime::currentDateTimeUtc()));
         client.getResponse().getHeader().insert("cache-control", "no-cache");
         // Gets the uri of the request
         uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority | QUrl::RemoveQuery | QUrl::RemoveFragment);
@@ -255,7 +255,7 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
 bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Session &session, const QByteArray &token, const QString &uri)
 {
     QByteArray  identifiant = session->getInformation("identifiant").toByteArray();
-    QDateTime   date = QDateTime::currentDateTime().toUTC();
+    QDateTime   date = QDateTime::currentDateTimeUtc();
 
     // The token is the combination of the identifiant, the current date (+/- 1 minute), and a part of the URI
     if (token == LightBird::sha256(identifiant + date.toString(TOKEN_DATE_FORMAT).toAscii() + uri.toAscii()) ||
@@ -377,7 +377,7 @@ void        Plugin::addCookie(LightBird::IClient &client, const QString &name, c
 
     cookie = name + "=" + value + "; ";
     if (!value.isEmpty())
-        cookie += "expires=" + Plugin::getInstance().httpDate(QDateTime::currentDateTime().addYears(2), true) + "; ";
+        cookie += "expires=" + Plugin::getInstance().httpDate(QDateTime::currentDateTimeUtc().addYears(2), true) + "; ";
     cookie += "path=/";
     client.getResponse().getHeader().insertMulti("set-cookie", cookie);
 }

@@ -244,7 +244,7 @@ Commands::Result Commands::_mdtm(const QString &path, LightBird::Session &sessio
 
     if (!(file = this->_getFile(path, session)))
         return (Result(550, QString("File not found.")));
-    return (Result(213, QFileInfo(file.getFullPath()).lastModified().toString("yyyyMMddhhmmss")));
+    return (Result(213, QFileInfo(file.getFullPath()).lastModified().toUTC().toString("yyyyMMddhhmmss")));
 }
 
 Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBird::IClient &)
@@ -412,7 +412,7 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
             LightBird::TableDirectories directory(d.next());
             name = LightBird::TableAccounts(directory.getIdAccount()).getName();
             subDirectories = QString::number(directory.getDirectories().size() + 1);
-            date = this->_listDate(directory.getModified());
+            date = this->_listDate(directory.getModified().toLocalTime());
             line = pattern.arg("d", subDirectories, (name.isEmpty() ? "nouser" : name), QString::number(4096), date, directory.getName());
             content.setContent(line.toUtf8());
         }

@@ -1,6 +1,6 @@
--- Update the fields created and modified of an inserted row
--- Update the field modified of an updated row
--- Insert the id of the deleted rows in the table delete
+-- Ensures that the inserted rows are correct.
+-- Updates the field modified of an updated row.
+-- Inserts the id of the deleted rows in the table delete.
 
 -----------------------------
 -- Accounts
@@ -8,13 +8,12 @@
 CREATE TRIGGER "insert_accounts" AFTER INSERT ON accounts
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.administrator NOT IN (0, 1) OR NEW.active NOT IN (0, 1);
-    UPDATE accounts SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_accounts" AFTER UPDATE ON accounts
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.administrator NOT IN (0, 1) OR NEW.active NOT IN (0, 1);
-    UPDATE accounts SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE accounts SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_accounts" BEFORE DELETE ON accounts
@@ -25,14 +24,9 @@ END;
 -----------------------------
 -- Accounts_groups
 -----------------------------
-CREATE TRIGGER "insert_accounts_groups" AFTER INSERT ON accounts_groups
-BEGIN
-    UPDATE accounts_groups SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
-END;
-
 CREATE TRIGGER "update_accounts_groups" AFTER UPDATE ON accounts_groups
 BEGIN
-    UPDATE accounts_groups SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE accounts_groups SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_accounts_groups" BEFORE DELETE ON accounts_groups
@@ -46,13 +40,12 @@ END;
 CREATE TRIGGER "insert_accounts_informations" AFTER INSERT ON accounts_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE accounts_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_accounts_informations" AFTER UPDATE ON accounts_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE accounts_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE accounts_informations SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_accounts_informations" BEFORE DELETE ON accounts_informations
@@ -66,13 +59,12 @@ END;
 CREATE TRIGGER "insert_collections" AFTER INSERT ON collections
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE collections SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_collections" AFTER UPDATE ON collections
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE collections SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE collections SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_collections" BEFORE DELETE ON collections
@@ -86,13 +78,12 @@ END;
 CREATE TRIGGER "insert_directories" AFTER INSERT ON directories
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE directories SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_directories" AFTER UPDATE ON directories
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE directories SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE directories SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_directories" BEFORE DELETE ON directories
@@ -106,13 +97,12 @@ END;
 CREATE TRIGGER "insert_events" AFTER INSERT ON events
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE events SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_events" AFTER UPDATE ON events
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE events SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE events SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_events" BEFORE DELETE ON events
@@ -126,13 +116,12 @@ END;
 CREATE TRIGGER "insert_events_informations" AFTER INSERT ON events_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE events_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_events_informations" AFTER UPDATE ON events_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE events_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE events_informations SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_events_informations" BEFORE DELETE ON events_informations
@@ -146,13 +135,12 @@ END;
 CREATE TRIGGER "insert_files" AFTER INSERT ON files
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.path='';
-    UPDATE files SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_files" AFTER UPDATE ON files
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.path='';
-    UPDATE files SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE files SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_files" BEFORE DELETE ON files
@@ -163,14 +151,9 @@ END;
 -----------------------------
 -- Files_collections
 -----------------------------
-CREATE TRIGGER "insert_files_collections" AFTER INSERT ON files_collections
-BEGIN
-    UPDATE files_collections SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
-END;
-
 CREATE TRIGGER "update_files_collections" AFTER UPDATE ON files_collections
 BEGIN
-    UPDATE files_collections SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE files_collections SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_files_collections" BEFORE DELETE ON files_collections
@@ -184,13 +167,12 @@ END;
 CREATE TRIGGER "insert_files_informations" AFTER INSERT ON files_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE files_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_files_informations" AFTER UPDATE ON files_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE files_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE files_informations SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_files_informations" BEFORE DELETE ON files_informations
@@ -204,13 +186,12 @@ END;
 CREATE TRIGGER "insert_groups" AFTER INSERT ON groups
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE groups SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_groups" AFTER UPDATE ON groups
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE groups SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE groups SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_groups" BEFORE DELETE ON groups
@@ -224,13 +205,12 @@ END;
 CREATE TRIGGER "insert_limits" AFTER INSERT ON limits
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE limits SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_limits" AFTER UPDATE ON limits
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.value='';
-    UPDATE limits SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE limits SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_limits" BEFORE DELETE ON limits
@@ -244,13 +224,12 @@ END;
 CREATE TRIGGER "insert_permissions" AFTER INSERT ON permissions
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.granted NOT IN (0, 1);
-    UPDATE permissions SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_permissions" AFTER UPDATE ON permissions
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.granted NOT IN (0, 1);
-    UPDATE permissions SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE permissions SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_permissions" BEFORE DELETE ON permissions
@@ -261,14 +240,9 @@ END;
 -----------------------------
 -- Sessions
 -----------------------------
-CREATE TRIGGER "insert_sessions" AFTER INSERT ON sessions
-BEGIN
-    UPDATE sessions SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
-END;
-
 CREATE TRIGGER "update_sessions" AFTER UPDATE ON sessions
 BEGIN
-    UPDATE sessions SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE sessions SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 -----------------------------
@@ -277,13 +251,12 @@ END;
 CREATE TRIGGER "insert_sessions_informations" AFTER INSERT ON sessions_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE sessions_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_sessions_informations" AFTER UPDATE ON sessions_informations
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE sessions_informations SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE sessions_informations SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 -----------------------------
@@ -292,13 +265,12 @@ END;
 CREATE TRIGGER "insert_tags" AFTER INSERT ON tags
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE tags SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),  created = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE rowid = new.rowid;
 END;
 
 CREATE TRIGGER "update_tags" AFTER UPDATE ON tags
 BEGIN
     SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
-    UPDATE tags SET modified = (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) WHERE new.modified != (STRFTIME('%Y-%m-%d %H:%M:%S', 'now', 'localtime')) AND rowid = new.rowid;
+    UPDATE tags SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
 CREATE TRIGGER "delete_tags" BEFORE DELETE ON tags

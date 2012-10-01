@@ -17,6 +17,7 @@ namespace LightBird
 
         /// @brief Calls when a log is submit.
         /// @param level : The level of the current log.
+        /// @param date : The date of the log in local time.
         /// @param message : The message of the log.
         /// @param properties : A map of properties that can give additionals informations on the log.
         /// @param thread : The address of the thread that emits the log, in base 64.

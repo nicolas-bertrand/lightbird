@@ -76,7 +76,7 @@ private:
     bool                display;                    ///< If the logs have to be displayed on the standard output
     QDir                directory;                  ///< The log directory.
     QFile               file;                       ///< The log file.
-    QString             lastError;                  ///< Date of the last error (to avoid repetitions).
+    QString             lastError;                  ///< Date of the last error (used to avoid repetitions).
     QMutex              mutex;                      ///< Makes this class thread safe.
     QStringList         buffer;                     ///< Buffered the logs to write in the timer.
     QMap<LightBird::ILogs::Level, QString> levels;  ///< Combines the levels and their names.

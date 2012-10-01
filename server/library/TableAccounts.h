@@ -1,7 +1,6 @@
 #ifndef LIGHTBIRD_TABLEACCOUNTS_H
 # define LIGHTBIRD_TABLEACCOUNTS_H
 
-# include <QDateTime>
 # include <QMap>
 # include <QString>
 # include <QStringList>

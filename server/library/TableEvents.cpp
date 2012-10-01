@@ -37,10 +37,10 @@ QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, cons
     QString                 end;
 
     query.prepare(Library::database().getQuery("TableEvents", "getEvents"));
-    begin = b.toString(DATE_FORMAT);
+    begin = b.toUTC().toString(DATE_FORMAT);
     if (begin.isEmpty())
         begin = "1970-01-01 00:00:00";
-    end = e.toString(DATE_FORMAT);
+    end = e.toUTC().toString(DATE_FORMAT);
     query.bindValue(":name", name);
     query.bindValue(":begin", begin);
     query.bindValue(":end", end);

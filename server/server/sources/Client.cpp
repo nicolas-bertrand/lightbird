@@ -35,20 +35,20 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->disconnected = false;
     this->state = Client::NONE;
     this->oldTask = Client::NONE;
-    // Set the connection date at the current date
+    // Sets the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
     // Creates the engine
     if (this->mode == LightBird::IClient::SERVER)
         this->engine = new EngineServer(*this);
     else
         this->engine = new EngineClient(*this);
-    // Add a task to call the _onConnect method
+    // Adds a task to call the _onConnect method
     this->_newTask(Client::CONNECT);
 }
 
 Client::~Client()
 {
-    // Ensure that all the informations requests has been processed
+    // Ensures that all the informations requests has been processed
     this->_getInformations();
     delete this->engine;
     Log::trace("Client destroyed!", Properties("id", this->id), "Client", "~Client");

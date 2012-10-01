@@ -54,7 +54,7 @@ namespace LightBird
         virtual unsigned short       getPeerPort() const = 0;
         /// @brief The name of the host of the client (usually empty).
         virtual const QString        &getPeerName() const = 0;
-        /// @brief The date of the connection of the client.
+        /// @brief The date of the connection of the client, in local time.
         virtual const QDateTime      &getConnectionDate() const = 0;
         /// @brief The connection mode of the client.
         virtual LightBird::IClient::Mode getMode() const = 0;

@@ -1,7 +1,6 @@
 #ifndef FILES_H
 # define FILES_H
 
-# include <QDateTime>
 # include <QFileSystemWatcher>
 # include <QMap>
 # include <QMutex>

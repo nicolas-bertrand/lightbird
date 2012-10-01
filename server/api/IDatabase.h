@@ -29,7 +29,7 @@ namespace LightBird
             DELETED     ///< The entry has been deleted.
         };
 
-        /// List all the modifications of the database. The first dimension is
+        /// Lists all the modifications of the database. The first dimension is
         /// the name of the table, the second is the state of the rows, the third
         /// are the rows, and the last is the field/value pairs.
         typedef QMap<QString, QMap<LightBird::IDatabase::State, QList<QMap<QString, QVariant> > > > Updates;
@@ -78,12 +78,12 @@ namespace LightBird
         /// @param name : The name of the query.
         /// @return The query or an empty string if it is not found.
         virtual QString getQuery(const QString &group, const QString &name) = 0;
-        /// @brief Check if the database has been updated since the date in parameter,
+        /// @brief Checks if the database has been updated since the date in parameter,
         /// and returns the list of the modifications.
         /// @param updates : Contains all the modification made on the database
         /// that match the filters. The delete state only stores the id of the row.
-        /// @param date : The date from which to check the updates. If null, all
-        /// the rows are listed as ADDED.
+        /// @param date : The date in local time from which to check the updates.
+        /// If null, all the rows are listed as ADDED.
         /// @param tables : The list of the tables for which the updates are checked.
         /// If empty, all the tables are taken.
         /// @return True if the database has been modified.

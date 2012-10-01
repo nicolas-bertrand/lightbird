@@ -67,7 +67,7 @@ public:
     /// @brief Adds a cookie in the response of the client.
     static void     addCookie(LightBird::IClient &client, const QString &name, const QString &value = QString());
     /// @brief Converts a date in the proper HTTP format.
-    /// @param date : The date to convert.
+    /// @param date : The date to convert, expressed in UTC.
     /// @param separator : If true, the separator of the date (dd MM yyyy) is "-".
     /// Otherwise it is " ".
     QString         httpDate(const QDateTime &date, bool separator = false);

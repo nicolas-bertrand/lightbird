@@ -23,8 +23,8 @@ namespace LightBird
 
         /// @brief Return the id of all the events with the specified name and date.
         /// @param name : The name of the events to return.
-        /// @param start : The date on which the search begins.
-        /// @param end : The date on which the search ends.
+        /// @param start : The date on which the search begins, in local time.
+        /// @param end : The date on which the search ends, in local time.
         /// @return The list of the id of the events that match the filters.
         QStringList getEvents(const QString &name, const QDateTime &begin = QDateTime(), const QDateTime &end = QDateTime::currentDateTime()) const;
         /// @brief Created a new event.

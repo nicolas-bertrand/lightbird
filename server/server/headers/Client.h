@@ -172,7 +172,7 @@ private:
     QString                  peerName;            ///< The name of the client's host (usually empty).
     LightBird::IClient::Mode mode;                ///< The connection mode of the client.
     IReadWrite               *readWriteInterface; ///< This interface is used to read and write data on network.
-    QDateTime                connectionDate;      ///< The date of the connection.
+    QDateTime                connectionDate;      ///< The date of the connection, in local time.
     QVariantMap              informations;        ///< Contains information on the client.
     QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
     LightBird::TableAccounts account;             ///< Allows the client to be identified as a know account.
@@ -180,7 +180,7 @@ private:
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
     State                    oldTask;             ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
-    State                    resume;              ///< The state to resume after the date have been written on the network.
+    State                    resume;              ///< The state to resume after the data have been written on the network.
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     reading;             ///< Data are available on the network.
     bool                     writing;             ///< The client's task is paused while the data are being written on the network.

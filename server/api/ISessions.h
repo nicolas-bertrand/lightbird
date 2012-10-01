@@ -22,9 +22,10 @@ namespace LightBird
         virtual ~ISessions() {}
 
         /// @brief Creates a session.
-        /// @param expiration : The expiration date of the session. Once exceeded,
-        /// the session is automatically destroyed. It has around 10 seconds accuracy.
-        /// If null, the session will be destroyed during the server shutdown.
+        /// @param expiration : The expiration date of the session in local time.
+        /// Once exceeded, the session is automatically destroyed. It has around
+        /// 10 seconds accuracy. If null, the session will be destroyed during
+        /// the server shutdown.
         /// @param id_account : Associates an account to the session.
         /// @param clients : The id of the clients associated with the session.
         /// @param informations : Some informations on the session, if relevant.
