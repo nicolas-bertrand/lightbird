@@ -30,20 +30,27 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
     informations["binary-flag"] = false;         // Whether we are in Ascii or Image mode.
     informations["transfer-ip"] = QString();     // In active mode these two variables contains the information gived by the PORT command,
     informations["transfer-port"] = 0;           // however in passive mode they contains the control client informations.
-//  informations["transfer-command"] = "";       // The command that initiated the transfert. Defined only during the transfert.
-//  informations["transfer-parameter"] = "";     // The paramater of the command. Defined only during the transfert.
+//  informations["transfer-command"] = "";       // The command that initiated the transfer. Defined only during the transfer.
+//  informations["transfer-parameter"] = "";     // The paramater of the command. Defined only during the transfer.
     informations["transfer-mode"] = (int)Commands::NONE; // The selected transfer mode of the data.
     session->setInformations(informations);
     // Initializes the control connection specific informations
     informations.clear();
-//  informations["user"] = QString();    // The name of the account gived by the USER command.
-//  informations["oldName"] = QString(); // The name of the file to rename in RNTO.
+//  informations["user"] = QString();            // The name of the account gived by the USER command.
+//  informations["oldName"] = QString();         // The name of the file to rename in RNTO.
     client.getInformations() = informations;
+    // Here is the list of the data connection specific informations
+//  informations["download"] = true;             // Defined when a download is in progress.
+//  informations["upload"] = true;               // Defined when an upload is in progress.
+//  informations["message"] = QString();         // Defined if a message have to be sent through the control connection after the transfert.
+//  informations["code"] = 0;                    // Sent along with the message when a transfert is completed.
+//  informations["upload-id"] = QString();       // The id of the uploaded file. Used to identify it in the timer thread.
+//  informations["download-completed"] = true;   // Defined when the download has been completed. An error message is sent otherwise.
     // Be polite and welcome the user
     Commands::Result greeting(220, "Welcome to Lightbird's FTP server.\r\n"
                                    "Please authenticate.\r\n"
                                    "And of course, have fun!\r\n");
-    this->_sendControlMessage(client.getId(), greeting);
+    Plugin::sendControlMessage(client.getId(), greeting);
     return (true);
 }
 
@@ -77,15 +84,6 @@ bool    ClientHandler::doControlExecute(LightBird::IClient &client)
     return (true);
 }
 
-void    ClientHandler::_sendControlMessage(const QString &id, const Commands::Result &message)
-{
-    QVariantMap informations;
-    informations.insert("send-message", true); // The presence of the information indicates that we need to send a message and not process a request
-    informations.insert("code", message.first); // The code of the message
-    informations.insert("message", message.second); // And it's description
-    this->api->network().send(id, "FTP", informations);
-}
-
 Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
 {
     Commands::TransferMode mode = (Commands::TransferMode)session->getInformation("transfer-mode").toInt();
@@ -114,7 +112,7 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
                     session->setClient(dataId);
                     session->setInformation("data-id", dataId);
                     QString command = session->getInformation("transfer-command").toString();
-                    // Starts the transfert
+                    // Starts the transfer
                     if (this->commands->isSender(command))
                         this->api->network().send(dataId);
                     else
@@ -122,7 +120,6 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
                     // Wakes the data connection up if it was waiting for the control connection
                     if (this->wait.contains(dataId))
                         this->wait.value(dataId)->wakeAll();
-                    result = Commands::Result(150, "Accepted data connection.");
                     it.remove();
                     break;
                 }
@@ -194,7 +191,6 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
         this->api->network().send(client.getId());
     else
         this->api->network().receive(client.getId());
-    this->_sendControlMessage(session->getInformation("control-id").toString(), Commands::Result(150, "Accepted data connection."));
     return (true);
 }
 
@@ -228,7 +224,7 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
     else
         client.getInformations().insert("upload", true);
     controlOut = this->commands->executeTransfer(command, parameter, session, client);
-    this->_sendControlMessage(control, controlOut);
+    Plugin::sendControlMessage(control, controlOut);
     session->removeInformation("transfer-command");
     session->removeInformation("transfer-parameter");
     return (true);

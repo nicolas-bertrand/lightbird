@@ -98,6 +98,10 @@ public:
     /// @brief Adds a file to be identified in the timer thread.
     /// @param idFile : The id of the file to identify.
     static void identify(const QString &idFile);
+    /// @brief Sends a message on the control connection.
+    /// @param idClient : The id of the control connection.
+    /// @param message : The message to send.
+    static void sendControlMessage(const QString &controlId, const Commands::Result &message);
     /// @brief Returns the configuration of the plugin
     static Configuration     &getConfiguration();
 

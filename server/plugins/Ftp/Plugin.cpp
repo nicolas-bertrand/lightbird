@@ -223,6 +223,21 @@ void    Plugin::identify(const QString &idFile)
     Plugin::instance->api->timers().setTimer("identify");
 }
 
+void    Plugin::sendControlMessage(const QString &controlId, const Commands::Result &message)
+{
+    QVariantMap informations;
+
+    if (!Plugin::instance || controlId.isEmpty() || message.second.isEmpty())
+        return ;
+    // The presence of the information indicates that we need to send a message and not process a request
+    informations.insert("send-message", true);
+    // The code of the message
+    informations.insert("code", message.first);
+    // And it's description
+    informations.insert("message", message.second);
+    Plugin::instance->api->network().send(controlId, "FTP", informations);
+}
+
 Parser      *Plugin::_getParser(const LightBird::IClient &client)
 {
     Parser  *parser;

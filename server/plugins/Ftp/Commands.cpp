@@ -37,6 +37,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["TYPE"] = &Commands::_type;
     this->controlCommands["STRU"] = &Commands::_stru;
     this->controlCommands["MODE"] = &Commands::_mode;
+    this->controlCommands["ALLO"] = &Commands::_allo;
     this->controlCommands["PASV"] = &Commands::_pasv;
     this->controlCommands["PORT"] = &Commands::_port;
     this->controlCommands["NOOP"] = &Commands::_noop;
@@ -318,6 +319,11 @@ Commands::Result Commands::_mode(const QString &mode, LightBird::Session &, Ligh
     return (Result(200, QString("Mode set to %1.").arg(mode)));
 }
 
+Commands::Result Commands::_allo(const QString &, LightBird::Session &, LightBird::IClient &)
+{
+    return (Result(202, QString("ALLO command ignored.")));
+}
+
 Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, LightBird::IClient &client)
 {
     QString         protocol = Plugin::getConfiguration().dataProtocolName;
@@ -381,6 +387,7 @@ Commands::Result Commands::_quit(const QString &, LightBird::Session &session, L
 
 Commands::Result Commands::_list(const QString &path, LightBird::Session &session, LightBird::IClient &client)
 {
+    QString                     controlId = session->getInformation("control-id").toString();
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     LightBird::IContent         &content = client.getResponse().getContent();
     QStringList                 files;
@@ -392,6 +399,7 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
     QString                     date;
     QString                     size;
 
+    Plugin::sendControlMessage(controlId, Result(150, "Here comes the directory listing."));
     // Changes the directory to the argument if possible
     if (!path.isEmpty() && !directory.cd(path))
     {
@@ -437,8 +445,9 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
         line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), size, date, file.getName());
         content.setContent(line.toUtf8());
     }
-
-    return (Result(226, QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size()))));
+    client.getInformations().insert("code", 226);
+    client.getInformations().insert("message", QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size())));
+    return (Result());
 }
 
 QString     Commands::_listDate(const QDateTime &datetime)
@@ -452,6 +461,8 @@ QString     Commands::_listDate(const QDateTime &datetime)
 
 Commands::Result Commands::_retr(const QString &path, LightBird::Session &session, LightBird::IClient &client)
 {
+    QString                     controlId = session->getInformation("control-id").toString();
+    bool                        binary = session->getInformation("binary-flag").toBool();
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     LightBird::TableFiles       file;
     Result                      result;
@@ -463,7 +474,11 @@ Commands::Result Commands::_retr(const QString &path, LightBird::Session &sessio
     if (file)
     {
         client.getResponse().getContent().setStorage(LightBird::IContent::FILE, file.getFullPath());
-        result = Result(226, "File successfully transferred.");
+        // Intermediate response
+        Plugin::sendControlMessage(controlId, Result(150, QString("Opening %1 mode data connection for %2 (%3 bytes).").arg(binary ? "BINARY" : "ASCII", path, QString::number(QFileInfo(file.getFullPath()).size()))));
+        // Final response
+        client.getInformations().insert("code", 226);
+        client.getInformations().insert("message", "Transfer complete.");
     }
     else
         result = Result(550, QString("Can't open %1: No such file or directory.").arg(path));
@@ -472,6 +487,8 @@ Commands::Result Commands::_retr(const QString &path, LightBird::Session &sessio
 
 Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &session, LightBird::IClient &client)
 {
+    QString                     controlId = session->getInformation("control-id").toString();
+    bool                        binary = session->getInformation("binary-flag").toBool();
     LightBird::IContent         &content = client.getRequest().getContent();
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     LightBird::TableFiles       file;
@@ -520,7 +537,12 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
     content.setStorage(LightBird::IContent::FILE, realPath);
     // The id is stored here in order to identify the file at the end of the upload
     client.getInformations().insert("upload-id", file.getId());
-    return (Result(250, "File successfully transferred."));
+    // Intermediate response
+    Plugin::sendControlMessage(controlId, Result(150, QString("Opening %1 mode data connection for %2 (%3 bytes).").arg(binary ? "BINARY" : "ASCII", pathName, QString::number(QFileInfo(file.getFullPath()).size()))));
+    // Final response
+    client.getInformations().insert("code", 250);
+    client.getInformations().insert("message", QString("Transfer complete."));
+    return (Result());
 }
 
 LightBird::TableFiles Commands::_getFile(const QString &path, LightBird::Session &session)

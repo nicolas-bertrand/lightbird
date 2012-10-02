@@ -75,6 +75,7 @@ private:
     Result  _type(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _stru(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _mode(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _allo(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _pasv(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _port(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _noop(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);

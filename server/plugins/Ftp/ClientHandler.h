@@ -24,7 +24,6 @@ public:
     void    onDataDestroy(LightBird::IClient &client);
 
 private:
-    void    _sendControlMessage(const QString &id, const Commands::Result &message);
     Commands::Result _prepareTransferMethod(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
     LightBird::IApi  *api;

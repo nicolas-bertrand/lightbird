@@ -21,15 +21,18 @@ bool    ParserData::doSerializeContent(QByteArray &data)
 {
     LightBird::IContent &content = this->client.getResponse().getContent();
     quint32 maxPacketSize = Plugin::getConfiguration().maxPacketSize;
+    bool    result = true;
 
     if (content.size() < maxPacketSize)
         data = content.getContent();
     else
     {
         data = content.getContent(maxPacketSize);
-        return (content.getSeek() >= content.size());
+        result = (content.getSeek() >= content.size());
     }
-    return (true);
+    if (result)
+        this->client.getInformations().insert("download-completed", true);
+    return (result);
 }
 
 void    ParserData::onFinish()
@@ -58,13 +61,20 @@ bool    ParserData::onDisconnect()
 void    ParserData::onDestroy()
 {
     LightBird::Session  session = this->client.getSession();
+    QVariantMap         &informations = this->client.getInformations();
 
     // Destroy the session if there is no control connection
     if (session)
     {
         // If we just uploaded a file, we have to identify it
-        if (this->client.getInformations().contains("upload") && this->client.getInformations().contains("upload-id"))
-            Plugin::identify(this->client.getInformations().value("upload-id").toString());
+        if (informations.contains("upload") && informations.contains("upload-id"))
+            Plugin::identify(informations.value("upload-id").toString());
+        // If the download was not completed before the disconnection, an error occured
+        if (informations.contains("download") && informations.contains("message") && !informations.contains("download-completed"))
+            Plugin::sendControlMessage(session->getInformation("control-id").toString(), Commands::Result(426, "Transfer aborted."));
+        // A message have to be sent after the transfer
+        else if (informations.contains("message"))
+            Plugin::sendControlMessage(session->getInformation("control-id").toString(), Commands::Result(informations.value("code").toUInt(), informations.value("message").toString()));
         session->setInformation("disconnect-data", false);
         session->removeInformation("data-id");
         session->removeClient(this->client.getId());
