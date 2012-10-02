@@ -88,11 +88,16 @@ Commands::Result Commands::executeTransfer(const QString &command, const QString
     return (result);
 }
 
-Commands::Result Commands::_user(const QString &user, LightBird::Session &, LightBird::IClient &client)
+Commands::Result Commands::_user(const QString &user, LightBird::Session &session, LightBird::IClient &client)
 {
     Result  result;
 
-    if(!user.trimmed().isEmpty())
+    if (!session->getAccount().isEmpty())
+    {
+        LightBird::TableAccounts account(session->getAccount());
+        result = Result(530, QString("Already logged in as %1.").arg(account.getName()));
+    }
+    else if(!user.trimmed().isEmpty())
     {
         client.getInformations().insert("user", user);
         result = Result(331, QString("User %1 OK. Password required.").arg(user));
