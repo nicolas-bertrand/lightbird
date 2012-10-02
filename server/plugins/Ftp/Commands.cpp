@@ -44,6 +44,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["ABOR"] = &Commands::_abor;
     this->controlCommands["QUIT"] = &Commands::_quit;
     this->transferCommands["LIST"] = qMakePair(true, &Commands::_list);
+    this->transferCommands["NLST"] = qMakePair(true, &Commands::_nlst);
     this->transferCommands["RETR"] = qMakePair(true, &Commands::_retr);
     this->transferCommands["STOR"] = qMakePair(false, &Commands::_stor);
     this->transferCommands["STOU"] = qMakePair(false, &Commands::_stou);
@@ -449,6 +450,55 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
     }
     client.getInformations().insert("code", 226);
     client.getInformations().insert("message", QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size())));
+    return (Result());
+}
+
+Commands::Result Commands::_nlst(const QString &path, LightBird::Session &session, LightBird::IClient &client)
+{
+    QString                     controlId = session->getInformation("control-id").toString();
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    QStringList                 list;
+    QString                     name;
+    QString                     result;
+
+    Plugin::sendControlMessage(controlId, Result(150, "Here comes the directory listing."));
+    // Changes the directory to the argument if possible
+    if (!path.isEmpty() && !directory.cd(path))
+    {
+        // The argument might by a path to a file
+        if (path.contains('/'))
+        {
+            directory.cd(name = path.left(path.lastIndexOf('/') + 1));
+            result = name;
+            if (!(name = directory.getFile(path.right(path.size() - name.size()))).isEmpty())
+                list.append(LightBird::TableFiles(name).getName());
+        }
+        // Otherwise it is a file name
+        else if (!(name = directory.getFile(path)).isEmpty())
+            list.append(LightBird::TableFiles(name).getName());
+    }
+    // Fills the list with the content of the directory
+    else
+    {
+        QStringListIterator directories(directory.getDirectories());
+        while (directories.hasNext())
+            list << LightBird::TableDirectories(directories.next()).getName();
+        QStringListIterator files(directory.getFiles());
+        while (files.hasNext())
+            list << LightBird::TableFiles(files.next()).getName();
+        result = path;
+    }
+    // Joins the elements of the list with the relative path
+    if (result.endsWith('/'))
+        result.chop(1);
+    if (!list.isEmpty() && !result.isEmpty())
+        result += "/" + list.join("\r\n" + result + "/");
+    // And without it
+    else
+        result = list.join("\r\n");
+    client.getResponse().getContent().setContent(result.toUtf8());
+    client.getInformations().insert("code", 226);
+    client.getInformations().insert("message", QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(list.size())));
     return (Result());
 }
 

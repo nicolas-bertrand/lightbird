@@ -83,6 +83,7 @@ private:
     Result  _quit(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     // Transfer methods
     Result  _list(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _nlst(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _retr(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _stor(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _stou(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
