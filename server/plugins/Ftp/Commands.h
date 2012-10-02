@@ -85,6 +85,8 @@ private:
     Result  _list(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _retr(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _stor(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _stou(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _appe(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
     /// @brief Returns the file pointed by path.
     /// @param session : Used to get the working directory if the path is relative.

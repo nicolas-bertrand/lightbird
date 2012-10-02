@@ -46,6 +46,8 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->transferCommands["LIST"] = qMakePair(true, &Commands::_list);
     this->transferCommands["RETR"] = qMakePair(true, &Commands::_retr);
     this->transferCommands["STOR"] = qMakePair(false, &Commands::_stor);
+    this->transferCommands["STOU"] = qMakePair(false, &Commands::_stou);
+    this->transferCommands["APPE"] = qMakePair(false, &Commands::_appe);
     this->anonymousCommands << "USER" << "PASS" << "HELP" << "ACCT";
 }
 
@@ -489,7 +491,6 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
 {
     QString                     controlId = session->getInformation("control-id").toString();
     bool                        binary = session->getInformation("binary-flag").toBool();
-    LightBird::IContent         &content = client.getRequest().getContent();
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     LightBird::TableFiles       file;
     QString                     filesPath = LightBird::getFilesPath();
@@ -500,9 +501,7 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
     // Checks if the file exists
     if (fileName.contains('/'))
         fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
-    if (!pathName.contains('/'))
-        file.setIdFromVirtualPath(pathName);
-    else if (directory.cd(pathName.left(pathName.lastIndexOf('/') + 1)))
+    if (!pathName.contains('/') || directory.cd(pathName.left(pathName.lastIndexOf('/') + 1)))
         file.setId(directory.getFile(fileName));
     else
         return (Result(501, QString("Directory \"%1\" not found.").arg(pathName.left(pathName.lastIndexOf('/')))));
@@ -520,7 +519,10 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
         // Creates the file
         if (!QFile(realPath).open(QIODevice::WriteOnly)
             || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
+        {
+            QFile::remove(realPath);
             return (Result(550, "Unable to create the file."));
+        }
     }
     // Removes the old file
     else
@@ -530,15 +532,134 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
             realPath = filesPath + path;
         if ((QFileInfo(realPath).isFile() && !QFile::remove(realPath))
             || !QFile(realPath).open(QIODevice::WriteOnly))
+        {
+            QFile::remove(realPath);
             return (Result(550, "Unable to replace the file."));
+        }
         file.setIdAccount(session->getAccount());
     }
     // The file will be filled in the parser via the content
-    content.setStorage(LightBird::IContent::FILE, realPath);
+    client.getRequest().getContent().setStorage(LightBird::IContent::FILE, realPath);
     // The id is stored here in order to identify the file at the end of the upload
     client.getInformations().insert("upload-id", file.getId());
     // Intermediate response
-    Plugin::sendControlMessage(controlId, Result(150, QString("Opening %1 mode data connection for %2 (%3 bytes).").arg(binary ? "BINARY" : "ASCII", pathName, QString::number(QFileInfo(file.getFullPath()).size()))));
+    Plugin::sendControlMessage(controlId, Result(150, QString("Opening %1 mode data connection for %2.").arg(binary ? "BINARY" : "ASCII", pathName)));
+    // Final response
+    client.getInformations().insert("code", 250);
+    client.getInformations().insert("message", QString("Transfer complete."));
+    return (Result());
+}
+
+Commands::Result Commands::_stou(const QString &pathName, LightBird::Session &session, LightBird::IClient &client)
+{
+    QString                     controlId = session->getInformation("control-id").toString();
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::TableFiles       file;
+    QString                     filesPath = LightBird::getFilesPath();
+    QString                     fileName = pathName;
+    QString                     realPath;
+    QString                     path;
+    QString                     extension;
+    unsigned int                i = 0;
+
+    // Checks if the file exists
+    if (fileName.contains('/'))
+        fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+    if (!pathName.contains('/') || directory.cd(pathName.left(pathName.lastIndexOf('/') + 1)))
+        file.setId(directory.getFile(fileName));
+    else
+        return (Result(501, QString("Directory \"%1\" not found.").arg(pathName.left(pathName.lastIndexOf('/')))));
+    // Separates the extension from the file name
+    if (fileName.contains('.'))
+        extension = fileName.right(fileName.size() - fileName.lastIndexOf('.'));
+    fileName = fileName.left(fileName.size() - extension.size());
+    // A file has already this name, so we search a unique name in the directory
+    if (file)
+        do
+            path = fileName + " - " + QString::number(++i);
+        while ((directory.getId().isEmpty() && file.setIdFromVirtualPath(path + extension))
+               || (!directory.getId().isEmpty() && !directory.getFile(path + extension).isEmpty()));
+    // Creates the file
+    if (!path.isEmpty())
+        fileName = path;
+    path = fileName + '.' + LightBird::createUuid() + extension;
+    realPath = filesPath + path;
+    if (!QFile(realPath).open(QIODevice::WriteOnly)
+        || !file.add(fileName + extension, path, "other", directory.getId(), session->getAccount()))
+    {
+        QFile::remove(realPath);
+        return (Result(550, "Unable to create the file."));
+    }
+    // The file will be filled in the parser via the content
+    client.getRequest().getContent().setStorage(LightBird::IContent::FILE, realPath);
+    // The id is stored here in order to identify the file at the end of the upload
+    client.getInformations().insert("upload-id", file.getId());
+    // Intermediate response
+    Plugin::sendControlMessage(controlId, Result(150, QString("FILE: %1").arg(file.getVirtualPath(true, true))));
+    // Final response
+    client.getInformations().insert("code", 250);
+    client.getInformations().insert("message", QString("Transfer complete."));
+    return (Result());
+}
+
+Commands::Result Commands::_appe(const QString &pathName, LightBird::Session &session, LightBird::IClient &client)
+{
+    QString                     controlId = session->getInformation("control-id").toString();
+    LightBird::IContent         &content = client.getRequest().getContent();
+    bool                        binary = session->getInformation("binary-flag").toBool();
+    LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
+    LightBird::TableFiles       file;
+    QString                     filesPath = LightBird::getFilesPath();
+    QString                     fileName = pathName;
+    QString                     realPath;
+    QString                     path;
+
+    // Checks if the file exists
+    if (fileName.contains('/'))
+        fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
+    if (!pathName.contains('/') || directory.cd(pathName.left(pathName.lastIndexOf('/') + 1)))
+        file.setId(directory.getFile(fileName));
+    else
+        return (Result(501, QString("Directory \"%1\" not found.").arg(pathName.left(pathName.lastIndexOf('/')))));
+    // Creates a new file
+    if (!file)
+    {
+        // Defines the new name
+        path = fileName;
+        if (path.contains('.'))
+            path = path.left(fileName.lastIndexOf('.'));
+        path += '.' + LightBird::createUuid();
+        if (fileName.contains('.'))
+            path += fileName.right(fileName.size() - fileName.lastIndexOf('.'));
+        realPath = filesPath + path;
+        // Creates the file
+        if (!QFile(realPath).open(QIODevice::WriteOnly)
+            || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
+        {
+            QFile::remove(realPath);
+            return (Result(550, "Unable to create the file."));
+        }
+    }
+    // If the file already exists the uploaded data will be append to it
+    else
+    {
+        path = file.getPath();
+        if ((realPath = file.getFullPath()).isEmpty())
+            realPath = filesPath + path;
+        if (!QFile(realPath).open(QIODevice::ReadWrite))
+        {
+            QFile::remove(realPath);
+            return (Result(550, "Unable to append data to the file."));
+        }
+        file.setIdAccount(session->getAccount());
+    }
+    // The file will be filled from the end in the parser via the content
+    client.getRequest().getContent().setStorage(LightBird::IContent::FILE, realPath);
+    content.setSeek(content.size());
+    // The id is stored here in order to identify the file at the end of the upload
+    client.getInformations().insert("upload-id", file.getId());
+    // Intermediate response
+    Plugin::sendControlMessage(controlId, Result(150, QString("Opening %1 mode data connection for %2.").arg(binary ? "BINARY" : "ASCII", pathName)));
     // Final response
     client.getInformations().insert("code", 250);
     client.getInformations().insert("message", QString("Transfer complete."));
