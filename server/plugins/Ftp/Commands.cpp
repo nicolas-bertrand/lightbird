@@ -38,6 +38,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["TYPE"] = &Commands::_type;
     this->controlCommands["STRU"] = &Commands::_stru;
     this->controlCommands["MODE"] = &Commands::_mode;
+    this->controlCommands["REST"] = &Commands::_rest;
     this->controlCommands["ALLO"] = &Commands::_allo;
     this->controlCommands["PASV"] = &Commands::_pasv;
     this->controlCommands["PORT"] = &Commands::_port;
@@ -157,7 +158,7 @@ Commands::Result Commands::_pwd(const QString &, LightBird::Session &session, Li
 {
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     
-    return (Result(257, QString("\"%1\" is your current location").arg(this->_escapePath(directory.getVirtualPath(true)))));
+    return (Result(257, QString("\"%1\" is your current location.").arg(this->_escapePath(directory.getVirtualPath(true)))));
 }
 
 Commands::Result Commands::_cwd(const QString &path, LightBird::Session &session, LightBird::IClient &)
@@ -289,7 +290,7 @@ Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBir
 {
     QStringList  feat;
 
-    feat << "MDTM" << "PASV" << "SIZE" << "UTF8";
+    feat << "MDTM" << "PASV" << "REST STREAM" << "SIZE" << "UTF8";
     return (Result(0, "211-Features:\r\n " + feat.join("\r\n ") + "\r\n211 End\r\n"));
 }
 
@@ -348,6 +349,17 @@ Commands::Result Commands::_mode(const QString &mode, LightBird::Session &, Ligh
     if (QString(mode).toUpper() != "S")
         return (Result(504, "Bad MODE command."));
     return (Result(200, QString("Mode set to %1.").arg(mode)));
+}
+
+Commands::Result Commands::_rest(const QString &position, LightBird::Session &session, LightBird::IClient &)
+{
+    if (!position.contains(QRegExp("^\\d+$")))
+        return (Result(501, "Bad argument."));
+    if (position.toULongLong())
+        session->setInformation("restart", position.toULongLong());
+    else
+        session->removeInformation("restart");
+    return (Result(350, QString("Restart position accepted (%1).").arg(position)));
 }
 
 Commands::Result Commands::_allo(const QString &, LightBird::Session &, LightBird::IClient &)
@@ -551,10 +563,13 @@ Commands::Result Commands::_retr(const QString &path, LightBird::Session &sessio
 {
     QString                     controlId = session->getInformation("control-id").toString();
     bool                        binary = session->getInformation("binary-flag").toBool();
+    quint64                     restart = session->getInformation("restart").toULongLong();
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     LightBird::TableFiles       file;
     Result                      result;
 
+    if (restart)
+        session->removeInformation("restart");
     if (!path.contains('/'))
         file.setIdFromVirtualPath(path);
     else if (directory.cd(path.left(path.lastIndexOf('/') + 1)))
@@ -562,6 +577,7 @@ Commands::Result Commands::_retr(const QString &path, LightBird::Session &sessio
     if (file)
     {
         client.getResponse().getContent().setStorage(LightBird::IContent::FILE, file.getFullPath());
+        client.getResponse().getContent().setSeek(restart);
         // Intermediate response
         Plugin::sendControlMessage(controlId, Result(150, QString("Opening %1 mode data connection for %2 (%3 bytes).").arg(binary ? "BINARY" : "ASCII", path, QString::number(QFileInfo(file.getFullPath()).size()))));
         // Final response
@@ -577,6 +593,7 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
 {
     QString                     controlId = session->getInformation("control-id").toString();
     bool                        binary = session->getInformation("binary-flag").toBool();
+    quint64                     restart = session->getInformation("restart").toULongLong();
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
     LightBird::TableFiles       file;
     QString                     filesPath = LightBird::getFilesPath();
@@ -584,6 +601,8 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
     QString                     realPath;
     QString                     path;
 
+    if (restart)
+        session->removeInformation("restart");
     // Checks if the file exists
     if (fileName.contains('/'))
         fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
@@ -603,25 +622,27 @@ Commands::Result Commands::_stor(const QString &pathName, LightBird::Session &se
             path += fileName.right(fileName.size() - fileName.lastIndexOf('.'));
         realPath = filesPath + path;
         // Creates the file
-        if (!QFile(realPath).open(QIODevice::WriteOnly)
+        if (!QFile(realPath).open(QIODevice::WriteOnly | QIODevice::Truncate)
             || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
         {
             QFile::remove(realPath);
             return (Result(550, "Unable to create the file."));
         }
     }
-    // Removes the old file
+    // Removes the old file or restart the transfert
     else
     {
         path = file.getPath();
         if ((realPath = file.getFullPath()).isEmpty())
             realPath = filesPath + path;
-        if ((QFileInfo(realPath).isFile() && !QFile::remove(realPath))
-            || !QFile(realPath).open(QIODevice::WriteOnly))
+        if (restart)
         {
-            QFile::remove(realPath);
-            return (Result(550, "Unable to replace the file."));
+            QFile f(realPath);
+            if (!f.open(QIODevice::ReadWrite) || (qint64)restart > f.size() || !f.resize(restart))
+                return (Result(550, "Unable to RESTart the transfert."));
         }
+        else if (!QFile(realPath).open(QIODevice::WriteOnly | QIODevice::Truncate))
+            return (Result(550, "Unable to replace the file."));
         file.setIdAccount(session->getAccount());
     }
     // The file will be filled in the parser via the content
@@ -648,6 +669,12 @@ Commands::Result Commands::_stou(const QString &pathName, LightBird::Session &se
     QString                     extension;
     unsigned int                i = 0;
 
+    // RESTart is not allowed here
+    if (session->hasInformation("restart"))
+    {
+        session->removeInformation("restart");
+        return (Result(503, "RESTart is not allowed for STOU and APPE."));
+    }
     // Checks if the file exists
     if (fileName.contains('/'))
         fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
@@ -670,7 +697,7 @@ Commands::Result Commands::_stou(const QString &pathName, LightBird::Session &se
         fileName = path;
     path = fileName + '.' + LightBird::createUuid() + extension;
     realPath = filesPath + path;
-    if (!QFile(realPath).open(QIODevice::WriteOnly)
+    if (!QFile(realPath).open(QIODevice::WriteOnly | QIODevice::Truncate)
         || !file.add(fileName + extension, path, "other", directory.getId(), session->getAccount()))
     {
         QFile::remove(realPath);
@@ -700,6 +727,12 @@ Commands::Result Commands::_appe(const QString &pathName, LightBird::Session &se
     QString                     realPath;
     QString                     path;
 
+    // RESTart is not allowed here
+    if (session->hasInformation("restart"))
+    {
+        session->removeInformation("restart");
+        return (Result(503, "RESTart is not allowed for APPE and STOU."));
+    }
     // Checks if the file exists
     if (fileName.contains('/'))
         fileName = fileName.right(fileName.size() - fileName.lastIndexOf('/') - 1);
@@ -719,7 +752,7 @@ Commands::Result Commands::_appe(const QString &pathName, LightBird::Session &se
             path += fileName.right(fileName.size() - fileName.lastIndexOf('.'));
         realPath = filesPath + path;
         // Creates the file
-        if (!QFile(realPath).open(QIODevice::WriteOnly)
+        if (!QFile(realPath).open(QIODevice::WriteOnly | QIODevice::Truncate)
             || !file.add(fileName, path, "other", directory.getId(), session->getAccount()))
         {
             QFile::remove(realPath);

@@ -28,6 +28,7 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
     informations["last-command"] = QString();    // The last command executed by the control connection.
     informations["disconnect-data"] = false;     // Allows to abort the data connection if true.
     informations["binary-flag"] = false;         // Whether we are in Ascii or Image mode.
+//  informations["restart"] = 0;                 // The RESTart position of the next RETR or STOR command.
     informations["transfer-ip"] = QString();     // In active mode these two variables contains the information gived by the PORT command,
     informations["transfer-port"] = 0;           // however in passive mode they contains the control client informations.
 //  informations["transfer-command"] = "";       // The command that initiated the transfer. Defined only during the transfer.
