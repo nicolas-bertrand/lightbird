@@ -41,7 +41,9 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["REST"] = &Commands::_rest;
     this->controlCommands["ALLO"] = &Commands::_allo;
     this->controlCommands["PASV"] = &Commands::_pasv;
+    this->controlCommands["EPSV"] = &Commands::_epsv;
     this->controlCommands["PORT"] = &Commands::_port;
+    this->controlCommands["EPRT"] = &Commands::_eprt;
     this->controlCommands["NOOP"] = &Commands::_noop;
     this->controlCommands["ABOR"] = &Commands::_abor;
     this->controlCommands["QUIT"] = &Commands::_quit;
@@ -290,7 +292,7 @@ Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBir
 {
     QStringList  feat;
 
-    feat << "MDTM" << "PASV" << "REST STREAM" << "SIZE" << "UTF8";
+    feat << "EPRT" << "EPSV" << "MDTM" << "PASV" << "REST STREAM" << "SIZE" << "UTF8";
     return (Result(0, "211-Features:\r\n " + feat.join("\r\n ") + "\r\n211 End\r\n"));
 }
 
@@ -385,23 +387,56 @@ Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, L
     return (Result(502, "Data port not opened.\r\nUse active connection instead."));
 }
 
+Commands::Result Commands::_epsv(const QString &network, LightBird::Session &session, LightBird::IClient &client)
+{
+    QString         protocol = Plugin::getConfiguration().dataProtocolName;
+    QStringList     protocols;
+    unsigned int    maxClients;
+    unsigned short  port = Plugin::getConfiguration().passivePort;
+
+    // Ensures that the passive port is opened
+    if (this->api->network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
+    {
+        if (!network.isEmpty() && network != "1" && network != "2")
+            return (Result(522, "Network protocol not supported, use (1,2)"));
+        session->setInformation("transfer-mode", Commands::PASSIVE);
+        session->setInformation("transfer-ip", client.getPeerAddress().toString());
+        session->setInformation("transfer-port", client.getPeerPort());
+        return (Result(229, QString("Extended Passive Mode Entered (|||%1|)").arg(QString::number(port))));
+    }
+    return (Result(502, "Data port not opened.\r\nUse active connection instead."));
+}
+
 Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &session, LightBird::IClient &)
 {
-    Result  result;
     QRegExp reg("(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3})"); // Regex matching the port parameter
 
-    if (reg.indexIn(hostPort) >= 0)
-    {
-        QString address = QString("%1.%2.%3.%4").arg(reg.cap(1)).arg(reg.cap(2)).arg(reg.cap(3)).arg(reg.cap(4));
-        unsigned short port = reg.cap(5).toInt() << 8 | reg.cap(6).toInt();
-        session->setInformation("transfer-mode", Commands::ACTIVE);
-        session->setInformation("transfer-ip", address);
-        session->setInformation("transfer-port", port);
-        result = Result(200, "PORT command successful.");
-    }
-    else
-        result = Result(501, "Syntax error in IP address.");
-    return (result);
+    if (reg.indexIn(hostPort) < 0)
+        return (Result(501, "Syntax error in IP address."));
+    QString address = QString("%1.%2.%3.%4").arg(reg.cap(1)).arg(reg.cap(2)).arg(reg.cap(3)).arg(reg.cap(4));
+    unsigned short port = reg.cap(5).toInt() << 8 | reg.cap(6).toInt();
+    session->setInformation("transfer-mode", Commands::ACTIVE);
+    session->setInformation("transfer-ip", address);
+    session->setInformation("transfer-port", port);
+    return (Result(200, QString("Entered Active Mode (%1:%2)").arg(address, QString::number(port))));
+}
+
+Commands::Result Commands::_eprt(const QString &hostPort, LightBird::Session &session, LightBird::IClient &)
+{
+    QRegExp        reg("\\|(\\d+)\\|(.+)\\|(\\d{1,3})\\|"); // Regex matching the eprt parameter
+    QHostAddress   host;
+
+    if (reg.indexIn(hostPort) != 0 || reg.matchedLength() != hostPort.length())
+        return (Result(501, "Syntax error in the parameter."));
+    if (reg.cap(1) != "1" && reg.cap(1) != "2")
+        return (Result(522, "Network protocol not supported, use (1,2)"));
+    if (!host.setAddress(reg.cap(2)) || (reg.cap(1) == "1" && host.protocol() != QAbstractSocket::IPv4Protocol)
+        || (reg.cap(1) == "2" && host.protocol() != QAbstractSocket::IPv6Protocol))
+        return (Result(501, "Syntax error in the host address."));
+    session->setInformation("transfer-mode", Commands::ACTIVE);
+    session->setInformation("transfer-ip", host.toString());
+    session->setInformation("transfer-port", reg.cap(3).toUShort());
+    return (Result(200, QString("Extended Active Mode Entered (%1|%2)").arg(host.toString(), reg.cap(3))));
 }
 
 Commands::Result  Commands::_noop(const QString &, LightBird::Session &, LightBird::IClient &)
