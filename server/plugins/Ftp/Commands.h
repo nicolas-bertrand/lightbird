@@ -70,6 +70,7 @@ private:
     Result  _size(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _mdtm(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _syst(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
+    Result  _stat(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _feat(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _opts(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
     Result  _type(const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
@@ -94,6 +95,8 @@ private:
     LightBird::TableFiles _getFile(const QString &path, LightBird::Session &session);
     /// @brief Double-quotes in the path are escaped by double-quotes.
     QString _escapePath(const QString &path);
+    /// @brief Returns the list of the objects in a directory, with the "ls -l" format.
+    QStringList _getList(const QString &path, LightBird::Session &session);
     /// @brief Converts the date in the "ls -l" format.
     QString _listDate(const QDateTime &datetime);
 

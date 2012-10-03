@@ -32,6 +32,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->controlCommands["SIZE"] = &Commands::_size;
     this->controlCommands["MDTM"] = &Commands::_mdtm;
     this->controlCommands["SYST"] = &Commands::_syst;
+    this->controlCommands["STAT"] = &Commands::_stat;
     this->controlCommands["FEAT"] = &Commands::_feat;
     this->controlCommands["OPTS"] = &Commands::_opts;
     this->controlCommands["TYPE"] = &Commands::_type;
@@ -262,6 +263,28 @@ Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBir
     return (Result(215, "UNIX Type: L8"));
 }
 
+Commands::Result Commands::_stat(const QString &path, LightBird::Session &session, LightBird::IClient &)
+{
+    bool         binary = session->getInformation("binary-flag").toBool();
+    QString      result;
+
+    if (path.isEmpty())
+    {
+        result = "211-FTP server status:\r\n";
+        result += " Logged in as " + LightBird::TableAccounts(session->getAccount()).getName() + "\r\n";
+        result += " TYPE: " + QString(binary ? "BINARY" : "ASCII") + "\r\n";
+        result += " LightBird " + this->api->getServerVersion() + "\r\n";
+        result += "211 End of status\r\n";
+    }
+    else
+    {
+        result = "213-Status follows:\r\n";
+        result += this->_getList(path, session).join("");
+        result += "213 End of status.\r\n";
+    }
+    return (Result(0, result));
+}
+
 Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBird::IClient &)
 {
     return (Result(0, "211-Features:\r\n MDTM\r\n SIZE\r\n211 End\r\n"));
@@ -390,19 +413,29 @@ Commands::Result Commands::_quit(const QString &, LightBird::Session &session, L
 
 Commands::Result Commands::_list(const QString &path, LightBird::Session &session, LightBird::IClient &client)
 {
-    QString                     controlId = session->getInformation("control-id").toString();
+    LightBird::IContent &content = client.getResponse().getContent();
+    QString             controlId = session->getInformation("control-id").toString();
+    QStringList         result;
+
+    Plugin::sendControlMessage(controlId, Result(150, "Here comes the directory listing."));
+    content.setContent((result = this->_getList(path, session)).join("").toUtf8());
+    client.getInformations().insert("code", 226);
+    client.getInformations().insert("message", QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(result.size())));
+    return (Result());
+}
+
+QStringList Commands::_getList(const QString &path, LightBird::Session &session)
+{
     LightBird::TableDirectories directory(session->getInformation("working-dir").toString());
-    LightBird::IContent         &content = client.getResponse().getContent();
     QStringList                 files;
     QStringList                 directories;
     QString                     pattern("%1rwx------ %2 %3 nogroup %4 %5 %6\r\n");
-    QString                     line;
     QString                     name;
     QString                     subDirectories;
     QString                     date;
     QString                     size;
+    QStringList                 result;
 
-    Plugin::sendControlMessage(controlId, Result(150, "Here comes the directory listing."));
     // Changes the directory to the argument if possible
     if (!path.isEmpty() && !directory.cd(path))
     {
@@ -427,10 +460,9 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
         {
             LightBird::TableDirectories directory(d.next());
             name = LightBird::TableAccounts(directory.getIdAccount()).getName();
-            subDirectories = QString::number(directory.getDirectories().size() + 1);
+            subDirectories = QString::number(directory.getDirectories().size() + 2);
             date = this->_listDate(directory.getModified().toLocalTime());
-            line = pattern.arg("d", subDirectories, (name.isEmpty() ? "nouser" : name), QString::number(4096), date, directory.getName());
-            content.setContent(line.toUtf8());
+            result << pattern.arg("d", subDirectories, (name.isEmpty() ? "nouser" : name), QString::number(4096), date, directory.getName());
         }
     }
     // List the files
@@ -445,12 +477,18 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
             date = this->_listDate(fileInfo.lastModified());
         else
             date = this->_listDate(file.getModified());
-        line = pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), size, date, file.getName());
-        content.setContent(line.toUtf8());
+        result << pattern.arg("-", "1", (name.isEmpty() ? "nouser" : name), size, date, file.getName());
     }
-    client.getInformations().insert("code", 226);
-    client.getInformations().insert("message", QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(files.size() + directories.size())));
-    return (Result());
+    return (result);
+}
+
+QString     Commands::_listDate(const QDateTime &datetime)
+{
+    QDate   date(datetime.date());
+
+    if (date.year() == QDate::currentDate().year())
+        return (Commands::months[date.month()] + datetime.toString(" dd hh:mm"));
+    return (Commands::months[date.month()] + datetime.toString(" dd yyyy"));
 }
 
 Commands::Result Commands::_nlst(const QString &path, LightBird::Session &session, LightBird::IClient &client)
@@ -491,24 +529,17 @@ Commands::Result Commands::_nlst(const QString &path, LightBird::Session &sessio
     // Joins the elements of the list with the relative path
     if (result.endsWith('/'))
         result.chop(1);
-    if (!list.isEmpty() && !result.isEmpty())
-        result += "/" + list.join("\r\n" + result + "/");
+    if (!result.isEmpty())
+        result += "/" + list.join("\r\n" + result + "/").append("\r\n");
     // And without it
     else
-        result = list.join("\r\n");
+        result = list.join("\r\n").append("\r\n");
+    if (list.isEmpty())
+        result.clear();
     client.getResponse().getContent().setContent(result.toUtf8());
     client.getInformations().insert("code", 226);
     client.getInformations().insert("message", QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(list.size())));
     return (Result());
-}
-
-QString     Commands::_listDate(const QDateTime &datetime)
-{
-    QDate   date(datetime.date());
-
-    if (date.year() == QDate::currentDate().year())
-        return (Commands::months[date.month()] + datetime.toString(" dd hh:mm"));
-    return (Commands::months[date.month()] + datetime.toString(" dd yyyy"));
 }
 
 Commands::Result Commands::_retr(const QString &path, LightBird::Session &session, LightBird::IClient &client)
