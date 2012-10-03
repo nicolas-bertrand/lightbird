@@ -50,7 +50,7 @@ Commands::Commands(LightBird::IApi *api) : api(api)
     this->transferCommands["STOR"] = qMakePair(false, &Commands::_stor);
     this->transferCommands["STOU"] = qMakePair(false, &Commands::_stou);
     this->transferCommands["APPE"] = qMakePair(false, &Commands::_appe);
-    this->anonymousCommands << "USER" << "PASS" << "HELP" << "ACCT";
+    this->anonymousCommands << "USER" << "PASS" << "HELP" << "ACCT" << "FEAT" << "OPTS";
 }
 
 Commands::~Commands()
@@ -287,11 +287,16 @@ Commands::Result Commands::_stat(const QString &path, LightBird::Session &sessio
 
 Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBird::IClient &)
 {
-    return (Result(0, "211-Features:\r\n MDTM\r\n SIZE\r\n211 End\r\n"));
+    QStringList  feat;
+
+    feat << "MDTM" << "PASV" << "SIZE" << "UTF8";
+    return (Result(0, "211-Features:\r\n " + feat.join("\r\n ") + "\r\n211 End\r\n"));
 }
 
-Commands::Result Commands::_opts(const QString &, LightBird::Session &, LightBird::IClient &)
+Commands::Result Commands::_opts(const QString &parameter, LightBird::Session &, LightBird::IClient &)
 {
+    if (parameter == "UTF8 ON")
+        return (Result(200, "Always in UTF8 mode."));
     return (Result(501, "Option not understood."));
 }
 
