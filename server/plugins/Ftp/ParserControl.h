@@ -9,7 +9,7 @@
 class ParserControl : public Parser
 {
 public:
-    ParserControl(LightBird::IApi *api, LightBird::IClient &client);
+    ParserControl(LightBird::IApi &api, LightBird::IClient &client);
     ~ParserControl();
 
     bool    doUnserializeContent(const QByteArray &data, quint64 &used);

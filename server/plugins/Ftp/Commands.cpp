@@ -15,7 +15,7 @@
 
 const char *Commands::months[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-Commands::Commands(LightBird::IApi *api) : api(api)
+Commands::Commands(LightBird::IApi &api) : api(api)
 {
     this->controlCommands["USER"] = &Commands::_user;
     this->controlCommands["PASS"] = &Commands::_pass;
@@ -276,7 +276,7 @@ Commands::Result Commands::_stat(const QString &path, LightBird::Session &sessio
         result = "211-FTP server status:\r\n";
         result += " Logged in as " + LightBird::TableAccounts(session->getAccount()).getName() + "\r\n";
         result += " TYPE: " + QString(binary ? "BINARY" : "ASCII") + "\r\n";
-        result += " LightBird " + this->api->getServerVersion() + "\r\n";
+        result += " LightBird " + this->api.getServerVersion() + "\r\n";
         result += "211 End of status\r\n";
     }
     else
@@ -377,7 +377,7 @@ Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, L
     unsigned short  port = Plugin::getConfiguration().passivePort;
 
     // Ensures that the passive port is opened
-    if (this->api->network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
+    if (this->api.network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
     {
         session->setInformation("transfer-mode", Commands::PASSIVE);
         session->setInformation("transfer-ip", client.getPeerAddress().toString());
@@ -395,7 +395,7 @@ Commands::Result Commands::_epsv(const QString &network, LightBird::Session &ses
     unsigned short  port = Plugin::getConfiguration().passivePort;
 
     // Ensures that the passive port is opened
-    if (this->api->network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
+    if (this->api.network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
     {
         if (!network.isEmpty() && network != "1" && network != "2")
             return (Result(522, "Network protocol not supported, use (1,2)"));
@@ -423,10 +423,10 @@ Commands::Result Commands::_port(const QString &hostPort, LightBird::Session &se
 
 Commands::Result Commands::_eprt(const QString &hostPort, LightBird::Session &session, LightBird::IClient &)
 {
-    QRegExp        reg("\\|(\\d+)\\|(.+)\\|(\\d{1,3})\\|"); // Regex matching the eprt parameter
+    QRegExp        reg("^\\|(\\d+)\\|(.+)\\|(\\d{1,5})\\|$"); // Regex matching the eprt parameter
     QHostAddress   host;
 
-    if (reg.indexIn(hostPort) != 0 || reg.matchedLength() != hostPort.length())
+    if (reg.indexIn(hostPort) != 0)
         return (Result(501, "Syntax error in the parameter."));
     if (reg.cap(1) != "1" && reg.cap(1) != "2")
         return (Result(522, "Network protocol not supported, use (1,2)"));
@@ -450,7 +450,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session, L
 
     if (dataId.isEmpty())
         return (Result(225, "No transfer in progress."));
-    this->api->network().disconnect(dataId);
+    this->api.network().disconnect(dataId);
     session->getClients();
     session->setInformation("disconnect-data", true);
     return (Result(0, "426 Data connection closed.\r\n226 Transfer aborted.\r\n"));
@@ -459,7 +459,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session, L
 Commands::Result Commands::_quit(const QString &, LightBird::Session &session, LightBird::IClient &)
 {
     session->destroy();
-    this->api->network().disconnect(session->getInformation("control-id").toString());
+    this->api.network().disconnect(session->getInformation("control-id").toString());
     return (Result(221, "Goodbye."));
 }
 

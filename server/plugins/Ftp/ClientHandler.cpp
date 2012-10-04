@@ -4,7 +4,7 @@
 
 #include "IClient.h"
 
-ClientHandler::ClientHandler(LightBird::IApi *api) : api(api)
+ClientHandler::ClientHandler(LightBird::IApi &api) : api(api)
 {
     this->commands = new Commands(api);
 }
@@ -20,7 +20,7 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
 
     // Initializes a new session for this control connection. Only the informations
     // used by both the control and data connections are stored here.
-    LightBird::Session session = this->api->sessions().create();
+    LightBird::Session session = this->api.sessions().create();
     session->setClient(client.getId());
     informations["control-id"] = client.getId(); // The id of the control connection. Defined while it is opened.
 //  informations["data-id"] = QString();         // The id of the data connection. Defined while it is opened.
@@ -115,9 +115,9 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
                     QString command = session->getInformation("transfer-command").toString();
                     // Starts the transfer
                     if (this->commands->isSender(command))
-                        this->api->network().send(dataId);
+                        this->api.network().send(dataId);
                     else
-                        this->api->network().receive(dataId);
+                        this->api.network().receive(dataId);
                     // Wakes the data connection up if it was waiting for the control connection
                     if (this->wait.contains(dataId))
                         this->wait.value(dataId)->wakeAll();
@@ -133,7 +133,7 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
         {
             // Connection to the client. The mutex guarantees the atomicity of assignment of the session.
             this->mutex.lock();
-            dataId = this->api->network().connect(QHostAddress(address), port, QStringList(Plugin::getConfiguration().dataProtocolName))->getResult();
+            dataId = this->api.network().connect(QHostAddress(address), port, QStringList(Plugin::getConfiguration().dataProtocolName))->getResult();
             session->setClient(dataId);
             if (!dataId.isEmpty())
                 session->setInformation("data-id", dataId);
@@ -147,7 +147,7 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
 
 bool    ClientHandler::onDataConnect(LightBird::IClient &client)
 {
-    LightBird::IDatabase &database = this->api->database();
+    LightBird::IDatabase &database = this->api.database();
     LightBird::Session   session;
     QVector<QVariantMap> result;
     QSqlQuery            query;
@@ -171,7 +171,7 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
             return (true);
         }
         // The control connection has been found
-        if (!(session = this->api->sessions().getSession(result.first().value("id").toString())))
+        if (!(session = this->api.sessions().getSession(result.first().value("id").toString())))
             return (false);
         session->setClient(client.getId());
         session->setInformation("data-id", client.getId());
@@ -189,9 +189,9 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
     command = session->getInformation("transfer-command").toString();
     // Starts the transfer
     if (this->commands->isSender(command))
-        this->api->network().send(client.getId());
+        this->api.network().send(client.getId());
     else
-        this->api->network().receive(client.getId());
+        this->api.network().receive(client.getId());
     return (true);
 }
 

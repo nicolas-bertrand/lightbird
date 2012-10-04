@@ -19,13 +19,15 @@ HEADERS =  ClientHandler.h \
     Parser.h \
     ParserControl.h \
     ParserData.h \
-    Plugin.h
+    Plugin.h \
+    Timer.h
 SOURCES = ClientHandler.cpp \
     Commands.cpp \
     Parser.cpp \
     ParserControl.cpp \
     ParserData.cpp \
-    Plugin.cpp
+    Plugin.cpp \
+    Timer.cpp
 OTHER_FILES = Configuration.xml \
     Queries.xml
 

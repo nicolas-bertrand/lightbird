@@ -14,7 +14,7 @@
 class ClientHandler
 {
 public:
-    ClientHandler(LightBird::IApi *api);
+    ClientHandler(LightBird::IApi &api);
     ~ClientHandler();
 
     bool    onConnect(LightBird::IClient &client);
@@ -26,7 +26,7 @@ public:
 private:
     Commands::Result _prepareTransferMethod(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
 
-    LightBird::IApi  *api;
+    LightBird::IApi  &api;
     Commands         *commands;
     QMutex           mutex; ///< Makes the class thread safe.
     /// The list of the clients that are waiting to be associated with a control connection in passive mode.

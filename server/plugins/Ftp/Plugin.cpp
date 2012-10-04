@@ -3,7 +3,6 @@
 #include <QtPlugin>
 #include <QDomNode>
 
-#include "IIdentifier.h"
 #include "Plugin.h"
 #include "ParserData.h"
 #include "ParserControl.h"
@@ -24,12 +23,15 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
-    this->handler = new ClientHandler(api);
+    this->handler = new ClientHandler(*api);
+    this->timerManager = new Timer(*api);
     // Fills the configuration
     if (!(this->configuration.maxPacketSize = api->configuration(true).get("maxPacketSize").toUInt()))
         this->configuration.maxPacketSize = 10000000;
     if (!(this->configuration.timeWaitControl = api->configuration(true).get("timeWaitControl").toUInt()) || this->configuration.timeWaitControl > 30000)
         this->configuration.timeWaitControl = 5000;
+    if (!(this->configuration.timeout = api->configuration(true).get("timeout").toUInt()))
+        this->configuration.timeout = 120;
     // Gets the data connection protocol name
     QDomElement element = this->api->configuration(true).readDom();
     element = element.firstChildElement("contexts").firstChildElement("context").firstChildElement("protocol");
@@ -54,6 +56,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
 void    Plugin::onUnload()
 {
     delete this->handler;
+    this->handler = NULL;
+    delete this->timerManager;
     this->handler = NULL;
 }
 
@@ -87,12 +91,12 @@ bool        Plugin::onConnect(LightBird::IClient &client)
 
     if (client.getProtocols().first() == "FTP")
     {
-        parser = new ParserControl(this->api, client);
+        parser = new ParserControl(*this->api, client);
         result = this->handler->onConnect(client);
     }
     else if (client.getProtocols().first() == this->configuration.dataProtocolName)
     {
-        parser = new ParserData(this->api, client);
+        parser = new ParserData(*this->api, client);
         result = this->handler->onDataConnect(client);
     }
     else
@@ -101,6 +105,7 @@ bool        Plugin::onConnect(LightBird::IClient &client)
     if (parser)
         this->parsers.insert(client.getId(), parser);
     this->mutex.unlock();
+    this->timerManager->startTimeout(client.getId());
     return (result);
 }
 
@@ -115,6 +120,7 @@ bool    Plugin::doUnserializeHeader(LightBird::IClient &client, const QByteArray
 
 bool     Plugin::doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
 {
+    this->timerManager->stopTimeout(client.getId());
     return (this->_getParser(client)->doUnserializeContent(data, used));
 }
 
@@ -156,6 +162,7 @@ bool     Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize
 void    Plugin::onFinish(LightBird::IClient &client)
 {
     this->_getParser(client)->onFinish();
+    this->timerManager->startTimeout(client.getId());
 }
 
 bool     Plugin::onDisconnect(LightBird::IClient &client)
@@ -172,55 +179,19 @@ void    Plugin::onDestroy(LightBird::IClient &client)
     delete this->parsers.value(client.getId());
     this->parsers.remove(client.getId());
     this->mutex.unlock();
+    this->timerManager->stopTimeout(client.getId());
 }
 
 bool    Plugin::timer(const QString &name)
 {
-    QList<void *>   extensions;
-    QStringList     files;
-    LightBird::IIdentify::Information information;
-    LightBird::TableFiles file;
-
-    if (name != "identify")
-        return (false);
-    // Gets the files to identify
-    this->identifyMutex.lock();
-    files = this->identifyList;
-    this->identifyList.clear();
-    this->identifyMutex.unlock();
-    // While there are files to identify
-    while (!files.isEmpty())
-    {
-        QStringListIterator it(files);
-        while (it.hasNext())
-            // Identify the file
-            if (file.setId(it.next()))
-            {
-                if (!(extensions = this->api->extensions().get("IIdentifier")).isEmpty())
-                    information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(file.getFullPath());
-                this->api->extensions().release(extensions);
-                file.setType(information.type_string);
-                file.setInformations(information.data);
-                information.data.clear();
-            }
-        files.clear();
-        // If some files have been uploaded in the meantime, we continue the identification
-        this->identifyMutex.lock();
-        files = this->identifyList;
-        this->identifyList.clear();
-        this->identifyMutex.unlock();
-    }
-    return (false);
+    return (this->timerManager->timer(name));
 }
 
 void    Plugin::identify(const QString &idFile)
 {
     if (!Plugin::instance)
         return ;
-    Plugin::instance->identifyMutex.lock();
-    Plugin::instance->identifyList << idFile;
-    Plugin::instance->identifyMutex.unlock();
-    Plugin::instance->api->timers().setTimer("identify");
+    Plugin::instance->timerManager->identify(idFile);
 }
 
 void    Plugin::sendControlMessage(const QString &controlId, const Commands::Result &message)

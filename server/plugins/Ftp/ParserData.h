@@ -7,7 +7,7 @@
 class ParserData : public Parser
 {
 public:
-    ParserData(LightBird::IApi *api, LightBird::IClient &client);
+    ParserData(LightBird::IApi &api, LightBird::IClient &client);
     ~ParserData();
 
     bool    doUnserializeContent(const QByteArray &data, quint64 &used);

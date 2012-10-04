@@ -13,4 +13,6 @@
   <maxPacketSize>10000000</maxPacketSize>
   <!-- The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready. -->
   <timeWaitControl>5000</timeWaitControl>
+  <!-- The number of seconds an inactive client can stay connected to the server. -->
+  <timeout>120</timeout>
 </configuration>

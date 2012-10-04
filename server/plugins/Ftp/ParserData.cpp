@@ -1,7 +1,7 @@
 #include "ParserData.h"
 #include "Plugin.h"
 
-ParserData::ParserData(LightBird::IApi *api, LightBird::IClient &client) : Parser(api, client)
+ParserData::ParserData(LightBird::IApi &api, LightBird::IClient &client) : Parser(api, client)
 {
 }
 
@@ -37,7 +37,7 @@ bool    ParserData::doSerializeContent(QByteArray &data)
 
 void    ParserData::onFinish()
 {
-    this->api->network().disconnect(this->client.getId());
+    this->api.network().disconnect(this->client.getId());
 }
 
 bool    ParserData::onSerialize(LightBird::IOnSerialize::Serialize)

@@ -23,6 +23,7 @@
 
 # include "ClientHandler.h"
 # include "Parser.h"
+# include "Timer.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -60,6 +61,7 @@ public:
     {
         quint32 maxPacketSize;      ///< The maximum size send at a time to the client.
         quint32 timeWaitControl;    ///< The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready.
+        quint32 timeout;            ///< The number of seconds an inactive client can stay connected to the server.
         QString dataProtocolName;   ///< The name of the data connection protocol.
         unsigned short passivePort; ///< The port on which the clients can etablish a passive connection.
     };
@@ -110,8 +112,7 @@ private:
     QReadWriteLock           mutex;         ///< Makes parsers thread safe.
     QHash<QString, Parser *> parsers;       ///< Parses the FTP control and data connections.
     ClientHandler            *handler;      ///< This single object handles all the connections.
-    QStringList              identifyList;  ///< The list of the id of the files to identify in the timer thread.
-    QMutex                   identifyMutex; ///< Makes identifyFiles thread safe.
+    Timer                    *timerManager; ///< Manages the identification of the uploaded files and the connections timeout.
     static Configuration     configuration; ///< The configuration of the plugin.
     static Plugin            *instance;     ///< Allows to access the Plugin instance from a static method.
 };
