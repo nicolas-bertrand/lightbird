@@ -126,8 +126,13 @@ Commands::Result Commands::_pass(const QString &pass, LightBird::Session &sessio
         user = client.getInformations().value(CONTROL_USER).toString();
         if (account.setIdFromNameAndPassword(user, pass))
         {
-            result = Result(230, QString("Welcome %1.\r\nMake yourself at home!").arg(user));
-            session->setAccount(account.getId());
+            if (account.isActive())
+            {
+                result = Result(230, QString("Welcome %1.\r\nMake yourself at home!").arg(user));
+                session->setAccount(account.getId());
+            }
+            else
+                result = Result(530, "This account is disabled.");
         }
         else
             result = Result(530, "Login authentification failed.");
