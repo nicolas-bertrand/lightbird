@@ -5,6 +5,7 @@
 
 # include "IEvent.h"
 # include "IPlugin.h"
+# include "ITest.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -30,16 +31,7 @@ public:
 
 private:
     LightBird::IApi *api;
+    QList<QPair<QString, ITest *> > tests;
 };
-
-// Throws an exception if the assertion is false
-# define ASSERT(a)\
-if (!(a))\
-{\
-    QMap<QString, QString> properties;\
-    properties.insert("line", QString::number(__LINE__));\
-    throw (properties);\
-}\
-else (void)0
 
 #endif // PLUGIN_H

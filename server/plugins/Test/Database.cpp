@@ -4,48 +4,42 @@
 #include <QStringList>
 
 #include "LightBird.h"
-#include "UnitTests.h"
+#include "Database.h"
 
-UnitTests::UnitTests(LightBird::IApi &a) : api(a),
-                                           database(api.database()),
-                                           log(api.log())
-{
-    bool    result = true;
-
-    this->log.info("Runing the unit tests of the whole server", "UnitTests", "UnitTests");
-    if (!this->_accounts())
-        result = false;
-    else if (!this->_collections())
-        result = false;
-    else if (!this->_configuration())
-        result = false;
-    else if (!this->_directories())
-        result = false;
-    else if (!this->_events())
-        result = false;
-    else if (!this->_files())
-        result = false;
-    else if (!this->_groups())
-        result = false;
-    else if (!this->_limits())
-        result = false;
-    else if (!this->_permissions())
-        result = false;
-    else if (!this->_sessions())
-        result = false;
-    else if (!this->_tags())
-        result = false;
-    if (result)
-        this->log.info("All the unit tests were successful!", "UnitTests", "UnitTests");
-    else
-        this->log.info("At least one unit test failed!", "UnitTests", "UnitTests");
-}
-
-UnitTests::~UnitTests()
+Database::Database(LightBird::IApi &api) : ITest(api)
 {
 }
 
-bool            UnitTests::_accounts()
+Database::~Database()
+{
+}
+
+unsigned int    Database::run()
+{
+    log.debug("Running the unit tests of the database...", "Database", "run");
+    try
+    {
+        this->_accounts();
+        this->_collections();
+        this->_directories();
+        this->_events();
+        this->_files();
+        this->_groups();
+        this->_limits();
+        this->_permissions();
+        this->_sessions();
+        this->_tags();
+    }
+    catch (unsigned int line)
+    {
+        this->log.debug("Unit tests of the database failed!", Properties("line", line).toMap(), "Database", "run");
+        return (line);
+    }
+    this->log.debug("Unit tests of the database successful!", "Database", "run");
+    return (0);
+}
+
+void            Database::_accounts()
 {
     LightBird::TableAccounts a1;
     LightBird::TableAccounts a2;
@@ -54,7 +48,7 @@ bool            UnitTests::_accounts()
     QString     id1;
     QString     id2;
 
-    this->log.debug("Running unit tests of the accounts...", "UnitTests", "_accounts");
+    this->log.trace("Running unit tests of the accounts...", "Database", "_accounts");
     query.prepare("DELETE FROM accounts WHERE name=\"a1\" OR name=\"a2\" OR name=\"a3\"");
     this->database.query(query);
     query.prepare("DELETE FROM groups WHERE name=\"g1\" OR name=\"g2\" OR name=\"g3\"");
@@ -155,16 +149,15 @@ bool            UnitTests::_accounts()
         ASSERT(a1.remove());
         ASSERT(a2.remove());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the accounts failed", properties, "UnitTests", "_accounts");
-        return (false);
+        this->log.trace("Unit tests of the accounts failed!", Properties("line", line).toMap(), "Database", "_accounts");
+        throw line;
     }
-    this->log.debug("Unit tests of the accounts successful!", "UnitTests", "_accounts");
-    return (true);
+    this->log.trace("Unit tests of the accounts successful!", "Database", "_accounts");
 }
 
-bool            UnitTests::_collections()
+void            Database::_collections()
 {
     LightBird::TableCollections c1;
     LightBird::TableCollections c2;
@@ -174,7 +167,7 @@ bool            UnitTests::_collections()
     QSqlQuery   query;
     QStringList l;
 
-    this->log.debug("Running unit tests of the collections...", "UnitTests", "_collections");
+    this->log.trace("Running unit tests of the collections...", "Database", "_collections");
     query.prepare("DELETE FROM collections WHERE name IN('videos', 'images', 'egypte', 'spiders')");
     this->database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
@@ -251,90 +244,15 @@ bool            UnitTests::_collections()
         ASSERT(f.remove(f.getIdFromVirtualPath("toto.xml")));
         ASSERT(f.remove(f.getIdFromVirtualPath("titi.xml")));
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the collections failed", properties, "UnitTests", "_collections");
-        return (false);
+        this->log.trace("Unit tests of the collections failed!", Properties("line", line).toMap(), "Database", "_collections");
+        throw line;
     }
-    this->log.debug("Unit tests of the collections successful!", "UnitTests", "_collections");
-    return (true);
+    this->log.trace("Unit tests of the collections successful!", "Database", "_collections");
 }
 
-bool    UnitTests::_configuration()
-{
-    LightBird::IConfiguration   &c = this->api.configuration();
-
-    log.debug("Running the unit tests of the configuration...", "UnitTests", "_configuration");
-    // Build the test tree
-    c.remove("unitTests");
-    c.set("unitTests/node1", "node1A1");
-    c.set("unitTests/node1[1]", "node1B1");
-    c.set("unitTests/node2[0]", "node2A1");
-    c.set("unitTests/node1[2]", "node1C1");
-    c.set("unitTests/node2[1]", "node2B1");
-    c.set("unitTests/node1[6]", "node1D1");
-    c.set("unitTests/node1[4]", "node1E1");
-    c.set("unitTests/node1[2]/node3", "node3A1");
-    c.set("unitTests/node1[2]/node3[1]", "node3B1");
-    c.set("unitTests/node1[2]/node3[2]", "node3C1");
-    c.set("unitTests/node1[2]/node3.attr1", "node3D1");
-    c.set("unitTests/node1[2]/node3.attr2", "node3E1");
-    c.set("unitTests/node1[2]/node3.attr1", "node3D2");
-    c.set("unitTests/node1[2]/node3[2].attr3", "node3F1");
-    c.set("unitTests/node1[2]/node3[1].attr4", "node3G1");
-    c.set("unitTests/node1[2].attr5", "node1F1");
-    c.set("unitTests/node1[3].attr5", "node1F2");
-    c.set("unitTests/node1[2]/node3", "node3A2");
-    c.set("unitTests/node1[2]/node3[1]", "node3B2");
-    c.set("unitTests/node1[2]/node3[2]", "node3C2");
-    c.set("unitTests/node1", "node1A2");
-    c.set("unitTests/node1[2]", "node1C2");
-    c.set("unitTests/node1[4]", "node1E2");
-    try
-    {
-        // Test if the tree has been correctly built
-        ASSERT(c.get("unitTests/node1[1]") == "node1B1");
-        ASSERT(c.get("unitTests/node2[0]") == "node2A1");
-        ASSERT(c.get("unitTests/node2[1]") == "node2B1");
-        ASSERT(c.get("unitTests/node1[3]") == "node1D1");
-        ASSERT(c.get("unitTests/node1[2]/node3.attr2") == "node3E1");
-        ASSERT(c.get("unitTests/node1[2]/node3.attr1") == "node3D2");
-        ASSERT(c.get("unitTests/node1[2]/node3[2].attr3") == "node3F1");
-        ASSERT(c.get("unitTests/node1[2]/node3[1].attr4") == "node3G1");
-        ASSERT(c.get("unitTests/node1[2].attr5") == "node1F1");
-        ASSERT(c.get("unitTests/node1[3].attr5") == "node1F2");
-        ASSERT(c.get("unitTests/node1[2]/node3") == "node3A2");
-        ASSERT(c.get("unitTests/node1[2]/node3[1]") == "node3B2");
-        ASSERT(c.get("unitTests/node1[2]/node3[2]") == "node3C2");
-        ASSERT(c.get("unitTests/node1") == "node1A2");
-        ASSERT(c.get("unitTests/node1[2]") == "node1C2");
-        ASSERT(c.get("unitTests/node1[4]") == "node1E2");
-        ASSERT(c.get("unitTests/node1[78]") == "");
-        ASSERT(c.get("unitTests/node1[-1]") == "node1A2");
-        ASSERT(c.get("unitTests/node1[egshuge]") == "node1A2");
-        ASSERT(c.get("unitTests/node1[]") == "node1A2");
-        ASSERT(c.get("unitTests/node4") == "");
-        ASSERT(c.get("unitTests/node[3].attr6") == "");
-        // Test the count function
-        ASSERT(c.count("unitTests") == 1);
-        ASSERT(c.count("unitTests/node1") == 5);
-        ASSERT(c.count("unitTests/node2") == 2);
-        ASSERT(c.count("unitTests/node1[2]/node3") == 3);
-        ASSERT(c.count("") == 0);
-        ASSERT(c.count("gesgsho") == 0);
-        ASSERT(c.count("unitTests/gsegesi") == 0);
-        c.remove("unitTests");
-    }
-    catch (QMap<QString, QString> properties)
-    {
-        this->log.error("Unit tests of the configuration failed", properties, "UnitTests", "_configuration");
-        return (false);
-    }
-    this->log.debug("Unit tests of the configuration successful!", "UnitTests", "_configuration");
-    return (true);
-}
-
-bool            UnitTests::_directories()
+void            Database::_directories()
 {
     LightBird::TableDirectories d1;
     LightBird::TableDirectories d2;
@@ -346,7 +264,7 @@ bool            UnitTests::_directories()
     QStringList m;
     QString     d;
 
-    this->log.debug("Running unit tests of the directories...", "UnitTests", "_directories");
+    this->log.trace("Running unit tests of the directories...", "Database", "_directories");
     query.prepare("DELETE FROM directories WHERE name IN('videos', 'images', 'egypte', 'spiders', 'pictures')");
     this->database.query(query);
     query.prepare("DELETE FROM files WHERE name IN('toto.png', 'titi.png')");
@@ -445,16 +363,15 @@ bool            UnitTests::_directories()
         ASSERT(d1.cd("videos/d2") && d1.getVirtualPath() == "videos/d2");
         ASSERT(d1.remove(d1.getIdFromVirtualPath("videos")));
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the directories failed", properties, "UnitTests", "_directories");
-        return (false);
+        this->log.trace("Unit tests of the directories failed!", Properties("line", line).toMap(), "Database", "_directories");
+        throw line;
     }
-    this->log.debug("Unit tests of the directories successful!", "UnitTests", "_directories");
-    return (true);
+    this->log.trace("Unit tests of the directories successful!", "Database", "_directories");
 }
 
-bool            UnitTests::_events()
+void            Database::_events()
 {
     LightBird::TableEvents e1;
     LightBird::TableEvents e2;
@@ -462,7 +379,7 @@ bool            UnitTests::_events()
     QSqlQuery   query;
     QStringList events;
 
-    this->log.debug("Running unit tests of the events...", "UnitTests", "_events");
+    this->log.trace("Running unit tests of the events...", "Database", "_events");
     query.prepare("DELETE FROM events WHERE name=\"e1\"");
     this->database.query(query);
     try
@@ -508,16 +425,15 @@ bool            UnitTests::_events()
         ASSERT(e2.remove());
         ASSERT(!e1.remove());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the events failed", properties, "UnitTests", "_events");
-        return (false);
+        this->log.trace("Unit tests of the events failed!", Properties("line", line).toMap(), "Database", "_events");
+        throw line;
     }
-    this->log.debug("Unit tests of the events successful!", "UnitTests", "_events");
-    return (true);
+    this->log.trace("Unit tests of the events successful!", "Database", "_events");
 }
 
-bool            UnitTests::_files()
+void            Database::_files()
 {
     LightBird::TableFiles f1;
     LightBird::TableFiles f2;
@@ -525,7 +441,7 @@ bool            UnitTests::_files()
     LightBird::TableAccounts a1;
     QSqlQuery   query;
 
-    this->log.debug("Running unit tests of the files...", "UnitTests", "_files");
+    this->log.trace("Running unit tests of the files...", "Database", "_files");
     query.prepare("DELETE FROM files WHERE name IN('f1', 'f2', 'f3')");
     this->database.query(query);
     query.prepare("DELETE FROM directories WHERE name=\"d1\"");
@@ -607,16 +523,15 @@ bool            UnitTests::_files()
         ASSERT(f2.remove(f1.getId()));
         ASSERT(f2.remove());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the files failed", properties, "UnitTests", "_files");
-        return (false);
+        this->log.trace("Unit tests of the files failed!", Properties("line", line).toMap(), "Database", "_files");
+        throw line;
     }
-    this->log.debug("Unit tests of the files successful!", "UnitTests", "_files");
-    return (true);
+    this->log.trace("Unit tests of the files successful!", "Database", "_files");
 }
 
-bool            UnitTests::_groups()
+void            Database::_groups()
 {
     LightBird::TableGroups g1;
     LightBird::TableGroups g2;
@@ -625,7 +540,7 @@ bool            UnitTests::_groups()
     QString     id1;
     QString     id2;
 
-    this->log.debug("Running unit tests of the groups...", "UnitTests", "_groups");
+    this->log.trace("Running unit tests of the groups...", "Database", "_groups");
     query.prepare("DELETE FROM groups WHERE name=\"b1\" OR name=\"b2\" OR name=\"b3\"");
     this->database.query(query);
     query.prepare("DELETE FROM accounts WHERE name=\"a1\" OR name=\"a2\" OR name=\"a3\"");
@@ -689,16 +604,15 @@ bool            UnitTests::_groups()
         ASSERT(a.remove(g1.getAccounts().first()));
         ASSERT(g1.remove());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the groups failed", properties, "UnitTests", "_groups");
-        return (false);
+        this->log.trace("Unit tests of the groups failed!", Properties("line", line).toMap(), "Database", "_groups");
+        throw line;
     }
-    this->log.debug("Unit tests of the groups successful!", "UnitTests", "_groups");
-    return (true);
+    this->log.trace("Unit tests of the groups successful!", "Database", "_groups");
 }
 
-bool            UnitTests::_limits()
+void            Database::_limits()
 {
     LightBird::TableLimits l;
     LightBird::TableGroups g1;
@@ -706,7 +620,7 @@ bool            UnitTests::_limits()
     LightBird::TableDirectories d1;
     QSqlQuery   query;
 
-    this->log.debug("Running unit tests of the limits...", "UnitTests", "_limits");
+    this->log.trace("Running unit tests of the limits...", "Database", "_limits");
     query.prepare("DELETE FROM limits WHERE name IN('l1', 'l2')");
     this->database.query(query);
     query.prepare("DELETE FROM groups WHERE name IN('g1', 'g2')");
@@ -747,16 +661,15 @@ bool            UnitTests::_limits()
         ASSERT(!l.exists());
         ASSERT(d1.remove());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the limits failed", properties, "UnitTests", "_limits");
-        return (false);
+        this->log.trace("Unit tests of the limits failed!", Properties("line", line).toMap(), "Database", "_limits");
+        throw line;
     }
-    this->log.debug("Unit tests of the limits successful!", "UnitTests", "_limits");
-    return (true);
+    this->log.trace("Unit tests of the limits successful!", "Database", "_limits");
 }
 
-bool            UnitTests::_permissions()
+void            Database::_permissions()
 {
     LightBird::TablePermissions p;
     LightBird::TableAccounts a;
@@ -772,7 +685,7 @@ bool            UnitTests::_permissions()
     QStringList allowed;
     QStringList denied;
 
-    this->log.debug("Running unit tests of the permissions...", "UnitTests", "_permissions");
+    this->log.trace("Running unit tests of the permissions...", "Database", "_permissions");
     query.prepare("DELETE FROM directories WHERE name IN('d', 'Directory1', 'Directory6', 'Directory7')");
     this->database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
@@ -1099,16 +1012,15 @@ bool            UnitTests::_permissions()
         ASSERT(g1.remove(g2.getIdFromName("g1").first()));
         ASSERT(g1.remove(g2.getIdFromName("g2").first()));
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the permissions failed", properties, "UnitTests", "_permissions");
-        return (false);
+        this->log.trace("Unit tests of the permissions failed!", Properties("line", line).toMap(), "Database", "_permissions");
+        throw line;
     }
-    this->log.debug("Unit tests of the permissions successful!", "UnitTests", "_permissions");
-    return (true);
+    this->log.trace("Unit tests of the permissions successful!", "Database", "_permissions");
 }
 
-bool            UnitTests::_sessions()
+void            Database::_sessions()
 {
     LightBird::TableAccounts a;
     QSqlQuery   query;
@@ -1117,7 +1029,7 @@ bool            UnitTests::_sessions()
     QVariantMap i;
     QStringList l;
 
-    this->log.debug("Running unit tests of the sessions...", "UnitTests", "_sessions");
+    this->log.trace("Running unit tests of the sessions...", "Database", "_sessions");
     query.prepare("DELETE FROM accounts WHERE name=\"a1\"");
     this->database.query(query);
     try
@@ -1201,23 +1113,22 @@ bool            UnitTests::_sessions()
         ASSERT(s1->isExpired());
         ASSERT(a.remove());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the sessions failed", properties, "UnitTests", "_sessions");
-        return (false);
+        this->log.trace("Unit tests of the sessions failed!", Properties("line", line).toMap(), "Database", "_sessions");
+        throw line;
     }
-    this->log.debug("Unit tests of the sessions successful!", "UnitTests", "_sessions");
-    return (true);
+    this->log.trace("Unit tests of the sessions successful!", "Database", "_sessions");
 }
 
-bool            UnitTests::_tags()
+void            Database::_tags()
 {
     LightBird::TableTags t;
     LightBird::TableDirectories d1;
     LightBird::TableDirectories d2;
     QSqlQuery   query;
 
-    this->log.debug("Running unit tests of the tags...", "UnitTests", "_tags");
+    this->log.trace("Running unit tests of the tags...", "Database", "_tags");
     query.prepare("DELETE FROM tags WHERE name IN('t1', 't2')");
     this->database.query(query);
     query.prepare("DELETE FROM directories WHERE name IN('d1', 'd2')");
@@ -1240,11 +1151,10 @@ bool            UnitTests::_tags()
         ASSERT(d1.remove());
         ASSERT(!t.exists());
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Unit tests of the tags failed", properties, "UnitTests", "_tags");
-        return (false);
+        this->log.trace("Unit tests of the tags failed!", Properties("line", line).toMap(), "Database", "_tags");
+        throw line;
     }
-    this->log.debug("Unit tests of the tags successful!", "UnitTests", "_tags");
-    return (true);
+    this->log.trace("Unit tests of the tags successful!", "Database", "_tags");
 }

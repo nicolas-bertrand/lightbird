@@ -14,12 +14,15 @@ TARGET = Test
 DESTDIR = ../../build/plugins/Test
 LIBS += -L../../build -lLightBird
 
-HEADERS = Ftp.h \
-    Plugin.h \
-    UnitTests.h
-SOURCES = Ftp.cpp \
-    Plugin.cpp \
-    UnitTests.cpp
+HEADERS = Configuration.h \
+    Database.h \
+    Ftp.h \
+    ITest.h \
+    Plugin.h
+SOURCES = Configuration.cpp \
+    Database.cpp \
+    Ftp.cpp \
+    Plugin.cpp
 OTHER_FILES = Configuration.xml
 
 OBJECTS_DIR = tmp

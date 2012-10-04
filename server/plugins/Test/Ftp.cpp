@@ -3,37 +3,39 @@
 #include "LightBird.h"
 #include "Ftp.h"
 
-Ftp::Ftp(LightBird::IApi &a) : api(a),
-                               database(api.database()),
-                               log(api.log())
+Ftp::Ftp(LightBird::IApi &api) : ITest(api)
 {
-    bool    result = true;
-
     if (!(this->port = this->api.configuration(true).get("ftp/port").toUShort()))
         this->port = 21;
-    this->log.info("Runing the tests of the FTP server", "Ftp", "Ftp");
-    if (!this->_tests())
-        result = false;
-    //if (!this->_data())
-    //    result = false;
-    if (result)
-        this->log.info("All the tests of the FTP server were successful!", "Ftp", "Ftp");
-    else
-        this->log.info("At least one test failed!", "Ftp", "Ftp");
 }
 
 Ftp::~Ftp()
 {
 }
 
-bool            Ftp::_tests()
+unsigned int    Ftp::run()
+{
+    log.debug("Running the tests of the FTP server...", "Ftp", "run");
+    try
+    {
+        this->_tests();
+    }
+    catch (unsigned int line)
+    {
+        this->log.debug("Tests of the FTP server failed!", Properties("line", line).toMap(), "Ftp", "run");
+        return (line);
+    }
+    this->log.debug("Tests of the FTP server successful!", "Ftp", "run");
+    return (0);
+}
+
+void            Ftp::_tests()
 {
     QTcpSocket  s;
     QTcpServer  server;
     QTcpSocket  *c;
     QString     str;
 
-    this->log.debug("Running the tests...", "Ftp", "_tests");
     try
     {
         s.connectToHost(QHostAddress::LocalHost, this->port);
@@ -51,6 +53,7 @@ bool            Ftp::_tests()
         COMMAND("USER user", "331");
         COMMAND("PASS pass", "230");
         COMMAND("PASS pass", "503");
+        COMMAND("USER user", "530");
         // -----
         COMMAND("PWD", "257 \"/\"");
         COMMAND("RMD testFtp", "");
@@ -81,6 +84,7 @@ bool            Ftp::_tests()
         COMMAND("MODE S", "200");
         COMMAND("MODE", "504");
         COMMAND("MODE C", "504");
+        COMMAND("ALLO 42", "202");
         // -----
         COMMAND("ABOR", "225");
         COMMAND(" PORT 127,0,0,1,0,142", "200");
@@ -93,6 +97,7 @@ bool            Ftp::_tests()
             ASSERT(c->waitForReadyRead(MSEC) && !(str += c->readAll()).isEmpty());
         ASSERT(s.waitForReadyRead(MSEC) && s.readAll().contains("226"));
         ASSERT(c->waitForDisconnected(MSEC));
+        server.close();
         delete c;
         // -----
         COMMAND("CWD /testFtp/d1/d2", "250");
@@ -100,23 +105,34 @@ bool            Ftp::_tests()
         COMMAND("PWD", "257 \"/\"");
         COMMAND("QUIT", "221");
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Test failed", properties, "Ftp", "_tests");
+        throw line;
+    }
+}
+
+bool        Ftp::_command(QTcpSocket &s, const QString &request, const QString &response)
+{
+    QString result;
+
+    if (s.write(QString(request + "\r\n").toAscii()) == -1 || !s.waitForBytesWritten(MSEC))
+        return (false);
+    if (!s.waitForReadyRead(MSEC) || !(result = s.readAll()).contains(response.toAscii()))
+    {
+        this->log.error("Test failed", Properties("response", result.trimmed()).toMap(), "Ftp", "_command");
         return (false);
     }
-    this->log.debug("Test successful!", "Ftp", "_tests");
     return (true);
 }
 
-bool            Ftp::_data()
+void            Ftp::_data()
 {
 
     this->log.debug("Running the tests...", "Ftp", "_data");
     try
     {
         QTcpSocket c;
-        c.connectToHost("ftp.mozilla.org", this->port);
+        c.connectToHost("ftp.mozilla.org", 21);
         ASSERT(c.waitForConnected(MSEC));
         ASSERT(c.waitForReadyRead(MSEC));
         ASSERT(c.readAll().contains("220"));
@@ -132,27 +148,12 @@ bool            Ftp::_data()
         this->_print(c, "LIST index.html");
         this->_print(s, "");
     }
-    catch (QMap<QString, QString> properties)
+    catch (unsigned int line)
     {
-        this->log.error("Test failed", properties, "Ftp", "_data");
-        return (false);
+        this->log.error("Test failed", Properties("line", line).toMap(), "Ftp", "_data");
+        throw line;
     }
     this->log.debug("Test successful!", "Ftp", "_data");
-    return (true);
-}
-
-bool        Ftp::_command(QTcpSocket &s, const QString &request, const QString &response)
-{
-    QString result;
-
-    if (s.write(QString(request + "\r\n").toAscii()) == -1 || !s.waitForBytesWritten(MSEC))
-        return (false);
-    if (!s.waitForReadyRead(MSEC) || !(result = s.readAll()).contains(response.toAscii()))
-    {
-        this->log.error("Test failed", Properties("response", result.trimmed()).toMap(), "Ftp", "_command");
-        return (false);
-    }
-    return (true);
 }
 
 #ifdef WIN32
