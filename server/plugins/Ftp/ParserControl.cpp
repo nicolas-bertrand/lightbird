@@ -1,3 +1,4 @@
+#include "ClientHandler.h"
 #include "ParserControl.h"
 
 ParserControl::ParserControl(LightBird::IApi &api, LightBird::IClient &client) : Parser(api, client)
@@ -48,9 +49,9 @@ bool        ParserControl::doUnserializeContent(const QByteArray &data, quint64 
         this->buffer.clear();
         used = data.size();
         QVariantMap &informations = this->client.getRequest().getInformations();
-        informations["send-message"] = true;
-        informations["code"] = 500;
-        informations["message"] = "Command line too long";
+        informations[CONTROL_SEND_MESSAGE] = true;
+        informations[CONTROL_CODE] = 500;
+        informations[CONTROL_MESSAGE] = "Command line too long";
     }
     return (used != 0);
 }
@@ -93,9 +94,9 @@ void    ParserControl::onDestroy()
     // Destroy the session if there is no data connection
     if (session)
     {
-        session->removeInformation("control-id");
+        session->removeInformation(SESSION_CONTROL_ID);
         session->removeClient(this->client.getId());
-        if (session->getInformation("data-id").toString().isEmpty())
+        if (session->getInformation(SESSION_DATA_ID).toString().isEmpty())
             session->destroy();
     }
 }

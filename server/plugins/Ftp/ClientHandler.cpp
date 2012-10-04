@@ -18,35 +18,18 @@ bool    ClientHandler::onConnect(LightBird::IClient &client)
 {
     QVariantMap informations;
 
-    // Initializes a new session for this control connection. Only the informations
-    // used by both the control and data connections are stored here.
+    // Initializes a new session for this control connection.
     LightBird::Session session = this->api.sessions().create();
     session->setClient(client.getId());
-    informations["control-id"] = client.getId(); // The id of the control connection. Defined while it is opened.
-//  informations["data-id"] = QString();         // The id of the data connection. Defined while it is opened.
-    informations["working-dir"] = QString();     // The id of the working directory. Empty for the root.
-    informations["last-command"] = QString();    // The last command executed by the control connection.
-    informations["disconnect-data"] = false;     // Allows to abort the data connection if true.
-    informations["binary-flag"] = false;         // Whether we are in Ascii or Image mode.
-//  informations["restart"] = 0;                 // The RESTart position of the next RETR or STOR command.
-    informations["transfer-ip"] = QString();     // In active mode these two variables contains the information gived by the PORT command,
-    informations["transfer-port"] = 0;           // however in passive mode they contains the control client informations.
-//  informations["transfer-command"] = "";       // The command that initiated the transfer. Defined only during the transfer.
-//  informations["transfer-parameter"] = "";     // The paramater of the command. Defined only during the transfer.
-    informations["transfer-mode"] = (int)Commands::NONE; // The selected transfer mode of the data.
+    informations[SESSION_CONTROL_ID] = client.getId();
+    informations[SESSION_WORKING_DIR] = QString();
+    informations[SESSION_LAST_COMMAND] = QString();
+    informations[SESSION_DISCONNECT_DATA] = false;
+    informations[SESSION_BINARY_FLAG] = false;
+    informations[SESSION_TRANSFER_IP] = QString();
+    informations[SESSION_TRANSFER_PORT] = 0;
+    informations[SESSION_TRANSFER_MODE] = (int)Commands::NONE;
     session->setInformations(informations);
-    // Initializes the control connection specific informations
-    informations.clear();
-//  informations["user"] = QString();            // The name of the account gived by the USER command.
-//  informations["oldName"] = QString();         // The name of the file to rename in RNTO.
-    client.getInformations() = informations;
-    // Here is the list of the data connection specific informations
-//  informations["download"] = true;             // Defined when a download is in progress.
-//  informations["upload"] = true;               // Defined when an upload is in progress.
-//  informations["message"] = QString();         // Defined if a message have to be sent through the control connection after the transfert.
-//  informations["code"] = 0;                    // Sent along with the message when a transfert is completed.
-//  informations["upload-id"] = QString();       // The id of the uploaded file. Used to identify it in the timer thread.
-//  informations["download-completed"] = true;   // Defined when the download has been completed. An error message is sent otherwise.
     // Be polite and welcome the user
     Commands::Result greeting(220, "Welcome to Lightbird's FTP server.\r\n"
                                    "Please authenticate.\r\n"
@@ -63,10 +46,10 @@ bool    ClientHandler::doControlExecute(LightBird::IClient &client)
     LightBird::Session   session = client.getSession();
     QVariantMap          &info = request.getInformations();
 
-    if (info.contains("send-message") && info.value("send-message").toBool())
+    if (info.contains(CONTROL_SEND_MESSAGE) && info.value(CONTROL_SEND_MESSAGE).toBool())
     {
-        result.first = info.value("code").toInt();
-        result.second = info.value("message").toString();
+        result.first = info.value(CONTROL_CODE).toInt();
+        result.second = info.value(CONTROL_MESSAGE).toString();
     }
     else
     {
@@ -87,9 +70,9 @@ bool    ClientHandler::doControlExecute(LightBird::IClient &client)
 
 Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client)
 {
-    Commands::TransferMode mode = (Commands::TransferMode)session->getInformation("transfer-mode").toInt();
-    QString                address = session->getInformation("transfer-ip").toString();
-    int                    port = session->getInformation("transfer-port").toInt();
+    Commands::TransferMode mode = (Commands::TransferMode)session->getInformation(SESSION_TRANSFER_MODE).toInt();
+    QString                address = session->getInformation(SESSION_TRANSFER_IP).toString();
+    int                    port = session->getInformation(SESSION_TRANSFER_PORT).toInt();
     Commands::Result       result;
     QString                dataId;
 
@@ -99,8 +82,8 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
         result = Commands::Result(425, "No Data Connection.");
     else
     {
-        session->setInformation("transfer-command", command);
-        session->setInformation("transfer-parameter", parameter);
+        session->setInformation(SESSION_TRANSFER_COMMAND, command);
+        session->setInformation(SESSION_TRANSFER_PARAMETER, parameter);
         if (mode == Commands::PASSIVE)
         {
             this->mutex.lock();
@@ -111,8 +94,8 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
                 {
                     dataId = it.peekPrevious().second;
                     session->setClient(dataId);
-                    session->setInformation("data-id", dataId);
-                    QString command = session->getInformation("transfer-command").toString();
+                    session->setInformation(SESSION_DATA_ID, dataId);
+                    QString command = session->getInformation(SESSION_TRANSFER_COMMAND).toString();
                     // Starts the transfer
                     if (this->commands->isSender(command))
                         this->api.network().send(dataId);
@@ -126,7 +109,7 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
                 }
             // Otherwise we wait for a valid client
             if (dataId.isEmpty())
-                session->setInformation("data-id", QString());
+                session->setInformation(SESSION_DATA_ID, QString());
             this->mutex.unlock();
         }
         else if (mode == Commands::ACTIVE)
@@ -136,7 +119,7 @@ Commands::Result ClientHandler::_prepareTransferMethod(const QString &command, c
             dataId = this->api.network().connect(QHostAddress(address), port, QStringList(Plugin::getConfiguration().dataProtocolName))->getResult();
             session->setClient(dataId);
             if (!dataId.isEmpty())
-                session->setInformation("data-id", dataId);
+                session->setInformation(SESSION_DATA_ID, dataId);
             else
                 result = Commands::Result(425, "Could not open data connection.");
             this->mutex.unlock();
@@ -161,6 +144,8 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
             return (false);
         // The first control connection with the same ip as the client is used
         query.prepare(database.getQuery("Ftp", "select_session"));
+        query.bindValue(":dataId", SESSION_DATA_ID);
+        query.bindValue(":transferIp", SESSION_TRANSFER_IP);
         query.bindValue(":ip", client.getPeerAddress().toString());
         if (!database.query(query, result))
             return (false);
@@ -174,7 +159,7 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
         if (!(session = this->api.sessions().getSession(result.first().value("id").toString())))
             return (false);
         session->setClient(client.getId());
-        session->setInformation("data-id", client.getId());
+        session->setInformation(SESSION_DATA_ID, client.getId());
         mutex.unlock();
     }
     // Active mode. The mutex ensures that we have the time to assign the session to the client, in _prepareTransferMethod
@@ -186,7 +171,7 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
     }
     if (session == NULL)
         return (false);
-    command = session->getInformation("transfer-command").toString();
+    command = session->getInformation(SESSION_TRANSFER_COMMAND).toString();
     // Starts the transfer
     if (this->commands->isSender(command))
         this->api.network().send(client.getId());
@@ -215,19 +200,19 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
         if (!(session = client.getSession()))
             return (false);
     }
-    QString command = session->getInformation("transfer-command").toString();
-    QString parameter = session->getInformation("transfer-parameter").toString();
-    QString control = session->getInformation("control-id").toString();
+    QString command = session->getInformation(SESSION_TRANSFER_COMMAND).toString();
+    QString parameter = session->getInformation(SESSION_TRANSFER_PARAMETER).toString();
+    QString control = session->getInformation(SESSION_CONTROL_ID).toString();
     if (!this->commands->isTransfer(command))
         return (false);
     if (this->commands->isSender(command))
-        client.getInformations().insert("download", true);
+        client.getInformations().insert(DATA_DOWNLOAD, true);
     else
-        client.getInformations().insert("upload", true);
+        client.getInformations().insert(DATA_UPLOAD, true);
     controlOut = this->commands->executeTransfer(command, parameter, session, client);
     Plugin::sendControlMessage(control, controlOut);
-    session->removeInformation("transfer-command");
-    session->removeInformation("transfer-parameter");
+    session->removeInformation(SESSION_TRANSFER_COMMAND);
+    session->removeInformation(SESSION_TRANSFER_PARAMETER);
     return (true);
 }
 

@@ -105,7 +105,8 @@ bool        Plugin::onConnect(LightBird::IClient &client)
     if (parser)
         this->parsers.insert(client.getId(), parser);
     this->mutex.unlock();
-    this->timerManager->startTimeout(client.getId());
+    if (result)
+        this->timerManager->startTimeout(client.getId());
     return (result);
 }
 
@@ -201,11 +202,11 @@ void    Plugin::sendControlMessage(const QString &controlId, const Commands::Res
     if (!Plugin::instance || controlId.isEmpty() || message.second.isEmpty())
         return ;
     // The presence of the information indicates that we need to send a message and not process a request
-    informations.insert("send-message", true);
+    informations.insert(CONTROL_SEND_MESSAGE, true);
     // The code of the message
-    informations.insert("code", message.first);
+    informations.insert(CONTROL_CODE, message.first);
     // And it's description
-    informations.insert("message", message.second);
+    informations.insert(CONTROL_MESSAGE, message.second);
     Plugin::instance->api->network().send(controlId, "FTP", informations);
 }
 
