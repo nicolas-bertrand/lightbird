@@ -28,7 +28,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->id = LightBird::createUuid();
     this->reading = false;
     this->running = false;
-    this->writing = false;
+    this->writing = NULL;
     this->written = false;
     this->finish = false;
     this->disconnecting = false;
@@ -110,7 +110,7 @@ void        Client::run()
                 this->reading = true;
             // The processing is paused while data are being written on the network
             if (this->writing)
-                return (void)(this->resume = newTask);
+                return (this->_write(newTask));
             break;
 
         case Client::RESUME :
@@ -217,9 +217,14 @@ void        Client::write(QByteArray *data)
         Log::trace("Writing data", Properties("id", this->id).add("data", LightBird::simplify(*data)).add("size", data->size()), "Client", "write");
     else if (Log::instance()->isDebug())
         Log::debug("Writing data", Properties("id", this->id).add("size", data->size()), "Client", "write");
-    // Writes the data
-    this->writing = true;
-    this->readWriteInterface->write(data, this);
+    // The data will be written in Client::_write
+    this->writing = data;
+}
+
+void        Client::_write(Client::State newTask)
+{
+    this->resume = newTask;
+    this->readWriteInterface->write(this->writing, this);
 }
 
 void        Client::bytesWriting()
@@ -241,7 +246,7 @@ void        Client::bytesWritten()
 
     if (mutex && this->writing)
     {
-        this->writing = false;
+        this->writing = NULL;
         this->written = false;
         this->_newTask(Client::RESUME);
     }

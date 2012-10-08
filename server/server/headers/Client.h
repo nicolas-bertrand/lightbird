@@ -45,8 +45,9 @@ public:
     /// @brief Called by the readWriteInterface to notifity the Client that data
     /// have been read and are ready to be processed.
     void                    bytesRead();
-    /// @brief Write the data to the client. This method takes ownership of the data.
-    /// The processing of the Client is paused until written() is called.
+    /// @brief Writes the data to the client. This method takes ownership of the data.
+    /// The processing of the Client is paused until written() is called. The data to
+    /// send are stored in Client::writing and actually written in Client::_write.
     void                    write(QByteArray *data);
     /// @brief Asks the engine to generate a new request.
     /// @see LightBird::INetwork::send
@@ -143,6 +144,8 @@ private:
     /// @brief Ends the reading phase and calls LightBird::IOnRead via the Engine.
     /// @return True if there is data waiting to be processed.
     bool    _read();
+    /// @brief Writes the data stored in Client::writing to the client.
+    void    _write(Client::State newTask);
     /// @brief Asks the Engine to generate a new request.
     /// @return True if the Engine is generating the request.
     bool    _send();
@@ -183,7 +186,7 @@ private:
     State                    resume;              ///< The state to resume after the data have been written on the network.
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     reading;             ///< Data are available on the network.
-    bool                     writing;             ///< The client's task is paused while the data are being written on the network.
+    QByteArray               *writing;            ///< Stores the data to write. The client's task is paused while the data are being written on the network (ie while writing is not NULL).
     bool                     written;             ///< The data have been written on the socket but not sent on the network yet (bytesWriting).
     bool                     finish;              ///< If true, the client is going to be disconnected.
     bool                     disconnecting;       ///< The client is disconnected from the server, but there is still data to process.
