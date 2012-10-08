@@ -96,6 +96,8 @@ private:
     /// @brief Returns the file pointed by path.
     /// @param session : Used to get the working directory if the path is relative.
     LightBird::TableFiles _getFile(const QString &path, LightBird::Session &session);
+    /// @brief Returns the directory pointed by path.
+    LightBird::TableDirectories _getDirectory(const QString &path, LightBird::Session &session);
     /// @brief Double-quotes in the path are escaped by double-quotes.
     QString _escapePath(const QString &path);
     /// @brief Returns the list of the objects in a directory, with the "ls -l" format.

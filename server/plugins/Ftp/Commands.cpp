@@ -210,26 +210,30 @@ Commands::Result Commands::_rmd(const QString &pathName, LightBird::Session &ses
 
 Commands::Result Commands::_rnfr(const QString &oldName, LightBird::Session &session, LightBird::IClient &client)
 {
-    if (!this->_getFile(oldName, session))
-        return (Result(550, QString("File not found.")));
+    bool    isFile;
+
+    if (!(isFile = this->_getFile(oldName, session)) && !this->_getDirectory(oldName, session))
+        return (Result(550, QString("File or directory not found.")));
     client.getInformations().insert(CONTROL_OLDNAME, oldName);
-    return (Result(350, QString("Waiting for the new name of the file \"%1\".").arg(this->_escapePath(oldName))));
+    return (Result(350, QString("Waiting for the new name of the %1 \"%2\".").arg(isFile ? "file" : "directory", this->_escapePath(oldName))));
 }
 
 Commands::Result Commands::_rnto(const QString &newName, LightBird::Session &session, LightBird::IClient &client)
 {
-    LightBird::TableFiles   file;
-    QString                 oldName;
+    LightBird::TableFiles       file;
+    LightBird::TableDirectories directory;
+    QString                     oldName;
+    bool                        isFile;
 
     if (session->getInformation(SESSION_LAST_COMMAND) != "RNFR" || !client.getInformations().contains(CONTROL_OLDNAME))
         return (Result(503, "Bad sequence of commands."));
     oldName = client.getInformations().value(CONTROL_OLDNAME).toString();
     client.getInformations().remove(CONTROL_OLDNAME);
-    if (!(file = this->_getFile(oldName, session)))
-        return (Result(550, QString("File not found \"%1\".").arg(this->_escapePath(oldName))));
-    if (!file.setName(newName))
-        return (Result(553, QString("Unable to rename the file.")));
-    return (Result(250, QString("File renamed from \"%1\" to \"%2\".").arg(this->_escapePath(oldName), this->_escapePath(newName))));
+    if (!(isFile = (file = this->_getFile(oldName, session))) && !(directory = this->_getDirectory(oldName, session)))
+        return (Result(550, QString("File or directory not found \"%1\".").arg(this->_escapePath(oldName))));
+    if ((isFile && !file.setName(newName)) || (!isFile && !directory.setName(newName)))
+        return (Result(553, QString("Unable to rename the %1.").arg(isFile ? "file" : "directory")));
+    return (Result(250, QString("%1 renamed from \"%2\" to \"%3\".").arg(isFile ? "File" : "Directory", this->_escapePath(oldName), this->_escapePath(newName))));
 }
 
 Commands::Result Commands::_dele(const QString &path, LightBird::Session &session, LightBird::IClient &)
@@ -839,6 +843,14 @@ LightBird::TableFiles Commands::_getFile(const QString &path, LightBird::Session
             file.setId(directory.getFile(path.right(path.size() - name.size())));
     }
     return (file);
+}
+
+LightBird::TableDirectories Commands::_getDirectory(const QString &path, LightBird::Session &session)
+{
+    LightBird::TableDirectories directory(session->getInformation(SESSION_WORKING_DIR).toString());
+
+    directory.cd(path);
+    return (directory);
 }
 
 QString Commands::_escapePath(const QString &path)

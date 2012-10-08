@@ -31,11 +31,14 @@ bool        ParserControl::doUnserializeContent(const QByteArray &data, quint64 
     // Separates the command and its parameter
     if (used)
     {
-        QString command = this->buffer.trimmed();
+        // Left trim
+        for (i = 0, j = this->buffer.size(); this->buffer.at(i) == ' ' && i < j; ++i)
+            ;
+        QString command = this->buffer.right(this->buffer.size() - i);
         QString parameter;
         if ((j = command.indexOf(' ')) >= 0)
         {
-            parameter = this->buffer.right(command.size() - j - 1);
+            parameter = command.right(command.size() - j - 1);
             command.truncate(j);
         }
         command = command.toUpper();
