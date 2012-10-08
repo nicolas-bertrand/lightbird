@@ -68,10 +68,11 @@ bool        TableCollections::setIdFromVirtualPath(const QString &virtualPath, c
 
 bool    TableCollections::add(const QString &name, const QString &id_collection, const QString &id_account)
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QString                 id;
+    QSqlQuery   query;
+    QString     id;
 
+    if (!LightBird::isValidName(name))
+        return (false);
     id = createUuid();
     query.prepare(Library::database().getQuery("TableCollections", "add"));
     query.bindValue(":id", id);

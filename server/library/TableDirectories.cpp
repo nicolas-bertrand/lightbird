@@ -62,10 +62,11 @@ bool        TableDirectories::setIdFromVirtualPath(const QString &virtualPath)
 
 bool    TableDirectories::add(const QString &name, const QString &id_directory, const QString &id_account)
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QString                 id;
+    QSqlQuery   query;
+    QString     id;
 
+    if (!LightBird::isValidName(name))
+        return (false);
     id = createUuid();
     query.prepare(Library::database().getQuery("TableDirectories", "add"));
     query.bindValue(":id", id);

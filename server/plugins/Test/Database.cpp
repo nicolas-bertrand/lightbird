@@ -168,7 +168,7 @@ void            Database::_collections()
     QStringList l;
 
     this->log.trace("Running unit tests of the collections...", "Database", "_collections");
-    query.prepare("DELETE FROM collections WHERE name IN('videos', 'images', 'egypte', 'spiders')");
+    query.prepare("DELETE FROM collections WHERE name IN('videos', 'pictures', 'images', 'egypte', 'spiders')");
     this->database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
     this->database.query(query);
@@ -189,6 +189,9 @@ void            Database::_collections()
         ASSERT(c2.setId(c1.getId()));
         ASSERT(c2.getName() == "pictures");
         ASSERT(c1.setName("images"));
+        ASSERT(!c1.setName("."));
+        ASSERT(!c1.setName(".."));
+        ASSERT(!c1.setName("images/"));
         ASSERT(c2.getName() == "images");
         ASSERT(c1.getIdCollection().isEmpty());
         ASSERT(c2.getIdAccount().isEmpty());
@@ -265,7 +268,7 @@ void            Database::_directories()
     QString     d;
 
     this->log.trace("Running unit tests of the directories...", "Database", "_directories");
-    query.prepare("DELETE FROM directories WHERE name IN('videos', 'images', 'egypte', 'spiders', 'pictures')");
+    query.prepare("DELETE FROM directories WHERE name IN('videos', 'images..', '...', 'pictures', 'images', 'egypte', 'spiders', 'pictures')");
     this->database.query(query);
     query.prepare("DELETE FROM files WHERE name IN('toto.png', 'titi.png')");
     this->database.query(query);
@@ -285,6 +288,11 @@ void            Database::_directories()
         ASSERT(d1.getName() == "pictures");
         ASSERT(d2.setId(d1.getId()));
         ASSERT(d2.getName() == "pictures");
+        ASSERT(!d1.setName("."));
+        ASSERT(!d1.setName(".."));
+        ASSERT(d1.setName("..."));
+        ASSERT(d1.setName("images.."));
+        ASSERT(!d1.setName("images/"));
         ASSERT(d1.setName("images"));
         ASSERT(d2.getName() == "images");
         ASSERT(d1.getIdDirectory().isEmpty());
@@ -292,6 +300,8 @@ void            Database::_directories()
         ASSERT(d2.add("bahrain", d1.getId()));
         ASSERT(d2.getIdDirectory() == d1.getId());
         ASSERT(d2.add("france", d1.getId()));
+        ASSERT(!d2.add("/france", d1.getId()));
+        ASSERT(!d2.add(".", d1.getId()));
         ASSERT(d2.add("spiders", d2.getId()));
         ASSERT(d2.add("egypte", d2.getIdDirectory()));
         ASSERT(d2.getVirtualPath() == "images/france/egypte");
@@ -463,6 +473,9 @@ void            Database::_files()
         ASSERT(f2.getName() == "f8");
         ASSERT(f1.setName("f1"));
         ASSERT(f2.setName("f2"));
+        ASSERT(!f2.setName("."));
+        ASSERT(!f2.setName(".."));
+        ASSERT(!f2.setName("f2/"));
         ASSERT(f1.getName() == "f1");
         ASSERT(f2.getName() == "f2");
         ASSERT(f1.getIdFromVirtualPath("d1/f2") == f2.getId());

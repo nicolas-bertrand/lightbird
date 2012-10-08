@@ -60,7 +60,7 @@ bool    TableObjects::setName(const QString &name)
 {
     QSqlQuery   query;
 
-    if (name.isEmpty())
+    if (!LightBird::isValidName(name))
         return (false);
     query.prepare(Library::database().getQuery("TableObjects", "setName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);

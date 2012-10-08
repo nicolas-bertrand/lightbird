@@ -25,6 +25,8 @@ namespace LightBird
     /// @brief Does the same job as QDir::cleanPath but removes also the "\" under Linux.
     /// @param removeFirstSlash : Removes the first char if it is "/".
     LIB QString     cleanPath(const QString &path, bool removeFirstSlash = false);
+    /// @brief Returns true if the file or directory name is valid and can be safely used.
+    LIB bool        isValidName(const QString &objectName);
     /// @brief Returns a new Universally Unique Identifier.
     LIB QString     createUuid();
     /// @brief Returns the filesPath, which is the relative path to the

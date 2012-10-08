@@ -97,6 +97,8 @@ bool    TableFiles::add(const QString &name, const QString &path, const QVariant
     QSqlQuery   query;
     QString     id;
 
+    if (!LightBird::isValidName(name))
+        return (false);
     id = createUuid();
     query.prepare(Library::database().getQuery("TableFiles", "add"));
     query.bindValue(":id", id);

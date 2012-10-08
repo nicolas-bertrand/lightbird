@@ -41,6 +41,13 @@ QString     LightBird::cleanPath(const QString &p, bool removeFirstSlash)
     return (result);
 }
 
+bool        LightBird::isValidName(const QString &objectName)
+{
+    if (objectName == "." || objectName == ".." || objectName.contains('/'))
+        return (false);
+    return (true);
+}
+
 QString LightBird::createUuid()
 {
     return (QUuid::createUuid().toString().remove(0, 1).remove(36, 1));

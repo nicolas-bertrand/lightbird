@@ -30,7 +30,7 @@ void    PortUdp::run()
     // When a client connected to the server, the slot _read is called
     QObject::connect(&this->socket, SIGNAL(readyRead()), this, SLOT(_readPendingDatagrams()), Qt::QueuedConnection);
     // Listens on the given port
-    if (!this->socket.bind(this->getPort()))
+    if (!this->socket.bind(QHostAddress::Any, this->getPort()))
     {
         Log::error("Failed to bind the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
                    .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
