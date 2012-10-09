@@ -91,6 +91,8 @@ bool            TableDirectories::remove(bool removeFiles)
     QStringList paths;
     TableEvents event;
 
+    if (this->id.isEmpty())
+        return (false);
     // Gets the paths of all the files in the directory
     if (removeFiles)
     {

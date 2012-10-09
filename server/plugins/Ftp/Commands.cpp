@@ -302,7 +302,7 @@ Commands::Result Commands::_feat(const QString &, LightBird::Session &, LightBir
 
 Commands::Result Commands::_opts(const QString &parameter, LightBird::Session &, LightBird::IClient &)
 {
-    if (parameter == "UTF8 ON")
+    if (parameter.trimmed() == "UTF8 ON")
         return (Result(200, "Always in UTF8 mode."));
     return (Result(501, "Option not understood."));
 }

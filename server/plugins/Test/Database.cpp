@@ -270,7 +270,7 @@ void            Database::_directories()
     this->log.trace("Running unit tests of the directories...", "Database", "_directories");
     query.prepare("DELETE FROM directories WHERE name IN('videos', 'images..', '...', 'pictures', 'images', 'egypte', 'spiders', 'pictures')");
     this->database.query(query);
-    query.prepare("DELETE FROM files WHERE name IN('toto.png', 'titi.png')");
+    query.prepare("DELETE FROM files WHERE name IN('toto.png', 'titi.png', 'file.png')");
     this->database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
     this->database.query(query);
@@ -317,6 +317,9 @@ void            Database::_directories()
         ASSERT(d2.getIdDirectory() == d1.getId());
         ASSERT(f.add("toto.png", "toto.png", "", d1.getId()));
         ASSERT(f.add("titi.png", "titi.png", "", d1.getId()));
+        ASSERT(f.add("file.png", "file.png", "", d1.getDirectories().first()));
+        ASSERT(d1.getAllFiles().contains(f.getId()) && d1.getAllFiles().contains(f.getIdFromVirtualPath("images/titi.png")));
+        ASSERT(!d1.getFiles().contains("file.png"));
         ASSERT(a.add("a"));
         ASSERT((l = d1.getDirectories()).size() == 3);
         ASSERT(l.contains(d1.getIdFromVirtualPath("images/france")));
