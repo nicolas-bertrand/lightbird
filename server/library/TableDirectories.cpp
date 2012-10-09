@@ -1,3 +1,5 @@
+#include <QFile>
+
 #include "Library.h"
 #include "LightBird.h"
 
@@ -76,6 +78,36 @@ bool    TableDirectories::add(const QString &name, const QString &id_directory, 
     if (!Library::database().query(query))
         return (false);
     this->id = id;
+    return (true);
+}
+
+bool    TableDirectories::remove(const QString &id)
+{
+    return (Table::remove(id));
+}
+
+bool            TableDirectories::remove(bool removeFiles)
+{
+    QStringList paths;
+    TableEvents event;
+
+    // Gets the paths of all the files in the directory
+    if (removeFiles)
+    {
+        QStringListIterator it(this->getAllFiles());
+        while (it.hasNext())
+            paths << TableFiles(it.next()).getFullPath();
+    }
+    if (!Table::remove())
+        return (false);
+    // Removes the files from the file system
+    QStringListIterator it(paths);
+    while (it.hasNext())
+        if (!QFile::remove(it.next()))
+        {
+            event.add("remove_file_later");
+            event.setInformation("path", it.peekPrevious());
+        }
     return (true);
 }
 
@@ -172,6 +204,17 @@ QStringList TableDirectories::getFiles(const QString &id_accessor, const QString
         if (id_accessor.isEmpty() || p.isAllowed(id_accessor, result[i]["id"].toString(), right))
             files << result[i]["id"].toString();
     return (files);
+}
+
+QStringList     TableDirectories::getAllFiles(const QString &id_accessor, const QString &right) const
+{
+    QStringList result;
+
+    result = this->getFiles(id_accessor, right);
+    QStringListIterator it(this->getDirectories(id_accessor, right));
+    while (it.hasNext())
+        result += TableDirectories(it.next()).getAllFiles(id_accessor, right);
+    return (result);
 }
 
 QString     TableDirectories::getDirectory(const QString &name) const

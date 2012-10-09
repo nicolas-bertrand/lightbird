@@ -204,7 +204,7 @@ Commands::Result Commands::_rmd(const QString &pathName, LightBird::Session &ses
 
     if (!directory.cd(pathName))
         return (Result(550, QString("Directory not found \"%1\".").arg(this->_escapePath(pathName))));
-    directory.remove();
+    directory.remove(true);
     return (Result(250, QString("\"%1\" directory removed.").arg(this->_escapePath(pathName))));
 }
 
@@ -239,15 +239,10 @@ Commands::Result Commands::_rnto(const QString &newName, LightBird::Session &ses
 Commands::Result Commands::_dele(const QString &path, LightBird::Session &session, LightBird::IClient &)
 {
     LightBird::TableFiles   file;
-    QString                 realPath;
 
     if (!(file = this->_getFile(path, session)))
         return (Result(550, QString("File not found.")));
-    realPath = file.getFullPath();
-    if (QFileInfo(realPath).isFile() && !QFile(realPath).remove())
-        return (Result(450, QString("Unable to delete this file now. Try again later.")));
-    if (!file.remove())
-        return (Result(550, QString("Unable to delete the file.")));
+    file.remove(true);
     return (Result(250, QString("\"%1\" file deleted.").arg(path)));
 }
 

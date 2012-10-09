@@ -29,6 +29,18 @@ namespace LightBird
         /// @param id_account : The id of the account that owns the directory.
         /// @return True if the directory has been created.
         bool        add(const QString &name, const QString &id_directory = "", const QString &id_account = "");
+        /// @see LightBird::Table::remove
+        bool        remove(const QString &id = "");
+        /// @brief Removes the directory from the database and all the files it
+        /// contains from the file system.
+        /// @param removeFiles : If true, the directory is removed from the
+        /// database and all the files it contains are deleted from the file
+        /// system. Otherwise its files will be removed from the database but not
+        /// from the file system.
+        /// @return True if the directory have been removed. If some files can't
+        /// be deleted from the file system now, they will be automatically
+        /// removed later, but they will no longer exist in the database anyway.
+        bool        remove(bool removeFiles);
 
         // Fields
         /// @brief Returns the id of the parent of the directory, or empty if
@@ -59,6 +71,14 @@ namespace LightBird
         /// accessor has the right will be returned.
         /// @param right : The name of the right that the accessor must have.
         QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const;
+        /// @brief Returns the id of all the files in the current directory
+        /// and its subdirectories.
+        /// If id_accessor and right are not empty, only the files for which
+        /// the accessor has the right will be returned.
+        /// @param id_accessor : If not empty, only the files for which this
+        /// accessor has the right will be returned.
+        /// @param right : The name of the right that the accessor must have.
+        QStringList getAllFiles(const QString &id_accessor = "", const QString &right = "") const;
         /// @brief Returns the id of the directory with the given name in the
         /// current directory if it exists.
         /// @param name : The name of the directory to return.

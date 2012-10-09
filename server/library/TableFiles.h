@@ -46,7 +46,7 @@ namespace LightBird
                         const QString &id_directory = "", const QString &id_account = "");
         /// @see LightBird::Table::remove
         bool        remove(const QString &id = "");
-        /// @brief Removes the file in the database and from the file system.
+        /// @brief Removes the file from the database and the file system.
         /// @param removeFile : If true, the file is removed from the database
         /// and the file system. Otherwise it is only removed from the database.
         /// @return True if the file has been removed. If the file can't be removed
