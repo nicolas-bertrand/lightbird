@@ -247,6 +247,13 @@ void              Ftp::_tests()
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
         ASSERT(this->_retr("RETR /testFtp/file3.txt", "content9", server, control));
+        COMMAND("STOR /testFtp/file4.txt", "");
+        ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
+        delete data;
+        str.clear();
+        while (!str.contains("250"))
+            ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
+        COMMAND("SIZE testFtp/file4.txt", "213 0");
         // -----
         COMMAND("RNFR testFtp/false", "550");
         COMMAND("RNTO testFtp/file1.txt", "503");

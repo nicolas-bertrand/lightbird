@@ -218,8 +218,11 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
 
 void    ClientHandler::onDataDestroy(LightBird::IClient &client)
 {
-    SmartMutex  mutex(this->mutex, "ClientHandler", "onDataDestroyed");
-
+    // Handles the case in which an empty file is uploaded (doUnserializeHeader is never called)
+    if (!client.getInformations().contains(DATA_DOWNLOAD) && !client.getInformations().contains(DATA_UPLOAD))
+        this->doDataExecute(client);
+    // Cleans the passiveClients list
+    SmartMutex mutex(this->mutex, "ClientHandler", "onDataDestroyed");
     if (!mutex)
         return ;
     QMutableListIterator<QPair<QHostAddress, QString> > it(this->passiveClients);
