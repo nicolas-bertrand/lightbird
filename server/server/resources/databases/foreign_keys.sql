@@ -5,15 +5,15 @@
 -----------------------------
 CREATE TRIGGER "fk_delete_accounts" BEFORE DELETE ON accounts
 BEGIN
-    DELETE FROM accounts_informations WHERE id_account = old.id;
-    DELETE FROM accounts_groups WHERE id_account = old.id;
-    DELETE FROM limits WHERE id_accessor = old.id;
-    DELETE FROM events WHERE id_accessor = old.id;
-    DELETE FROM permissions WHERE id_accessor = old.id;
-    DELETE FROM directories WHERE id_account = old.id;
-    DELETE FROM collections WHERE id_account = old.id;
-    DELETE FROM files WHERE id_account = old.id;
-    DELETE FROM sessions WHERE id_account = old.id;
+    DELETE FROM accounts_informations WHERE id_account = OLD.id;
+    DELETE FROM accounts_groups WHERE id_account = OLD.id;
+    DELETE FROM limits WHERE id_accessor = OLD.id;
+    DELETE FROM events WHERE id_accessor = OLD.id;
+    DELETE FROM permissions WHERE id_accessor = OLD.id;
+    DELETE FROM directories WHERE id_account = OLD.id;
+    DELETE FROM collections WHERE id_account = OLD.id;
+    DELETE FROM files WHERE id_account = OLD.id;
+    DELETE FROM sessions WHERE id_account = OLD.id;
 END;
 
 CREATE TRIGGER "fk_update_accounts" BEFORE UPDATE ON accounts
@@ -56,12 +56,12 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_delete_collections" BEFORE DELETE ON collections
 BEGIN
-    DELETE FROM files_collections WHERE id_collection = old.id;
-    DELETE FROM tags WHERE id_object = old.id;
-    DELETE FROM permissions WHERE id_object = old.id;
-    DELETE FROM events WHERE id_object = old.id;
-    DELETE FROM limits WHERE id_object = old.id;
-    DELETE FROM collections WHERE id_collection = old.id;
+    DELETE FROM files_collections WHERE id_collection = OLD.id;
+    DELETE FROM tags WHERE id_object = OLD.id;
+    DELETE FROM permissions WHERE id_object = OLD.id;
+    DELETE FROM events WHERE id_object = OLD.id;
+    DELETE FROM limits WHERE id_object = OLD.id;
+    DELETE FROM collections WHERE id_collection = OLD.id;
 END;
 
 CREATE TRIGGER "fk_insert_collections" BEFORE INSERT ON collections
@@ -82,12 +82,12 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_delete_directories" BEFORE DELETE ON directories
 BEGIN
-    DELETE FROM files WHERE id_directory = old.id;
-    DELETE FROM tags WHERE id_object = old.id;
-    DELETE FROM permissions WHERE id_object = old.id;
-    DELETE FROM events WHERE id_object = old.id;
-    DELETE FROM limits WHERE id_object = old.id;
-    DELETE FROM directories WHERE id_directory = old.id;
+    DELETE FROM files WHERE id_directory = OLD.id;
+    DELETE FROM tags WHERE id_object = OLD.id;
+    DELETE FROM permissions WHERE id_object = OLD.id;
+    DELETE FROM events WHERE id_object = OLD.id;
+    DELETE FROM limits WHERE id_object = OLD.id;
+    DELETE FROM directories WHERE id_directory = OLD.id;
 END;
 
 CREATE TRIGGER "fk_insert_directories" BEFORE INSERT ON directories
@@ -108,7 +108,7 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_delete_events" BEFORE DELETE ON events
 BEGIN
-    DELETE FROM events_informations WHERE id_event = old.id;
+    DELETE FROM events_informations WHERE id_event = OLD.id;
 END;
 
 CREATE TRIGGER "fk_insert_events" BEFORE INSERT ON events
@@ -157,12 +157,12 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_delete_files" BEFORE DELETE ON files
 BEGIN
-    DELETE FROM files_informations WHERE id_file = old.id;
-    DELETE FROM files_collections WHERE id_file = old.id;
-    DELETE FROM tags WHERE id_object = old.id;
-    DELETE FROM permissions WHERE id_object = old.id;
-    DELETE FROM events WHERE id_object = old.id;
-    DELETE FROM limits WHERE id_object = old.id;
+    DELETE FROM files_informations WHERE id_file = OLD.id;
+    DELETE FROM files_collections WHERE id_file = OLD.id;
+    DELETE FROM tags WHERE id_object = OLD.id;
+    DELETE FROM permissions WHERE id_object = OLD.id;
+    DELETE FROM events WHERE id_object = OLD.id;
+    DELETE FROM limits WHERE id_object = OLD.id;
 END;
 
 CREATE TRIGGER "fk_insert_files" BEFORE INSERT ON files
@@ -213,11 +213,11 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_delete_groups" BEFORE DELETE ON groups
 BEGIN
-    DELETE FROM accounts_groups WHERE id_group = old.id;
-    DELETE FROM limits WHERE id_accessor = old.id;
-    DELETE FROM permissions WHERE id_accessor = old.id;
-    DELETE FROM events WHERE id_accessor = old.id;
-    DELETE FROM groups WHERE id_group = old.id;
+    DELETE FROM accounts_groups WHERE id_group = OLD.id;
+    DELETE FROM limits WHERE id_accessor = OLD.id;
+    DELETE FROM permissions WHERE id_accessor = OLD.id;
+    DELETE FROM events WHERE id_accessor = OLD.id;
+    DELETE FROM groups WHERE id_group = OLD.id;
 END;
 
 CREATE TRIGGER "fk_insert_groups" BEFORE INSERT ON groups
@@ -296,7 +296,7 @@ END;
 -----------------------------
 CREATE TRIGGER "fk_delete_sessions" BEFORE DELETE ON sessions
 BEGIN
-    DELETE FROM sessions_informations WHERE id_session = old.id;
+    DELETE FROM sessions_informations WHERE id_session = OLD.id;
 END;
 
 CREATE TRIGGER "fk_insert_sessions" BEFORE INSERT ON sessions

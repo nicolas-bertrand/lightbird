@@ -292,6 +292,7 @@ void              Ftp::_tests()
         COMMAND("RMD /testFtp", "250");
         COMMAND("PWD", "257 \"/\"");
         COMMAND("QUIT", "221");
+        a.remove(a.getIdFromName(FTP_USER));
     }
     catch (unsigned int line)
     {
