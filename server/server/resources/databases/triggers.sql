@@ -63,7 +63,7 @@ END;
 
 CREATE TRIGGER "update_collections" AFTER UPDATE ON collections
 BEGIN
-    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
+    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.id == NEW.id_collection;
     UPDATE collections SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
@@ -82,7 +82,7 @@ END;
 
 CREATE TRIGGER "update_directories" AFTER UPDATE ON directories
 BEGIN
-    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
+    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.id == NEW.id_directory;
     UPDATE directories SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 
@@ -190,7 +190,7 @@ END;
 
 CREATE TRIGGER "update_groups" AFTER UPDATE ON groups
 BEGIN
-    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='';
+    SELECT RAISE(ROLLBACK, '') WHERE NEW.name='' OR NEW.id == NEW.id_group;
     UPDATE groups SET modified = (datetime('now')) WHERE new.modified != (datetime('now')) AND rowid = new.rowid;
 END;
 

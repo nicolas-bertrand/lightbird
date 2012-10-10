@@ -179,3 +179,17 @@ QStringList TableCollections::getFiles(const QString &id_accessor, const QString
             files << result[i]["id_file"].toString();
     return (files);
 }
+
+QStringList TableCollections::getParents() const
+{
+    TableCollections    collection(this->id);
+    QString             id;
+    QStringList         result;
+
+    while (!(id = collection.getIdCollection()).isEmpty())
+    {
+        result << id;
+        collection.setId(id);
+    }
+    return (result);
+}

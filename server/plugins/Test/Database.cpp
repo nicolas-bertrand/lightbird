@@ -232,6 +232,9 @@ void            Database::_collections()
         ASSERT(c1.getIdFromVirtualPath("images/france", a.getId()) == c2.getId());
         ASSERT(c2.remove());
         ASSERT(c2.setIdFromVirtualPath("images/egypte"));
+        ASSERT(c2.getParents() == QStringList() << c2.getIdFromVirtualPath("images"));
+        ASSERT(c1.getParents().isEmpty());
+        ASSERT(!c2.setIdCollection(c2.getId()));
         ASSERT(c1.getCollections(a.getId(), "read").size() == 0);
         ASSERT(c1.getFiles(a.getId(), "read").size() == 0);
         ASSERT(p.add(a.getId(), c2.getId(), "read"));
@@ -371,9 +374,14 @@ void            Database::_directories()
         ASSERT(d1.cd("..") && !d1.exists());
         ASSERT(!d1.cd("d2"));
         ASSERT(d1.cd("videos/d2/../d2/../d2/d3") && d1.getVirtualPath() == "videos/d2/d3");
+        ASSERT(d1.getParents() == (QStringList() << d1.getIdFromVirtualPath("videos/d2") << d1.getIdFromVirtualPath("videos")));
         ASSERT(d1.cd("/videos/d2") && d1.getVirtualPath() == "videos/d2");
         d1.clear();
         ASSERT(d1.cd("videos/d2") && d1.getVirtualPath() == "videos/d2");
+        ASSERT(d1.getParents() == (QStringList() << d1.getIdFromVirtualPath("videos")));
+        ASSERT(d1.cd(".."));
+        ASSERT(d1.getParents().isEmpty());
+        ASSERT(!d1.setIdDirectory(d1.getId()));
         ASSERT(d1.remove(d1.getIdFromVirtualPath("videos")));
     }
     catch (unsigned int line)
@@ -604,6 +612,9 @@ void            Database::_groups()
         ASSERT(g2.add("b2", g1.getId()));
         ASSERT(!g2.add("b2", g2.getIdGroup()));
         ASSERT(g2.add("b3", g2.getIdGroup()));
+        ASSERT(g2.getParents() == QStringList() << g1.getId());
+        ASSERT(g1.getParents().isEmpty());
+        ASSERT(!g2.setIdGroup(g2.getId()));
         ASSERT(!g2.setName("b2"));
         ASSERT(g2.setName("b1"));
         ASSERT(g1.getIdGroup().isEmpty());

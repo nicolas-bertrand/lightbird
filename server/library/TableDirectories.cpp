@@ -245,6 +245,20 @@ QString     TableDirectories::getFile(const QString &name) const
     return (QString());
 }
 
+QStringList             TableDirectories::getParents() const
+{
+    TableDirectories    directory(this->id);
+    QString             id;
+    QStringList         result;
+
+    while (!(id = directory.getIdDirectory()).isEmpty())
+    {
+        result << id;
+        directory.setId(id);
+    }
+    return (result);
+}
+
 QString                 TableDirectories::createVirtualPath(const QString &virtualPath, const QString &id_account)
 {
     TableDirectories    directory;

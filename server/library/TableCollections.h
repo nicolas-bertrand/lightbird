@@ -65,6 +65,8 @@ namespace LightBird
         /// accessor has the right will be returned.
         /// @param right : The name of the right that the accessor must have.
         QStringList getFiles(const QString &id_accessor = "", const QString &right = "") const;
+        /// @brief Returns the list of the parents of the collection.
+        QStringList getParents() const;
     };
 }
 

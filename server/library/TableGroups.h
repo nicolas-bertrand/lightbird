@@ -40,6 +40,8 @@ namespace LightBird
         bool        removeAccount(const QString &id_account);
         /// @brief Returns the id of the accounts of the group.
         QStringList getAccounts() const;
+        /// @brief Returns the list of the parents of the group.
+        QStringList getParents() const;
     };
 }
 

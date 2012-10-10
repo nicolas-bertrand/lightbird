@@ -87,6 +87,8 @@ namespace LightBird
         /// directory if it exists.
         /// @param name : The name of the file to return.
         QString     getFile(const QString &name) const;
+        /// @brief Returns the list of the parents of the directory.
+        QStringList getParents() const;
         /// @brief Creates all the directories that are missing in the path from
         /// the current directory, or from the root if the directory is not set.
         /// @param path : The path to create from the current directory or the root.

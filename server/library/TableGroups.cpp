@@ -117,3 +117,17 @@ QStringList     TableGroups::getAccounts() const
             accounts << result[i]["id_account"].toString();
     return (accounts);
 }
+
+QStringList     TableGroups::getParents() const
+{
+    TableGroups group(this->id);
+    QString     id;
+    QStringList result;
+
+    while (!(id = group.getIdGroup()).isEmpty())
+    {
+        result << id;
+        group.setId(id);
+    }
+    return (result);
+}
