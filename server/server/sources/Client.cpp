@@ -454,6 +454,11 @@ const QString   &Client::getId() const
     return (this->id);
 }
 
+QAbstractSocket &Client::getSocket()
+{
+    return (*this->socket);
+}
+
 unsigned short  Client::getPort() const
 {
     return (this->port);
@@ -499,9 +504,9 @@ LightBird::IClient::Mode Client::getMode() const
     return (this->mode);
 }
 
-QAbstractSocket &Client::getSocket()
+quint64         Client::getBufferSize() const
 {
-    return (*this->socket);
+    return (this->data.size() + this->socket->size());
 }
 
 QVariantMap     &Client::getInformations()

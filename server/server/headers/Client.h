@@ -82,6 +82,7 @@ public:
 
     // LightBird::IClient
     const QString           &getId() const;
+    QAbstractSocket         &getSocket();
     unsigned short          getPort() const;
     const QStringList       &getProtocols() const;
     LightBird::INetwork::Transport getTransport() const;
@@ -91,7 +92,7 @@ public:
     const QString           &getPeerName() const;
     const QDateTime         &getConnectionDate() const;
     LightBird::IClient::Mode getMode() const;
-    QAbstractSocket         &getSocket();
+    quint64                 getBufferSize() const;
     QVariantMap             &getInformations();
     LightBird::TableAccounts &getAccount();
     LightBird::IRequest     &getRequest();
