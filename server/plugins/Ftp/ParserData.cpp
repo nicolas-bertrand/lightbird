@@ -9,7 +9,7 @@ ParserData::~ParserData()
 {
 }
 
-bool    ParserData::doUnserializeContent(const QByteArray &data, quint64 &)
+bool    ParserData::doDeserializeContent(const QByteArray &data, quint64 &)
 {
     // Upload in progress (otherwise the data received are just discarded)
     if (this->client.getInformations().contains(DATA_UPLOAD))

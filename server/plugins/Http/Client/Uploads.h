@@ -52,10 +52,10 @@ public:
     };
 
     /// @brief Starts the download of the files.
-    void    onUnserializeHeader(LightBird::IClient &client);
+    void    onDeserializeHeader(LightBird::IClient &client);
     /// @brief Download the files one by one by reading the multipart/form-data
     /// of the content of the request.
-    void    onUnserializeContent(LightBird::IClient &client);
+    void    onDeserializeContent(LightBird::IClient &client);
     /// @brief Starts the identification of the files in a timer thread.
     void    doExecution(LightBird::IClient &client);
     /// @brief Identifies the files in the identification queue.

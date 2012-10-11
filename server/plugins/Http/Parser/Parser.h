@@ -17,10 +17,10 @@ public:
 
     /// @brief Search the protocol of the client (HTTP).
     virtual bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
-    /// @brief Unserialize the header.
-    virtual bool    doUnserializeHeader(const QByteArray &data, quint64 &used) = 0;
-    /// @brief Unserialize the content.
-    virtual bool    doUnserializeContent(const QByteArray &data, quint64 &used) = 0;
+    /// @brief Deserialize the header.
+    virtual bool    doDeserializeHeader(const QByteArray &data, quint64 &used) = 0;
+    /// @brief Deserialize the content.
+    virtual bool    doDeserializeContent(const QByteArray &data, quint64 &used) = 0;
     /// @brief Serialize the header.
     virtual void    doSerializeHeader(QByteArray &data) = 0;
     /// @brief Serialize the content.

@@ -57,7 +57,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "Parser HTTP";
     metadata.brief = "The HTTP parser.";
-    metadata.description = "Parse HTTP requests. Unserialize the request/response and serialize the request/response, depending on the mode of the client.";
+    metadata.description = "Parse HTTP requests. Deserialize the request/response and serialize the request/response, depending on the mode of the client.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
@@ -90,14 +90,14 @@ bool    Plugin::onProtocol(LightBird::IClient &client, const QByteArray &data, Q
     return (this->_getParser(client)->onProtocol(data, protocol, error));
 }
 
-bool    Plugin::doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used)
+bool    Plugin::doDeserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used)
 {
-    return (this->_getParser(client)->doUnserializeHeader(data, used));
+    return (this->_getParser(client)->doDeserializeHeader(data, used));
 }
 
-bool    Plugin::doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
+bool    Plugin::doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
 {
-    return (this->_getParser(client)->doUnserializeContent(data, used));
+    return (this->_getParser(client)->doDeserializeContent(data, used));
 }
 
 void    Plugin::doSerializeHeader(LightBird::IClient &client, QByteArray &data)

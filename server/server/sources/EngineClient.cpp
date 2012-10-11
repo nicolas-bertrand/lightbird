@@ -3,9 +3,9 @@
 #include "IDoSerializeHeader.h"
 #include "IDoSerializeContent.h"
 #include "IDoSerializeFooter.h"
-#include "IDoUnserializeHeader.h"
-#include "IDoUnserializeContent.h"
-#include "IDoUnserializeFooter.h"
+#include "IDoDeserializeHeader.h"
+#include "IDoDeserializeContent.h"
+#include "IDoDeserializeFooter.h"
 #include "IDoExecution.h"
 #include "IOnExecution.h"
 #include "IOnFinish.h"
@@ -60,7 +60,7 @@ bool    EngineClient::receive(const QString &protocol, const QVariantMap &inform
     this->request.setProtocol(protocol);
     this->request.getInformations() = informations;
     this->_onSerialize(LightBird::IOnSerialize::IDoSerialize);
-    this->state = &EngineClient::_doUnserializeHeader;
+    this->state = &EngineClient::_doDeserializeHeader;
     return (true);
 }
 
@@ -224,8 +224,8 @@ bool    EngineClient::_doSerializeFooter()
         // Calls the final IOnSerialize that define if the request needs a response
         if (this->_onSerialize(LightBird::IOnSerialize::IDoSerialize))
         {
-            this->state = &EngineClient::_doUnserializeHeader;
-            // If there are pending data they are unserialized
+            this->state = &EngineClient::_doDeserializeHeader;
+            // If there are pending data they are deserialized
             if (!this->data.isEmpty())
                 return (true);
             // Otherwise we are waiting for a response
@@ -251,18 +251,18 @@ bool    EngineClient::_doSerializeFooter()
     }
 }
 
-bool    EngineClient::_doUnserializeHeader()
+bool    EngineClient::_doDeserializeHeader()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, LightBird::IDoUnserializeHeader *> instance;
+    QPair<QString, LightBird::IDoDeserializeHeader *> instance;
 
     this->done = false;
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoUnserializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
-        Log::trace("Calling IDoUnserializeHeader::doUnserializeHeader()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doUnserializeHeader");
-        result = instance.second->doUnserializeHeader(this->client, this->data, used);
+        Log::trace("Calling IDoDeserializeHeader::doDeserializeHeader()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeHeader");
+        result = instance.second->doDeserializeHeader(this->client, this->data, used);
         Plugins::instance()->release(instance.first);
         // If true is returned, we go to the next step
         if (result)
@@ -274,10 +274,10 @@ bool    EngineClient::_doUnserializeHeader()
             else if (used)
                 this->data.clear();
             if (Log::instance()->isTrace())
-                Log::trace("Header complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doUnserializeHeader");
-            // Calls onUnserialize
-            this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeHeader);
-            this->state = &EngineClient::_doUnserializeContent;
+                Log::trace("Header complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doDeserializeHeader");
+            // Calls onDeserialize
+            this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserializeHeader);
+            this->state = &EngineClient::_doDeserializeContent;
         }
         else
             // All the data has been used, but the header is not complete
@@ -289,27 +289,27 @@ bool    EngineClient::_doUnserializeHeader()
     // If no plugin matches, we go to the next step
     else
     {
-        Log::trace("No plugin implempents IDoUnserializeHeader for this context", Properties("id", this->client.getId()), "EngineClient", "_doUnserializeHeader");
-        this->state = &EngineClient::_doUnserializeContent;
+        Log::trace("No plugin implempents IDoDeserializeHeader for this context", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeHeader");
+        this->state = &EngineClient::_doDeserializeContent;
     }
     // Go to the next step
-    if (this->state == &EngineClient::_doUnserializeContent)
+    if (this->state == &EngineClient::_doDeserializeContent)
         return (true);
     // Otherwise the engine waits for more data
     return (false);
 }
 
-bool    EngineClient::_doUnserializeContent()
+bool    EngineClient::_doDeserializeContent()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, LightBird::IDoUnserializeContent *> instance;
+    QPair<QString, LightBird::IDoDeserializeContent *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoUnserializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
-        Log::trace("Calling IDoUnserializeContent::doUnserializeContent()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doUnserializeContent");
-        result = instance.second->doUnserializeContent(this->client, this->data, used);
+        Log::trace("Calling IDoDeserializeContent::doDeserializeContent()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeContent");
+        result = instance.second->doDeserializeContent(this->client, this->data, used);
         Plugins::instance()->release(instance.first);
         // If true is returned, we go to the next step
         if (result)
@@ -321,14 +321,14 @@ bool    EngineClient::_doUnserializeContent()
             else if (used)
                 this->data.clear();
             if (Log::instance()->isTrace())
-                Log::trace("Content complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doUnserializeContent");
-            this->state = &EngineClient::_doUnserializeFooter;
+                Log::trace("Content complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doDeserializeContent");
+            this->state = &EngineClient::_doDeserializeFooter;
         }
         else
             // All the data has been used, but the content is not complete
             this->data.clear();
-        // Calls onUnserialize
-        this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeContent);
+        // Calls onDeserialize
+        this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserializeContent);
         // If the data have been used
         if (!result || used)
             this->done = true;
@@ -336,27 +336,27 @@ bool    EngineClient::_doUnserializeContent()
     // If no plugin matches, we go to the next step
     else
     {
-        Log::trace("No plugin implempents IDoUnserializeContent for this context", Properties("id", this->client.getId()), "EngineClient", "_doUnserializeContent");
-        this->state = &EngineClient::_doUnserializeFooter;
+        Log::trace("No plugin implempents IDoDeserializeContent for this context", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeContent");
+        this->state = &EngineClient::_doDeserializeFooter;
     }
     // Go to the next step
-    if (this->state == &EngineClient::_doUnserializeFooter)
+    if (this->state == &EngineClient::_doDeserializeFooter)
         return (true);
     // Otherwise the engine waits for more data
     return (false);
 }
 
-bool    EngineClient::_doUnserializeFooter()
+bool    EngineClient::_doDeserializeFooter()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, LightBird::IDoUnserializeFooter *> instance;
+    QPair<QString, LightBird::IDoDeserializeFooter *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoUnserializeFooter>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeFooter>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
-        Log::trace("Calling IDoUnserializeFooter::doUnserializeFooter()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doUnserializeFooter");
-        result = instance.second->doUnserializeFooter(this->client, this->data, used);
+        Log::trace("Calling IDoDeserializeFooter::doDeserializeFooter()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeFooter");
+        result = instance.second->doDeserializeFooter(this->client, this->data, used);
         Plugins::instance()->release(instance.first);
         // If true is returned, we go to the next step
         if (result)
@@ -368,9 +368,9 @@ bool    EngineClient::_doUnserializeFooter()
             else if (used)
                 this->data.clear();
             if (Log::instance()->isTrace())
-                Log::trace("Footer complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doUnserializeFooter");
-            // Calls onUnserialize
-            this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserializeFooter);
+                Log::trace("Footer complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doDeserializeFooter");
+            // Calls onDeserialize
+            this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserializeFooter);
             this->state = &EngineClient::_doExecution;
         }
         else
@@ -383,34 +383,34 @@ bool    EngineClient::_doUnserializeFooter()
     // If no plugin matches, we go to the next step
     else
     {
-        Log::trace("No plugin implempents IDoUnserializeFooter for this context", Properties("id", this->client.getId()), "EngineClient", "_doUnserializeFooter");
+        Log::trace("No plugin implempents IDoDeserializeFooter for this context", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
         this->state = &EngineClient::_doExecution;
     }
-    // If the response has been unserialized
+    // If the response has been deserialized
     if (this->state == &EngineClient::_doExecution)
     {
         // The response is going to be executed
         if (this->done)
         {
             if (Log::instance()->isDebug())
-                Log::debug("Response complete", Properties("id", this->client.getId()), "EngineClient", "_doUnserializeFooter");
-            // Calls onUnserialize
-            this->_onUnserialize(LightBird::IOnUnserialize::IDoUnserialize);
-            // Executes the unserialized response if there is no error
+                Log::debug("Response complete", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
+            // Calls onDeserialize
+            this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserialize);
+            // Executes the deserialized response if there is no error
             if (!this->response.isError())
                 return (true);
             // Otherwise it is not executed
             else
             {
-                Log::debug("An error has been found in the response", Properties("id", this->client.getId()), "EngineClient", "_doUnserializeFooter");
+                Log::debug("An error has been found in the response", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
                 return (this->_onFinish());
             }
         }
-        // If the data has never been unserialized in header, content, or footer, they are cleared
+        // If the data has never been deserialized in header, content, or footer, they are cleared
         else
         {
-            Log::warning("The data has not been unserialized because no plugin implements IDoUnserialize* for this context, or the data are never used. The data has been cleared",
-                         Properties("id", this->client.getId()), "EngineClient", "_doUnserializeFooter");
+            Log::warning("The data has not been deserialized because no plugin implements IDoDeserialize* for this context, or the data are never used. The data has been cleared",
+                         Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
             this->data.clear();
             return (this->_onFinish());
         }

@@ -57,13 +57,13 @@ void    Engine::_onWrite(QByteArray &data)
     }
 }
 
-void    Engine::_onUnserialize(LightBird::IOnUnserialize::Unserialize type)
+void    Engine::_onDeserialize(LightBird::IOnDeserialize::Deserialize type)
 {
-    QMapIterator<QString, LightBird::IOnUnserialize *> it(Plugins::instance()->getInstances<LightBird::IOnUnserialize>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
+    QMapIterator<QString, LightBird::IOnDeserialize *> it(Plugins::instance()->getInstances<LightBird::IOnDeserialize>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
     while (it.hasNext())
     {
-        Log::trace("Calling IOnUnserialize::onUnserialize()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "Engine", "_onUnserialize");
-        it.peekNext().value()->onUnserialize(this->client, type);
+        Log::trace("Calling IOnDeserialize::onDeserialize()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "Engine", "_onDeserialize");
+        it.peekNext().value()->onDeserialize(this->client, type);
         Plugins::instance()->release(it.next().key());
     }
 }

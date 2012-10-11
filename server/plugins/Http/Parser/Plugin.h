@@ -9,8 +9,8 @@
 
 # include "IDoSerializeContent.h"
 # include "IDoSerializeHeader.h"
-# include "IDoUnserializeContent.h"
-# include "IDoUnserializeHeader.h"
+# include "IDoDeserializeContent.h"
+# include "IDoDeserializeHeader.h"
 # include "IOnConnect.h"
 # include "IOnDisconnect.h"
 # include "IOnFinish.h"
@@ -23,8 +23,8 @@ class Plugin : public QObject,
                public LightBird::IPlugin,
                public LightBird::IOnConnect,
                public LightBird::IOnProtocol,
-               public LightBird::IDoUnserializeHeader,
-               public LightBird::IDoUnserializeContent,
+               public LightBird::IDoDeserializeHeader,
+               public LightBird::IDoDeserializeContent,
                public LightBird::IDoSerializeHeader,
                public LightBird::IDoSerializeContent,
                public LightBird::IOnFinish,
@@ -34,8 +34,8 @@ class Plugin : public QObject,
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
                  LightBird::IOnProtocol
-                 LightBird::IDoUnserializeHeader
-                 LightBird::IDoUnserializeContent
+                 LightBird::IDoDeserializeHeader
+                 LightBird::IDoDeserializeContent
                  LightBird::IDoSerializeHeader
                  LightBird::IDoSerializeContent
                  LightBird::IOnFinish
@@ -66,10 +66,10 @@ public:
     bool    onConnect(LightBird::IClient &client);
     bool    onDisconnect(LightBird::IClient &client);
 
-    // Unserialize
+    // Deserialize
     bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error);
-    bool    doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
-    bool    doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
+    bool    doDeserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
+    bool    doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
 
     // Serialize
     void    doSerializeHeader(LightBird::IClient &client, QByteArray &data);

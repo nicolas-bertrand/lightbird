@@ -10,7 +10,7 @@
 # include "IOnDestroy.h"
 # include "IOnFinish.h"
 # include "IOnSerialize.h"
-# include "IOnUnserialize.h"
+# include "IOnDeserialize.h"
 # include "IPlugin.h"
 # include "ITimer.h"
 
@@ -25,7 +25,7 @@
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
-               public LightBird::IOnUnserialize,
+               public LightBird::IOnDeserialize,
                public LightBird::IDoExecution,
                public LightBird::IOnSerialize,
                public LightBird::IOnFinish,
@@ -33,7 +33,7 @@ class Plugin : public QObject,
                public LightBird::ITimer
 {
     Q_OBJECT
-    Q_INTERFACES(LightBird::IPlugin LightBird::IOnUnserialize LightBird::IDoExecution LightBird::IOnSerialize
+    Q_INTERFACES(LightBird::IPlugin LightBird::IOnDeserialize LightBird::IDoExecution LightBird::IOnSerialize
                  LightBird::IOnFinish LightBird::IOnDestroy LightBird::ITimer)
 
 public:
@@ -47,8 +47,8 @@ public:
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
 
-    // IOnUnserialize, IDoExecution, IOnSerialize, IOnFinish, ITimer
-    void    onUnserialize(LightBird::IClient &client, LightBird::IOnUnserialize::Unserialize type);
+    // IOnDeserialize, IDoExecution, IOnSerialize, IOnFinish, ITimer
+    void    onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type);
     bool    doExecution(LightBird::IClient &client);
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
     void    onFinish(LightBird::IClient &client);

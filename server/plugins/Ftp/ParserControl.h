@@ -12,7 +12,7 @@ public:
     ParserControl(LightBird::IApi &api, LightBird::IClient &client);
     ~ParserControl();
 
-    bool    doUnserializeContent(const QByteArray &data, quint64 &used);
+    bool    doDeserializeContent(const QByteArray &data, quint64 &used);
     bool    doSerializeContent(QByteArray &data);
     bool    onExecution();
     void    onDestroy();

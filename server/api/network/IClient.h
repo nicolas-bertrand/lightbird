@@ -58,9 +58,9 @@ namespace LightBird
         virtual const QDateTime      &getConnectionDate() const = 0;
         /// @brief The connection mode of the client.
         virtual LightBird::IClient::Mode getMode() const = 0;
-        /// @brief Returns the amount of data that is waiting to be unserialized.
+        /// @brief Returns the amount of data that is waiting to be deserialized.
         /// It is the addition of the data already read from the network but not
-        /// yet unserialized, and the data waiting to be read on the socket.
+        /// yet deserialized, and the data waiting to be read on the socket.
         virtual quint64              getBufferSize() const = 0;
         /// @brief Allows to store informations on the client.
         virtual QVariantMap          &getInformations() = 0;

@@ -36,8 +36,8 @@ void    Plugin::onUninstall(LightBird::IApi *api)
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
     metadata.name = "Json parser";
-    metadata.brief = "Serializes and unserializes JSON streams to QVariant type.";
-    metadata.description = "Serializes and unserializes JSON streams to QVariant type, which is a generic data representation that can be used independently of the format. This plugin uses QJson to unserialize.";
+    metadata.brief = "Serializes and deserializes JSON streams to QVariant type.";
+    metadata.description = "Serializes and deserializes JSON streams to QVariant type, which is a generic data representation that can be used independently of the format. This plugin uses QJson to deserialize.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
@@ -45,7 +45,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "CC BY-NC-SA 3.0";
 }
 
-void    Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnserialize::Unserialize type)
+void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)
 {
     type = type;
     client = client;
@@ -53,14 +53,14 @@ void    Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnserial
     LightBird::IContent &content = client.getRequest().getContent();
     bool                ok;
 
-    if (type == LightBird::IOnUnserialize::IDoUnserialize && !client.getRequest().isError() &&
+    if (type == LightBird::IOnDeserialize::IDoDeserialize && !client.getRequest().isError() &&
         (client.getRequest().getType().toLower() == "json" || client.getRequest().getType().toLower() == "application/json") &&
         (content.getStorage() == LightBird::IContent::BYTEARRAY || content.getStorage() == LightBird::IContent::TEMPORARYFILE))
     {
         QJson::Parser parser;
-        QVariant unserialized = parser.parse(content.getContent(), &ok);
+        QVariant deserialized = parser.parse(content.getContent(), &ok);
         content.setStorage(LightBird::IContent::VARIANT);
-        *content.getVariant() = unserialized;
+        *content.getVariant() = deserialized;
         if (!ok)
         {
             client.getRequest().setError();

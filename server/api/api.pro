@@ -23,18 +23,19 @@ HEADERS = IApi.h \
     ISessions.h \
     network/IClient.h \
     network/IContent.h \
+    network/IDoDeserializeContent.h \
+    network/IDoDeserializeFooter.h \
+    network/IDoDeserializeHeader.h \
     network/IDoExecution.h \
     network/IDoRead.h \
     network/IDoSend.h \
     network/IDoSerializeContent.h \
     network/IDoSerializeFooter.h \
     network/IDoSerializeHeader.h \
-    network/IDoUnserializeContent.h \
-    network/IDoUnserializeFooter.h \
-    network/IDoUnserializeHeader.h \
     network/IDoWrite.h \
     network/INetwork.h \
     network/IOnConnect.h \
+    network/IOnDeserialize.h \
     network/IOnDestroy.h \
     network/IOnDisconnect.h \
     network/IOnExecution.h \
@@ -43,7 +44,6 @@ HEADERS = IApi.h \
     network/IOnRead.h \
     network/IOnSend.h \
     network/IOnSerialize.h \
-    network/IOnUnserialize.h \
     network/IOnWrite.h \
     network/IRequest.h \
     network/IResponse.h

@@ -15,7 +15,7 @@ TARGET = Json
 DESTDIR = ../../build/plugins/Json
 LIBS += -L../../build -lLightBird
 
-# Builds the plugin with QJson, which allows it to unserialize a request in Json.
+# Builds the plugin with QJson, which allows it to deserialize a request in Json.
 # Without QJson the plugin can only serialize QVariant objects into json.
 LIBS += -L. -lqjson.0.7.1
 DEFINES += QJSON

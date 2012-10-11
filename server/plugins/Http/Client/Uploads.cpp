@@ -17,7 +17,7 @@ Uploads::~Uploads()
 {
 }
 
-void        Uploads::onUnserializeHeader(LightBird::IClient &client)
+void        Uploads::onDeserializeHeader(LightBird::IClient &client)
 {
     QString id = client.getRequest().getUri().queryItemValue("id");
     Upload  upload;
@@ -39,20 +39,20 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     // If the id is valid, insert it in the map
     if (!id.isEmpty() && !this->uploads.contains(id))
     {
-        Plugin::api().log().debug("Upload started", Properties("idUpload", id).add("idClient", client.getId()).add("path", upload.path).toMap(), "Uploads", "onUnserializeHeader");
+        Plugin::api().log().debug("Upload started", Properties("idUpload", id).add("idClient", client.getId()).add("path", upload.path).toMap(), "Uploads", "onDeserializeHeader");
         this->uploads.insert(id, upload);
     }
     // Otherwise an upload is already using this id
     else
     {
-        Plugin::api().log().error("This upload id is already used", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeHeader");
+        Plugin::api().log().error("This upload id is already used", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
         Plugin::api().network().disconnect(client.getId());
     }
     this->mutex.unlock();
     // Some browsers send a negative content length when there is too many files (firefox 10, safari 5)
     if (client.getRequest().getHeader().value("content-length").toLongLong() < 0)
     {
-        Plugin::api().log().error("Negative content-length", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeHeader");
+        Plugin::api().log().error("Negative content-length", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
         Plugin::api().network().disconnect(client.getId());
     }
     // Tells the parser to store the data in the memory and not in a temporary file
@@ -60,7 +60,7 @@ void        Uploads::onUnserializeHeader(LightBird::IClient &client)
     this->_removeCompleteUploads();
 }
 
-void            Uploads::onUnserializeContent(LightBird::IClient &client)
+void            Uploads::onDeserializeContent(LightBird::IClient &client)
 {
     QString     id = client.getInformations().value("idUpload").toString();
     QByteArray  &data = *client.getRequest().getContent().getByteArray();
@@ -68,7 +68,7 @@ void            Uploads::onUnserializeContent(LightBird::IClient &client)
     qint64      position = 0;
     qint64      i, j = 0;
     qint64      boundarySize;
-    SmartMutex  mutex(this->mutex, Plugin::api().getId(), "Uploads", "onUnserializeContent");
+    SmartMutex  mutex(this->mutex, Plugin::api().getId(), "Uploads", "onDeserializeContent");
 
     if (!mutex || !this->uploads.contains(id) || this->uploads[id].idClient != client.getId())
         return ;
@@ -394,14 +394,14 @@ void        Uploads::_createFile(LightBird::IClient &client, Upload &upload, Fil
             if (!upload.file->open(QIODevice::WriteOnly))
             {
                 upload.fileTable.remove(true);
-                Plugin::api().log().warning("Failed to open the file", Properties("idUpload", upload.id).add("file", file.path).toMap(), "Uploads", "onUnserializeContent");
+                Plugin::api().log().warning("Failed to open the file", Properties("idUpload", upload.id).add("file", file.path).toMap(), "Uploads", "onDeserializeContent");
             }
         }
         else
-            Plugin::api().log().warning("Failed to add the file in the database", Properties("idDirectory", idDirectory).add("path", file.path).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeContent");
+            Plugin::api().log().warning("Failed to add the file in the database", Properties("idDirectory", idDirectory).add("path", file.path).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
     }
     else
-        Plugin::api().log().warning("Failed to create the virtual path", Properties("path", upload.path).add("idUpload", upload.id).add("file", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onUnserializeContent");
+        Plugin::api().log().warning("Failed to create the virtual path", Properties("path", upload.path).add("idUpload", upload.id).add("file", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
 }
 
 void        Uploads::_fileComplete(LightBird::IClient &client, Upload &upload)

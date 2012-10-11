@@ -1,5 +1,5 @@
-#ifndef IDOUNSERIALIZEFOOTER_H
-# define IDOUNSERIALIZEFOOTER_H
+#ifndef IDODESERIALIZEFOOTER_H
+# define IDODESERIALIZEFOOTER_H
 
 # include <QByteArray>
 
@@ -13,10 +13,10 @@ namespace LightBird
     /// the data received exceeds the footer size, plugins have to indicates
     /// how many bytes they have used to fill the footer. The other bytes will
     /// be used by an other request.
-    class IDoUnserializeFooter
+    class IDoDeserializeFooter
     {
     public:
-        virtual ~IDoUnserializeFooter() {}
+        virtual ~IDoDeserializeFooter() {}
 
         /// @brief Converts the data received through the network to the footer. The footer
         /// is stored in the object IRequest that can be accessed via IClient::getRequest.
@@ -24,17 +24,17 @@ namespace LightBird
         /// @param data : The data received.
         /// @param used : If true is returned, users have to set the number of bytes used
         /// from the data, in this parameter, so that the remaining data can be used in
-        /// IDoUnserializeHeader of the next request. If all the data has been consumed,
+        /// IDoDeserializeHeader of the next request. If all the data has been consumed,
         /// the value of "used" must be equal or highter to the size of the received data.
         /// If the data received represents more than the content, users have to set the
         /// length used from data to this variable. Let zero if no data have to be used,
         /// ie if there is no content.
         /// @return True if the footer is complete. This method will be called while
         /// false is returned.
-        virtual bool    doUnserializeFooter(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
+        virtual bool    doDeserializeFooter(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoUnserializeFooter, "cc.lightbird.IDoUnserializeFooter")
+Q_DECLARE_INTERFACE(LightBird::IDoDeserializeFooter, "cc.lightbird.IDoDeserializeFooter")
 
-#endif // IDOUNSERIALIZEFOOTER_H
+#endif // IDODESERIALIZEFOOTER_H

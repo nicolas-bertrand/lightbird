@@ -88,13 +88,13 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "CC BY-NC-SA 3.0";
 }
 
-void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnserialize::Unserialize type)
+void        Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)
 {
     QString uri;
     LightBird::IRequest &request = client.getRequest();
 
     // Checks the header and identify the client
-    if (type == LightBird::IOnUnserialize::IDoUnserializeHeader)
+    if (type == LightBird::IOnDeserialize::IDoDeserializeHeader)
     {
         // Sets the generic HTTP headers
         client.getResponse().getHeader().insert("server", "LightBird");
@@ -108,7 +108,7 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
         this->_session(client, uri);
     }
     // If an error occured we don't execute the request
-    else if (type == LightBird::IOnUnserialize::IDoUnserialize && client.getResponse().getCode() >= 400)
+    else if (type == LightBird::IOnDeserialize::IDoDeserialize && client.getResponse().getCode() >= 400)
         request.setError(true);
     // The client is uploading something
     if (request.getHeader().contains("content-length"))
@@ -119,10 +119,10 @@ void        Plugin::onUnserialize(LightBird::IClient &client, LightBird::IOnUnse
         // Manages the upload of files
         else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().endsWith("/Execute/Uploads"))
         {
-            if (type == LightBird::IOnUnserialize::IDoUnserializeHeader)
-                this->uploads.onUnserializeHeader(client);
-            else if (type == LightBird::IOnUnserialize::IDoUnserializeContent)
-                this->uploads.onUnserializeContent(client);
+            if (type == LightBird::IOnDeserialize::IDoDeserializeHeader)
+                this->uploads.onDeserializeHeader(client);
+            else if (type == LightBird::IOnDeserialize::IDoDeserializeContent)
+                this->uploads.onDeserializeContent(client);
         }
         else if (!request.getUri().path().contains("/Execute/Uploads"))
             this->_api->network().disconnect(client.getId());

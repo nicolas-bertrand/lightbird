@@ -67,7 +67,7 @@ bool        ParserClient::doSerializeContent(QByteArray &data)
     return (true);
 }
 
-bool    ParserClient::doUnserializeHeader(const QByteArray &data, quint64 &used)
+bool    ParserClient::doDeserializeHeader(const QByteArray &data, quint64 &used)
 {
     this->header.append(data);
     // If the header contains the characteres END_OF_HEADER, this mean that all the header
@@ -99,11 +99,11 @@ bool    ParserClient::doUnserializeHeader(const QByteArray &data, quint64 &used)
     return (false);
 }
 
-bool        ParserClient::doUnserializeContent(const QByteArray &data, quint64 &used)
+bool        ParserClient::doDeserializeContent(const QByteArray &data, quint64 &used)
 {
     quint64 rest;
 
-    // If there is an error the content is not unserialized
+    // If there is an error the content is not deserialized
     if (this->response.isError())
         return (true);
     // If there is a content

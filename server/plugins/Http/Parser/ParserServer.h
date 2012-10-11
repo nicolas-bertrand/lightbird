@@ -16,16 +16,16 @@ public:
 
     // Parser
     bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
-    bool    doUnserializeHeader(const QByteArray &data, quint64 &used);
-    bool    doUnserializeContent(const QByteArray &data, quint64 &used);
+    bool    doDeserializeHeader(const QByteArray &data, quint64 &used);
+    bool    doDeserializeContent(const QByteArray &data, quint64 &used);
     void    doSerializeHeader(QByteArray &data);
     bool    doSerializeContent(QByteArray &data);
 
 private:
-    // Unserialize Header
+    // Deserialize Header
     /// @brief Check that the characters are correct.
     bool    _checkHeaderCharacters();
-    /// @brief Check that the first line is correct, and unserialize its data.
+    /// @brief Check that the first line is correct, and deserialize its data.
     bool    _parseHeaderFirstLine();
     /// @brief Check that the properties are correct.
     bool    _parseHeaderProperties();

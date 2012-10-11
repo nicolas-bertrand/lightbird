@@ -4,16 +4,16 @@
 # include <QObject>
 
 # include "IPlugin.h"
-# include "IOnUnserialize.h"
+# include "IOnDeserialize.h"
 # include "IOnSerialize.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
-               public LightBird::IOnUnserialize,
+               public LightBird::IOnDeserialize,
                public LightBird::IOnSerialize
 {
     Q_OBJECT
-    Q_INTERFACES(LightBird::IPlugin LightBird::IOnUnserialize LightBird::IOnSerialize)
+    Q_INTERFACES(LightBird::IPlugin LightBird::IOnDeserialize LightBird::IOnSerialize)
 
 public:
     Plugin();
@@ -26,8 +26,8 @@ public:
     void        onUninstall(LightBird::IApi *api);
     void        getMetadata(LightBird::IMetadata &metadata) const;
 
-    // Unserialize / Serialize
-    void        onUnserialize(LightBird::IClient &client, LightBird::IOnUnserialize::Unserialize type);
+    // Deserialize / Serialize
+    void        onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type);
     bool        onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
 
 private:

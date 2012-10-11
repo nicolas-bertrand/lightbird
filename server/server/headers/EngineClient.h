@@ -24,7 +24,7 @@ public:
     /// @return True if the engine is ready to run and send a new request.
     bool    send(const QString &id, const QString &protocol, const QVariantMap &informations);
     /// @brief Receive a response without sending a request. Bypass the serialize
-    /// api and call directly IOnSerialize followed by IDoUnserializeHeader.
+    /// api and call directly IOnSerialize followed by IDoDeserializeHeader.
     /// @param protocol : The protocol used to communicate with the client.
     /// @param informations : The informations of the request.
     /// @return False if the engine is not idle.
@@ -47,9 +47,9 @@ private slots:
     bool    _doSerializeHeader();
     bool    _doSerializeContent();
     bool    _doSerializeFooter();
-    bool    _doUnserializeHeader();
-    bool    _doUnserializeContent();
-    bool    _doUnserializeFooter();
+    bool    _doDeserializeHeader();
+    bool    _doDeserializeContent();
+    bool    _doDeserializeFooter();
     bool    _doExecution();
     bool    _onExecution();
     bool    _onFinish();

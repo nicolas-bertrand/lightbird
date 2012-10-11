@@ -5,8 +5,8 @@
 # include <QObject>
 # include <QStringList>
 
+# include "IOnDeserialize.h"
 # include "IOnSerialize.h"
-# include "IOnUnserialize.h"
 
 # include "Client.h"
 # include "Request.h"
@@ -44,16 +44,16 @@ protected:
     virtual void    _clear();
     /// @brief Calls LightBird::IOnWrite.
     void            _onWrite(QByteArray &data);
-    /// @brief Calls LightBird::IOnUnserialize.
-    void            _onUnserialize(LightBird::IOnUnserialize::Unserialize type);
+    /// @brief Calls LightBird::IOnDeserialize.
+    void            _onDeserialize(LightBird::IOnDeserialize::Deserialize type);
     /// @brief Calls LightBird::IOnSerialize.
     bool            _onSerialize(LightBird::IOnSerialize::Serialize type);
 
     Client          &client;  ///< The client for which the engine is running.
-    QByteArray      &data;    ///< The raw data received from a client, waiting to be unserialized.
+    QByteArray      &data;    ///< The raw data received from a client, waiting to be deserialized.
     Request         request;  ///< The request.
     Response        response; ///< The response.
-    bool            done;     ///< True if at least one plugin has implemented one of the IDoUnserialize or the IDoSerialize interfaces.
+    bool            done;     ///< True if at least one plugin has implemented one of the IDoDeserialize or the IDoSerialize interfaces.
 };
 
 #endif // ENGINE_H

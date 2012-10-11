@@ -18,7 +18,7 @@ public:
 
     bool    run();
     /// @brief Sends a response without waiting for a request. Bypass the
-    /// unserialize api, and call directly IOnUnserialize followed by IDoExecution.
+    /// deserialize api, and call directly IOnDeserialize followed by IDoExecution.
     /// @param protocol : The protocol used to communicate with the client.
     /// @param informations : The informations of the request.
     /// @return False if the engine is not idle.
@@ -37,9 +37,9 @@ private slots:
     // This methods calls the interfaces implemented by the plugins,
     // in order to execute the request and generate a response.
     bool    _onProtocol();
-    bool    _doUnserializeHeader();
-    bool    _doUnserializeContent();
-    bool    _doUnserializeFooter();
+    bool    _doDeserializeHeader();
+    bool    _doDeserializeContent();
+    bool    _doDeserializeFooter();
     bool    _doExecution();
     bool    _onExecution();
     bool    _doSerializeHeader();

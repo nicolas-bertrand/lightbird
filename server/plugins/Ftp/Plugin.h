@@ -11,13 +11,13 @@
 # include "IOnConnect.h"
 # include "IOnDisconnect.h"
 # include "IOnDestroy.h"
-# include "IDoSerializeContent.h"
+# include "IDoDeserializeContent.h"
+# include "IDoDeserializeHeader.h"
 # include "IDoExecution.h"
-# include "IDoUnserializeContent.h"
-# include "IDoUnserializeHeader.h"
-# include "IDoSend.h"
 # include "IOnExecution.h"
 # include "IOnSerialize.h"
+# include "IDoSerializeContent.h"
+# include "IDoSend.h"
 # include "IOnFinish.h"
 # include "ITimer.h"
 
@@ -30,8 +30,8 @@ class Plugin : public QObject,
                public LightBird::IOnConnect,
                public LightBird::IOnDisconnect,
                public LightBird::IOnDestroy,
-               public LightBird::IDoUnserializeHeader,
-               public LightBird::IDoUnserializeContent,
+               public LightBird::IDoDeserializeHeader,
+               public LightBird::IDoDeserializeContent,
                public LightBird::IDoExecution,
                public LightBird::IOnExecution,
                public LightBird::IOnSerialize,
@@ -45,8 +45,8 @@ class Plugin : public QObject,
                  LightBird::IOnConnect
                  LightBird::IOnDisconnect
                  LightBird::IOnDestroy
-                 LightBird::IDoUnserializeHeader
-                 LightBird::IDoUnserializeContent
+                 LightBird::IDoDeserializeHeader
+                 LightBird::IDoDeserializeContent
                  LightBird::IDoExecution
                  LightBird::IOnExecution
                  LightBird::IOnSerialize
@@ -82,8 +82,8 @@ public:
     void    onDestroy(LightBird::IClient &client);
 
     // Execution
-    bool    doUnserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
-    bool    doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
+    bool    doDeserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
+    bool    doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
     bool    doExecution(LightBird::IClient &client);
     bool    onExecution(LightBird::IClient &client);
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);

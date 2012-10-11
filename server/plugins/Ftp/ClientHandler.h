@@ -59,7 +59,7 @@ private:
     QMutex           mutex; ///< Makes the class thread safe.
     /// The list of the clients that are waiting to be associated with a control connection in passive mode.
     QList<QPair<QHostAddress, QString> > passiveClients;
-    /// The list of the clients that are waiting the control connection to be ready before the start of the unserialization.
+    /// The list of the clients that are waiting the control connection to be ready before the start of the deserialization.
     QHash<QString, QWaitCondition *> wait;
 };
 

@@ -9,7 +9,7 @@ ParserControl::~ParserControl()
 {
 }
 
-bool        ParserControl::doUnserializeContent(const QByteArray &data, quint64 &used)
+bool        ParserControl::doDeserializeContent(const QByteArray &data, quint64 &used)
 {
     int     i;
     int     j;

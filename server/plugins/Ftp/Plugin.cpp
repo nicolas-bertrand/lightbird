@@ -110,7 +110,7 @@ bool        Plugin::onConnect(LightBird::IClient &client)
     return (result);
 }
 
-bool    Plugin::doUnserializeHeader(LightBird::IClient &client, const QByteArray &, quint64 &)
+bool    Plugin::doDeserializeHeader(LightBird::IClient &client, const QByteArray &, quint64 &)
 {
     // ClientHandler::doDataExecute is only called here from the data connection
     // when the client is sending data to us. It is used to initiate the upload.
@@ -119,10 +119,10 @@ bool    Plugin::doUnserializeHeader(LightBird::IClient &client, const QByteArray
     return (true);
 }
 
-bool     Plugin::doUnserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
+bool     Plugin::doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
 {
     this->timerManager->stopTimeout(client.getId());
-    return (this->_getParser(client)->doUnserializeContent(data, used));
+    return (this->_getParser(client)->doDeserializeContent(data, used));
 }
 
 bool     Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data)

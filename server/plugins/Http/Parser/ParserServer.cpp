@@ -31,7 +31,7 @@ bool    ParserServer::onProtocol(const QByteArray &data, QString &protocol, bool
     return (false);
 }
 
-bool    ParserServer::doUnserializeHeader(const QByteArray &data, quint64 &used)
+bool    ParserServer::doDeserializeHeader(const QByteArray &data, quint64 &used)
 {
     this->header.append(data);
     // If the header contains the characteres END_OF_HEADER, this mean that all the header
@@ -66,18 +66,18 @@ bool    ParserServer::doUnserializeHeader(const QByteArray &data, quint64 &used)
     return (false);
 }
 
-bool        ParserServer::doUnserializeContent(const QByteArray &data, quint64 &used)
+bool        ParserServer::doDeserializeContent(const QByteArray &data, quint64 &used)
 {
     quint64 rest;
 
-    // If there is an error the content is not unserialized
+    // If there is an error the content is not deserialized
     if (this->request.isError())
         return (true);
     // If there is a content
     if (this->contentLength > 0)
     {
         // The first time a content is received, we determine if it has to be stored in a temporary file or in the memory
-        // If keepInMemory is defined in the clients informations, a plugin will store itself the content from IOnUnserialize
+        // If keepInMemory is defined in the clients informations, a plugin will store itself the content from IOnDeserialize
         if (this->contentStored == 0 && this->contentLength > Plugin::getConfiguration().maxContentInMemory
             && !this->client.getInformations().contains("keepInMemory"))
             this->request.getContent().setStorage(LightBird::IContent::TEMPORARYFILE);

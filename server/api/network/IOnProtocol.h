@@ -9,7 +9,7 @@
 namespace LightBird
 {
     /// @brief By inheriting this interface, a plugin can define the name of the protocol
-    /// used by a client in its request. It is called before IDoUnserializeHeader, while
+    /// used by a client in its request. It is called before IDoDeserializeHeader, while
     /// the plugin has not found which protocol uses the client to communicate with the server.
     /// This allows a client to use several protocols on the same port and connection (one per request).
     /// The protocol is defined from the first plugin that finds it.
@@ -19,7 +19,7 @@ namespace LightBird
         virtual ~IOnProtocol() {}
 
         /// @brief This method is called at the beginning of each request, before
-        /// IDoUnserializeHeader, and while false returned. It allows to define the
+        /// IDoDeserializeHeader, and while false returned. It allows to define the
         /// name of the protocol used in a request. The protocol must be determined as
         /// soon as possible.
         /// @param client : This object represents the client.
