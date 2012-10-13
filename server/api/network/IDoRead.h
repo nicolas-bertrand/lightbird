@@ -7,7 +7,7 @@
 
 namespace LightBird
 {
-    /// @brief Interface uses to read on a socket.
+    /// @brief Interface used to read on a socket.
     /// It replaces the default read made by the server. This interface is not called
     /// if the client is connected via UDP in SERVER mode, because the server needs
     /// to read the UDP datagram itself in order to know which client sent it.

@@ -64,6 +64,15 @@ signals:
     /// write these data from the thread (where the sockets lives).
     void            writeSignal();
 
+private:
+    Clients(const Clients &);
+    Clients &operator=(const Clients &);
+
+    /// @brief The main method of the thread.
+    void            run();
+    /// @brief Returns true if the writeBuffer contains the client.
+    bool            _containsClient(Client *client);
+
 private slots:
     /// @brief Connects a TCP client to the server.
     void            _connect(QString id);
@@ -78,22 +87,22 @@ private slots:
     void            _finished();
 
 private:
-    Clients(const Clients &);
-    Clients &operator=(const Clients &);
+    /// @brief Stores the data to write to a client.
+    struct WriteBuffer
+    {
+        WriteBuffer(Client *c, QByteArray *d) : client(c), data(d), offset(0) {}
+        Client      *client; ///< The client to which the data will be written.
+        QByteArray  *data;   ///< The data to write.
+        int         offset;  ///< The amount of data already written.
+    };
 
-    /// @brief The main method of the thread.
-    void            run();
-
-    QList<Client *> clients;        ///< The list of the clients managed.
-    mutable QMutex  mutex;          ///< Makes the class thread safe.
-    Future<bool>    threadStarted;  ///< This future is unlocked when the thread is started.
+    QList<Client *>    clients;       ///< The list of the clients managed.
+    mutable QMutex     mutex;         ///< Makes the class thread safe.
+    QList<WriteBuffer> writeBuffer;   ///< The list of the data that are going to be send from the thread.
+    Future<bool>       threadStarted; ///< This future is unlocked when the thread is started.
     /// The list of the futures waiting for the connection of the client
     /// in order to set their results.
     QMap<QString, QPair<Future<QString> *, int> > connections;
-    /// The list of the data that are going to be send from the thread.
-    QQueue<QPair<Client *, QByteArray *> >        writeBuffer;
-    /// The list of the clients that are going to send data (the same as in writeBuffer).
-    QList<Client *> writeBufferClients;
 };
 
 #endif // CLIENTS_H

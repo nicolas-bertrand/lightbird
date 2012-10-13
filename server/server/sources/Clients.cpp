@@ -207,10 +207,10 @@ void            Clients::shutdown()
         delete it.next().value().first;
     this->connections.clear();
     // Cleans the write buffer
-    while (!this->writeBuffer.isEmpty())
-        delete this->writeBuffer.dequeue().second;
+    QListIterator<WriteBuffer> wb(this->writeBuffer);
+    while (wb.hasNext())
+        delete wb.next().data;
     this->writeBuffer.clear();
-    this->writeBufferClients.clear();
     // Removes the remaining clients
     QListIterator<Client *> client(this->clients);
     while (client.hasNext())
@@ -253,43 +253,61 @@ bool            Clients::write(QByteArray *data, Client *client)
     // If a signal has not already be send
     if (this->writeBuffer.isEmpty())
         emit writeSignal();
-    this->writeBuffer.enqueue(QPair<Client *, QByteArray *>(client, data));
-    this->writeBufferClients.push_back(client);
+    this->writeBuffer.push_back(WriteBuffer(client, data));
     return (true);
 }
 
-void            Clients::_write()
+void                   Clients::_write()
 {
-    SmartMutex  mutex(this->mutex, "Clients", "_write");
-    Client      *client;
-    QByteArray  *data;
-    int         wrote;
+    SmartMutex         mutex(this->mutex, "Clients", "_write");
+    QList<WriteBuffer> writeBuffer;
+    qint64             result;
 
-    if (!mutex)
+    if (!mutex || this->writeBuffer.isEmpty())
         return ;
-    // While there is data to send
-    while (!this->writeBuffer.isEmpty())
+    // We make a copy of the writeBuffer in order to write the data outside of the mutex.
+    // This is important because the API (IDoWrite) must never be called in a mutex.
+    // This is fine because Port::clients is only modified in this thread.
+    writeBuffer = this->writeBuffer;
+    this->writeBuffer.clear();
+    mutex.unlock();
+
+    QMutableListIterator<WriteBuffer> it(writeBuffer);
+    while (it.hasNext())
     {
-        client = this->writeBuffer.head().first;
-        data = this->writeBuffer.head().second;
-        if (this->clients.contains(client))
+        WriteBuffer &w = it.next();
+        result = -1;
+        // Ensures that we are still connected to the client
+        if (this->clients.contains(w.client) && w.client->getSocket().state() == QAbstractSocket::ConnectedState)
         {
-            // The API should never be called in a mutex
-            mutex.unlock();
-            // Calls the IDoWrite interface of the plugins, if the client still exists and is connected
-            if(client->getSocket().state() == QAbstractSocket::ConnectedState && !client->doWrite(*data))
-                // If no plugins implements IDoWrite, the server write the data itself
-                if ((wrote = client->getSocket().write(*data)) != data->size())
-                    Log::warning("All data has not been written", Properties("wrote", wrote)
-                                 .add("size", data->size()).add("id", client->getId()), "Clients", "write");
-            mutex.lock();
+            // Tries to call the IDoWrite interface of the plugins
+            if (!w.client->doWrite(w.data->data() + w.offset, w.data->size() - w.offset, result))
+                // If no plugins implements IDoWrite, we write the data ourself
+                result = w.client->getSocket().write(w.data->data() + w.offset, w.data->size() - w.offset);
+            w.offset += result;
+            if (result < 0)
+                Log::debug("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
+            if (result == 0)
+                Log::trace("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
         }
-        delete data;
-        this->writeBuffer.dequeue();
-        // Notifies the Client that the data are being written
-        client->bytesWriting();
+        if (result < 0 || w.offset >= w.data->size())
+        {
+            // Notifies the Client that the data are being written
+            w.client->bytesWriting();
+            delete w.data;
+            it.remove();
+        }
     }
-    this->writeBufferClients.clear();
+
+    mutex.lock();
+    // Finally we put the data that have not been sent at the beginning of the writeBuffer,
+    // which may have been filled in the meantime by other threads.
+    QListIterator<WriteBuffer> i(writeBuffer);
+    i.toBack();
+    while (i.hasPrevious())
+        this->writeBuffer.prepend(i.previous());
+    if (!writeBuffer.isEmpty())
+        emit writeSignal();
 }
 
 bool            Clients::connect(Client *client)
@@ -387,9 +405,19 @@ void            Clients::_finished()
     QMutableListIterator<Client *> it(this->clients);
     while (it.hasNext())
         // The client is deleted only if there is no remaining data in the writeBuffer
-        if ((client = it.next())->isFinished() && !this->writeBufferClients.contains(client))
+        if ((client = it.next())->isFinished() && !this->_containsClient(client))
         {
             it.remove();
             delete client;
         }
+}
+
+bool    Clients::_containsClient(Client *client)
+{
+    QListIterator<WriteBuffer> it(this->writeBuffer);
+
+    while (it.hasNext())
+        if (it.next().client == client)
+            return (true);
+    return (false);
 }

@@ -1,7 +1,6 @@
 #ifndef PORTTCP_H
 # define PORTTCP_H
 
-# include <QQueue>
 # include <QPair>
 # include <QTcpServer>
 
@@ -39,6 +38,8 @@ private:
     void    run();
     /// @brief Returns true if the port is currently listening the network.
     bool    _isListening() const;
+    /// @brief Returns true if the writeBuffer contains the client.
+    bool    _containsClient(Client *client);
 
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the tcpServer.
@@ -54,11 +55,19 @@ private slots:
     Client  *_finished(Client *client = NULL);
 
 private:
-    QTcpServer                             tcpServer;     ///< The TCP server that listens on the network and waits new connections.
-    QMap<QAbstractSocket *, Client *>      sockets;       ///< Associates the socket with its client.
-    QQueue<QPair<Client *, QByteArray *> > writeBuffer;   ///< List of the data that are going to be send from the thread.
-    QList<Client *>                        writeBufferClients; ///< The list of the clients that are going to send data (the same as in writeBuffer).
-    Future<bool>                           threadStarted; ///< This future is unlocked when the thread is started.
+    /// @brief Stores the data to write to a client.
+    struct WriteBuffer
+    {
+        WriteBuffer(Client *c, QByteArray *d) : client(c), data(d), offset(0) {}
+        Client     *client; ///< The client to which the data will be written.
+        QByteArray *data;   ///< The data to write.
+        int        offset;  ///< The amount of data already written.
+    };
+
+    QTcpServer                        tcpServer;     ///< The TCP server that listens on the network and waits new connections.
+    QMap<QAbstractSocket *, Client *> sockets;       ///< Associates the socket with its client.
+    QList<WriteBuffer>                writeBuffer;   ///< The list of the data that are going to be send from the thread.
+    Future<bool>                      threadStarted; ///< This future is unlocked when the thread is started.
 };
 
 #endif // PORTTCP_H

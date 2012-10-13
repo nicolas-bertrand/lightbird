@@ -380,15 +380,14 @@ bool        Client::doRead(QByteArray &data)
     return (false);
 }
 
-bool        Client::doWrite(QByteArray &data)
+bool        Client::doWrite(const char *data, qint64 size, qint64 &result)
 {
     QPair<QString, LightBird::IDoWrite *> instance;
 
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->mode, this->transport, this->protocols, this->port)).second)
     {
         Log::trace("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
-        if (!instance.second->doWrite(*this, data))
-            Log::debug("IDoWrite::doWrite() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doWrite");
+        result = instance.second->doWrite(*this, data, size);
         Plugins::instance()->release(instance.first);
         return (true);
     }

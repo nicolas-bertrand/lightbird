@@ -28,8 +28,8 @@ namespace LightBird
         /// several requests.
         /// @param protocol : The name of the protocol. Must be filled when true is returned.
         /// @param unknow : If this parameter is set to true by the plugin, it means that the
-        /// plugin doesn't know the protocol used by the request. Then this method will not
-        /// be called again for this request.
+        /// it doesn't know the protocol used by the request. Then this method will not be
+        /// called again for this request.
         /// @return False while the protocol of the request has not been found. True is
         /// returned when the protocol name has been filled in the protocol parameter.
         virtual bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &unknow) = 0;

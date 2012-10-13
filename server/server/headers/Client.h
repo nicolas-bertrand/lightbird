@@ -60,7 +60,9 @@ public:
     /// @brief Calls the IDoRead interface of the plugins.
     bool                    doRead(QByteArray &data);
     /// @brief Calls the IDoWrite interface of the plugins.
-    bool                    doWrite(QByteArray &data);
+    /// @param result : The return of the IDoWrite call.
+    /// @return True if doWrite has been called.
+    bool                    doWrite(const char *data, qint64 size, qint64 &result);
     /// @brief Returns true if the client is finished and can be safely destroyed.
     bool                    isFinished() const;
     /// @brief Returns the data buffer of the client. This method should only be
