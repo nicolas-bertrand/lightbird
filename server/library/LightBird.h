@@ -46,6 +46,9 @@ namespace LightBird
     /// value is zero the data are not truncated.
     /// @return The simplified data.
     LIB QByteArray  simplify(QByteArray data, char replace = '.', quint64 maxSize = 2000);
+    /// @brief A cross-platform sleep.
+    /// @param The number of milliseconds to sleep.
+    LIB void        sleep(unsigned long time);
 }
 
 #endif // LIGHTBIRD_H

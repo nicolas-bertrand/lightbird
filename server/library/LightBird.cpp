@@ -1,6 +1,7 @@
 #include <QDir>
 #include <QFile>
 #include <QUuid>
+#include <QWaitCondition>
 
 #include "Library.h"
 #include "LightBird.h"
@@ -69,4 +70,14 @@ QByteArray LightBird::simplify(QByteArray data, char replace, quint64 maxSize)
         if (data.data()[i] < 32 || data.data()[i] > 126)
             data.data()[i] = replace;
     return (data);
+}
+
+void                LightBird::sleep(unsigned long time)
+{
+    QWaitCondition  wait;
+    QMutex          mutex;
+
+    mutex.lock();
+    wait.wait(&mutex, time);
+    mutex.unlock();
 }
