@@ -70,6 +70,10 @@ namespace LightBird
         /// @brief Returns the path of the current plugin which consists of
         /// the pluginsPath plus its id.
         virtual const QString               &getPluginPath() const = 0;
+        /// @brief Returns the resources path of the current plugin which consists
+        /// of the define PLUGINS_RESOURCES_PATH followed by the plugin id. The
+        /// resources path stores all the resources used by the plugin.
+        virtual const QString               &getResourcesPath() const = 0;
         /// @brief Returns the current version of the server.
         virtual QString                     getServerVersion() const = 0;
         /// @brief Returns the server language (en for english, fr for france...).

@@ -38,8 +38,9 @@ public:
     void                        stop();
     void                        restart();
     const QString               &getId() const;
-    QString                     getServerVersion() const;
     const QString               &getPluginPath() const;
+    const QString               &getResourcesPath() const;
+    QString                     getServerVersion() const;
     QString                     getLanguage() const;
 
 private:
@@ -49,6 +50,7 @@ private:
 
     QString                     id;                 ///< The id of the plugin for which the object has been created.
     QString                     pluginPath;         ///< The path to the plugin that own this object.
+    QString                     resourcesPath;      ///< The plugin resources path.
     LightBird::IConfiguration   &configurationApi;  ///< The instance of the configuration api.
     ApiDatabase                 databaseApi;        ///< The instance of the database api.
     ApiEvents                   *eventsApi;         ///< The instance of the events api.

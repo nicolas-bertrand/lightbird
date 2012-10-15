@@ -24,6 +24,7 @@ Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event
         this->timersApi = new ApiTimers(this->id, this);
     // Set the plugin path
     this->pluginPath = Configurations::instance()->get("pluginsPath") + "/" + this->id + "/";
+    this->resourcesPath = QString(PLUGINS_RESOURCES_PATH) + "/" + this->id;
 }
 
 Api::~Api()
@@ -112,14 +113,19 @@ const QString               &Api::getId() const
     return (this->id);
 }
 
-QString                     Api::getServerVersion() const
-{
-    return (VERSION);
-}
-
 const QString               &Api::getPluginPath() const
 {
     return (this->pluginPath);
+}
+
+const QString               &Api::getResourcesPath() const
+{
+    return (this->resourcesPath);
+}
+
+QString                     Api::getServerVersion() const
+{
+    return (VERSION);
 }
 
 QString                     Api::getLanguage() const
