@@ -66,7 +66,7 @@ private:
     QString             keyFile;            ///< The name of the key file.
     gnutls_dh_params_t  dhParams;
     QString             dhParamsFile;       ///< The name of the file that stores the DH params cache.
-    gnutls_sec_param_t  secParam;           ///< The security level of the DH params (GNUTLS_SEC_PARAM_*).
+    gnutls_sec_param_t  secParam;           ///< Security parameters for passive attacks (GNUTLS_SEC_PARAM_*).
     QDateTime           dhParamsExpiration; ///< The expiration date of the DH params.
     gnutls_priority_t   priority;
     int                 handshakeTimeout;   ///< The maximum duration of the handshake.

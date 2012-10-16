@@ -15,7 +15,7 @@
   <!-- The name of the file that will store the dh_params. The security level
        is inserted before the extension (dh_params.hight.pem). -->
   <dh_params>dh_params.pem</dh_params>
-  <!-- The security level of the DH params (GNUTLS_SEC_PARAM_*) -->
+  <!-- Security parameters for passive attacks (GNUTLS_SEC_PARAM_*). -->
   <sec_param>HIGH</sec_param>
   <!-- The expiration of the DH params in days. -->
   <dh_params_expiration>90</dh_params_expiration>

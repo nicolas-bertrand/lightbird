@@ -250,20 +250,38 @@ void    Plugin::_loadConfiguration()
 
 bool    Plugin::_generatePrivateKey()
 {
-    QFile                   file(this->keyFile);
-    gnutls_x509_privkey_t   key;
-    int                     bits;
-    size_t                  size;
-    QByteArray              data;
+    QFile                 file(this->keyFile);
+    gnutls_x509_privkey_t key;
+    int                   bits;
+    size_t                size;
+    QByteArray            data;
+    gnutls_datum_t        datum;
+    int                   error;
 
+    if (gnutls_x509_privkey_init(&key) != GNUTLS_E_SUCCESS)
+        return (false);
     if (!file.open(QIODevice::ReadWrite))
         return (false);
+    // Checks that the private key is valid
+    if (file.size() > 0)
+    {
+        data = file.readAll();
+        datum.size = data.size();
+        datum.data = (unsigned char *)data.data();
+        if ((error = gnutls_x509_privkey_import(key, &datum, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+        {
+            this->api->log().error("Invalid private key", Properties("error", gnutls_strerror(error)).toMap(), "Plugin", "_generatePrivateKey");
+            file.resize(0);
+        }
+        else if (gnutls_x509_privkey_sec_param(key) != this->secParam)
+            file.resize(0);
+    }
+    // Generates the private key
     if (file.size() == 0)
     {
-        if (gnutls_x509_privkey_init(&key) != GNUTLS_E_SUCCESS)
-            return (false);
         if ((bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_RSA, this->secParam)) == 0)
             return (false);
+        this->api->log().info("Generating a new private key", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generatePrivateKey");
         if (gnutls_x509_privkey_generate(key, GNUTLS_PK_RSA, bits, 0) != GNUTLS_E_SUCCESS)
             return (false);
         if (gnutls_x509_privkey_verify_params(key) != GNUTLS_E_SUCCESS)
@@ -274,8 +292,8 @@ bool    Plugin::_generatePrivateKey()
             return (false);
         data.resize(size);
         file.write(data);
-        gnutls_x509_privkey_deinit(key);
     }
+    gnutls_x509_privkey_deinit(key);
     return (true);
 }
 
@@ -294,8 +312,7 @@ bool                Plugin::_generateDHParams()
         return (false);
     // The DH parameters expired
     if (QFileInfo(file).created() < this->dhParamsExpiration)
-        file.remove();
-    this->api->log().fatal(this->dhParamsExpiration.toString(DATE_FORMAT));
+        file.resize(0);
     // Import the DH params from the PEM file
     if (file.size() > 0)
     {
@@ -303,7 +320,7 @@ bool                Plugin::_generateDHParams()
         datum.data = (unsigned char *)data.data();
         datum.size = data.size();
         if (gnutls_dh_params_import_pkcs3(this->dhParams, &datum, GNUTLS_X509_FMT_PEM) != GNUTLS_E_SUCCESS)
-            file.remove();
+            file.resize(0);
     }
     // Generates the DH params and store them in a PEM file
     if (file.size() == 0)
@@ -311,7 +328,7 @@ bool                Plugin::_generateDHParams()
         data.resize(bits);
         datum.data = (unsigned char *)data.data();
         datum.size = bits;
-        this->api->log().info("Generating new DH params. This might take some time.", Properties("secParam", this->secParam).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
+        this->api->log().info("Generating new DH params. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
         if (gnutls_dh_params_generate2(this->dhParams, bits) != GNUTLS_E_SUCCESS)
             return (false);
         if ((gnutls_dh_params_export_pkcs3(this->dhParams, GNUTLS_X509_FMT_PEM, datum.data, &datum.size)) != GNUTLS_E_SUCCESS)
