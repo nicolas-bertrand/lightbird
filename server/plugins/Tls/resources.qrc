@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/Tls">
+        <file alias="configuration">Configuration.xml</file>
+    </qresource>
+</RCC>
