@@ -52,25 +52,33 @@ public:
 
 private:
     /// @brief Loads the configuration of the plugin.
-    void    _loadConfiguration();
-    bool    _generatePrivateKey();
+    void        _loadConfiguration();
+    /// @brief Checks the RSA private key, and generate it if necessary.
+    bool        _generatePrivateKey();
+    /// @brief Generates a self-signed x.509 certificate based on the private key.
+    bool        _generateCertificate();
     /// @brief Generate Diffie-Hellman parameters. For use with DHE kx algorithms.
     /// When short bit length is used, it might be wise to regenerate parameters often.
     /// @return False if an error occured.
-    bool    _generateDHParams();
+    bool        _generateDHParams();
+    /// @brief Generates a 16 bytes random serial number for the x.509 certificate.
+    QByteArray  _generateSerial();
 
-    static Plugin       *instance;
-    LightBird::IApi     *api;
+    static Plugin         *instance;
+    LightBird::IApi       *api;
     gnutls_certificate_credentials_t x509_cred;
-    QString             certFile;           ///< The name of the certificate file.
-    QString             keyFile;            ///< The name of the key file.
-    gnutls_dh_params_t  dhParams;
-    QString             dhParamsFile;       ///< The name of the file that stores the DH params cache.
-    gnutls_sec_param_t  secParam;           ///< Security parameters for passive attacks (GNUTLS_SEC_PARAM_*).
-    QDateTime           dhParamsExpiration; ///< The expiration date of the DH params.
-    gnutls_priority_t   priority;
-    int                 handshakeTimeout;   ///< The maximum duration of the handshake.
-    QReadWriteLock      mutex;
+    gnutls_x509_crt_t     crt;                ///< The x.509 certificate.
+    gnutls_x509_privkey_t key;                ///< The RSA private key.
+    QString               crtFile;            ///< The name of the certificate file.
+    QString               keyFile;            ///< The name of the key file.
+    gnutls_dh_params_t    dhParams;
+    QString               dhParamsFile;       ///< The name of the file that stores the DH params cache.
+    QDateTime             dhParamsExpiration; ///< The expiration date of the DH params.
+    gnutls_sec_param_t    secParam;           ///< Security parameters for passive attacks (GNUTLS_SEC_PARAM_*).
+    gnutls_priority_t     priority;
+    QByteArray            priorityStrings;    ///< The priority strings for the handshake algorithms.
+    int                   handshakeTimeout;   ///< The maximum duration of the handshake.
+    QReadWriteLock        mutex;
     QHash<int, LightBird::IClient *> clients;
 };
 

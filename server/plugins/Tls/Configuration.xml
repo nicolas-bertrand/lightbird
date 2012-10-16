@@ -7,8 +7,11 @@
       <protocol>TLS</protocol>
     </context>
   </contexts>
-  <!-- The name of the self-signed certificate used to authenticate the server. -->
-  <cert>cert.pem</cert>
+  <!-- Sets the TLS handshake algorithms allowed by the server.
+       See GnuTLS priority strings for details. -->
+  <priority_strings>SECURE128:-VERS-SSL3.0:%SERVER_PRECEDENCE</priority_strings>
+  <!-- The name of the self-signed x.509 certificate used to authenticate the server. -->
+  <crt>crt.pem</crt>
   <!-- The name of the private key file, used to sign the certificate.
        This file must not be keeped secret. -->
   <key>key.pem</key>

@@ -8,4 +8,5 @@ SUBDIRS = Example \
     Json/QJson \
     Json \
     Log \
-    Test
+    Test \
+#   Tls
