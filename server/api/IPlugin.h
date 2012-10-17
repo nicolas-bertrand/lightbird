@@ -16,7 +16,8 @@ namespace LightBird
         /// @param api : The LightBird APIs. Allows plugins to access to the server APIs. This pointer
         /// should be kept by the plugins to be used later. The address of the API is valid during
         /// all the time where the plugin is loaded, so it can be safely stored.
-        /// @return True if the plugin have been correclty loaded.
+        /// @return True if the plugin have been correclty loaded. Notice that onUnload is not called
+        /// when onLoad returns false.
         virtual bool    onLoad(LightBird::IApi *api) = 0;
         /// @brief Called when the plugin is unloading. The plugins must stop all its jobs as soon as
         /// possible, or it can be killed.

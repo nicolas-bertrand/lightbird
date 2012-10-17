@@ -66,14 +66,18 @@ public:
 private:
     /// @brief Loads the configuration of the plugin.
     void        _loadConfiguration();
-    /// @brief Checks the RSA private key, and generate it if necessary.
-    bool        _loadPrivateKey();
-    /// @brief Generates a self-signed X.509 certificate based on the private key.
-    bool        _loadCertificate();
-    /// @brief Generates Diffie-Hellman parameters. For use with DHE kx algorithms.
-    bool        _loadDHParams();
+    /// @brief Loads the RSA private key, and generates it if necessary.
+    void        _loadPrivateKey();
+    /// @brief Loads the self-signed X.509 certificate based on the private key,
+    /// and generates it if necessary.
+    void        _loadCertificate();
+    /// @brief Loads the Diffie-Hellman parameters for use with DHE kx algorithms,
+    /// and generates them if necessary.
+    void        _loadDHParams();
     /// @brief Generates a 16 bytes random serial number for the X.509 certificate.
     QByteArray  _generateSerial();
+    /// @brief Deinit all the structures allocated by GnuTLS.
+    void        _deinit();
 
     static Plugin         *instance;            ///< Allows the static methods to access the plugin.
     LightBird::IApi       *api;                 ///< The LightBird Api.
@@ -89,8 +93,23 @@ private:
     QString               dhParamsFile;         ///< The name of the file that stores the Diffie-Hellman parameters cache.
     QDateTime             dhParamsExpiration;   ///< The expiration of the Diffie-Hellman parameters.
     int                   handshakeTimeout;     ///< The maximum duration of the handshake.
-    QReadWriteLock        mutex;                ///< Makes the clients hash thread safe.
+    QReadWriteLock        mutex;                ///< Makes this->clients thread safe.
     QHash<int, LightBird::IClient *> clients;   ///< Associates a socket descriptor with its IClient.
+    QStringList           init;                 ///< The list of the GnuTLS structures initialized.
 };
+
+// Throws an exception if the gnutls call failed
+# define ASSERT(GNUTLS_FUNC) \
+if ((error = GNUTLS_FUNC) != GNUTLS_E_SUCCESS) \
+    throw Properties("error", gnutls_strerror(error)).add("line", __LINE__); \
+else (void)0
+
+// Throws an exception if the gnutls_init call failed.
+// Otherwise marks the structure as initialized.
+# define ASSERT_INIT(GNUTLS_FUNC, STRUCT) \
+if ((error = GNUTLS_FUNC) != GNUTLS_E_SUCCESS) \
+    throw Properties("error", gnutls_strerror(error)).add("line", __LINE__); \
+else \
+    this->init << STRUCT
 
 #endif // PLUGIN_H
