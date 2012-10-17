@@ -105,9 +105,6 @@ void        Client::run()
             // While run() returns true, the engine continues to run
             if (this->engine->run())
                 newTask = Client::RUN;
-            // Otherwise we try to get more data
-            else if (this->data.isEmpty())
-                this->reading = true;
             // The processing is paused while data are being written on the network
             if (this->writing)
                 return (this->_write(newTask));
@@ -191,6 +188,9 @@ void            Client::bytesRead()
 
     if (!mutex || !this->running || this->state != Client::READING)
         return ;
+    // All the data have not been read
+    if (this->socket->size() > 0)
+        this->reading = true;
     this->_newTask(Client::READ);
 }
 
