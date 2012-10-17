@@ -74,7 +74,7 @@ void        Client::run()
                       .add("peerPort", this->peerPort), "Client", "run");
             // If the client is not allowed to connect, it is disconnected
             if (!this->_onConnect())
-                newTask = Client::DISCONNECT;
+                return this->_finish();
             break;
 
         case Client::READING :
@@ -116,7 +116,6 @@ void        Client::run()
             break;
 
         case Client::DISCONNECT :
-            this->finish = false;
             if (this->_onDisconnect())
                 // The client is destroyed now
                 return this->_finish();
@@ -137,7 +136,7 @@ void        Client::run()
     if (!this->informationsRequests.isEmpty())
         this->_getInformations();
     // The client must be disconnected
-    if (this->finish)
+    if (this->finish && !this->disconnecting)
     {
         this->oldTask = newTask;
         newTask = Client::DISCONNECT;
