@@ -41,47 +41,56 @@ public:
     void    getMetadata(LightBird::IMetadata &metadata) const;
 
     // Network
+    /// @brief Runs the handshake.
     bool    onConnect(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
+    /// @brief Reads and decrypts data from the socket.
     bool    doRead(LightBird::IClient &client, QByteArray &data);
+    /// @brief Encrypts and writes data on the socket.
     qint64  doWrite(LightBird::IClient &client, const char *data, qint64 size);
 
     // Callbacks
+    /// @brief Reads data from the QTcpSocket. Called during the handshake.
     static ssize_t handshake_pull(gnutls_transport_ptr_t socketDescriptor, void *data, size_t size);
+    /// @brief Writes data directly on the socket using send. This is needed
+    /// because data can only be written using QTcpSocket from the thread where
+    /// the object lives. Called during the handshake.
     static ssize_t handshake_push(gnutls_transport_ptr_t socketDescriptor, const void *data, size_t size);
+    /// @brief Reads encrypted data from the QTcpSocket. Called indirectly by doRead.
     static ssize_t record_pull(gnutls_transport_ptr_t socketDescriptor, void *data, size_t size);
+    /// @brief Writes encrypted data on the QTcpSocket. Called indirectly by doWrite.
     static ssize_t record_push(gnutls_transport_ptr_t socketDescriptor, const void *data, size_t size);
+    /// @brief Receives GnuTLS logs.
+    static void    log(gnutls_session_t session, const char *log);
 
 private:
     /// @brief Loads the configuration of the plugin.
     void        _loadConfiguration();
     /// @brief Checks the RSA private key, and generate it if necessary.
-    bool        _generatePrivateKey();
+    bool        _loadPrivateKey();
     /// @brief Generates a self-signed X.509 certificate based on the private key.
-    bool        _generateCertificate();
-    /// @brief Generate Diffie-Hellman parameters. For use with DHE kx algorithms.
-    /// When short bit length is used, it might be wise to regenerate parameters often.
-    /// @return False if an error occured.
-    bool        _generateDHParams();
+    bool        _loadCertificate();
+    /// @brief Generates Diffie-Hellman parameters. For use with DHE kx algorithms.
+    bool        _loadDHParams();
     /// @brief Generates a 16 bytes random serial number for the X.509 certificate.
     QByteArray  _generateSerial();
 
-    static Plugin         *instance;
-    LightBird::IApi       *api;
-    gnutls_certificate_credentials_t x509_cred;
-    gnutls_x509_crt_t     crt;                ///< The X.509 certificate.
-    gnutls_x509_privkey_t key;                ///< The RSA private key.
-    QString               crtFile;            ///< The name of the certificate file.
-    QString               keyFile;            ///< The name of the key file.
-    gnutls_dh_params_t    dhParams;
-    QString               dhParamsFile;       ///< The name of the file that stores the DH params cache.
-    QDateTime             dhParamsExpiration; ///< The expiration date of the DH params.
-    gnutls_sec_param_t    secParam;           ///< Security parameters for passive attacks (GNUTLS_SEC_PARAM_*).
-    gnutls_priority_t     priority;
-    QByteArray            priorityStrings;    ///< The priority strings for the handshake algorithms.
-    int                   handshakeTimeout;   ///< The maximum duration of the handshake.
-    QReadWriteLock        mutex;
-    QHash<int, LightBird::IClient *> clients;
+    static Plugin         *instance;            ///< Allows the static methods to access the plugin.
+    LightBird::IApi       *api;                 ///< The LightBird Api.
+    gnutls_priority_t     priority;             ///< The priority strings for the handshake algorithms.
+    gnutls_sec_param_t    secParam;             ///< Security parameters for passive attacks.
+    gnutls_x509_crt_t     crt;                  ///< The X.509 certificate.
+    gnutls_x509_privkey_t key;                  ///< The RSA private key.
+    gnutls_certificate_credentials_t x509_cred; ///< The X.509 certificate associated with its private key.
+    QString               crtFile;              ///< The name of the certificate file.
+    QString               keyFile;              ///< The name of the key file.
+    gnutls_dh_params_t    dhParams;             ///< The Diffie-Hellman parameters.
+    QByteArray            priorityStrings;      ///< The handshake algorithms allowed by the server.
+    QString               dhParamsFile;         ///< The name of the file that stores the Diffie-Hellman parameters cache.
+    QDateTime             dhParamsExpiration;   ///< The expiration of the Diffie-Hellman parameters.
+    int                   handshakeTimeout;     ///< The maximum duration of the handshake.
+    QReadWriteLock        mutex;                ///< Makes the clients hash thread safe.
+    QHash<int, LightBird::IClient *> clients;   ///< Associates a socket descriptor with its IClient.
 };
 
 #endif // PLUGIN_H

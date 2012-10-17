@@ -31,16 +31,16 @@ bool        Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
     this->_loadConfiguration();
-    // Initializes GnuTLS
     if (gnutls_global_init() != GNUTLS_E_SUCCESS)
         return (false);
     if (!gnutls_check_version(GNUTLS_CHECK_VERSION))
         return (false);
-    if (!this->_generatePrivateKey())
+    gnutls_global_set_audit_log_function(Plugin::log);
+    if (!this->_loadPrivateKey())
         return (false);
-    if (!this->_generateCertificate())
+    if (!this->_loadCertificate())
         return (false);
-    if (!this->_generateDHParams())
+    if (!this->_loadDHParams())
         return (false);
     if (gnutls_certificate_allocate_credentials(&this->x509_cred) != GNUTLS_E_SUCCESS)
         return (false);
@@ -54,6 +54,7 @@ bool        Plugin::onLoad(LightBird::IApi *api)
 
 void    Plugin::onUnload()
 {
+    gnutls_priority_deinit(this->priority);
     gnutls_dh_params_deinit(this->dhParams);
     gnutls_x509_privkey_deinit(this->key);
     gnutls_x509_crt_deinit(this->crt);
@@ -103,6 +104,7 @@ bool    Plugin::onConnect(LightBird::IClient &client)
     gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t)client.getSocket().socketDescriptor());
     gnutls_transport_set_pull_function(session, Plugin::handshake_pull);
     gnutls_transport_set_push_function(session, Plugin::handshake_push);
+    // Starts the handshake
     timeout.start();
     do
     {
@@ -143,10 +145,7 @@ bool    Plugin::doRead(LightBird::IClient &client, QByteArray &data)
     result = gnutls_record_recv(client.getInformations().value("gnutls_session").value<gnutls_session_t>(), data.data(), 1024);
     data.resize(result);
     if (result < 0)
-    {
-        this->api->log().fatal(QString("doRead : ") + gnutls_strerror(result));
         return (false);
-    }
     return (true);
 }
 
@@ -167,7 +166,6 @@ ssize_t Plugin::handshake_pull(gnutls_transport_ptr_t socketDescriptor, void *da
     client = Plugin::instance->clients.value((int)socketDescriptor);
     Plugin::instance->mutex.unlock();
     ssize_t result = client->getSocket().read((char *)data, size);
-    //Plugin::instance->api->log().fatal("handshake_pull " + QString::number(result) + " " + QString::number(size));
     // If no data was received, we adopt the non-blocking behavior of recv
     if (result == 0 && size > 0)
     {
@@ -185,7 +183,6 @@ ssize_t Plugin::handshake_push(gnutls_transport_ptr_t socketDescriptor, const vo
     client = Plugin::instance->clients.value((int)socketDescriptor);
     Plugin::instance->mutex.unlock();
     ssize_t result = send((SOCKET)socketDescriptor, (char *)data, size, 0);
-    //Plugin::instance->api->log().fatal("handshake_push " + QString::number(result) + " " + QString::number(size));
     return (result);
 }
 
@@ -197,7 +194,6 @@ ssize_t Plugin::record_pull(gnutls_transport_ptr_t socketDescriptor, void *data,
     client = Plugin::instance->clients.value((int)socketDescriptor);
     Plugin::instance->mutex.unlock();
     ssize_t result = client->getSocket().read((char *)data, size);
-    //Plugin::instance->api->log().fatal("record_pull " + QString::number(result) + " " + QString::number(size));
     // If no data was received, we adopt the non-blocking behavior of recv
     if (result == 0 && size > 0)
     {
@@ -215,8 +211,12 @@ ssize_t Plugin::record_push(gnutls_transport_ptr_t socketDescriptor, const void 
     client = Plugin::instance->clients.value((int)socketDescriptor);
     Plugin::instance->mutex.unlock();
     ssize_t result = client->getSocket().write((char *)data, size);
-    //Plugin::instance->api->log().fatal("record_push " + QString::number(result) + " " + QString::number(size));
     return (result);
+}
+
+void    Plugin::log(gnutls_session_t, const char *log)
+{
+    Plugin::instance->api->log().debug("GnuTLS log: " + QString(log), "Plugin", "log");
 }
 
 void    Plugin::_loadConfiguration()
@@ -231,7 +231,7 @@ void    Plugin::_loadConfiguration()
     secParams.insert("HIGH", GNUTLS_SEC_PARAM_HIGH);
     secParams.insert("ULTRA", GNUTLS_SEC_PARAM_ULTRA);
     if ((this->priorityStrings = this->api->configuration(true).get("priority_strings").toAscii()).isEmpty())
-        this->priorityStrings = "SECURE128:-VERS-SSL3.0:%SERVER_PRECEDENCE";
+        this->priorityStrings = "SECURE128:-VERS-SSL3.0";
     if ((this->crtFile = this->api->configuration(true).get("crt")).isEmpty())
         this->crtFile = "crt.pem";
     if ((this->keyFile = this->api->configuration(true).get("key")).isEmpty())
@@ -255,7 +255,7 @@ void    Plugin::_loadConfiguration()
         this->dhParamsFile.append("." + secParams.key(this->secParam).toLower());
 }
 
-bool    Plugin::_generatePrivateKey()
+bool    Plugin::_loadPrivateKey()
 {
     QFile                 file(this->keyFile);
     int                   bits;
@@ -302,7 +302,7 @@ bool    Plugin::_generatePrivateKey()
     return (true);
 }
 
-bool    Plugin::_generateCertificate()
+bool    Plugin::_loadCertificate()
 {
     QFile            file(this->crtFile);
     gnutls_datum_t   datum;
@@ -399,7 +399,7 @@ bool    Plugin::_generateCertificate()
     return (true);
 }
 
-bool                Plugin::_generateDHParams()
+bool                Plugin::_loadDHParams()
 {
     QByteArray      data;
     QFile           file(this->dhParamsFile);
@@ -412,10 +412,10 @@ bool                Plugin::_generateDHParams()
         return (false);
     if (!file.open(QIODevice::ReadWrite))
         return (false);
-    // The DH parameters expired
+    // The Diffie-Hellman parameters expired
     if (QFileInfo(file).created() < this->dhParamsExpiration)
         file.resize(0);
-    // Import the DH params from the PEM file
+    // Import the DH parameters from the PEM file
     if (file.size() > 0)
     {
         data = file.readAll();
@@ -424,10 +424,10 @@ bool                Plugin::_generateDHParams()
         if (gnutls_dh_params_import_pkcs3(this->dhParams, &datum, GNUTLS_X509_FMT_PEM) != GNUTLS_E_SUCCESS)
             file.resize(0);
     }
-    // Generates the DH params and store them in a PEM file
+    // Generates the DH parameters and store them in a PEM file
     if (file.size() == 0)
     {
-        this->api->log().info("Generating new DH params. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
+        this->api->log().info("Generating new Diffie-Hellman parameters. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
         data.resize(bits);
         datum.data = (unsigned char *)data.data();
         datum.size = bits;
