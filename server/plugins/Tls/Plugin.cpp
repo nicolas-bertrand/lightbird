@@ -305,11 +305,12 @@ bool    Plugin::_generatePrivateKey()
 bool    Plugin::_generateCertificate()
 {
     QFile            file(this->crtFile);
-    gnutls_pubkey_t  pubkey;
-    gnutls_privkey_t privkey;
-    QByteArray       serial;
+    gnutls_datum_t   datum;
     unsigned int     size = 2048;
-    QByteArray       data(size, 0);
+    QByteArray       data;
+    gnutls_privkey_t privkey;
+    gnutls_pubkey_t  pubkey;
+    gnutls_pubkey_t  pubkeyCrt;
     QMap<char *, QByteArray> oid;
     gnutls_digest_algorithm_t digest;
 
@@ -325,42 +326,74 @@ bool    Plugin::_generateCertificate()
         return (false);
     if (gnutls_pubkey_import_privkey(pubkey, privkey, 0, 0) != GNUTLS_E_SUCCESS)
         return (false);
-    oid.insert((char *)GNUTLS_OID_X520_COMMON_NAME, "LightBird");
-    oid.insert((char *)GNUTLS_OID_X520_ORGANIZATION_NAME, "LightBird");
-    QMapIterator<char *, QByteArray> it(oid);
-    while (it.hasNext())
-        if (gnutls_x509_crt_set_dn_by_oid(this->crt, it.key(), 0, it.value().data(), it.next().value().size()) != GNUTLS_E_SUCCESS)
+    // Verifies that the certificate is valid
+    if (file.size() > 0)
+    {
+        if (gnutls_pubkey_init(&pubkeyCrt) != GNUTLS_E_SUCCESS)
             return (false);
-    if (gnutls_x509_crt_set_pubkey(this->crt, pubkey) != GNUTLS_E_SUCCESS)
-        return (false);
-    serial = this->_generateSerial();
-    if (gnutls_x509_crt_set_serial(this->crt, serial.data(), serial.size()) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_activation_time(this->crt, time(NULL)) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_expiration_time(this->crt, time(NULL) + 360 * 24 * 60 * 60) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_basic_constraints(this->crt, 0, -1) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_key_purpose_oid(this->crt, GNUTLS_KP_TLS_WWW_SERVER, 0) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_key_usage(this->crt, GNUTLS_KEY_DIGITAL_SIGNATURE | GNUTLS_KEY_KEY_ENCIPHERMENT) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_get_key_id(this->crt, 0, (unsigned char *)data.data(), &size) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_subject_key_id(this->crt, (unsigned char *)data.data(), size) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_set_version(this->crt, 3) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_pubkey_get_preferred_hash_algorithm(pubkey, &digest, NULL) != GNUTLS_E_SUCCESS)
-        return (false);
-    if (gnutls_x509_crt_privkey_sign(this->crt, this->crt, privkey, digest, 0) != GNUTLS_E_SUCCESS)
-        return (false);
-    size = data.size();
-    if (gnutls_x509_crt_export(this->crt, GNUTLS_X509_FMT_PEM, data.data(), &size) != GNUTLS_E_SUCCESS)
-        return (false);
-    data.resize(size);
-    file.write(data);
+        data = file.readAll();
+        datum.size = data.size();
+        datum.data = (unsigned char *)data.data();
+        if (gnutls_x509_crt_import(this->crt, &datum, GNUTLS_X509_FMT_PEM) != GNUTLS_E_SUCCESS)
+            file.resize(0);
+        else if (gnutls_x509_crt_get_expiration_time(this->crt) < ::time(NULL) + CRT_EXPIRATION_REGEN)
+            file.resize(0);
+        else if (gnutls_pubkey_import_x509(pubkeyCrt, this->crt, 0) != GNUTLS_E_SUCCESS)
+            file.resize(0);
+        // Ensures that the public keys of the certificate and the private key match
+        unsigned int size1 = size, size2 = size;
+        QByteArray pub1(size1, 0), pub2(size2, 0);
+        if (gnutls_pubkey_export(pubkey, GNUTLS_X509_FMT_PEM, pub1.data(), &size1) != GNUTLS_E_SUCCESS
+            || gnutls_pubkey_export(pubkeyCrt, GNUTLS_X509_FMT_PEM, pub2.data(), &size2) != GNUTLS_E_SUCCESS
+            || size1 != size2 || pub1 != pub2)
+            file.resize(0);
+        gnutls_pubkey_deinit(pubkeyCrt);
+    }
+    // Generates a new certificate
+    if (file.size() == 0)
+    {
+        gnutls_x509_crt_deinit(this->crt);
+        if (gnutls_x509_crt_init(&this->crt) != GNUTLS_E_SUCCESS)
+            return (false);
+        this->api->log().info("Generating a new certificate", "Plugin", "_generateCertificate");
+        oid.insert((char *)GNUTLS_OID_X520_COMMON_NAME, "LightBird");
+        oid.insert((char *)GNUTLS_OID_X520_ORGANIZATION_NAME, "LightBird");
+        QMapIterator<char *, QByteArray> it(oid);
+        while (it.hasNext())
+            if (gnutls_x509_crt_set_dn_by_oid(this->crt, it.key(), 0, it.value().data(), it.next().value().size()) != GNUTLS_E_SUCCESS)
+                return (false);
+        if (gnutls_x509_crt_set_pubkey(this->crt, pubkey) != GNUTLS_E_SUCCESS)
+            return (false);
+        data = this->_generateSerial();
+        if (gnutls_x509_crt_set_serial(this->crt, data.data(), data.size()) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_activation_time(this->crt, ::time(NULL)) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_expiration_time(this->crt, ::time(NULL) + CRT_EXPIRATION) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_basic_constraints(this->crt, 0, -1) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_key_purpose_oid(this->crt, GNUTLS_KP_TLS_WWW_SERVER, 0) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_key_usage(this->crt, GNUTLS_KEY_DIGITAL_SIGNATURE | GNUTLS_KEY_KEY_ENCIPHERMENT) != GNUTLS_E_SUCCESS)
+            return (false);
+        data.resize(size);
+        if (gnutls_x509_crt_get_key_id(this->crt, 0, (unsigned char *)data.data(), &size) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_subject_key_id(this->crt, (unsigned char *)data.data(), size) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_set_version(this->crt, 3) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_pubkey_get_preferred_hash_algorithm(pubkey, &digest, NULL) != GNUTLS_E_SUCCESS)
+            return (false);
+        if (gnutls_x509_crt_privkey_sign(this->crt, this->crt, privkey, digest, 0) != GNUTLS_E_SUCCESS)
+            return (false);
+        size = data.size();
+        if (gnutls_x509_crt_export(this->crt, GNUTLS_X509_FMT_PEM, data.data(), &size) != GNUTLS_E_SUCCESS)
+            return (false);
+        data.resize(size);
+        file.write(data);
+    }
     gnutls_pubkey_deinit(pubkey);
     gnutls_privkey_deinit(privkey);
     return (true);
@@ -394,10 +427,10 @@ bool                Plugin::_generateDHParams()
     // Generates the DH params and store them in a PEM file
     if (file.size() == 0)
     {
+        this->api->log().info("Generating new DH params. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
         data.resize(bits);
         datum.data = (unsigned char *)data.data();
         datum.size = bits;
-        this->api->log().info("Generating new DH params. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
         if (gnutls_dh_params_generate2(this->dhParams, bits) != GNUTLS_E_SUCCESS)
             return (false);
         if ((gnutls_dh_params_export_pkcs3(this->dhParams, GNUTLS_X509_FMT_PEM, datum.data, &datum.size)) != GNUTLS_E_SUCCESS)

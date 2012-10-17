@@ -11,7 +11,9 @@
 # include "IDoRead.h"
 # include "IDoWrite.h"
 
-# define GNUTLS_CHECK_VERSION "3.1.2"
+# define GNUTLS_CHECK_VERSION "3.1.2"            // The GnuTLS version used by the current implementation of the plugin.
+# define CRT_EXPIRATION       360 * 24 * 60 * 60 // The number of seconds of validity of the certificate.
+# define CRT_EXPIRATION_REGEN 7 * 24 * 60 * 60   // The number of seconds before the expiration of the certificate after which it is regenerated.
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -55,19 +57,19 @@ private:
     void        _loadConfiguration();
     /// @brief Checks the RSA private key, and generate it if necessary.
     bool        _generatePrivateKey();
-    /// @brief Generates a self-signed x.509 certificate based on the private key.
+    /// @brief Generates a self-signed X.509 certificate based on the private key.
     bool        _generateCertificate();
     /// @brief Generate Diffie-Hellman parameters. For use with DHE kx algorithms.
     /// When short bit length is used, it might be wise to regenerate parameters often.
     /// @return False if an error occured.
     bool        _generateDHParams();
-    /// @brief Generates a 16 bytes random serial number for the x.509 certificate.
+    /// @brief Generates a 16 bytes random serial number for the X.509 certificate.
     QByteArray  _generateSerial();
 
     static Plugin         *instance;
     LightBird::IApi       *api;
     gnutls_certificate_credentials_t x509_cred;
-    gnutls_x509_crt_t     crt;                ///< The x.509 certificate.
+    gnutls_x509_crt_t     crt;                ///< The X.509 certificate.
     gnutls_x509_privkey_t key;                ///< The RSA private key.
     QString               crtFile;            ///< The name of the certificate file.
     QString               keyFile;            ///< The name of the key file.
