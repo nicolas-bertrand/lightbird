@@ -201,8 +201,10 @@ function List()
         else
             $(self.list).addClass("scroll");
         self.list.scrollTop = 0;
+		// Displays the files
         for (var i = 0; i < resource.files.length; i++)
-            self.addRow(-1, i);
+            self.addRow(i, i);
+        self.addEmptyRows();
     }
     
     // Updates the width of the columns.
@@ -262,6 +264,8 @@ function List()
         }
         else
             $(self.list).addClass("scroll");
+        // Ensures that the list is always filled with rows
+        self.addEmptyRows();
     }
     
     // Adds a row at the given position.
@@ -269,37 +273,48 @@ function List()
     // @param absolute : The absolute position of the row in the list, which includes the rows that are not visible.
     self.addRow = function (relative, absolute)
     {
+        var isFile = absolute < resource.files.length;
+        
         // Creates the row
         var row = self.table.insertRow(relative);
         $(row).addClass(absolute % 2 ? "even" : "odd");
         // The first cell is the type of the file
-        var type = resource.files[absolute].type;
-        var firstCell = 0;
-        if (!row.previousSibling || !$(row.previousSibling).hasClass(type))
+        if (isFile)
         {
-            var cell = $(row.insertCell(-1)).addClass("type")[0];
-            for (var i = absolute; i < resource.files.length && resource.files[i].type == type; ++i)
-                ;
-            cell.rowSpan = i - absolute;
-            firstCell = 1;
+            var type = resource.files[absolute].type;
+            var firstCell = 0;
+            if (!row.previousSibling || !$(row.previousSibling).hasClass(type))
+            {
+                var cell = $(row.insertCell(-1)).addClass("type")[0];
+                for (var i = absolute; i < resource.files.length && resource.files[i].type == type; ++i)
+                    ;
+                cell.rowSpan = i - absolute;
+                firstCell = 1;
+            }
+        }
+        else
+        {
+            $(row).addClass("empty");
+            $(row.insertCell(-1));
         }
         // Builds the other cells
         var columns = resource.header.getColumns();
         for (var i = 0; i <= columns.length; ++i)
             row.insertCell(-1);
         // If the row represents a file we fill its cells
-        if (absolute >= resource.files.length)
-            return ;
-        $(row).addClass(resource.files[absolute].type);
-        $(row.cells[firstCell]).addClass("first");
-        for (var i = 0; i < columns.length; ++i)
+        if (isFile)
         {
-            var cell = row.cells[i + firstCell];
-            cell.name = columns[i].originalName;
-            cell.originalText = resource.layout.convert(columns[i].originalName, resource.files[absolute][columns[i].originalName]);
-            cell.innerHTML = cell.originalText;
-            if (columns[i].align != "left")
-                cell.align = columns[i].align;
+            $(row).addClass(resource.files[absolute].type);
+            $(row.cells[firstCell]).addClass("first");
+            for (var i = 0; i < columns.length; ++i)
+            {
+                var cell = row.cells[i + firstCell];
+                cell.name = columns[i].originalName;
+                cell.originalText = resource.layout.convert(columns[i].originalName, resource.files[absolute][columns[i].originalName]);
+                cell.innerHTML = cell.originalText;
+                if (columns[i].align != "left")
+                    cell.align = columns[i].align;
+            }
         }
     }
 
@@ -308,11 +323,10 @@ function List()
     {
         if (e.which != 1)
             return ;
-        // Gets the selected file by the user
+        // Gets the file selected by the user
         var file = e.target;
         for (var i = 0; i < 3 && file.tagName.toLowerCase() != "tr"; ++i, file = file.parentNode)
             ;
-        console.log(i);
         // If the event is directly on the table we use an other way to get the selected file
         if (e.target == self.table)
         {
@@ -322,33 +336,43 @@ function List()
             else
                 return ;
         }
-        // Selects or deselects a file
-        if (e.ctrlKey == true)
+        // The row is empty
+        if ($(file).hasClass("empty"))
         {
-            for (i in self.selectedFiles)
-                if (self.selectedFiles[i] == file)
-                {
-                    delete self.selectedFiles[i];
-                    $(file).removeClass("selected");
-                    self.lastFileSelected = file;
-                    return ;
-                }
-            self.selectedFiles[self.index++] = file;
-            $(file).addClass("selected");
+            if (e.ctrlKey == false && e.shiftKey == false)
+            {
+                self.selectedFiles = new Object();
+                $(self.table.rows).removeClass("selected");
+            }
+            return ;
         }
-        // Selects multiple files
-        else if (e.shiftKey == true)
+        // Selects or deselects one file
+        else if (e.ctrlKey == true && e.shiftKey == false)
         {
-            // No file selected
-            for (var f in self.selectedFiles)
-                break ;
-            if (!f)
+            // Selects the file
+            if (!$(file).hasClass("selected"))
             {
                 self.selectedFiles[self.index++] = file;
                 $(file).addClass("selected");
             }
-            // Selects all the files between the selected file and the last file
+            // Deselects the file
             else
+                for (i in self.selectedFiles)
+                    if (self.selectedFiles[i] == file)
+                    {
+                        delete self.selectedFiles[i];
+                        $(file).removeClass("selected");
+                        break ;
+                    }
+        }
+        // Selects / deselects multiple files
+        else if (e.shiftKey == true && e.ctrlKey == false)
+        {
+            // Deselects all the files
+            self.selectedFiles = new Object();
+            $(self.table.rows).removeClass("selected");
+            // Selects all the files between the selected file and the last file
+            if (self.lastFileSelected)
             {
                 var start = self.lastFileSelected;
                 var end = file;
@@ -363,20 +387,75 @@ function List()
                             self.selectedFiles[self.index++] = row;
                             $(row).addClass("selected");
                         }
+                return ;
+            }
+            // Selects the file
+            else
+            {
+                self.selectedFiles[self.index++] = file;
+                $(file).addClass("selected");
+            }
+        }
+        // Selects multiple files
+        else if (e.shiftKey == true && e.ctrlKey == true)
+        {
+            // No file selected
+            for (var f in self.selectedFiles)
+                break ;
+            // Selects all the files between the selected file and the last file
+            if (f || self.lastFileSelected)
+            {
+                var start = self.lastFileSelected;
+                var end = file;
+                if (self.lastFileSelected.rowIndex > file.rowIndex)
+                {
+                    start = file;
+                    end = self.lastFileSelected;
+                }
+                for (var row = start; row != end.nextSibling; row = row.nextSibling)
+                    if (!$(row).hasClass("selected"))
+                        {
+                            self.selectedFiles[self.index++] = row;
+                            $(row).addClass("selected");
+                        }
+                return ;
+            }
+            // Selects the file
+            else
+            {
+                self.selectedFiles[self.index++] = file;
+                $(file).addClass("selected");
             }
         }
         // Selects one file
         else
         {
             // Deselects all the files
-            for (var i in self.selectedFiles)
-                $(self.selectedFiles[i]).removeClass("selected");
+            $(self.table.rows).removeClass("selected");
             self.selectedFiles = new Object();
             // Selects the file
+            self.index = 0;
             self.selectedFiles[self.index++] = file;
             $(file).addClass("selected");
         }
         self.lastFileSelected = file;
+    }
+    
+    // Ensures that the list is allways filled with rows.
+    self.addEmptyRows = function ()
+    {
+        var totalRows = self.listHeight / C.Files.listRowHeight;
+        
+        // Adds empty rows
+        if (totalRows > resource.files.length)
+        {
+            for (var i = self.table.rows.length; self.table.rows.length < totalRows; i++)
+                self.addRow(-1, i);
+        }
+        // Remove all the empty rows
+        else
+            while (self.table.rows.length > resource.files.length)
+                self.table.deleteRow(-1);
     }
     
     self.init();
