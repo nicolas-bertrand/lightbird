@@ -14,6 +14,7 @@
 # define GNUTLS_CHECK_VERSION "3.1.2"            // The GnuTLS version used by the current implementation of the plugin.
 # define CRT_EXPIRATION       360 * 24 * 60 * 60 // The number of seconds of validity of the certificate.
 # define CRT_EXPIRATION_REGEN 7 * 24 * 60 * 60   // The number of seconds before the expiration of the certificate after which it is regenerated.
+# define WAIT_FOR_READ 4                         // The number of milliseconds during which the server sleeps, waiting for more data.
 
 class Plugin : public QObject,
                public LightBird::IPlugin,

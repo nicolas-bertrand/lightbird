@@ -114,8 +114,8 @@ bool    Plugin::onConnect(LightBird::IClient &client)
     {
         if ((result = gnutls_handshake(session)) == GNUTLS_E_AGAIN)
             // Slows down the handsake if more data are needed.
-            // We can't call waitForRead because we are not in the socket thread.
-            LightBird::sleep(2);
+            // We can't call waitForReadyRead because we are not in the socket thread.
+            LightBird::sleep(WAIT_FOR_READ);
         if (timeout.elapsed() > this->handshakeTimeout)
         {
             this->api->log().debug("Handshake timeout", Properties("timeout", this->handshakeTimeout).toMap(), "Plugin", "onConnect");
@@ -135,14 +135,32 @@ bool    Plugin::onConnect(LightBird::IClient &client)
 
 void    Plugin::onDestroy(LightBird::IClient &client)
 {
+    gnutls_session_t session;
+    QTime            timeout;
+    int              result;
+
     this->mutex.lockForWrite();
     QMutableHashIterator<int, LightBird::IClient *> it(this->clients);
     while (it.hasNext())
         if (it.next().value() == &client)
             it.remove();
-    if (client.getInformations().contains("gnutls_session"))
-        gnutls_deinit(client.getInformations().value("gnutls_session").value<gnutls_session_t>());
     this->mutex.unlock();
+    if (client.getInformations().contains("gnutls_session"))
+    {
+        session = client.getInformations().value("gnutls_session").value<gnutls_session_t>();
+        // Properly terminates the TLS session
+        if (client.getSocket().state() == QAbstractSocket::ConnectedState)
+        {
+            gnutls_transport_set_pull_function(session, Plugin::handshake_pull);
+            gnutls_transport_set_push_function(session, Plugin::handshake_push);
+            timeout.start();
+            do
+                if ((result = gnutls_bye(session, GNUTLS_SHUT_RDWR)) == GNUTLS_E_AGAIN)
+                    LightBird::sleep(WAIT_FOR_READ);
+            while (result < 0 && gnutls_error_is_fatal(result) == 0 && timeout.elapsed() < this->handshakeTimeout);
+        }
+        gnutls_deinit(session);
+    }
 }
 
 bool    Plugin::doRead(LightBird::IClient &client, QByteArray &data)
@@ -277,12 +295,12 @@ void    Plugin::_loadConfiguration()
 
 void    Plugin::_loadPrivateKey()
 {
-    QFile                 file(this->keyFile);
-    int                   bits;
-    size_t                size;
-    QByteArray            data;
-    gnutls_datum_t        datum;
-    int                   error;
+    QFile           file(this->keyFile);
+    int             bits;
+    size_t          size;
+    QByteArray      data;
+    gnutls_datum_t  datum;
+    int             error;
 
     if (!file.open(QIODevice::ReadWrite))
         throw Properties("error", "Unable to open the private key file").add("file", this->keyFile);
@@ -393,7 +411,7 @@ void    Plugin::_loadCertificate()
     gnutls_privkey_deinit(privkey);
 }
 
-void                Plugin::_loadDHParams()
+void    Plugin::_loadDHParams()
 {
     QByteArray      data;
     QFile           file(this->dhParamsFile);
