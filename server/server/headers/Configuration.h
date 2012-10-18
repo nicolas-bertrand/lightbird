@@ -35,7 +35,7 @@ public:
     /// @see LightBird::IConfiguration::count
     virtual unsigned    count(const QString &nodeName) const;
     /// @see LightBird::IConfiguration::set
-    virtual void        set(const QString &nodeName, const QString &nodeValue);
+    virtual LightBird::IConfiguration &set(const QString &nodeName, const QString &nodeValue);
     /// @see LightBird::IConfiguration::remove
     virtual bool        remove(const QString &nodeName);
     /// @see LightBird::IConfiguration::readDom

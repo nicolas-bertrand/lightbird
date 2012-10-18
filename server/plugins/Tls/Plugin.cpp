@@ -259,10 +259,7 @@ void    Plugin::_loadConfiguration()
     if (!(this->handshakeTimeout = this->api->configuration(true).get("handshake_timeout").toInt()))
         this->handshakeTimeout = 5000;
     if ((this->keyPassword = this->api->configuration(true).get("private_key_password").toAscii()).isEmpty())
-    {
-        this->api->configuration(true).set("private_key_password", (this->keyPassword = this->_generatePassword()));
-        this->api->configuration(true).save();
-    }
+        this->api->configuration(true).set("private_key_password", (this->keyPassword = this->_generatePassword())).save();
     this->dhParamsExpiration = QDateTime::currentDateTime().addDays(-expiration);
     this->crtFile.prepend(this->api->getPluginPath());
     this->keyFile.prepend(this->api->getPluginPath());

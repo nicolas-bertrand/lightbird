@@ -33,7 +33,7 @@ namespace LightBird
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName[.attribut]", or simply "nodeName".
         /// @param nodeValue : The value to set or change.
-        virtual void        set(const QString &nodeName, const QString &nodeValue) = 0;
+        virtual IConfiguration &set(const QString &nodeName, const QString &nodeValue) = 0;
         /// @brief Remove a node and all its childs. Only the first node that match is removed.
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName[n]", or simply "nodeName".

@@ -51,10 +51,11 @@ unsigned int     ApiConfiguration::count(const QString &nodeName) const
     return (result);
 }
 
-void        ApiConfiguration::set(const QString &nodeName, const QString &nodeValue)
+LightBird::IConfiguration &ApiConfiguration::set(const QString &nodeName, const QString &nodeValue)
 {
     this->_set(nodeName, nodeValue, this->_findConfiguration(this->configuration.writeDom()));
     this->configuration.release();
+    return (*this);
 }
 
 bool        ApiConfiguration::remove(const QString &nodeName)

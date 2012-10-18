@@ -23,7 +23,7 @@ public:
     QString         getPath() const;
     QString         get(const QString &nodeName) const;
     unsigned int    count(const QString &nodeName) const;
-    void            set(const QString &nodeName, const QString &nodeValue);
+    LightBird::IConfiguration &set(const QString &nodeName, const QString &nodeValue);
     bool            remove(const QString &nodeName);
     QDomElement     readDom() const;
     QDomElement     writeDom();

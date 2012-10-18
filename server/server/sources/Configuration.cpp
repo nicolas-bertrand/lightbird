@@ -121,12 +121,13 @@ unsigned int    Configuration::count(const QString &nodeName) const
     return (this->_count(nodeName, this->dom));
 }
 
-void            Configuration::set(const QString &nodeName, const QString &nodeValue)
+LightBird::IConfiguration &Configuration::set(const QString &nodeName, const QString &nodeValue)
 {
     SmartMutex  mutex(this->mutex, "Configuration", "set");
 
     if (mutex)
         this->_set(nodeName, nodeValue, this->dom);
+    return (*this);
 }
 
 bool            Configuration::remove(const QString &nodeName)
