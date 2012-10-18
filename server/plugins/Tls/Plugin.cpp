@@ -1,6 +1,7 @@
 #include <QtPlugin>
 #include <QDir>
 #include <gnutls/abstract.h>
+#include <gnutls/crypto.h>
 #include <gnutls/x509.h>
 
 #include "LightBird.h"
@@ -34,11 +35,11 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     this->api = api;
     try
     {
-        this->_loadConfiguration();
         ASSERT_INIT(gnutls_global_init(), "global");
-        if (gnutls_check_version(GNUTLS_CHECK_VERSION))
+        if (!gnutls_check_version(GNUTLS_CHECK_VERSION))
             throw Properties("error", "Bad GnuTLS version").add("version required", GNUTLS_CHECK_VERSION);
         gnutls_global_set_audit_log_function(Plugin::log);
+        this->_loadConfiguration();
         this->_loadPrivateKey();
         this->_loadCertificate();
         this->_loadDHParams();
@@ -257,6 +258,11 @@ void    Plugin::_loadConfiguration()
         expiration = 90;
     if (!(this->handshakeTimeout = this->api->configuration(true).get("handshake_timeout").toInt()))
         this->handshakeTimeout = 5000;
+    if ((this->keyPassword = this->api->configuration(true).get("private_key_password").toAscii()).isEmpty())
+    {
+        this->api->configuration(true).set("private_key_password", (this->keyPassword = this->_generatePassword()));
+        this->api->configuration(true).save();
+    }
     this->dhParamsExpiration = QDateTime::currentDateTime().addDays(-expiration);
     this->crtFile.prepend(this->api->getPluginPath());
     this->keyFile.prepend(this->api->getPluginPath());
@@ -286,7 +292,7 @@ void    Plugin::_loadPrivateKey()
         data = file.readAll();
         datum.size = data.size();
         datum.data = (unsigned char *)data.data();
-        if ((error = gnutls_x509_privkey_import(this->key, &datum, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+        if ((error = gnutls_x509_privkey_import_pkcs8(this->key, &datum, GNUTLS_X509_FMT_PEM, this->keyPassword.data(), 0)) != GNUTLS_E_SUCCESS)
         {
             this->api->log().error("Invalid private key", Properties("error", gnutls_strerror(error)).toMap(), "Plugin", "_generatePrivateKey");
             file.resize(0);
@@ -303,7 +309,7 @@ void    Plugin::_loadPrivateKey()
         ASSERT(gnutls_x509_privkey_verify_params(this->key));
         size = bits;
         data.resize(size);
-        ASSERT(gnutls_x509_privkey_export(this->key, GNUTLS_X509_FMT_PEM, data.data(), &size));
+        ASSERT(gnutls_x509_privkey_export_pkcs8(this->key, GNUTLS_X509_FMT_PEM, this->keyPassword.data(), GNUTLS_PKCS_USE_PBES2_AES_256, data.data(), &size));
         data.resize(size);
         file.write(data);
     }
@@ -433,6 +439,17 @@ QByteArray      Plugin::_generateSerial()
     for (int i = 0; i < uuid.size(); i += 2)
         *(r++) = QString(uuid[i]).toUInt(&ok, 16) | QString(uuid[i + 1]).toUInt(&ok, 16) << 4;
     return (result);
+}
+
+QByteArray      Plugin::_generatePassword(unsigned int size)
+{
+    QByteArray  data(size, 0);
+    int         error;
+
+    ASSERT(gnutls_rnd(GNUTLS_RND_RANDOM, data.data(), size));
+    for (unsigned int i = 0; i < size; ++i)
+        data[i] = ((unsigned char)data[i] % 93 + 32);
+    return (data);
 }
 
 void    Plugin::_deinit()

@@ -76,6 +76,8 @@ private:
     void        _loadDHParams();
     /// @brief Generates a 16 bytes random serial number for the X.509 certificate.
     QByteArray  _generateSerial();
+    /// @brief Generates a password for the private key.
+    QByteArray  _generatePassword(unsigned int size = 32);
     /// @brief Deinit all the structures allocated by GnuTLS.
     void        _deinit();
 
@@ -93,6 +95,7 @@ private:
     QString               dhParamsFile;         ///< The name of the file that stores the Diffie-Hellman parameters cache.
     QDateTime             dhParamsExpiration;   ///< The expiration of the Diffie-Hellman parameters.
     int                   handshakeTimeout;     ///< The maximum duration of the handshake.
+    QByteArray            keyPassword;          ///< The password with which the private key is encrypted and stored.
     QReadWriteLock        mutex;                ///< Makes this->clients thread safe.
     QHash<int, LightBird::IClient *> clients;   ///< Associates a socket descriptor with its IClient.
     QStringList           init;                 ///< The list of the GnuTLS structures initialized.

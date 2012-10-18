@@ -27,8 +27,8 @@ namespace LightBird
         /// @return The number of nodeName in his parent node.
         virtual unsigned    count(const QString &nodeName) const = 0;
         /// @brief Sets value of the node identified by nodeName.
-        /// If nodeName does not exist, it'll be created.
-        /// If nodeName occured multiple times on the tree,
+        /// If nodeName does not exist, it will be created.
+        /// If nodeName occured multiple times in the tree,
         /// only the first one will be edited.
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName[.attribut]", or simply "nodeName".
