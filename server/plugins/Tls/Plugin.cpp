@@ -28,9 +28,10 @@ Plugin::~Plugin()
     Plugin::instance = NULL;
 }
 
-bool    Plugin::onLoad(LightBird::IApi *api)
+bool            Plugin::onLoad(LightBird::IApi *api)
 {
-    int error;
+    int         error;
+    const char  *err_pos = NULL;
 
     this->api = api;
     try
@@ -45,11 +46,13 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->_loadDHParams();
         ASSERT_INIT(gnutls_certificate_allocate_credentials(&this->x509_cred), "credentials");
         ASSERT(gnutls_certificate_set_x509_key(this->x509_cred, &this->crt, 1, this->key));
-        ASSERT_INIT(gnutls_priority_init(&this->priority, this->priorityStrings.data(), NULL), "priority");
+        ASSERT_INIT(gnutls_priority_init(&this->priority, this->priorityStrings.data(), &err_pos), "priority");
         gnutls_certificate_set_dh_params(this->x509_cred, this->dhParams);
     }
     catch (Properties p)
     {
+        if (err_pos)
+            p.add("error position", err_pos).add("priority string", this->priorityStrings);
         this->api->log().fatal("Unable to initialize GnuTLS", p.toMap(), "Plugin", "onLoad");
         this->_deinit();
         return (false);
