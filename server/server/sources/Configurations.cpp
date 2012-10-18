@@ -26,7 +26,7 @@ Configurations::Configurations(const QString &configurationPath, QObject *parent
     // If the configuration failed to load
     if (*this->configurations[""] == false)
     {
-        Log::error("Failed to load the configuration", "Configurations", "instance");
+        LOG_ERROR("Failed to load the configuration", "Configurations", "instance");
         delete this->configurations[""];
         this->configurations.remove("");
         return ;
@@ -80,7 +80,7 @@ Configurations::~Configurations()
     while (it.hasNext())
         delete it.next().value();
     this->configurations.clear();
-    Log::trace("Configurations destroyed!", "Configurations", "~Configurations");
+    LOG_TRACE("Configurations destroyed!", "Configurations", "~Configurations");
 }
 
 Configuration       *Configurations::getConfiguration(const QString &configuration, const QString &alternative)
@@ -101,7 +101,7 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     // If the server configuration is not loaded
     if (!this->configurations.contains(""))
     {
-        Log::error("The configuration of the server must be initialized first", Properties("path", configuration).add("alternative", alternative), "Configurations", "instance");
+        LOG_ERROR("The configuration of the server must be initialized first", Properties("path", configuration).add("alternative", alternative), "Configurations", "instance");
         return (NULL);
     }
     cleaned = configuration;
@@ -116,7 +116,7 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
         // Creates the configuration of the plugin if it doesn't exists
         if (!this->configurations.contains(path) && !*(instance = new ApiConfiguration(path)))
         {
-            Log::error("Failed to load the configuration of the plugin", Properties("id", path), "Configurations", "instance");
+            LOG_ERROR("Failed to load the configuration of the plugin", Properties("id", path), "Configurations", "instance");
             delete instance;
             return (NULL);
         }
@@ -128,7 +128,7 @@ Configuration       *Configurations::getConfiguration(const QString &configurati
     if (instance == NULL && !this->configurations.contains(path) &&
         !*(instance = new Configuration(path, alternative)))
     {
-        Log::error("Failed to load the configuration", Properties("path", path).add("alternative", alternative), "Configurations", "instance");
+        LOG_ERROR("Failed to load the configuration", Properties("path", path).add("alternative", alternative), "Configurations", "instance");
         delete instance;
         return (NULL);
     }

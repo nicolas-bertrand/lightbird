@@ -31,7 +31,7 @@ PortTcp::~PortTcp()
     while (it.hasNext())
         delete it.next().data;
     this->writeBuffer.clear();
-    Log::trace("Port TCP destroyed!", Properties("port", this->getPort()), "PortTcp", "~PortTcp");
+    LOG_TRACE("Port TCP destroyed!", Properties("port", this->getPort()), "PortTcp", "~PortTcp");
 }
 
 void    PortTcp::run()
@@ -44,13 +44,13 @@ void    PortTcp::run()
     // Listen on the given port
     if (!this->tcpServer.listen(QHostAddress::Any, this->getPort()))
     {
-        Log::error("Failed to listen on the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
+        LOG_ERROR("Failed to listen on the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
                    .add("transport", "TCP").add("maxClients", this->getMaxClients()), "PortTcp", "PortTcp");
         this->threadStarted.setResult(false);
         this->moveToThread(QCoreApplication::instance()->thread());
         return ;
     }
-    Log::info("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
+    LOG_INFO("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
               .add("transport", "TCP").add("maxClients", this->getMaxClients()), "PortTcp", "PortTcp");
     Port::_isListening(true);
     this->threadStarted.setResult(true);
@@ -63,7 +63,7 @@ void    PortTcp::run()
         delete client.next();
     this->clients.clear();
     this->moveToThread(QCoreApplication::instance()->thread());
-    Log::info("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
+    LOG_INFO("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
 }
 
 void    PortTcp::read(Client *client)
@@ -127,7 +127,7 @@ void            PortTcp::_newConnection()
         }
         else
         {
-            Log::debug("Invalid socket", Properties("port", this->getPort()).add("state", socket->state()), "PortTcp", "_newConnection");
+            LOG_DEBUG("Invalid socket", Properties("port", this->getPort()).add("state", socket->state()), "PortTcp", "_newConnection");
             delete socket;
         }
     }
@@ -146,7 +146,7 @@ void            PortTcp::_read(Client *client)
         data.resize(client->getSocket().size());
         if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
         {
-            Log::warning("An error occured while reading the data", Properties("id", client->getId())
+            LOG_WARNING("An error occured while reading the data", Properties("id", client->getId())
                          .add("error", read).add("size", data.size()), "PortTcp", "_read");
             data.resize(read);
         }
@@ -183,9 +183,9 @@ void                 PortTcp::_write()
                 result = w.client->getSocket().write(w.data->data() + w.offset, w.data->size() - w.offset);
             w.offset += result;
             if (result < 0)
-                Log::debug("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "PortTcp", "_write");
+                LOG_DEBUG("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "PortTcp", "_write");
             if (result == 0)
-                Log::trace("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "PortTcp", "_write");
+                LOG_DEBUG("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "PortTcp", "_write");
         }
         if (result < 0 || w.offset >= w.data->size())
         {

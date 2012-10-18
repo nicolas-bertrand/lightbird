@@ -22,7 +22,7 @@ Configuration::Configuration()
 Configuration::~Configuration()
 {
     if (!this->file.fileName().isEmpty())
-        Log::trace("Configuration destroyed!", Properties("file", this->file.fileName()), "Configuration", "~Configuration");
+        LOG_TRACE("Configuration destroyed!", Properties("file", this->file.fileName()), "Configuration", "~Configuration");
 }
 
 bool        Configuration::_load(const QString &configurationPath, const QString &alternativePath)
@@ -43,7 +43,7 @@ bool        Configuration::_load(const QString &configurationPath, const QString
     // If the configurationPath is empty, we can't load it
     if (configuration.isEmpty())
     {
-        Log::error("The configuration path is not valid", Properties("file", configurationPath), "Configuration", "_load");
+        LOG_ERROR("The configuration path is not valid", Properties("file", configurationPath), "Configuration", "_load");
         return (false);
     }
     // If the file is not defined after the directories, we add the defaut configuration file name
@@ -56,42 +56,42 @@ bool        Configuration::_load(const QString &configurationPath, const QString
     this->file.setFileName(configuration);
     if (!QFileInfo(this->file.fileName()).isFile())
     {
-        Log::debug("The configuration file doesn't exists and will be created using the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
+        LOG_DEBUG("The configuration file doesn't exists and will be created using the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
         if (!QFileInfo(alternative).isFile())
         {
-            Log::warning("The alternative path doesn't exists either. The configuration can't be loaded.", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
+            LOG_WARNING("The alternative path doesn't exists either. The configuration can't be loaded.", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
             return (false);
         }
         // Creates the directory of the configuration file if it doesn't exists
         if (!dirName.isEmpty() && !directory.exists(dirName) && !directory.mkpath(dirName))
         {
-            Log::error("Cannot creates the directory of the configuration", Properties("directory", dirName), "Configuration", "_load");
+            LOG_ERROR("Cannot creates the directory of the configuration", Properties("directory", dirName), "Configuration", "_load");
             return (false);
         }
         // Creates the configuration file using the alternative file
         if (LightBird::copy(alternative, this->file.fileName()) == false)
         {
-            Log::error("Cannot creates the configuration file from the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
+            LOG_ERROR("Cannot creates the configuration file from the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
             return (false);
         }
     }
     // Ensure that the permission of the file are correct
     //if (this->file.setPermissions(QFile::ReadUser | QFile::WriteUser))
-    //  Log::error("The permissions of the configuration file cannot be modified", "Configuration", "_load");
+    //  LOG_ERROR("The permissions of the configuration file cannot be modified", "Configuration", "_load");
     // Open the configuration file
     if (!this->file.open(QIODevice::ReadOnly))
     {
-        Log::error("Cannot open the configuration file", Properties("file", this->file.fileName()), "Configuration", "_load");
+        LOG_ERROR("Cannot open the configuration file", Properties("file", this->file.fileName()), "Configuration", "_load");
         return (false);
     }
     // Parse the configuration file into a DOM representation
     if (!this->doc.setContent(&this->file, false, &errorMsg, &errorLine, &errorColumn))
     {
-        Log::error("An error occured while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
-                   .add("line", QString::number(errorLine)).add("column", errorColumn), "Configuration", "_load");
+        LOG_ERROR("An error occured while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
+                  .add("line", QString::number(errorLine)).add("column", errorColumn), "Configuration", "_load");
         return (false);
     }
-    Log::debug("Configuration loaded", Properties("file", this->file.fileName()), "Configuration", "_load");
+    LOG_DEBUG("Configuration loaded", Properties("file", this->file.fileName()), "Configuration", "_load");
     this->file.close();
     this->dom = this->doc.documentElement();
     this->isInitialized();
@@ -142,14 +142,14 @@ bool            Configuration::remove(const QString &nodeName)
 QDomElement Configuration::readDom() const
 {
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
-        Log::error("Deadlock", "Configuration", "readDom");
+        LOG_ERROR("Deadlock", "Configuration", "readDom");
     return (this->dom);
 }
 
 QDomElement Configuration::writeDom()
 {
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
-        Log::error("Deadlock", "Configuration", "writeDom");
+        LOG_ERROR("Deadlock", "Configuration", "writeDom");
     return (this->dom);
 }
 
@@ -170,14 +170,14 @@ bool            Configuration::save()
         return (false);
     if (this->file.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
     {
-        Log::error("Cannot open the configuration file in order to save the configuration", Properties("file",  this->file.fileName()), "Configuration", "save");
+        LOG_ERROR("Cannot open the configuration file in order to save the configuration", Properties("file",  this->file.fileName()), "Configuration", "save");
         return (false);
     }
     data = this->doc.toByteArray(2);
     if ((wrote = this->file.write(data)) != data.size())
     {
-        Log::error("Unable to write all the data in the configuration file", Properties("file",  this->file.fileName())
-                   .add("data", data).add("wrote", wrote), "Configuration", "save");
+        LOG_ERROR("Unable to write all the data in the configuration file", Properties("file",  this->file.fileName())
+                  .add("data", data).add("wrote", wrote), "Configuration", "save");
         this->file.close();
         return (false);
     }
@@ -185,7 +185,7 @@ bool            Configuration::save()
     // If the configuration of the server has been saved, an event occured
     if (Configurations::instance() == this)
         Events::instance()->send("configuration_saved");
-    Log::debug("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");
+    LOG_DEBUG("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");
     return (true);
 }
 

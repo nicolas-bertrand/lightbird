@@ -38,12 +38,12 @@ Plugins::~Plugins()
     this->shutdown();
     this->quit();
     QThread::wait();
-    Log::trace("Plugins destroyed!", "Plugins", "~Plugins");
+    LOG_TRACE("Plugins destroyed!", "Plugins", "~Plugins");
 }
 
 void        Plugins::run()
 {
-    Log::debug("Plugins thread started", "Plugins", "run");
+    LOG_DEBUG("Plugins thread started", "Plugins", "run");
     // Tells to the thread that started the current thread that it is running
     this->mutex.lockForWrite();
     this->awake = true;
@@ -51,7 +51,7 @@ void        Plugins::run()
     this->mutex.unlock();
     // Executes the event loop
     this->exec();
-    Log::debug("Plugins thread finished", "Plugins", "run");
+    LOG_DEBUG("Plugins thread finished", "Plugins", "run");
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
@@ -109,9 +109,9 @@ void            Plugins::shutdown()
     // and we wait until they are released.
     if (this->plugins.size() > 0)
     {
-        Log::info("Some plugins are still used. The server is waiting that all the plugins are unloaded...", "Plugins", "shutdown");
+        LOG_INFO("Some plugins are still used. The server is waiting that all the plugins are unloaded...", "Plugins", "shutdown");
         this->wait.wait(&this->mutex);
-        Log::info("All plugins has been unloaded", "Plugins", "shutdown");
+        LOG_INFO("All plugins has been unloaded", "Plugins", "shutdown");
     }
 }
 
@@ -121,18 +121,18 @@ void                                Plugins::_load(const QString &identifier, Fu
     QString                         id = Plugins::checkId(identifier);
     QSharedPointer<Future<bool> >   future(f);
 
-    Log::debug("Loading the plugin", Properties("id", id), "Plugins", "_load");
+    LOG_DEBUG("Loading the plugin", Properties("id", id), "Plugins", "_load");
     SmartMutex  mutex(this->mutex, "Plugins", "_load");
     if (!mutex)
         return ;
     if (this->unloadAllPlugins)
     {
-        Log::warning("No plugins can be loaded, because all plugins are unloading.", Properties("id", id), "Plugins", "_load");
+        LOG_WARNING("No plugins can be loaded, because all plugins are unloading.", Properties("id", id), "Plugins", "_load");
         return ;
     }
     if (this->plugins.contains(id))
     {
-        Log::warning("The plugin is already loaded", Properties("id", id), "Plugins", "_load");
+        LOG_WARNING("The plugin is already loaded", Properties("id", id), "Plugins", "_load");
         return ;
     }
     if (this->_getState(id) != LightBird::IPlugins::UNLOADED)
@@ -146,7 +146,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     plugin = new Plugin(id, this);
     if (!plugin->load())
     {
-        Log::error("Unable to load the plugin", Properties("id", id), "Plugins", "_load");
+        LOG_ERROR("Unable to load the plugin", Properties("id", id), "Plugins", "_load");
         delete plugin;
         return ;
     }
@@ -154,7 +154,7 @@ void                                Plugins::_load(const QString &identifier, Fu
     this->plugins.insert(id, plugin);
     this->orderedPlugins.push_back(id);
     Events::instance()->send("plugin_loaded", id);
-    Log::info("Plugin loaded", Properties("id", id), "Plugins", "_load");
+    LOG_INFO("Plugin loaded", Properties("id", id), "Plugins", "_load");
     emit this->loaded(id);
     future->setResult(true);
 }
@@ -163,24 +163,24 @@ void                                Plugins::_unload(const QString &id, Future<b
 {
     QSharedPointer<Future<bool> >   future(f);
 
-    Log::debug("Unloading the plugin", Properties("id", id), "Plugins", "_unload");
+    LOG_DEBUG("Unloading the plugin", Properties("id", id), "Plugins", "_unload");
     SmartMutex  mutex(this->mutex, "Plugins", "_unload");
     if (!mutex)
         return ;
     if (!this->plugins.contains(id))
     {
-        Log::warning("The plugin is already unloaded or doesn't exists", Properties("id", id), "Plugins", "_unload");
+        LOG_WARNING("The plugin is already unloaded or doesn't exists", Properties("id", id), "Plugins", "_unload");
         return ;
     }
     if (this->plugins.value(id)->getState() != LightBird::IPlugins::LOADED)
     {
-        Log::warning("The plugin is already unloading", Properties("id", id), "Plugins", "_unload");
+        LOG_WARNING("The plugin is already unloading", Properties("id", id), "Plugins", "_unload");
         return ;
     }
     Extensions::instance()->remove(this->plugins.value(id));
     if (!this->plugins.value(id)->unload())
     {
-        Log::error("Unable to unload the plugin", Properties("id", id), "Plugins", "_unload");
+        LOG_ERROR("Unable to unload the plugin", Properties("id", id), "Plugins", "_unload");
         return ;
     }
     if (this->plugins.value(id)->getState() == LightBird::IPlugins::UNLOADED)
@@ -189,7 +189,7 @@ void                                Plugins::_unload(const QString &id, Future<b
         this->plugins.remove(id);
         this->orderedPlugins.removeAll(id);
         Events::instance()->send("plugin_unloaded", id);
-        Log::info("Plugin unloaded", Properties("id", id), "Plugins", "_unload");
+        LOG_INFO("Plugin unloaded", Properties("id", id), "Plugins", "_unload");
     }
     future->setResult(true);
 }
@@ -199,34 +199,34 @@ void                                Plugins::_install(const QString &id, Future<
     LightBird::IPlugins::State      state;
     QSharedPointer<Future<bool> >   future(f);
 
-    Log::debug("Installing the plugin", Properties("id", id), "Plugins", "_install");
+    LOG_DEBUG("Installing the plugin", Properties("id", id), "Plugins", "_install");
     SmartMutex  mutex(this->mutex, "Plugins", "_install");
     if (!mutex)
         return ;
     if (this->unloadAllPlugins)
     {
-        Log::warning("No plugins can be installed, because all plugins are unloading.", Properties("id", id), "Plugins", "_install");
+        LOG_WARNING("No plugins can be installed, because all plugins are unloading.", Properties("id", id), "Plugins", "_install");
         return ;
     }
     if ((state = this->_getState(id)) != LightBird::IPlugins::UNINSTALLED)
     {
-        Log::warning(state != LightBird::IPlugins::UNKNOW ? "The plugin is already installed" : "The plugin is unknow",
-                     Properties("id", id).add("state", QString::number(state)), "Plugins", "_install");
+        LOG_WARNING(state != LightBird::IPlugins::UNKNOW ? "The plugin is already installed" : "The plugin is unknow",
+                    Properties("id", id).add("state", QString::number(state)), "Plugins", "_install");
         return ;
     }
     Plugin plugin(id);
     if (!plugin.load(false))
     {
-        Log::warning("Unable to load the plugin in order to install it", Properties("id", id), "Plugins", "_install");
+        LOG_WARNING("Unable to load the plugin in order to install it", Properties("id", id), "Plugins", "_install");
         return ;
     }
     if (!plugin.install())
     {
-        Log::warning("Unable to install the plugin", Properties("id", id), "Plugins", "_install");
+        LOG_WARNING("Unable to install the plugin", Properties("id", id), "Plugins", "_install");
         return ;
     }
     Events::instance()->send("plugin_installed", id);
-    Log::info("Plugin installed", Properties("id", id), "Plugins", "_install");
+    LOG_INFO("Plugin installed", Properties("id", id), "Plugins", "_install");
     future->setResult(true);
 }
 
@@ -235,38 +235,38 @@ void                                Plugins::_uninstall(const QString &id, Futur
     LightBird::IPlugins::State      state;
     QSharedPointer<Future<bool> >   future(f);
 
-    Log::debug("Uninstalling the plugin", Properties("id", id), "Plugins", "_uninstall");
+    LOG_DEBUG("Uninstalling the plugin", Properties("id", id), "Plugins", "_uninstall");
     SmartMutex  mutex(this->mutex, "Plugins", "_uninstall");
     if (!mutex)
         return ;
     if (this->unloadAllPlugins)
     {
-        Log::warning("No plugins can be uninstalled, because all plugins are unloading.", Properties("id", id), "Plugins", "_uninstall");
+        LOG_WARNING("No plugins can be uninstalled, because all plugins are unloading.", Properties("id", id), "Plugins", "_uninstall");
         return ;
     }
     if ((state = this->_getState(id)) == LightBird::IPlugins::UNINSTALLED)
     {
-        Log::warning("The plugin is already uninstalled", Properties("id", id), "Plugins", "_uninstall");
+        LOG_WARNING("The plugin is already uninstalled", Properties("id", id), "Plugins", "_uninstall");
         return ;
     }
     if (this->plugins.contains(id))
     {
-        Log::warning("The plugin must be unloaded to be uninstalled", Properties("id", id), "Plugins", "_uninstall");
+        LOG_WARNING("The plugin must be unloaded to be uninstalled", Properties("id", id), "Plugins", "_uninstall");
         return ;
     }
     Plugin plugin(id);
     if (!plugin.load(false))
     {
-        Log::warning("Unable to load the plugin in order to uninstall it", Properties("id", id), "Plugins", "_uninstall");
+        LOG_WARNING("Unable to load the plugin in order to uninstall it", Properties("id", id), "Plugins", "_uninstall");
         return ;
     }
     if (!plugin.uninstall())
     {
-        Log::warning("Unable to uninstall the plugin", Properties("id", id), "Plugins", "_uninstall");
+        LOG_WARNING("Unable to uninstall the plugin", Properties("id", id), "Plugins", "_uninstall");
         return ;
     }
     Events::instance()->send("plugin_uninstalled", id);
-    Log::info("Plugin uninstalled", Properties("id", id), "Plugins", "_uninstall");
+    LOG_INFO("Plugin uninstalled", Properties("id", id), "Plugins", "_uninstall");
     future->setResult(true);
 }
 
@@ -285,7 +285,7 @@ bool            Plugins::release(const QString &id)
         this->plugins.remove(id);
         this->orderedPlugins.removeAll(id);
         Events::instance()->send("plugin_unloaded", id);
-        Log::info("Plugin unloaded", Properties("id", id), "Plugins", "release");
+        LOG_INFO("Plugin unloaded", Properties("id", id), "Plugins", "release");
         if (this->unloadAllPlugins && this->plugins.size() == 0)
             this->wait.wakeAll();
     }
@@ -307,7 +307,7 @@ LightBird::IMetadata     Plugins::getMetadata(const QString &id) const
         plugin = new Plugin(id);
         if (!plugin->load(false))
         {
-            Log::warning("Unable to load the plugin in order to get its metadata", Properties("id", id), "Plugins", "getMetadata");
+            LOG_WARNING("Unable to load the plugin in order to get its metadata", Properties("id", id), "Plugins", "getMetadata");
             delete plugin;
             return (metadata);
         }

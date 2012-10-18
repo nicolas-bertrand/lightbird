@@ -135,4 +135,21 @@ private:
     QObject                                 *parent;    ///< The parent of the Log.
 };
 
+/// Undefines the defines of ILogs.
+# undef LOG_FATAL
+# undef LOG_ERROR
+# undef LOG_WARNING
+# undef LOG_INFO
+# undef LOG_DEBUG
+# undef LOG_TRACE
+/// Optimizes the use of the log by checking its level before issuing the log.
+/// This way, the parameters of the log are ondly evaluate when the level is correct,
+/// which avoids unnecessary computation in higher log levels.
+# define LOG_FATAL   Log::fatal
+# define LOG_ERROR   if (Log::instance()->isError())   Log::error
+# define LOG_WARNING if (Log::instance()->isWarning()) Log::warning
+# define LOG_INFO    if (Log::instance()->isInfo())    Log::info
+# define LOG_DEBUG   if (Log::instance()->isDebug())   Log::debug
+# define LOG_TRACE   if (Log::instance()->isTrace())   Log::trace
+
 #endif // LOG_H

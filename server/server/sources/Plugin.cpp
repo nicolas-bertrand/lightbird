@@ -16,7 +16,7 @@
 Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
                                                              id(identifier)
 {
-    Log::trace("Plugin created", Properties("id", this->id), "Plugin", "Plugin");
+    LOG_TRACE("Plugin created", Properties("id", this->id), "Plugin", "Plugin");
     this->_initialize();
 }
 
@@ -25,7 +25,7 @@ Plugin::~Plugin()
     this->_clean();
     delete this->loader;
     this->loader = NULL;
-    Log::trace("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
+    LOG_TRACE("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
 }
 
 bool            Plugin::load(bool full)
@@ -36,19 +36,19 @@ bool            Plugin::load(bool full)
         return (false);
     if (!this->_load())
     {
-        Log::error("Unable to load the plugin", Properties("id", this->id), "Plugin", "load");
+        LOG_ERROR("Unable to load the plugin", Properties("id", this->id), "Plugin", "load");
         this->_clean();
         return (false);
     }
     if (full && !this->configuration)
     {
-        Log::error("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
+        LOG_ERROR("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
         return (false);
     }
     if (full && !this->instance->onLoad(this->api))
     {
-        Log::error("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
+        LOG_ERROR("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
         this->_clean();
         return (false);
     }
@@ -73,7 +73,7 @@ bool            Plugin::unload(bool full)
     if (this->used == 0)
         this->_unload();
     else
-        Log::debug("The plugin will be unloaded later because it is still used", Properties("id", this->id).add("used", QString::number(this->used)), "Plugins", "unload");
+        LOG_DEBUG("The plugin will be unloaded later because it is still used", Properties("id", this->id).add("used", QString::number(this->used)), "Plugins", "unload");
     return (true);
 }
 
@@ -85,24 +85,24 @@ bool            Plugin::install()
         return (false);
     if (this->state != LightBird::IPlugins::LOADED)
     {
-        Log::error("The plugin must be loaded to be installed", Properties("id", this->id), "Plugin", "install");
+        LOG_ERROR("The plugin must be loaded to be installed", Properties("id", this->id), "Plugin", "install");
         return (false);
     }
     if (this->configuration)
     {
-        Log::error("The plugin is already installed", Properties("id", this->id), "Plugin", "install");
+        LOG_ERROR("The plugin is already installed", Properties("id", this->id), "Plugin", "install");
         return (false);
     }
     if (!this->_createConfiguration())
     {
-        Log::error("Unable to create the configuration of the plugin", Properties("id", this->id), "Plugin", "install");
+        LOG_ERROR("Unable to create the configuration of the plugin", Properties("id", this->id), "Plugin", "install");
         return (false);
     }
     this->configuration = Configurations::instance(this->id);
     this->_loadApi();
     if (this->instance->onInstall(this->api) == false)
     {
-        Log::error("The plugin returned false from IPlugin::onInstall(), so it will not be installed", Properties("id", this->id), "Plugin", "install");
+        LOG_ERROR("The plugin returned false from IPlugin::onInstall(), so it will not be installed", Properties("id", this->id), "Plugin", "install");
         this->_removeConfiguration();
         return (false);
     }
@@ -117,12 +117,12 @@ bool            Plugin::uninstall()
         return (false);
     if (this->state != LightBird::IPlugins::LOADED)
     {
-        Log::error("The plugin must be loaded to be uninstalled", Properties("id", this->id), "Plugin", "uninstall");
+        LOG_ERROR("The plugin must be loaded to be uninstalled", Properties("id", this->id), "Plugin", "uninstall");
         return (false);
     }
     if (!this->configuration)
     {
-        Log::error("The plugin is already uninstalled", Properties("id", this->id), "Plugin", "uninstall");
+        LOG_ERROR("The plugin is already uninstalled", Properties("id", this->id), "Plugin", "uninstall");
         return (false);
     }
     this->instance->onUninstall(this->api);
@@ -138,13 +138,13 @@ bool            Plugin::release()
         return (false);
     if (this->state == LightBird::IPlugins::UNLOADED)
     {
-        Log::warning("The plugin is already unloaded", Properties("id", this->id), "Plugin", "release");
+        LOG_WARNING("The plugin is already unloaded", Properties("id", this->id), "Plugin", "release");
         return (false);
     }
     this->used--;
     if (this->used < 0)
     {
-        Log::warning("Used plugin is lesser than 0", Properties("id", this->id), "Plugin", "release");
+        LOG_WARNING("Used plugin is lesser than 0", Properties("id", this->id), "Plugin", "release");
         this->used = 0;
     }
     if (this->used == 0 && this->state == LightBird::IPlugins::UNLOADING)
@@ -175,20 +175,19 @@ bool    Plugin::checkContext(const QString &mode, const QString &transport, cons
         if ((!all && it.next().isValid(mode, transport, protocols, port)) ||
             (all && it.next().isValid(mode, transport, protocols, port, method, type)))
         {
-            /*if (Log::instance()->isTrace())
-                Log::trace("Context valid", Properties(it.peekPrevious().toMap()).add("id", this->id)
-                           .add("requiredmode", mode).add("requiredTransport", transport)
-                           .add("requiredProtocols", protocols.join(" "))
-                           .add("requiredPort", port).add("requiredMethod", method, false)
-                           .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
+            /*LOG_TRACE("Context valid", Properties(it.peekPrevious().toMap()).add("id", this->id)
+                      .add("requiredmode", mode).add("requiredTransport", transport)
+                      .add("requiredProtocols", protocols.join(" "))
+                      .add("requiredPort", port).add("requiredMethod", method, false)
+                      .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
             return (true);
         }
-        /*else if (Log::instance()->isTrace())
-            Log::trace("Context invalid", Properties(it.peekPrevious().toMap()).add("id", this->id)
-                       .add("requiredmode", mode).add("requiredTransport", transport)
-                       .add("requiredProtocols", protocols.join(" "))
-                       .add("requiredPort", port).add("requiredMethod", method, false)
-                       .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
+        /*else
+            LOG_TRACE("Context invalid", Properties(it.peekPrevious().toMap()).add("id", this->id)
+                      .add("requiredmode", mode).add("requiredTransport", transport)
+                      .add("requiredProtocols", protocols.join(" "))
+                      .add("requiredPort", port).add("requiredMethod", method, false)
+                      .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
     }
     return (false);
 }
@@ -252,10 +251,10 @@ bool                    Plugin::_loadLibrary()
     }
     if (!this->loader)
     {
-        Log::warning("Unable to find a valid plugin library", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
+        LOG_WARNING("Unable to find a valid plugin library", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
         return (false);
     }
-    Log::trace("Plugin library found", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
+    LOG_TRACE("Plugin library found", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
     return (true);
 }
 
@@ -288,13 +287,13 @@ bool    Plugin::_load()
 {
     if (!this->loader)
     {
-        Log::debug("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
+        LOG_DEBUG("Failed to load the plugin", Properties("id", this->id), "Plugin", "_load");
         return (false);
     }
     this->instanceObject = this->loader->instance();
     if (!(this->instance = qobject_cast<LightBird::IPlugin *>(this->instanceObject)))
     {
-        Log::debug("The plugin does not implement IPlugin", Properties("id", this->id), "Plugin", "_load");
+        LOG_DEBUG("The plugin does not implement IPlugin", Properties("id", this->id), "Plugin", "_load");
         return (false);
     }
     if (Plugins::isInstalled(this->id))
@@ -373,8 +372,7 @@ void                        Plugin::_loadContexts()
             // Saves the context if it doesn't already exists
             if (!this->contexts.contains(context))
             {
-                if (Log::instance()->isDebug())
-                    Log::debug("Context added", Properties(context.toMap()).add("id", this->id), "Plugin", "_loadInformations");
+                LOG_DEBUG("Context added", Properties(context.toMap()).add("id", this->id), "Plugin", "_loadInformations");
                 this->contexts.push_back(context);
             }
         }
@@ -414,11 +412,11 @@ void            Plugin::_loadResources()
                     QDir().mkpath(path);
                 // Copy the resource
                 nodeName = resourcesPath + "/" + dom.toElement().attribute("alias");
-                Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
-                           .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
+                LOG_TRACE("Copying the resource of the plugin to the file system", Properties("id", this->id)
+                          .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
                 if (!LightBird::copy(nodeName, nodeValue))
-                    Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
-                                 .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
+                    LOG_WARNING("Unable to copy the plugin resource to the file system", Properties("id", this->id)
+                                .add("file", nodeValue).add("resource", nodeName), "Plugin", "_loadInformations");
             }
             // Copy all the files in the resources of the plugin
             else if (nodeName == "resource" && alias.isEmpty())
@@ -453,11 +451,11 @@ void            Plugin::_copyAllResources(const QString &resourcesPath, const QS
             if (!QFileInfo(destDir + "/" + currentDir).isDir())
                 QDir().mkpath(destDir + "/" + currentDir);
             // Copy the resource
-            Log::trace("Copying the resource of the plugin to the file system", Properties("id", this->id)
-                       .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
+            LOG_TRACE("Copying the resource of the plugin to the file system", Properties("id", this->id)
+                      .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
             if (!LightBird::copy(source, destination))
-                Log::warning("Unable to copy the plugin resource to the file system", Properties("id", this->id)
-                             .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
+                LOG_WARNING("Unable to copy the plugin resource to the file system", Properties("id", this->id)
+                            .add("file", destination).add("resource", source), "Plugin", "_copyAllResources");
         }
         f.next();
     }
@@ -492,8 +490,8 @@ bool                Plugin::_createConfiguration()
             // Try to parse the default XML configuration of the plugin, from its resources
             if (!doc.setContent(&file, false, &errorMsg, &errorLine, &errorColumn))
             {
-                Log::error("An error occured while parsing the configuration file of a plugin", Properties("message", errorMsg).add("file", file.fileName())
-                           .add("line", QString::number(errorLine)).add("column", errorColumn).add("id", this->id), "Plugin", "_createConfigurations");
+                LOG_ERROR("An error occured while parsing the configuration file of a plugin", Properties("message", errorMsg).add("file", file.fileName())
+                          .add("line", QString::number(errorLine)).add("column", errorColumn).add("id", this->id), "Plugin", "_createConfigurations");
                 Configurations::instance()->release();
                 return (false);
             }
@@ -506,7 +504,7 @@ bool                Plugin::_createConfiguration()
         // If the default configuration doesn't exists, just create the node of the plugin
         else
         {
-            Log::debug("The configuration of the plugin doesn't exists in its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
+            LOG_DEBUG("The configuration of the plugin doesn't exists in its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
             QDomElement plugin = element.ownerDocument().createElement("plugin");
             plugin.setAttribute("id", this->id);
             element.appendChild(plugin);

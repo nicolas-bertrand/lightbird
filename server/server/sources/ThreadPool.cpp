@@ -15,7 +15,7 @@ ThreadPool::ThreadPool(QObject *parent) : QObject(parent)
 ThreadPool::~ThreadPool()
 {
     this->shutdown();
-    Log::trace("ThreadPool destroyed!", "ThreadPool", "~ThreadPool");
+    LOG_TRACE("ThreadPool destroyed!", "ThreadPool", "~ThreadPool");
 }
 
 void            ThreadPool::addTask(ThreadPool::ITask *task)

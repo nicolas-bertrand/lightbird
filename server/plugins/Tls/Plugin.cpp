@@ -53,7 +53,7 @@ bool            Plugin::onLoad(LightBird::IApi *api)
     {
         if (err_pos)
             p.add("error position", err_pos).add("priority string", this->priorityStrings);
-        this->api->log().fatal("Unable to initialize GnuTLS", p.toMap(), "Plugin", "onLoad");
+        LOG_FATAL("Unable to initialize GnuTLS", p.toMap(), "Plugin", "onLoad");
         this->_deinit();
         return (false);
     }
@@ -118,14 +118,14 @@ bool    Plugin::onConnect(LightBird::IClient &client)
             LightBird::sleep(WAIT_FOR_READ);
         if (timeout.elapsed() > this->handshakeTimeout)
         {
-            this->api->log().debug("Handshake timeout", Properties("timeout", this->handshakeTimeout).toMap(), "Plugin", "onConnect");
+            LOG_DEBUG("Handshake timeout", Properties("timeout", this->handshakeTimeout).toMap(), "Plugin", "onConnect");
             return (false);
         }
     }
     while (result < 0 && gnutls_error_is_fatal(result) == 0);
     if (result < 0)
     {
-        this->api->log().debug("Handshake error", Properties("error", gnutls_strerror(result)).toMap(), "Plugin", "onConnect");
+        LOG_DEBUG("Handshake error", Properties("error", gnutls_strerror(result)).toMap(), "Plugin", "onConnect");
         return (false);
     }
     gnutls_transport_set_pull_function(session, Plugin::record_pull);
@@ -252,7 +252,8 @@ ssize_t Plugin::record_push(gnutls_transport_ptr_t socketDescriptor, const void 
 
 void    Plugin::log(gnutls_session_t, const char *log)
 {
-    Plugin::instance->api->log().debug("GnuTLS log: " + QString(log), "Plugin", "log");
+    if (Plugin::instance->api->log().isDebug())
+        Plugin::instance->api->log().debug("GnuTLS log: " + QString(log), "Plugin", "log");
 }
 
 void    Plugin::_loadConfiguration()
@@ -313,7 +314,7 @@ void    Plugin::_loadPrivateKey()
         datum.data = (unsigned char *)data.data();
         if ((error = gnutls_x509_privkey_import_pkcs8(this->key, &datum, GNUTLS_X509_FMT_PEM, this->keyPassword.data(), 0)) != GNUTLS_E_SUCCESS)
         {
-            this->api->log().error("Invalid private key", Properties("error", gnutls_strerror(error)).toMap(), "Plugin", "_generatePrivateKey");
+            LOG_ERROR("Invalid private key", Properties("error", gnutls_strerror(error)).toMap(), "Plugin", "_generatePrivateKey");
             file.resize(0);
         }
         else if (gnutls_x509_privkey_sec_param(this->key) != this->secParam)
@@ -323,7 +324,7 @@ void    Plugin::_loadPrivateKey()
     if (file.size() == 0)
     {
         bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_RSA, this->secParam);
-        this->api->log().info("Generating a new private key", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generatePrivateKey");
+        LOG_INFO("Generating a new private key", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generatePrivateKey");
         ASSERT(gnutls_x509_privkey_generate(this->key, GNUTLS_PK_RSA, bits, 0));
         ASSERT(gnutls_x509_privkey_verify_params(this->key));
         size = bits;
@@ -382,7 +383,7 @@ void    Plugin::_loadCertificate()
         gnutls_x509_crt_deinit(this->crt);
         this->init.removeAll("crt");
         ASSERT_INIT(gnutls_x509_crt_init(&this->crt), "crt");
-        this->api->log().info("Generating a new certificate", "Plugin", "_generateCertificate");
+        LOG_INFO("Generating a new certificate", "Plugin", "_generateCertificate");
         oid.insert((char *)GNUTLS_OID_X520_COMMON_NAME, "LightBird");
         oid.insert((char *)GNUTLS_OID_X520_ORGANIZATION_NAME, "LightBird");
         QMapIterator<char *, QByteArray> it(oid);
@@ -438,7 +439,7 @@ void    Plugin::_loadDHParams()
     // Generates the DH parameters and store them in a PEM file
     if (file.size() == 0)
     {
-        this->api->log().info("Generating new Diffie-Hellman parameters. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
+        LOG_INFO("Generating new Diffie-Hellman parameters. This might take some time.", Properties("secParam", gnutls_sec_param_get_name(this->secParam)).add("bits", bits).toMap(), "Plugin", "_generateDHParams");
         data.resize(bits);
         datum.data = (unsigned char *)data.data();
         datum.size = bits;

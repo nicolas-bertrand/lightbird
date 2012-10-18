@@ -51,7 +51,7 @@ Client::~Client()
     // Ensures that all the informations requests has been processed
     this->_getInformations();
     delete this->engine;
-    Log::trace("Client destroyed!", Properties("id", this->id), "Client", "~Client");
+    LOG_TRACE("Client destroyed!", Properties("id", this->id), "Client", "~Client");
 }
 
 void        Client::run()
@@ -67,11 +67,11 @@ void        Client::run()
             // Tries to connect to the client
             if (!this->readWriteInterface->connect(this))
                 return this->_finish();
-            Log::info("Client connected", Properties("id", this->id).add("port", this->port)
-                      .add("socket", ((this->socketDescriptor >= 0) ? QString::number(this->socketDescriptor) : ""), false)
-                      .add("peerAddress", this->peerAddress.toString()).add("peerName", this->peerName, false)
-                      .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server")
-                      .add("peerPort", this->peerPort), "Client", "run");
+            LOG_INFO("Client connected", Properties("id", this->id).add("port", this->port)
+                     .add("socket", ((this->socketDescriptor >= 0) ? QString::number(this->socketDescriptor) : ""), false)
+                     .add("peerAddress", this->peerAddress.toString()).add("peerName", this->peerName, false)
+                     .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server")
+                     .add("peerPort", this->peerPort), "Client", "run");
             // If the client is not allowed to connect, it is disconnected
             if (!this->_onConnect())
                 return this->_finish();
@@ -370,9 +370,9 @@ bool        Client::doRead(QByteArray &data)
     data.clear();
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->mode, this->transport, this->protocols, this->port)).second)
     {
-        Log::trace("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
+        LOG_TRACE("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
         if (!instance.second->doRead(*this, data))
-            Log::debug("IDoRead::doRead() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doRead");
+            LOG_DEBUG("IDoRead::doRead() returned false", Properties("id", this->id).add("plugin", instance.first).add("dataSize", data.size()), "Client", "doRead");
         Plugins::instance()->release(instance.first);
         return (true);
     }
@@ -385,7 +385,7 @@ bool        Client::doWrite(const char *data, qint64 size, qint64 &result)
 
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->mode, this->transport, this->protocols, this->port)).second)
     {
-        Log::trace("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
+        LOG_TRACE("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
         result = instance.second->doWrite(*this, data, size);
         Plugins::instance()->release(instance.first);
         return (true);
@@ -401,11 +401,11 @@ bool        Client::_onConnect()
     QMapIterator<QString, LightBird::IOnConnect *> it(Plugins::instance()->getInstances<LightBird::IOnConnect>(this->mode, this->transport, this->protocols, this->port));
     while (it.hasNext())
     {
-        Log::trace("Calling IOnConnect::onConnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
+        LOG_TRACE("Calling IOnConnect::onConnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
         // Calls onConnect
         if (!it.peekNext().value()->onConnect(*this))
         {
-            Log::trace("IOnConnect::onConnect() returned false. The client will be disconnected", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
+            LOG_TRACE("IOnConnect::onConnect() returned false. The client will be disconnected", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
             accept = false;
         }
         // Every plugins in the map must be released
@@ -422,12 +422,12 @@ bool        Client::_onDisconnect()
     QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->mode, this->transport, this->protocols, this->port));
     while (it.hasNext())
     {
-        Log::trace("Calling IOnDisconnect::onDisconnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDisconnect");
+        LOG_TRACE("Calling IOnDisconnect::onDisconnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDisconnect");
         if (!it.peekNext().value()->onDisconnect(*this))
             finish = false;
         Plugins::instance()->release(it.next().key());
     }
-    Log::info("Client disconnected", Properties("id", this->id).add("disconnecting", !finish), "Client", "run");
+    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish), "Client", "run");
     return (finish);
 }
 
@@ -436,7 +436,7 @@ void        Client::_onDestroy()
     QMapIterator<QString, LightBird::IOnDestroy *> it(Plugins::instance()->getInstances<LightBird::IOnDestroy>(this->mode, this->transport, this->protocols, this->port));
     while (it.hasNext())
     {
-        Log::trace("Calling IOnDestroy::onDestroy()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDestroy");
+        LOG_TRACE("Calling IOnDestroy::onDestroy()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDestroy");
         it.peekNext().value()->onDestroy(*this);
         Plugins::instance()->release(it.next().key());
     }
@@ -562,7 +562,7 @@ QString         Client::getProtocol(QString protocol)
     // If the protocol is defined we check that it is in the protocols handled by the client
     if (!protocol.isEmpty() && !this->protocols.contains("all") && !this->protocols.contains(protocol))
     {
-        Log::debug("The protocol is not handled by the client", Properties("id", this->id).add("protocol", protocol), "Clients", "send");
+        LOG_DEBUG("The protocol is not handled by the client", Properties("id", this->id).add("protocol", protocol), "Clients", "send");
         return (QString());
     }
     // Otherwise the protocol is the first in the protocols list
@@ -571,7 +571,7 @@ QString         Client::getProtocol(QString protocol)
     // No protocol has been found
     if (protocol.isEmpty())
     {
-        Log::debug("No protocol defined for the request", Properties("id", this->id), "Clients", "send");
+        LOG_DEBUG("No protocol defined for the request", Properties("id", this->id), "Clients", "send");
         return (QString());
     }
     return (protocol);

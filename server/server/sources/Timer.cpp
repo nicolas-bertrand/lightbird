@@ -15,7 +15,7 @@ Timer::Timer(QString i, QString n, unsigned int in, ApiTimers &timers) : id(i),
                                                                          apiTimers(timers),
                                                                          stopped(false)
 {
-    Log::debug("Loading the timer", Properties("name", this->name).add("id", this->id).add("interval", QString::number(this->interval)), "Timer", "Timer");
+    LOG_DEBUG("Loading the timer", Properties("name", this->name).add("id", this->id).add("interval", QString::number(this->interval)), "Timer", "Timer");
     this->timer.setSingleShot(true);
     // Starts the Timer thread
     this->moveToThread(this);
@@ -24,7 +24,7 @@ Timer::Timer(QString i, QString n, unsigned int in, ApiTimers &timers) : id(i),
 
 Timer::~Timer()
 {
-    Log::trace("Timer destroyed!", Properties("id", this->id).add("name", this->name), "Timer", "~Timer");
+    LOG_TRACE("Timer destroyed!", Properties("id", this->id).add("name", this->name), "Timer", "~Timer");
 }
 
 void    Timer::run()
@@ -36,9 +36,9 @@ void    Timer::run()
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(_timeout()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(setIntervalSignal()), this, SLOT(_setInterval()), Qt::QueuedConnection);
     this->timer.start(this->interval);
-    Log::trace("Timer thread started", Properties("id", this->id).add("name", this->name), "Timer", "run");
+    LOG_TRACE("Timer thread started", Properties("id", this->id).add("name", this->name), "Timer", "run");
     this->exec();
-    Log::trace("Timer thread finished", Properties("id", this->id).add("name", this->name), "Timer", "run");
+    LOG_TRACE("Timer thread finished", Properties("id", this->id).add("name", this->name), "Timer", "run");
     // The thread where lives the Timer is changed to the thread main
     this->moveToThread(QCoreApplication::instance()->thread());
 }
@@ -69,7 +69,7 @@ void                    Timer::_timeout()
     LightBird::ITimer   *instance;
     bool                result;
 
-    //Log::trace("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
+    //LOG_TRACE("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
     if (this->stopped || !(instance = Plugins::instance()->getInstance<LightBird::ITimer>(this->id)))
         return ;
     result = instance->timer(this->name);

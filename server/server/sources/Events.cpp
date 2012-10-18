@@ -5,12 +5,12 @@
 
 Events::Events(QObject *parent) : QObject(parent)
 {
-    Log::trace("Events created", "Events", "Events");
+    LOG_TRACE("Events created", "Events", "Events");
 }
 
 Events::~Events()
 {
-    Log::trace("Events destroyed!", "Events", "~Events");
+    LOG_TRACE("Events destroyed!", "Events", "~Events");
 }
 
 void    Events::add(ApiEvents *apiEvents)
@@ -37,7 +37,7 @@ void    Events::send(const QString &event, const QVariant &property)
     QListIterator<ApiEvents *> it(this->events);
     while (it.hasNext())
         it.next()->post(event, property);
-    Log::trace("Event sent", Properties("event", event).add("property", property.toString(), false), "Events", "send");
+    LOG_TRACE("Event sent", Properties("event", event).add("property", property.toString(), false), "Events", "send");
     this->mutex.unlock();
 }
 

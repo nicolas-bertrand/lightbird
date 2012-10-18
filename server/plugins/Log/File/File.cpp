@@ -28,7 +28,7 @@ bool    File::onLoad(LightBird::IApi *api)
         this->expires = 30;
     if ((this->maxNbOfFile = this->_getNodeValue("maxNbOfFile").toInt()) < 1)
     {
-        this->api->log().warning("Invalid maxNbOfFile (" + QString::number(this->maxNbOfFile) + "). It should be greater than 0.", "File", "onLoad");
+        LOG_WARNING("Invalid maxNbOfFile (" + QString::number(this->maxNbOfFile) + "). It should be greater than 0.", "File", "onLoad");
         this->maxNbOfFile = 10;
     }
     this->display = true;
@@ -44,7 +44,7 @@ bool    File::onLoad(LightBird::IApi *api)
     properties["display"] = "false";
     if (this->display == true)
         properties["display"] = "true";
-    this->api->log().debug("Loading Log/File", properties, "File", "onLoad");
+    LOG_DEBUG("Loading Log/File", properties, "File", "onLoad");
 
     // Map the names of the log levels
     this->levels[LightBird::ILogs::FATAL] = "Fatal";
@@ -232,13 +232,13 @@ bool                            File::_manageFiles()
         if (date.toString("yyyy-MM-dd hh-mm-ss") != lastError)
         {
             lastError = date.toString("yyyy-MM-dd hh-mm-ss");
-            this->api->log().warning("Cannot rename the log file to archive it", properties, "File", "_manageFiles");
+            LOG_WARNING("Cannot rename the log file to archive it", properties, "File", "_manageFiles");
         }
     }
     else
     {
         properties["archive"] = this->file.fileName();
-        this->api->log().trace("Log archive file created", properties, "File", "_manageFiles");
+        LOG_TRACE("Log archive file created", properties, "File", "_manageFiles");
     }
     this->file.close();
     this->_createLogFile();
@@ -266,7 +266,7 @@ bool                            File::_manageFiles()
         if (!QFile::remove(this->path + files.begin().value()))
             this->api->log().warning("Can't remove the log archive file", properties, "File", "_manageFiles");
         else
-            this->api->log().trace("Log archive file removed", properties, "File", "_manageFiles");
+            LOG_TRACE("Log archive file removed", properties, "File", "_manageFiles");
         files.erase(files.begin());
     }
 
@@ -282,7 +282,7 @@ bool                            File::_manageFiles()
             if (!QFile::remove(this->path + files.begin().value()))
                 this->api->log().warning("Can't remove the expired log archive file", properties, "File", "_manageFiles");
             else
-                this->api->log().trace("Expired log archive file removed", properties, "File", "_manageFiles");
+                LOG_TRACE("Expired log archive file removed", properties, "File", "_manageFiles");
             flag = true;
         }
         files.erase(files.begin());

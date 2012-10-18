@@ -67,14 +67,14 @@ void    Plugin::event(const QString &, const QVariant &)
     unsigned int    line = 0;
     QListIterator<QPair<QString, ITest *> > test(this->tests);
 
-    this->api->log().info("Running the tests of the server...", "Plugin", "event");
+    LOG_INFO("Running the tests of the server...", "Plugin", "event");
     // Runs the tests
     while (test.hasNext() && !line)
         line = test.next().second->run();
     if (!line)
         this->api->log().info("All the tests were successful!", "Plugin", "event");
     else
-        this->api->log().error("At least one test failed!", Properties("class", test.peekPrevious().first).add("line", line).toMap(), "Plugin", "event");
+        LOG_ERROR("At least one test failed!", Properties("class", test.peekPrevious().first).add("line", line).toMap(), "Plugin", "event");
 }
 
 Q_EXPORT_PLUGIN2(Plugin, Plugin)

@@ -73,9 +73,7 @@ QByteArray  Content::getContent(quint64 size)
     }
     else if (this->storage == LightBird::IContent::FILE)
     {
-        if (!this->file->open(QIODevice::ReadOnly))
-            Log::warning("Unable to open the file", Properties("file", this->file->fileName()), "Content", "getContent");
-        else
+        if (this->file->open(QIODevice::ReadOnly))
         {
             if (size == 0)
                 content = this->file->readAll();
@@ -88,6 +86,8 @@ QByteArray  Content::getContent(quint64 size)
             }
             this->file->close();
         }
+        else
+            LOG_WARNING("Unable to open the file", Properties("file", this->file->fileName()), "Content", "getContent");
     }
     else if (this->storage == LightBird::IContent::TEMPORARYFILE)
     {
@@ -125,8 +125,8 @@ void    Content::setContent(const QByteArray &content, bool append)
         else
             this->file->open(QIODevice::WriteOnly | QIODevice::Truncate);
         if ((wrote = this->file->write(content)) != content.size())
-            Log::warning("All data has not been written in the file", Properties("size", content.size())
-                         .add("wrote", wrote).add("file", this->file->fileName()), "Content", "setContent");
+            LOG_WARNING("All data has not been written in the file", Properties("size", content.size())
+                        .add("wrote", wrote).add("file", this->file->fileName()), "Content", "setContent");
         this->file->close();
     }
     else if (this->storage == LightBird::IContent::TEMPORARYFILE)
@@ -136,8 +136,8 @@ void    Content::setContent(const QByteArray &content, bool append)
         else
             this->temporaryFile->resize(0);
         if ((wrote = this->temporaryFile->write(content)) != content.size())
-            Log::warning("All data has not been written in the temporary file", Properties("size", content.size())
-                         .add("wrote", wrote).add("file", this->temporaryFile->fileName()), "Content", "setContent");
+            LOG_WARNING("All data has not been written in the temporary file", Properties("size", content.size())
+                        .add("wrote", wrote).add("file", this->temporaryFile->fileName()), "Content", "setContent");
     }
 }
 

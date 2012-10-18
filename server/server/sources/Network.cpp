@@ -15,7 +15,7 @@ Network::Network(QObject *parent) : QObject(parent)
 Network::~Network()
 {
     this->shutdown();
-    Log::trace("Network destroyed!", "Network", "~Network");
+    LOG_TRACE("Network destroyed!", "Network", "~Network");
 }
 
 bool            Network::openPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients)
@@ -28,8 +28,8 @@ bool            Network::openPort(unsigned short port, const QStringList &protoc
     // The port already exists
     if (this->ports[transport].contains(port))
     {
-        Log::error("The port is already listening", Properties("port", port).add("protocols", protocols.join(" "))
-                   .add("transport", (transport == LightBird::INetwork::TCP ? "TCP" : "UDP")), "Network", "openPort");
+        LOG_ERROR("The port is already listening", Properties("port", port).add("protocols", protocols.join(" "))
+                  .add("transport", (transport == LightBird::INetwork::TCP ? "TCP" : "UDP")), "Network", "openPort");
         return (false);
     }
     // Creates the port
@@ -59,13 +59,13 @@ bool            Network::closePort(unsigned short port, LightBird::INetwork::Tra
     // The port doesn't exists
     if (!this->ports[transport].contains(port))
     {
-        Log::warning("The port doesn't exists", Properties("port", port), "Network", "closePort");
+        LOG_WARNING("The port doesn't exists", Properties("port", port), "Network", "closePort");
         return (false);
     }
     // If the port is already removing
     if (!this->ports[transport][port]->isListening())
     {
-        Log::warning("The port is already removing", Properties("port", port), "Network", "closePort");
+        LOG_WARNING("The port is already removing", Properties("port", port), "Network", "closePort");
         return (false);
     }
     // Forbids new connections to this port and removes all the remaining connected clients

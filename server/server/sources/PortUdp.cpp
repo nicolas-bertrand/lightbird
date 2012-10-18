@@ -22,7 +22,7 @@ PortUdp::~PortUdp()
     // Quits the thread if it is still running
     this->quit();
     this->wait();
-    Log::trace("Port UDP destroyed!", Properties("port", this->getPort()), "PortUdp", "~PortUdp");
+    LOG_TRACE("Port UDP destroyed!", Properties("port", this->getPort()), "PortUdp", "~PortUdp");
 }
 
 void    PortUdp::run()
@@ -32,13 +32,13 @@ void    PortUdp::run()
     // Listens on the given port
     if (!this->socket.bind(QHostAddress::Any, this->getPort()))
     {
-        Log::error("Failed to bind the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
-                   .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
+        LOG_ERROR("Failed to bind the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
+                  .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
         this->moveToThread(QCoreApplication::instance()->thread());
         return ;
     }
-    Log::info("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
-              .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
+    LOG_INFO("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
+             .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
     Port::_isListening(true);
     this->threadStarted.setResult(true);
     this->exec();
@@ -55,7 +55,7 @@ void    PortUdp::run()
         delete client.next();
     this->clients.clear();
     this->moveToThread(QCoreApplication::instance()->thread());
-    Log::info("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
+    LOG_INFO("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
 }
 
 void            PortUdp::read(Client *client)
@@ -94,7 +94,7 @@ bool            PortUdp::write(QByteArray *data, Client *client)
     // Writes the data on the socket
     if ((wrote = this->socket.writeDatagram(*data, client->getPeerAddress(), client->getPeerPort())) != data->size())
     {
-        Log::debug("All data has not been written", Properties("wrote", wrote).add("toWrite", data->size()).add("id", client->getId()), "PortUdp", "write");
+        LOG_DEBUG("All data has not been written", Properties("wrote", wrote).add("toWrite", data->size()).add("id", client->getId()), "PortUdp", "write");
         result = false;
     }
     // Notifies the Client that the data have been written

@@ -12,7 +12,7 @@ ApiConfiguration::ApiConfiguration(const QString &idPlugin) : id(Plugins::checkI
     // The plugin doesn't exists
     if (!QFileInfo(Configurations::instance()->get("pluginsPath") + "/" + this->id).isDir())
     {
-        Log::warning("The plugin doesn't exists", Properties("id", this->id), "ApiConfiguration", "ApiConfiguration");
+        LOG_WARNING("The plugin doesn't exists", Properties("id", this->id), "ApiConfiguration", "ApiConfiguration");
         return ;
     }
     // Creates the plugin configurations parent node if it doesn't exists

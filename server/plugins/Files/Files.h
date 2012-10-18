@@ -14,7 +14,7 @@ class Files : public QObject
     Q_OBJECT
 
 public:
-    Files(LightBird::IApi &api, const QString &timerName);
+    Files(LightBird::IApi *api, const QString &timerName);
     ~Files();
 
     /// @brief Called periodically to check if some file can be removed from the
@@ -32,7 +32,7 @@ private:
     /// @return The list of the files that could not be removed this time.
     QStringList _removeFiles();
 
-    LightBird::IApi     &api;
+    LightBird::IApi     *api;
     QFileSystemWatcher  fileSystemWatcher; ///< Tells when something has changed in the filesPath.
     QString             timerName;         ///< The name of the timer that manages the thread of this class.
     unsigned int        removeFileTimer;   ///< The time to check and remove the files that could not be removed before from the filesPath.

@@ -96,7 +96,7 @@ bool            Port::send(const QString &id, const QString &p, const QVariantMa
     // Checks the protocol
     if ((protocol = client->getProtocol(p)).isEmpty())
     {
-        Log::warning("Invalid protocol", Properties("id", id).add("protocol", p, false), "Port", "send");
+        LOG_WARNING("Invalid protocol", Properties("id", id).add("protocol", p, false), "Port", "send");
         return (false);
     }
     return (client->send(protocol, informations));

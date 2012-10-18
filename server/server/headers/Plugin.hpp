@@ -119,7 +119,7 @@ T       *Plugin::getInstance()
 
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugin", "getInstance");
+        LOG_ERROR("Deadlock", "Plugin", "getInstance");
         return (NULL);
     }
     if (this->state != LightBird::IPlugins::LOADED)

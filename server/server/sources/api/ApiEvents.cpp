@@ -36,7 +36,7 @@ ApiEvents::~ApiEvents()
 
 void    ApiEvents::run()
 {
-    Log::trace("ApiEvents thread started", Properties("id", this->id), "ApiEvents", "run");
+    LOG_TRACE("ApiEvents thread started", Properties("id", this->id), "ApiEvents", "run");
     // Tells to the thread that started the current thread that it is running
     this->mutex.lock();
     this->awake = true;
@@ -44,7 +44,7 @@ void    ApiEvents::run()
     this->mutex.unlock();
     // Execute the event loop
     this->exec();
-    Log::trace("ApiEvents thread finished", Properties("id", this->id), "ApiEvents", "run");
+    LOG_TRACE("ApiEvents thread finished", Properties("id", this->id), "ApiEvents", "run");
     // The thread where lives the Timer is changed to the thread main
     this->moveToThread(QCoreApplication::instance()->thread());
 }
@@ -75,7 +75,7 @@ void            ApiEvents::subscribe(const QStringList &events)
         return ;
     this->subscribed << events;
     this->subscribed.removeDuplicates();
-    Log::debug("Events subscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
+    LOG_DEBUG("Events subscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
 }
 
 void            ApiEvents::unsubscribe(const QString &event)
@@ -85,7 +85,7 @@ void            ApiEvents::unsubscribe(const QString &event)
     if (!mutex)
         return ;
     this->subscribed.removeAll(event);
-    Log::debug("Event unsubscribed", Properties("id", this->id).add("event", event), "ApiEvents", "unsubscribe");
+    LOG_DEBUG("Event unsubscribed", Properties("id", this->id).add("event", event), "ApiEvents", "unsubscribe");
 }
 
 void            ApiEvents::unsubscribe(const QStringList &events)
@@ -97,7 +97,7 @@ void            ApiEvents::unsubscribe(const QStringList &events)
     QStringListIterator it(events);
     while (it.hasNext())
         this->subscribed.removeAll(it.next());
-    Log::debug("Events unsubscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
+    LOG_DEBUG("Events unsubscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
 }
 
 QStringList     ApiEvents::getEvents() const

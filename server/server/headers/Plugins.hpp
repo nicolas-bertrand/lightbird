@@ -185,7 +185,7 @@ T       *Plugins::getInstance(const QString &id)
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugins", "getInstance");
+        LOG_ERROR("Deadlock", "Plugins", "getInstance");
         return (instance);
     }
     if (this->plugins.contains(id))
@@ -211,7 +211,7 @@ QPair<QString, T *> Plugins::getInstance(LightBird::IClient::Mode mode, LightBir
         transportText = "UDP";
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugins", "getInstance");
+        LOG_ERROR("Deadlock", "Plugins", "getInstance");
         return (pair);
     }
     QStringListIterator it(this->orderedPlugins);
@@ -250,7 +250,7 @@ QMap<QString, T *>  Plugins::getInstances()
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugins", "getInstances");
+        LOG_ERROR("Deadlock", "Plugins", "getInstances");
         return (instances);
     }
     QStringListIterator it(this->orderedPlugins);
@@ -281,7 +281,7 @@ QMap<QString, T *>  Plugins::getInstances(LightBird::IClient::Mode mode, LightBi
         transportText = "UDP";
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "Plugins", "getInstances");
+        LOG_ERROR("Deadlock", "Plugins", "getInstances");
         return (instances);
     }
     QStringListIterator it(this->orderedPlugins);

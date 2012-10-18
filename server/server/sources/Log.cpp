@@ -159,37 +159,27 @@ void    Log::isDisplay(bool display)
 
 bool    Log::isError() const
 {
-    if (this->level <= LightBird::ILogs::ERROR)
-        return (true);
-    return (false);
+    return (this->level <= LightBird::ILogs::ERROR);
 }
 
 bool    Log::isWarning() const
 {
-    if (this->level <= LightBird::ILogs::WARNING)
-        return (true);
-    return (false);
+    return (this->level <= LightBird::ILogs::WARNING);
 }
 
 bool    Log::isInfo() const
 {
-    if (this->level <= LightBird::ILogs::INFO)
-        return (true);
-    return (false);
+    return (this->level <= LightBird::ILogs::INFO);
 }
 
 bool    Log::isDebug() const
 {
-    if (this->level <= LightBird::ILogs::DEBUG)
-        return (true);
-    return (false);
+    return (this->level <= LightBird::ILogs::DEBUG);
 }
 
 bool    Log::isTrace() const
 {
-    if (this->level <= LightBird::ILogs::TRACE)
-        return (true);
-    return (false);
+    return (this->level <= LightBird::ILogs::TRACE);
 }
 
 void    Log::setMode(Log::Mode mode)

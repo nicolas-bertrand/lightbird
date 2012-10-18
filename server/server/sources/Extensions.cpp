@@ -7,12 +7,12 @@
 
 Extensions::Extensions(QObject *parent) : QObject(parent)
 {
-    Log::trace("Extensions created", "Extensions", "Extensions");
+    LOG_TRACE("Extensions created", "Extensions", "Extensions");
 }
 
 Extensions::~Extensions()
 {
-    Log::trace("Extensions destroyed!", "Extensions", "~Extensions");
+    LOG_TRACE("Extensions destroyed!", "Extensions", "~Extensions");
 }
 
 void                        Extensions::add(Plugin *plugin)
@@ -29,7 +29,7 @@ void                        Extensions::add(Plugin *plugin)
     // If the plugin is already managed, an error occured
     if (this->plugins.contains(plugin->id))
     {
-        Log::error("The plugin is already managed", "Extensions", "add");
+        LOG_ERROR("The plugin is already managed", "Extensions", "add");
         return ;
     }
     // Get the names of the extensions that the plugin implements
@@ -46,7 +46,7 @@ void                        Extensions::add(Plugin *plugin)
     this->plugins[plugin->id].instance = plugin;
     this->plugins[plugin->id].extensions = extension;
     this->plugins[plugin->id].loaded = true;
-    Log::debug("Extensions plugin added", properties.add("pluginId", plugin->id), "Extensions", "add");
+    LOG_DEBUG("Extensions plugin added", properties.add("pluginId", plugin->id), "Extensions", "add");
 }
 
 void            Extensions::remove(Plugin *plugin)
@@ -57,7 +57,7 @@ void            Extensions::remove(Plugin *plugin)
     {
         this->plugins[plugin->id].loaded = false;
         this->_remove(plugin->id);
-        Log::debug("Extensions plugin removed", Properties("pluginId", plugin->id), "Extensions", "remove");
+        LOG_DEBUG("Extensions plugin removed", Properties("pluginId", plugin->id), "Extensions", "remove");
     }
 }
 
@@ -84,7 +84,7 @@ QList<void *>       Extensions::get(const QString &name)
                 extension.plugin = it.peekNext();
                 this->extensions.insertMulti(name, extension);
                 result.push_back(extension.instance);
-                Log::trace("Extension instance created", Properties("pluginId", it.peekNext()).add("extensionName", name), "Extensions", "get");
+                LOG_TRACE("Extension instance created", Properties("pluginId", it.peekNext()).add("extensionName", name), "Extensions", "get");
                 // Increments the used variable of plugins, so that it will not be unloaded until the extension is released
                 this->plugins[it.peekNext()].instance->used++;
             }
@@ -116,7 +116,7 @@ void            Extensions::release(QList<void *> extensions)
                 plugin = it2.value().plugin;
                 this->plugins[plugin].extensions->releaseExtension(it2.key(), it2.value().instance);
                 emit Plugins::instance()->release(plugin);
-                Log::trace("Extension instance released", Properties("pluginId", plugin).add("extensionName", it2.key()), "Extensions", "release");
+                LOG_TRACE("Extension instance released", Properties("pluginId", plugin).add("extensionName", it2.key()), "Extensions", "release");
                 it2.remove();
                 if (this->plugins[plugin].loaded == false)
                     this->_remove(plugin);
@@ -150,10 +150,10 @@ void        Extensions::_remove(const QString &plugin)
             if (it2.value() == plugin)
                 it2.remove();
         }
-        Log::trace("Plugin removed", Properties("pluginId", plugin), "Extensions", "_remove");
+        LOG_TRACE("Plugin removed", Properties("pluginId", plugin), "Extensions", "_remove");
     }
     else
-        Log::trace("Some extensions of this plugin are still used", Properties("pluginId", plugin), "Extensions", "_remove");
+        LOG_TRACE("Some extensions of this plugin are still used", Properties("pluginId", plugin), "Extensions", "_remove");
 }
 
 Extensions  *Extensions::instance()

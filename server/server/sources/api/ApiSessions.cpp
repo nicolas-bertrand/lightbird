@@ -20,12 +20,12 @@ ApiSessions::ApiSessions(QObject *parent) : QObject(parent)
     query.bindValue(":expiration", QDateTime::currentDateTimeUtc().toString(DATE_FORMAT));
     Database::instance()->query(query);
     this->expiration();
-    Log::trace("ApiSessions created", "ApiSessions", "ApiSessions");
+    LOG_TRACE("ApiSessions created", "ApiSessions", "ApiSessions");
 }
 
 ApiSessions::~ApiSessions()
 {
-    Log::trace("ApiSessions destroyed!", "ApiSessions", "~ApiSessions");
+    LOG_TRACE("ApiSessions destroyed!", "ApiSessions", "~ApiSessions");
 }
 
 LightBird::Session  ApiSessions::create(const QDateTime &expiration, const QString &id_account, const QStringList &clients, const QVariantMap &informations)

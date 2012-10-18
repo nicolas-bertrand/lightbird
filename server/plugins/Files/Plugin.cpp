@@ -49,7 +49,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 bool    Plugin::timer(const QString &name)
 {
     if (!this->files)
-        this->files = new Files(*this->api, name);
+        this->files = new Files(this->api, name);
     this->files->timer();
     return (true);
 }

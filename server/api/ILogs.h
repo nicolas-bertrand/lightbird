@@ -93,6 +93,16 @@ namespace LightBird
     };
 }
 
+/// Optimizes the use of the log by checking its level before issuing the log.
+/// This way, the parameters of the log are only evaluated when the level is correct,
+/// which avoids unnecessary computation in higher log levels.
+# define LOG_FATAL   this->api->log().fatal
+# define LOG_ERROR   if (this->api->log().isError())   this->api->log().error
+# define LOG_WARNING if (this->api->log().isWarning()) this->api->log().warning
+# define LOG_INFO    if (this->api->log().isInfo())    this->api->log().info
+# define LOG_DEBUG   if (this->api->log().isDebug())   this->api->log().debug
+# define LOG_TRACE   if (this->api->log().isTrace())   this->api->log().trace
+
 Q_DECLARE_INTERFACE(LightBird::ILogs, "cc.lightbird.ILogs")
 
 #endif // ILOGS_H

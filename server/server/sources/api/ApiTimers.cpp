@@ -35,18 +35,18 @@ void    ApiTimers::setTimer(const QString &name, unsigned int interval)
 {
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "ApiTimers", "setTimer");
+        LOG_ERROR("Deadlock", "ApiTimers", "setTimer");
         return ;
     }
     if (this->timers.contains(name))
     {
-        Log::trace("Timer modified", Properties("id", this->id).add("name", name).add("interval", QString::number(interval)), "ApiTimers", "setTimer");
+        LOG_TRACE("Timer modified", Properties("id", this->id).add("name", name).add("interval", QString::number(interval)), "ApiTimers", "setTimer");
         this->timers.value(name)->setInterval(interval);
         this->mutex.unlock();
     }
     else
     {
-        Log::trace("Timer created", Properties("id", this->id).add("name", name).add("interval", QString::number(interval)), "ApiTimers", "setTimer");
+        LOG_TRACE("Timer created", Properties("id", this->id).add("name", name).add("interval", QString::number(interval)), "ApiTimers", "setTimer");
         this->timers.insert(name, new Timer(this->id, name, interval, *this));
         this->mutex.unlock();
     }
@@ -58,7 +58,7 @@ unsigned int        ApiTimers::getTimer(const QString &name) const
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "ApiTimers", "getTimer");
+        LOG_ERROR("Deadlock", "ApiTimers", "getTimer");
         return (0);
     }
     if (this->timers.contains(name))
@@ -73,7 +73,7 @@ QMap<QString, unsigned int>     ApiTimers::getTimers() const
 
     if (!this->mutex.tryLockForRead(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "ApiTimers", "getTimers");
+        LOG_ERROR("Deadlock", "ApiTimers", "getTimers");
         return (timers);
     }
     QMapIterator<QString, Timer *> it(this->timers);
@@ -90,7 +90,7 @@ bool    ApiTimers::removeTimer(const QString &name)
 {
     if (!this->mutex.tryLockForWrite(MAXTRYLOCK))
     {
-        Log::error("Deadlock", "ApiTimers", "removeTimer");
+        LOG_ERROR("Deadlock", "ApiTimers", "removeTimer");
         return (false);
     }
     if (!this->timers.contains(name))
@@ -101,7 +101,7 @@ bool    ApiTimers::removeTimer(const QString &name)
     this->timers.value(name)->stop();
     this->timers.value(name)->quit();
     this->timers.remove(name);
-    Log::trace("Timer deleted", Properties("id", this->id).add("name", name), "ApiTimers", "removeTimer");
+    LOG_TRACE("Timer deleted", Properties("id", this->id).add("name", name), "ApiTimers", "removeTimer");
     this->mutex.unlock();
     return (true);
 }

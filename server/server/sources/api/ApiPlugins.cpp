@@ -5,12 +5,12 @@
 
 ApiPlugins::ApiPlugins(QObject *parent) : QObject(parent)
 {
-    Log::trace("ApiPlugins created", "ApiPlugins", "ApiPlugins");
+    LOG_TRACE("ApiPlugins created", "ApiPlugins", "ApiPlugins");
 }
 
 ApiPlugins::~ApiPlugins()
 {
-    Log::trace("ApiPlugins destroyed!", "ApiPlugins", "~ApiPlugins");
+    LOG_TRACE("ApiPlugins destroyed!", "ApiPlugins", "~ApiPlugins");
 }
 
 QSharedPointer<LightBird::IFuture<bool> > ApiPlugins::load(const QString &id)

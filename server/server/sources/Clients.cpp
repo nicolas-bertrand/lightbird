@@ -113,7 +113,7 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
     // Checks the protocol
     if ((protocol = client->getProtocol(p)).isEmpty())
     {
-        Log::warning("Invalid protocol", Properties("idClient", idClient).add("idPlugin", idPlugin).add("protocol", p, false), "Clients", "send");
+        LOG_WARNING("Invalid protocol", Properties("idClient", idClient).add("idPlugin", idPlugin).add("protocol", p, false), "Clients", "send");
         return (false);
     }
     client->send(protocol, informations, idPlugin);
@@ -139,7 +139,7 @@ bool            Clients::receive(const QString &id, const QString &p, const QVar
     // Checks the protocol
     if ((protocol = client->getProtocol(p)).isEmpty())
     {
-        Log::warning("Invalid protocol", Properties("id", id).add("protocol", p, false), "Clients", "receive");
+        LOG_WARNING("Invalid protocol", Properties("id", id).add("protocol", p, false), "Clients", "receive");
         return (false);
     }
     return (client->receive(protocol, informations));
@@ -236,8 +236,8 @@ void            Clients::_read(Client *client)
         data.resize(client->getSocket().size());
         if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
         {
-            Log::warning("An error occured while reading the data", Properties("id", client->getId())
-                         .add("error", read).add("size", data.size()), "Clients", "_read");
+            LOG_WARNING("An error occured while reading the data", Properties("id", client->getId())
+                        .add("error", read).add("size", data.size()), "Clients", "_read");
             data.resize(read);
         }
     }
@@ -286,9 +286,9 @@ void                   Clients::_write()
                 result = w.client->getSocket().write(w.data->data() + w.offset, w.data->size() - w.offset);
             w.offset += result;
             if (result < 0)
-                Log::debug("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
+                LOG_DEBUG("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
             if (result == 0)
-                Log::trace("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
+                LOG_TRACE("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
         }
         if (result < 0 || w.offset >= w.data->size())
         {
@@ -365,10 +365,10 @@ void            Clients::_connect(QString id)
         }
         // An error occured
         else
-            Log::error("Connection failed", Properties("address", client->getPeerAddress().toString())
-                       .add("port", client->getPeerPort())
-                       .add("transport", (client->getTransport() == LightBird::INetwork::TCP ? "TCP" : "UDP"))
-                       .add("error", client->getSocket().errorString(), false), "Clients", "connect");
+            LOG_ERROR("Connection failed", Properties("address", client->getPeerAddress().toString())
+                      .add("port", client->getPeerPort())
+                      .add("transport", (client->getTransport() == LightBird::INetwork::TCP ? "TCP" : "UDP"))
+                      .add("error", client->getSocket().errorString(), false), "Clients", "connect");
     }
 }
 
