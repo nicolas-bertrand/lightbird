@@ -86,6 +86,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
     metadata.licence = "CC BY-NC-SA 3.0";
+    metadata.dependencies << QString("GnuTLS %1").arg(GNUTLS_VERSION);
 }
 
 bool    Plugin::onConnect(LightBird::IClient &client)
