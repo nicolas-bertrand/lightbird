@@ -22,7 +22,11 @@ bool    ParserServer::onProtocol(const QByteArray &data, QString &protocol, bool
     // Search the protocol used
     if (i < j && i >= 0)
     {
-        protocol = "HTTP";
+        QByteArray line = data.left(j);
+        if (line.contains(" /f/") || line.contains(" /f "))
+            protocol = "FILES";
+        else
+            protocol = "HTTP";
         return (true);
     }
     // The protocol of the request is unknown

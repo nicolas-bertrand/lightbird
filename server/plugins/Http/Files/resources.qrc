@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/plugins/Http/Files">
+        <file alias="configuration">Configuration.xml</file>
+        <file>directory.html</file>
+    </qresource>
+</RCC>

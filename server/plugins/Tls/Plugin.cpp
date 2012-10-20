@@ -126,7 +126,7 @@ bool    Plugin::onConnect(LightBird::IClient &client)
     while (result < 0 && gnutls_error_is_fatal(result) == 0);
     if (result < 0)
     {
-        LOG_DEBUG("Handshake error", Properties("error", gnutls_strerror(result)).toMap(), "Plugin", "onConnect");
+        LOG_WARNING("Handshake error", Properties("error", gnutls_strerror(result)).toMap(), "Plugin", "onConnect");
         return (false);
     }
     gnutls_transport_set_pull_function(session, Plugin::record_pull);

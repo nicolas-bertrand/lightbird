@@ -161,8 +161,8 @@ bool        Plugin::doExecution(LightBird::IClient &client)
             client.getResponse().setType(this->_getMime(uri));
             client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
         }
-        // If the help has not been found, an error occured
-        else if (uri.contains("/"))
+        // If the folder has not been found, an error occured
+        else if (uri.contains("/") || uri.contains("favicon"))
             this->response(client, 404, "Not Found", "File not found.");
         // Otherwise the client is redirected
         else
@@ -316,7 +316,7 @@ void    Plugin::_getFile(LightBird::IClient &client)
         !file.isAllowed(client.getAccount().getId(), "read"))
         return (this->response(client, 403, "Forbidden", "Access denied."));
     path = file.getFullPath();
-    // Checks that the file exists on the disk
+    // Checks that the file exists on the file system
     if (!QFileInfo(path).isFile())
         return (this->response(client, 404, "Not Found", "File not found."));
     // If the file has to be downloaded by the browser, a special MIME is used

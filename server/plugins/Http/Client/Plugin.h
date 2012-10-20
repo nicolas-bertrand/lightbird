@@ -17,7 +17,7 @@
 # include "Files.h"
 # include "Uploads.h"
 
-# define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser may download the content.
+# define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser should download the content.
 # define DEFAULT_INTERFACE_NAME  "desktop"
 # define TOKEN_DATE_FORMAT       "yyyy-MM-dd hh:mm"
 # define IDENTIFICATION_ATTEMPTS 10 // Number of identifications attempts that can be done before the connection is systematically refused.
