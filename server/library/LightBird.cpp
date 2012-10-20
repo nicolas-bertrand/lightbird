@@ -6,7 +6,7 @@
 #include "Library.h"
 #include "LightBird.h"
 
-// The maximum amount of data copied each time
+// The maximum number of bytes copied each time
 static const unsigned READ_WRITE_SIZE = 1048576;
 
 bool            LightBird::copy(const QString &sourceName, const QString &destinationName)

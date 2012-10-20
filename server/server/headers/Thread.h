@@ -19,7 +19,7 @@ public:
     void    taskAvailable(ThreadPool::ITask *task);
 
 signals:
-    /// @brief This signal is emited when a new task is available
+    /// @brief This signal is emitted when a new task is available
     /// for the current thread.
     void    taskAvailableSignal(ThreadPool::ITask *task);
 

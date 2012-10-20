@@ -26,11 +26,6 @@ PortTcp::~PortTcp()
     // Quit the thread if it is still running
     this->quit();
     this->wait();
-    // Clean the write buffer
-    QListIterator<WriteBuffer> it(this->writeBuffer);
-    while (it.hasNext())
-        delete it.next().data;
-    this->writeBuffer.clear();
     LOG_TRACE("Port TCP destroyed!", Properties("port", this->getPort()), "PortTcp", "~PortTcp");
 }
 
@@ -66,24 +61,6 @@ void    PortTcp::run()
     LOG_INFO("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
 }
 
-void    PortTcp::read(Client *client)
-{
-    emit this->readSignal(client);
-}
-
-bool            PortTcp::write(QByteArray *data, Client *client)
-{
-    SmartMutex  mutex(this->mutex, "PortTcp", "write");
-
-    if (!mutex)
-        return (false);
-    // If a signal has not already been sent
-    if (this->writeBuffer.isEmpty())
-        emit writeSignal();
-    this->writeBuffer.push_back(WriteBuffer(client, data));
-    return (true);
-}
-
 void            PortTcp::close()
 {
     SmartMutex  mutex(this->mutex, "PortTcp", "close");
@@ -92,7 +69,6 @@ void            PortTcp::close()
         return ;
     // Stop listening on the network
     this->tcpServer.close();
-    this->tcpServer.disconnect();
     // Removes all the remaining clients
     Port::close();
 }
@@ -118,8 +94,6 @@ void            PortTcp::_newConnection()
             this->sockets[socket] = client;
             // When new data are received on this socket, read() is called on the client
             QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::QueuedConnection);
-            // When the data have been written on this socket, Client::written is called
-            QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(bytesWritten()), Qt::QueuedConnection);
             // When the client is disconnected, _disconnected() is called
             QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(_disconnected()), Qt::QueuedConnection);
             // Read the data received between the creation of the client and the connection of the read signal
@@ -131,6 +105,11 @@ void            PortTcp::_newConnection()
             delete socket;
         }
     }
+}
+
+void    PortTcp::read(Client *client)
+{
+    emit this->readSignal(client);
 }
 
 void            PortTcp::_read(Client *client)
@@ -154,11 +133,27 @@ void            PortTcp::_read(Client *client)
     client->bytesRead();
 }
 
-void                 PortTcp::_write()
+bool            PortTcp::write(QByteArray *data, Client *client)
 {
-    SmartMutex       mutex(this->mutex, "PortTcp", "_write");
-    QList<WriteBuffer> writeBuffer;
-    qint64           result;
+    SmartMutex  mutex(this->mutex, "PortTcp", "write");
+
+    if (!mutex)
+        return (false);
+    // Creates the write buffer
+    QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, this->thread()));
+    QObject::connect(writeBuffer.data(), SIGNAL(bytesWritten()), this, SLOT(_write()), Qt::QueuedConnection);
+    this->writeBuffer.insert(client, writeBuffer);
+    // Writes the data via _write()
+    emit writeSignal();
+    return (true);
+}
+
+void            PortTcp::_write()
+{
+    SmartMutex  mutex(this->mutex, "PortTcp", "_write");
+    Client      *client;
+    qint64      result;
+    QHash<Client *, QSharedPointer<WriteBuffer> > writeBuffer;
 
     if (!mutex || this->writeBuffer.isEmpty())
         return ;
@@ -169,57 +164,61 @@ void                 PortTcp::_write()
     this->writeBuffer.clear();
     mutex.unlock();
 
-    QMutableListIterator<WriteBuffer> it(writeBuffer);
+    QMutableHashIterator<Client *, QSharedPointer<WriteBuffer> > it(writeBuffer);
     while (it.hasNext())
     {
-        WriteBuffer &w = it.next();
+        WriteBuffer &w = *it.next().value();
+        client = it.key();
         result = -1;
         // Ensures that we are still connected to the client
-        if (this->clients.contains(w.client) && w.client->getSocket().state() == QAbstractSocket::ConnectedState)
+        if (!w.isWritten() && client->getSocket().state() == QAbstractSocket::ConnectedState)
         {
-            // Tries to call the IDoWrite interface of the plugins
-            if (!w.client->doWrite(w.data->data() + w.offset, w.data->size() - w.offset, result))
-                // If no plugins implements IDoWrite, we write the data ourself
-                result = w.client->getSocket().write(w.data->data() + w.offset, w.data->size() - w.offset);
-            w.offset += result;
-            if (result < 0)
-                LOG_DEBUG("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "PortTcp", "_write");
-            if (result == 0)
-                LOG_DEBUG("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "PortTcp", "_write");
+            // The WriteBuffer is ready to write more data
+            if (!w.isWriting())
+            {
+                // Tries to call the IDoWrite interface of the plugins
+                if (!client->doWrite(w.getData(), w.getSize(), result))
+                    // If no plugins implements IDoWrite, we write the data ourselves
+                    result = client->getSocket().write(w.getData(), w.getSize());
+                w.bytesWriting(result);
+                if (result < 0)
+                    LOG_WARNING("An error occured while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "PortTcp", "_write");
+                if (result == 0)
+                    LOG_ERROR("Write returned 0", Properties("size", w.getTotalSize()).add("id", client->getId()), "PortTcp", "_write");
+            }
+            else
+                result = 0;
         }
-        if (result < 0 || w.offset >= w.data->size())
-        {
-            // Notifies the Client that the data are being written
-            w.client->bytesWriting();
-            delete w.data;
+        if (result < 0)
             it.remove();
-        }
     }
 
     mutex.lock();
-    // Finally we put the data that have not been sent at the beginning of the writeBuffer,
-    // which may have been filled in the meantime by other threads.
-    QListIterator<WriteBuffer> i(writeBuffer);
-    i.toBack();
-    while (i.hasPrevious())
-        this->writeBuffer.prepend(i.previous());
-    if (!writeBuffer.isEmpty())
+    // Finally we put the data that have not been sent in the writeBuffer,
+    // which may have been filled by other threads in the meantime.
+    if (!this->writeBuffer.isEmpty())
         emit writeSignal();
+    this->writeBuffer.unite(writeBuffer);
 }
 
 void                PortTcp::_disconnected()
 {
     SmartMutex      mutex(this->mutex, SmartMutex::READ, "PortTcp", "_disconnected");
     QAbstractSocket *socket;
+    Client          *client;
 
     if (!mutex)
         return ;
     // If the sender of the signal is a QAbstractSocket
     if ((socket = qobject_cast<QAbstractSocket *>(this->sender())))
         // Searches the client associated with this socket
-        if (this->sockets.contains(socket))
+        if ((client = this->sockets.value(socket)))
+        {
             // Removes the client of the disconnected socket
-            this->_removeClient(this->sockets.value(socket));
+            this->_removeClient(client);
+            // Removes the client from the write buffer since we won't be able to write to him anymore
+            this->writeBuffer.remove(client);
+        }
 }
 
 Client          *PortTcp::_finished(Client *client)
@@ -233,7 +232,7 @@ Client          *PortTcp::_finished(Client *client)
     QListIterator<Client *> it(this->clients);
     while (it.hasNext())
         // The client is deleted only if there is no remaining data in the writeBuffer
-        if ((client = it.next())->isFinished() && !this->_containsClient(client))
+        if ((client = it.next())->isFinished() && !this->writeBuffer.contains(client))
         {
             // Removes the client
             Port::_finished(client);
@@ -253,14 +252,4 @@ Client          *PortTcp::_finished(Client *client)
 bool    PortTcp::_isListening() const
 {
     return (Port::_isListening() && this->tcpServer.isListening());
-}
-
-bool    PortTcp::_containsClient(Client *client)
-{
-    QListIterator<WriteBuffer> it(this->writeBuffer);
-
-    while (it.hasNext())
-        if (it.next().client == client)
-            return (true);
-    return (false);
 }

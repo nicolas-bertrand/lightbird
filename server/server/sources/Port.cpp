@@ -152,7 +152,7 @@ Client  *Port::_finished(Client *client)
     // Deletes the client
     this->clients.removeAll(client);
     delete client;
-    // If there are no more connected client and the server is no longer listening, the thread is quit
+    // If there are no more connected client and the server is no longer listening, we quit the thread
     if (this->clients.size() == 0 && !this->_isListening())
         this->quit();
     return (client);

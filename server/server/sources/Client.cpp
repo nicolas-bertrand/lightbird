@@ -29,7 +29,6 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->reading = false;
     this->running = false;
     this->writing = NULL;
-    this->written = false;
     this->finish = false;
     this->disconnecting = false;
     this->disconnected = false;
@@ -89,6 +88,11 @@ void        Client::run()
                 newTask = Client::RUN;
             break;
 
+        case Client::WRITTEN :
+            // Resumes the workflow where it was before the writing
+            newTask = this->written;
+            break;
+
         case Client::SEND :
             // Some data have to be sent to the client
             if ((send = this->_send()))
@@ -108,11 +112,6 @@ void        Client::run()
             // The processing is paused while data are being written on the network
             if (this->writing)
                 return (this->_write(newTask));
-            break;
-
-        case Client::RESUME :
-            // Resumes the workflow where it had stopped in Client::RUN
-            newTask = this->resume;
             break;
 
         case Client::DISCONNECT :
@@ -222,21 +221,8 @@ void        Client::write(QByteArray *data)
 
 void        Client::_write(Client::State newTask)
 {
-    this->resume = newTask;
+    this->written = newTask;
     this->readWriteInterface->write(this->writing, this);
-}
-
-void        Client::bytesWriting()
-{
-    SmartMutex  mutex(this->mutex, "Client", "bytesWriting");
-
-    if (mutex && this->writing)
-    {
-        this->written = true;
-        // If the client is already disconnected the bytesWritten slot will not be called, so we do it ourself.
-        if (this->socket->state() != QAbstractSocket::ConnectedState && this->socket->state() != QAbstractSocket::BoundState)
-            QTimer::singleShot(0, this, SLOT(bytesWritten()));
-    }
 }
 
 void        Client::bytesWritten()
@@ -246,8 +232,7 @@ void        Client::bytesWritten()
     if (mutex && this->writing)
     {
         this->writing = NULL;
-        this->written = false;
-        this->_newTask(Client::RESUME);
+        this->_newTask(Client::WRITTEN);
     }
 }
 
@@ -355,12 +340,6 @@ void            Client::disconnect()
     this->finish = true;
     if (!this->running)
         this->_newTask(Client::DISCONNECT);
-    // If the client is already disconnected and we are writing on it, the bytesWritten
-    // slot will not be called, so we do it ourself.
-    if (this->socket->state() != QAbstractSocket::ConnectedState
-        && this->socket->state() != QAbstractSocket::BoundState
-        && this->writing && this->written)
-        QTimer::singleShot(0, this, SLOT(bytesWritten()));
 }
 
 bool        Client::doRead(QByteArray &data)
@@ -385,7 +364,7 @@ bool        Client::doWrite(const char *data, qint64 size, qint64 &result)
 
     if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->mode, this->transport, this->protocols, this->port)).second)
     {
-        LOG_TRACE("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first), "Client", "doWrite");
+        LOG_TRACE("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first).add("size", size), "Client", "doWrite");
         result = instance.second->doWrite(*this, data, size);
         Plugins::instance()->release(instance.first);
         return (true);

@@ -85,7 +85,7 @@ public:
     void        run();
 
 signals:
-    /// @brief This signal is emited to write a log.
+    /// @brief This signal is emitted to write a log.
     void        writeLog(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 
 private:

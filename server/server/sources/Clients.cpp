@@ -85,8 +85,6 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         client->moveToThread(this);
         // When new data are received on this socket, Client::read is called
         QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::QueuedConnection);
-        // When the data have been written on this socket, Client::written is called
-        QObject::connect(socket, SIGNAL(bytesWritten(qint64)), client, SLOT(written()), Qt::QueuedConnection);
         // When the client is finished, _finished is called
         QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
         return (Future<QString>(client->getId()));
@@ -206,108 +204,11 @@ void            Clients::shutdown()
     while (it.hasNext())
         delete it.next().value().first;
     this->connections.clear();
-    // Cleans the write buffer
-    QListIterator<WriteBuffer> wb(this->writeBuffer);
-    while (wb.hasNext())
-        delete wb.next().data;
-    this->writeBuffer.clear();
     // Removes the remaining clients
     QListIterator<Client *> client(this->clients);
     while (client.hasNext())
         delete client.next();
     this->clients.clear();
-}
-
-void    Clients::read(Client *client)
-{
-    emit this->readSignal(client);
-}
-
-void            Clients::_read(Client *client)
-{
-    QByteArray  &data = client->getData();
-    int         read;
-
-    data.clear();
-    // Calls the IDoRead interface of the plugins
-    if (!client->doRead(data))
-    {
-        // If no plugin implements it, the server read the data itself
-        data.resize(client->getSocket().size());
-        if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
-        {
-            LOG_WARNING("An error occured while reading the data", Properties("id", client->getId())
-                        .add("error", read).add("size", data.size()), "Clients", "_read");
-            data.resize(read);
-        }
-    }
-    client->bytesRead();
-}
-
-bool            Clients::write(QByteArray *data, Client *client)
-{
-    SmartMutex  mutex(this->mutex, "Clients", "write");
-
-    if (!mutex)
-        return (false);
-    // If a signal has not already be send
-    if (this->writeBuffer.isEmpty())
-        emit writeSignal();
-    this->writeBuffer.push_back(WriteBuffer(client, data));
-    return (true);
-}
-
-void                   Clients::_write()
-{
-    SmartMutex         mutex(this->mutex, "Clients", "_write");
-    QList<WriteBuffer> writeBuffer;
-    qint64             result;
-
-    if (!mutex || this->writeBuffer.isEmpty())
-        return ;
-    // We make a copy of the writeBuffer in order to write the data outside of the mutex.
-    // This is important because the API (IDoWrite) must never be called in a mutex.
-    // This is fine because Port::clients is only modified in this thread.
-    writeBuffer = this->writeBuffer;
-    this->writeBuffer.clear();
-    mutex.unlock();
-
-    QMutableListIterator<WriteBuffer> it(writeBuffer);
-    while (it.hasNext())
-    {
-        WriteBuffer &w = it.next();
-        result = -1;
-        // Ensures that we are still connected to the client
-        if (this->clients.contains(w.client) && w.client->getSocket().state() == QAbstractSocket::ConnectedState)
-        {
-            // Tries to call the IDoWrite interface of the plugins
-            if (!w.client->doWrite(w.data->data() + w.offset, w.data->size() - w.offset, result))
-                // If no plugins implements IDoWrite, we write the data ourself
-                result = w.client->getSocket().write(w.data->data() + w.offset, w.data->size() - w.offset);
-            w.offset += result;
-            if (result < 0)
-                LOG_DEBUG("An error occured while writing the data", Properties("return", result).add("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
-            if (result == 0)
-                LOG_TRACE("Write returned 0", Properties("size", w.data->size()).add("id", w.client->getId()), "Clients", "_write");
-        }
-        if (result < 0 || w.offset >= w.data->size())
-        {
-            // Notifies the Client that the data are being written
-            w.client->bytesWriting();
-            delete w.data;
-            it.remove();
-        }
-    }
-
-    mutex.lock();
-    // Finally we put the data that have not been sent at the beginning of the writeBuffer,
-    // which may have been filled in the meantime by other threads.
-    QListIterator<WriteBuffer> i(writeBuffer);
-    i.toBack();
-    while (i.hasPrevious())
-        this->writeBuffer.prepend(i.previous());
-    if (!writeBuffer.isEmpty())
-        emit writeSignal();
 }
 
 bool            Clients::connect(Client *client)
@@ -372,6 +273,100 @@ void            Clients::_connect(QString id)
     }
 }
 
+void    Clients::read(Client *client)
+{
+    emit this->readSignal(client);
+}
+
+void            Clients::_read(Client *client)
+{
+    QByteArray  &data = client->getData();
+    int         read;
+
+    data.clear();
+    // Calls the IDoRead interface of the plugins
+    if (!client->doRead(data))
+    {
+        // If no plugin implements it, the server read the data itself
+        data.resize(client->getSocket().size());
+        if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
+        {
+            LOG_WARNING("An error occured while reading the data", Properties("id", client->getId())
+                        .add("error", read).add("size", data.size()), "Clients", "_read");
+            data.resize(read);
+        }
+    }
+    client->bytesRead();
+}
+
+bool            Clients::write(QByteArray *data, Client *client)
+{
+    SmartMutex  mutex(this->mutex, "Clients", "write");
+
+    if (!mutex)
+        return (false);
+    // Creates the write buffer
+    QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, this->thread()));
+    QObject::connect(writeBuffer.data(), SIGNAL(bytesWritten()), this, SLOT(_write()), Qt::QueuedConnection);
+    this->writeBuffer.insert(client, writeBuffer);
+    // Writes the data via _write()
+    emit writeSignal();
+    return (true);
+}
+
+void            Clients::_write()
+{
+    SmartMutex  mutex(this->mutex, "Clients", "_write");
+    Client      *client;
+    qint64      result;
+    QHash<Client *, QSharedPointer<WriteBuffer> > writeBuffer;
+
+    if (!mutex || this->writeBuffer.isEmpty())
+        return ;
+    // We make a copy of the writeBuffer in order to write the data outside of the mutex.
+    // This is important because the API (IDoWrite) must never be called in a mutex.
+    // This is fine because Port::clients is only modified in this thread.
+    writeBuffer = this->writeBuffer;
+    this->writeBuffer.clear();
+    mutex.unlock();
+
+    QMutableHashIterator<Client *, QSharedPointer<WriteBuffer> > it(writeBuffer);
+    while (it.hasNext())
+    {
+        WriteBuffer &w = *it.next().value();
+        client = it.key();
+        result = -1;
+        // Ensures that we are still connected to the client
+        if (!w.isWritten() && client->getSocket().state() == QAbstractSocket::ConnectedState)
+        {
+            // The WriteBuffer is ready to write more data
+            if (!w.isWriting())
+            {
+                // Tries to call the IDoWrite interface of the plugins
+                if (!client->doWrite(w.getData(), w.getSize(), result))
+                    // If no plugins implements IDoWrite, we write the data ourselves
+                    result = client->getSocket().write(w.getData(), w.getSize());
+                w.bytesWriting(result);
+                if (result < 0)
+                    LOG_WARNING("An error occured while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
+                if (result == 0)
+                    LOG_ERROR("Write returned 0", Properties("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
+            }
+            else
+                result = 0;
+        }
+        if (result < 0)
+            it.remove();
+    }
+
+    mutex.lock();
+    // Finally we put the data that have not been sent in the writeBuffer,
+    // which may have been filled by other threads in the meantime.
+    if (!this->writeBuffer.isEmpty())
+        emit writeSignal();
+    this->writeBuffer.unite(writeBuffer);
+}
+
 void                Clients::_disconnected()
 {
     SmartMutex      mutex(this->mutex);
@@ -389,6 +384,8 @@ void                Clients::_disconnected()
             if (&(it.next()->getSocket()) == socket)
             {
                 it.peekPrevious()->disconnect();
+                // Removes the client from the write buffer since we won't be able to write to him anymore
+                this->writeBuffer.remove(it.peekPrevious());
                 break;
             }
     }
@@ -405,19 +402,9 @@ void            Clients::_finished()
     QMutableListIterator<Client *> it(this->clients);
     while (it.hasNext())
         // The client is deleted only if there is no remaining data in the writeBuffer
-        if ((client = it.next())->isFinished() && !this->_containsClient(client))
+        if ((client = it.next())->isFinished() && !this->writeBuffer.contains(client))
         {
             it.remove();
             delete client;
         }
-}
-
-bool    Clients::_containsClient(Client *client)
-{
-    QListIterator<WriteBuffer> it(this->writeBuffer);
-
-    while (it.hasNext())
-        if (it.next().client == client)
-            return (true);
-    return (false);
 }

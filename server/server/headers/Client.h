@@ -46,7 +46,7 @@ public:
     /// have been read and are ready to be processed.
     void                    bytesRead();
     /// @brief Writes the data to the client. This method takes ownership of the data.
-    /// The processing of the Client is paused until written() is called. The data to
+    /// The processing of the Client is paused until bytesWritten() is called. The data to
     /// send are stored in Client::writing and actually written in Client::_write.
     void                    write(QByteArray *data);
     /// @brief Asks the engine to generate a new request.
@@ -109,10 +109,6 @@ public slots:
     /// read in the appropriate thread via the readWriteInterface. Finally the
     /// READ state is set, and the engine is RUN if any data have been read.
     void                    readyRead();
-    /// @brief Tells the Client that the data are being written on the network.
-    /// At this point the Client can be safely disconnected. This event is
-    /// followed by bytesWritten.
-    void                    bytesWriting();
     /// @brief Tells the Client that the data have been written on the network,
     /// and that it can resume its processing.
     void                    bytesWritten();
@@ -132,10 +128,10 @@ private:
         CONNECT,    ///< The client is still connecting.
         READING,    ///< Data should be available to read on the network.
         READ,       ///< Data have been read and are ready to be processed.
+        WRITTEN,    ///< Data have been written on the socket.
         SEND,       ///< Data have to be sent to the client.
         RECEIVE,    ///< Data have to be received without sending a request.
         RUN,        ///< The engine is running.
-        RESUME,     ///< Allows to resume the processing of the Client after the data have been written on the network.
         DISCONNECT, ///< The client is going to be disconnected.
         NONE        ///< The client is idle.
     };
@@ -186,11 +182,10 @@ private:
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
     State                    oldTask;             ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
-    State                    resume;              ///< The state to resume after the data have been written on the network.
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     reading;             ///< Data are available on the network.
-    QByteArray               *writing;            ///< Stores the data to write. The client's task is paused while the data are being written on the network (ie while writing is not NULL).
-    bool                     written;             ///< The data have been written on the socket but not sent on the network yet (bytesWriting).
+    QByteArray               *writing;            ///< Stores the data to write. The client's task is paused while the data are being written on the network (i.e. while writing is not NULL).
+    State                    written;             ///< The state to resume after the data have been written on the socket.
     bool                     finish;              ///< If true, the client is going to be disconnected.
     bool                     disconnecting;       ///< The client is disconnected from the server, but there is still data to process.
     bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.

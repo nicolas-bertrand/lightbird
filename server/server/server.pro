@@ -77,6 +77,7 @@ HEADERS += headers/Arguments.h \
     headers/ThreadPool.h \
     headers/Threads.h \
     headers/Timer.h \
+    headers/WriteBuffer.h \
     headers/api/Api.h \
     headers/api/ApiConfiguration.h \
     headers/api/ApiDatabase.h \
@@ -117,6 +118,7 @@ SOURCES += sources/main.cpp \
     sources/ThreadPool.cpp \
     sources/Threads.cpp \
     sources/Timer.cpp \
+    sources/WriteBuffer.cpp \
     sources/api/Api.cpp \
     sources/api/ApiConfiguration.cpp \
     sources/api/ApiDatabase.cpp \

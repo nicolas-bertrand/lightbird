@@ -142,7 +142,7 @@ signals:
     void                    installSignal(const QString &id, Future<bool> *future);
     void                    uninstallSignal(const QString &id, Future<bool> *future);
 
-    /// @brief This signal is emited when a plugin has been loaded.
+    /// @brief This signal is emitted when a plugin has been loaded.
     /// @param id : The id of the loaded plugin.
     void                    loaded(QString id);
 

@@ -58,6 +58,19 @@ void    PortUdp::run()
     LOG_INFO("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
 }
 
+void            PortUdp::close()
+{
+    SmartMutex  mutex(this->mutex, "PortUdp", "close");
+
+    if (!mutex)
+        return ;
+    // Close the udp socket and disconect its signals
+    this->socket.close();
+    this->socket.disconnect();
+    // Removes all the remaining clients
+    Port::close();
+}
+
 void            PortUdp::read(Client *client)
 {
     SmartMutex  mutex(this->mutex, "PortUdp", "read");
@@ -101,19 +114,6 @@ bool            PortUdp::write(QByteArray *data, Client *client)
     QTimer::singleShot(0, client, SLOT(bytesWritten()));
     delete data;
     return (result);
-}
-
-void            PortUdp::close()
-{
-    SmartMutex  mutex(this->mutex, "PortUdp", "close");
-
-    if (!mutex)
-        return ;
-    // Close the udp socket and disconect its signals
-    this->socket.close();
-    this->socket.disconnect();
-    // Removes all the remaining clients
-    Port::close();
 }
 
 void             PortUdp::_readPendingDatagrams()

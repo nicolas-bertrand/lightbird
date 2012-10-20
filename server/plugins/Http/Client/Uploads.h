@@ -64,7 +64,7 @@ public:
     /// the client to check that the files that will be uploaded are not already
     /// on the server.
     void    check(LightBird::IClient &client);
-    /// @brief Returns the amount of data download so far, in JSON.
+    /// @brief Returns the number of bytes downloaded so far, in JSON.
     void    progress(LightBird::IClient &client);
     /// @brief Stops the upload and removes the current file.
     void    stop(LightBird::IClient &client);
