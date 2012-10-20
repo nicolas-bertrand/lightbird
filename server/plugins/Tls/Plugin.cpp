@@ -1,5 +1,6 @@
 #include <QtPlugin>
 #include <QDir>
+#include <errno.h>
 #include <gnutls/abstract.h>
 #include <gnutls/crypto.h>
 #include <gnutls/x509.h>
@@ -175,7 +176,10 @@ bool    Plugin::doRead(LightBird::IClient &client, QByteArray &data)
     if (result < 0)
     {
         if (gnutls_error_is_fatal(result))
+        {
+            LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Plugin", "doRead");
             this->api->network().disconnect(client.getId());
+        }
         return (false);
     }
     return (true);
@@ -188,7 +192,10 @@ qint64  Plugin::doWrite(LightBird::IClient &client, const char *data, qint64 siz
     if ((result = gnutls_record_send(client.getInformations().value("gnutls_session").value<gnutls_session_t>(), data, size)) < 0)
     {
         if (gnutls_error_is_fatal(result))
+        {
+            LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Plugin", "doWrite");
             this->api->network().disconnect(client.getId());
+        }
         return (-1);
     }
     return (result);
@@ -213,13 +220,7 @@ ssize_t Plugin::handshake_pull(gnutls_transport_ptr_t socketDescriptor, void *da
 
 ssize_t Plugin::handshake_push(gnutls_transport_ptr_t socketDescriptor, const void *data, size_t size)
 {
-    LightBird::IClient  *client;
-
-    Plugin::instance->mutex.lockForRead();
-    client = Plugin::instance->clients.value((int)socketDescriptor);
-    Plugin::instance->mutex.unlock();
-    ssize_t result = send((SOCKET)socketDescriptor, (char *)data, size, 0);
-    return (result);
+    return (send((SOCKET)socketDescriptor, (char *)data, size, 0));
 }
 
 ssize_t Plugin::record_pull(gnutls_transport_ptr_t socketDescriptor, void *data, size_t size)
