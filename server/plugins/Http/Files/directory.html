@@ -1,11 +1,73 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset=\"UTF-8\" />
-    <meta name=\"robots\" content=\"noindex, nofollow\" />
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>%1</title>
+    <style>
+        *
+        {
+            margin: 0px;
+            padding: 0px;
+        }
+        body
+        {
+            font-family: arial, verdana;
+            font-size: 14px;
+            color: #191919;
+            text-align: justify;
+            background-color: #E3EAEE;
+            cursor: auto;
+            padding: 40px;
+        }
+        a, a:active/*, a:visited, a:hover*/
+        {
+            text-decoration: none;
+            border: 0px;
+        }
+        div.content
+        {
+            background-color: #FFFFFF;
+            padding: 20px;
+            margin: auto;
+            border-radius: 5px 5px 5px 5px;
+            box-shadow: 0 0 3px #777777;
+            max-width: 1280px;
+            min-width: 450px;
+        }
+        table
+        {
+            width: 100%;
+        }
+        th
+        {
+            font-weigth: bold;
+            font-size: 16px;
+            height: 30px;
+        }
+        th.size
+        {
+            text-align: right;
+        }
+        th.date
+        {
+            text-align: right;
+        }
+        td.size
+        {
+            width: 100px;
+            text-align: right;
+        }
+        td.date
+        {
+            width: 150px;
+            text-align: right;
+        }
+    </style>
   </head>
   <body>
-    %2
+    <div class="content">
+      %2
+    </div>
   </body>
 </html>

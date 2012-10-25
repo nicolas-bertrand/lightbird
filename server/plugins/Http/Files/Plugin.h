@@ -6,6 +6,8 @@
 # include "IDoExecution.h"
 # include "IPlugin.h"
 
+# define DEFAULT_CONTENT_TYPE "application/octet-stream" ///< The default MIME type.
+
 class Plugin : public QObject,
                public LightBird::IPlugin,
                public LightBird::IDoExecution
@@ -28,7 +30,12 @@ public:
     bool    doExecution(LightBird::IClient &client);
 
 private:
+    /// @brief Authenticate the client using the basic access authentication of HTTP.
+    bool    _authenticate(LightBird::IClient &client, LightBird::IRequest &request, LightBird::IResponse &response);
+    /// @brief Returns the MIME type of the file, based on its extension.
     QString _getMime(const QString &file);
+    /// @brief Converts the size into a string with the closest unit.
+    QString _size(quint64 size);
 
     LightBird::IApi *api;
     QString         content;
