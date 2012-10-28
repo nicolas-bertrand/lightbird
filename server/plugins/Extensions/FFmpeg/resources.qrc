@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/Extensions/FFmpeg">
+        <file alias="configuration">Configuration.xml</file>
+    </qresource>
+</RCC>
