@@ -19,6 +19,7 @@ extern "C"
     #include <libavutil/timestamp.h>
     #include <libavutil/log.h>
     #include <libavutil/opt.h>
+    #include <libswscale/swscale.h>
 }
 
 # include "IExtension.h"
@@ -54,6 +55,9 @@ private:
     bool        _configureAudioFilter();
     bool        _configureInputAudioFilter(AVFilterInOut *inputs);
     bool        _configureOutputAudioFilter(AVFilterInOut *outputs);
+    bool        _configureVideoFilter();
+    bool        _configureInputVideoFilter(AVFilterInOut *inputs);
+    bool        _configureOutputVideoFilter(AVFilterInOut *outputs);
     /// @param flush : Flush the decoder cache.
     void        _transcodeAudio(bool flush = false);
     /// @return True if a frame have been decoded.
@@ -64,7 +68,9 @@ private:
     quint32     _getSampleRate(AVCodec *codec);
     // select layout with the highest channel count
     quint32     _getChannelLayout(AVCodec *codec);
-    void        _swap(qint64 &a, qint64 &b);
+    /// @brief Returns the list of the pixel format names supported by the
+    /// encoder, separated by ":".
+    QByteArray  _getPixelFormats(const AVCodec *codec) const;
 
     LightBird::IApi *api; ///< The LightBird Api.
     AVFormatContext *formatIn;
@@ -86,9 +92,12 @@ private:
     qint64          videoFramePts;
     AVPacket        packetIn;
     AVPacket        packetOut;
-    AVFilterGraph   *filterGraph;
-    AVFilterContext *filterInput;
-    AVFilterContext *filterOutput;
+    AVFilterGraph   *audioFilterGraph;
+    AVFilterContext *audioFilterIn;
+    AVFilterContext *audioFilterOut;
+    AVFilterGraph   *videoFilterGraph;
+    AVFilterContext *videoFilterIn;
+    AVFilterContext *videoFilterOut;
 };
 
 #endif // PLUGIN_H
