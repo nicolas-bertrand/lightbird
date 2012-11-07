@@ -23,7 +23,7 @@ namespace LightBird
             VIDEO
         };
 
-        /// @brief Contains the information that has been collected on the file.
+        /// @brief Stores the information that has been collected on the file.
         struct Information
         {
             Type        type;        ///< The type of the file.

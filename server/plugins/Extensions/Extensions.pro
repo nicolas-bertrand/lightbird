@@ -1,3 +1,4 @@
 TEMPLATE = subdirs
 
-SUBDIRS = Identifier
+SUBDIRS = Identifier \
+#   FFmpeg

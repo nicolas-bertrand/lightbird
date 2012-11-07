@@ -16,7 +16,7 @@ DESTDIR = ../../build/plugins/Tls
 LIBS += -L../../build -lLightBird
 # GnuTLS should be located in the GnuTLS folder of the plugin
 LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll
-# winsock2 is requires on Windows
+# winsock2 is required on Windows
 win32:LIBS += -lWs2_32
 
 HEADERS = Plugin.h

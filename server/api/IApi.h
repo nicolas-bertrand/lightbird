@@ -1,6 +1,7 @@
 #ifndef IAPI_H
 # define IAPI_H
 
+# include <QObject>
 # include <QString>
 
 # include "IConfiguration.h"

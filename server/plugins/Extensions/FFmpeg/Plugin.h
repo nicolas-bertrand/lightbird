@@ -3,29 +3,12 @@
 
 # include <QObject>
 # include <QFile>
-// INT64_C and UINT64_C are not defined in C++ and used by FFmpeg
-#define INT64_C(c) (c ## LL)
-#define UINT64_C(c) (c ## ULL)
-// FFmpeg is a C library
-extern "C"
-{
-    #include <libavcodec/avcodec.h>
-    #include <libavformat/avformat.h>
-    #include <libavfilter/avfiltergraph.h>
-    #include <libavfilter/avcodec.h>
-    #include <libavfilter/buffersrc.h>
-    #include <libavfilter/buffersink.h>
-    #include <libavutil/imgutils.h>
-    #include <libavutil/timestamp.h>
-    #include <libavutil/log.h>
-    #include <libavutil/opt.h>
-    #include <libswscale/swscale.h>
-}
+# include "FFmpeg.h"
 
 # include "IExtension.h"
 # include "IPlugin.h"
 
-# define DEFAULT_SAMPLE_RATE 44100
+# include "Identify.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -45,13 +28,17 @@ public:
     void        onUninstall(LightBird::IApi *api);
     void        getMetadata(LightBird::IMetadata &metadata) const;
 
-    // IExtensions
+    // IExtension
     QStringList getExtensionsNames();
     void        *getExtension(const QString &name);
     void        releaseExtension(const QString &name, void *extension);
 
 private:
-    AVStream    *_openStream(enum AVMediaType type);
+    void        _loadConfiguration();
+    bool        _transcode();
+    AVStream    *_openStream(AVCodecContext *&context, enum AVMediaType type);
+    bool        _openAudioEncoder();
+    bool        _openVideoEncoder();
     bool        _configureAudioFilter();
     bool        _configureInputAudioFilter(AVFilterInOut *inputs);
     bool        _configureOutputAudioFilter(AVFilterInOut *outputs);
@@ -62,17 +49,17 @@ private:
     void        _transcodeAudio(bool flush = false);
     /// @return True if a frame have been decoded.
     bool        _transcodeVideo();
-    // check that a given sample format is supported by the encoder
-    bool        _checkSampleFormat(const AVCodec *codec, enum AVSampleFormat format);
-    // just pick the highest supported samplerate
-    quint32     _getSampleRate(AVCodec *codec);
-    // select layout with the highest channel count
-    quint32     _getChannelLayout(AVCodec *codec);
-    /// @brief Returns the list of the pixel format names supported by the
-    /// encoder, separated by ":".
+    /// @brief Returns a comma-separated list of supported sample formats.
+    QByteArray  _getSampleFormats(const AVCodec *codec);
+    /// @brief Returns a comma-separated list of supported sample rates.
+    QByteArray  _getSampleRates(const AVCodec *codec);
+    /// @brief Returns a comma-separated list of supported channel layouts.
+    QByteArray  _getChannelLayouts(const AVCodec *codec);
+    /// @brief Returns a colon-separated list of supported pixel formats.
     QByteArray  _getPixelFormats(const AVCodec *codec) const;
 
-    LightBird::IApi *api; ///< The LightBird Api.
+    LightBird::IApi *api;      ///< The LightBird Api.
+    Identify        *identify; ///< Implements the IIdentify extension.
     AVFormatContext *formatIn;
     AVFormatContext *formatOut;
     const char      *source;

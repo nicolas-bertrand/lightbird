@@ -25,7 +25,7 @@ public:
     void        onUninstall(LightBird::IApi *api);
     void        getMetadata(LightBird::IMetadata &metadata) const;
 
-    // IExtensions
+    // IExtension
     QStringList getExtensionsNames();
     void        *getExtension(const QString &name);
     void        releaseExtension(const QString &name, void *extension);
