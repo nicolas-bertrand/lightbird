@@ -5,7 +5,6 @@ RESOURCES = resources.qrc
 
 INCLUDEPATH += . \
     ../../api \
-    ../../api/table \
     ../../api/network \
     ../../extensions \
     ../../library \

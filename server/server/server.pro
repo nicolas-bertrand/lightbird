@@ -9,13 +9,12 @@ DEPENDPATH += sources \
     headers \
     headers/api \
     ../api \
-    ../api/table \
     ../api/network \
+    ../extensions \
     ../library
 INCLUDEPATH += headers \
     headers/api \
     ../api \
-    ../api/table \
     ../api/network \
     ../extensions \
     ../library
