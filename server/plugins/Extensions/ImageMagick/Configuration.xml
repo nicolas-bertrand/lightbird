@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- The path to the ImageMagick binaries, from the working directory of the server. It can be absolute or relative.
+       By default this path is the directory "ImageMagick" of the plugin ImageMagick. -->
+  <image_magick_path></image_magick_path>
+</configuration>

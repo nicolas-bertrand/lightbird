@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS = Identifier \
-#   FFmpeg
+#   FFmpeg \
+#   ImageMagick

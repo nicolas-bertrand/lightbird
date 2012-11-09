@@ -27,12 +27,12 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
         // Opens the input file
         if ((code = avformat_open_input(&format, file.toUtf8().data(), NULL, NULL)) < 0)
         {
-            LOG_DEBUG("Could not open source file", Properties("file", file).add("error", this->_errorToString(code)).toMap(), "Identify", "identify");
+            LOG_TRACE("Could not open source file", Properties("file", file).add("error", this->_errorToString(code)).toMap(), "Identify", "identify");
             throw false;
         }
         if ((code = avformat_find_stream_info(format, NULL)) < 0)
         {
-            LOG_DEBUG("Could not find stream information", Properties("file", file).add("error", this->_errorToString(code)).toMap(), "Identify", "identify");
+            LOG_TRACE("Could not find stream information", Properties("file", file).add("error", this->_errorToString(code)).toMap(), "Identify", "identify");
             throw false;
         }
         // The file should be a document
@@ -118,13 +118,13 @@ AVStream     *Identify::_openStream(AVFormatContext *format, AVCodecContext *&co
 
     if ((result = av_find_best_stream(format, type, -1, -1, &decoder, 0)) < 0)
     {
-        LOG_DEBUG(QString("Could not find %1 stream in input file").arg(av_get_media_type_string(type)), "Identify", "_openStream");
+        LOG_TRACE(QString("Could not find %1 stream in input file").arg(av_get_media_type_string(type)), "Identify", "_openStream");
         return (NULL);
     }
     stream = format->streams[result];
     if ((result = avcodec_open2(stream->codec, decoder, NULL)))
     {
-        LOG_DEBUG(QString("Failed to open %1 codec").arg(av_get_media_type_string(type)), Properties("error", result).toMap(), "Identify", "_openStream");
+        LOG_TRACE(QString("Failed to open %1 codec").arg(av_get_media_type_string(type)), Properties("error", result).toMap(), "Identify", "_openStream");
         return (NULL);
     }
     context = stream->codec;

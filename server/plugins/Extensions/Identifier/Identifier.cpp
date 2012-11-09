@@ -76,7 +76,6 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
         result.type_string = "other";
     // Debug
     /**this->api.log().debug("Type: " + QString::number(result.type));
-    std::cout << "Type: " << QString::number(result.type).toStdString() << std::endl;
     QMapIterator<QString, QVariant> i(result.data);
     while (i.hasNext())
     {
