@@ -12,7 +12,7 @@
 /// @brief Manages all the configurations of the server. The configurations loaded
 /// are cashed, and deleted only when this object is destroyed.
 class Configurations : public QObject,
-                       public Initialize
+                       public LightBird::Initialize
 {
     Q_OBJECT
 

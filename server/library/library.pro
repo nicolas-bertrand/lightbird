@@ -11,6 +11,7 @@ DEFINES += LIGHTBIRD_LIBRARY
 
 HEADERS = Defines.h \
     Export.h \
+    Initialize.h \
     Library.h \
     LightBird.h \
     Properties.h \
@@ -30,7 +31,8 @@ HEADERS = Defines.h \
     Dir.h \
     File.h \
     Node.h
-SOURCES = Library.cpp \
+SOURCES = Initialize.cpp \
+    Library.cpp \
     LightBird.cpp \
     Properties.cpp \
     Sha256.cpp \

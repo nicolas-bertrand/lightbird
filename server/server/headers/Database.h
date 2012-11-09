@@ -17,7 +17,7 @@
 
 /// @brief Manage all the operations made on the database by the server and its plugins.
 class Database : public QObject,
-                 public Initialize
+                 public LightBird::Initialize
 {
     Q_OBJECT
 

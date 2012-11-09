@@ -13,7 +13,7 @@
 /// @brief Server implementation of the API's IConfiguration.
 /// Manage an XML configuration file.
 class Configuration : public QObject,
-                      public Initialize,
+                      public LightBird::Initialize,
                       public LightBird::IConfiguration
 {
     Q_OBJECT

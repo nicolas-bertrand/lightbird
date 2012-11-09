@@ -445,7 +445,7 @@ void    Plugin::_loadDHParams()
         datum.data = (unsigned char *)data.data();
         datum.size = bits;
         ASSERT(gnutls_dh_params_generate2(this->dhParams, bits));
-        ASSERT((gnutls_dh_params_export_pkcs3(this->dhParams, GNUTLS_X509_FMT_PEM, datum.data, &datum.size)));
+        ASSERT(gnutls_dh_params_export_pkcs3(this->dhParams, GNUTLS_X509_FMT_PEM, datum.data, &datum.size));
         file.write(data.data(), datum.size);
     }
 }

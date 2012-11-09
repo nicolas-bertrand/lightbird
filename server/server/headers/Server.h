@@ -20,7 +20,7 @@
 
 /// @brief The main class of the LightBird server.
 class Server : public QObject,
-               public Initialize
+               public LightBird::Initialize
 {
     Q_OBJECT
 

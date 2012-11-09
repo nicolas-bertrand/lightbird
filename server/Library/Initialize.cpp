@@ -1,5 +1,7 @@
 #include "Initialize.h"
 
+using namespace LightBird;
+
 Initialize::Initialize(bool initialize) : initialized(initialize)
 {
 }

@@ -6,6 +6,7 @@
 # include <QString>
 
 # include "Export.h"
+# include "Initialize.h"
 # include "Properties.h"
 # include "SmartMutex.h"
 # include "TableAccounts.h"
