@@ -2,6 +2,7 @@
 
 LightBird::IConfiguration *LightBird::Library::_configuration = NULL;
 LightBird::IDatabase      *LightBird::Library::_database = NULL;
+LightBird::IExtensions    *LightBird::Library::_extension = NULL;
 LightBird::ILogs          *LightBird::Library::_log = NULL;
 
 LightBird::IConfiguration &LightBird::Library::configuration()
@@ -12,6 +13,11 @@ LightBird::IConfiguration &LightBird::Library::configuration()
 LightBird::IDatabase &LightBird::Library::database()
 {
     return (*LightBird::Library::_database);
+}
+
+LightBird::IExtensions &LightBird::Library::extension()
+{
+    return (*LightBird::Library::_extension);
 }
 
 LightBird::ILogs &LightBird::Library::log()
@@ -29,6 +35,12 @@ void LightBird::Library::setDatabase(LightBird::IDatabase *database)
 {
     if (!LightBird::Library::_database)
         LightBird::Library::_database = database;
+}
+
+void LightBird::Library::setExtension(LightBird::IExtensions *extension)
+{
+    if (!LightBird::Library::_extension)
+        LightBird::Library::_extension = extension;
 }
 
 void LightBird::Library::setLog(LightBird::ILogs *log)

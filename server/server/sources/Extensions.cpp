@@ -1,4 +1,5 @@
 #include "Extensions.h"
+#include "Library.h"
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
@@ -8,6 +9,8 @@
 Extensions::Extensions(QObject *parent) : QObject(parent)
 {
     LOG_TRACE("Extensions created", "Extensions", "Extensions");
+    // Allows the library to use the extensions
+    LightBird::Library::setExtension(this);
 }
 
 Extensions::~Extensions()
