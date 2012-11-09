@@ -1,5 +1,5 @@
-#ifndef IIMAGE_H_
-# define IIMAGE_H_
+#ifndef IIMAGE_H
+# define IIMAGE_H
 
 # include <QString>
 
@@ -11,7 +11,7 @@ namespace LightBird
     public:
         virtual ~IImage() {}
 
-        /// @brief List the possible image formats.
+        /// @brief The available image formats.
         enum Format
         {
             BMP,
@@ -22,7 +22,7 @@ namespace LightBird
             TIFF
         };
 
-        /// @brief Convert the source image into the given format at the given size. If the width
+        /// @brief Converts the source image into the given format at the given size. If the width
         /// and the height are 0, the original size is keeped.
         /// @param source : The name of the image that will be converted.
         /// @param destination : The path to the file that will contains the converted image, without
@@ -36,4 +36,4 @@ namespace LightBird
     };
 }
 
-#endif // IIMAGE_H_
+#endif // IIMAGE_H

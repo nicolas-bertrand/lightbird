@@ -5,6 +5,7 @@
 # include "IPlugin.h"
 
 # include "Identify.h"
+# include "Image.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -32,6 +33,7 @@ public:
 private:
     LightBird::IApi *api;      ///< The LightBird Api.
     Identify        *identify; ///< Implements the IIdentify extension.
+    Image           *image;    ///< Implements the IImage and IPreview extensions.
 };
 
 #endif // PLUGIN_H

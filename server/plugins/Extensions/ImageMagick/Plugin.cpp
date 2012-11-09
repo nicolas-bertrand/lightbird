@@ -17,7 +17,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
     this->identify = new Identify(this->api);
-    return (*this->identify);
+    this->image = new Image(this->api);
+    return (*this->identify && *this->image);
 }
 
 void    Plugin::onUnload()
@@ -51,13 +52,17 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 
 QStringList Plugin::getExtensionsNames()
 {
-    return (QStringList() << "IIdentify");
+    return (QStringList() << "IIdentify" << "IImage" << "IPreview");
 }
 
 void    *Plugin::getExtension(const QString &name)
 {
     if (name == "IIdentify")
         return (dynamic_cast<LightBird::IIdentify *>(this->identify));
+    if (name == "IImage")
+        return (dynamic_cast<LightBird::IImage *>(this->image));
+    if (name == "IPreview")
+        return (dynamic_cast<LightBird::IPreview *>(this->image));
     return (NULL);
 }
 

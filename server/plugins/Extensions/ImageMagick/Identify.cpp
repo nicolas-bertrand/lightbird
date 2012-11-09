@@ -13,8 +13,8 @@ Identify::Identify(LightBird::IApi *a) : api(a)
     if (this->imageMagickPath.isEmpty())
         this->imageMagickPath = this->api->getPluginPath() + "/ImageMagick";
     this->binaryName = "identify";
-    QString path = this->imageMagickPath + "/" + this->binaryName;
     // Ensure that the identify binary exists
+    QString path = this->imageMagickPath + "/" + this->binaryName;
     if (QFileInfo(path).isFile() || QFileInfo(path + ".exe").isFile())
         this->isInitialized();
     else
