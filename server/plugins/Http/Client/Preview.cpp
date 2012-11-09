@@ -1,4 +1,5 @@
 #include <QFileInfo>
+#include "LightBird.h"
 
 #include "Preview.h"
 
@@ -12,8 +13,7 @@ Preview::~Preview()
 
 void    Preview::go()
 {
-    QList<void *>   extensions;
-    unsigned int    position;
+    unsigned int position;
 
     // Extract the file id from the uri
     this->file.setId(this->uri.queryItemValue("id"));
@@ -27,11 +27,8 @@ void    Preview::go()
     this->_size();
     // Get the position of the preview
     position = this->uri.queryItemValue("position").toUInt();
-    // Get the extensions that can generates a preview of the file
-    if ((extensions = this->api.extensions().get("IPreviews")).size() > 0)
-        this->previewFileName = static_cast<LightBird::IPreviews *>(extensions.first())->previews(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position);
-    // Release the extensions
-    this->api.extensions().release(extensions);
+    // Generates a preview of the file
+    this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position);
     // No extensions has been able to generate the preview
     if (this->previewFileName.isEmpty())
         return this->_error("Preview", 501, "Not Implemented", "Unable to generate a preview from this file.");

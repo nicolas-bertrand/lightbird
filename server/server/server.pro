@@ -17,6 +17,7 @@ INCLUDEPATH += headers \
     ../api \
     ../api/table \
     ../api/network \
+    ../extensions \
     ../library
 
 # Qt Modules

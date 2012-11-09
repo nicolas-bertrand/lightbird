@@ -3,7 +3,8 @@ QT += sql xml
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../api
+    ../api \
+    ../extensions
 
 TARGET = LightBird
 DESTDIR = ../build
@@ -14,6 +15,7 @@ HEADERS = Defines.h \
     Initialize.h \
     Library.h \
     LightBird.h \
+    Preview.h \
     Properties.h \
     SmartMutex.h \
     Table.h \
@@ -34,6 +36,7 @@ HEADERS = Defines.h \
 SOURCES = Initialize.cpp \
     Library.cpp \
     LightBird.cpp \
+    Preview.cpp \
     Properties.cpp \
     Sha256.cpp \
     SmartMutex.cpp \

@@ -8,5 +8,4 @@ HEADERS = IAudio.h \
     IImage.h \
     IMime.h \
     IPreview.h \
-    IPreviews.h \
-    IVideo.h \
+    IVideo.h

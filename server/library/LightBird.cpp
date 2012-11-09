@@ -5,11 +5,12 @@
 
 #include "Library.h"
 #include "LightBird.h"
+#include "Preview.h"
 
 // The maximum number of bytes copied each time
 static const unsigned READ_WRITE_SIZE = 1048576;
 
-bool            LightBird::copy(const QString &sourceName, const QString &destinationName)
+bool    LightBird::copy(const QString &sourceName, const QString &destinationName)
 {
     QFile       source(sourceName);
     QFile       destination(destinationName);
@@ -34,7 +35,7 @@ bool            LightBird::copy(const QString &sourceName, const QString &destin
     return (true);
 }
 
-QString     LightBird::cleanPath(const QString &p, bool removeFirstSlash)
+QString LightBird::cleanPath(const QString &p, bool removeFirstSlash)
 {
     QString result = QDir::cleanPath(QString(p).replace('\\', '/')).replace("//", "/").remove('~');
     if (removeFirstSlash && result.startsWith('/'))
@@ -42,7 +43,7 @@ QString     LightBird::cleanPath(const QString &p, bool removeFirstSlash)
     return (result);
 }
 
-bool        LightBird::isValidName(const QString &objectName)
+bool    LightBird::isValidName(const QString &objectName)
 {
     if (objectName == "." || objectName == ".." || objectName.contains('/'))
         return (false);
@@ -61,6 +62,15 @@ QString LightBird::getFilesPath(bool finalSlash)
     return (Library::configuration().get("filesPath"));
 }
 
+QString LightBird::preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int position)
+{
+    static Preview *preview = NULL;
+
+    if (!preview)
+        preview = new Preview();
+    return (preview->generate(fileId, format, width, height, position));
+}
+
 QByteArray LightBird::simplify(QByteArray data, char replace, quint64 maxSize)
 {
     if (maxSize)
@@ -72,7 +82,7 @@ QByteArray LightBird::simplify(QByteArray data, char replace, quint64 maxSize)
     return (data);
 }
 
-void                LightBird::sleep(unsigned long time)
+void    LightBird::sleep(unsigned long time)
 {
     QWaitCondition  wait;
     QMutex          mutex;

@@ -5,6 +5,8 @@
 # include <QObject>
 # include <QString>
 
+# include "IImage.h"
+
 # include "Export.h"
 # include "Initialize.h"
 # include "Properties.h"
@@ -35,6 +37,20 @@ namespace LightBird
     /// is defined by the configuration node "filesPath".
     /// @param finalSlash : If true, a "/" is added at the end of the filesPath.
     LIB QString     getFilesPath(bool finalSlash = true);
+    /// @brief Calls all the plugins that implements IPreview in order to generate
+    /// the preview of a file. A cache system is also implemented in order to
+    /// not generate a new preview at each calls.
+    ///
+    /// Generates a preview image of a file if possible. If the width and the height are 0,
+    /// the original size is keeped.
+    /// @param fileId : The id of the file for which the preview image will be generated.
+    /// @param format : The format of the preview image that will be generate.
+    /// @param width : The width of the preview. If it is 0, it will be proportional to the height.
+    /// @param height : The height of the preview. If it is 0, it will be proportional to the width.
+    /// @param position : For a video, this parameter could be the time where the preview is captured.
+    /// @return The path to the generated preview. This file should not been deleted (for cache purpose).
+    /// If empty, no preview could have been generated for the source file.
+    LIB QString     preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0);
     /// @brief Implementation of SHA-256.
     /// @author jagatsastry.nitk@gmail.com
     /// @return The hash of data in hex.

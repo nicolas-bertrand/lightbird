@@ -41,6 +41,11 @@
     <maxSize>1M</maxSize>
     <expires>30</expires>
   </log>
+  <preview>
+    <cacheEnabled>true</cacheEnabled>
+    <cachePath>cache</cachePath>
+    <cacheSizeLimit>100</cacheSizeLimit>
+  </preview>
   <ports>
     <port protocol="HTTP" transport="TCP" maxClients="100">80</port>
     <port protocol="HTTP" transport="TCP" maxClients="100">4242</port>
