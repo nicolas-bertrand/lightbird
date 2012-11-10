@@ -17,9 +17,11 @@ LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec -lavdevice 
 
 HEADERS = FFmpeg.h \
     Identify.h \
-    Plugin.h
+    Plugin.h \
+    Preview.h
 SOURCES = Identify.cpp \
-    Plugin.cpp
+    Plugin.cpp \
+    Preview.cpp
 OTHER_FILES = Configuration.xml
 
 OBJECTS_DIR = tmp

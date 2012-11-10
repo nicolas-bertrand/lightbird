@@ -50,7 +50,7 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
         tmp.setFileTemplate(this->fileTemplate + this->extensions[format]);
         if (!tmp.open())
         {
-            LOG_ERROR("Error with QTemporaryFile::open", "Image", "convert");
+            LOG_DEBUG("Error with QTemporaryFile::open", "Image", "convert");
             return (false);
         }
         destination = tmp.fileName();
@@ -72,7 +72,7 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
         if (!(output = process.readAllStandardOutput()).isEmpty())
             output += "\n";
         output += process.readAllStandardError();
-        this->api->log().debug("An error occured while executing ImageMagick", properties.add("programOutput", output).add("exitCode", QString::number(process.exitCode())).toMap(), "Image", "convert");
+        LOG_DEBUG("An error occured while executing ImageMagick", properties.add("programOutput", output).add("exitCode", QString::number(process.exitCode())).toMap(), "Image", "convert");
         if (replaceSource)
             destination = "";
         return (false);
@@ -86,12 +86,12 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     {
         if (!QFile::remove(source))
         {
-            LOG_ERROR("Unable to remove the source file", properties.add("source", source).toMap(), "Image", "convert");
+            LOG_DEBUG("Unable to remove the source file", properties.add("source", source).toMap(), "Image", "convert");
             return (false);
         }
         if (!QFile::copy(destination, source))
         {
-            LOG_ERROR("Unable to replace the source by the destination", properties.add("source", source).add("destination", destination).toMap(), "Image", "convert");
+            LOG_DEBUG("Unable to replace the source by the destination", properties.add("source", source).add("destination", destination).toMap(), "Image", "convert");
             return (false);
         }
         destination = source;

@@ -18,7 +18,7 @@ Preview::Preview()
     if ((this->cachePath = LightBird::Library::configuration().get("preview/cachePath")).isEmpty())
         this->cachePath = "cache";
     this->cacheSizeLimit = LightBird::Library::configuration().get("preview/cacheSizeLimit").toUInt();
-    this->extensions[LightBird::IImage::JPEG] = ".jpg";
+    this->extensions[LightBird::IImage::JPEG] = ".jpeg";
     this->extensions[LightBird::IImage::PNG] = ".png";
     this->extensions[LightBird::IImage::GIF] = ".gif";
     this->extensions[LightBird::IImage::TIFF] = ".tiff";

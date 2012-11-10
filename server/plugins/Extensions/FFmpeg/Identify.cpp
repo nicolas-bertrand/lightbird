@@ -1,5 +1,6 @@
 #include "LightBird.h"
 #include "Identify.h"
+#include "Plugin.h"
 
 Identify::Identify(LightBird::IApi *a) : api(a)
 {
@@ -122,7 +123,7 @@ AVStream     *Identify::_openStream(AVFormatContext *format, AVCodecContext *&co
         return (NULL);
     }
     stream = format->streams[result];
-    if ((result = avcodec_open2(stream->codec, decoder, NULL)))
+    if ((result = Plugin::avcodec_open2(stream->codec, decoder, NULL)))
     {
         LOG_TRACE(QString("Failed to open %1 codec").arg(av_get_media_type_string(type)), Properties("error", result).toMap(), "Identify", "_openStream");
         return (NULL);

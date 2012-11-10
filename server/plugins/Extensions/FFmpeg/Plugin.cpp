@@ -2,13 +2,18 @@
 
 #include "Plugin.h"
 
+Plugin  *Plugin::instance = NULL;
+
 Plugin::Plugin()
 {
     this->identify = NULL;
+    this->preview = NULL;
+    this->instance = this;
 }
 
 Plugin::~Plugin()
 {
+    this->instance = NULL;
 }
 
 bool    Plugin::onLoad(LightBird::IApi *api)
@@ -19,13 +24,16 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     avfilter_register_all();
     this->_loadConfiguration();
     this->identify = new Identify(this->api);
+    this->preview = new Preview(this->api);
     return (true);
 }
 
 void    Plugin::onUnload()
 {
     delete this->identify;
+    delete this->preview;
     this->identify = NULL;
+    this->preview = NULL;
 }
 
 bool    Plugin::onInstall(LightBird::IApi *api)
@@ -53,18 +61,30 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 
 QStringList Plugin::getExtensionsNames()
 {
-    return (QStringList() << "IIdentify");
+    return (QStringList() << "IIdentify" << "IPreview");
 }
 
 void    *Plugin::getExtension(const QString &name)
 {
     if (name == "IIdentify")
         return (dynamic_cast<LightBird::IIdentify *>(this->identify));
+    if (name == "IPreview")
+        return (dynamic_cast<LightBird::IPreview *>(this->preview));
     return (NULL);
 }
 
 void    Plugin::releaseExtension(const QString &, void *)
 {
+}
+
+int     Plugin::avcodec_open2(AVCodecContext *avctx, const AVCodec *codec, AVDictionary **options)
+{
+    int result;
+
+    Plugin::instance->mutex.lock();
+    result = ::avcodec_open2(avctx, codec, options);
+    Plugin::instance->mutex.unlock();
+    return (result);
 }
 
 void    Plugin::_loadConfiguration()
@@ -181,7 +201,7 @@ bool    Plugin::_transcode()
     avcodec_close(this->videoDec);
     avcodec_close(this->videoEnc);
     avformat_close_input(&this->formatIn);
-    avformat_close_input(&this->formatOut);
+    avformat_free_context(this->formatOut);
     return (true);
 }
 

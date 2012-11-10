@@ -3,12 +3,14 @@
 
 # include <QObject>
 # include <QFile>
+# include <QMutex>
 # include "FFmpeg.h"
 
 # include "IExtension.h"
 # include "IPlugin.h"
 
 # include "Identify.h"
+# include "Preview.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
@@ -32,6 +34,9 @@ public:
     QStringList getExtensionsNames();
     void        *getExtension(const QString &name);
     void        releaseExtension(const QString &name, void *extension);
+
+    /// @brief Calls avcodec_open2 in a thread safe way.
+    static int  avcodec_open2(AVCodecContext *avctx, const AVCodec *codec, AVDictionary **options);
 
 private:
     void        _loadConfiguration();
@@ -60,6 +65,9 @@ private:
 
     LightBird::IApi *api;      ///< The LightBird Api.
     Identify        *identify; ///< Implements the IIdentify extension.
+    Preview         *preview;  ///< Implements the IPreview extension.
+    QMutex          mutex;     ///< Makes avcodec_open2 thread safe.
+    static Plugin   *instance; ///< The global instance of the plugin, used by the static methods.
     AVFormatContext *formatIn;
     AVFormatContext *formatOut;
     const char      *source;
