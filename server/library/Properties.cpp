@@ -49,3 +49,8 @@ const QMap<QString, QString>    &Properties::toMap() const
 {
     return (this->properties);
 }
+
+void    Properties::clear()
+{
+    this->properties.clear();
+}

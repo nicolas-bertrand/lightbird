@@ -30,6 +30,8 @@ public:
     Properties                      &add(const QVariantMap &properties);
     /// @brief Converts the properties to a map.
     const QMap<QString, QString>    &toMap() const;
+    /// @brief Clears the properties.
+    void                            clear();
 
 private:
     QMap<QString, QString>          properties;
