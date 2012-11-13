@@ -27,9 +27,7 @@ bool    Video::initialize(const QString &source)
         this->api->log().error("Could not open the source file", this->_getProperties(ret), "Video", "initialize");
     else if ((ret = avformat_find_stream_info(this->formatIn, NULL)) < 0)
         this->api->log().error("Could not find stream information", this->_getProperties(ret), "Video", "initialize");
-    else if (!(this->videoStreamIn = this->_openStream(this->videoDec, AVMEDIA_TYPE_VIDEO)))
-        this->api->log().error("Could not find a valid video stream", this->_getProperties(), "Video", "initialize");
-    else
+    else if ((this->videoStreamIn = this->_openStream(this->videoDec, AVMEDIA_TYPE_VIDEO)))
         this->audioStreamIn = this->_openStream(this->audioDec, AVMEDIA_TYPE_AUDIO);
     // The file doesn't have a valid video stream
     if (!this->videoStreamIn)
@@ -230,7 +228,7 @@ int     Video::writePacket(void *opaque, uint8_t *buf, int buf_size)
     QByteArray  *buffer;
     int         length;
 
-    // AVIO tries to write on a buffer already returned
+    // The muxer tries to write on a buffer already returned
     if (instance->seek < position)
     {
         if (instance->seek > 1024)
@@ -245,7 +243,7 @@ int     Video::writePacket(void *opaque, uint8_t *buf, int buf_size)
     while (it.hasNext() && (position += it.next().size()) < instance->seek)
         ;
     buffer = &it.peekPrevious();
-    // AVIO seeked too far
+    // The muxer seeked too far
     if (position < instance->seek)
     {
         instance->api->log().warning("Seek too far", instance->_getProperties(0, Properties("seek", instance->seek).add("position", position).add("buf_size", buf_size)), "Video", "writePacket");
@@ -503,7 +501,7 @@ bool    Video::_openVideoEncoder()
     this->videoEnc->bit_rate = this->videoBitRate;
     this->videoStreamOut->r_frame_rate = av_buffersink_get_frame_rate(this->videoFilterOut);
     this->videoEnc->time_base = av_inv_q(this->videoStreamOut->r_frame_rate);
-    this->duration = this->duration * av_q2d(this->videoStreamOut->r_frame_rate);
+    this->duration *= av_q2d(this->videoStreamOut->r_frame_rate);
     //this->videoEnc->gop_size = 10;
     //this->videoEnc->max_b_frames = 2;
     if (this->formatOut->oformat->flags & AVFMT_GLOBALHEADER)
@@ -864,9 +862,9 @@ bool    Video::_transcodeVideo()
                 }
                 av_free_packet(&this->packetOut);
             }
+            avfilter_unref_bufferp(&bufferRef);
             this->videoFramePts++;
             this->framesToEncode--;
-            avfilter_unref_bufferp(&bufferRef);
         }
     }
     return (gotFrame != 0);
@@ -918,7 +916,6 @@ void    Video::_transcodeAudio(bool flush)
                     LOG_ERROR("Could not encode the audio frame", this->_getProperties(ret), "Video", "_transcodeAudio");
                     throw false;
                 }
-                this->audioFramePts += this->frame->nb_samples;
                 if (gotPacket)
                 {
                     if (this->packetOut.pts != AV_NOPTS_VALUE)
@@ -936,6 +933,7 @@ void    Video::_transcodeAudio(bool flush)
                     av_free_packet(&this->packetOut);
                 }
                 avfilter_unref_bufferp(&bufferRef);
+                this->audioFramePts += this->frame->nb_samples;
             }
         }
     }

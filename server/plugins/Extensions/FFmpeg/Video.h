@@ -8,7 +8,7 @@
 # include "IVideo.h"
 
 # define IO_BUFFER_SIZE 32728 ///< The size of the ioBuffer (see avio_alloc_context).
-# define BUFFERS_NUMBER  5    ///< The number of buffers to keep in order to allows the seeking.
+# define BUFFERS_NUMBER 5     ///< The number of buffers to keep in order to allows the seeking.
 
 /// @brief Implements the IVideo extension which allows to transcode videos.
 class Video : public LightBird::IVideo
@@ -44,7 +44,7 @@ public:
     /// @brief Seeks through the buffers. If the muxer seeks to a buffer
     /// already returned, writePacket will do nothing.
     static int64_t seekPacket(void *opaque, int64_t offset, int whence);
-    /// @brief This method should not be called by AVIO.
+    /// @brief This method should not be called by the muxer.
     static int  readPacket(void *opaque, uint8_t *buf, int buf_size);
 
 private:
@@ -65,8 +65,8 @@ private:
     bool        _configureVideoFilter();
     bool        _configureInputVideoFilter(AVFilterInOut *inputs);
     bool        _configureOutputVideoFilter(AVFilterInOut *outputs);
-    /// @brief The audio filters allows to change the sample format of the audio,
-    /// its sample rate and its channel layout.
+    /// @brief The audio filters allows to change the sample format, the sample
+    /// rate and the channel layout.
     bool        _configureAudioFilter();
     bool        _configureInputAudioFilter(AVFilterInOut *inputs);
     bool        _configureOutputAudioFilter(AVFilterInOut *outputs);
@@ -99,7 +99,7 @@ private:
 
     LightBird::IApi *api;            ///< The LightBird API.
     QStringList     &formats;        ///< The list of the available output formats.
-    QString         source;          ///< The source video.
+    QString         source;          ///< The input file name.
     QList<QByteArray> buffers;       ///< The transcoded data not returned yet. Each element contains approximately one second of encoded video and audio streams.
     int             framesToEncode;  ///< The number of frames to encode in the transcode method.
     int             position;        ///< The number of second transcoded so far.

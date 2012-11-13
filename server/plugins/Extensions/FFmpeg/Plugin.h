@@ -9,6 +9,7 @@
 # include "IExtension.h"
 # include "IPlugin.h"
 
+# include "Audio.h"
 # include "Identify.h"
 # include "Preview.h"
 # include "Video.h"
@@ -48,6 +49,7 @@ private:
     static Plugin   *instance; ///< The global instance of the plugin, used by the static methods.
     Identify        *identify; ///< The IIdentify extension.
     Preview         *preview;  ///< The IPreview extension.
+    QList<QSharedPointer<Audio> > audios; ///< The IAudio extensions.
     QList<QSharedPointer<Video> > videos; ///< The IVideo extensions.
 };
 

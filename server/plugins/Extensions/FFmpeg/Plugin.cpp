@@ -15,7 +15,7 @@ Plugin::~Plugin()
 {
     this->instance = NULL;
 }
-#include <iostream>
+
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     AVOutputFormat *format = NULL;
@@ -69,12 +69,20 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 
 QStringList Plugin::getExtensionsNames()
 {
-    return (QStringList() << "IIdentify" << "IPreview" << "IVideo");
+    return (QStringList() << "IAudio" << "IIdentify" << "IPreview" << "IVideo");
 }
 
 void    *Plugin::getExtension(const QString &name)
 {
-    if (name == "IIdentify")
+    if (name == "IAudio")
+    {
+        Audio *audio = new Audio(this->api, this->formats);
+        this->mutex.lock();
+        this->audios.push_back(QSharedPointer<Audio>(audio));
+        this->mutex.unlock();
+        return (dynamic_cast<LightBird::IAudio *>(audio));
+    }
+    else if (name == "IIdentify")
         return (dynamic_cast<LightBird::IIdentify *>(this->identify));
     else if (name == "IPreview")
         return (dynamic_cast<LightBird::IPreview *>(this->preview));
@@ -92,7 +100,17 @@ void    *Plugin::getExtension(const QString &name)
 void    Plugin::releaseExtension(const QString &name, void *extension)
 {
     this->mutex.lock();
-    if (name == "IVideo")
+    if (name == "IAudio")
+    {
+        QMutableListIterator<QSharedPointer<Audio> > it(this->audios);
+        while (it.hasNext())
+            if (dynamic_cast<LightBird::IAudio *>(it.next().data()) == extension)
+            {
+                it.remove();
+                break;
+            }
+    }
+    else if (name == "IVideo")
     {
         QMutableListIterator<QSharedPointer<Video> > it(this->videos);
         while (it.hasNext())
