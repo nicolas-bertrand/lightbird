@@ -18,7 +18,7 @@
 /// log is lower than this->level, the log will not be written. For example, to write an info, call
 /// "Log::info("Your log");". The logs are written in a separate thread (except for the standard output)
 /// to ensure that they will not slow down the thread from which they are launched. Indeed, logs can
-/// be very slow because they are usually sent throught the network, or wrote in a file via plugins.
+/// be very slow because they are usually sent through the network, or wrote in a file via plugins.
 class Log : public QThread
 {
     Q_OBJECT

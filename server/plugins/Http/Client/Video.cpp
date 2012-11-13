@@ -4,7 +4,7 @@
 
 Video::Video(LightBird::IClient &client) : Media(client)
 {
-    QString format;
+    /*QString format;
     qint32  width = this->file.getInformation("width").toInt();
     quint32 quality = this->uri.queryItemValue("quality").toUInt();
     quint32 seek = this->uri.queryItemValue("seek").toUInt();
@@ -64,15 +64,15 @@ Video::Video(LightBird::IClient &client) : Media(client)
             this->response.getHeader().insert("content-type", "video/ogg");
         }
         this->video->start(this->file.getFullPath(), "", format);
-    }
+    }*/
 }
 
 Video::~Video()
 {
     if (!this->video)
         return ;
-    if (!this->video->isFinished())
-        this->video->stop();
+    /*if (!this->video->isFinished())
+        this->video->stop();*/
     // Release the extensions
     this->api.extensions().release(extensions);
 }
@@ -81,8 +81,8 @@ void    Video::read()
 {
     QByteArray  data;
 
-    if (!this->video->waitForRead())
+    /*if (!this->video->waitForRead())
         return ;
-    data = this->video->read(MAX_READ);
+    data = this->video->read(MAX_READ);*/
     this->response.getContent().setContent(data);
 }

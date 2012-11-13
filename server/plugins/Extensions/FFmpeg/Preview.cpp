@@ -40,10 +40,10 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
 
     try
     {
-        properties.add("source", source).add("destination", destination).add("format", fmt);
         // Checks the source and the destination
         if (!QFileInfo(source).isFile() || source == destination || destination.isEmpty())
             throw false;
+        properties.add("source", source).add("destination", destination).add("format", fmt);
         // Opens the source and its video stream
         if ((ret = avformat_open_input(&format, source.toAscii().data(), NULL, NULL)) < 0)
         {

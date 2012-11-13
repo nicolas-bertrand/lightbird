@@ -13,15 +13,17 @@ INCLUDEPATH += . \
 TARGET = FFmpeg
 DESTDIR = ../../../build/plugins/Extensions/FFmpeg
 LIBS += -L../../../build -lLightBird
-LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec -lavdevice -lavfilter -lavformat -lavutil -lpostproc -lswresample -lswscale
+LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec -lavfilter -lavformat -lavutil -lswscale
 
 HEADERS = FFmpeg.h \
     Identify.h \
     Plugin.h \
-    Preview.h
+    Preview.h \
+    Video.h
 SOURCES = Identify.cpp \
-    Plugin.cpp \
-    Preview.cpp
+    Preview.cpp \
+    Video.cpp \
+    Plugin.cpp
 OTHER_FILES = Configuration.xml
 
 OBJECTS_DIR = tmp
