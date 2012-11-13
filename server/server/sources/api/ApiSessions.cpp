@@ -2,6 +2,7 @@
 #include "Database.h"
 #include "Defines.h"
 #include "Events.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Network.h"
 #include "Server.h"
@@ -153,7 +154,7 @@ void                        ApiSessions::expiration()
     // The timer will call expiration the next time a session expire
     if (mutex && Database::instance()->query(query, result) && result.size() > 0)
     {
-        s = result[0]["expiration"].toDateTime().toMSecsSinceEpoch() - QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+        s = result[0]["expiration"].toDateTime().toMSecsSinceEpoch() - LightBird::currentMSecsSinceEpochUtc();
         // Avoid a possible int overflow
         s = (s < 0) ? 0 : (s > 2000000000) ? 2000000000 : s;
         this->timer.start(s);

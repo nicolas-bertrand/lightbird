@@ -91,3 +91,10 @@ void    LightBird::sleep(unsigned long time)
     wait.wait(&mutex, time);
     mutex.unlock();
 }
+
+qint64  LightBird::currentMSecsSinceEpochUtc()
+{
+    QDateTime   current(QDateTime::currentDateTimeUtc());
+
+    return (QDateTime(current.date(), current.time()).toMSecsSinceEpoch());
+}

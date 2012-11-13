@@ -66,6 +66,10 @@ namespace LightBird
     /// @brief A cross-platform sleep.
     /// @param The number of milliseconds to sleep.
     LIB void        sleep(unsigned long time);
+    /// @brief Returns the current number of milliseconds since epoch in UTC. This
+    /// method is needed because QDateTime::currentDateTimeUtc().toMSecsSinceEpoch()
+    /// returns the same value as QDateTime::currentDateTime().toMSecsSinceEpoch().
+    LIB qint64      currentMSecsSinceEpochUtc();
 }
 
 #endif // LIGHTBIRD_H
