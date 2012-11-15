@@ -64,11 +64,7 @@ QString LightBird::getFilesPath(bool finalSlash)
 
 QString LightBird::preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int position)
 {
-    static Preview *preview = NULL;
-
-    if (!preview)
-        preview = new Preview();
-    return (preview->generate(fileId, format, width, height, position));
+    return (LightBird::Library::getPreview()->generate(fileId, format, width, height, position));
 }
 
 QByteArray LightBird::simplify(QByteArray data, char replace, quint64 maxSize)

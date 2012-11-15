@@ -1,50 +1,85 @@
 #include "Library.h"
+#include "Preview.h"
 
-LightBird::IConfiguration *LightBird::Library::_configuration = NULL;
-LightBird::IDatabase      *LightBird::Library::_database = NULL;
-LightBird::IExtensions    *LightBird::Library::_extension = NULL;
-LightBird::ILogs          *LightBird::Library::_log = NULL;
+using namespace LightBird;
 
-LightBird::IConfiguration &LightBird::Library::configuration()
+Library *Library::instance = NULL;
+
+Library *Library::getInstance()
 {
-    return (*LightBird::Library::_configuration);
+    if (!Library::instance)
+        Library::instance = new Library();
+    return (Library::instance);
 }
 
-LightBird::IDatabase &LightBird::Library::database()
+void Library::shutdown()
 {
-    return (*LightBird::Library::_database);
+    delete Library::instance;
+    Library::instance = NULL;
 }
 
-LightBird::IExtensions &LightBird::Library::extension()
+Library::Library() : _configuration(NULL),
+                     _database(NULL),
+                     _extension(NULL),
+                     _log(NULL),
+                     preview(NULL)
 {
-    return (*LightBird::Library::_extension);
 }
 
-LightBird::ILogs &LightBird::Library::log()
+Library::~Library()
 {
-    return (*LightBird::Library::_log);
+    // This ILogs was allocated just for us
+    delete this->_log;
+    delete this->preview;
 }
 
-void LightBird::Library::setConfiguration(LightBird::IConfiguration *configuration)
+void Library::setConfiguration(IConfiguration *configuration)
 {
-    if (!LightBird::Library::_configuration)
-        LightBird::Library::_configuration = configuration;
+    if (!(instance = Library::getInstance())->_configuration)
+        Library::getInstance()->_configuration = configuration;
 }
 
-void LightBird::Library::setDatabase(LightBird::IDatabase *database)
+void Library::setDatabase(IDatabase *database)
 {
-    if (!LightBird::Library::_database)
-        LightBird::Library::_database = database;
+    if (!(instance = Library::getInstance())->_database)
+        Library::getInstance()->_database = database;
 }
 
-void LightBird::Library::setExtension(LightBird::IExtensions *extension)
+void Library::setExtension(IExtensions *extension)
 {
-    if (!LightBird::Library::_extension)
-        LightBird::Library::_extension = extension;
+    if (!(instance = Library::getInstance())->_extension)
+        Library::getInstance()->_extension = extension;
 }
 
-void LightBird::Library::setLog(LightBird::ILogs *log)
+void Library::setLog(ILogs *log)
 {
-    if (!LightBird::Library::_log)
-        LightBird::Library::_log = log;
+    if (!(instance = Library::getInstance())->_log)
+        Library::getInstance()->_log = log;
+}
+
+IConfiguration  &Library::configuration()
+{
+    return (*Library::instance->_configuration);
+}
+
+IDatabase   &Library::database()
+{
+    return (*Library::instance->_database);
+}
+
+IExtensions &Library::extension()
+{
+    return (*Library::instance->_extension);
+}
+
+ILogs   &Library::log()
+{
+    return (*Library::instance->_log);
+}
+
+Preview *Library::getPreview()
+{
+    if (!Library::instance->preview)
+        Library::instance->preview = new Preview();
+    return (Library::instance->preview);
 }

@@ -6,6 +6,7 @@
 
 #include "IGui.h"
 
+#include "Library.h"
 #include "LightBird.h"
 #include "Log.h"
 #include "Server.h"
@@ -128,6 +129,7 @@ Server::~Server()
     Log::info("Shutdown the network", "Server", "~Server");
     if (this->network)
         this->network->shutdown();
+    LightBird::Library::shutdown();
     Log::info("Cleans the server features", "Server", "~Server");
     // The reason why we dont delete directly these objects and call shutdown
     // is that they still need each other before this point. Now we are guaranteed

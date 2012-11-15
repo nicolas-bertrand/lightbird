@@ -66,7 +66,7 @@ void            Uploads::onDeserializeContent(LightBird::IClient &client)
     QByteArray  &data = *client.getRequest().getContent().getByteArray();
     qint64      size = data.size();
     qint64      position = 0;
-    qint64      i, j = 0;
+    qint64      i = 0, j = 0;
     qint64      boundarySize;
     SmartMutex  mutex(this->mutex, Plugin::api().getId(), "Uploads", "onDeserializeContent");
 

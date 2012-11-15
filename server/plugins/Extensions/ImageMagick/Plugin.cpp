@@ -5,12 +5,15 @@
 Plugin::Plugin()
 {
     this->identify = NULL;
+    this->image = NULL;
 }
 
 Plugin::~Plugin()
 {
     delete this->identify;
     this->identify = NULL;
+    delete this->image;
+    this->image = NULL;
 }
 
 bool    Plugin::onLoad(LightBird::IApi *api)
@@ -25,6 +28,8 @@ void    Plugin::onUnload()
 {
     delete this->identify;
     this->identify = NULL;
+    delete this->image;
+    this->image = NULL;
 }
 
 bool    Plugin::onInstall(LightBird::IApi *api)
@@ -59,9 +64,9 @@ void    *Plugin::getExtension(const QString &name)
 {
     if (name == "IIdentify")
         return (dynamic_cast<LightBird::IIdentify *>(this->identify));
-    if (name == "IImage")
+    else if (name == "IImage")
         return (dynamic_cast<LightBird::IImage *>(this->image));
-    if (name == "IPreview")
+    else if (name == "IPreview")
         return (dynamic_cast<LightBird::IPreview *>(this->image));
     return (NULL);
 }

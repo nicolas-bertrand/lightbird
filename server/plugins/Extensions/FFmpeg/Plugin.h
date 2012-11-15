@@ -2,7 +2,6 @@
 # define PLUGIN_H
 
 # include <QObject>
-# include <QFile>
 # include <QMutex>
 # include "FFmpeg.h"
 
