@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS = Identifier \
 #   FFmpeg \
-#   ImageMagick
+#   ImageMagick \
+#   TagLib
