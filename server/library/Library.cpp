@@ -24,6 +24,12 @@ Library::Library() : _configuration(NULL),
                      _log(NULL),
                      preview(NULL)
 {
+    this->imageExtensions.insert(LightBird::IImage::BMP, "bmp");
+    this->imageExtensions.insert(LightBird::IImage::GIF, "gif");
+    this->imageExtensions.insert(LightBird::IImage::JPEG, "jpeg");
+    this->imageExtensions.insert(LightBird::IImage::PNG, "png");
+    this->imageExtensions.insert(LightBird::IImage::TGA, "tga");
+    this->imageExtensions.insert(LightBird::IImage::TIFF, "tiff");
 }
 
 Library::~Library()
@@ -82,4 +88,9 @@ Preview *Library::getPreview()
     if (!Library::instance->preview)
         Library::instance->preview = new Preview();
     return (Library::instance->preview);
+}
+
+QHash<LightBird::IImage::Format, QString> &Library::getImageExtensions()
+{
+    return (Library::instance->imageExtensions);
 }

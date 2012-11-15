@@ -3,16 +3,11 @@
 #include <QTemporaryFile>
 
 #include "Image.h"
+#include "LightBird.h"
 #include "Properties.h"
 
 Image::Image(LightBird::IApi *a) : api(a)
 {
-    this->extensions[LightBird::IImage::BMP] = "bmp";
-    this->extensions[LightBird::IImage::GIF] = "gif";
-    this->extensions[LightBird::IImage::JPEG] = "jpg";
-    this->extensions[LightBird::IImage::PNG] = "png";
-    this->extensions[LightBird::IImage::TGA] = "tga";
-    this->extensions[LightBird::IImage::TIFF] = "tiff";
     // Get the path to ImageMagick from the configuration of the plugin
     this->imageMagickPath = this->api->configuration(true).get("image_magick_path");
     // The default path
@@ -34,6 +29,7 @@ Image::~Image()
 
 bool    Image::convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height)
 {
+    QString         extension = LightBird::getImageExtension(format);
     QProcess        process;
     QString         commandLine;
     Properties      properties;
@@ -47,7 +43,7 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     if (destination.isEmpty())
     {
         replaceSource = true;
-        tmp.setFileTemplate(this->fileTemplate + this->extensions[format]);
+        tmp.setFileTemplate(this->fileTemplate + extension);
         if (!tmp.open())
         {
             LOG_DEBUG("Error with QTemporaryFile::open", "Image", "convert");
@@ -58,8 +54,8 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     // Defines the command line
     commandLine = this->imageMagickPath + "/" + this->binaryName + " " + source + " " + this->_resize(width, height) + destination;
     properties.add("commandLine", commandLine);
-    if (!destination.contains(QRegExp("\\." + this->extensions[format] + "$")))
-        commandLine += "." + this->extensions[format];
+    if (!destination.contains(QRegExp("\\." + extension + "$")))
+        commandLine += "." + extension;
     // Start the converter
     process.start(commandLine);
     process.waitForStarted();
@@ -79,8 +75,8 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     }
     LOG_TRACE("ImageMagick command line", properties.toMap(), "Image", "convert");
     // Add the extension at the end of the destination file name
-    if (!destination.endsWith("." + this->extensions[format]))
-        destination += "." + this->extensions[format];
+    if (!destination.endsWith("." + extension))
+        destination += "." + extension;
     // Replace the source by the destination if the destination was empty
     if (replaceSource)
     {

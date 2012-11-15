@@ -26,7 +26,6 @@ private:
     QString         imageMagickPath; ///< The path to the ImageMagick binaries.
     QString         binaryName;      ///< The name of the convert tool of ImageMagick.
     QString         fileTemplate;    ///< The template of the temporary files.
-    QMap<LightBird::IImage::Format, QString> extensions; ///< Associates the formats to there extensions.
 };
 
 #endif // IMAGE_H

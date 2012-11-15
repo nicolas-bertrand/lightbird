@@ -19,7 +19,6 @@ public:
 private:
     LightBird::IApi *api;         ///< The LightBird API.
     QString         fileTemplate; ///< The template of the temporary files.
-    QHash<LightBird::IImage::Format, QString> formats; ///< The list of the image output formats supported by Qt and their extension.
 };
 
 #endif // PREVIEW_H

@@ -10,10 +10,6 @@
 Preview::Preview(LightBird::IApi *a) : api(a)
 {
     this->fileTemplate = this->api->configuration().get("temporaryPath") + "/" + "XXXXXX.jpeg";
-    this->formats.insert(LightBird::IImage::BMP, ".bmp");
-    this->formats.insert(LightBird::IImage::JPEG, ".jpeg");
-    this->formats.insert(LightBird::IImage::PNG, ".png");
-    this->formats.insert(LightBird::IImage::TIFF, ".tiff");
 }
 
 Preview::~Preview()
@@ -123,13 +119,8 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
         }
         sws_scale(swsContext, frame->data, frame->linesize, 0, context->height, &data, linesize);
         // Saves the image to the destination file if the format is supported by Qt
-        if (this->formats.contains(fmt))
-        {
-            destination += this->formats.value(fmt);
-            image.save(destination);
-        }
+        if (!LightBird::saveImage(image, destination, fmt))
         // Otherwise converts the image into the requested format using the IImage extension
-        else
         {
             // Opens the temporary file
             tmp.setFileTemplate(this->fileTemplate);

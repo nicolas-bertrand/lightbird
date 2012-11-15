@@ -2,6 +2,7 @@
 # define LIGHTBIRD_H
 
 # include <QByteArray>
+# include <QImage>
 # include <QObject>
 # include <QString>
 
@@ -37,6 +38,9 @@ namespace LightBird
     /// is defined by the configuration node "filesPath".
     /// @param finalSlash : If true, a "/" is added at the end of the filesPath.
     LIB QString     getFilesPath(bool finalSlash = true);
+    /// @brief Returns the extension that corresponds to the format.
+    /// @param dot : If the extension have to start with a dot.
+    LIB QString     getImageExtension(LightBird::IImage::Format format, bool dot = false);
     /// @brief Calls all the plugins that implements IPreview in order to generate
     /// the preview of a file. A cache system is also implemented in order to
     /// not generate a new preview at each calls.
@@ -51,6 +55,9 @@ namespace LightBird
     /// @return The path to the generated preview. This file should not been deleted (for cache purpose).
     /// If empty, no preview could have been generated for the source file.
     LIB QString     preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0);
+    /// @brief Saves the image in the requested format if Qt supports it.
+    /// @param fileName : The name of the file in which the image is saved.
+    LIB bool        saveImage(QImage &image, QString fileName, LightBird::IImage::Format format);
     /// @brief Implementation of SHA-256.
     /// @author jagatsastry.nitk@gmail.com
     /// @return The hash of data in hex.

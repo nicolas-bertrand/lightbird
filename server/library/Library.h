@@ -6,6 +6,7 @@
 # include "IConfiguration.h"
 # include "IDatabase.h"
 # include "IExtensions.h"
+# include "IImage.h"
 # include "ILogs.h"
 
 # include "Export.h"
@@ -27,6 +28,8 @@ namespace LightBird
         static ILogs          &log();
         // Other
         static Preview        *getPreview();
+        static QHash<LightBird::IImage::Format, QString> &getImageExtensions();
+
         // These methods must only be used by the server
         LIB static void setConfiguration(IConfiguration *configuration);
         LIB static void setDatabase(IDatabase *database);
@@ -49,6 +52,7 @@ namespace LightBird
         ILogs          *_log;
         // Other
         Preview        *preview;
+        QHash<LightBird::IImage::Format, QString> imageExtensions;
     };
 }
 
