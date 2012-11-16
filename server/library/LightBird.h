@@ -41,12 +41,10 @@ namespace LightBird
     /// @brief Returns the extension that corresponds to the format.
     /// @param dot : If the extension have to start with a dot.
     LIB QString     getImageExtension(LightBird::IImage::Format format, bool dot = false);
-    /// @brief Calls all the plugins that implements IPreview in order to generate
+    /// @brief Generates a preview image of the file if possible.
+    /// Calls all the plugins that implements IPreview in order to generate
     /// the preview of a file. A cache system is also implemented in order to
     /// not generate a new preview at each calls.
-    ///
-    /// Generates a preview image of a file if possible. If the width and the height are 0,
-    /// the original size is keeped.
     /// @param fileId : The id of the file for which the preview image will be generated.
     /// @param format : The format of the preview image that will be generate.
     /// @param width : The width of the preview. If it is 0, it will be proportional to the height.
