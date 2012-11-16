@@ -73,13 +73,15 @@ QString LightBird::preview(const QString &fileId, LightBird::IImage::Format form
     return (LightBird::Library::getPreview()->generate(fileId, format, width, height, position));
 }
 
-bool    LightBird::saveImage(QImage &image, QString fileName, LightBird::IImage::Format format)
+bool    LightBird::saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format)
 {
     QList<QByteArray> supported = QImageWriter::supportedImageFormats();
     QString extension = LightBird::getImageExtension(format);
 
     if (!supported.contains(extension.toAscii()))
         return (false);
+    if (!fileName.contains(QRegExp("\\." + extension + "$")))
+        fileName.append("." + extension);
     return (image.save(fileName, extension.toAscii().data()));
 }
 

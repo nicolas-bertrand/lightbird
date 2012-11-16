@@ -40,7 +40,7 @@ private:
     void        _clear(bool free = true, bool settings = false);
     /// @brief Opens the best audio stream.
     AVStream    *_openStream(AVCodecContext *&context);
-    /// @brief Initializes the output format and streams, and starts the transcoding
+    /// @brief Initializes the output format and streams, and starts the transcoding.
     void        _initializeOutput();
     /// @brief Applies the settings.
     void        _settings();

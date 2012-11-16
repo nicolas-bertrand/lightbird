@@ -57,7 +57,9 @@ namespace LightBird
     LIB QString     preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0);
     /// @brief Saves the image in the requested format if Qt supports it.
     /// @param fileName : The name of the file in which the image is saved.
-    LIB bool        saveImage(QImage &image, QString fileName, LightBird::IImage::Format format);
+    /// The extension of the format is added if not already present.
+    /// @return True on success.
+    LIB bool        saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format);
     /// @brief Implementation of SHA-256.
     /// @author jagatsastry.nitk@gmail.com
     /// @return The hash of data in hex.
