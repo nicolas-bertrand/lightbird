@@ -12,6 +12,7 @@ DEFINES += LIGHTBIRD_LIBRARY
 
 HEADERS = Defines.h \
     Export.h \
+    Identify.h \
     Initialize.h \
     Library.h \
     LightBird.h \
@@ -33,7 +34,8 @@ HEADERS = Defines.h \
     Dir.h \
     File.h \
     Node.h
-SOURCES = Initialize.cpp \
+SOURCES = Identify.cpp \
+    Initialize.cpp \
     Library.cpp \
     LightBird.cpp \
     Preview.cpp \

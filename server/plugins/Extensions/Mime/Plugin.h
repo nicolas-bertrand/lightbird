@@ -4,15 +4,17 @@
 # include <QObject>
 
 # include "IExtension.h"
+# include "IMime.h"
 # include "IPlugin.h"
-# include "Identifier.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
-               public LightBird::IExtension
+               public LightBird::IExtension,
+               public LightBird::IMime
 {
     Q_OBJECT
-    Q_INTERFACES(LightBird::IPlugin LightBird::IExtension)
+    Q_INTERFACES(LightBird::IPlugin
+                 LightBird::IExtension)
 
 public:
     Plugin();
@@ -30,9 +32,11 @@ public:
     void        *getExtension(const QString &name);
     void        releaseExtension(const QString &name, void *extension);
 
+    // IMime
+    QString     getMime(const QString &file);
+
 private:
-    LightBird::IApi *api;        ///< The LightBird's Api.
-    Identifier      *identifier; ///< Implements the IIdentifier extension.
+    LightBird::IApi *api; ///< The LightBird's Api.
 };
 
 #endif // PLUGIN_H

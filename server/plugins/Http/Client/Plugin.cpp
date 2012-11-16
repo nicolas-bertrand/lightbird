@@ -211,9 +211,6 @@ bool    Plugin::timer(const QString &name)
         }
         this->mutex.unlock();
     }
-    // The uploads timer is used to identify the files
-    else if (name == "uploads")
-        return (this->uploads.timer());
     return (true);
 }
 

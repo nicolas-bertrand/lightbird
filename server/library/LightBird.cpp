@@ -4,6 +4,7 @@
 #include <QUuid>
 #include <QWaitCondition>
 
+#include "Identify.h"
 #include "Library.h"
 #include "LightBird.h"
 #include "Preview.h"
@@ -42,6 +43,11 @@ QString LightBird::cleanPath(const QString &p, bool removeFirstSlash)
     if (removeFirstSlash && result.startsWith('/'))
         result.remove(0, 1);
     return (result);
+}
+
+void    LightBird::identify(const QString &file, LightBird::IIdentify::Information *information)
+{
+    LightBird::Library::getIdentify()->identify(file, information);
 }
 
 bool    LightBird::isValidName(const QString &objectName)

@@ -11,6 +11,7 @@
 
 # include "Export.h"
 
+class Identify;
 class Preview;
 
 namespace LightBird
@@ -27,6 +28,7 @@ namespace LightBird
         static IExtensions    &extension();
         static ILogs          &log();
         // Other
+        static Identify       *getIdentify();
         static Preview        *getPreview();
         static QHash<LightBird::IImage::Format, QString> &getImageExtensions();
 
@@ -51,6 +53,7 @@ namespace LightBird
         IExtensions    *_extension;
         ILogs          *_log;
         // Other
+        Identify       *identify;
         Preview        *preview;
         QHash<LightBird::IImage::Format, QString> imageExtensions;
     };

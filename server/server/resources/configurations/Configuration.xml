@@ -9,6 +9,7 @@
   <languagesPath>languages</languagesPath>
   <language>fr</language>
   <threadsNumber>10</threadsNumber>
+  <hashSizeLimit>-1</hashSizeLimit>
   <database>
     <name/>
     <file>database.sqlite</file>
@@ -51,7 +52,7 @@
     <port protocol="HTTP" transport="TCP" maxClients="100">4242</port>
   </ports>
   <plugins>
-    <plugin>Extensions/Identifier</plugin>
+    <plugin>Extensions/Mime</plugin>
     <plugin>Files</plugin>
     <plugin>Http/Client</plugin>
     <plugin>Http/Parser</plugin>
@@ -60,7 +61,7 @@
     <!--plugin>Test</plugin-->
   </plugins>
   <configurations>
-    <plugin id="Extensions/Identifier"/>
+    <plugin id="Extensions/Mime"/>
     <plugin id="Files"/>
     <plugin id="Ftp"/>
     <plugin id="Http/Client"/>

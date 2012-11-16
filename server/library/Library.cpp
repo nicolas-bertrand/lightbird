@@ -1,3 +1,4 @@
+#include "Identify.h"
 #include "Library.h"
 #include "Preview.h"
 
@@ -22,6 +23,7 @@ Library::Library() : _configuration(NULL),
                      _database(NULL),
                      _extension(NULL),
                      _log(NULL),
+                     identify(NULL),
                      preview(NULL)
 {
     this->imageExtensions.insert(LightBird::IImage::BMP, "bmp");
@@ -36,6 +38,7 @@ Library::~Library()
 {
     // This ILogs was allocated just for us
     delete this->_log;
+    delete this->identify;
     delete this->preview;
 }
 
@@ -81,6 +84,13 @@ IExtensions &Library::extension()
 ILogs   &Library::log()
 {
     return (*Library::instance->_log);
+}
+
+Identify *Library::getIdentify()
+{
+    if (!Library::instance->identify)
+        Library::instance->identify = new Identify();
+    return (Library::instance->identify);
 }
 
 Preview *Library::getPreview()

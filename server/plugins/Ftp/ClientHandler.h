@@ -35,7 +35,7 @@
 # define DATA_UPLOAD                "upload"             // Defined when an upload is in progress.
 # define DATA_CODE                  "code"               // Sent along with the message when a transfer is completed.
 # define DATA_MESSAGE               "message"            // Defined if a message have to be sent through the control connection after the transfer.
-# define DATA_UPLOAD_ID             "upload-id"          // The id of the uploaded file. Used to identify it in the timer thread.
+# define DATA_UPLOAD_ID             "upload-id"          // The id of the uploaded file. Used to identify it.
 # define DATA_DOWNLOAD_COMPLETED    "download-completed" // Defined when the download has been completed. An error message is sent otherwise.
 
 /// @brief Manages the clients on the control and data connections.

@@ -1,9 +1,6 @@
 #include <QUuid>
 #include <QDir>
 
-#include "IIdentify.h"
-#include "IIdentifier.h"
-
 #include "LightBird.h"
 #include "Plugin.h"
 #include "Uploads.h"
@@ -191,45 +188,6 @@ void        Uploads::doExecution(LightBird::IClient &client)
     this->mutex.unlock();
 }
 
-bool                Uploads::timer()
-{
-    QList<void *>   extensions;
-    QStringList     files;
-    LightBird::IIdentify::Information information;
-    LightBird::TableFiles file;
-
-    // Gets the files to identify
-    this->mutex.lock();
-    files = this->identify;
-    this->identify.clear();
-    this->mutex.unlock();
-    // While there are files to identify
-    while (!files.isEmpty())
-    {
-        QStringListIterator it(files);
-        while (it.hasNext())
-            // Identify the file
-            if (file.setIdFromVirtualPath(it.next()))
-            {
-                if (!(extensions = Plugin::api().extensions().get("IIdentifier")).isEmpty())
-                    information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(file.getFullPath());
-                Plugin::api().extensions().release(extensions);
-                file.setType(information.type_string);
-                if (information.data.value("mime").toString() == "application/octet-stream")
-                    information.data.remove("mime");
-                file.setInformations(information.data);
-                information.data.clear();
-            }
-        files.clear();
-        // If some files have been uploaded in the meantime, we continue the identification
-        this->mutex.lock();
-        files = this->identify;
-        this->identify.clear();
-        this->mutex.unlock();
-    }
-    return (false);
-}
-
 void                Uploads::check(LightBird::IClient &client)
 {
     QVariantList    result;
@@ -412,7 +370,7 @@ void        Uploads::_fileComplete(LightBird::IClient &client, Upload &upload)
     if (!upload.file->isOpen())
         return ;
     // Identify the file
-    this->identify << (upload.path + file.name);
+    LightBird::identify(upload.fileTable.getId());
     Plugin::api().log().info("File uploaded", Properties("idFile", upload.fileTable.getId()).add("path", upload.path + file.name).add("idClient", client.getId()).toMap(), "Uploads", "_insert");
 }
 

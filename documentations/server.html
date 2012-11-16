@@ -52,6 +52,7 @@
                 <span class="chevron">&lt;</span>languagesPath<span class="chevron">&gt;</span><span class="text">languages</span><span class="chevron">&lt;/</span>languagesPath<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>language<span class="chevron">&gt;</span><span class="text">fr</span><span class="chevron">&lt;/</span>language<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>threadsNumber<span class="chevron">&gt;</span><span class="text">10</span><span class="chevron">&lt;/</span>threadsNumber<span class="chevron">&gt;</span><br />
+                <span class="chevron">&lt;</span>hashSizeLimit<span class="chevron">&gt;</span><span class="text">-1</span><span class="chevron">&lt;/</span>hashSizeLimit<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>database<span class="chevron">&gt;</span><br />
                 <div class="indent">
                     <span class="chevron">&lt;</span>name<span class="chevron">/&gt;</span><br />
@@ -169,10 +170,15 @@
                 <td>Le nom du fichier de langage à charger afin de traduire le serveur, sans son extension finale. Si ce fichier n’existe pas dans le dossier des langages, il sera cherché dans les resources du serveur, sous le dossier « languages ». Si ce nœud est vide ou non défini, la langue locale du système est utilisée (en, fr…).</td>
                 <td class="value">Langue locale</td>
             </tr>
-            <tr class="last odd">
+            <tr class="odd">
                 <td class="key">threadsNumber</td>
                 <td>Le nombre de threads dans la thread pool. Ces threads sont principalement utilisés pour traiter les requêtes et les réponses du serveur. Cette valeur dépend de l’utilisation qui est faite du serveur et de l’environnement dans lequel il est exécuté.</td>
                 <td class="value">10</td>
+            </tr>
+            <tr class="last">
+                <td class="key">hashSizeLimit</td>
+                <td>Les empreintes MD5 et SHA1 ne sont pas calculées pour les fichiers excédant cette taille. Si elle vaut zéro, les empreintes ne sont jamais calculées. Une valeur négative enléve la limite. Cette option est utile car le temps calcule d'une empreinte est proportionnel à la taille du fichier.</td>
+                <td class="value">-1</td>
             </tr>
         </table>
         

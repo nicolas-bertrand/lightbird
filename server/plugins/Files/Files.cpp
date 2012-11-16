@@ -1,7 +1,5 @@
 #include <QDir>
 
-#include "IIdentifier.h"
-
 #include "LightBird.h"
 #include "Plugin.h"
 
@@ -38,12 +36,10 @@ void    Files::_directoryChanged(const QString &)
 
 void    Files::_addFiles()
 {
-    LightBird::TableFiles   file;
-    QDir                    directory(LightBird::getFilesPath());
-    QStringList             removeFilesList;
-    QString                 fileName;
-    QList<void *>           extensions;
-    LightBird::IIdentify::Information information;
+    LightBird::TableFiles file;
+    QDir                  directory(LightBird::getFilesPath());
+    QStringList           removeFilesList;
+    QString               fileName;
 
     removeFilesList = this->_removeFiles();
     // Adds the new files to the database
@@ -57,12 +53,7 @@ void    Files::_addFiles()
             file.add(fileName, fileName);
             LOG_INFO("File added", Properties("name", fileName).add("idFile", file.getId()).toMap(), "Files", "_addFiles");
             // Identify the file
-            if (!(extensions = this->api->extensions().get("IIdentifier")).isEmpty())
-                information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(file.getFullPath());
-            this->api->extensions().release(extensions);
-            file.setType(information.type_string);
-            file.setInformations(information.data);
-            information.data.clear();
+            LightBird::identify(file.getId());
         }
         it.next();
     }

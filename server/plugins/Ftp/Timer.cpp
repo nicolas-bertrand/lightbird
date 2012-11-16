@@ -1,5 +1,3 @@
-#include "IIdentifier.h"
-
 #include "Plugin.h"
 #include "Timer.h"
 #include "TableFiles.h"
@@ -14,19 +12,9 @@ Timer::~Timer()
 
 bool    Timer::timer(const QString &name)
 {
-    if (name == TIMER_IDENTIFY)
-        return (this->_identify());
-    else if (name == TIMER_TIMEOUT)
+    if (name == TIMER_TIMEOUT)
         return (this->_timeout());
     return (false);
-}
-
-void    Timer::identify(const QString &idFile)
-{
-    this->mutex.lock();
-    this->identifyList << idFile;
-    this->mutex.unlock();
-    this->api.timers().setTimer(TIMER_IDENTIFY);
 }
 
 void          Timer::startTimeout(const QString &idClient)
@@ -69,43 +57,6 @@ void          Timer::stopTimeout(const QString &idClient)
         }
     }
     this->mutex.unlock();
-}
-
-bool    Timer::_identify()
-{
-    QList<void *>         extensions;
-    QStringList           files;
-    LightBird::TableFiles file;
-    LightBird::IIdentify::Information information;
-
-    // Gets the files to identify
-    this->mutex.lock();
-    (files = this->identifyList).removeDuplicates();
-    this->identifyList.clear();
-    this->mutex.unlock();
-    // While there are files to identify
-    while (!files.isEmpty())
-    {
-        QStringListIterator it(files);
-        while (it.hasNext())
-            // Identify the file
-            if (file.setId(it.next()))
-            {
-                if (!(extensions = this->api.extensions().get("IIdentifier")).isEmpty())
-                    information = static_cast<LightBird::IIdentifier *>(extensions.first())->identify(file.getFullPath());
-                this->api.extensions().release(extensions);
-                file.setType(information.type_string);
-                file.setInformations(information.data);
-                information.data.clear();
-            }
-        files.clear();
-        // If some files have been uploaded in the meantime, we continue the identification
-        this->mutex.lock();
-        (files = this->identifyList).removeDuplicates();
-        this->identifyList.clear();
-        this->mutex.unlock();
-    }
-    return (false);
 }
 
 bool          Timer::_timeout()

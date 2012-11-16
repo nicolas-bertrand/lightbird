@@ -1,9 +1,12 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 
-#include "Identifier.h"
+#include "Identify.h"
+#include "IMime.h"
+#include "Library.h"
+#include "LightBird.h"
 
-Identifier::Identifier(LightBird::IApi &a) : api(a)
+Identify::Identify() : thread(NULL)
 {
     this->mimeDocument.push_back("text/");
     this->mimeDocument.push_back("pdf");
@@ -14,18 +17,98 @@ Identifier::Identifier(LightBird::IApi &a) : api(a)
     this->mimeDocument.push_back("postscript");
     this->mimeDocument.push_back("xml");
     this->mimeDocument.push_back("json");
-    this->maxSizeHash = api.configuration(true).get("maxSizeHash").toLongLong();
+    this->typeString.insert(LightBird::IIdentify::AUDIO, "audio");
+    this->typeString.insert(LightBird::IIdentify::DOCUMENT, "document");
+    this->typeString.insert(LightBird::IIdentify::IMAGE, "image");
+    this->typeString.insert(LightBird::IIdentify::OTHER, "other");
+    this->typeString.insert(LightBird::IIdentify::VIDEO, "video");
+    this->maxSizeHash = LightBird::Library::configuration().get("hashSizeLimit").toLongLong();
+    if (!LightBird::Library::configuration().count("hashSizeLimit"))
+        this->maxSizeHash = -1;
 }
 
-Identifier::~Identifier()
+Identify::~Identify()
 {
+    Thread  *thread;
+
+    // Waits for the thread to finish
+    this->mutex.lock();
+    if ((thread = this->thread))
+    {
+        this->mutex.unlock();
+        thread->wait();
+        this->mutex.lock();
+    }
+    this->mutex.unlock();
 }
 
-LightBird::IIdentify::Information Identifier::identify(const QString &file)
+void    Identify::identify(const QString &file, LightBird::IIdentify::Information *information)
+{
+    // Identifies the file directly
+    if (information)
+    {
+        *information = this->_identify(file);
+        return ;
+    }
+    // Identifies the file via the thread
+    this->mutex.lock();
+    this->files << file;
+    // Starts the thread
+    if (!this->thread)
+    {
+        this->thread = new Thread();
+        this->thread->start();
+    }
+    this->mutex.unlock();
+}
+
+void    Identify::Thread::run()
+{
+    Identify              *instance = LightBird::Library::getIdentify();
+    QStringList           files;
+    LightBird::TableFiles file;
+    LightBird::IIdentify::Information information;
+
+    // Gets the files to identify
+    instance->mutex.lock();
+    (files = instance->files).removeDuplicates();
+    instance->files.clear();
+    instance->mutex.unlock();
+    // While there are files to identify
+    while (!files.isEmpty())
+    {
+        QStringListIterator it(files);
+        while (it.hasNext())
+            // Identify the file
+            if (file.setId(it.next()))
+            {
+                information = instance->_identify(file.getFullPath());
+                file.setType(instance->typeString.value(information.type));
+                file.setInformations(information.data);
+                information.data.clear();
+            }
+        files.clear();
+        // If some files have been added in the meantime, we continue the identification
+        instance->mutex.lock();
+        (files = instance->files).removeDuplicates();
+        if (!files.isEmpty())
+            instance->files.clear();
+        // No more file to identify
+        else
+        {
+            instance->thread = NULL;
+            this->deleteLater();
+        }
+        instance->mutex.unlock();
+    }
+}
+
+LightBird::IIdentify::Information Identify::_identify(const QString &file)
 {
     Info            result;
     Info            tmp;
-    QList<void *>   extentions;
+    QList<void *>   extensions;
+    QString         mime;
     QMap<LightBird::IIdentify::Type, QVariantMap> info;
 
     result.type = LightBird::IIdentify::OTHER;
@@ -33,7 +116,7 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     if (!QFileInfo(file).isFile())
         return (result);
     // Gets the extensions that implements IIdentify
-    QListIterator<void *> it(extentions = this->api.extensions().get("IIdentify"));
+    QListIterator<void *> it(extensions = LightBird::Library::extension().get("IIdentify"));
     while (it.hasNext())
     {
         tmp.data.clear();
@@ -44,16 +127,19 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
         it.next();
     }
     // Releases the extensions
-    this->api.extensions().release(extentions);
+    LightBird::Library::extension().release(extensions);
     // Puts the data gathered in the result
     if (info.size() > 0)
         this->_identify(info, result);
-    // Gets the size and the extension of the file
+    // Gets the size, the extension and the mime of the file
     result.data.insert("size", QFileInfo(file).size());
     if (file.contains("."))
     {
         result.data.insert("extension", file.right(file.size() - file.lastIndexOf(".") - 1));
-        result.data.insert("mime", this->getMime(file));
+        extensions = LightBird::Library::extension().get("IMime");
+        if (!extensions.isEmpty() && !(mime = static_cast<LightBird::IMime *>(extensions.first())->getMime(file)).isEmpty())
+            result.data.insert("mime", mime);
+        LightBird::Library::extension().release(extensions);
     }
     // Determines if the file is a document
     if (result.type == LightBird::IIdentify::OTHER)
@@ -63,17 +149,6 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
         this->_typeFromMime(result);
     // Computes the hashes of the file
     this->_hash(file, result);
-    // Sets the type in string
-    if (result.type == LightBird::IIdentify::AUDIO)
-        result.type_string = "audio";
-    else if (result.type == LightBird::IIdentify::DOCUMENT)
-        result.type_string = "document";
-    else if (result.type == LightBird::IIdentify::IMAGE)
-        result.type_string = "image";
-    else if (result.type == LightBird::IIdentify::VIDEO)
-        result.type_string = "video";
-    else
-        result.type_string = "other";
     // Debug
     /**this->api.log().debug("Type: " + QString::number(result.type));
     QMapIterator<QString, QVariant> i(result.data);
@@ -85,21 +160,7 @@ LightBird::IIdentify::Information Identifier::identify(const QString &file)
     return (result);
 }
 
-QString     Identifier::getMime(const QString &file)
-{
-    QString                     extension;
-    LightBird::IConfiguration   *configuration = NULL;
-
-    if (file.contains(".") && (configuration = this->api.configuration(this->api.getPluginPath() + "/Mime.xml")))
-    {
-        extension = file.right(file.size() - file.lastIndexOf(".") - 1);
-        if (!(extension = configuration->get(extension.toLower())).isEmpty())
-            return (extension);
-    }
-    return ("application/octet-stream");
-}
-
-void    Identifier::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
+void    Identify::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
 {
     if (this->_add(LightBird::IIdentify::DOCUMENT, info, result))
         return ;
@@ -111,7 +172,7 @@ void    Identifier::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info
         return ;
 }
 
-bool    Identifier::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
+bool    Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
 {
     if (info.contains(type))
     {
@@ -130,7 +191,7 @@ bool    Identifier::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdent
     return (false);
 }
 
-void        Identifier::_document(Info &result)
+void        Identify::_document(Info &result)
 {
     QString mime = result.data.value("mime").toString();
 
@@ -143,7 +204,7 @@ void        Identifier::_document(Info &result)
         }
 }
 
-void        Identifier::_typeFromMime(Info &result)
+void        Identify::_typeFromMime(Info &result)
 {
     QString mime = result.data.value("mime").toString();
 
@@ -155,7 +216,7 @@ void        Identifier::_typeFromMime(Info &result)
         result.type = LightBird::IIdentify::VIDEO;
 }
 
-void    Identifier::_hash(const QString &fileName, Info &result)
+void    Identify::_hash(const QString &fileName, Info &result)
 {
     QCryptographicHash  md5(QCryptographicHash::Md5);
     QCryptographicHash  sha1(QCryptographicHash::Sha1);

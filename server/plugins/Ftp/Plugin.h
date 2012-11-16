@@ -97,9 +97,6 @@ public:
 
     /// @brief Returns the parser that is in charge of the client, in a thread safe way.
     Parser  *_getParser(const LightBird::IClient &client);
-    /// @brief Adds a file to be identified in the timer thread.
-    /// @param idFile : The id of the file to identify.
-    static void identify(const QString &idFile);
     /// @brief Sends a message on the control connection.
     /// @param idClient : The id of the control connection.
     /// @param message : The message to send.
@@ -112,7 +109,7 @@ private:
     QReadWriteLock           mutex;         ///< Makes parsers thread safe.
     QHash<QString, Parser *> parsers;       ///< Parses the FTP control and data connections.
     ClientHandler            *handler;      ///< This single object handles all the connections.
-    Timer                    *timerManager; ///< Manages the identification of the uploaded files and the connections timeout.
+    Timer                    *timerManager; ///< Manages the connections timeout.
     static Configuration     configuration; ///< The configuration of the plugin.
     static Plugin            *instance;     ///< Allows to access the Plugin instance from a static method.
 };

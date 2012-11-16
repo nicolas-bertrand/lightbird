@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS = Identifier \
+SUBDIRS = Mime \
 #   FFmpeg \
 #   ImageMagick \
 #   TagLib

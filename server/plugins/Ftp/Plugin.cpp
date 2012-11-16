@@ -188,13 +188,6 @@ bool    Plugin::timer(const QString &name)
     return (this->timerManager->timer(name));
 }
 
-void    Plugin::identify(const QString &idFile)
-{
-    if (!Plugin::instance)
-        return ;
-    Plugin::instance->timerManager->identify(idFile);
-}
-
 void    Plugin::sendControlMessage(const QString &controlId, const Commands::Result &message)
 {
     QVariantMap informations;

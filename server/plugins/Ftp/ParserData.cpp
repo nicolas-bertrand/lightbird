@@ -1,3 +1,4 @@
+#include "LightBird.h"
 #include "ParserData.h"
 #include "Plugin.h"
 
@@ -66,9 +67,9 @@ void    ParserData::onDestroy()
     // Destroy the session if there is no control connection
     if (session)
     {
-        // If we just uploaded a file, we have to identify it
+        // If we just uploaded a file, we identify it
         if (informations.contains(DATA_UPLOAD) && informations.contains(DATA_UPLOAD_ID))
-            Plugin::identify(informations.value(DATA_UPLOAD_ID).toString());
+            LightBird::identify(informations.value(DATA_UPLOAD_ID).toString());
         // If the download was not completed before the disconnection, an error occured
         if (informations.contains(DATA_DOWNLOAD) && informations.contains(DATA_MESSAGE) && !informations.contains(DATA_DOWNLOAD_COMPLETED))
             Plugin::sendControlMessage(session->getInformation(SESSION_CONTROL_ID).toString(), Commands::Result(426, "Transfer aborted."));

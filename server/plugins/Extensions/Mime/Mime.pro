@@ -9,14 +9,12 @@ INCLUDEPATH += . \
     ../../../extensions \
     ../../../library
 
-TARGET = Identifier
-DESTDIR = ../../../build/plugins/Extensions/Identifier
+TARGET = Mime
+DESTDIR = ../../../build/plugins/Extensions/Mime
 LIBS += -L../../../build -lLightBird
 
-HEADERS = Plugin.h \
-    Identifier.h
-SOURCES = Plugin.cpp \
-    Identifier.cpp
+HEADERS = Plugin.h
+SOURCES = Plugin.cpp
 OTHER_FILES = Configuration.xml \
     Mime.xml
 

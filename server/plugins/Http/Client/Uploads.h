@@ -93,7 +93,6 @@ private:
 
     QMap<QString, Upload>   uploads;         ///< List of the upload requests being processed.
     qint64                  maxHeaderLength; ///< The maximum length of the headers in the content of the request.
-    QStringList             identify;        ///< The list of the files waiting to be identified.
     QMutex                  mutex;           ///< Makes this class thread safe.
 };
 

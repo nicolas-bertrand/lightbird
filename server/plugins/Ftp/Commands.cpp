@@ -1,9 +1,6 @@
 #include <QDir>
 #include <QSqlQuery>
 
-#include "IIdentify.h"
-#include "IIdentifier.h"
-
 #include "Dir.h"
 #include "Commands.h"
 #include "File.h"
