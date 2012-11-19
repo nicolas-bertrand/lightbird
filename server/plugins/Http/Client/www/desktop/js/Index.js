@@ -4,8 +4,6 @@
 var gl_loaded = false;
 // Holds the size of the browser
 var gl_browserSize;
-// A number used to get an unique id across the session. Use getUid() to get one.
-var gl_uid = 0;
 
 // Initializes the page (called by onload)
 function load()
@@ -15,12 +13,14 @@ function load()
 	// Initializes the desktop and the windows singletons
 	new Desktop();
 	new Windows();
+    // Downloads the files list
+    new Files();
 	// Initializes the browser size
 	onResize();
 	// onResize is called every time the browser is resized
 	window.onresize = onResize;
 	// Initializes the Account management system
-	gl_account = new Account();
+	new Account();
 	// The right click is disabled in order to replace the normal contextual menu of the browser.
 	//document.oncontextmenu = function() { return (false); };
 	document.getElementById("loading_client").style.display = "none";
@@ -191,62 +191,6 @@ function changeOpacity(node, value)
 		node.style.opacity = value;
 }
 
-// Calculates the coordonates of the mouse
-function mouseCoordinates(event)
-{
-	if (event.pageX || event.pageY)
-	{
-		return {x:event.pageX, y:event.pageY};
-	}
-	return {x:event.clientX + document.body.scrollLeft - document.body.clientLeft,
-			y:event.clientY + document.body.scrollTop  - document.body.clientTop};
-}
-
-// Returns the coordonates of an element
-function elementCoordinates(element)
-{
-	var left = 0;
-	var top = 0;
-
-	while (element.offsetParent)
-	{
-		left += element.offsetLeft;
-		top += element.offsetTop;
-		element = element.offsetParent;
-	}
-	left += element.offsetLeft;
-	top += element.offsetTop;
-	return {x:left, y:top};
-}
-
-// Adds an event to an element.
-// @ element : The element on which the event will be applied.
-// @ event : The name of the event to apply (without the "on").
-// @ fct : A function to call when the event occured.
-function addEvent(element, event, fct)
-{
-	// IE
-	if (element.attachEvent)
-		element.attachEvent('on' + event, fct);
-	// Others
-	else
-		element.addEventListener(event, fct, true);
-}
-
-// Removes an event to an element.
-// @ element : The element on which the event will be removed.
-// @ event : The name of the event to remove (without the "on").
-// @ fct : A function to call when the event occured.
-function removeEvent(element, event, fct)
-{
-	// IE
-	if(element.detachEvent)
-		element.detachEvent('on' + event, fct);
-	// Others
-	else
-		element.removeEventListener(event, fct, true);
-}
-
 function getElementsByClassName(className, node, first)
 {
 	if(!node)
@@ -267,83 +211,7 @@ function getElementsByClassName(className, node, first)
 	return (result);
 }
 
-// Class name management
-function getClassName(node, className)
-{
-	var regexp = new RegExp('\\b' + className + '\\b');
-	if (regexp.test(node.className))
-		return (true);
-	return (false);
-}
-
-function setClassName(node, className)
-{
-	if (!getClassName(node, className))
-		node.className += " " + className;
-}
-
-function removeClassName(node, className)
-{
-    node.className = node.className.replace(new RegExp('\\b' + className + '\\b'), "");
-    node.className = node.className.replace("  ", " ");
-}
-
-// Compares too strings
-function compare(str1, str2)
-{
-	for (var i = 0, s = str1.length; i < s; ++i)
-		if (str2.length <= i)
-			return (1);
-		else if (str1[i] < str2[i])
-			return (-1);
-		else if (str1[i] > str2[i])
-			return (1);
-	if (str1.length == str2.length)
-		return (0);
-	return (-1);
-}
-
-// Finds the target of the event in a cross browser way.
-function getEventTarget(event, name, depth)
-{
-	target = (event.target || event.srcElement);
-	if (name == undefined)
-		return (target);
-    if (!depth)
-        depth = 999;
-	for (var d = 0; target && (!depth || d < depth); d++)
-	{
-		if ((target.tagName && target.tagName.toLowerCase() == name.toLowerCase()) ||
-		    (target.className && (new RegExp('\\b' + name + '\\b')).test(target.className)))
-			return (target);
-		target = target.parentNode;
-	}
-}
-
-// Finds the related target of the event in a cross browser way.
-function getEventRelatedTarget(event, name, depth)
-{
-    var target;
-    
-    if (event.relatedTarget)
-        target = event.relatedTarget;
-    else if (event.type == "mouseout")
-        target = event.toElement;
-    else if (event.type == "mouseover")
-        target = event.fromElement;
-	if (name == undefined)
-		return (target);
-    if (!depth)
-        depth = 999;
-	for (var d = 0; target && d < depth; d++)
-	{
-        if (target.className && (new RegExp('\\b' + name + '\\b')).test(target.className))
-			return (target);
-		target = target.parentNode;
-	}
-}
-
-// Returns the name of the object
+// Returns the name of the object.
 function getObjectName(object)
 { 
     var funcNameRegex = /function (.{1,})\(/;
@@ -351,7 +219,7 @@ function getObjectName(object)
     return (results && results.length > 1) ? results[1] : "";
 }
 
-// Removes the texts nodes of a node (nodes without a tagName)
+// Removes the texts nodes of a node (nodes without a tagName).
 function removeTextNodes(node)
 {
     var child = node.firstChild;
@@ -366,13 +234,6 @@ function removeTextNodes(node)
     }
     return (node);
 }
-    
-// Allows to get a unique id across the current session.
-// Increments the value each time an id is needed.
-function getUid()
-{
-    return (gl_uid++);
-}
 
 // Generates a universally unique identifier.
 function getUuid()
@@ -382,24 +243,6 @@ function getUuid()
        return (((1 + Math.random()) * 0x10000)|0).toString(16).substring(1);
     };
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4()+"-" + S4() + S4() + S4());
-}
-
-// Returns the number of a button in a cross browser way.
-// 0 is the left button
-// 1 is the middle button
-// 2 is the right button
-function getButton(event)
-{
-    // IE
-    if (/MSIE /.test(navigator.userAgent))
-    {
-        if (event.button == 1)
-            return (0);
-        else if (event.button == 4)
-            return (1);
-    }
-    // Other
-    return (event.button);
 }
 
 // Same as parseInt, except that NaN is replaced by 0.
@@ -447,7 +290,7 @@ function randomString(size)
     return (text);
 }
 
-// Converts the size to a string like 5,42 Mb
+// Converts the size to a string like 5,42 Mb.
 function sizeToString(size)
 {
     size = new String(size);
@@ -467,7 +310,7 @@ function sizeToString(size)
     return (n + " " + unit);
 }
 
-// Translates the text in the correct language
+// Translates the text in the correct language.
 function tr(text)
 {
     if (text)

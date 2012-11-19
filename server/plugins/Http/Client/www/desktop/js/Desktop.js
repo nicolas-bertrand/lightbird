@@ -71,9 +71,10 @@ function Desktop(task)
     
     // Opens a task in a new page.
     // @param resource : The name of the resource that will be loaded in the task.
-    self.openPage = function (resource, event)
+    // @param parameter : An optional parameter for the resource.
+    self.openPage = function (resource, parameter, event)
     {
-        if ($.Event(event).originalEvent.which != 1)
+        if (event && $.Event(event).originalEvent.which != 1)
             return ;
         // Loads the task from the resources
         gl_resources.load(resource, function (html)
@@ -82,7 +83,7 @@ function Desktop(task)
             var page = new Page();
             var task = new Task(resource, html);
             page.addTask(task);
-            gl_resources.callJs(resource, task);
+            gl_resources.callJs(resource, task, parameter);
             page.display();
             // Ensures that the tasks list is displayed
             $(self.node.tasks_list.container).addClass("display");
@@ -573,7 +574,7 @@ function Page()
                 self.renderTree(node.first, left, top, Math.max(first, 0), height);
                 self.renderTree(node.second, l, top, Math.max(second, 0), height);
                 // Positions the vertical resize bar
-                setClassName(node.resize, "vertical");
+                $(node.resize).addClass("vertical");
                 node.resize.style.left = Math.max(l - taskMargin, left) + taskBorder + "px";
                 node.resize.style.top = top + "px";
                 node.resize.style.width = Math.min(taskMargin, width) - taskBorder + "px";
@@ -601,7 +602,7 @@ function Page()
                 self.renderTree(node.first, left, top, width, Math.max(first, 0));
                 self.renderTree(node.second, left, t, width, Math.max(second, 0));
                 // Positions the horizontal resize bar
-                setClassName(node.resize, "horizontal");
+                $(node.resize).addClass("horizontal");
                 node.resize.style.left = left + "px";
                 node.resize.style.top = Math.max(t - taskMargin, top) + taskBorder + "px";
                 node.resize.style.width = width + taskBorder + "px";
@@ -667,6 +668,8 @@ function Task(resource, html)
         self.ghost; // A div that shows the future position of the task while it is dragged
         self.page; // The position of the task's page in tha tasks list
         self.node; // The node of the task in the tree
+        self.lastBackgroundSet; // The last task background set using setBackground()
+        self.overflow = true; // If the overflow of the content is disabled
         // Keeps various data in a cache so that we dont have to calculate them each time the cursor moves
         // {position, limit, numberPage, number_task, page, task, createPage}
         self.taskCache;
@@ -1179,12 +1182,6 @@ function Task(resource, html)
         self.content.style.zIndex = zIndex;
     }
     
-    // Sets the instance of the resource that manages the content.
-    self.setResource = function (resource)
-    {
-        self.resource = resource;
-    }
-
     // Returns the page of the task.
     self.getPage = function () { return (self.icon.parentNode.object); }
     
@@ -1194,6 +1191,62 @@ function Task(resource, html)
         return (self.taskCache && self.taskCache.createPage);
     }
 
+// Resource interface
+// These methods are called by the resource in order to interact with the task.
+    
+    // Sets the instance of the resource that manages the content.
+    // Allows the task to call the methods onResize and close of the resource.
+    self.setResource = function (resource)
+    {
+        self.resource = resource;
+    }
+    
+    // Sets the background of the task.
+    // @param transparent : If true the background and the border will be transparent.
+    // @param background : The css class that will be applied to the task in order to modify its background and its border.
+    self.setBackground = function (transparent, background)
+    {
+        // Remove the previous background
+        if (self.lastBackgroundSet)
+        {
+            $(self.content).removeClass(self.lastBackgroundSet);
+            delete self.lastBackgroundSet;
+        }
+        // Transparent background
+        if (transparent)
+            $(self.content).addClass("transparent_background");
+        // Custom background
+        else
+        {
+            $(self.content).removeClass("transparent_background");
+            if (background)
+            {
+                self.lastBackgroundSet = background;
+                $(self.content).addClass(background);
+            }
+        }
+    }
+    
+    // Allows the resources to disable the overflow of the content.
+    // @param overflow : True if the overflow is enabled.
+    self.setOverflow = function (overflow)
+    {
+        if (overflow != self.overflow)
+        {
+            self.overflow = overflow;
+            if (!overflow)
+                $(self.content).addClass("disable_overflow");
+            else
+                $(self.content).removeClass("disable_overflow");
+        }
+    }
+    
+    // Returns true if the page have the focus.
+    self.isFocus = function ()
+    {
+        return ($(self.content).hasClass("focus"));
+    }
+    
     self.init();
     return (self);
 }
@@ -1255,9 +1308,8 @@ function TaskTreeNode(node)
     self.mouseMove = function (e)
     {
         var taskMargin = C.Desktop.taskMargin + C.Desktop.taskBorder * 2;
-        var m = mouseCoordinates(e);
-        var x = m.x;
-        var y = m.y;
+        var x = e.pageX;
+        var y = e.pageY;
 
         // Resizes horizontally
         if (self.h >= 0)

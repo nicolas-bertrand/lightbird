@@ -1,4 +1,4 @@
-﻿function Uploads(task)
+﻿function ResourceUploads(task)
 {
     var self = this;
     
@@ -536,5 +536,5 @@ function UploadsSession(uploads)
     return (self);
 }
 
-function initialize_uploads(task) { return new Uploads(task); }
+function initialize_resource_uploads(task) { return new ResourceUploads(task); }
 gl_resources.jsLoaded("uploads");

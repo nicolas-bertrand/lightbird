@@ -70,10 +70,10 @@ Resources.prototype.loaded = function (resource)
 	this[resource].queue.splice(0, this[resource].queue.length);
 }
 
-Resources.prototype.callJs = function(resource, parameter)
+Resources.prototype.callJs = function(resource, task, parameter)
 {
 	if (this[resource] != undefined && this[resource].callback != undefined)
-		window[this[resource].callback](parameter);
+		window[this[resource].callback](task, parameter);
 }
 
 // Load a javascript or a css file.
@@ -109,7 +109,7 @@ Resources.prototype.initialize = function(resource)
 	this[resource].html = "resources/" + resource + ".html";
 	this[resource].css = "resources/" + resource + ".css";
 	this[resource].js = "resources/" + resource + ".js";
-	this[resource].callback = "initialize_" + resource;
+	this[resource].callback = "initialize_resource_" + resource;
 	this[resource].loaded = false;
 	this[resource].jsLoaded = false;
 	this[resource].loading = false;

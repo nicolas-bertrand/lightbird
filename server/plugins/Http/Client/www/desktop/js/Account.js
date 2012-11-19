@@ -5,6 +5,7 @@ var gl_account;
 function Account()
 {
     var self = this;
+    gl_account = self;
     
     self.init = function ()
     {
@@ -57,14 +58,14 @@ function Account()
                 if (HttpRequest.status == 200)
                 {
                     self.identified = true;
-                    animation(document.getElementById("desktop"), 250, animationOpacity, true);
-                    animation(self.background, 250, animationOpacity, true);
+                    animation(document.getElementById("desktop"), 0, animationOpacity, true);
+                    animation(self.background, 0, animationOpacity, true);
                 }
                 // Displays the identification panel
                 else
                 {
-                    animation(identification, 1000, animationOpacity, true, null, 250);
-                    animation(self.background, 250, animationOpacity, false);
+                    animation(identification, 0, animationOpacity, true, null, 0);
+                    animation(self.background, 0, animationOpacity, false);
                 }
             }
             // Tries to identify the user
@@ -73,11 +74,11 @@ function Account()
         // Displays the identification panel if the user is not connected
         else
         {
-            animation(identification, 1000, animationOpacity, true, null, 250);
-            animation(self.background, 250, animationOpacity, false);
+            animation(identification, 0, animationOpacity, true, null, 0);
+            animation(self.background, 0, animationOpacity, false);
             // Displays the background the first time the page is loaded
             if (!gl_loaded)
-                animation(self.idenfificationBackground, 500, animationOpacity, true, null, 0, 10);
+                animation(self.idenfificationBackground, 0, animationOpacity, true, null, 0, 10);
         }
     }
 
@@ -168,7 +169,7 @@ function Account()
         }
 
         // Gets the salt from the account name, that will allow us to generate the identifiant
-        var salt = getUuid(32);
+        var salt = getUuid();
         animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);});
     }
 
@@ -218,8 +219,8 @@ function Account()
         for (id in gl_windows)
             closeWindow(id);
         // Hides the desktop and the background
-        animation(document.getElementById("desktop"), 1000, animationOpacity, false, function() {self.disconnecting = false; self.checkIdentification();});
-        animation(self.background, 250, animationOpacity, false, null, 250);
+        animation(document.getElementById("desktop"), 0, animationOpacity, false, function() {self.disconnecting = false; self.checkIdentification();});
+        animation(self.background, 0, animationOpacity, false, null, 0);
         // Displays the identification background
         self.idenfificationBackground.style.display = "block";
         // Tells the server that the client want to disconnect

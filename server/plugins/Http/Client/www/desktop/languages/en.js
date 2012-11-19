@@ -25,6 +25,7 @@ var Translation =
     {
         files : "Files",
         uploads : "Uploads",
+        view : "View",
     },
     Files :
     {

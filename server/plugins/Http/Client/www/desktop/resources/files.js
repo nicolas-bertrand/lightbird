@@ -1,4 +1,4 @@
-function Files(task)
+function ResourceFiles(task)
 {
     var resource = this;
     
@@ -12,30 +12,13 @@ function Files(task)
         resource.node.list = $(resource.node.element).children(".list")[0];
         
         // Members
-        resource.files = new Array(); // The list of the files on the server
         resource.icons = new Icons(); // Generates the SVG icons
         resource.layout = new Layout(); // Manages the layout of the columns
         resource.header = new Header(); // The header of the files list
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
         
-        // Download the files list
-        resource.getFiles();
         // Sets the resource instance to the task, so that it can call close and onResize
         task.setResource(resource);
-    }
-    
-    // Gets the list of the files from the server, and gives it to the container which will display them.
-    resource.getFiles = function ()
-    {
-        // Gets the files
-        request("GET", "Execute/FilesGet", function (HttpRequest)
-        {
-            if (HttpRequest.status == 200)
-            {
-                resource.files = jsonParse(HttpRequest.responseText);
-                resource.container.initialize();
-            }
-        });
     }
     
     // The task have been resized.
@@ -188,21 +171,18 @@ function List()
         
         // Events
         $(self.table).mousedown(function (e) { self.mouseDown(e); });
+        $(self.table).dblclick(function (e) { self.dblClick(e); });
         
         self.updateColumns();
-    }
-    
-    // Initializes the files list.
-    self.initialize = function ()
-    {
+        
         // Hides the scroll if all the files can be seen at the same time
-        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+        if (self.listHeight / C.Files.listRowHeight >= gl_files.list.length)
             $(self.list).removeClass("scroll");
         else
             $(self.list).addClass("scroll");
         self.list.scrollTop = 0;
 		// Displays the files
-        for (var i = 0; i < resource.files.length; i++)
+        for (var i = 0; i < gl_files.list.length; i++)
             self.addRow(i, i);
         self.addEmptyRows();
     }
@@ -257,7 +237,7 @@ function List()
         self.listHeight = height - C.Files.controlsHeight - C.Files.headerHeight - 2; // -2 is the border of the header
         self.list.style.height = self.listHeight + "px";
         // Hides the scroll when all the files can be seen at the same time
-        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+        if (self.listHeight / C.Files.listRowHeight >= gl_files.list.length)
         {
             $(self.list).removeClass("scroll");
             self.list.scrollTop = 0;
@@ -273,7 +253,7 @@ function List()
     // @param absolute : The absolute position of the row in the list, which includes the rows that are not visible.
     self.addRow = function (relative, absolute)
     {
-        var isFile = absolute < resource.files.length;
+        var isFile = absolute < gl_files.list.length;
         
         // Creates the row
         var row = self.table.insertRow(relative);
@@ -281,12 +261,12 @@ function List()
         // The first cell is the type of the file
         if (isFile)
         {
-            var type = resource.files[absolute].type;
+            var type = gl_files.list[absolute].type;
             var firstCell = 0;
             if (!row.previousSibling || !$(row.previousSibling).hasClass(type))
             {
                 var cell = $(row.insertCell(-1)).addClass("type")[0];
-                for (var i = absolute; i < resource.files.length && resource.files[i].type == type; ++i)
+                for (var i = absolute; i < gl_files.list.length && gl_files.list[i].type == type; ++i)
                     ;
                 cell.rowSpan = i - absolute;
                 firstCell = 1;
@@ -304,13 +284,14 @@ function List()
         // If the row represents a file we fill its cells
         if (isFile)
         {
-            $(row).addClass(resource.files[absolute].type);
+            row.fileIndex = absolute;
+            $(row).addClass(gl_files.list[absolute].type);
             $(row.cells[firstCell]).addClass("first");
             for (var i = 0; i < columns.length; ++i)
             {
                 var cell = row.cells[i + firstCell];
                 cell.name = columns[i].originalName;
-                cell.originalText = resource.layout.convert(columns[i].originalName, resource.files[absolute][columns[i].originalName]);
+                cell.originalText = resource.layout.convert(columns[i].originalName, gl_files.list[absolute][columns[i].originalName]);
                 cell.innerHTML = cell.originalText;
                 if (columns[i].align != "left")
                     cell.align = columns[i].align;
@@ -441,20 +422,42 @@ function List()
         self.lastFileSelected = file;
     }
     
+    // Opens the file.
+    self.dblClick = function (e)
+    {
+        if (e.which != 1 || e.ctrlKey || e.shiftKey)
+            return ;
+        // Gets the file selected by the user
+        var file = e.target;
+        for (var i = 0; i < 3 && file.tagName.toLowerCase() != "tr"; ++i, file = file.parentNode)
+            ;
+        // If the event is directly on the table we use an other way to get the selected file
+        if (e.target == self.table)
+        {
+            var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.Files.listRowHeight));
+            if (n < self.table.rows.length)
+                file = self.table.rows[n];
+            else
+                return ;
+        }
+        // Opens a new page with the file.
+        gl_desktop.openPage("view", file.fileIndex);
+    }
+    
     // Ensures that the list is allways filled with rows.
     self.addEmptyRows = function ()
     {
         var totalRows = self.listHeight / C.Files.listRowHeight;
         
         // Adds empty rows
-        if (totalRows > resource.files.length)
+        if (totalRows > gl_files.list.length)
         {
             for (var i = self.table.rows.length; self.table.rows.length < totalRows; i++)
                 self.addRow(-1, i);
         }
         // Remove all the empty rows
         else
-            while (self.table.rows.length > resource.files.length)
+            while (self.table.rows.length > gl_files.list.length)
                 self.table.deleteRow(-1);
     }
     
@@ -749,5 +752,5 @@ function Icons()
     return (resource);
 }
 
-function initialize_files(task) { return new Files(task); }
+function initialize_resource_files(task) { return new ResourceFiles(task); }
 gl_resources.jsLoaded("files");

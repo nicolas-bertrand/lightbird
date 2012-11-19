@@ -63,6 +63,10 @@ var Configuration =
         headerDefaultWidth : 200, // The default width of the coulmns of the header.
         listRowHeight : 30, // The height of the rows of the files list.
 	},
+	View :
+	{
+        imageMinHeight : 15, // The minimal height of the image.
+	},
 };
 var C = Configuration;
 var DOMWindow = window;

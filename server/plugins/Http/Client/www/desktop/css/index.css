@@ -37,6 +37,21 @@ a:visited
 }
 
 /*////////////////////////////////////////////////////////////////////////////
+//                                   FONTS                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+/*@font-face {
+	font-family: "family";
+	src: url('/Client/fonts/font.eot?'); /* IE9 * /
+ 	src: url('/Client/fonts/font.eot?') format('eot'), /* IE6-8 * /
+ 	     url('/Client/fonts/font.woff') format('woff'), /* Modern browsers * /
+	     url('/Client/fonts/font.ttf') format('truetype'), /* Older Webkits * /
+	     url('/Client/fonts/font.svg#webfont') format('svg'); /* Opera * /
+	font-weight: normal;
+	font-style: normal;
+}*/
+
+/*////////////////////////////////////////////////////////////////////////////
 //                                BACKGROUND                                //
 ////////////////////////////////////////////////////////////////////////////*/
 
@@ -512,7 +527,6 @@ a:visited
 {
     border: 1px solid rgba(139, 161, 190, 0.5);
     background-clip: padding-box;
-
 }
 
 #desktop>.middle>.tasks>.task.display
@@ -538,9 +552,24 @@ a:visited
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.hide_border
+#desktop>.middle>.tasks>.task.transparent_background,
+#desktop>.middle>.tasks>.task.transparent_background.over
+{
+    background-color: inherit;
+    border: 1px solid rgba(255, 255, 255, 0);
+    box-shadow: none;
+}
+
+#desktop>.middle>.tasks>.task.disable_overflow
+{
+    overflow: visible;
+}
+
+#desktop>.middle>.tasks>.task.hide_border,
+#desktop>.middle>.tasks>.task.over.hide_border
 {
     border: none;
+    box-shadow: none;
 }
 
 /* Resize_layer */
