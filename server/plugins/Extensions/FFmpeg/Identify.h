@@ -22,6 +22,8 @@ private:
     void        _addMetadata(AVDictionary *metadata, QVariantMap &map);
     /// @brief Returns the string that corresponds to the error code.
     QByteArray  _errorToString(int code);
+    /// @brief Returns true if the video stream is an image.
+    bool        _isImage(AVStream *videoStream);
 
     LightBird::IApi *api; ///< The LightBird API.
 };

@@ -74,7 +74,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
             data.insert("sample format", av_get_sample_fmt_name(audio->sample_fmt));
         }
         // Identify the video stream
-        if (videoStream)
+        if (videoStream && !this->_isImage(videoStream))
         {
             information.type = LightBird::IIdentify::VIDEO;
             data.insert("video codec", video->codec->name);
@@ -148,4 +148,9 @@ QByteArray  Identify::_errorToString(int errnum)
 
     av_strerror(errnum, error.data(), error.size());
     return (error);
+}
+
+bool    Identify::_isImage(AVStream *videoStream)
+{
+    return (av_q2d(videoStream->r_frame_rate) >= 90000);
 }
