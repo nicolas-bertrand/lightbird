@@ -72,6 +72,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
                 data.insert("audio frames", audioStream->nb_frames);
             data.insert("audio time base", QString("%1/%2").arg(QString::number(audioStream->time_base.num), QString::number(audioStream->time_base.den)));
             data.insert("sample format", av_get_sample_fmt_name(audio->sample_fmt));
+            this->_addMetadata(audioStream->metadata, data);
         }
         // Identify the video stream
         if (videoStream && !this->_isImage(videoStream))
@@ -96,6 +97,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
                 av_reduce(&dar.num, &dar.den, video->width * sar.num, video->height * sar.den, 1024 * 1024);
                 data.insert("aspect ratio", QString("%1/%2").arg(QString::number(dar.num), QString::number(dar.den)));
             }
+            this->_addMetadata(videoStream->metadata, data);
         }
     }
     catch (bool exception)
