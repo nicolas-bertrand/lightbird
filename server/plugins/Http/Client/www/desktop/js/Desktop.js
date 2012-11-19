@@ -1017,10 +1017,20 @@ function Task(resource, html)
                 // The icon is moved in the same page
                 else if (!preview.page && preview.task.getPage() == self.getPage())
                 {
+                    $(self.icon).insertBefore(self.ghost);
                     var page = self.getPage();
                     page.removeNode(self.node);
                     page.addNode(self, preview.position, preview.task);
                     page.onResize();
+                }
+                // The task is moved on the edge of the page
+                else if (preview.page && preview.page == self.getPage())
+                {
+                    self.getPage().removeTask(self, true);
+                    preview.page.addTask(self, preview.position);
+                    $(self.icon).insertBefore(self.ghost);
+                    $(self.content).addClass("focus");
+                    preview.page.onResize();
                 }
                 // The task is moved on the edge of another page
                 else if (preview.page)
