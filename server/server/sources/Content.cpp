@@ -111,6 +111,8 @@ void    Content::setContent(const QByteArray &content, bool append)
 {
     int wrote;
 
+    if (!append)
+        this->seek = 0;
     if (this->storage == LightBird::IContent::BYTEARRAY)
     {
         if (append)

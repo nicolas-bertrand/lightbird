@@ -34,7 +34,6 @@ private:
     /// @brief Send an error to the client.
     bool    _error(int code, const QString &message, const QByteArray &content = "");
 
-    quint64 contentLength;  ///< The length of the content of the request.
     quint64 contentStored;  ///< The size of the content already stored.
 };
 

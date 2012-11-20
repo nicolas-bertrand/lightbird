@@ -27,11 +27,15 @@ public:
     virtual bool    doSerializeContent(QByteArray &data) = 0;
 
 protected:
+    bool    doSerializeContent(LightBird::IContent &content, QByteArray &data);
+
     LightBird::IClient   &client;
     LightBird::IRequest  &request;
     LightBird::IResponse &response;
     QByteArray           header;
-    quint64              contentSent;
+    quint64              contentLength; ///< The length of the content of the request.
+    quint64              chunkEncoding; ///< The data are send in chunks. Used when the content is dynamically generating.
+    quint64              contentSent;   ///< The number of bytes of content sent so far.
 };
 
 #endif // PARSER_H

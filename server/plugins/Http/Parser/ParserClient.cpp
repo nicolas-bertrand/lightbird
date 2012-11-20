@@ -28,8 +28,11 @@ void            ParserClient::doSerializeHeader(QByteArray &data)
     if ((version = this->request.getVersion().toAscii()).isEmpty())
         version = "HTTP/1.1";
     data.append(method + " " + uri + " " + version + END_OF_LINE);
+    // There is no content-length in chunk transfer encoding
+    if ((this->chunkEncoding = (this->response.getHeader().value("transfer-encoding") == "chunked")))
+        this->request.getHeader().remove("content-length");
     // If the content length is not defined, we fill it
-    if (!this->request.getHeader().contains("content-length"))
+    else if (!this->request.getHeader().contains("content-length"))
         this->request.getHeader().insert("content-length", QString::number(this->request.getContent().size()));
     // Adds the type
     if (!(type = this->request.getType().toAscii()).isEmpty())
@@ -47,24 +50,7 @@ void            ParserClient::doSerializeHeader(QByteArray &data)
 
 bool        ParserClient::doSerializeContent(QByteArray &data)
 {
-    // If there is a content to send
-    if (this->contentLength && this->contentLength > this->contentSent)
-    {
-        // Get the data
-        if (this->contentLength < Plugin::getConfiguration().maxPacketSize)
-            data = this->request.getContent().getContent(this->contentLength);
-        else
-            data = this->request.getContent().getContent(Plugin::getConfiguration().maxPacketSize);
-        // If there is not enough data, they are padded
-        if (data.isEmpty())
-            data.append(QByteArray(((this->contentLength - this->contentSent) < Plugin::getConfiguration().maxPacketSize) ?
-                                   (this->contentLength - this->contentSent) : Plugin::getConfiguration().maxPacketSize, 0));
-        this->contentSent += data.size();
-        // More data have to be sent
-        if (this->contentSent < this->contentLength)
-            return (false);
-    }
-    return (true);
+    return (Parser::doSerializeContent(this->request.getContent(), data));
 }
 
 bool    ParserClient::doDeserializeHeader(const QByteArray &data, quint64 &used)

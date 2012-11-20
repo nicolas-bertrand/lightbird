@@ -127,8 +127,11 @@ void            ParserServer::doSerializeHeader(QByteArray &data)
     if (!this->response.getMessage().isEmpty())
         message = this->response.getMessage().toAscii();
     data.append(version + " " + code + " " + message + END_OF_LINE);
+    // There is no content-length in chunk transfer encoding
+    if ((this->chunkEncoding = (this->response.getHeader().value("transfer-encoding") == "chunked")))
+        this->response.getHeader().remove("content-length");
     // If the content length is not defined, we fill it
-    if (!this->response.getHeader().contains("content-length"))
+    else if (!this->response.getHeader().contains("content-length"))
         this->response.getHeader().insert("content-length", QString::number(this->response.getContent().size()));
     // Adds the type
     if (!(type = this->response.getType()).isEmpty())
@@ -146,24 +149,7 @@ void            ParserServer::doSerializeHeader(QByteArray &data)
 
 bool        ParserServer::doSerializeContent(QByteArray &data)
 {
-    // If there is a content to send
-    if (this->contentLength && this->contentLength > this->contentSent)
-    {
-        // Get the data
-        if (this->contentLength < Plugin::getConfiguration().maxPacketSize)
-            data = this->response.getContent().getContent(this->contentLength);
-        else
-            data = this->response.getContent().getContent(Plugin::getConfiguration().maxPacketSize);
-        // If there is not enough data, they are padded
-        if (data.isEmpty())
-            data.append(QByteArray(((this->contentLength - this->contentSent) < Plugin::getConfiguration().maxPacketSize) ?
-                                   (this->contentLength - this->contentSent) : Plugin::getConfiguration().maxPacketSize, 0));
-        this->contentSent += data.size();
-        // More data have to be sent
-        if (this->contentSent < this->contentLength)
-            return (false);
-    }
-    return (true);
+    return (Parser::doSerializeContent(this->response.getContent(), data));
 }
 
 bool            ParserServer::_checkHeaderCharacters()
