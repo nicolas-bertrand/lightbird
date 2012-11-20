@@ -140,12 +140,6 @@ void    Plugin::onDestroy(LightBird::IClient &client)
     QTime            timeout;
     int              result;
 
-    this->mutex.lockForWrite();
-    QMutableHashIterator<int, LightBird::IClient *> it(this->clients);
-    while (it.hasNext())
-        if (it.next().value() == &client)
-            it.remove();
-    this->mutex.unlock();
     if (client.getInformations().contains("gnutls_session"))
     {
         session = client.getInformations().value("gnutls_session").value<gnutls_session_t>();
@@ -162,6 +156,12 @@ void    Plugin::onDestroy(LightBird::IClient &client)
         }
         gnutls_deinit(session);
     }
+    this->mutex.lockForWrite();
+    QMutableHashIterator<int, LightBird::IClient *> it(this->clients);
+    while (it.hasNext())
+        if (it.next().value() == &client)
+            it.remove();
+    this->mutex.unlock();
 }
 
 bool    Plugin::doRead(LightBird::IClient &client, QByteArray &data)
