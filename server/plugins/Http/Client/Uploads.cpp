@@ -213,12 +213,12 @@ void        Uploads::progress(LightBird::IClient &client)
     client.getResponse().setType("application/json");
     this->mutex.lock();
     if (this->uploads.contains(id) && this->uploads[id].idAccount == client.getAccount().getId())
-        client.getResponse().getContent().setContent("{\"size\":" + QByteArray::number(this->uploads[id].size) +
-                                                     ",\"progress\":" + QByteArray::number(this->uploads[id].progress) +
-                                                     ",\"complete\":" + QVariant(this->uploads[id].complete).toString().toAscii() + "}");
+        client.getResponse().getContent().setData("{\"size\":" + QByteArray::number(this->uploads[id].size) +
+                                                  ",\"progress\":" + QByteArray::number(this->uploads[id].progress) +
+                                                  ",\"complete\":" + QVariant(this->uploads[id].complete).toString().toAscii() + "}");
     // The upload request is not yet arrived.
     else
-        client.getResponse().getContent().setContent("{\"complete\":false}");
+        client.getResponse().getContent().setData("{\"complete\":false}");
     this->mutex.unlock();
 }
 

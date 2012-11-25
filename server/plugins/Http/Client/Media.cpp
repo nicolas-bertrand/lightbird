@@ -48,6 +48,6 @@ void    Media::_error(int code, const QString &message, const QByteArray &conten
     this->response.setCode(code);
     this->response.setMessage(message);
     if (!content.isEmpty())
-        this->response.getContent().setContent(content);
+        this->response.getContent().setData(content);
     this->error = true;
 }

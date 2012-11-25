@@ -103,13 +103,13 @@ bool        ParserClient::doDeserializeContent(const QByteArray &data, quint64 &
         // All the data are used
         if ((quint64)data.size() <= rest)
         {
-            this->response.getContent().setContent(data);
+            this->response.getContent().setData(data);
             used = data.size();
         }
         // Only a part of the data are used
         else
         {
-            this->response.getContent().setContent(data.left(rest));
+            this->response.getContent().setData(data.left(rest));
             used = rest;
         }
         // All the content has been reveived

@@ -59,7 +59,7 @@ void    Preview::_error(const QString &method, int code, const QString &message,
     this->response.setCode(code);
     this->response.setMessage(message);
     if (!content.isEmpty())
-        this->response.getContent().setContent(content);
+        this->response.getContent().setData(content);
     if (!log.isEmpty())
         Plugin::api().log().write(level, log, this->properties, "Preview", method);
 }

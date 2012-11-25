@@ -496,7 +496,7 @@ Commands::Result Commands::_list(const QString &path, LightBird::Session &sessio
     QStringList         result;
 
     Plugin::sendControlMessage(controlId, Result(150, "Here comes the directory listing."));
-    content.setContent((result = this->_getList(path, session)).join("").toUtf8());
+    content.setData((result = this->_getList(path, session)).join("").toUtf8());
     client.getInformations().insert(DATA_CODE, 226);
     client.getInformations().insert(DATA_MESSAGE, QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(result.size())));
     return (Result());
@@ -614,7 +614,7 @@ Commands::Result Commands::_nlst(const QString &path, LightBird::Session &sessio
         result = list.join("\r\n").append("\r\n");
     if (list.isEmpty())
         result.clear();
-    client.getResponse().getContent().setContent(result.toUtf8());
+    client.getResponse().getContent().setData(result.toUtf8());
     client.getInformations().insert(DATA_CODE, 226);
     client.getInformations().insert(DATA_MESSAGE, QString("Directory sent.\r\n%1 objects\r\n").arg(QString::number(list.size())));
     return (Result());

@@ -90,13 +90,13 @@ bool        ParserServer::doDeserializeContent(const QByteArray &data, quint64 &
         // All the data are used
         if ((quint64)data.size() <= rest)
         {
-            this->request.getContent().setContent(data);
+            this->request.getContent().setData(data);
             used = data.size();
         }
         // Only a part of the data are used
         else
         {
-            this->request.getContent().setContent(data.left(rest));
+            this->request.getContent().setData(data.left(rest));
             used = rest;
         }
         this->contentStored += used;
@@ -280,6 +280,6 @@ bool    ParserServer::_error(int code, const QString &message, const QByteArray 
     this->response.setCode(code);
     this->response.setMessage(message);
     if (!content.isEmpty())
-        this->response.getContent().setContent(content, false);
+        this->response.getContent().setData(content, false);
     return (false);
 }

@@ -14,7 +14,7 @@ bool    ParserData::doDeserializeContent(const QByteArray &data, quint64 &)
 {
     // Upload in progress (otherwise the data received are just discarded)
     if (this->client.getInformations().contains(DATA_UPLOAD))
-        this->client.getRequest().getContent().setContent(data);
+        this->client.getRequest().getContent().setData(data);
     return (false);
 }
 
@@ -25,10 +25,10 @@ bool    ParserData::doSerializeContent(QByteArray &data)
     bool    result = true;
 
     if (content.size() < maxPacketSize)
-        data = content.getContent();
+        data = content.getData();
     else
     {
-        data = content.getContent(maxPacketSize);
+        data = content.getData(maxPacketSize);
         result = (content.getSeek() >= content.size());
     }
     if (result)

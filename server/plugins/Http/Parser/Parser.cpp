@@ -25,9 +25,9 @@ bool    Parser::doSerializeContent(LightBird::IContent &content, QByteArray &dat
     {
         // Get the data
         if (this->contentLength < Plugin::getConfiguration().maxPacketSize)
-            data = content.getContent(this->contentLength);
+            data = content.getData(this->contentLength);
         else
-            data = content.getContent(Plugin::getConfiguration().maxPacketSize);
+            data = content.getData(Plugin::getConfiguration().maxPacketSize);
         // If there is not enough data, they are padded
         if (data.isEmpty())
             data.append(QByteArray(((this->contentLength - this->contentSent) < Plugin::getConfiguration().maxPacketSize) ?
@@ -45,7 +45,7 @@ bool    Parser::doSerializeContent(LightBird::IContent &content, QByteArray &dat
         if (size)
         {
             data = QString::number(size, 16).toAscii() + END_OF_LINE;
-            data += content.getContent(size) + END_OF_LINE;
+            data += content.getData(size) + END_OF_LINE;
             return (false);
         }
         // The last chunk

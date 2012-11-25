@@ -108,13 +108,13 @@ void    Commands::_identify(LightBird::IClient &client, const QString &)
             session->setInformation("identifiant", LightBird::sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + session->getId().toAscii()));
             Plugin::addCookie(client, "sid", session->getId());
             // Return the id of the account, which is the salt of the password
-            client.getResponse().getContent().setContent(id.toAscii());
+            client.getResponse().getContent().setData(id.toAscii());
         }
         // Otherwise we return a fake salt and sid (the user shouldn't know that the name doesn't exists).
         else
         {
             Plugin::addCookie(client, "sid", LightBird::createUuid());
-            client.getResponse().getContent().setContent(LightBird::createUuid().toAscii());
+            client.getResponse().getContent().setData(LightBird::createUuid().toAscii());
             Plugin::instance().identificationFailed(client);
         }
     }

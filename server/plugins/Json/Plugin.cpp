@@ -58,7 +58,7 @@ void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserial
         (content.getStorage() == LightBird::IContent::BYTEARRAY || content.getStorage() == LightBird::IContent::TEMPORARYFILE))
     {
         QJson::Parser parser;
-        QVariant deserialized = parser.parse(content.getContent(), &ok);
+        QVariant deserialized = parser.parse(content.getData(), &ok);
         content.setStorage(LightBird::IContent::VARIANT);
         *content.getVariant() = deserialized;
         if (!ok)
@@ -66,8 +66,8 @@ void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserial
             client.getRequest().setError();
             client.getResponse().setCode(400);
             client.getResponse().setMessage("Bad Request");
-            client.getResponse().getContent().setContent(QString("Parse error in the JSon in the content of the request: \"" + parser.errorString() + \
-                                                         "\", line: " + QString::number(parser.errorLine()) + ".").toAscii());
+            client.getResponse().getContent().setData(QString("Parse error in the JSon in the content of the request: \"" + parser.errorString() + \
+                                                      "\", line: " + QString::number(parser.errorLine()) + ".").toAscii());
         }
     }
 #endif // !QJSON
@@ -84,7 +84,7 @@ bool    Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize:
         QJson::Serializer serializer;
         const QByteArray &serialized = serializer.serialize(*content.getVariant());
         content.setStorage(LightBird::IContent::BYTEARRAY);
-        content.setContent(serialized);
+        content.setData(serialized);
 #else // !QJSON
         const QByteArray &serialized = this->_serializer(*content.getVariant());
         content.setStorage(LightBird::IContent::BYTEARRAY);

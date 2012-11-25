@@ -59,5 +59,5 @@ void    Audio::read()
     /*if (!this->audio->waitForRead())
         return ;
     data = this->audio->read(MAX_READ);*/
-    this->response.getContent().setContent(data);
+    this->response.getContent().setData(data);
 }

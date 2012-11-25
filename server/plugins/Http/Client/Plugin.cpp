@@ -335,7 +335,7 @@ void    Plugin::response(LightBird::IClient &client, int code, const QString &me
     client.getResponse().setCode(code);
     client.getResponse().setMessage(message);
     if (!content.isEmpty())
-        client.getResponse().getContent().setContent(content, false);
+        client.getResponse().getContent().setData(content, false);
 }
 
 QString     Plugin::getCookie(LightBird::IClient &client, const QString &n)

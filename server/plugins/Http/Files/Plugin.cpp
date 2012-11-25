@@ -143,7 +143,7 @@ bool    Plugin::doExecution(LightBird::IClient &client)
     {
         html = this->content.arg(title, body);
         response.getHeader().insert("content-type", "text/html");
-        response.getContent().setContent(html.toAscii());
+        response.getContent().setData(html.toAscii());
     }
     return (true);
 }
