@@ -17,8 +17,8 @@ Medias::~Medias()
 
 void    Medias::start(LightBird::IClient &client, Medias::Type type)
 {
-    SmartMutex  mutex(this->mutex);
-    Media       *media = NULL;
+    Mutex   mutex(this->mutex, "Medias", "start");
+    Media   *media = NULL;
 
     if (!mutex)
         return;

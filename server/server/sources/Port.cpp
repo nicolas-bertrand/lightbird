@@ -1,7 +1,7 @@
 #include "Configurations.h"
 #include "Log.h"
 #include "Port.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols, unsigned int maxClients)
@@ -28,7 +28,7 @@ Port::~Port()
 
 Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "getClient");
+    Mutex   mutex(this->mutex, Mutex::READ, "Port", "getClient");
 
     found = false;
     if (!mutex)
@@ -46,9 +46,9 @@ Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &
     return (Future<bool>(false));
 }
 
-QStringList     Port::getClients() const
+QStringList Port::getClients() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "getClients");
+    Mutex       mutex(this->mutex, Mutex::READ, "Port", "getClients");
     QStringList result;
 
     if (!mutex)
@@ -60,9 +60,9 @@ QStringList     Port::getClients() const
     return (result);
 }
 
-bool            Port::disconnect(const QString &id)
+bool    Port::disconnect(const QString &id)
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "disconnect");
+    Mutex   mutex(this->mutex, Mutex::READ, "Port", "disconnect");
 
     if (!mutex)
         return (false);
@@ -77,11 +77,11 @@ bool            Port::disconnect(const QString &id)
     return (false);
 }
 
-bool            Port::send(const QString &id, const QString &p, const QVariantMap &informations)
+bool    Port::send(const QString &id, const QString &p, const QVariantMap &informations)
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "send");
-    Client      *client = NULL;
-    QString     protocol;
+    Mutex   mutex(this->mutex, Mutex::READ, "Port", "send");
+    Client  *client = NULL;
+    QString protocol;
 
     if (!mutex)
         return (false);
@@ -116,7 +116,7 @@ void    Port::close()
         this->quit();
 }
 
-Client      *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
+Client  *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
 {
     Client  *client;
 
@@ -180,17 +180,17 @@ unsigned int    Port::getMaxClients() const
 
 bool            Port::isListening() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Port", "isListening");
+    Mutex   mutex(this->mutex, Mutex::READ, "Port", "isListening");
 
     return (mutex && this->_isListening());
 }
 
-bool            Port::_isListening() const
+bool    Port::_isListening() const
 {
     return (this->listening && this->isRunning());
 }
 
-void            Port::_isListening(bool listening)
+void    Port::_isListening(bool listening)
 {
     this->listening = listening;
 }

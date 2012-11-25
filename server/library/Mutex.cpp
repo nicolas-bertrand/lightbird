@@ -1,60 +1,60 @@
 #include "Library.h"
 #include "LightBird.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
-SmartMutex::SmartMutex(QMutex &m, const QString &o, const QString &f, int wait) :
-                       mutex(&m), readWriteLock(NULL), isLock(false), object(o), function(f)
+Mutex::Mutex(QMutex &m, const QString &o, const QString &f, int wait) :
+             mutex(&m), readWriteLock(NULL), isLock(false), object(o), function(f)
 {
     this->lock(wait);
 }
 
-SmartMutex::SmartMutex(QMutex &m, const QString &p, const QString &o, const QString &f, int wait) :
-                       mutex(&m), readWriteLock(NULL), isLock(false), plugin(p), object(o), function(f)
+Mutex::Mutex(QMutex &m, const QString &p, const QString &o, const QString &f, int wait) :
+             mutex(&m), readWriteLock(NULL), isLock(false), plugin(p), object(o), function(f)
 {
     this->lock(wait);
 }
 
-SmartMutex::SmartMutex(QReadWriteLock &m, const QString &o, const QString &f, int wait) :
-                       mutex(NULL), readWriteLock(&m), isLock(false), object(o), function(f)
+Mutex::Mutex(QReadWriteLock &m, const QString &o, const QString &f, int wait) :
+             mutex(NULL), readWriteLock(&m), isLock(false), object(o), function(f)
 {
     this->lockForWrite(wait);
 }
 
-SmartMutex::SmartMutex(QReadWriteLock &m, const QString &p, const QString &o, const QString &f, int wait) :
-                       mutex(NULL), readWriteLock(&m), isLock(false), plugin(p), object(o), function(f)
+Mutex::Mutex(QReadWriteLock &m, const QString &p, const QString &o, const QString &f, int wait) :
+             mutex(NULL), readWriteLock(&m), isLock(false), plugin(p), object(o), function(f)
 {
     this->lockForWrite(wait);
 }
 
-SmartMutex::SmartMutex(QReadWriteLock &m, SmartMutex::ReadWriteLock lock, const QString &o, const QString &f, int wait) :
-                       mutex(NULL), readWriteLock(&m), isLock(false), object(o), function(f)
+Mutex::Mutex(QReadWriteLock &m, Mutex::ReadWriteLock lock, const QString &o, const QString &f, int wait) :
+             mutex(NULL), readWriteLock(&m), isLock(false), object(o), function(f)
 {
-    if (lock == SmartMutex::WRITE)
+    if (lock == Mutex::WRITE)
         this->lockForWrite(wait);
     else
         this->lockForRead(wait);
 }
 
-SmartMutex::SmartMutex(QReadWriteLock &m, SmartMutex::ReadWriteLock lock, const QString &p, const QString &o, const QString &f, int wait) :
-                       mutex(NULL), readWriteLock(&m), isLock(false), plugin(p), object(o), function(f)
+Mutex::Mutex(QReadWriteLock &m, Mutex::ReadWriteLock lock, const QString &p, const QString &o, const QString &f, int wait) :
+             mutex(NULL), readWriteLock(&m), isLock(false), plugin(p), object(o), function(f)
 {
-    if (lock == SmartMutex::WRITE)
+    if (lock == Mutex::WRITE)
         this->lockForWrite(wait);
     else
         this->lockForRead(wait);
 }
 
-SmartMutex::~SmartMutex()
+Mutex::~Mutex()
 {
     this->unlock();
 }
 
-SmartMutex::operator bool() const
+Mutex::operator bool() const
 {
     return (this->isLock);
 }
 
-bool    SmartMutex::lock(int wait)
+bool    Mutex::lock(int wait)
 {
     if (this->isLock)
         return (false);
@@ -68,7 +68,7 @@ bool    SmartMutex::lock(int wait)
     return (this->isLock);
 }
 
-bool    SmartMutex::lockForWrite(int wait)
+bool    Mutex::lockForWrite(int wait)
 {
     if (this->isLock)
         return (false);
@@ -82,7 +82,7 @@ bool    SmartMutex::lockForWrite(int wait)
     return (this->isLock);
 }
 
-bool    SmartMutex::lockForRead(int wait)
+bool    Mutex::lockForRead(int wait)
 {
     if (this->isLock)
         return (false);
@@ -96,7 +96,7 @@ bool    SmartMutex::lockForRead(int wait)
     return (this->isLock);
 }
 
-void    SmartMutex::unlock()
+void    Mutex::unlock()
 {
     if (this->isLock)
     {

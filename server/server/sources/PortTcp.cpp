@@ -3,7 +3,7 @@
 
 #include "Log.h"
 #include "PortTcp.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
@@ -19,7 +19,7 @@ PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int
 
 PortTcp::~PortTcp()
 {
-    SmartMutex  mutex(this->mutex, "PortTcp", "~PortTcp");
+    Mutex   mutex(this->mutex, "PortTcp", "~PortTcp");
 
     if (!mutex)
         return ;
@@ -50,7 +50,7 @@ void    PortTcp::run()
     Port::_isListening(true);
     this->threadStarted.setResult(true);
     this->exec();
-    SmartMutex mutex(this->mutex, "PortTcp", "run");
+    Mutex mutex(this->mutex, "PortTcp", "run");
     this->tcpServer.close();
     // Remove the remaining clients
     QListIterator<Client *> client(this->clients);
@@ -61,9 +61,9 @@ void    PortTcp::run()
     LOG_INFO("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
 }
 
-void            PortTcp::close()
+void    PortTcp::close()
 {
-    SmartMutex  mutex(this->mutex, "PortTcp", "close");
+    Mutex   mutex(this->mutex, "PortTcp", "close");
 
     if (!mutex)
         return ;
@@ -73,9 +73,9 @@ void            PortTcp::close()
     Port::close();
 }
 
-void            PortTcp::_newConnection()
+void    PortTcp::_newConnection()
 {
-    SmartMutex  mutex(this->mutex, "PortTcp", "_newConnection");
+    Mutex       mutex(this->mutex, "PortTcp", "_newConnection");
     QTcpSocket  *socket;
     Client      *client;
 
@@ -112,7 +112,7 @@ void    PortTcp::read(Client *client)
     emit this->readSignal(client);
 }
 
-void            PortTcp::_read(Client *client)
+void    PortTcp::_read(Client *client)
 {
     QByteArray  &data = client->getData();
     int         read;
@@ -133,9 +133,9 @@ void            PortTcp::_read(Client *client)
     client->bytesRead();
 }
 
-bool            PortTcp::write(QByteArray *data, Client *client)
+bool    PortTcp::write(QByteArray *data, Client *client)
 {
-    SmartMutex  mutex(this->mutex, "PortTcp", "write");
+    Mutex   mutex(this->mutex, "PortTcp", "write");
 
     if (!mutex)
         return (false);
@@ -148,9 +148,9 @@ bool            PortTcp::write(QByteArray *data, Client *client)
     return (true);
 }
 
-void            PortTcp::_write()
+void    PortTcp::_write()
 {
-    SmartMutex  mutex(this->mutex, "PortTcp", "_write");
+    Mutex       mutex(this->mutex, "PortTcp", "_write");
     Client      *client;
     qint64      result;
     QHash<Client *, QSharedPointer<WriteBuffer> > writeBuffer;
@@ -201,11 +201,11 @@ void            PortTcp::_write()
     this->writeBuffer.unite(writeBuffer);
 }
 
-void                PortTcp::_disconnected()
+void    PortTcp::_disconnected()
 {
-    SmartMutex      mutex(this->mutex, SmartMutex::READ, "PortTcp", "_disconnected");
+    Mutex   mutex(this->mutex, Mutex::READ, "PortTcp", "_disconnected");
+    Client  *client;
     QAbstractSocket *socket;
-    Client          *client;
 
     if (!mutex)
         return ;
@@ -221,9 +221,9 @@ void                PortTcp::_disconnected()
         }
 }
 
-Client          *PortTcp::_finished(Client *client)
+Client  *PortTcp::_finished(Client *client)
 {
-    SmartMutex  mutex(this->mutex, "PortTcp", "_finished");
+    Mutex   mutex(this->mutex, "PortTcp", "_finished");
 
     if (!mutex)
         return (NULL);

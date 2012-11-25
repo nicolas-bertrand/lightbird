@@ -9,7 +9,7 @@
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Server.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 Plugins::Plugins()
@@ -41,7 +41,7 @@ Plugins::~Plugins()
     LOG_TRACE("Plugins destroyed!", "Plugins", "~Plugins");
 }
 
-void        Plugins::run()
+void    Plugins::run()
 {
     LOG_DEBUG("Plugins thread started", "Plugins", "run");
     // Tells to the thread that started the current thread that it is running
@@ -55,45 +55,45 @@ void        Plugins::run()
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
-Future<bool>        Plugins::load(const QString &id)
+Future<bool>    Plugins::load(const QString &id)
 {
-    Future<bool>    *future = new Future<bool>(false);
-    Future<bool>    result(*future);
+    Future<bool> *future = new Future<bool>(false);
+    Future<bool> result(*future);
 
     emit this->loadSignal(id, future);
     return (result);
 }
 
-Future<bool>        Plugins::unload(const QString &id)
+Future<bool>    Plugins::unload(const QString &id)
 {
-    Future<bool>    *future = new Future<bool>(false);
-    Future<bool>    result(*future);
+    Future<bool> *future = new Future<bool>(false);
+    Future<bool> result(*future);
 
     emit this->unloadSignal(id, future);
     return (result);
 }
 
-Future<bool>        Plugins::install(const QString &id)
+Future<bool>    Plugins::install(const QString &id)
 {
-    Future<bool>    *future = new Future<bool>(false);
-    Future<bool>    result(*future);
+    Future<bool> *future = new Future<bool>(false);
+    Future<bool> result(*future);
 
     emit this->installSignal(id, future);
     return (result);
 }
 
-Future<bool>        Plugins::uninstall(const QString &id)
+Future<bool>    Plugins::uninstall(const QString &id)
 {
-    Future<bool>    *future = new Future<bool>(false);
-    Future<bool>    result(*future);
+    Future<bool> *future = new Future<bool>(false);
+    Future<bool> result(*future);
 
     emit this->uninstallSignal(id, future);
     return (result);
 }
 
-void            Plugins::shutdown()
+void    Plugins::shutdown()
 {
-    SmartMutex  mutex(this->mutex, "Plugins", "shutdown");
+    Mutex   mutex(this->mutex, "Plugins", "shutdown");
 
     if (!mutex)
         return ;
@@ -115,14 +115,14 @@ void            Plugins::shutdown()
     }
 }
 
-void                                Plugins::_load(const QString &identifier, Future<bool> *f)
+void    Plugins::_load(const QString &identifier, Future<bool> *f)
 {
-    Plugin                          *plugin;
-    QString                         id = Plugins::checkId(identifier);
-    QSharedPointer<Future<bool> >   future(f);
+    Plugin  *plugin;
+    QString id = Plugins::checkId(identifier);
+    QSharedPointer<Future<bool> > future(f);
 
     LOG_DEBUG("Loading the plugin", Properties("id", id), "Plugins", "_load");
-    SmartMutex  mutex(this->mutex, "Plugins", "_load");
+    Mutex mutex(this->mutex, "Plugins", "_load");
     if (!mutex)
         return ;
     if (this->unloadAllPlugins)
@@ -159,12 +159,12 @@ void                                Plugins::_load(const QString &identifier, Fu
     future->setResult(true);
 }
 
-void                                Plugins::_unload(const QString &id, Future<bool> *f)
+void    Plugins::_unload(const QString &id, Future<bool> *f)
 {
-    QSharedPointer<Future<bool> >   future(f);
+    QSharedPointer<Future<bool> > future(f);
 
     LOG_DEBUG("Unloading the plugin", Properties("id", id), "Plugins", "_unload");
-    SmartMutex  mutex(this->mutex, "Plugins", "_unload");
+    Mutex mutex(this->mutex, "Plugins", "_unload");
     if (!mutex)
         return ;
     if (!this->plugins.contains(id))
@@ -194,13 +194,13 @@ void                                Plugins::_unload(const QString &id, Future<b
     future->setResult(true);
 }
 
-void                                Plugins::_install(const QString &id, Future<bool> *f)
+void    Plugins::_install(const QString &id, Future<bool> *f)
 {
-    LightBird::IPlugins::State      state;
-    QSharedPointer<Future<bool> >   future(f);
+    LightBird::IPlugins::State    state;
+    QSharedPointer<Future<bool> > future(f);
 
     LOG_DEBUG("Installing the plugin", Properties("id", id), "Plugins", "_install");
-    SmartMutex  mutex(this->mutex, "Plugins", "_install");
+    Mutex mutex(this->mutex, "Plugins", "_install");
     if (!mutex)
         return ;
     if (this->unloadAllPlugins)
@@ -230,13 +230,13 @@ void                                Plugins::_install(const QString &id, Future<
     future->setResult(true);
 }
 
-void                                Plugins::_uninstall(const QString &id, Future<bool> *f)
+void    Plugins::_uninstall(const QString &id, Future<bool> *f)
 {
-    LightBird::IPlugins::State      state;
-    QSharedPointer<Future<bool> >   future(f);
+    LightBird::IPlugins::State    state;
+    QSharedPointer<Future<bool> > future(f);
 
     LOG_DEBUG("Uninstalling the plugin", Properties("id", id), "Plugins", "_uninstall");
-    SmartMutex  mutex(this->mutex, "Plugins", "_uninstall");
+    Mutex mutex(this->mutex, "Plugins", "_uninstall");
     if (!mutex)
         return ;
     if (this->unloadAllPlugins)
@@ -270,9 +270,9 @@ void                                Plugins::_uninstall(const QString &id, Futur
     future->setResult(true);
 }
 
-bool            Plugins::release(const QString &id)
+bool    Plugins::release(const QString &id)
 {
-    SmartMutex  mutex(this->mutex, "Plugins", "release");
+    Mutex   mutex(this->mutex, "Plugins", "release");
 
     if (!mutex)
         return (false);
@@ -292,11 +292,11 @@ bool            Plugins::release(const QString &id)
     return (true);
 }
 
-LightBird::IMetadata     Plugins::getMetadata(const QString &id) const
+LightBird::IMetadata Plugins::getMetadata(const QString &id) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Plugins", "getMetadata");
+    Mutex   mutex(this->mutex, Mutex::READ, "Plugins", "getMetadata");
+    Plugin  *plugin;
     LightBird::IMetadata metadata;
-    Plugin               *plugin;
 
     if (!mutex)
         return (metadata);
@@ -318,12 +318,12 @@ LightBird::IMetadata     Plugins::getMetadata(const QString &id) const
     return (metadata);
 }
 
-QString     Plugins::getResourcesPath(const QString &id)
+QString Plugins::getResourcesPath(const QString &id)
 {
     return (QString(PLUGINS_RESOURCES_PATH) + "/" + id);
 }
 
-QString     Plugins::checkId(const QString &identifier)
+QString Plugins::checkId(const QString &identifier)
 {
     QString id;
     QString path;
@@ -357,7 +357,7 @@ QString     Plugins::checkId(const QString &identifier)
     return (result);
 }
 
-bool            Plugins::isInstalled(const QString &id)
+bool    Plugins::isInstalled(const QString &id)
 {
     QDomElement element;
 
@@ -375,7 +375,7 @@ QStringList Plugins::getLibraryExtensions()
 
 LightBird::IPlugins::State Plugins::getState(const QString &id) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Plugins", "getState");
+    Mutex   mutex(this->mutex, Mutex::READ, "Plugins", "getState");
     LightBird::IPlugins::State  state;
 
     if (!mutex)
@@ -384,7 +384,7 @@ LightBird::IPlugins::State Plugins::getState(const QString &id) const
     return (state);
 }
 
-QStringList     Plugins::getPlugins() const
+QStringList Plugins::getPlugins() const
 {
     QStringList plugins;
 
@@ -392,9 +392,9 @@ QStringList     Plugins::getPlugins() const
     return (plugins);
 }
 
-QStringList     Plugins::getLoadedPlugins() const
+QStringList Plugins::getLoadedPlugins() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Plugins", "getLoadedPlugins");
+    Mutex   mutex(this->mutex, Mutex::READ, "Plugins", "getLoadedPlugins");
     QStringList list;
 
     if (!mutex)
@@ -403,7 +403,7 @@ QStringList     Plugins::getLoadedPlugins() const
     return (list);
 }
 
-QStringList     Plugins::getUnloadedPlugins() const
+QStringList Plugins::getUnloadedPlugins() const
 {
     QStringList plugins;
 
@@ -416,7 +416,7 @@ QStringList     Plugins::getUnloadedPlugins() const
     return (plugins);
 }
 
-QStringList     Plugins::getInstalledPlugins() const
+QStringList Plugins::getInstalledPlugins() const
 {
     QStringList plugins;
     QDomElement element;
@@ -429,7 +429,7 @@ QStringList     Plugins::getInstalledPlugins() const
     return (plugins);
 }
 
-QStringList     Plugins::getUninstalledPlugins() const
+QStringList Plugins::getUninstalledPlugins() const
 {
     QStringList plugins;
 
@@ -442,12 +442,12 @@ QStringList     Plugins::getUninstalledPlugins() const
     return (plugins);
 }
 
-void                    Plugins::_findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins) const
+void    Plugins::_findPlugins(const QString &pluginsPath, const QString &path, QStringList &plugins) const
 {
-    QString             id;
-    QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
+    QString id;
 
     // Runs through all the directories of the current location to find the plugins
+    QStringListIterator it(QDir(pluginsPath + "/" + path).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
     while (it.hasNext())
     {
         if (!path.isEmpty())
@@ -462,7 +462,7 @@ void                    Plugins::_findPlugins(const QString &pluginsPath, const 
     }
 }
 
-LightBird::IPlugins::State  Plugins::_getState(const QString &id) const
+LightBird::IPlugins::State Plugins::_getState(const QString &id) const
 {
     // A loaded plugin can be LOADED, UNLOADING, or UNLOADED
     if (this->plugins.contains(id))

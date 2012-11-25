@@ -3,7 +3,7 @@
 #include "Defines.h"
 #include "LightBird.h"
 #include "Session.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 Session::Session(const QString &id) : destroyed(false)
 {
@@ -79,19 +79,19 @@ const QString   &Session::getId() const
     return (this->id);
 }
 
-QString         Session::getAccount() const
+QString Session::getAccount() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getAccount");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "getAccount");
 
     if (!mutex)
         return (QString());
     return (this->id_account);
 }
 
-bool            Session::setAccount(const QString &id_account)
+bool    Session::setAccount(const QString &id_account)
 {
     QSqlQuery   query;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setAccount");
+    Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "setAccount");
 
     if (!mutex)
         return (false);
@@ -104,9 +104,9 @@ bool            Session::setAccount(const QString &id_account)
     return (true);
 }
 
-bool            Session::isExpired() const
+bool    Session::isExpired() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "isExpired");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "isExpired");
 
     if (!mutex || destroyed)
         return (true);
@@ -114,19 +114,19 @@ bool            Session::isExpired() const
 
 }
 
-QDateTime       Session::getExpiration() const
+QDateTime   Session::getExpiration() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getExpiration");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "getExpiration");
 
     if (!mutex)
         return (QDateTime());
     return (this->expiration);
 }
 
-bool            Session::setExpiration(const QDateTime &expiration)
+bool    Session::setExpiration(const QDateTime &expiration)
 {
     QSqlQuery   query;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setExpiration");
+    Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "setExpiration");
 
     if (!mutex)
         return (false);
@@ -140,27 +140,27 @@ bool            Session::setExpiration(const QDateTime &expiration)
     return (true);
 }
 
-QDateTime       Session::getCreation() const
+QDateTime   Session::getCreation() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getCreation");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "getCreation");
 
     if (!mutex)
         return (QDateTime());
     return (this->creation);
 }
 
-QStringList     Session::getClients() const
+QStringList Session::getClients() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getClients");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "getClients");
 
     if (!mutex)
         return (QStringList());
     return (this->clients);
 }
 
-bool            Session::setClient(const QString &client)
+bool    Session::setClient(const QString &client)
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setClient");
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Session", "setClient");
 
     if (!mutex)
         return (false);
@@ -169,9 +169,9 @@ bool            Session::setClient(const QString &client)
     return (true);
 }
 
-bool            Session::setClients(const QStringList &clients)
+bool    Session::setClients(const QStringList &clients)
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setClients");
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Session", "setClients");
 
     if (!mutex)
         return (false);
@@ -182,7 +182,7 @@ bool            Session::setClients(const QStringList &clients)
 
 bool    Session::removeClient(const QString &client)
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "removeClient");
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Session", "removeClient");
 
     if (!mutex)
         return (false);
@@ -192,7 +192,7 @@ bool    Session::removeClient(const QString &client)
 
 bool    Session::removeClients(const QStringList &clients)
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "removeClients");
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Session", "removeClients");
 
     if (!mutex)
         return (false);
@@ -207,37 +207,37 @@ bool    Session::removeClients(const QStringList &clients)
     return (true);
 }
 
-bool            Session::hasInformation(const QString &name) const
+bool    Session::hasInformation(const QString &name) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "hasInformation");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "hasInformation");
 
     if (!mutex)
         return (false);
     return (this->informations.contains(name));
 }
 
-QVariant        Session::getInformation(const QString &name) const
+QVariant    Session::getInformation(const QString &name) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getInformation");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "getInformation");
 
     if (!mutex)
         return (QVariant());
     return (this->informations.value(name));
 }
 
-QVariantMap     Session::getInformations() const
+QVariantMap Session::getInformations() const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Session", "getInformations");
+    Mutex   mutex(this->mutex, Mutex::READ, "Session", "getInformations");
 
     if (!mutex)
         return (QVariantMap());
     return (this->informations);
 }
 
-bool            Session::setInformation(const QString &name, const QVariant &value)
+bool    Session::setInformation(const QString &name, const QVariant &value)
 {
     QSqlQuery   query;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "setInformation");
+    Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "setInformation");
 
     if (!mutex)
         return (false);
@@ -262,9 +262,9 @@ bool            Session::setInformation(const QString &name, const QVariant &val
     return (true);
 }
 
-bool            Session::setInformations(const QVariantMap &informations)
+bool    Session::setInformations(const QVariantMap &informations)
 {
-    bool        result = true;
+    bool    result = true;
 
     QMapIterator<QString, QVariant> it(informations);
     while (it.hasNext() && result)
@@ -275,10 +275,10 @@ bool            Session::setInformations(const QVariantMap &informations)
     return (result);
 }
 
-bool            Session::removeInformation(const QString &name)
+bool    Session::removeInformation(const QString &name)
 {
     QSqlQuery   query;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "removeInformation");
+    Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "removeInformation");
 
     if (!mutex)
         return (false);
@@ -291,14 +291,14 @@ bool            Session::removeInformation(const QString &name)
     return (true);
 }
 
-bool            Session::removeInformations(const QStringList &informations)
+bool    Session::removeInformations(const QStringList &informations)
 {
     QSqlQuery   query;
     bool        result = true;
 
     if (informations.isEmpty())
     {
-        SmartMutex mutex(this->mutex, SmartMutex::WRITE, "Session", "removeInformations");
+        Mutex mutex(this->mutex, Mutex::WRITE, "Session", "removeInformations");
         if (!mutex)
             return (false);
         query.prepare(Database::instance()->getQuery("Sessions", "removeInformations"));
@@ -315,15 +315,15 @@ bool            Session::removeInformations(const QStringList &informations)
     return (result);
 }
 
-bool            Session::destroy(bool disconnect)
+bool    Session::destroy(bool disconnect)
 {
     return (ApiSessions::instance()->destroy(this->id, disconnect));
 }
 
-bool            Session::remove()
+bool    Session::remove()
 {
     QSqlQuery   query;
-    SmartMutex  mutex(this->mutex, SmartMutex::WRITE, "Session", "destroy");
+    Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "destroy");
 
     if (!mutex)
         return (false);

@@ -11,7 +11,7 @@
 #include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Server.h"
 
 Database::Database(QObject *parent) : QObject(parent)
@@ -35,7 +35,7 @@ Database::~Database()
     LOG_TRACE("Database destroyed!", "Database", "~Database");
 }
 
-bool        Database::query(QSqlQuery &query)
+bool    Database::query(QSqlQuery &query)
 {
     bool    error;
 
@@ -48,7 +48,7 @@ bool        Database::query(QSqlQuery &query)
     return (error);
 }
 
-bool            Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
+bool    Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
 {
     bool        error;
     int         count;
@@ -77,7 +77,7 @@ bool            Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
     return (error);
 }
 
-bool        Database::query(QSqlQuery &query, QVariantMap &result)
+bool    Database::query(QSqlQuery &query, QVariantMap &result)
 {
     bool    error;
     int     count;
@@ -101,12 +101,12 @@ bool        Database::query(QSqlQuery &query, QVariantMap &result)
     return (error);
 }
 
-LightBird::Table            *Database::getTable(LightBird::Table::Id table, const QString &id)
+LightBird::Table    *Database::getTable(LightBird::Table::Id table, const QString &id)
 {
-    QStringList             tables;
-    QString                 name;
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QStringList          tables;
+    QString              name;
+    QSqlQuery            query;
+    QVector<QVariantMap> result;
 
     // If the table is unknow, tries to find it using the id of the row
     if (!id.isEmpty() && (table == LightBird::Table::Unknow || table == LightBird::Table::Accessor || table == LightBird::Table::Object))
@@ -156,10 +156,10 @@ LightBird::Table            *Database::getTable(LightBird::Table::Id table, cons
     return (NULL);
 }
 
-QString         Database::getQuery(const QString &group, const QString &name, const QString &id)
+QString Database::getQuery(const QString &group, const QString &name, const QString &id)
 {
-    SmartMutex  mutex(this->mutex, "Database", "getQuery");
-    QString     result;
+    Mutex   mutex(this->mutex, "Database", "getQuery");
+    QString result;
 
     if (!mutex)
         return ("");
@@ -172,7 +172,7 @@ QString         Database::getQuery(const QString &group, const QString &name, co
     return ("");
 }
 
-bool                            Database::updates(LightBird::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
+bool    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTime &d, const QStringList &t)
 {
     LightBird::IDatabase::State state;
     QDateTime                   utc = d.toUTC();
@@ -232,7 +232,7 @@ bool                            Database::updates(LightBird::IDatabase::Updates 
     return (false);
 }
 
-bool                Database::_connection()
+bool    Database::_connection()
 {
     QSqlDatabase    database;
     QString         name;
@@ -287,7 +287,7 @@ bool                Database::_connection()
     return (true);
 }
 
-bool        Database::_name(QString &name)
+bool    Database::_name(QString &name)
 {
     QDir    dir;
     QString file;
@@ -338,7 +338,7 @@ bool        Database::_name(QString &name)
     return (true);
 }
 
-bool        Database::_loadQueries(const QString &id)
+bool    Database::_loadQueries(const QString &id)
 {
     QString type;
     QString path;

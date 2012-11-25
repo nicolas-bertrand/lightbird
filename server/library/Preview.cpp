@@ -71,7 +71,7 @@ QString Preview::generate(const QString &fileId, LightBird::IImage::Format forma
     // Moves the preview to the cache directory
     if (this->cacheEnabled)
     {
-        SmartMutex mutex(this->mutex);
+        Mutex mutex(this->mutex, "Preview", "generate");
         // Moves the file
         if (!mutex || !this->_move(params))
             return ("");

@@ -6,7 +6,7 @@
 #include "Events.h"
 #include "LightBird.h"
 #include "Log.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent) : QObject(parent)
 {
@@ -25,7 +25,7 @@ Configuration::~Configuration()
         LOG_TRACE("Configuration destroyed!", Properties("file", this->file.fileName()), "Configuration", "~Configuration");
 }
 
-bool        Configuration::_load(const QString &configurationPath, const QString &alternativePath)
+bool    Configuration::_load(const QString &configurationPath, const QString &alternativePath)
 {
     QDir    directory;
     QString dirName;
@@ -103,9 +103,9 @@ QString Configuration::getPath() const
     return (this->file.fileName());
 }
 
-QString         Configuration::get(const QString &nodeName) const
+QString Configuration::get(const QString &nodeName) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "get");
+    Mutex   mutex(this->mutex, Mutex::READ, "Configuration", "get");
 
     if (!mutex)
         return ("");
@@ -114,7 +114,7 @@ QString         Configuration::get(const QString &nodeName) const
 
 unsigned int    Configuration::count(const QString &nodeName) const
 {
-    SmartMutex  mutex(this->mutex, SmartMutex::READ, "Configuration", "count");
+    Mutex   mutex(this->mutex, Mutex::READ, "Configuration", "count");
 
     if (!mutex)
         return (0);
@@ -123,16 +123,16 @@ unsigned int    Configuration::count(const QString &nodeName) const
 
 LightBird::IConfiguration &Configuration::set(const QString &nodeName, const QString &nodeValue)
 {
-    SmartMutex  mutex(this->mutex, "Configuration", "set");
+    Mutex   mutex(this->mutex, "Configuration", "set");
 
     if (mutex)
         this->_set(nodeName, nodeValue, this->dom);
     return (*this);
 }
 
-bool            Configuration::remove(const QString &nodeName)
+bool    Configuration::remove(const QString &nodeName)
 {
-    SmartMutex  mutex(this->mutex, "Configuration", "remove");
+    Mutex   mutex(this->mutex, "Configuration", "remove");
 
     if (!mutex)
         return (false);
@@ -158,9 +158,9 @@ void    Configuration::release() const
     this->mutex.unlock();
 }
 
-bool            Configuration::save()
+bool    Configuration::save()
 {
-    SmartMutex  mutex(this->mutex, "Configuration", "save");
+    Mutex       mutex(this->mutex, "Configuration", "save");
     QByteArray  data;
     int         wrote;
 
@@ -189,18 +189,18 @@ bool            Configuration::save()
     return (true);
 }
 
-QString                     Configuration::_get(const QString &nodeName, QDomElement element) const
+QString Configuration::_get(const QString &nodeName, QDomElement element) const
 {
-    QString                 result = "";
-    QDomNode                node;
-    QString                 name;
-    QString                 attribut;
-    QString                 tmp;
-    int                     index;
-    QStringListIterator     it(nodeName.split('/'));
+    QString  result = "";
+    QDomNode node;
+    QString  name;
+    QString  attribut;
+    QString  tmp;
+    int      index;
 
     if (*this == false)
         return ("");
+    QStringListIterator it(nodeName.split('/'));
     while (it.hasNext() == true && element.isNull() == false)
     {
         index = 0;
@@ -241,20 +241,20 @@ QString                     Configuration::_get(const QString &nodeName, QDomEle
     return (result);
 }
 
-unsigned int                Configuration::_count(const QString &nodeName, QDomElement element) const
+unsigned int    Configuration::_count(const QString &nodeName, QDomElement element) const
 {
-    unsigned int            result = 0;
-    QString                 name;
-    QString                 tmp;
-    int                     index;
-    int                     i;
-    QStringListIterator     it(nodeName.split('/'));
+    unsigned int result = 0;
+    QString      name;
+    QString      tmp;
+    int          index;
+    int          i;
 
     if (*this == false)
         return (0);
     if (nodeName.isEmpty())
         return (0);
     i = nodeName.count('/') + 1;
+    QStringListIterator it(nodeName.split('/'));
     while (it.hasNext() == true && element.isNull() == false)
     {
         --i;
@@ -279,19 +279,19 @@ unsigned int                Configuration::_count(const QString &nodeName, QDomE
     return (result);
 }
 
-void                        Configuration::_set(const QString &nodeName, const QString &nodeValue, QDomElement element)
+void    Configuration::_set(const QString &nodeName, const QString &nodeValue, QDomElement element)
 {
-    QDomText                text;
-    QDomElement             newElement;
-    QDomNode                node;
-    QString                 name;
-    QString                 attribut;
-    QString                 tmp;
-    int                     index;
-    QStringListIterator     it(nodeName.split('/'));
+    QDomText    text;
+    QDomElement newElement;
+    QDomNode    node;
+    QString     name;
+    QString     attribut;
+    QString     tmp;
+    int         index;
 
     if (*this == false || element.isNull())
         return ;
+    QStringListIterator it(nodeName.split('/'));
     while (it.hasNext() == true)
     {
         index = 0;
@@ -359,20 +359,20 @@ void                        Configuration::_set(const QString &nodeName, const Q
     }
 }
 
-bool                        Configuration::_remove(const QString &nodeName, QDomElement element)
+bool    Configuration::_remove(const QString &nodeName, QDomElement element)
 {
-    bool                    result = false;
-    QString                 name;
-    QString                 tmp;
-    int                     index;
-    int                     i;
-    QStringListIterator     it(nodeName.split('/'));
+    bool    result = false;
+    QString name;
+    QString tmp;
+    int     index;
+    int     i;
 
     if (*this == false)
         return (false);
     if (nodeName.isEmpty())
         return (false);
     i = nodeName.count('/') + 1;
+    QStringListIterator it(nodeName.split('/'));
     while (it.hasNext() == true && element.isNull() == false && !result)
     {
         --i;
@@ -404,7 +404,7 @@ bool                        Configuration::_remove(const QString &nodeName, QDom
     return (result);
 }
 
-void        Configuration::setParent(QObject *parent)
+void    Configuration::setParent(QObject *parent)
 {
     emit this->setParentSignal(parent);
 }

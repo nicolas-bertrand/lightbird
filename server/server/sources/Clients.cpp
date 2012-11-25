@@ -4,7 +4,7 @@
 
 #include "Clients.h"
 #include "Log.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 Clients::Clients()
@@ -36,7 +36,7 @@ void    Clients::run()
 Future<QString> Clients::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
                                  LightBird::INetwork::Transport transport, int wait)
 {
-    SmartMutex      mutex(this->mutex);
+    Mutex           mutex(this->mutex, "Clients", "connect");
     Future<QString> *future;
 
     if (!mutex)
@@ -92,11 +92,11 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
     return (Future<QString>());
 }
 
-bool            Clients::send(const QString &idClient, const QString &idPlugin, const QString &p, const QVariantMap &informations)
+bool    Clients::send(const QString &idClient, const QString &idPlugin, const QString &p, const QVariantMap &informations)
 {
-    SmartMutex  mutex(this->mutex, "Clients", "send");
-    Client      *client = NULL;
-    QString     protocol;
+    Mutex   mutex(this->mutex, "Clients", "send");
+    Client  *client = NULL;
+    QString protocol;
 
     if (!mutex)
         return (false);
@@ -118,11 +118,11 @@ bool            Clients::send(const QString &idClient, const QString &idPlugin, 
     return (true);
 }
 
-bool            Clients::receive(const QString &id, const QString &p, const QVariantMap &informations)
+bool    Clients::receive(const QString &id, const QString &p, const QVariantMap &informations)
 {
-    SmartMutex  mutex(this->mutex, "Clients", "send");
-    Client      *client = NULL;
-    QString     protocol;
+    Mutex   mutex(this->mutex, "Clients", "send");
+    Client  *client = NULL;
+    QString protocol;
 
     if (!mutex)
         return (false);
@@ -145,7 +145,7 @@ bool            Clients::receive(const QString &id, const QString &p, const QVar
 
 Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
 {
-    SmartMutex  mutex(this->mutex, "Clients", "getClient");
+    Mutex   mutex(this->mutex, "Clients", "getClient");
 
     found = false;
     if (!mutex)
@@ -163,9 +163,9 @@ Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Clien
     return (Future<bool>(false));
 }
 
-QStringList     Clients::getClients() const
+QStringList Clients::getClients() const
 {
-    SmartMutex  mutex(this->mutex, "Clients", "getClients");
+    Mutex       mutex(this->mutex, "Clients", "getClients");
     QStringList result;
 
     if (!mutex)
@@ -177,9 +177,9 @@ QStringList     Clients::getClients() const
     return (result);
 }
 
-bool            Clients::disconnect(const QString &id)
+bool    Clients::disconnect(const QString &id)
 {
-    SmartMutex  mutex(this->mutex, "Clients", "disconnect");
+    Mutex   mutex(this->mutex, "Clients", "disconnect");
 
     if (!mutex)
         return (false);
@@ -193,9 +193,9 @@ bool            Clients::disconnect(const QString &id)
     return (false);
 }
 
-void            Clients::shutdown()
+void    Clients::shutdown()
 {
-    SmartMutex  mutex(this->mutex, "Clients", "shutdown");
+    Mutex   mutex(this->mutex, "Clients", "shutdown");
 
     if (!mutex)
         return ;
@@ -211,10 +211,10 @@ void            Clients::shutdown()
     this->clients.clear();
 }
 
-bool            Clients::connect(Client *client)
+bool    Clients::connect(Client *client)
 {
-    SmartMutex  mutex(this->mutex, "Clients", "connect");
-    QString     id;
+    Mutex   mutex(this->mutex, "Clients", "connect");
+    QString id;
 
     if (!mutex)
         return (false);
@@ -234,10 +234,10 @@ bool            Clients::connect(Client *client)
     return (!future.getResult().isEmpty());
 }
 
-void            Clients::_connect(QString id)
+void    Clients::_connect(QString id)
 {
-    SmartMutex  mutex(this->mutex, "Clients", "_connect");
-    Client      *client = NULL;
+    Mutex   mutex(this->mutex, "Clients", "_connect");
+    Client  *client = NULL;
 
     if (!mutex)
         return ;
@@ -278,7 +278,7 @@ void    Clients::read(Client *client)
     emit this->readSignal(client);
 }
 
-void            Clients::_read(Client *client)
+void    Clients::_read(Client *client)
 {
     QByteArray  &data = client->getData();
     int         read;
@@ -299,9 +299,9 @@ void            Clients::_read(Client *client)
     client->bytesRead();
 }
 
-bool            Clients::write(QByteArray *data, Client *client)
+bool    Clients::write(QByteArray *data, Client *client)
 {
-    SmartMutex  mutex(this->mutex, "Clients", "write");
+    Mutex   mutex(this->mutex, "Clients", "write");
 
     if (!mutex)
         return (false);
@@ -314,11 +314,11 @@ bool            Clients::write(QByteArray *data, Client *client)
     return (true);
 }
 
-void            Clients::_write()
+void    Clients::_write()
 {
-    SmartMutex  mutex(this->mutex, "Clients", "_write");
-    Client      *client;
-    qint64      result;
+    Mutex   mutex(this->mutex, "Clients", "_write");
+    Client  *client;
+    qint64  result;
     QHash<Client *, QSharedPointer<WriteBuffer> > writeBuffer;
 
     if (!mutex || this->writeBuffer.isEmpty())
@@ -367,9 +367,9 @@ void            Clients::_write()
     this->writeBuffer.unite(writeBuffer);
 }
 
-void                Clients::_disconnected()
+void    Clients::_disconnected()
 {
-    SmartMutex      mutex(this->mutex);
+    Mutex           mutex(this->mutex, "Clients", "_disconnected");
     QAbstractSocket *socket;
 
     if (!mutex)
@@ -391,10 +391,10 @@ void                Clients::_disconnected()
     }
 }
 
-void            Clients::_finished()
+void        Clients::_finished()
 {
-    SmartMutex  mutex(this->mutex, "Clients", "_finished");
-    Client      *client;
+    Mutex   mutex(this->mutex, "Clients", "_finished");
+    Client  *client;
 
     if (!mutex)
         return ;

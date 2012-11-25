@@ -11,7 +11,7 @@
 #include "Log.h"
 #include "Plugin.hpp"
 #include "Plugins.hpp"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
                                                              id(identifier)
@@ -28,9 +28,9 @@ Plugin::~Plugin()
     LOG_TRACE("Plugin destroyed!", Properties("id", this->id), "Plugin", "~Plugin");
 }
 
-bool            Plugin::load(bool full)
+bool    Plugin::load(bool full)
 {
-    SmartMutex  mutex(this->mutex, "Plugin", "load");
+    Mutex   mutex(this->mutex, "Plugin", "load");
 
     if (!mutex)
         return (false);
@@ -56,9 +56,9 @@ bool            Plugin::load(bool full)
     return (true);
 }
 
-bool            Plugin::unload(bool full)
+bool    Plugin::unload(bool full)
 {
-    SmartMutex  mutex(this->mutex, "Plugin", "unload");
+    Mutex   mutex(this->mutex, "Plugin", "unload");
 
     if (!mutex)
         return (false);
@@ -77,9 +77,9 @@ bool            Plugin::unload(bool full)
     return (true);
 }
 
-bool            Plugin::install()
+bool    Plugin::install()
 {
-    SmartMutex  mutex(this->mutex, "Plugin", "install");
+    Mutex   mutex(this->mutex, "Plugin", "install");
 
     if (!mutex)
         return (false);
@@ -109,9 +109,9 @@ bool            Plugin::install()
     return (true);
 }
 
-bool            Plugin::uninstall()
+bool    Plugin::uninstall()
 {
-    SmartMutex  mutex(this->mutex, "Plugin", "uninstall");
+    Mutex   mutex(this->mutex, "Plugin", "uninstall");
 
     if (!mutex)
         return (false);
@@ -130,9 +130,9 @@ bool            Plugin::uninstall()
     return (true);
 }
 
-bool            Plugin::release()
+bool    Plugin::release()
 {
-    SmartMutex  mutex(this->mutex, "Plugin", "release");
+    Mutex   mutex(this->mutex, "Plugin", "release");
 
     if (!mutex)
         return (false);
@@ -152,10 +152,10 @@ bool            Plugin::release()
     return (true);
 }
 
-LightBird::IMetadata     Plugin::getMetadata() const
+LightBird::IMetadata Plugin::getMetadata() const
 {
     LightBird::IMetadata metadata;
-    SmartMutex           mutex(this->mutex, SmartMutex::READ, "Plugin", "getMetadata");
+    Mutex mutex(this->mutex, Mutex::READ, "Plugin", "getMetadata");
 
     if (!mutex)
         return (metadata);
@@ -192,10 +192,10 @@ bool    Plugin::checkContext(const QString &mode, const QString &transport, cons
     return (false);
 }
 
-LightBird::IPlugins::State      Plugin::getState() const
+LightBird::IPlugins::State Plugin::getState() const
 {
-    LightBird::IPlugins::State  state;
-    SmartMutex                  mutex(this->mutex, SmartMutex::READ, "Plugin", "getState");
+    LightBird::IPlugins::State state;
+    Mutex mutex(this->mutex, Mutex::READ, "Plugin", "getState");
 
     if (!mutex)
         return (LightBird::IPlugins::UNKNOW);
@@ -203,7 +203,7 @@ LightBird::IPlugins::State      Plugin::getState() const
     return (state);
 }
 
-void        Plugin::_initialize()
+void    Plugin::_initialize()
 {
     this->state = LightBird::IPlugins::UNLOADED;
     this->used = 0;
@@ -219,9 +219,9 @@ void        Plugin::_initialize()
     Configurations::instance(this->id);
 }
 
-bool                    Plugin::_loadLibrary()
+bool    Plugin::_loadLibrary()
 {
-    LightBird::IPlugin  *instance;
+    LightBird::IPlugin *instance;
 
     // Iterate over the files of the plugin directory
     QStringListIterator dir(QDir(this->path).entryList(Plugins::getLibraryExtensions(), QDir::Files));
@@ -258,7 +258,7 @@ bool                    Plugin::_loadLibrary()
     return (true);
 }
 
-void            Plugin::_loadDefaultConfiguration()
+void    Plugin::_loadDefaultConfiguration()
 {
     QDomElement element;
     bool        create = false;
@@ -315,13 +315,13 @@ void    Plugin::_loadApi()
     }
 }
 
-void                        Plugin::_loadContexts()
+void    Plugin::_loadContexts()
 {
-    QDomNode                read;
-    QDomNode                dom;
-    QDomNode                contextNode;
-    QString                 nodeName;
-    QString                 nodeValue;
+    QDomNode read;
+    QDomNode dom;
+    QDomNode contextNode;
+    QString  nodeName;
+    QString  nodeValue;
 
     // Load the contexts of the plugin
     read = this->configuration->readDom().firstChild();
@@ -381,15 +381,15 @@ void                        Plugin::_loadContexts()
     this->configuration->release();
 }
 
-void            Plugin::_loadResources()
+void    Plugin::_loadResources()
 {
-    QDomNode    read;
-    QDomNode    dom;
-    QString     nodeName;
-    QString     nodeValue;
-    QString     path;
-    QString     alias;
-    QString     resourcesPath;
+    QDomNode read;
+    QDomNode dom;
+    QString  nodeName;
+    QString  nodeValue;
+    QString  path;
+    QString  alias;
+    QString  resourcesPath;
 
     // Creates the resources of the plugin that doesn't exists
     resourcesPath = Plugins::getResourcesPath(this->id);
@@ -427,7 +427,7 @@ void            Plugin::_loadResources()
     this->configuration->release();
 }
 
-void            Plugin::_copyAllResources(const QString &resourcesPath, const QString &destDir, QString currentDir)
+void    Plugin::_copyAllResources(const QString &resourcesPath, const QString &destDir, QString currentDir)
 {
     QStringList files;
     QString     source;
@@ -471,13 +471,13 @@ void    Plugin::_unload()
     this->state = LightBird::IPlugins::UNLOADED;
 }
 
-bool                Plugin::_createConfiguration()
+bool    Plugin::_createConfiguration()
 {
-    QDomDocument    doc;
-    QDomElement     element;
-    QString         errorMsg;
-    int             errorLine;
-    int             errorColumn;
+    QDomDocument doc;
+    QDomElement  element;
+    QString      errorMsg;
+    int          errorLine;
+    int          errorColumn;
 
     // Create the plugin configuration from its resource if it doesn't exists
     if (!Plugins::isInstalled(this->id))
@@ -516,7 +516,7 @@ bool                Plugin::_createConfiguration()
     return (true);
 }
 
-void            Plugin::_removeConfiguration()
+void    Plugin::_removeConfiguration()
 {
     QDomElement element;
 

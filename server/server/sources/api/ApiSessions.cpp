@@ -7,7 +7,7 @@
 #include "Network.h"
 #include "Server.h"
 #include "Session.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 ApiSessions::ApiSessions(QObject *parent) : QObject(parent)
 {
@@ -31,8 +31,8 @@ ApiSessions::~ApiSessions()
 
 LightBird::Session  ApiSessions::create(const QDateTime &expiration, const QString &id_account, const QStringList &clients, const QVariantMap &informations)
 {
-    SmartMutex      mutex(this->mutex, "ApiSessions", "create");
-    Session         *session;
+    Mutex   mutex(this->mutex, "ApiSessions", "create");
+    Session *session;
 
     if (!mutex)
         return (QSharedPointer<LightBird::ISession>());
@@ -44,10 +44,10 @@ LightBird::Session  ApiSessions::create(const QDateTime &expiration, const QStri
     return (this->sessions.value(session->getId()));
 }
 
-bool            ApiSessions::destroy(const QString &id, bool disconnect)
+bool    ApiSessions::destroy(const QString &id, bool disconnect)
 {
     QSharedPointer<LightBird::ISession> session(this->getSession(id));
-    SmartMutex  mutex(this->mutex, "ApiSessions", "destroy");
+    Mutex   mutex(this->mutex, "ApiSessions", "destroy");
 
     if (!mutex || session.isNull())
         return (false);
@@ -66,14 +66,14 @@ bool            ApiSessions::destroy(const QString &id, bool disconnect)
     return (session->isExpired());
 }
 
-QStringList     ApiSessions::getSessions(const QString &id_account, const QString &client) const
+QStringList ApiSessions::getSessions(const QString &id_account, const QString &client) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    int                     i;
-    int                     s;
-    QStringList             sessions;
-    SmartMutex  mutex(this->mutex, "ApiSessions", "getSessions");
+    QSqlQuery            query;
+    QVector<QVariantMap> result;
+    int                  i;
+    int                  s;
+    QStringList          sessions;
+    Mutex   mutex(this->mutex, "ApiSessions", "getSessions");
 
     if (!mutex)
         return (QStringList());
@@ -105,7 +105,7 @@ QStringList     ApiSessions::getSessions(const QString &id_account, const QStrin
 
 LightBird::Session  ApiSessions::getSession(const QString &id)
 {
-    SmartMutex      mutex(this->mutex, "ApiSessions", "destroy");
+    Mutex   mutex(this->mutex, "ApiSessions", "destroy");
     QSharedPointer<LightBird::ISession> result;
 
     if (!mutex)
@@ -122,17 +122,17 @@ LightBird::Session  ApiSessions::getSession(const QString &id)
     return (result);
 }
 
-bool        ApiSessions::exists(const QString &id)
+bool    ApiSessions::exists(const QString &id)
 {
     return (!this->getSession(id).isNull() && !this->getSession(id)->isExpired());
 }
 
-void                        ApiSessions::expiration()
+void    ApiSessions::expiration()
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    int                     i;
-    qint64                  s;
+    QSqlQuery            query;
+    QVector<QVariantMap> result;
+    int                  i;
+    qint64               s;
 
     // If the current thread is not the main thread (where the sessions live),
     // we emit a signal that will call expiration in the correct thread.
@@ -150,7 +150,7 @@ void                        ApiSessions::expiration()
             this->destroy(result[i]["id"].toString());
     // Search the next session that is going to expire
     query.prepare(Database::instance()->getQuery("Sessions", "getNextExpiration"));
-    SmartMutex mutex(this->mutex, "ApiSessions", "expiration");
+    Mutex mutex(this->mutex, "ApiSessions", "expiration");
     // The timer will call expiration the next time a session expire
     if (mutex && Database::instance()->query(query, result) && result.size() > 0)
     {

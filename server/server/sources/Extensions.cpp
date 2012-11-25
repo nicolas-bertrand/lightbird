@@ -4,7 +4,7 @@
 #include "Plugin.hpp"
 #include "Plugins.hpp"
 #include "Server.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 Extensions::Extensions(QObject *parent) : QObject(parent)
 {
@@ -18,11 +18,11 @@ Extensions::~Extensions()
     LOG_TRACE("Extensions destroyed!", "Extensions", "~Extensions");
 }
 
-void                        Extensions::add(Plugin *plugin)
+void    Extensions::add(Plugin *plugin)
 {
-    SmartMutex              mutex(this->mutex, "Extensions", "add");
-    LightBird::IExtension   *extension;
-    Properties              properties;
+    Mutex                 mutex(this->mutex, "Extensions", "add");
+    LightBird::IExtension *extension;
+    Properties            properties;
 
     if (!mutex)
         return ;
@@ -54,7 +54,7 @@ void                        Extensions::add(Plugin *plugin)
 
 void            Extensions::remove(Plugin *plugin)
 {
-    SmartMutex  mutex(this->mutex, "Extensions", "remove");
+    Mutex  mutex(this->mutex, "Extensions", "remove");
 
     if (mutex && this->plugins.contains(plugin->id))
     {
@@ -66,7 +66,7 @@ void            Extensions::remove(Plugin *plugin)
 
 QList<void *>       Extensions::get(const QString &name)
 {
-    SmartMutex      mutex(this->mutex, "Extensions", "get");
+    Mutex      mutex(this->mutex, "Extensions", "get");
     QList<void *>   result;
     Extension       extension;
 
@@ -99,7 +99,7 @@ QList<void *>       Extensions::get(const QString &name)
 
 void            Extensions::release(QList<void *> extensions)
 {
-    SmartMutex  mutex(this->mutex, "Extensions", "release");
+    Mutex  mutex(this->mutex, "Extensions", "release");
     QString     plugin;
 
     if (!mutex)

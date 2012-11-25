@@ -6,7 +6,7 @@
 #include "Events.h"
 #include "Log.h"
 #include "Plugins.hpp"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 ApiEvents::ApiEvents(const QString &id, bool event)
@@ -49,9 +49,9 @@ void    ApiEvents::run()
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
-void            ApiEvents::post(const QString &event, const QVariant &property)
+void    ApiEvents::post(const QString &event, const QVariant &property)
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "post");
+    Mutex   mutex(this->mutex, "ApiEvents", "post");
 
     if (!mutex)
         return ;
@@ -67,9 +67,9 @@ void    ApiEvents::subscribe(const QString &event)
     this->subscribe(QStringList() << event);
 }
 
-void            ApiEvents::subscribe(const QStringList &events)
+void    ApiEvents::subscribe(const QStringList &events)
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "subscribe");
+    Mutex   mutex(this->mutex, "ApiEvents", "subscribe");
 
     if (!mutex)
         return ;
@@ -78,9 +78,9 @@ void            ApiEvents::subscribe(const QStringList &events)
     LOG_DEBUG("Events subscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
 }
 
-void            ApiEvents::unsubscribe(const QString &event)
+void    ApiEvents::unsubscribe(const QString &event)
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "unsubscribe");
+    Mutex   mutex(this->mutex, "ApiEvents", "unsubscribe");
 
     if (!mutex)
         return ;
@@ -88,9 +88,9 @@ void            ApiEvents::unsubscribe(const QString &event)
     LOG_DEBUG("Event unsubscribed", Properties("id", this->id).add("event", event), "ApiEvents", "unsubscribe");
 }
 
-void            ApiEvents::unsubscribe(const QStringList &events)
+void    ApiEvents::unsubscribe(const QStringList &events)
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "unsubscribe");
+    Mutex   mutex(this->mutex, "ApiEvents", "unsubscribe");
 
     if (!mutex)
         return ;
@@ -100,9 +100,9 @@ void            ApiEvents::unsubscribe(const QStringList &events)
     LOG_DEBUG("Events unsubscribed", Properties("id", this->id).add("events", events.join(";")), "ApiEvents", "subscribe");
 }
 
-QStringList     ApiEvents::getEvents() const
+QStringList ApiEvents::getEvents() const
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "getEvents");
+    Mutex   mutex(this->mutex, "ApiEvents", "getEvents");
 
     if (!mutex)
         return (QStringList());
@@ -116,7 +116,7 @@ void    ApiEvents::send(const QString &event, const QVariant &property)
 
 QList<QPair<QString, QVariant> > ApiEvents::receive()
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "receive");
+    Mutex   mutex(this->mutex, "ApiEvents", "receive");
     QList<QPair<QString, QVariant> > result;
 
     if (!mutex)
@@ -126,19 +126,19 @@ QList<QPair<QString, QVariant> > ApiEvents::receive()
     return (result);
 }
 
-bool            ApiEvents::isAvailable() const
+bool    ApiEvents::isAvailable() const
 {
-    SmartMutex  mutex(this->mutex, "ApiEvents", "isAvailable");
+    Mutex   mutex(this->mutex, "ApiEvents", "isAvailable");
 
     if (!mutex)
         return (false);
     return (!this->events.isEmpty());
 }
 
-void                    ApiEvents::_newEvent()
+void    ApiEvents::_newEvent()
 {
-    SmartMutex          mutex(this->mutex, "ApiEvents", "_newEvent");
-    LightBird::IEvent   *plugin;
+    Mutex             mutex(this->mutex, "ApiEvents", "_newEvent");
+    LightBird::IEvent *plugin;
 
     if (!mutex)
         return ;

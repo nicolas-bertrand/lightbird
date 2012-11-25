@@ -15,7 +15,7 @@
 #include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStringList &pr,
@@ -53,7 +53,7 @@ Client::~Client()
     LOG_TRACE("Client destroyed!", Properties("id", this->id), "Client", "~Client");
 }
 
-void        Client::run()
+void    Client::run()
 {
     State   newTask = Client::NONE;
     bool    send = true;
@@ -128,7 +128,7 @@ void        Client::run()
     }
 
     // Runs a new task
-    SmartMutex mutex(this->mutex, "Client", "run");
+    Mutex mutex(this->mutex, "Client", "run");
     if (!mutex)
         return ;
     // Fills the pending informations requests
@@ -169,9 +169,9 @@ void        Client::run()
         this->running = false;
 }
 
-void            Client::readyRead()
+void    Client::readyRead()
 {
-    SmartMutex  mutex(this->mutex, "Client", "readyRead");
+    Mutex   mutex(this->mutex, "Client", "readyRead");
 
     if (!mutex)
         return ;
@@ -180,9 +180,9 @@ void            Client::readyRead()
         this->_newTask(Client::READING);
 }
 
-void            Client::bytesRead()
+void    Client::bytesRead()
 {
-    SmartMutex  mutex(this->mutex, "Client", "bytesRead");
+    Mutex   mutex(this->mutex, "Client", "bytesRead");
 
     if (!mutex || !this->running || this->state != Client::READING)
         return ;
@@ -192,9 +192,9 @@ void            Client::bytesRead()
     this->_newTask(Client::READ);
 }
 
-bool            Client::_read()
+bool    Client::_read()
 {
-    SmartMutex  mutex(this->mutex, "Client", "_read");
+    Mutex   mutex(this->mutex, "Client", "_read");
 
     if (!mutex)
         return (false);
@@ -207,7 +207,7 @@ bool            Client::_read()
     return (true);
 }
 
-void        Client::write(QByteArray *data)
+void    Client::write(QByteArray *data)
 {
     if (data->size() == 0)
         return (delete data);
@@ -219,15 +219,15 @@ void        Client::write(QByteArray *data)
     this->writing = data;
 }
 
-void        Client::_write(Client::State newTask)
+void    Client::_write(Client::State newTask)
 {
     this->written = newTask;
     this->readWriteInterface->write(this->writing, this);
 }
 
-void        Client::bytesWritten()
+void    Client::bytesWritten()
 {
-    SmartMutex  mutex(this->mutex, "Client", "bytesWritten");
+    Mutex   mutex(this->mutex, "Client", "bytesWritten");
 
     if (mutex && this->writing)
     {
@@ -236,9 +236,9 @@ void        Client::bytesWritten()
     }
 }
 
-bool            Client::send(const QString &protocol, const QVariantMap &informations, const QString &id)
+bool    Client::send(const QString &protocol, const QVariantMap &informations, const QString &id)
 {
-    SmartMutex  mutex(this->mutex, "Client", "send");
+    Mutex       mutex(this->mutex, "Client", "send");
     QVariantMap sendRequest;
 
     if (!mutex)
@@ -263,12 +263,12 @@ bool            Client::send(const QString &protocol, const QVariantMap &informa
     return (true);
 }
 
-bool                Client::_send()
+bool    Client::_send()
 {
-    SmartMutex      mutex(this->mutex, "Client", "_send");
-    EngineServer    *engineServer = qobject_cast<EngineServer *>(this->engine);
-    EngineClient    *engineClient = qobject_cast<EngineClient *>(this->engine);
-    bool            run = false;
+    Mutex        mutex(this->mutex, "Client", "_send");
+    EngineServer *engineServer = qobject_cast<EngineServer *>(this->engine);
+    EngineClient *engineClient = qobject_cast<EngineClient *>(this->engine);
+    bool         run = false;
 
     if (!mutex)
         return (false);
@@ -294,9 +294,9 @@ bool                Client::_send()
     return (run);
 }
 
-bool            Client::receive(const QString &protocol, const QVariantMap &informations)
+bool    Client::receive(const QString &protocol, const QVariantMap &informations)
 {
-    SmartMutex  mutex(this->mutex, "Client", "receive");
+    Mutex       mutex(this->mutex, "Client", "receive");
     QVariantMap receiveResponses;
 
     if (!mutex)
@@ -314,11 +314,11 @@ bool            Client::receive(const QString &protocol, const QVariantMap &info
     return (true);
 }
 
-bool                Client::_receive()
+bool    Client::_receive()
 {
-    SmartMutex      mutex(this->mutex, "Client", "_receive");
-    EngineClient    *engine = qobject_cast<EngineClient *>(this->engine);
-    bool            run = false;
+    Mutex        mutex(this->mutex, "Client", "_receive");
+    EngineClient *engine = qobject_cast<EngineClient *>(this->engine);
+    bool         run = false;
 
     if (!mutex)
         return (false);
@@ -329,9 +329,9 @@ bool                Client::_receive()
     return (run);
 }
 
-void            Client::disconnect()
+void    Client::disconnect()
 {
-    SmartMutex  mutex(this->mutex, "Client", "disconnect");
+    Mutex  mutex(this->mutex, "Client", "disconnect");
 
     if (!mutex || this->disconnecting)
         return ;
@@ -342,7 +342,7 @@ void            Client::disconnect()
         this->_newTask(Client::DISCONNECT);
 }
 
-bool        Client::doRead(QByteArray &data)
+bool    Client::doRead(QByteArray &data)
 {
     QPair<QString, LightBird::IDoRead *> instance;
 
@@ -358,7 +358,7 @@ bool        Client::doRead(QByteArray &data)
     return (false);
 }
 
-bool        Client::doWrite(const char *data, qint64 size, qint64 &result)
+bool    Client::doWrite(const char *data, qint64 size, qint64 &result)
 {
     QPair<QString, LightBird::IDoWrite *> instance;
 
@@ -372,7 +372,7 @@ bool        Client::doWrite(const char *data, qint64 size, qint64 &result)
     return (false);
 }
 
-bool        Client::_onConnect()
+bool    Client::_onConnect()
 {
     bool    accept = true;
 
@@ -394,7 +394,7 @@ bool        Client::_onConnect()
     return (accept);
 }
 
-bool        Client::_onDisconnect()
+bool    Client::_onDisconnect()
 {
     bool    finish = true;
 
@@ -410,7 +410,7 @@ bool        Client::_onDisconnect()
     return (finish);
 }
 
-void        Client::_onDestroy()
+void    Client::_onDestroy()
 {
     QMapIterator<QString, LightBird::IOnDestroy *> it(Plugins::instance()->getInstances<LightBird::IOnDestroy>(this->mode, this->transport, this->protocols, this->port));
     while (it.hasNext())
@@ -421,7 +421,7 @@ void        Client::_onDestroy()
     }
 }
 
-bool        Client::isFinished() const
+bool    Client::isFinished() const
 {
     return (this->disconnected);
 }
@@ -451,7 +451,7 @@ LightBird::INetwork::Transport Client::getTransport() const
     return (this->transport);
 }
 
-int             Client::getSocketDescriptor() const
+int Client::getSocketDescriptor() const
 {
     return (this->socketDescriptor);
 }
@@ -481,12 +481,12 @@ LightBird::IClient::Mode Client::getMode() const
     return (this->mode);
 }
 
-quint64         Client::getBufferSize() const
+quint64 Client::getBufferSize() const
 {
     return (this->data.size() + this->socket->size());
 }
 
-QVariantMap     &Client::getInformations()
+QVariantMap &Client::getInformations()
 {
     return (this->informations);
 }
@@ -496,7 +496,7 @@ LightBird::TableAccounts &Client::getAccount()
     return (this->account);
 }
 
-LightBird::IRequest     &Client::getRequest()
+LightBird::IRequest &Client::getRequest()
 {
     return (this->engine->getRequest());
 }
@@ -511,7 +511,7 @@ QStringList Client::getSessions(const QString &id_account) const
     return (ApiSessions::instance()->getSessions(id_account, this->getId()));
 }
 
-LightBird::Session      Client::getSession(const QString &id_account) const
+LightBird::Session  Client::getSession(const QString &id_account) const
 {
     QStringList         id;
     LightBird::Session  session;
@@ -521,7 +521,7 @@ LightBird::Session      Client::getSession(const QString &id_account) const
     return (session);
 }
 
-bool                    Client::isDisconnecting() const
+bool    Client::isDisconnecting() const
 {
     return (this->disconnecting);
 }
@@ -536,7 +536,7 @@ void    Client::setPort(unsigned short port)
     this->port = port;
 }
 
-QString         Client::getProtocol(QString protocol)
+QString Client::getProtocol(QString protocol)
 {
     // If the protocol is defined we check that it is in the protocols handled by the client
     if (!protocol.isEmpty() && !this->protocols.contains("all") && !this->protocols.contains(protocol))
@@ -556,9 +556,9 @@ QString         Client::getProtocol(QString protocol)
     return (protocol);
 }
 
-void            Client::getInformations(LightBird::INetwork::Client &client, Future<bool> *future)
+void    Client::getInformations(LightBird::INetwork::Client &client, Future<bool> *future)
 {
-    SmartMutex  mutex(this->mutex, "Client", "getInformations");
+    Mutex   mutex(this->mutex, "Client", "getInformations");
 
     if (!mutex)
         return ;
@@ -599,7 +599,7 @@ void    Client::_getInformations(LightBird::INetwork::Client &client, Future<boo
     delete future;
 }
 
-void            Client::_finish()
+void    Client::_finish()
 {
     this->_onDestroy();
     this->disconnected = true;

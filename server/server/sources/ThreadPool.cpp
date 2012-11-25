@@ -1,7 +1,7 @@
 #include "Configurations.h"
 #include "Log.h"
 #include "Server.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Thread.h"
 #include "ThreadPool.h"
 
@@ -18,21 +18,27 @@ ThreadPool::~ThreadPool()
     LOG_TRACE("ThreadPool destroyed!", "ThreadPool", "~ThreadPool");
 }
 
-void            ThreadPool::addTask(ThreadPool::ITask *task)
+void    ThreadPool::addTask(ThreadPool::ITask *task)
 {
-    SmartMutex  mutex(this->mutex);
+    Mutex   mutex(this->mutex, "ThreadPool", "addTask");
+
+    if (!mutex)
+        return ;
     this->tasks.enqueue(task);
     this->_executeTask();
 }
 
-unsigned int    ThreadPool::getThreadNumber() const
+unsigned int ThreadPool::getThreadNumber() const
 {
     return (this->threadsNumber);
 }
 
-void            ThreadPool::setThreadNumber(unsigned int threadNumber)
+void    ThreadPool::setThreadNumber(unsigned int threadNumber)
 {
-    SmartMutex  mutex(this->mutex);
+    Mutex   mutex(this->mutex, "ThreadPool", "setThreadNumber");
+
+    if (!mutex)
+        return ;
     if (threadNumber == 0)
         threadNumber = 1;
     this->threadsNumber = threadNumber;
@@ -42,9 +48,12 @@ void            ThreadPool::setThreadNumber(unsigned int threadNumber)
         this->_removeThread(this->available.head());
 }
 
-void            ThreadPool::shutdown()
+void    ThreadPool::shutdown()
 {
-    SmartMutex  mutex(this->mutex);
+    Mutex   mutex(this->mutex, "ThreadPool", "shutdown");
+
+    if (!mutex)
+        return ;
     QListIterator<Thread *> it(this->threads);
     // Quits the event loop of each threads
     while (it.hasNext())
@@ -64,9 +73,12 @@ void            ThreadPool::shutdown()
         delete it.next();
 }
 
-void            ThreadPool::_threadAvailable(Thread *thread)
+void    ThreadPool::_threadAvailable(Thread *thread)
 {
-    SmartMutex  mutex(this->mutex);
+    Mutex   mutex(this->mutex, "ThreadPool", "_threadAvailable");
+
+    if (!mutex)
+        return ;
     if (this->threads.contains(thread) && !this->available.contains(thread))
         this->available.enqueue(thread);
     if (this->threads.count() > (int)this->threadsNumber && !this->available.isEmpty())
@@ -98,15 +110,21 @@ void    ThreadPool::_executeTask()
             this->available.dequeue()->taskAvailable(this->tasks.dequeue());
 }
 
-QThread         *ThreadPool::ITask::getThread() const
+QThread *ThreadPool::ITask::getThread() const
 {
-    SmartMutex  mutex(this->mutex);
+    Mutex   mutex(this->mutex, "ThreadPool", "getThread");
+
+    if (!mutex)
+        return (NULL);
     return (this->thread);
 }
 
-void            ThreadPool::ITask::setThread(QThread *thread)
+void    ThreadPool::ITask::setThread(QThread *thread)
 {
-    SmartMutex  mutex(this->mutex);
+    Mutex   mutex(this->mutex, "ThreadPool", "setThread");
+
+    if (!mutex)
+        return ;
     this->thread = thread;
 }
 

@@ -1,6 +1,6 @@
 #include "Log.h"
 #include "Server.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 Threads::Threads(QObject *parent) : QObject(parent)
@@ -13,9 +13,9 @@ Threads::~Threads()
     LOG_TRACE("Threads destroyed!", "Threads", "~Threads");
 }
 
-void            Threads::newThread(QThread *thread, bool remove)
+void    Threads::newThread(QThread *thread, bool remove)
 {
-    SmartMutex  mutex(this->mutex, "Threads", "newThread");
+    Mutex   mutex(this->mutex, "Threads", "newThread");
 
     if (!mutex)
         return ;
@@ -39,9 +39,9 @@ void            Threads::newThread(QThread *thread, bool remove)
     }
 }
 
-void            Threads::deleteThread(QThread *thread)
+void    Threads::deleteThread(QThread *thread)
 {
-    SmartMutex  mutex(this->mutex, "Threads", "deleteThread");
+    Mutex   mutex(this->mutex, "Threads", "deleteThread");
 
     if (!mutex)
         return ;
@@ -55,7 +55,7 @@ void            Threads::deleteThread(QThread *thread)
 
 void    Threads::shutdown()
 {
-    SmartMutex  mutex(this->mutex, "Threads", "shutdown");
+    Mutex   mutex(this->mutex, "Threads", "shutdown");
 
     if (!mutex)
         return ;
@@ -88,9 +88,9 @@ void    Threads::shutdown()
     this->threads.clear();
 }
 
-void            Threads::_threadFinished()
+void    Threads::_threadFinished()
 {
-    SmartMutex  mutex(this->mutex, "Threads", "_threadFinished");
+    Mutex   mutex(this->mutex, "Threads", "_threadFinished");
 
     if (!mutex)
         return ;
@@ -116,9 +116,9 @@ void            Threads::_threadFinished()
     }
 }
 
-void            Threads::_threadDestroyed(QObject *object)
+void    Threads::_threadDestroyed(QObject *object)
 {
-    SmartMutex  mutex(this->mutex, "Threads", "_threadDestroyed");
+    Mutex   mutex(this->mutex, "Threads", "_threadDestroyed");
 
     if (!mutex)
         return ;

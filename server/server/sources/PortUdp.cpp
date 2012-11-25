@@ -3,7 +3,7 @@
 
 #include "Log.h"
 #include "PortUdp.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 #include "Threads.h"
 
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
@@ -42,7 +42,7 @@ void    PortUdp::run()
     Port::_isListening(true);
     this->threadStarted.setResult(true);
     this->exec();
-    SmartMutex mutex(this->mutex, "PortUdp", "run");
+    Mutex mutex(this->mutex, "PortUdp", "run");
     this->socket.close();
     // Removes the unread datagrams
     QHashIterator<Client *, QByteArray *> readBuffer(this->readBuffer);
@@ -58,9 +58,9 @@ void    PortUdp::run()
     LOG_INFO("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
 }
 
-void            PortUdp::close()
+void    PortUdp::close()
 {
-    SmartMutex  mutex(this->mutex, "PortUdp", "close");
+    Mutex   mutex(this->mutex, "PortUdp", "close");
 
     if (!mutex)
         return ;
@@ -71,9 +71,9 @@ void            PortUdp::close()
     Port::close();
 }
 
-void            PortUdp::read(Client *client)
+void    PortUdp::read(Client *client)
 {
-    SmartMutex  mutex(this->mutex, "PortUdp", "read");
+    Mutex       mutex(this->mutex, "PortUdp", "read");
     QByteArray  &data = client->getData();
     quint64     size = 0;
 
@@ -96,11 +96,11 @@ void            PortUdp::read(Client *client)
     client->bytesRead();
 }
 
-bool            PortUdp::write(QByteArray *data, Client *client)
+bool    PortUdp::write(QByteArray *data, Client *client)
 {
-    SmartMutex  mutex(this->mutex, "PortUdp", "write");
-    int         wrote;
-    bool        result = true;
+    Mutex   mutex(this->mutex, "PortUdp", "write");
+    int     wrote;
+    bool    result = true;
 
     if (!mutex)
         return (false);
@@ -116,9 +116,9 @@ bool            PortUdp::write(QByteArray *data, Client *client)
     return (result);
 }
 
-void             PortUdp::_readPendingDatagrams()
+void    PortUdp::_readPendingDatagrams()
 {
-    SmartMutex   mutex(this->mutex, "PortUdp", "_readPendingDatagrams");
+    Mutex        mutex(this->mutex, "PortUdp", "_readPendingDatagrams");
     Client       *client;
     QHostAddress peerAddress;
     quint16      peerPort;
@@ -158,7 +158,7 @@ void             PortUdp::_readPendingDatagrams()
 
 Client  *PortUdp::_finished(Client *client)
 {
-    SmartMutex  mutex(this->mutex, "PortUdp", "_finished");
+    Mutex   mutex(this->mutex, "PortUdp", "_finished");
 
     if (mutex)
         return (NULL);

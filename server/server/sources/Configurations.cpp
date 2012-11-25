@@ -8,14 +8,14 @@
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Server.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 Configurations::Configurations(const QString &configurationPath, QObject *parent) : QObject(parent),
                                                                                     mutex(QMutex::Recursive)
 {
     QString         path = configurationPath;
     Configuration   *instance;
-    SmartMutex      mutex(this->mutex, "Configurations", "server");
+    Mutex           mutex(this->mutex, "Configurations", "server");
 
     if (!mutex)
         return ;
@@ -72,7 +72,7 @@ Configurations::Configurations(const QString &configurationPath, QObject *parent
 
 Configurations::~Configurations()
 {
-    SmartMutex  mutex(this->mutex, "Configurations", "~Configurations");
+    Mutex   mutex(this->mutex, "Configurations", "~Configurations");
 
     if (!mutex)
         return ;
@@ -83,12 +83,12 @@ Configurations::~Configurations()
     LOG_TRACE("Configurations destroyed!", "Configurations", "~Configurations");
 }
 
-Configuration       *Configurations::getConfiguration(const QString &configuration, const QString &alternative)
+Configuration   *Configurations::getConfiguration(const QString &configuration, const QString &alternative)
 {
     QString         cleaned;
     QString         path;
     Configuration   *instance = NULL;
-    SmartMutex      mutex(this->mutex, "Configurations", "instance");
+    Mutex           mutex(this->mutex, "Configurations", "instance");
 
     if (!mutex)
         return (NULL);

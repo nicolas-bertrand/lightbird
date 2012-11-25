@@ -65,7 +65,7 @@ void            Uploads::onDeserializeContent(LightBird::IClient &client)
     qint64      position = 0;
     qint64      i = 0, j = 0;
     qint64      boundarySize;
-    SmartMutex  mutex(this->mutex, Plugin::api().getId(), "Uploads", "onDeserializeContent");
+    Mutex       mutex(this->mutex, Plugin::api().getId(), "Uploads", "onDeserializeContent");
 
     if (!mutex || !this->uploads.contains(id) || this->uploads[id].idClient != client.getId())
         return ;

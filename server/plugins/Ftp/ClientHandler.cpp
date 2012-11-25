@@ -1,6 +1,6 @@
 #include "ClientHandler.h"
 #include "Plugin.h"
-#include "SmartMutex.h"
+#include "Mutex.h"
 
 #include "IClient.h"
 
@@ -139,7 +139,7 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
     // Passive mode
     if (client.getMode() == LightBird::IClient::SERVER)
     {
-        SmartMutex mutex(this->mutex, "ClientHandler", "onDataConnect");
+        Mutex mutex(this->mutex, "ClientHandler", "onDataConnect");
         if (!mutex)
             return (false);
         // The first control connection with the same ip as the client is used
@@ -187,7 +187,7 @@ bool    ClientHandler::doDataExecute(LightBird::IClient &client)
 
     if (session == NULL)
     {
-        SmartMutex mutex(this->mutex, "ClientHandler", "doDataExecute");
+        Mutex mutex(this->mutex, "ClientHandler", "doDataExecute");
         // If the control connection is still not ready, we have to wait
         if (mutex && this->passiveClients.contains(QPair<QHostAddress, QString>(client.getPeerAddress(), client.getId()))
             && client.getMode() == LightBird::IClient::SERVER)
@@ -222,7 +222,7 @@ void    ClientHandler::onDataDestroy(LightBird::IClient &client)
     if (!client.getInformations().contains(DATA_DOWNLOAD) && !client.getInformations().contains(DATA_UPLOAD))
         this->doDataExecute(client);
     // Cleans the passiveClients list
-    SmartMutex mutex(this->mutex, "ClientHandler", "onDataDestroyed");
+    Mutex mutex(this->mutex, "ClientHandler", "onDataDestroyed");
     if (!mutex)
         return ;
     QMutableListIterator<QPair<QHostAddress, QString> > it(this->passiveClients);

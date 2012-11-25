@@ -16,9 +16,9 @@ HEADERS = Defines.h \
     Initialize.h \
     Library.h \
     LightBird.h \
+    Mutex.h \
     Preview.h \
     Properties.h \
-    SmartMutex.h \
     Table.h \
     TableAccessors.h \
     TableAccounts.h \
@@ -38,10 +38,10 @@ SOURCES = Identify.cpp \
     Initialize.cpp \
     Library.cpp \
     LightBird.cpp \
+    Mutex.cpp \
     Preview.cpp \
     Properties.cpp \
     Sha256.cpp \
-    SmartMutex.cpp \
     Table.cpp \
     TableAccessors.cpp \
     TableAccounts.cpp \
