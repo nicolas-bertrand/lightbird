@@ -226,6 +226,7 @@ self.Header = function (player)
         self.element; // The initial y position of the header
         self.mouse; // The y position of the mouse in the header
         self.initialHeight; // The initial height of the playlist
+        self.tabFocused = $(); // The tab that has the focus
         
         // Default values
         node.header.height(C.Player.headerHeight);
@@ -248,7 +249,7 @@ self.Header = function (player)
         tab[0].tabIconEvent = new Array(); // Allows to send events to the icon (focus, odd, even)
         self.drawTabIcon(tab.children(".left")[0], 4, gl_svg.Player.tabLeft);
         self.drawTabIcon(tab.children(".right")[0], -5, gl_svg.Player.tabRight);
-        self.drawCloseIcon(tab.children(".close")[0], gl_svg.Player.tabClose);
+        self.drawCloseIcon(tab.children(".close").children()[0], gl_svg.Player.tabClose);
         tab.children(".middle").children()[0].innerHTML = name;
         self.focus(tab);
         tab.mousedown(function (e) { self.mouseDownOnTab(e); });
@@ -330,19 +331,61 @@ self.Header = function (player)
         icon.attr("stroke", "none");
         icon.glow({ width : 3, color : "#000000", opacity : 0.13 });
         // Events
-        $(icon.node.parentNode).mouseenter(function (e)
+        destination.mouseEnterCloseIcon = function ()
         {
             icon.attr("fill-opacity", "0.8");
-        });
-        $(icon.node.parentNode).mouseleave(function (e)
+        };
+        $(destination).mouseenter(function () { destination.mouseEnterCloseIcon(); });
+        destination.mouseLeaveCloseIcon = function ()
         {
-            icon.attr("fill-opacity", "0.25");
-        });
-        $(icon.node.parentNode).click(function (e)
+            if (!this.mouseOverCloseIcon)
+                icon.attr("fill-opacity", "0.25");
+        }
+        $(destination).mouseleave(function () { destination.mouseLeaveCloseIcon(); });
+        $(destination).click(function (e)
         {
             if (e.which == 1)
-                self.removeTab($(destination.parentNode));
+                self.removeTab($(destination).parents(".tab"));
         });
+    }
+    
+    // Emulates the mouse enter, leave and click events for the close icon that is below the focused tab.
+    self.mouseMoveOnFocusTab = function (e)
+    {
+        // We are not over the the close icon
+        if (e.pageX - e.delegateTarget.offsetLeft > C.Player.tabExternLeft || !e.delegateTarget.previousSibling)
+            return ;
+        // Gets the exact position of the icon
+        var left =  e.delegateTarget.offsetLeft - 7;
+        var right = left + 15;
+        var top = $(e.delegateTarget).offset().top + 3;
+        var bottom = top + 15;
+        // We are over the icon
+        if (e.pageX <= right && e.pageY >= top && e.pageY <= bottom)
+        {
+            var close = $(e.delegateTarget.previousSibling).children(".close")[0].firstChild;
+            if (close.mouseOverCloseIcon)
+                return ;
+            // Emulates the click event
+            var tabLeft = $(e.delegateTarget).children(".left");
+            tabLeft.mousedown(function (e) { close.mouseDownOnCloseIcon = (e.which == 1); });
+            $(close).mouseup(function (ev) { if (close.mouseDownOnCloseIcon && ev.which == 1) self.removeTab($(e.delegateTarget.previousSibling)); });
+            // Emulates the mouse leave event
+            $("body").mousemove(function (e)
+            {
+                if (e.pageX < left || e.pageX > right || e.pageY < top || e.pageY > bottom)
+                {
+                    $("body").unbind(e);
+                    tabLeft.unbind("mousedown");
+                    $(close).unbind("mouseup");
+                    close.mouseOverCloseIcon = false;
+                    close.mouseDownOnCloseIcon = false;
+                    close.mouseLeaveCloseIcon();
+                }
+            });
+            close.mouseEnterCloseIcon();
+            close.mouseOverCloseIcon = true;
+        }
     }
     
     // Removes a tab from the header
@@ -373,18 +416,21 @@ self.Header = function (player)
         var tabs = node.tabs.children();
         var z = tabs.length;
         
-        // Updates the z-indes and removes the previous focus
+        // Updates the z-index
         tabs.each(function ()
         {
             this.style.zIndex = z--;
-            $(this).removeClass("focus");
         });
+        self.tabFocused.removeClass("focus");
+        self.tabFocused.unbind("mousemove");
         self.updateOddEven();
         // Applies the new focus
         tab.addClass("focus");
         for (var j = 0; j < tab[0].tabIconEvent.length; ++j)
             tab[0].tabIconEvent[j]("focus");
         tab.css("z-index", tabs.length + 1);
+        tab.mousemove(function (e) { self.mouseMoveOnFocusTab(e); });
+        self.tabFocused = tab;
     }
     
     // Updates the odd / even alternation of the tabs.

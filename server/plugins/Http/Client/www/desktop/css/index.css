@@ -877,11 +877,13 @@ a:visited
     margin-right: 5px;
 }
 
-#desktop>.bottom>.playlist>.header>.tabs>.tab>.close>svg
+#desktop>.bottom>.playlist>.header>.tabs>.tab>.close>div
 {
     margin-left: 2px;
     margin-right: 1px;
-    margin-top: 5px;
+    margin-top: 4px;
+    width: 14px;
+    height: 14px;
 }
 
 #desktop>.bottom>.playlist>.header>.tab_template
