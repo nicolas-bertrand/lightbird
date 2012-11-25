@@ -6,21 +6,14 @@
 
 #include "IMime.h"
 
-#include "Execute.h"
 #include "LightBird.h"
 #include "Medias.h"
 #include "Plugin.h"
 
-Plugin  *Plugin::instance = NULL;
-
-Plugin &Plugin::getInstance()
-{
-    return (*Plugin::instance);
-}
+Plugin  *Plugin::_instance = NULL;
 
 Plugin::Plugin()
 {
-
 }
 
 Plugin::~Plugin()
@@ -30,7 +23,7 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->_api = api;
-    Plugin::instance = this;
+    Plugin::_instance = this;
     this->daysOfWeek[1] = "Mon";
     this->daysOfWeek[2] = "Tue";
     this->daysOfWeek[3] = "Wed";
@@ -55,9 +48,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     this->interfaces.push_back("mobile");
     if ((this->wwwDir = this->_api->configuration(true).get("resources/resource")).isEmpty())
         this->wwwDir = "www";
-    Medias::getInstance(this);
     // This timer will remove the outdated data in this->attempts
-    api->timers().setTimer("attempts", IDENTIFICATION_TIME * 1000);
+    this->_api->timers().setTimer("attempts", IDENTIFICATION_TIME * 1000);
     return (true);
 }
 
@@ -117,14 +109,14 @@ void        Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDese
         if (!client.getAccount().exists())
             this->_api->network().disconnect(client.getId());
         // Manages the upload of files
-        else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().endsWith("/Execute/Uploads"))
+        else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().endsWith("/command/uploads"))
         {
             if (type == LightBird::IOnDeserialize::IDoDeserializeHeader)
-                this->uploads.onDeserializeHeader(client);
+                this->_uploads.onDeserializeHeader(client);
             else if (type == LightBird::IOnDeserialize::IDoDeserializeContent)
-                this->uploads.onDeserializeContent(client);
+                this->_uploads.onDeserializeContent(client);
         }
-        else if (!request.getUri().path().contains("/Execute/Uploads"))
+        else if (!request.getUri().path().contains("/commands/uploads"))
             this->_api->network().disconnect(client.getId());
     }
 }
@@ -140,9 +132,9 @@ bool        Plugin::doExecution(LightBird::IClient &client)
         return (true);
     // Finds the interface of the user
     interface = this->_getInterface(client);
-    // The client wants to execute something
-    if (uri.startsWith("Execute/"))
-        Execute(*this->_api, client, uri.right(uri.size() - uri.indexOf('/') - 1));
+    // The client wants to execute a command
+    if (uri.startsWith("command/"))
+        this->commands.execute(client, uri.right(uri.size() - uri.indexOf('/') - 1));
     else if (uri == "Translation.js")
         this->_translation(client, interface);
     // The client wants to download a file
@@ -177,14 +169,14 @@ bool        Plugin::doExecution(LightBird::IClient &client)
 bool        Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type)
 {
     if (type == LightBird::IOnSerialize::IDoSerializeContent && !client.getRequest().isError())
-        Medias::getInstance().update(client);
+        this->_medias.update(client);
     return (true);
 }
 
 void        Plugin::onFinish(LightBird::IClient &client)
 {
-    Medias::getInstance().onFinish(client);
-    this->uploads.onFinish(client);
+    this->_medias.onFinish(client);
+    this->_uploads.onFinish(client);
     // The session is destroyed and all the clients associated to it are disconnected
     if (client.getInformations().contains("disconnect") && !client.getSessions().isEmpty())
         this->_api->sessions().destroy(client.getSessions().first(), true);
@@ -192,8 +184,8 @@ void        Plugin::onFinish(LightBird::IClient &client)
 
 void    Plugin::onDestroy(LightBird::IClient &client)
 {
-    Medias::getInstance().disconnected(client);
-    this->uploads.onDestroy(client);
+    this->_medias.disconnected(client);
+    this->_uploads.onDestroy(client);
 }
 
 bool    Plugin::timer(const QString &name)
@@ -338,11 +330,6 @@ QString             Plugin::_getMime(const QString &file)
     return (result);
 }
 
-LightBird::IApi &Plugin::api()
-{
-    return (*Plugin::instance->_api);
-}
-
 void    Plugin::response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content)
 {
     client.getResponse().setCode(code);
@@ -374,7 +361,7 @@ void        Plugin::addCookie(LightBird::IClient &client, const QString &name, c
 
     cookie = name + "=" + value + "; ";
     if (!value.isEmpty())
-        cookie += "expires=" + Plugin::getInstance().httpDate(QDateTime::currentDateTimeUtc().addYears(2), true) + "; ";
+        cookie += "expires=" + Plugin::instance().httpDate(QDateTime::currentDateTimeUtc().addYears(2), true) + "; ";
     cookie += "path=/";
     client.getResponse().getHeader().insertMulti("set-cookie", cookie);
 }
@@ -410,14 +397,29 @@ void    Plugin::identificationFailed(LightBird::IClient &client)
     this->mutex.unlock();
 }
 
-Files &Plugin::getFiles()
+Plugin  &Plugin::instance()
 {
-    return (this->files);
+    return (*Plugin::_instance);
 }
 
-Uploads &Plugin::getUploads()
+LightBird::IApi &Plugin::api()
 {
-    return (this->uploads);
+    return (*Plugin::_instance->_api);
+}
+
+Files   &Plugin::files()
+{
+    return (Plugin::_instance->_files);
+}
+
+Medias  &Plugin::medias()
+{
+    return (Plugin::_instance->_medias);
+}
+
+Uploads &Plugin::uploads()
+{
+    return (Plugin::_instance->_uploads);
 }
 
 Q_EXPORT_PLUGIN2(plugin, Plugin)

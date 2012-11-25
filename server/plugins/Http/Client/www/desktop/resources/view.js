@@ -7,6 +7,7 @@ function ResourceView(task, fileIndex)
         // Members
         resource.root = $(task.content).children(".view")[0]; // The root element of the resource
         resource.file = gl_files.list[fileIndex]; // The file displayed by the resource
+        resource.isFocus = true; // If the task had the focus in the last mouse down event
         resource.object; // The object that displays the file, based on its type
         
         // Capitalizes the first char of the type, to get the name of the object
@@ -17,6 +18,9 @@ function ResourceView(task, fileIndex)
         task.setResource(resource);
         // Transparent background
         task.setBackground(true);
+        
+        // Events
+        $(resource.root).mousedown(function (e) { resource.isFocus = task.isFocus(); });
     }
     
     // The task have been resized.
@@ -44,19 +48,17 @@ resource.Image = function ()
         self.image; // The img element
         self.resize = self.keepRatio; // The function used to resize the image when onResize is called
         self.horizontalAlign = false; // False if the css class horizontal align is defined
-        self.isFocus = true; // If the task had the focus in the last mouse down event
     
         // Displays the image
         var file = resource.file;
 		var url = file.name + "?id=" + file.id + "&token=" + getToken(file.name);
-        resource.root.innerHTML = "<img src=" + url + " alt=" + file.name + " />";
+        resource.root.innerHTML = "<img src=\"" + url + "\" alt=\"" + file.name + "\" class=\"file\" />";
         self.image = $(resource.root).children("img")[0];
         self.setOverflow(false);
         
         // Events
         $(resource.root).click(function (e) { self.changeBackground(e); });
         $(self.image).click(function (e) { self.changeResize(e); });
-        $(resource.root).mousedown(function (e) { self.isFocus = task.isFocus(); });
     }
     
     // Resizes the image to fit in the task dimensions.
@@ -97,9 +99,9 @@ resource.Image = function ()
             marginTop += Math.floor((h - height) / 2);
         self.image.style.marginTop = marginTop + "px";
         // Sets the minimal size
-        if (height < C.View.imageMinHeight)
+        if (height < C.View.minHeight)
         {
-            height = C.View.imageMinHeight;
+            height = C.View.minHeight;
             width = Math.floor(height * naturalWidth / naturalHeight);
             self.setOverflow(true);
         }
@@ -154,8 +156,8 @@ resource.Image = function ()
     // Resizes the image so that it fills all the space.
     self.scale = function (left, top, width, height)
     {
-        if (height < C.View.imageMinHeight)
-            height = C.View.imageMinHeight;
+        if (height < C.View.minHeight)
+            height = C.View.minHeight;
         $(self.image).width(width);
         $(self.image).height(height);
     }
@@ -164,7 +166,7 @@ resource.Image = function ()
     // @param background : If the defined, the background is changed to this value.
     self.changeBackground = function (e, background)
     {
-        if ((e && e.which != 1) || !self.isFocus)
+        if ((e && e.which != 1) || !resource.isFocus)
             return ;
         if (background)
         {
@@ -179,7 +181,7 @@ resource.Image = function ()
         {
             if (self.background == "transparent")
             {
-                task.setBackground(false, "image_background_black");
+                task.setBackground(false, "view_background_black");
                 self.background = "black";
                 self.setOverflow(false);
             }
@@ -205,7 +207,7 @@ resource.Image = function ()
     // Changes the resize function of the image.
     self.changeResize = function (e)
     {
-        if (e.which != 1 || !self.isFocus)
+        if (e.which != 1 || !resource.isFocus)
             return ;
         $(resource.root).removeClass("scroll");
         // Go to scale from keepRatio, or from naturalSize if the image is smaller than the task
@@ -246,6 +248,110 @@ resource.Image = function ()
         // The overflow is only disabled in keepRatio mode
         if (overflow || self.resize == self.keepRatio)
             task.setOverflow(overflow);
+    }
+
+    self.init();
+    return (self);
+}
+
+resource.Video = function ()
+{
+    var self = this;
+    
+    self.init = function ()
+    {
+        // Members
+        self.video; // The video element
+        self.background = "transparent"; // The background currently displayed (transparent, black or default)
+        
+        // Displays the video
+        var file = resource.file;
+		var url = "command/video.webm"
+        url += "?id=" + file.id + "&token=" + getToken(url);
+        resource.root.innerHTML = "<video autoplay class=\"file\" />";
+        self.video = $(resource.root).children("video")[0];
+        self.video.innerHTML = "<source src=\"" + url + "\" type='video/webm; codecs=\"vp8.0, vorbis\"'/>";
+        
+        /*<source src="movie.webm" type='video/webm; codecs="vp8.0, vorbis"'/>
+        <source src="movie.ogg" type='video/ogg; codecs="theora, vorbis"'/>
+        <source src="movie.mp4" type='video/mp4; codecs="avc1.4D401E, mp4a.40.2"'/>*/
+        
+        // Events
+        $(resource.root).click(function (e) { self.changeBackground(e); });
+        $(self.video).click(function (e) { self.playPause(e); });
+    }
+    
+    self.onResize = function (left, top, w, h)
+    {
+        var naturalWidth = self.video.videoWidth ? self.video.videoWidth : resource.file.width;
+        var naturalHeight = self.video.videoHeight ? self.video.videoHeight : resource.file.height;
+        var width = w;
+        var height = h;
+        
+        // Computes the size in order to display all the video with the natural ratio
+        height = Math.floor(width * naturalHeight / naturalWidth);
+        if (h < height)
+        {
+            width = Math.floor(h * naturalWidth / naturalHeight);
+            height = h;
+        }
+        // Centers the video vertically
+        var marginTop = 0;
+        if (height < h)
+            marginTop += Math.floor((h - height) / 2);
+        self.video.style.marginTop = marginTop + "px";
+        // Sets the minimal size
+        if (height < C.View.minHeight)
+        {
+            height = C.View.minHeight;
+            width = Math.floor(height * naturalWidth / naturalHeight);
+            task.setOverflow(true);
+        }
+        else
+            task.setOverflow(false);
+        // Resizes the video
+        $(self.video).width(width);
+        $(self.video).height(height);
+    }
+    
+    self.playPause = function (e)
+    {
+        if (e.which != 1)
+            return ;
+        if (self.video.paused)
+            self.video.play();
+        else
+            self.video.pause();
+    }
+    
+    // Changes the color of the background.
+    // @param background : If the defined, the background is changed to this value.
+    self.changeBackground = function (e, background)
+    {
+        if ((e && e.which != 1) || !resource.isFocus)
+            return ;
+        if (!e || e.target == resource.root)
+        {
+            if (self.background == "transparent")
+            {
+                task.setBackground(false, "view_background_black");
+                self.background = "black";
+                task.setOverflow(false);
+            }
+            else if (self.background == "black")
+            {
+                task.setBackground();
+                self.background = "default";
+                task.setOverflow(true);
+            }
+            else
+            {
+                task.setBackground(true);
+                self.background = "transparent";
+                task.setOverflow(true);
+            }
+            self.onResize(task.left, task.top, task.width, task.height);
+        }
     }
 
     self.init();

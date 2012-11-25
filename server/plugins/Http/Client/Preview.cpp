@@ -3,7 +3,7 @@
 
 #include "Preview.h"
 
-Preview::Preview(LightBird::IApi &a, LightBird::IClient &cl) : api(a), client(cl), uri(client.getRequest().getUri()), response(client.getResponse())
+Preview::Preview(LightBird::IClient &cl) : client(cl), uri(client.getRequest().getUri()), response(client.getResponse())
 {
 }
 
@@ -61,5 +61,5 @@ void    Preview::_error(const QString &method, int code, const QString &message,
     if (!content.isEmpty())
         this->response.getContent().setContent(content);
     if (!log.isEmpty())
-        this->api.log().write(level, log, this->properties, "Preview", method);
+        Plugin::api().log().write(level, log, this->properties, "Preview", method);
 }

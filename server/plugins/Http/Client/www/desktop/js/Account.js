@@ -1,7 +1,6 @@
-// The account singleton
+// Manages the account.
 var gl_account;
 
-// Manages the identification of the user.
 function Account()
 {
     var self = this;
@@ -37,7 +36,7 @@ function Account()
             self.remember = false;
             // Tells the server that the session can be destroyed
             if (!gl_loaded)
-                request("GET", "Execute/Disconnect");
+                request("GET", "command/disconnect");
             // Deletes the session cookie and the identifiant
             setCookie("sid", "", 0);
             localStorage.removeItem("identifiant");
@@ -60,6 +59,7 @@ function Account()
                     self.identified = true;
                     animation(document.getElementById("desktop"), 0, animationOpacity, true);
                     animation(self.background, 0, animationOpacity, true);
+                    gl_files.getFiles();
                 }
                 // Displays the identification panel
                 else
@@ -132,7 +132,7 @@ function Account()
                 // Displays the identification panel
                 animation(greenButton, 500, animationOpacity, true, function()
                 {
-                    animation(document.getElementById("identification"), 500, animationOpacity, false, function()
+                    animation(document.getElementById("identification"), 0, animationOpacity, false, function()
                     {
                         inputs[0].value = "Utilisateur";
                         inputs[1].value = "Password";
@@ -144,10 +144,11 @@ function Account()
                         greenIcon.style.display = "none";
                         changeOpacity(blueButton, 1);
                         self.identification = false;
-                    }, 500);
-                    animation(document.getElementById("desktop"), 2000, animationOpacity, true, null, 500);
-                    animation(self.background, 500, animationOpacity, true, null, 750);
+                    }, 0);
+                    animation(document.getElementById("desktop"), 0, animationOpacity, true, null, 0);
+                    animation(self.background, 0, animationOpacity, true, null, 0);
                 });
+                gl_files.getFiles();
             }
             // Otherwise a wrong password has been gived
             else
@@ -165,12 +166,12 @@ function Account()
         var generateIdentifiant = function(HttpRequest)
         {
             localStorage.setItem("identifiant", SHA256(name + SHA256(password + HttpRequest.responseText) + getCookie("sid")));
-            request("GET", "Execute/Identify", identify);
+            request("GET", "command/identify", identify);
         }
 
         // Gets the salt from the account name, that will allow us to generate the identifiant
         var salt = getUuid();
-        animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "Execute/Identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);});
+        animation(yellowButton, 500, animationOpacity, true, function(){request("GET", "command/identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);});
     }
 
     // This method is called when the focus is on an identification form, and adds
@@ -215,16 +216,15 @@ function Account()
         self.identified = false;
         setCookie("sid", "", 0);
         localStorage.removeItem("identifiant");
-        // Closes the windows
-        for (id in gl_windows)
-            closeWindow(id);
+        // Closes the all the pages
+        gl_desktop.disconnect();
         // Hides the desktop and the background
         animation(document.getElementById("desktop"), 0, animationOpacity, false, function() {self.disconnecting = false; self.checkIdentification();});
         animation(self.background, 0, animationOpacity, false, null, 0);
         // Displays the identification background
         self.idenfificationBackground.style.display = "block";
         // Tells the server that the client want to disconnect
-        request("GET", "Execute/Disconnect");
+        request("GET", "command/disconnect");
     }
 
     // Handles the lock/unlock button that allows user to stay connected when the page is refreshed.

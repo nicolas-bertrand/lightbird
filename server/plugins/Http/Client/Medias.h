@@ -3,33 +3,38 @@
 
 # include <QMap>
 # include <QMutex>
-# include <QObject>
 
+# include "IApi.h"
 # include "IClient.h"
+# include "IIdentify.h"
 
 # include "Media.h"
 
-class Medias : public QObject
+class Medias
 {
-    Q_OBJECT
-
 public:
-    static Medias   &getInstance(QObject *parent = NULL);
-
-    void            start(LightBird::IClient &client, bool video);
-    void            onFinish(LightBird::IClient &client);
-    void            update(LightBird::IClient &client);
-    void            stop(LightBird::IClient &client);
-    void            disconnected(LightBird::IClient &client);
-
-private:
-    Medias(QObject *parent = NULL);
+    Medias();
     ~Medias();
 
-    QMap<QString, Media *>  medias;
-    QStringList             stopList;
-    QMutex                  mutex;
-    static Medias           *instance;
+    enum Type
+    {
+        AUDIO,
+        VIDEO
+    };
+
+    void    start(LightBird::IClient &client, Medias::Type type = Medias::VIDEO);
+    void    onFinish(LightBird::IClient &client);
+    void    update(LightBird::IClient &client);
+    void    stop(LightBird::IClient &client);
+    void    disconnected(LightBird::IClient &client);
+
+private:
+    Medias(const Medias &);
+    Medias &operator=(const Medias &);
+
+    QMap<QString, Media *> medias;
+    QStringList            stopList;
+    QMutex                 mutex;
 };
 
 #endif // MEDIAS_H

@@ -1,17 +1,13 @@
 #ifndef FILES_H
 # define FILES_H
 
-# include <QVariantList>
-
 # include "IClient.h"
 
 /// @brief Manages the files.
-class Files : public QObject
+class Files
 {
-    Q_OBJECT
-
 public:
-    Files(QObject *parent = NULL);
+    Files();
     ~Files();
 
     /// @brief Returns the list of the files in json.

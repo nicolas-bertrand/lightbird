@@ -1,7 +1,6 @@
-// The windows singleton
+// Manages the windows.
 var gl_windows;
 
-// Manages the windows.
 function Windows()
 {
     var self = this;
@@ -120,10 +119,10 @@ function Window(page)
         }
         
         // Adds the SVG icons
-        self.addIcon($(self.node.close)[0], "#ff7733", 1, "M8.946,7.407L7.421,8.932L4.479,5.99L1.525,8.943L0,7.418l2.954-2.954L0.015,1.525L1.54,0l2.938,2.939l2.929-2.928l1.524,1.525L6.004,4.464L8.946,7.407z");
-        self.addIcon($(self.node.hide)[0], "#ffdd33", 4, "M0,0h10.006v3.045H0V0z");
-        self.addIcon($(self.node.window)[0], "#46da57", 0, "M0,10.011V0h10v10.011H0zM7.992,2H2.015v6.021h5.977V2z");
-        self.addIcon($(self.node.fullscreen)[0], "#33bbff", 0, "M9.989,6.029l-4,0.006v3.964h-2V6.038L0,6.044V3.982l3.989-0.006V0h2v3.972l4-0.006V6.029z");
+        self.addIcon($(self.node.close)[0], "#ff7733", 1, gl_svg.Window.close);
+        self.addIcon($(self.node.hide)[0], "#ffdd33", 4, gl_svg.Window.hide);
+        self.addIcon($(self.node.window)[0], "#46da57", 0, gl_svg.Window.window);
+        self.addIcon($(self.node.fullscreen)[0], "#33bbff", 0, gl_svg.Window.fullscreen);
         
         // Adds the window to the list
         $(self.element).appendTo(gl_windows.node.windows);
@@ -196,7 +195,7 @@ function Window(page)
             left = p.left + x;
             width = p.width - x;
         }
-        // Applies the new coordinates the their limits
+        // Applies the limits of the new coordinates
         if (left != undefined)
         {
             if (width < C.Window.minWidth)

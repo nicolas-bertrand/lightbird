@@ -10,11 +10,12 @@ class Audio : public Media
 public:
     Audio(LightBird::IClient &client);
     ~Audio();
-    /// @brief Read the data on the transcoding stream and put it in the client's response.
-    void                read();
+
+    /// @brief Reads the data on the transcoding stream and put it in the client's response.
+    void    read();
 
 private:
-    LightBird::IAudio   *audio; ///< Transcode the audio in another format while it is streamed.
+    LightBird::IAudio *audio; ///< Transcodes the audio in another format while it is streamed.
 };
 
 #endif // AUDIO_H

@@ -1,6 +1,4 @@
-/* This file manages the desktop. */
-
-// The desktop singleton
+// Manages the desktop.
 var gl_desktop;
 
 function Desktop(task)
@@ -15,7 +13,6 @@ function Desktop(task)
         self.node.desktop = $("#desktop");
         self.node.top = $("#desktop>.top")[0];
         self.node.middle = $("#desktop>.middle")[0];
-        self.node.bottom = $("#desktop>.bottom")[0];
         self.node.tasks_list = $(self.node.middle).children(".tasks_list").children(".icons")[0];
         self.node.tasks_list.container = $(self.node.middle).children(".tasks_list")[0];
         self.node.tasks_list.top = $(self.node.tasks_list).children(".top")[0];
@@ -42,7 +39,6 @@ function Desktop(task)
         
         // Sets the default values
         $(self.node.top).height(C.Desktop.topHeight);
-        $(self.node.bottom).height(C.Desktop.bottomHeight);
         
         // Events
         $(document.body).mousewheel(function (e, delta) { self.mouseWheel(e, delta); });
@@ -67,6 +63,7 @@ function Desktop(task)
         self.node.resize_layer.style.height = self.middleHeight + "px";
         if (self.currentPage)
             self.currentPage.onResize();
+        gl_player.onResize(width, height);
     }
     
     // Opens a task in a new page.
@@ -90,6 +87,13 @@ function Desktop(task)
             // Scrolls to the bottom of the tasks list
             self.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollHeight - gl_desktop.middleHeight - C.Desktop.pageMargin;
         });
+    }
+    
+    // Closes all the pages and their tasks.
+    self.disconnect = function ()
+    {
+        var pages = $(gl_desktop.node.tasks_list).children(".page");
+        pages.each(function () { this.object.close(); });
     }
     
     // Called each time the mouse wheel is used.
@@ -893,7 +897,12 @@ function Task(resource, html)
             position -= (C.Desktop.pageMargin + 1);
         // Determines if a new page have to be created
         if (pages.length == p && tasks.length == t && y > position && (p != self.page || self.getPage().numberTasks != 1))
+        {
             createPage = true;
+            $(self.content).addClass("create_page");
+        }
+        else
+            $(self.content).removeClass("create_page");
         // Saves the result in a cache, so that we dont have to calculate it each time the cursor moves
         self.taskCache = {position : position, limit : limit, numberPage : p, number_task : t, page : page, task : task, createPage : createPage}
         return (self.taskCache);
@@ -941,11 +950,15 @@ function Task(resource, html)
                 if ($(page).hasClass("page"))
                     self.taskCache.numberPage++;
             if (self.ghost.parentNode)
+            {
                 self.taskCache.createPage = false;
+                $(self.content).removeClass("create_page");
+            }
             // New page
             else
             {
                 self.taskCache.createPage = true;
+                $(self.content).addClass("create_page");
                 $(gl_desktop.node.tasks_list.bottom).height(C.Desktop.taskIconHeight);
                 $(gl_desktop.node.pages).children(".display").each(function () { this.object.hide(); });
                 self.setCoordinates(gl_desktop.left, gl_desktop.top, gl_desktop.width, gl_desktop.height);
@@ -1056,6 +1069,7 @@ function Task(resource, html)
         $(self.icon).removeClass("drag");
         $(self.icon.parentNode).removeClass("empty");
         $(self.ghost).remove();
+        $(self.content).removeClass("create_page");
         $(gl_desktop.node.tasks_list.bottom).height(0);
         gl_desktop.taskButtons.stopDrag(e);
         gl_desktop.taskPreview.hide(e);
@@ -1486,10 +1500,10 @@ function TaskButtons()
         self.task; // The last task on which the mouse entered.
         
         // Generates the SVG icons
-        self.addIcon($(self.close).children(".icon")[0], 9.5, "M4.468,2.94L2.942,4.466L0,1.523l-2.942,2.942L-4.468,2.94l2.942-2.942l-2.938-2.939l1.525-1.525L0-1.527l2.938-2.938l1.525,1.525L1.525-0.002L4.468,2.94z");
-        self.addIcon($(self.hide).children(".icon")[0], 9.5, "M-5.003-1.523H5.003v3.045H-5.003V-1.523z");
-        self.addIcon($(self.window).children(".icon")[0], 9.5, "M-5,4.505v-9.011H5v9.011H-5z M2.992-2.506h-5.978v5.021h5.978V-2.506z");
-        self.addIcon($(self.fullscreen).children(".icon")[0], 9, "M4.002,1.052l-3-0.006v2.951h-2V1.042l-3.004-0.006v-2.063l3.004,0.006v-2.977h2v2.98l3,0.006V1.052z");
+        self.addIcon($(self.close).children(".icon")[0], 9.5, gl_svg.TaskButtons.close);
+        self.addIcon($(self.hide).children(".icon")[0], 9.5, gl_svg.TaskButtons.hide);
+        self.addIcon($(self.window).children(".icon")[0], 9.5, gl_svg.TaskButtons.window);
+        self.addIcon($(self.fullscreen).children(".icon")[0], 9, gl_svg.TaskButtons.fullscreen);
         
         // Events
         $(self.close).click(function (e) { self.click(e); });

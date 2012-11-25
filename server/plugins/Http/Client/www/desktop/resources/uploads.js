@@ -145,7 +145,7 @@ function UploadsSession(uploads)
         if ((self.path = self.uploads.node.path.value) == self.uploads.node.path.defaultValue)
             self.path = "";
         var path = encodeURIComponent(self.path);
-        request("POST", "Execute/UploadsCheck?path=" + path, function (HttpRequest)
+        request("POST", "command/uploads/check?path=" + path, function (HttpRequest)
         {
             if (HttpRequest.status == 200)
                 self.checkResult(jsonParse(HttpRequest.responseText));
@@ -374,7 +374,7 @@ function UploadsSession(uploads)
     self.start = function ()
     {
         // Submit the form
-        var uri = "Execute/Uploads";
+        var uri = "command/uploads";
         var id = self.id;
         var path = encodeURIComponent(self.path);
         self.uploads.node.form.action = "/Client/" + uri + "?id=" + id + "&path=" + path + "&token=" + getToken(uri);
@@ -452,7 +452,7 @@ function UploadsSession(uploads)
             }
         }
         // Sends the request
-        request("GET", "Execute/UploadsProgress?id=" + self.id, callback);
+        request("GET", "command/uploads/progress?id=" + self.id, callback);
     }
 
     // Updates the progression bar.
@@ -488,7 +488,7 @@ function UploadsSession(uploads)
     self.stop = function ()
     {
         if (!self.complete)
-            request("GET", "Execute/UploadsStop?id=" + self.id);
+            request("GET", "command/uploads/stop?id=" + self.id);
         $(self.session).remove();
         self.uploads.updateParity();
     }
@@ -501,7 +501,7 @@ function UploadsSession(uploads)
 
         if (self.complete)
             files = self.filesToJson();
-        request("POST", "Execute/UploadsCancel?id=" + self.id + "&path=" + path, undefined, files, "application/json");
+        request("POST", "command/uploads/cancel?id=" + self.id + "&path=" + path, undefined, files, "application/json");
         $(self.session).remove();
         self.uploads.updateParity();
     }

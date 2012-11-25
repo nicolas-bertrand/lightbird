@@ -1,0 +1,216 @@
+#include <QCryptographicHash>
+#include <QDir>
+#include <QFileInfo>
+#include <QUrl>
+#include <QUuid>
+
+#include "Audio.h"
+#include "Commands.h"
+#include "LightBird.h"
+#include "Medias.h"
+#include "Plugin.h"
+#include "Preview.h"
+#include "Uploads.h"
+
+Commands::Commands()
+{
+    this->commands["audio"] = &Commands::_audio;
+    this->commands["disconnect"] = &Commands::_disconnect;
+    this->commands["identify"] = &Commands::_identify;
+    this->commands["preview"] = &Commands::_preview;
+    this->commands["select"] = &Commands::_select;
+    this->commands["files"] = &Commands::_files;
+    this->commands["uploads"] = &Commands::_uploads;
+    this->commands["stop_stream"] = &Commands::_stopStream;
+    this->commands["video"] = &Commands::_video;
+    this->commands["delete_file"] = &Commands::_deleteFile;
+}
+
+Commands::~Commands()
+{
+}
+
+void    Commands::execute(LightBird::IClient &client, QString command)
+{
+    QString tmp = command;
+
+    // Get the command
+    if (command.contains("."))
+        command = command.left(command.indexOf("."));
+    // The client is not connected and it doesn't tries to identify
+    if ((!client.getAccount().exists() || client.getRequest().getUri().queryItemValue("token").isEmpty()) && command != "identify")
+    {
+        Plugin::response(client, 403, "Forbidden");
+        return ;
+    }
+    // Execute the command
+    command = command.left(command.indexOf('/'));
+    if (this->commands.contains(command))
+        (this->*(this->commands[command]))(client, tmp.right(tmp.size() - command.size() - 1));
+    // The command is unknow
+    else
+        Plugin::response(client, 404, "Not Found");
+}
+
+void    Commands::_audio(LightBird::IClient &client, const QString &)
+{
+    Plugin::medias().start(client, Medias::AUDIO);
+}
+
+void    Commands::_disconnect(LightBird::IClient &client, const QString &)
+{
+    // Destroy the cookies
+    client.getResponse().getHeader().remove("set-cookie");
+    client.getResponse().getHeader().insertMulti("set-cookie", "sid=; path=/");
+    // The session will be destroyed in IOnFinish, because the new cookies
+    // have to be send to the browser before the client is disconnected
+    client.getInformations()["disconnect"] = true;
+}
+
+void    Commands::_identify(LightBird::IClient &client, const QString &)
+{
+    LightBird::Session      session;
+    QString                 salt;
+    QString                 name;
+    QString                 id;
+    QString                 token;
+    QSqlQuery               query;
+    QVector<QVariantMap>    result;
+    int                     i = 0;
+    int                     s;
+    QString                 sid;
+
+    // If too many identification failed attempts has been done
+    if (!Plugin::instance().identificationAllowed(client))
+        return Plugin::response(client, 403, "Forbidden");
+    // The client is asking the id of the account and a session id, in order to
+    // generate the identifiant : SHA-256(name + SHA-256(password + aid) + sid)
+    if (!(name = client.getRequest().getUri().queryItemValue("name")).isEmpty() &&
+        (salt = client.getRequest().getUri().queryItemValue("salt")).size() >= 32)
+    {
+        // Search the id of the account using the salt and its name
+        LightBird::IDatabase &database = Plugin::api().database();
+        query.prepare(database.getQuery("HttpClient", "select_all_accounts"));
+        if (database.query(query, result))
+            for (i = 0, s = result.size(); i < s && id.isEmpty(); ++i)
+                if (name == LightBird::sha256(result[i]["name"].toByteArray() + salt.toAscii()))
+                {
+                    id = result[i]["id"].toString();
+                    break;
+                }
+        client.getResponse().getHeader().remove("set-cookie");
+        // The account has been found
+        if (!id.isEmpty())
+        {
+            // Create a new session. The client has 30 seconds to generate the identifiant.
+            session = Plugin::api().sessions().create(QDateTime::currentDateTime().addSecs(30), id, QStringList() << client.getId());
+            // Compute the identifiant of the client
+            session->setInformation("identifiant", LightBird::sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + session->getId().toAscii()));
+            Plugin::addCookie(client, "sid", session->getId());
+            // Return the id of the account, which is the salt of the password
+            client.getResponse().getContent().setContent(id.toAscii());
+        }
+        // Otherwise we return a fake salt and sid (the user shouldn't know that the name doesn't exists).
+        else
+        {
+            Plugin::addCookie(client, "sid", LightBird::createUuid());
+            client.getResponse().getContent().setContent(LightBird::createUuid().toAscii());
+            Plugin::instance().identificationFailed(client);
+        }
+    }
+    // Try to identiy the user using the identifiant generated by the client
+    else if (!(token = client.getRequest().getUri().queryItemValue("token")).isEmpty() &&
+             !(sid = Plugin::getCookie(client, "sid")).isEmpty() &&
+             !(session = Plugin::api().sessions().getSession(sid)).isNull() &&
+             !client.getResponse().isError() &&
+             client.getAccount().setId(session->getAccount()) &&
+             client.getAccount().isActive())
+    {
+        session->setAccount(client.getAccount().getId());
+        session->setExpiration(QDateTime::currentDateTime().addMonths(1));
+    }
+    // The identification failed
+    else
+    {
+        Plugin::response(client, 403, "Forbidden");
+        client.getResponse().getHeader().remove("set-cookie");
+        Plugin::addCookie(client, "sid");
+        client.getAccount().clear();
+        if (!session.isNull())
+            session->destroy();
+    }
+}
+
+void    Commands::_preview(LightBird::IClient &client, const QString &)
+{
+    Preview preview(client);
+    preview.go();
+}
+
+void    Commands::_select(LightBird::IClient &client, const QString &)
+{
+    LightBird::TableFiles file;
+    QSqlQuery             query;
+    QVector<QVariantMap>  result;
+    int                   s = 0;
+    QVariantMap           row;
+    QList<QVariant>       rows;
+
+    query.prepare(Plugin::api().database().getQuery("HttpClient", "select_all_files"));
+    if (!Plugin::api().database().query(query, result))
+        return Plugin::response(client, 500, "Internal Server Error");
+    s = s;
+    for (int i = 0, s = result.size(); i < s; ++i)
+    {
+        file.setId(result[i]["id"].toString());
+        row = file.getInformations();
+        row.unite(result[i]);
+        rows.push_back(row);
+    }
+    client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT);
+    *client.getResponse().getContent().getVariant() = rows;
+    client.getResponse().setType("application/json");
+}
+
+void        Commands::_files(LightBird::IClient &client, const QString &)
+{
+    Plugin::files().get(client);
+}
+
+void        Commands::_uploads(LightBird::IClient &client, const QString &)
+{
+    Plugin::uploads().doExecution(client);
+    //Plugin::uploads().check(client);
+    //Plugin::uploads().progress(client);
+    //Plugin::uploads().stop(client);
+    //Plugin::uploads().cancel(client);
+}
+
+void        Commands::_stopStream(LightBird::IClient &client, const QString &)
+{
+    Plugin::medias().stop(client);
+}
+
+void        Commands::_video(LightBird::IClient &client, const QString &)
+{
+    Plugin::medias().start(client, Medias::VIDEO);
+}
+
+void    Commands::_deleteFile(LightBird::IClient &client, const QString &)
+{
+    LightBird::TableFiles file(client.getRequest().getUri().queryItemValue("id"));
+
+    if (file.exists())
+    {
+        if (file.isAllowed(client.getAccount().getId(), "delete"))
+        {
+            QString path = file.getFullPath();
+            file.remove();
+            QFile::remove(path);
+        }
+        else
+            Plugin::response(client, 403, "Forbidden");
+    }
+    else
+        Plugin::response(client, 404, "Not Found");
+}

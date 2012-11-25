@@ -14,7 +14,9 @@
 # include "IPlugin.h"
 # include "ITimer.h"
 
+# include "Commands.h"
 # include "Files.h"
+# include "Medias.h"
 # include "Uploads.h"
 
 # define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser should download the content.
@@ -55,17 +57,21 @@ public:
     void    onDestroy(LightBird::IClient &client);
     bool    timer(const QString &name);
 
-    // Other
-    static Plugin   &getInstance();
-    /// @brief Returns the LightBird Api.
+    // Static methods
+    static Plugin   &instance();
     static LightBird::IApi &api();
-    /// @brief Send a response to the client.
+    static Files    &files();
+    static Medias   &medias();
+    static Uploads  &uploads();
+    /// @brief Sends a response to the client.
     static void     response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content = "");
     /// @brief Returns the value of a cookie using its name.
     /// @param name : The name of the cookie to return.
     static QString  getCookie(LightBird::IClient &client, const QString &name);
     /// @brief Adds a cookie in the response of the client.
     static void     addCookie(LightBird::IClient &client, const QString &name, const QString &value = QString());
+
+    // Miscellaneous
     /// @brief Converts a date in the proper HTTP format.
     /// @param date : The date to convert, expressed in UTC.
     /// @param separator : If true, the separator of the date (dd MM yyyy) is "-".
@@ -76,10 +82,6 @@ public:
     bool            identificationAllowed(LightBird::IClient &client);
     /// @brief Called when a identification attempt failed.
     void            identificationFailed(LightBird::IClient &client);
-    /// @brief Returns the files manager.
-    Files           &getFiles();
-    /// @brief Returns the uploads manager.
-    Uploads         &getUploads();
 
 private:
     /// @brief Manages the session.
@@ -97,14 +99,16 @@ private:
     QString _getMime(const QString &file);
 
     LightBird::IApi     *_api;      ///< The LightBird's Api.
-    static Plugin       *instance;  ///< The instance of the plugin singleton.
+    static Plugin       *_instance; ///< The instance of the plugin.
     QStringList         interfaces; ///< Contains the name of the interfaces available.
     QString             wwwDir;     ///< The path to the www directory (where the interface is stored).
     QMap<int, QString>  daysOfWeek; ///< The names of the days of the week in english in three letters.
     QMap<int, QString>  months;     ///< The names of the months in three letters.
     QHash<QHostAddress, QPair<QDateTime, quint32> > attempts; ///< Stores the number of failed connection attempts per ip and date.
-    Files               files;      ///< Manages the files.
-    Uploads             uploads;    ///< Manages the uploads.
+    Commands            commands;   ///< Executes the commands of the client.
+    Files               _files;     ///< Manages the files.
+    Medias              _medias;    ///< Manages the medias.
+    Uploads             _uploads;   ///< Manages the uploads.
     QMutex              mutex;      ///< Makes this class thread safe.
 };
 

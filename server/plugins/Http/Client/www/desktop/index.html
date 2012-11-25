@@ -13,9 +13,12 @@
     <script src="/Client/js/Configuration.js"></script>
     <script src="/Client/js/Desktop.js"></script>
     <script src="/Client/js/Files.js"></script>
+    <script src="/Client/js/Header.js"></script>
     <script src="/Client/js/Index.js"></script>
+    <script src="/Client/js/Player.js"></script>
     <script src="/Client/js/Resources.js"></script>
     <script src="/Client/js/Selection.js"></script>
+    <script src="/Client/js/Svg.js"></script>
     <script src="/Client/js/Window.js"></script>
     <script src="/Client/libs/jQuery/jquery.js"></script>
     <script src="/Client/libs/jQuery/plugins.js"></script>
@@ -42,10 +45,10 @@
                 <div><script>tr(T.Menu.sessions)</script><div class="line red"></div></div>
             </div>
             <div class="icons">
-                <div class="icon"><div class="search"></div><div class="line blue"></div></div>
-                <div class="icon"><div class="settings"></div><div class="line green"></div></div>
-                <div class="icon"><div class="help"></div><div class="line yellow"></div></div>
-                <div class="icon" onclick="gl_account.disconnect(event)"><div class="disconnect"></div><div class="line red"></div></div>
+                <div class="search"><div></div><div class="line blue"></div></div>
+                <div class="settings"><div></div><div class="line green"></div></div>
+                <div class="help"><div></div><div class="line yellow"></div></div>
+                <div class="disconnect"><div></div><div class="line red"></div></div>
             </div>
         </div>
         <div class="middle">
@@ -68,6 +71,25 @@
             <div class="collections"></div>
         </div>
         <div class="bottom">
+            <div class="playlist">
+                <div class="header">
+                    <div class="tabs"></div>
+                    <div class="tab_template">
+                        <div class="tab">
+                            <div class="left"></div>
+                            <div class="middle"><div>Recent files</div></div>
+                            <div class="close"></div>
+                            <div class="right"></div>
+                        </div>
+                    </div>
+                    <div class="add"></div>
+                    <div class="pin"></div>
+                </div>
+                <div class="list">
+                    <div class="odd"></div>
+                    <div class="even"></div>
+                </div>
+            </div>
             <div class="timeline">
                 <div class="before"></div>
                 <div class="played"></div>
@@ -78,16 +100,16 @@
                 <div class="play">
                     <div class="play"><div></div><div class="line blue"></div></div>
                     <div class="previous"><div></div><div class="line green"></div></div>
-                    <div class="number"><div>6<span class="secondary"> / 24</span></div><div class="line yellow"></div></div>
+                    <div class="number"><div><span class="numerator">6</span><span class="secondary"> / <span class="denominator">24</span></span></div><div class="line red"></div></div>
                     <div class="next"><div></div><div class="line green"></div></div>
-                    <div class="time"><div>1:42<span class="secondary"> / 2:41</span></div><div class="line red"></div></div>
+                    <div class="time"><div><span class="elapsed">1:42</span><span class="secondary"> / <span class="duration">2:41</span></span></div><div class="line yellow"></div></div>
                 </div>
                 <div class="controls">
                     <div class="volume"><div></div><div class="line blue"></div></div>
                     <div class="settings"><div></div><div class="line green"></div></div>
                     <div class="repeat"><div></div><div class="line yellow"></div></div>
                     <div class="random"><div></div><div class="line red"></div></div>
-                    <div class="fullscreen"><div></div><div class="line green"></div></div>
+                    <div class="fullscreen"><div></div><div class="line blue"></div></div>
                 </div>
                 <div class="name">Conspiracy<span class="secondary"> - Paul Andrews</span></div>
             </div>

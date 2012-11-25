@@ -10,11 +10,12 @@ class Video : public Media
 public:
     Video(LightBird::IClient &client);
     ~Video();
-    /// @brief Read the data on the transcoding stream and put it in the client's response.
-    void                read();
+
+    /// @brief Reads the data on the transcoding stream and put it in the client's response.
+    void    read();
 
 private:
-    LightBird::IVideo   *video; ///< Transcode the video in another format while it is streamed.
+    LightBird::IVideo *video; ///< Transcodes the video in another format while it is streamed.
 };
 
 #endif // VIDEO_H

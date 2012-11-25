@@ -7,7 +7,6 @@
         <file alias="desktop/css/index.css">www/desktop/css/index.css</file>
         <file alias="desktop/css/window.css">www/desktop/css/window.css</file>
         <file alias="desktop/images/favicon.png">www/desktop/images/favicon.png</file>
-        <file alias="desktop/images/icons.png">www/desktop/images/icons.png</file>
         <file alias="desktop/images/backgrounds/birds.jpg">www/desktop/images/backgrounds/birds.jpg</file>
         <file alias="desktop/images/backgrounds/identification.jpg">www/desktop/images/backgrounds/identification.jpg</file>
         <file alias="desktop/images/identification/error.png">www/desktop/images/identification/error.png</file>

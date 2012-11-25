@@ -3,7 +3,11 @@
 #include "Media.h"
 #include "Plugin.h"
 
-Media::Media(LightBird::IClient &cl) : api(Plugin::api()), client(cl), uri(client.getRequest().getUri()), response(client.getResponse())
+Media::Media(LightBird::IClient &cl)
+    : api(Plugin::api())
+    , client(cl)
+    , uri(client.getRequest().getUri())
+    , response(client.getResponse())
 {
     this->error = false;
     this->id = this->client.getInformations().value("sid").toString() + this->uri.queryItemValue("streamId");

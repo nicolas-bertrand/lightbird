@@ -8,19 +8,18 @@ var gl_browserSize;
 // Initializes the page (called by onload)
 function load()
 {
-	// Initializes the resources
-	gl_resources = new Resources();
-	// Initializes the desktop and the windows singletons
+    // Initialize the main systems
+	new Resources();
 	new Desktop();
 	new Windows();
-    // Downloads the files list
+    new Header();
+    new Player();
     new Files();
+	new Account();
 	// Initializes the browser size
 	onResize();
 	// onResize is called every time the browser is resized
 	window.onresize = onResize;
-	// Initializes the Account management system
-	new Account();
 	// The right click is disabled in order to replace the normal contextual menu of the browser.
 	//document.oncontextmenu = function() { return (false); };
 	document.getElementById("loading_client").style.display = "none";

@@ -4,7 +4,7 @@
 #include "Plugin.h"
 #include "TableFiles.h"
 
-Files::Files(QObject *parent) : QObject(parent)
+Files::Files()
 {
 }
 

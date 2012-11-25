@@ -4,19 +4,21 @@
 
 Video::Video(LightBird::IClient &client) : Media(client)
 {
-    /*QString format;
-    qint32  width = this->file.getInformation("width").toInt();
-    quint32 quality = this->uri.queryItemValue("quality").toUInt();
-    quint32 seek = this->uri.queryItemValue("seek").toUInt();
+    QString format;
+    //qint32  width = this->file.getInformation("width").toInt();
+    //quint32 quality = this->uri.queryItemValue("quality").toUInt();
+    //quint32 seek = this->uri.queryItemValue("seek").toUInt();
 
     this->video = NULL;
-    this->response.getHeader().insert("content-length", QString::number((quint64)(QFileInfo(this->file.getFullPath()).size() * 1.2)));
+    //this->response.getHeader().insert("content-length", "10000000");
+    this->response.getHeader().insert("transfer-encoding", "chunked");
     // Get the extensions that can transcode the file
     if (!(extensions = this->api.extensions().get("IVideo")).isEmpty())
     {
         this->video = static_cast<LightBird::IVideo *>(extensions.first());
+        this->video->setDuration(30);
         // Set the quality of the video
-        width -= 100;
+        /*width -= 100;
         if (width < 0)
             width = 480;
         width = (quality * width / 100) + 100;
@@ -25,23 +27,25 @@ Video::Video(LightBird::IClient &client) : Media(client)
             video->setVideoBitRate(1000000);
         // Seek to the good position
         if (seek)
-            video->setSeek(seek);
+            video->setSeek(seek);*/
         // Set the format of the video
         if (this->uri.path().contains(".webm"))
         {
             format = "webm";
-            video->setVideoCodec("libvpx");
-            video->setAudioCodec("libvorbis");
+            this->video->setFormat("webm");
+            this->video->setVideoCodec("libvpx");
+            this->video->setAudioCodec("libvorbis");
             this->response.getHeader().insert("content-type", "video/webm");
         }
         else if (this->uri.path().contains(".mp4"))
         {
             format = "avi";
-            video->setVideoCodec("libx264");
-            video->setAudioCodec("libmp3lame");
-            QMap<QString, QString> options;
+            this->video->setFormat("mp4");
+            this->video->setVideoCodec("libx264");
+            this->video->setAudioCodec("libmp3lame");
+            QVariantHash options;
             options["x264"] = "faster";
-            video->setOptions(options);
+            this->video->setOptions(options);
             // Ensure that the size of the video is not odd
             int w = this->file.getInformation("width").toUInt();
             int h = this->file.getInformation("height").toUInt();
@@ -50,39 +54,29 @@ Video::Video(LightBird::IClient &client) : Media(client)
                 h = (h * 480) / w;
                 if (h % 2)
                     h++;
-                video->setHeight(h);
+                this->video->setHeight(h);
             }
             this->response.getHeader().insert("content-type", "video/mp4");
         }
         else
         {
             format = "ogg";
-            video->setVideoCodec("libtheora");
-            video->setAudioCodec("libvorbis");
-            if (width < 480)
-                video->setVideoBitRate(300000);
+            this->video->setFormat("ogg");
+            this->video->setVideoCodec("libtheora");
+            this->video->setAudioCodec("libvorbis");
             this->response.getHeader().insert("content-type", "video/ogg");
         }
-        this->video->start(this->file.getFullPath(), "", format);
-    }*/
+        if (!this->video->initialize(this->file.getFullPath()))
+            this->_error(415, "Unsupported Media Type", "Unable to initialize the transoding of the video.");
+    }
 }
 
 Video::~Video()
 {
-    if (!this->video)
-        return ;
-    /*if (!this->video->isFinished())
-        this->video->stop();*/
-    // Release the extensions
-    this->api.extensions().release(extensions);
+    this->api.extensions().release(this->extensions);
 }
 
 void    Video::read()
 {
-    QByteArray  data;
-
-    /*if (!this->video->waitForRead())
-        return ;
-    data = this->video->read(MAX_READ);*/
-    this->response.getContent().setContent(data);
+    this->response.getContent().setContent(this->video->transcode(), false);
 }

@@ -28,7 +28,6 @@ var Configuration =
         resizeResistance : 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
         resizeDeltaDivisor : 20, // Reduce the delta of the mouse wheel that resize the task margin.
     },
-	// The size of the window
 	Window :
 	{
         default : // The default position of the window
@@ -49,6 +48,23 @@ var Configuration =
         topHeight : 35, // The height of the top of the window.
         bottomHeight : 30, // The height of the bottom of the window.
 	},
+    Player :
+    {
+        defaultHeight : 45, // == C.Desktop.bottomHeight
+        playlistHeight : 200, // The default height of the playlist.
+        timelineHeight : 5, // The default height of the timeline.
+        timelineOverHeight : 5, // The additionnal height of the timeline when the mouse is over the player.
+        headerHeight : 24, // The height of the playlist header.
+        listFileHeight : 25, // The height of each file of the playlist.
+        tabShift : 30, // The initial shift of the tabs.
+        tabMargin : 16, // The margin between the tabs.
+        addIconMargin : 40, // The margin between the last tab and the add icon.
+        addIconOrigin : -16, // The origin position of the add icon.
+        tabOffsetInterval : 10, // The duration of the intervals used to get the offset* of the tabs.
+        tabExternLeft : 16, // The estimation of the width of the external left part of the tab, based on its shape.
+        tabExternRight : 21, // The estimation of the width of the external right part of the tab, based on its shape.
+        mouseLeaveTimeout : 1000, // The delay before the effect of the mouse leave.
+    },
     Uploads :
     {
         requestProgressInterval : 1000, // The number of milliseconds between each progress request.
@@ -65,8 +81,7 @@ var Configuration =
 	},
 	View :
 	{
-        imageMinHeight : 15, // The minimal height of the image.
+        minHeight : 15, // The minimal height of the images and videos.
 	},
 };
 var C = Configuration;
-var DOMWindow = window;

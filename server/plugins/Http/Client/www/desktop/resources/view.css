@@ -13,38 +13,8 @@
     overflow: auto;
 }
 
-/* Transparent background */
-.tasks>.task.transparent_background>.view>img
-{
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    position: relative;
-    left: -1px;
-    top: -1px;
-}
-
-.tasks>.task.transparent_background>.view>img.horizontal_align
-{
-    left: 0px;
-}
-
-.tasks>.task.over.transparent_background>.view>img
-{
-    border: 1px solid rgba(89, 202, 255, 1);
-    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
-}
-.tasks>.task.window.over.transparent_background>.view>img
-{
-    border: 1px solid rgba(77, 255, 97, 1);
-    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
-}
-.tasks>.task.focus.over.transparent_background>.view>img
-{
-    border: 1px solid rgba(255, 193, 0, 1);
-    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
-}
-
 /* Black background */
-#desktop>.middle>.tasks>.task.image_background_black
+#desktop>.middle>.tasks>.task.view_background_black
 {
     background-color: black;
     background-image: linear-gradient(top, #202020 0%, #050505 100%);
@@ -55,28 +25,60 @@
     border: 1px solid rgba(0, 0, 0, 1);
 }
 
-#desktop>.middle>.tasks>.task.window.image_background_black
+#desktop>.middle>.tasks>.task.window.view_background_black
 {
     border: 1px solid rgba(139, 161, 190, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.over.image_background_black
+#desktop>.middle>.tasks>.task.over.view_background_black
 {
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
-#desktop>.middle>.tasks>.task.window.over.image_background_black
+#desktop>.middle>.tasks>.task.window.over.view_background_black
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
-#desktop>.middle>.tasks>.task.focus.over.image_background_black
+#desktop>.middle>.tasks>.task.focus.over.view_background_black
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.image_background_black.hide_border
+#desktop>.middle>.tasks>.task.view_background_black.hide_border
 {
     border: none;
+}
+
+/* Transparent background */
+.tasks>.task.transparent_background>.view>.file
+{
+    background-color: black;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    position: relative;
+    left: -1px;
+    top: -1px;
+}
+
+.tasks>.task.transparent_background>.view>.file.horizontal_align
+{
+    left: 0px;
+}
+
+.tasks>.task.over.transparent_background>.view>.file
+{
+    border: 1px solid rgba(89, 202, 255, 1);
+    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
+}
+.tasks>.task.window.over.transparent_background>.view>.file
+{
+    border: 1px solid rgba(77, 255, 97, 1);
+    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
+}
+.tasks>.task.focus.over.transparent_background>.view>.file
+{
+    border: 1px solid rgba(255, 193, 0, 1);
+    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }

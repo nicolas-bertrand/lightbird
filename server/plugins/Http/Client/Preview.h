@@ -14,7 +14,7 @@
 class Preview
 {
 public:
-    Preview(LightBird::IApi &api, LightBird::IClient &client);
+    Preview(LightBird::IClient &client);
     ~Preview();
     void    go();
 
@@ -25,7 +25,6 @@ private:
     void    _error(const QString &method, int code, const QString &message, const QByteArray &content = "",
                    const QString &log = "", LightBird::ILogs::Level level = LightBird::ILogs::WARNING);
 
-    LightBird::IApi      &api;           ///< The LightBird's Api.
     LightBird::IClient   &client;        ///< The client that requested the preview.
     QUrl                 uri;            ///< The uri of the request.
     LightBird::TableFiles file;          ///< The file pointed by the uri.

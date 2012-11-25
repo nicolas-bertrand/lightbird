@@ -1,7 +1,6 @@
-// The files singleton
+// Manages the files.
 var gl_files;
 
-// Manages the files.
 function Files()
 {
     var self = this;
@@ -9,13 +8,15 @@ function Files()
     
     self.init = function ()
     {
-        // Downloads the files list
-        request("GET", "Execute/FilesGet", function (HttpRequest)
+    }
+    
+    // Downloads the files list
+    self.getFiles = function ()
+    {
+        request("GET", "command/files/get", function (HttpRequest)
         {
             if (HttpRequest.status == 200)
-            {
                 self.list = jsonParse(HttpRequest.responseText);
-            }
         });
     }
     

@@ -1,18 +1,10 @@
-#include "Plugin.h"
 #include "Audio.h"
+#include "LightBird.h"
 #include "Medias.h"
+#include "Plugin.h"
 #include "Video.h"
 
-Medias  *Medias::instance = NULL;
-
-Medias  &Medias::getInstance(QObject *parent)
-{
-    if (!Medias::instance)
-        Medias::instance = new Medias(parent);
-    return (*Medias::instance);
-}
-
-Medias::Medias(QObject *parent) : QObject(parent)
+Medias::Medias()
 {
 }
 
@@ -21,31 +13,27 @@ Medias::~Medias()
     QMapIterator<QString, Media *> it(this->medias);
     while (it.hasNext())
         delete it.next();
-    Medias::instance = NULL;
 }
 
-void        Medias::start(LightBird::IClient &client, bool video)
+void    Medias::start(LightBird::IClient &client, Medias::Type type)
 {
-    Media   *media;
+    SmartMutex  mutex(this->mutex);
+    Media       *media = NULL;
 
-    this->mutex.lock();
+    if (!mutex)
+        return;
     if (this->medias.contains(client.getId()))
     {
         delete this->medias[client.getId()];
         this->medias.remove(client.getId());
     }
-    if (video)
-        media = new Video(client);
-    else
+    if (type == Medias::AUDIO)
         media = new Audio(client);
-    if (media->isError())
-    {
-        delete media;
-        this->mutex.unlock();
-        return ;
-    }
+    else if (type == Medias::VIDEO)
+        media = new Video(client);
+    if (!media || media->isError())
+        return (delete media);
     this->medias[client.getId()] = media;
-    this->mutex.unlock();
 }
 
 void    Medias::onFinish(LightBird::IClient &client)
