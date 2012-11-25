@@ -12,7 +12,7 @@ namespace LightBird
     /// that can be accessed through IClient::getRequest(). In the case that
     /// the data received exceeds the content size, plugins have to indicate
     /// how many bytes they have used to fill the content. The other bytes will
-    /// be used by IDoDeserializeFooter.
+    /// be used by IDoDeserializeTrailer.
     class IDoDeserializeContent
     {
     public:
@@ -24,7 +24,7 @@ namespace LightBird
         /// @param data : The data received.
         /// @param used : If true is returned, users have to set the number of bytes used
         /// from the data, in this parameter, so that the remaining data can be used in
-        /// IDoDeserializeFooter. If all the data has been consumed, the value of "used"
+        /// IDoDeserializeTrailer. If all the data has been consumed, the value of "used"
         /// must be equal or highter than the size of the received data. If the data received
         /// represents more than the content, users have to set the length used from data to
         /// this variable. Let zero if no data have to be used, i.e if there is no content.

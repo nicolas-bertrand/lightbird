@@ -39,12 +39,12 @@ private slots:
     bool    _onProtocol();
     bool    _doDeserializeHeader();
     bool    _doDeserializeContent();
-    bool    _doDeserializeFooter();
+    bool    _doDeserializeTrailer();
     bool    _doExecution();
     bool    _onExecution();
     bool    _doSerializeHeader();
     bool    _doSerializeContent();
-    bool    _doSerializeFooter();
+    bool    _doSerializeTrailer();
     void    _onFinish();
 
 private:

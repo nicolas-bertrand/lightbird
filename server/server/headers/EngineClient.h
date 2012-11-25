@@ -46,10 +46,10 @@ private slots:
     bool    _onSend();
     bool    _doSerializeHeader();
     bool    _doSerializeContent();
-    bool    _doSerializeFooter();
+    bool    _doSerializeTrailer();
     bool    _doDeserializeHeader();
     bool    _doDeserializeContent();
-    bool    _doDeserializeFooter();
+    bool    _doDeserializeTrailer();
     bool    _doExecution();
     bool    _onExecution();
     bool    _onFinish();

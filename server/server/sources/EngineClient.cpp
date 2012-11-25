@@ -2,10 +2,10 @@
 #include "IOnSend.h"
 #include "IDoSerializeHeader.h"
 #include "IDoSerializeContent.h"
-#include "IDoSerializeFooter.h"
+#include "IDoSerializeTrailer.h"
 #include "IDoDeserializeHeader.h"
 #include "IDoDeserializeContent.h"
-#include "IDoDeserializeFooter.h"
+#include "IDoDeserializeTrailer.h"
 #include "IDoExecution.h"
 #include "IOnExecution.h"
 #include "IOnFinish.h"
@@ -189,23 +189,23 @@ bool    EngineClient::_doSerializeContent()
         LOG_TRACE("No plugin implempents IDoSerializeContent for this context", Properties("id", this->client.getId()), "EngineClient", "_doSerializeContent");
     // The content has been serialized
     if (result)
-        this->state = &EngineClient::_doSerializeFooter;
+        this->state = &EngineClient::_doSerializeTrailer;
     // There is more data to serialize
     else
         this->state = &EngineClient::_doSerializeContent;
     return (true);
 }
 
-bool    EngineClient::_doSerializeFooter()
+bool    EngineClient::_doSerializeTrailer()
 {
-    QPair<QString, LightBird::IDoSerializeFooter *> instance;
+    QPair<QString, LightBird::IDoSerializeTrailer *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeFooter>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeTrailer>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
         QByteArray *data = new QByteArray();
-        this->_onSerialize(LightBird::IOnSerialize::IDoSerializeFooter);
-        LOG_TRACE("Calling IDoSerializeFooter::doSerializeFooter()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doSerializeFooter");
-        instance.second->doSerializeFooter(this->client, *data);
+        this->_onSerialize(LightBird::IOnSerialize::IDoSerializeTrailer);
+        LOG_TRACE("Calling IDoSerializeTrailer::doSerializeTrailer()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doSerializeTrailer");
+        instance.second->doSerializeTrailer(this->client, *data);
         Plugins::instance()->release(instance.first);
         this->done = true;
         if (data->size())
@@ -217,7 +217,7 @@ bool    EngineClient::_doSerializeFooter()
             delete data;
     }
     else
-        LOG_TRACE("No plugin implempents IDoSerializeFooter for this context", Properties("id", this->client.getId()), "EngineClient", "_doSerializeFooter");
+        LOG_TRACE("No plugin implempents IDoSerializeTrailer for this context", Properties("id", this->client.getId()), "EngineClient", "_doSerializeTrailer");
     // The request has been sent and we are ready to execute the response
     if (this->done)
     {
@@ -235,14 +235,14 @@ bool    EngineClient::_doSerializeFooter()
         // No response needed
         else
         {
-            LOG_TRACE("The request does not need a response. An other request is going to be processed.", Properties("id", this->client.getId()), "EngineClient", "_doSerializeFooter");
+            LOG_TRACE("The request does not need a response. An other request is going to be processed.", Properties("id", this->client.getId()), "EngineClient", "_doSerializeTrailer");
             return (this->_onFinish());
         }
     }
     // The request has not been serialized
     else
     {
-        LOG_WARNING("The data has not been serialized because no plugin implements IDoSerialize* for this context.", Properties("id", this->client.getId()), "EngineClient", "_doSerializeFooter");
+        LOG_WARNING("The data has not been serialized because no plugin implements IDoSerialize* for this context.", Properties("id", this->client.getId()), "EngineClient", "_doSerializeTrailer");
         this->_clear();
         if (this->requests.isEmpty())
             return (false);
@@ -320,7 +320,7 @@ bool    EngineClient::_doDeserializeContent()
             else if (used)
                 this->data.clear();
             LOG_TRACE("Content complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doDeserializeContent");
-            this->state = &EngineClient::_doDeserializeFooter;
+            this->state = &EngineClient::_doDeserializeTrailer;
         }
         else
             // All the data has been used, but the content is not complete
@@ -335,26 +335,26 @@ bool    EngineClient::_doDeserializeContent()
     else
     {
         LOG_TRACE("No plugin implempents IDoDeserializeContent for this context", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeContent");
-        this->state = &EngineClient::_doDeserializeFooter;
+        this->state = &EngineClient::_doDeserializeTrailer;
     }
     // Go to the next step
-    if (this->state == &EngineClient::_doDeserializeFooter)
+    if (this->state == &EngineClient::_doDeserializeTrailer)
         return (true);
     // Otherwise the engine waits for more data
     return (false);
 }
 
-bool    EngineClient::_doDeserializeFooter()
+bool    EngineClient::_doDeserializeTrailer()
 {
     quint64 used = 0;
     bool    result;
-    QPair<QString, LightBird::IDoDeserializeFooter *> instance;
+    QPair<QString, LightBird::IDoDeserializeTrailer *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeFooter>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeTrailer>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
     {
-        LOG_TRACE("Calling IDoDeserializeFooter::doDeserializeFooter()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeFooter");
-        result = instance.second->doDeserializeFooter(this->client, this->data, used);
+        LOG_TRACE("Calling IDoDeserializeTrailer::doDeserializeTrailer()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeTrailer");
+        result = instance.second->doDeserializeTrailer(this->client, this->data, used);
         Plugins::instance()->release(instance.first);
         // If true is returned, we go to the next step
         if (result)
@@ -365,13 +365,13 @@ bool    EngineClient::_doDeserializeFooter()
             // All the bytes has been used
             else if (used)
                 this->data.clear();
-            LOG_TRACE("Footer complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doDeserializeFooter");
+            LOG_TRACE("Trailer complete", Properties("id", this->client.getId()).add("plugin", instance.first).add("used", used), "EngineClient", "_doDeserializeTrailer");
             // Calls onDeserialize
-            this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserializeFooter);
+            this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserializeTrailer);
             this->state = &EngineClient::_doExecution;
         }
         else
-            // All the data has been used, but the footer is not complete
+            // All the data has been used, but the trailer is not complete
             this->data.clear();
         // If the data have been used
         if (!result || used)
@@ -380,7 +380,7 @@ bool    EngineClient::_doDeserializeFooter()
     // If no plugin matches, we go to the next step
     else
     {
-        LOG_TRACE("No plugin implempents IDoDeserializeFooter for this context", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
+        LOG_TRACE("No plugin implempents IDoDeserializeTrailer for this context", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeTrailer");
         this->state = &EngineClient::_doExecution;
     }
     // If the response has been deserialized
@@ -389,7 +389,7 @@ bool    EngineClient::_doDeserializeFooter()
         // The response is going to be executed
         if (this->done)
         {
-            LOG_DEBUG("Response complete", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
+            LOG_DEBUG("Response complete", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeTrailer");
             // Calls onDeserialize
             this->_onDeserialize(LightBird::IOnDeserialize::IDoDeserialize);
             // Executes the deserialized response if there is no error
@@ -398,15 +398,15 @@ bool    EngineClient::_doDeserializeFooter()
             // Otherwise it is not executed
             else
             {
-                LOG_DEBUG("An error has been found in the response", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
+                LOG_DEBUG("An error has been found in the response", Properties("id", this->client.getId()), "EngineClient", "_doDeserializeTrailer");
                 return (this->_onFinish());
             }
         }
-        // If the data has never been deserialized in header, content, or footer, they are cleared
+        // If the data has never been deserialized in header, content, or trailer, they are cleared
         else
         {
             LOG_WARNING("The data has not been deserialized because no plugin implements IDoDeserialize* for this context, or the data are never used. The data has been cleared",
-                        Properties("id", this->client.getId()), "EngineClient", "_doDeserializeFooter");
+                        Properties("id", this->client.getId()), "EngineClient", "_doDeserializeTrailer");
             this->data.clear();
             return (this->_onFinish());
         }

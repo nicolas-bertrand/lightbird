@@ -17,14 +17,14 @@ namespace LightBird
         /// Allows to know which interface will be called after IOnSerialize.
         enum Serialize
         {
-            IDoSerialize,           ///< The request is going to be serialized
-            IDoSerializeHeader,     ///< The header is going to be serialized (called only if IDoSerializeHeader will be called)
-            IDoSerializeContent,    ///< The content is going to be serialized (called only if IDoSerializeContent will be called)
-            IDoSerializeFooter      ///< The footer is going to be serialized (called only if IDoSerializeFooter will be called)
+            IDoSerialize,        ///< The request is going to be serialized.
+            IDoSerializeHeader,  ///< The header is going to be serialized (called only if IDoSerializeHeader will be called).
+            IDoSerializeContent, ///< The content is going to be serialized (called only if IDoSerializeContent will be called).
+            IDoSerializeTrailer  ///< The trailer is going to be serialized (called only if IDoSerializeTrailer will be called).
         };
 
         /// @brief Method called to handle the request before IDoSerialize Header,
-        /// Content, or Footer.
+        /// Content, or Trailer.
         /// @param client : The client that has sent the request.
         /// @param type : Used to know which of the IDoSerialize interfaces is going
         /// to be called.

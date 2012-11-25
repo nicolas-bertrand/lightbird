@@ -1,5 +1,5 @@
-#ifndef IDODESERIALIZEFOOTER_H
-# define IDODESERIALIZEFOOTER_H
+#ifndef IDODESERIALIZETRAILER_H
+# define IDODESERIALIZETRAILER_H
 
 # include <QByteArray>
 
@@ -7,18 +7,18 @@
 
 namespace LightBird
 {
-    /// @brief Converts the data received by the network to the footer of the
-    /// request, so that it can be processed. The footer is stored in IRequest
+    /// @brief Converts the data received by the network to the trailer of the
+    /// request, so that it can be processed. The trailer is stored in IRequest
     /// that can be accessed through IClient::getRequest(). In the case that
-    /// the data received exceeds the footer size, plugins have to indicates
-    /// how many bytes they have used to fill the footer. The other bytes will
+    /// the data received exceeds the trailer size, plugins have to indicates
+    /// how many bytes they have used to fill the trailer. The other bytes will
     /// be used by an other request.
-    class IDoDeserializeFooter
+    class IDoDeserializeTrailer
     {
     public:
-        virtual ~IDoDeserializeFooter() {}
+        virtual ~IDoDeserializeTrailer() {}
 
-        /// @brief Converts the data received through the network to the footer. The footer
+        /// @brief Converts the data received through the network to the trailer. The trailer
         /// is stored in the object IRequest that can be accessed via IClient::getRequest.
         /// @param client : The client that sent the request.
         /// @param data : The data received.
@@ -29,12 +29,12 @@ namespace LightBird
         /// If the data received represents more than the content, users have to set the
         /// length used from data to this variable. Let zero if no data have to be used,
         /// ie if there is no content.
-        /// @return True if the footer is complete. This method will be called while
+        /// @return True if the trailer is complete. This method will be called while
         /// false is returned.
-        virtual bool    doDeserializeFooter(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
+        virtual bool    doDeserializeTrailer(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;
     };
 }
 
-Q_DECLARE_INTERFACE(LightBird::IDoDeserializeFooter, "cc.lightbird.IDoDeserializeFooter")
+Q_DECLARE_INTERFACE(LightBird::IDoDeserializeTrailer, "cc.lightbird.IDoDeserializeTrailer")
 
-#endif // IDODESERIALIZEFOOTER_H
+#endif // IDODESERIALIZETRAILER_H

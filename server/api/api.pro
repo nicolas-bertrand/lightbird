@@ -24,14 +24,14 @@ HEADERS = IApi.h \
     network/IClient.h \
     network/IContent.h \
     network/IDoDeserializeContent.h \
-    network/IDoDeserializeFooter.h \
     network/IDoDeserializeHeader.h \
+    network/IDoDeserializeTrailer.h \
     network/IDoExecution.h \
     network/IDoRead.h \
     network/IDoSend.h \
     network/IDoSerializeContent.h \
-    network/IDoSerializeFooter.h \
     network/IDoSerializeHeader.h \
+    network/IDoSerializeTrailer.h \
     network/IDoWrite.h \
     network/INetwork.h \
     network/IOnConnect.h \
