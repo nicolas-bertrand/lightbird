@@ -49,8 +49,8 @@ function Desktop(task)
     // Called when the browser is resized. Updates the size of the desktop.
     self.onResize = function ()
     {
-        var width = (gl_browserSize.width > C.Desktop.minWidth) ? gl_browserSize.width : C.Desktop.minWidth;
-        var height = (gl_browserSize.height > C.Desktop.minHeight) ? gl_browserSize.height : C.Desktop.minHeight;
+        var width = gl_browserSize.width;
+        var height = gl_browserSize.height;
         self.middleHeight = height - C.Desktop.topHeight - C.Desktop.bottomHeight;
         $(self.node.middle).height(self.middleHeight);
         self.left = C.Desktop.tasksListWidth;

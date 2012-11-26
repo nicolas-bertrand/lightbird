@@ -36,6 +36,8 @@ function Player(task)
         self.header; // Manages the header of the playlist
         self.playlist; // Manages the playlist
         self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leave
+        self.mouseOverPlayer; // True while the mouse is over the player
+        self.timeLineExpanded; // True if the time line is expanded
         
         // Default values
         C.Desktop.bottomHeight = C.Player.defaultHeight;
@@ -50,8 +52,6 @@ function Player(task)
         self.node.duration.innerHTML = "0:00";
         self.playlist = new self.Playlist(self);
         self.header = new self.Header(self);
-        
-        // Icons
         self.generateIcons();
         
         // Events
@@ -64,40 +64,69 @@ function Player(task)
     // Resizes the player when the browser size changes.
     self.onResize = function (width, height)
     {
-        self.node.playlist.width(width);
-        // The playlist is highter than the top part of the desktop
-        if (self.playlist.height > height - C.Desktop.bottomHeight - C.Desktop.topHeight)
-            self.playlist.setHeight(self.playlist.height);
+        self.playlist.onResize(width, height);
     }
     
     // The mouse entered the player area.
     self.mouseEnter = function (e)
     {
+        self.mouseOverPlayer = true;
         // The player is already in the correct state
         if (self.mouseLeaveTimeout)
         {
             clearTimeout(self.mouseLeaveTimeout);
             self.mouseLeaveTimeout = 0;
         }
-        else
-        {
-            C.Desktop.bottomHeight = C.Player.defaultHeight + C.Player.timelineOverHeight;
-            self.node.timeline.height(C.Player.timelineHeight + C.Player.timelineOverHeight);
-            gl_desktop.onResize();
-        }
+        // Expands the timeline
+        else if (!self.playlist.isDisplayed() && !gl_desktop.drag.isDragging())
+            self.expandTimeLine();
     }
     
     // The mouse leaved the player area.
     self.mouseLeave = function (e)
     {
-        self.mouseLeaveTimeout = setTimeout(function ()
+        self.mouseOverPlayer = false;
+        // If the playlist is not displayed, we retract the time line after the delay
+        if (!self.playlist.isDisplayed() && self.timeLineExpanded)
         {
-            C.Desktop.bottomHeight = C.Player.defaultHeight;
-            self.node.timeline.height(C.Player.timelineHeight);
-            self.playlist.hide();
-            gl_desktop.onResize();
-            self.mouseLeaveTimeout = 0;
-        }, C.Player.mouseLeaveTimeout);
+            self.mouseLeaveTimeout = setTimeout(function ()
+            {
+                self.retractTimeLine();
+                self.mouseLeaveTimeout = 0;
+            }, C.Player.mouseLeaveTimeout);
+        }
+        // Otherwise we wait a mouse down event outside the player to retract it and hide the playlist
+        else
+        {
+            $("body").unbind("mousedown");
+            $("body").mousedown(function (e)
+            {
+                $("body").unbind(e);
+                if (!self.mouseOverPlayer && !self.playlist.isPinned())
+                {
+                    self.playlist.hide();
+                    self.retractTimeLine();
+                }
+            });
+        }
+    }
+    
+    // Expands the time line.
+    self.expandTimeLine = function ()
+    {
+        C.Desktop.bottomHeight = C.Player.defaultHeight + C.Player.timelineOverHeight;
+        self.node.timeline.height(C.Player.timelineHeight + C.Player.timelineOverHeight);
+        self.timeLineExpanded = true;
+        gl_desktop.onResize();
+    }
+    
+    // Retracts the time line.
+    self.retractTimeLine = function ()
+    {
+        C.Desktop.bottomHeight = C.Player.defaultHeight;
+        self.node.timeline.height(C.Player.timelineHeight);
+        self.timeLineExpanded = false;
+        gl_desktop.onResize();
     }
     
     // Generates the SVG icons of the player.
@@ -143,10 +172,31 @@ function Player(task)
     {
         if (e.which != 1)
             return ;
-        // Opens the playlist
+        // Opens / close the playlist
         if ($(e.delegateTarget).hasClass("number") || $(e.delegateTarget).hasClass("name"))
         {
-            self.playlist.display();
+            if (!self.playlist.isPinned())
+            {
+                if (!self.playlist.isDisplayed())
+                    self.playlist.display();
+                else
+                    self.playlist.hide();
+            }
+            // If the playlist is pinned we resize it to the minimal height instead of hidding it
+            else
+            {
+                if (self.playlist.height <= C.Player.headerHeight + 1)
+                {
+                    if (!self.oldPlaylistHeight)
+                        self.oldPlaylistHeight = C.Player.playlistHeight;
+                    self.playlist.setHeight(self.oldPlaylistHeight);
+                }
+                else
+                {
+                    self.oldPlaylistHeight = self.playlist.height;
+                    self.playlist.setHeight(0);
+                }
+            }
         }
     }
 
@@ -160,6 +210,7 @@ self.Playlist = function (player)
     {
         // Members
         self.height; // The height of the playlist
+        self.pinned; // True if the playlist is pinned.
         
         // Default values
         self.setHeight(C.Player.playlistHeight);
@@ -170,6 +221,23 @@ self.Playlist = function (player)
     
     // Sets the height of the playlist.
     self.setHeight = function (height)
+    {
+        var listHeight;
+        if (!self.pinned)
+            listHeight = self.setHeightUnpinned(height);
+        else
+            listHeight = self.setHeightPinned(height);
+        // Fills the empty space of the playlist with empty rows
+        var wantedFilesNumber = listHeight / C.Player.listFileHeight;
+        var currentFilesNumber = node.list.children().length;
+        for (var i = currentFilesNumber; i < wantedFilesNumber; i++)
+            $("<div></div>").addClass(i % 2 ? "even" : "odd").appendTo(node.list);
+        currentFilesNumber = i;
+        for (var i = currentFilesNumber - 2; i > wantedFilesNumber; i--)
+            node.list.children().last().remove();
+    }
+    // Sets the height in the unpinned mode.
+    self.setHeightUnpinned = function (height)
     {
         // Clamp the height
         if (height <= C.Player.headerHeight)
@@ -182,14 +250,40 @@ self.Playlist = function (player)
         node.playlist.height(height);
         node.list.height(listHeight);
         node.playlist[0].style.top = -height + "px";
-        // Fills the empty space of the playlist with empty rows
-        var wantedFilesNumber = listHeight / C.Player.listFileHeight;
-        var currentFilesNumber = node.list.children().length;
-        for (var i = currentFilesNumber; i < wantedFilesNumber; i++)
-            $("<div></div>").addClass(i % 2 ? "even" : "odd").appendTo(node.list);
-        currentFilesNumber = i;
-        for (var i = currentFilesNumber - 2; i > wantedFilesNumber; i--)
-            node.list.children().last().remove();
+        return (listHeight);
+    }
+    // Sets the height in the pinned mode.
+    self.setHeightPinned = function (height)
+    {
+        // Clamp the height
+        if (height <= C.Player.headerHeight)
+            height = C.Player.headerHeight + 1;
+        else if (gl_browserSize.height - (height + C.Player.defaultHeight + C.Player.timelineOverHeight) < C.Desktop.topHeight)
+            height = gl_browserSize.height - (C.Player.defaultHeight + C.Player.timelineOverHeight + C.Desktop.topHeight);
+        // Resizes the playlist
+        var listHeight = height - C.Player.headerHeight;
+        self.height = height;
+        node.playlist.height(height);
+        node.list.height(listHeight);
+        // Updates the desktop
+        C.Desktop.bottomHeight = self.height + C.Player.defaultHeight + C.Player.timelineOverHeight;
+        node.bottom.css("padding-top", self.height);
+        gl_desktop.onResize();
+        return (listHeight);
+    }
+    
+    // Resizes the playlist when the browser size changes.
+    self.onResize = function (width, height)
+    {
+        node.playlist.width(width);
+        // Checks if the playlist is highter than the top part of the desktop
+        if (!self.pinned)
+        {
+            if (self.height > height - C.Desktop.bottomHeight - C.Desktop.topHeight)
+                self.setHeight(self.height);
+        }
+        else if (height - (self.height + C.Player.defaultHeight + C.Player.timelineOverHeight) < C.Desktop.topHeight)
+            self.setHeight(self.height);
     }
 
     // Displays the playlist.
@@ -206,6 +300,39 @@ self.Playlist = function (player)
         node.playlist.removeClass("display");
         node.timeline.removeClass("opaque");
         node.playlist.height(0);
+    }
+    
+    // Returns true if the playlist is displayed.
+    self.isDisplayed = function ()
+    {
+        return (node.playlist.hasClass("display"));
+    }
+    
+    // Pin the playlist to the player.
+    self.pin = function ()
+    {
+        self.pinned = true;
+        C.Desktop.bottomHeight = self.height + C.Player.defaultHeight + C.Player.timelineOverHeight;
+        node.bottom.css("padding-top", self.height);
+        node.playlist.css("top", 0);
+        gl_desktop.onResize();
+    }
+    
+    // Unpin the playlist from the player.
+    self.unpin = function ()
+    {
+        self.pinned = false;
+        node.bottom.css("padding-top", 0);
+        node.playlist.css("top", -self.height);
+        self.hide();
+        player.retractTimeLine();
+        gl_desktop.onResize();
+    }
+    
+    // Returns true if the playlist is pinned to the player.
+    self.isPinned = function ()
+    {
+        return (self.pinned);
     }
     
     self.init();
@@ -230,7 +357,6 @@ self.Header = function (player)
         
         // Default values
         node.header.height(C.Player.headerHeight);
-        self.addTab("Recent files");
         self.drawAdd();
         self.drawPin();
         
@@ -253,7 +379,7 @@ self.Header = function (player)
         tab.children(".middle").children()[0].innerHTML = name;
         self.focus(tab);
         tab.mousedown(function (e) { self.mouseDownOnTab(e); });
-        tab.click(function (e) { self.clickOnTab(e); });
+        tab.mouseup(function (e) { self.mouseUpOnTab(e); });
         tab.appendTo(node.tabs);
         // Waits for the offsetWidth of the tab to be defined before displaying it,
         // since we can't know the width of the tab in advance because of its text.
@@ -388,7 +514,7 @@ self.Header = function (player)
         }
     }
     
-    // Removes a tab from the header
+    // Removes a tab from the header.
     self.removeTab = function (tab)
     {
         var offset = tab[0].offsetWidth - C.Player.tabMargin - C.Player.tabShift;
@@ -549,22 +675,58 @@ self.Header = function (player)
     // Draws the pin element of the header.
     self.drawPin = function ()
     {
-        var paper = Raphael(node.pin[0], 53, 23);
+        var paper = Raphael(node.pin[0], 53, 24);
         var tabLeft = paper.path(gl_svg.Player.tabLeft);
-        tabLeft.translate(4, 0);
+        tabLeft.translate(4, 1);
         tabLeft.attr("fill", "#242424");
         tabLeft.attr("stroke", "none");
         tabLeft.glow({ width : 6, color : "black", opacity : 0.15 });
-        tabLeft.glow({ width : 1, color : "#4d4d4d", opacity : 1 });
-        var rect = paper.rect(35, 0, 50, 24);
+        tabBorder = tabLeft.glow({ width : 1, color : "#4d4d4d", opacity : 1 });
+        tabBorderOver = tabLeft.glow({ width : 1, color : "#e5e5e5", opacity : 1 }).hide();
+        var rect = paper.rect(35, 1, 50, 24);
         rect.attr("fill", "#242424");
         rect.attr("stroke", "none");
         var pin = paper.path(gl_svg.Player.pin);
-        pin.translate(28, 4);
+        pin.translate(28, 5);
         pin.attr("fill", "white");
         pin.attr("opacity", "0.5");
         pin.attr("stroke", "none");
-        pin.glow({ width : 6, color : "black", opacity : 0.15 });
+        var pinShadow = pin.glow({ width : 6, color : "black", opacity : 0.15 });
+        var borderTop = paper.rect(30, 0, 50, 1);
+        borderTop.attr("fill", "#4d4d4d");
+        borderTop.attr("stroke", "none");
+        // Events
+        node.pin.mouseenter(function (e)
+        {
+            tabLeft.attr("fill", "#e5e5e5");
+            tabBorder.hide();
+            tabBorderOver.show();
+            rect.attr("fill", "#e5e5e5");
+            pin.attr("fill", "#444444");
+            pin.attr("opacity", "1");
+            pinShadow.hide();
+            borderTop.attr("fill", "#e5e5e5");
+            node.pin.addClass("over");
+        });
+        node.pin.mouseleave(function (e)
+        {
+            tabLeft.attr("fill", "#242424");
+            tabBorder.show();
+            tabBorderOver.hide();
+            rect.attr("fill", "#242424");
+            pin.attr("fill", "white");
+            pin.attr("opacity", "0.5");
+            pinShadow.show();
+            borderTop.attr("fill", "#4d4d4d");
+            node.pin.removeClass("over");
+        });
+        node.pin.click(function (e)
+        {
+            if (!player.playlist.isPinned())
+                player.playlist.pin();
+            else
+                player.playlist.unpin();
+        });
     }
     
     // Focus / add a tab.
@@ -582,7 +744,7 @@ self.Header = function (player)
     }
     
     // Removes a tab.
-    self.clickOnTab = function (e)
+    self.mouseUpOnTab = function (e)
     {
         var tab = self.getTabUnderMouse(e);
         

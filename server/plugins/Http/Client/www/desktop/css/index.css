@@ -904,9 +904,15 @@ a:visited
 {
     position: absolute;
     right: 0px;
+    top: 0px;
     width: 53px;
     height: 23px;
     cursor: pointer;
+}
+
+#desktop>.bottom>.playlist>.header>.pin.over
+{
+    z-index: 1;
 }
 
 #desktop>.bottom>.playlist>.list

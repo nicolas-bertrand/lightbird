@@ -19,7 +19,7 @@
 # define SESSION_DISCONNECT_DATA    "disconnect-data"    // Allows to abort the data connection if true.
 # define SESSION_BINARY_FLAG        "binary-flag"        // Whether we are in Ascii or Image mode.
 # define SESSION_RESTART            "restart"            // The RESTart position of the next RETR or STOR command.
-# define SESSION_TRANSFER_IP        "transfer-ip"        // In active mode these two variables contains the information gived by the PORT command,
+# define SESSION_TRANSFER_IP        "transfer-ip"        // In active mode these two variables contains the information given by the PORT command,
 # define SESSION_TRANSFER_PORT      "transfer-port"      // however in passive mode they contains the control client informations.
 # define SESSION_TRANSFER_COMMAND   "transfer-command"   // The command that initiated the transfer. Defined only during the transfer.
 # define SESSION_TRANSFER_PARAMETER "transfer-parameter" // The paramater of the command. Defined only during the transfer.

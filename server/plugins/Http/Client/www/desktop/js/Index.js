@@ -8,6 +8,7 @@ var gl_browserSize;
 // Initializes the page (called by onload)
 function load()
 {
+	gl_browserSize = getBrowserSize();
     // Initialize the main systems
 	new Resources();
 	new Desktop();
@@ -52,8 +53,8 @@ function adjustBackgroundSize()
 {
 	// Sets the background size to the screen size
 	var background = document.getElementById("background");
-	$("#background").width(gl_browserSize.width > C.Desktop.minWidth ? gl_browserSize.width : C.Desktop.minWidth);
-	$("#background").height(gl_browserSize.height > C.Desktop.minHeight ? gl_browserSize.height : C.Desktop.minHeight);
+	$("#background").width(gl_browserSize.width);
+	$("#background").height(gl_browserSize.height);
 }
 
 // Finds the size of the browser window
@@ -80,8 +81,8 @@ function getBrowserSize()
 		width = document.body.clientWidth;
 		height = document.body.clientHeight;
 	}
-	return {width : width,
-			height : height};
+	return { width : (width > C.Desktop.minWidth ? width : C.Desktop.minWidth),
+             height : (height > C.Desktop.minHeight ? height : C.Desktop.minHeight) };
 }
 
 // Executes a Http Request on the server.

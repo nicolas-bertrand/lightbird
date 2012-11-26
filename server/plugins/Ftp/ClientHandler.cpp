@@ -53,7 +53,7 @@ bool    ClientHandler::doControlExecute(LightBird::IClient &client)
     }
     else
     {
-        // Make sure we capitalize it, as we do case insensitive matching
+        // Makes sure we capitalize the command, as we do case insensitive matching
         QString command = request.getMethod().toUpper();
         QString parameter = request.getInformations()["parameter"].toString();
         if (this->commands->isControl(command))
