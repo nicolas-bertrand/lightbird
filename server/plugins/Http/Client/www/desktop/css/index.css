@@ -900,6 +900,11 @@ a:visited
     z-index: 0;
 }
 
+#desktop>.bottom>.playlist>.header>.add.hide
+{
+    display: none;
+}
+
 #desktop>.bottom>.playlist>.header>.pin
 {
     position: absolute;

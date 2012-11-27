@@ -56,13 +56,14 @@ var Configuration =
         timelineOverHeight : 5, // The additionnal height of the timeline when the mouse is over the player.
         headerHeight : 24, // The height of the playlist header.
         listFileHeight : 25, // The height of each file of the playlist.
-        tabShift : 30, // The initial shift of the tabs.
+        tabOrigin : -30, // The original position of the tabs.
         tabMargin : 16, // The margin between the tabs.
         addIconMargin : 40, // The margin between the last tab and the add icon.
         addIconOrigin : -16, // The origin position of the add icon.
         tabOffsetInterval : 10, // The duration of the intervals used to get the offset* of the tabs.
         tabExternLeft : 16, // The estimation of the width of the external left part of the tab, based on its shape.
         tabExternRight : 21, // The estimation of the width of the external right part of the tab, based on its shape.
+        tabDragResistance : 3, // The number of pixels the mouse needs to move in otder to start the dragging.
         mouseLeaveTimeout : 1000, // The delay before the effect of the mouse leave.
     },
     Uploads :

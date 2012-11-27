@@ -364,117 +364,6 @@ self.Header = function (player)
         node.header.mousedown(function (e) { self.mouseDownOnHeader(e); });
     }
     
-    // Adds a tab.
-    self.addTab = function (name)
-    {
-        var tab = $(self.tabTemplate);
-        var lastTab = node.tabs.children().last()[0];
-        var position = -C.Player.tabShift;
-        
-        // Builds the tab
-        tab[0].tabIconEvent = new Array(); // Allows to send events to the icon (focus, odd, even)
-        self.drawTabIcon(tab.children(".left")[0], 4, gl_svg.Player.tabLeft);
-        self.drawTabIcon(tab.children(".right")[0], -5, gl_svg.Player.tabRight);
-        self.drawCloseIcon(tab.children(".close").children()[0], gl_svg.Player.tabClose);
-        tab.children(".middle").children()[0].innerHTML = name;
-        self.focus(tab);
-        tab.mousedown(function (e) { self.mouseDownOnTab(e); });
-        tab.mouseup(function (e) { self.mouseUpOnTab(e); });
-        tab.appendTo(node.tabs);
-        // Waits for the offsetWidth of the tab to be defined before displaying it,
-        // since we can't know the width of the tab in advance because of its text.
-        tab.addTabInterval = setInterval(function ()
-        {
-            if (tab[0].offsetWidth)
-            {
-                // Ensures that the tab doesn't "break"
-                tab.width(tab[0].offsetWidth + 5);
-                clearInterval(tab.addTabInterval);
-                // We need the offsetWidth and offsetLeft of the previous tab, which might not be defined yet
-                if (lastTab)
-                    tab.addTabInterval = setInterval(function ()
-                    {
-                        if (lastTab.offsetWidth && lastTab.offsetLeft)
-                        {
-                            // Sets the position of the tab relative to the previous one
-                            tab.css("left", (position + lastTab.offsetLeft + lastTab.offsetWidth - C.Player.tabMargin) + "px");
-                            clearInterval(tab.addTabInterval);
-                            tab.addClass("display");
-                            // Puts the add icon after the new tab
-                            self.updateAdd();
-                        }
-                    }, C.Player.tabOffsetInterval);
-            }
-        }, C.Player.tabOffsetInterval);
-        // The first tab can be directly displayed
-        if (!lastTab)
-        {
-            tab.css("left", position + "px");
-            tab.addClass("display");
-            self.updateAdd();
-        }
-    }
-    
-    // Draws the left or right part of the tab in SVG.
-    self.drawTabIcon = function (destination, left, path)
-    {
-        var paper = Raphael(destination, 30, 24);
-        var icon = paper.path(path);
-        icon.node.isMainPath = true;  // Distinguishes the main path from its shadow
-        icon.translate(left, 0);
-        icon.attr("fill", "90-#252525-#2c2c2c");
-        icon.attr("stroke", "none");
-        icon.glow({ width : 6, color : "black", opacity : 0.15 });
-        icon.glow({ width : 1, color : "#4d4d4d", opacity : 1 })[0].node.isMainPath = true; // Part of the main path
-        // Covers the shadow on the bottom border
-        var rect;
-        if ($(destination).hasClass("left"))
-            rect = paper.rect(0, 23, 5, 1);
-        else
-            rect = paper.rect(27, 23, 5, 1);
-        rect.attr("fill", "#4d4d4d");
-        rect.attr("stroke", "none");
-        // Changes the background of the SVG depending on the event
-        destination.parentNode.tabIconEvent.push(function (name)
-        {
-            if (name == "odd")
-                icon.attr("fill", "#292929");
-            else if (name == "even")
-                icon.attr("fill", "#303030");
-            else if (name == "focus")
-                icon.attr("fill", "90-#252525-#2c2c2c");
-        });
-    }
-    
-    // Draws the SVG close icon of the tab.
-    self.drawCloseIcon = function (destination, path)
-    {
-        var paper = Raphael(destination, 14, 14);
-        var icon = paper.path(path);
-        icon.translate(3.5, 3.5);
-        icon.attr("fill", "white");
-        icon.attr("fill-opacity", "0.25");
-        icon.attr("stroke", "none");
-        icon.glow({ width : 3, color : "#000000", opacity : 0.13 });
-        // Events
-        destination.mouseEnterCloseIcon = function ()
-        {
-            icon.attr("fill-opacity", "0.8");
-        };
-        $(destination).mouseenter(function () { destination.mouseEnterCloseIcon(); });
-        destination.mouseLeaveCloseIcon = function ()
-        {
-            if (!this.mouseOverCloseIcon)
-                icon.attr("fill-opacity", "0.25");
-        }
-        $(destination).mouseleave(function () { destination.mouseLeaveCloseIcon(); });
-        $(destination).click(function (e)
-        {
-            if (e.which == 1)
-                self.removeTab($(destination).parents(".tab"));
-        });
-    }
-    
     // Emulates the mouse enter, leave and click events for the close icon that is below the focused tab.
     self.mouseMoveOnFocusTab = function (e)
     {
@@ -495,7 +384,7 @@ self.Header = function (player)
             // Emulates the click event
             var tabLeft = $(e.delegateTarget).children(".left");
             tabLeft.mousedown(function (e) { close.mouseDownOnCloseIcon = (e.which == 1); });
-            $(close).mouseup(function (ev) { if (close.mouseDownOnCloseIcon && ev.which == 1) self.removeTab($(e.delegateTarget.previousSibling)); });
+            $(close).mouseup(function (ev) { if (close.mouseDownOnCloseIcon && ev.which == 1) e.delegateTarget.previousSibling.object.remove(); });
             // Emulates the mouse leave event
             $("body").mousemove(function (e)
             {
@@ -514,28 +403,6 @@ self.Header = function (player)
         }
     }
     
-    // Removes a tab from the header.
-    self.removeTab = function (tab)
-    {
-        var offset = tab[0].offsetWidth - C.Player.tabMargin - C.Player.tabShift;
-        
-        // Moves the next tabs to replace the removed tab
-        for (var nextTab = tab.next(); nextTab.length; nextTab = nextTab.next())
-            nextTab.css("left", nextTab[0].offsetLeft - offset);
-        // Ensures that the focus is always on a tab
-        if (tab.hasClass("focus"))
-        {
-            if (tab.next().length)
-                self.focus(tab.next());
-            else if (tab.prev().length)
-                self.focus(tab.prev());
-        }
-        // Removes the tab and updates the others
-        tab.remove();
-        self.updateOddEven();
-        self.updateAdd();
-    }
-    
     // Puts the focus on a tab.
     self.focus = function (tab)
     {
@@ -549,7 +416,7 @@ self.Header = function (player)
         });
         self.tabFocused.removeClass("focus");
         self.tabFocused.unbind("mousemove");
-        self.updateOddEven();
+        self.updateOddEvenTab();
         // Applies the new focus
         tab.addClass("focus");
         for (var j = 0; j < tab[0].tabIconEvent.length; ++j)
@@ -560,7 +427,7 @@ self.Header = function (player)
     }
     
     // Updates the odd / even alternation of the tabs.
-    self.updateOddEven = function ()
+    self.updateOddEvenTab = function ()
     {
         var tabs = node.tabs.children();
         var i = 0;
@@ -672,6 +539,23 @@ self.Header = function (player)
         }
     }
     
+    // Focus / add a tab.
+    self.mouseDownOnTab = function (e)
+    {
+        var tab = self.getTabUnderMouse(e);
+        
+        if (e.which == 1 && tab)
+        {
+            if (tab.hasClass("tab"))
+            {
+                self.focus(tab);
+                tab[0].object.mouseDown(e);
+            }
+            else if (tab.hasClass("add"))
+                new player.Tab(player, "New playlist " + (node.tabs.children().length + 1));
+        }
+    }
+    
     // Draws the pin element of the header.
     self.drawPin = function ()
     {
@@ -727,29 +611,6 @@ self.Header = function (player)
             else
                 player.playlist.unpin();
         });
-    }
-    
-    // Focus / add a tab.
-    self.mouseDownOnTab = function (e)
-    {
-        var tab = self.getTabUnderMouse(e);
-        
-        if (e.which == 1 && tab)
-        {
-            if (tab.hasClass("tab"))
-                self.focus(tab);
-            else if (tab.hasClass("add"))
-                self.addTab("New playlist " + (node.tabs.children().length));
-        }
-    }
-    
-    // Removes a tab.
-    self.mouseUpOnTab = function (e)
-    {
-        var tab = self.getTabUnderMouse(e);
-        
-        if (e.which == 2 && tab && tab.hasClass("tab"))
-            self.removeTab(tab);
     }
     
     // Starts to resize the playlist.
@@ -818,6 +679,238 @@ self.Header = function (player)
         // The mouse is on the add tab icon
         if ($(e.delegateTarget).hasClass("add"))
             return (node.add);
+    }
+    
+    self.init();
+    return (self);
+}
+
+// Creates and manages a tab.
+// name : The name of the tab.
+self.Tab = function (player, name)
+{
+    var self = this;
+    var node = player.node; 
+    
+    self.init = function ()
+    {
+        // Members
+        self.tab = self.create(name);
+        self.tab[0].object = self;
+        // Drag tab
+        self.element; // The initial position of the tab
+        self.mouse; // The position of the mouse in the tab
+        self.resistance; // The dragging will start only when the resistance is broken
+    }
+    
+    // Creates the tab
+    self.create = function (name)
+    {
+        var tab = $(player.header.tabTemplate);
+        var lastTab = node.tabs.children().last()[0];
+        
+        // Builds the tab
+        tab[0].tabIconEvent = new Array(); // Allows to send events to the icon (focus, odd, even)
+        self.drawTabIcon(tab.children(".left")[0], 4, gl_svg.Player.tabLeft);
+        self.drawTabIcon(tab.children(".right")[0], -5, gl_svg.Player.tabRight);
+        self.drawCloseIcon(tab.children(".close").children()[0], gl_svg.Player.tabClose);
+        tab.children(".middle").children()[0].innerHTML = name;
+        player.header.focus(tab);
+        tab.mousedown(function (e) { player.header.mouseDownOnTab(e); });
+        tab.mouseup(function (e) { self.mouseUp(e); });
+        tab.appendTo(node.tabs);
+        // Waits for the offsetWidth of the tab to be defined before displaying it,
+        // since we can't know the width of the tab in advance because of its text.
+        tab.addTabInterval = setInterval(function ()
+        {
+            if (tab[0].offsetWidth)
+            {
+                // Ensures that the tab doesn't "break"
+                tab.width(tab[0].offsetWidth + 5);
+                clearInterval(tab.addTabInterval);
+                // We need the offsetWidth and offsetLeft of the previous tab, which might not be defined yet
+                if (lastTab)
+                    tab.addTabInterval = setInterval(function ()
+                    {
+                        if (lastTab.offsetWidth && lastTab.offsetLeft)
+                        {
+                            // Sets the position of the tab relative to the previous one
+                            tab.css("left", (C.Player.tabOrigin + lastTab.offsetLeft + lastTab.offsetWidth - C.Player.tabMargin) + "px");
+                            clearInterval(tab.addTabInterval);
+                            tab.addClass("display");
+                            // Puts the add icon after the new tab
+                            player.header.updateAdd();
+                        }
+                    }, C.Player.tabOffsetInterval);
+            }
+        }, C.Player.tabOffsetInterval);
+        // The first tab can be directly displayed
+        if (!lastTab)
+        {
+            tab.css("left", C.Player.tabOrigin + "px");
+            tab.addClass("display");
+            player.header.updateAdd();
+        }
+        return (tab);
+    }
+    
+    // Draws the left or right part of the tab in SVG.
+    self.drawTabIcon = function (destination, left, path)
+    {
+        var paper = Raphael(destination, 30, 24);
+        var icon = paper.path(path);
+        icon.node.isMainPath = true;  // Distinguishes the main path from its shadow
+        icon.translate(left, 0);
+        icon.attr("fill", "90-#252525-#2c2c2c");
+        icon.attr("stroke", "none");
+        icon.glow({ width : 6, color : "black", opacity : 0.15 });
+        icon.glow({ width : 1, color : "#4d4d4d", opacity : 1 })[0].node.isMainPath = true; // Part of the main path
+        // Covers the shadow on the bottom border
+        var rect;
+        if ($(destination).hasClass("left"))
+            rect = paper.rect(0, 23, 5, 1);
+        else
+            rect = paper.rect(27, 23, 5, 1);
+        rect.attr("fill", "#4d4d4d");
+        rect.attr("stroke", "none");
+        // Changes the background of the SVG depending on the event
+        destination.parentNode.tabIconEvent.push(function (name)
+        {
+            if (name == "odd")
+                icon.attr("fill", "#292929");
+            else if (name == "even")
+                icon.attr("fill", "#303030");
+            else if (name == "focus")
+                icon.attr("fill", "90-#252525-#2c2c2c");
+        });
+    }
+    
+    // Draws the SVG close icon of the tab.
+    self.drawCloseIcon = function (destination, path)
+    {
+        var paper = Raphael(destination, 14, 14);
+        var icon = paper.path(path);
+        icon.translate(3.5, 3.5);
+        icon.attr("fill", "white");
+        icon.attr("fill-opacity", "0.25");
+        icon.attr("stroke", "none");
+        icon.glow({ width : 3, color : "#000000", opacity : 0.13 });
+        // Events
+        destination.mouseEnterCloseIcon = function ()
+        {
+            icon.attr("fill-opacity", "0.8");
+        };
+        $(destination).mouseenter(function () { destination.mouseEnterCloseIcon(); });
+        destination.mouseLeaveCloseIcon = function ()
+        {
+            if (!this.mouseOverCloseIcon)
+                icon.attr("fill-opacity", "0.25");
+        }
+        $(destination).mouseleave(function () { destination.mouseLeaveCloseIcon(); });
+        $(destination).click(function (e)
+        {
+            if (e.which == 1)
+                self.remove();
+        });
+    }
+    
+    // Removes the tab.
+    self.remove = function ()
+    {
+        var offset = self.tab[0].offsetWidth - C.Player.tabMargin + C.Player.tabOrigin;
+        
+        // Moves the next tabs to replace the removed tab
+        for (var nextTab = self.tab.next(); nextTab.length; nextTab = nextTab.next())
+            nextTab.css("left", nextTab[0].offsetLeft - offset);
+        // Ensures that the focus is always on a tab
+        if (self.tab.hasClass("focus"))
+        {
+            if (self.tab.next().length)
+                player.header.focus(self.tab.next());
+            else if (self.tab.prev().length)
+                player.header.focus(self.tab.prev());
+        }
+        // Removes the tab and updates the others
+        self.tab.remove();
+        player.header.updateOddEvenTab();
+        player.header.updateAdd();
+    }
+
+    // Starts the dragging of the tab.
+    self.mouseDown = function (e)
+    {
+        if (gl_desktop.drag.isDragging())
+            return ;
+        gl_desktop.drag.start(e, self.tab[0], self, "mouseMove", "", "mouseUpMove");
+        self.element = gl_desktop.drag.getElement();
+        self.mouse = gl_desktop.drag.getMouse();
+        self.resistance = true;
+    }
+    
+    // Drags the tab.
+    self.mouseMove = function (e)
+    {
+        var tab = self.tab[0];
+        var y = e.pageY - node.header.offset().top;
+        
+        // Resizes the playlist if the mouse is on the vertical edge of the header
+        if (y < 2)
+            player.playlist.setHeight(player.playlist.height - y + 2);
+        else if (y >= C.Player.headerHeight - 1)
+            player.playlist.setHeight(player.playlist.height - y + C.Player.headerHeight - 1);
+        // Starts to drag the tab horizontally once the resistance is broken
+        if (self.resistance)
+        {
+            var delta = e.pageX - (self.element.x + self.mouse.x);
+            if (Math.abs(delta) <= C.Player.tabDragResistance)
+                return ;
+            self.mouse.x += delta;
+            node.add.addClass("hide");
+            self.resistance = false;
+        }
+        // Moves the tab horizontally
+        var x = e.pageX - self.mouse.x;
+        var left = tab.offsetLeft;
+        if (x < C.Player.tabOrigin)
+            x = C.Player.tabOrigin;
+        // The tab has been moved to the left
+        if (x < left)
+            for (var previous = tab.previousSibling; previous && previous.offsetLeft + previous.offsetWidth / 3 > x; previous = previous.previousSibling.previousSibling)
+            {
+                self.tab.after(previous);
+                previous.style.left = (previous.offsetLeft + tab.offsetWidth - C.Player.tabMargin + C.Player.tabOrigin) + "px";
+                player.header.updateOddEvenTab();
+            }
+        // To the right
+        else if (x > left)
+        {
+            for (var next = tab.nextSibling; next && next.offsetLeft + next.offsetWidth - next.offsetWidth / 3 < x + tab.offsetWidth; next = next.nextSibling.nextSibling)
+            {
+                self.tab.before(next);
+                next.style.left = (next.offsetLeft - tab.offsetWidth + C.Player.tabMargin - C.Player.tabOrigin) + "px";
+                player.header.updateOddEvenTab();
+            }
+        }
+        tab.style.left = x + "px";
+    }
+    
+    // Moves the dragged tab to its final position.
+    self.mouseUpMove = function (e)
+    {
+        node.add.removeClass("hide");
+        if (self.tab.prev().length)
+            self.tab.css("left", (C.Player.tabOrigin + self.tab.prev()[0].offsetLeft + self.tab.prev().width() - C.Player.tabMargin) + "px");
+        else
+            self.tab.css("left", C.Player.tabOrigin + "px");
+    }
+    
+    // Removes a tab.
+    self.mouseUp = function (e)
+    {
+        var tab = player.header.getTabUnderMouse(e);
+        
+        if (e.which == 2 && tab && tab.hasClass("tab"))
+            tab[0].object.remove();
     }
     
     self.init();
