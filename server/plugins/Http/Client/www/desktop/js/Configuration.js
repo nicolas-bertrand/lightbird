@@ -63,7 +63,9 @@ var Configuration =
         tabOffsetInterval : 10, // The duration of the intervals used to get the offset* of the tabs.
         tabExternLeft : 16, // The estimation of the width of the external left part of the tab, based on its shape.
         tabExternRight : 21, // The estimation of the width of the external right part of the tab, based on its shape.
-        tabDragResistance : 3, // The number of pixels the mouse needs to move in otder to start the dragging.
+        tabDragResistance : 3, // The number of pixels the mouse needs to move in order to start the dragging.
+        playlistResizeResistance : 20, // The number of pixels the mouse needs to move in order to start the resizing.
+        playlistResizeEdges : -2, // The distance from the edge of the header where the resize takes effect.
         mouseLeaveTimeout : 1000, // The delay before the effect of the mouse leave.
     },
     Uploads :

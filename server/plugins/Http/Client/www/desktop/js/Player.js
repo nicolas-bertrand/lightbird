@@ -701,6 +701,7 @@ self.Tab = function (player, name)
         self.element; // The initial position of the tab
         self.mouse; // The position of the mouse in the tab
         self.resistance; // The dragging will start only when the resistance is broken
+        self.resizeResistance; // The resize of the playlist will start only when the resistance is broken
     }
     
     // Creates the tab
@@ -845,19 +846,15 @@ self.Tab = function (player, name)
         self.element = gl_desktop.drag.getElement();
         self.mouse = gl_desktop.drag.getMouse();
         self.resistance = true;
+        self.resizeResistance = true;
     }
     
     // Drags the tab.
     self.mouseMove = function (e)
     {
         var tab = self.tab[0];
-        var y = e.pageY - node.header.offset().top;
         
-        // Resizes the playlist if the mouse is on the vertical edge of the header
-        if (y < 2)
-            player.playlist.setHeight(player.playlist.height - y + 2);
-        else if (y >= C.Player.headerHeight - 1)
-            player.playlist.setHeight(player.playlist.height - y + C.Player.headerHeight - 1);
+        self.resizePlaylist(e);
         // Starts to drag the tab horizontally once the resistance is broken
         if (self.resistance)
         {
@@ -892,6 +889,33 @@ self.Tab = function (player, name)
             }
         }
         tab.style.left = x + "px";
+    }
+    
+    // Resizes the playlist if the mouse is on the vertical edges of the header.
+    self.resizePlaylist = function (e)
+    {
+        var y = e.pageY - node.header.offset().top;
+        
+        // Applies the resistance, so that the resize starts only when the mouse is far enough
+        if (self.resizeResistance)
+        {
+            var delta = 0;
+            if (y < -C.Player.playlistResizeEdges)
+                delta = y + C.Player.playlistResizeEdges;
+            else if (y > C.Player.headerHeight + C.Player.playlistResizeEdges)
+                delta = y - C.Player.headerHeight - C.Player.playlistResizeEdges;
+            // The resistance broke
+            if (Math.abs(delta) > C.Player.playlistResizeResistance)
+                self.resizeResistance = false;
+        }
+        // Resizes the playlist
+        else
+        {
+            if (y < -C.Player.playlistResizeEdges)
+                player.playlist.setHeight(player.playlist.height - y - C.Player.playlistResizeEdges);
+            else if (y > C.Player.headerHeight + C.Player.playlistResizeEdges)
+                player.playlist.setHeight(player.playlist.height - y + C.Player.headerHeight + C.Player.playlistResizeEdges);
+        }
     }
     
     // Moves the dragged tab to its final position.
