@@ -13,8 +13,9 @@
     overflow: auto;
 }
 
-/* Black background */
-#desktop>.middle>.tasks>.task.view_background_black
+/* Image */
+
+#desktop>.middle>.tasks>.view_image.task.view_background_black
 {
     background-color: black;
     background-image: linear-gradient(top, #202020 0%, #050505 100%);
@@ -25,34 +26,33 @@
     border: 1px solid rgba(0, 0, 0, 1);
 }
 
-#desktop>.middle>.tasks>.task.window.view_background_black
+#desktop>.middle>.tasks>.view_image.task.window.view_background_black
 {
     border: 1px solid rgba(139, 161, 190, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.over.view_background_black
+#desktop>.middle>.tasks>.view_image.task.over.view_background_black
 {
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
-#desktop>.middle>.tasks>.task.window.over.view_background_black
+#desktop>.middle>.tasks>.view_image.task.window.over.view_background_black
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
-#desktop>.middle>.tasks>.task.focus.over.view_background_black
+#desktop>.middle>.tasks>.view_image.task.focus.over.view_background_black
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.view_background_black.hide_border
+#desktop>.middle>.tasks>.view_image.task.view_background_black.hide_border
 {
     border: none;
 }
 
-/* Transparent background */
-.tasks>.task.transparent_background>.view>.file
+.tasks>.view_image.task.transparent_background>.view>.file
 {
     background-color: black;
     background-clip: padding-box;
@@ -62,22 +62,87 @@
     top: -1px;
 }
 
-.tasks>.task.transparent_background>.view>.file.horizontal_align
+.tasks>.view_image.task.transparent_background>.view>.file.horizontal_align
 {
     left: 0px;
 }
 
-.tasks>.task.over.transparent_background>.view>.file
+.tasks>.view_image.task.over.transparent_background>.view>.file
 {
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
-.tasks>.task.window.over.transparent_background>.view>.file
+.tasks>.view_image.task.window.over.transparent_background>.view>.file
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
-.tasks>.task.focus.over.transparent_background>.view>.file
+.tasks>.view_image.task.focus.over.transparent_background>.view>.file
+{
+    border: 1px solid rgba(255, 193, 0, 1);
+    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
+}
+
+/* Video */
+
+.tasks>.view_video.task>.view
+{
+    margin: 0px auto;
+}
+
+.tasks>.view_video.task.transparent_background>.view>video,
+#desktop>.middle>.tasks>.view_video.task.view_background_black>.view>video
+{
+    border: none;
+    position: relative;
+    left: -1px;
+    top: -1px;
+}
+
+#desktop>.middle>.tasks>.view_video.task.view_background_black
+{
+    background-color: black;
+    background-clip: border-box;
+    border: 1px solid rgba(255, 255, 255, 0);
+}
+
+#desktop>.middle>.tasks>.view_video.task.over.view_background_black
+{
+    border: 1px solid rgba(89, 202, 255, 1);
+    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
+    overflow: hidden;
+}
+#desktop>.middle>.tasks>.view_video.task.window.over.view_background_black
+{
+    border: 1px solid rgba(77, 255, 97, 1);
+    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
+}
+#desktop>.middle>.tasks>.view_video.task.focus.over.view_background_black
+{
+    border: 1px solid rgba(255, 193, 0, 1);
+    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
+}
+
+#desktop>.middle>.tasks>.view_video.task.view_background_black.hide_border
+{
+    border: none;
+}
+
+.tasks>.view_video.task.over.transparent_background>.view
+{
+    position: relative;
+    left: -1px;
+    top: -1px;
+    overflow: hidden;
+    border: 1px solid rgba(89, 202, 255, 1);
+    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
+}
+.tasks>.view_video.task.window.over.transparent_background>.view
+{
+    border: 1px solid rgba(77, 255, 97, 1);
+    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
+}
+.tasks>.view_video.task.focus.over.transparent_background>.view
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);

@@ -335,7 +335,9 @@
   <mp2>audio/x-mpeg</mp2>
   <mp2>audio/mpeg</mp2>
   <mp2>video/mpeg</mp2>
+  <mp3>audio/mpeg</mp3>
   <mp3>audio/mpeg3</mp3>
+  <mp3>audio/MPA</mp3>
   <mp3>video/x-mpeg</mp3>
   <mp3>video/mpeg</mp3>
   <mp3>audio/x-mpeg-3</mp3>

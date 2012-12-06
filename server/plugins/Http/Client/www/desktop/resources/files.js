@@ -427,21 +427,24 @@ function List()
     {
         if (e.which != 1 || e.ctrlKey || e.shiftKey)
             return ;
+        var file;
         // Gets the file selected by the user
-        var file = e.target;
-        for (var i = 0; i < 3 && file.tagName.toLowerCase() != "tr"; ++i, file = file.parentNode)
-            ;
+        if (e.target != self.table)
+            file = $(e.target).parents("tr")[0];
         // If the event is directly on the table we use an other way to get the selected file
-        if (e.target == self.table)
+        else
         {
             var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.Files.listRowHeight));
-            if (n < self.table.rows.length)
-                file = self.table.rows[n];
-            else
+            if (n >= self.table.rows.length)
                 return ;
+            file = self.table.rows[n];
         }
-        // Opens a new page with the file.
-        gl_desktop.openPage("view", file.fileIndex);
+        // If it is an audio file we play it directly
+        if (gl_files.list[file.fileIndex].type == "audio")
+            gl_player.addFile(file.fileIndex);
+        // Otherwise we open a new page to view the file
+        else
+            gl_desktop.openPage("view", file.fileIndex);
     }
     
     // Ensures that the list is allways filled with rows.

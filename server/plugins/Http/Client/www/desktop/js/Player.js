@@ -16,14 +16,34 @@ function Player(task)
         self.node.played = self.node.timeline.children(".played");
         self.node.buffered = self.node.timeline.children(".buffered");
         self.node.after = self.node.timeline.children(".after");
+        self.node.seek = self.node.timeline.children(".seek");
+        self.node.activeArea = self.node.timeline.children(".active_area");
         self.node.player = self.node.bottom.children(".player");
         self.node.play = self.node.player.children(".play");
         self.node.controls = self.node.player.children(".controls");
-        self.node.numerator = self.node.play.find(".numerator")[0]; // The number of the current file played
-        self.node.denominator = self.node.play.find(".denominator")[0]; // The total number of files
+        self.node.numerator = self.node.play.find(".numerator"); // The number of the current file played
+        self.node.denominator = self.node.play.find(".denominator"); // The total number of files
         self.node.time = self.node.play.children(".time");
-        self.node.elapsed = self.node.play.find(".elapsed")[0]; // The time elapsed for the current file
-        self.node.duration = self.node.play.find(".duration")[0]; // The duration of the file
+        self.node.elapsed = self.node.play.find(".elapsed"); // The time elapsed for the current file
+        self.node.duration = self.node.play.find(".duration"); // The duration of the file
+        self.node.filename = self.node.player.children(".name");
+        self.node.audio = self.node.bottom.children(".audio");
+        // Icons
+        self.node.icon = new Object();
+        self.node.icon.play = $(self.node.play).children(".play");
+        self.node.icon.pause = $(self.node.play).children(".pause");
+        self.node.icon.previous = $(self.node.play).children(".previous");
+        self.node.icon.next = $(self.node.play).children(".next");
+        self.node.icon.volume = $(self.node.controls).children(".volume");
+        self.node.icon.mute = $(self.node.controls).children(".mute");
+        self.node.icon.settings = $(self.node.controls).children(".settings");
+        self.node.icon.repeat = $(self.node.controls).children(".repeat");
+        self.node.icon.repeatOne = $(self.node.controls).children(".repeat_one");
+        self.node.icon.noRepeat = $(self.node.controls).children(".no_repeat");
+        self.node.icon.random = $(self.node.controls).children(".random");
+        self.node.icon.linear = $(self.node.controls).children(".linear");
+        self.node.icon.fullscreen = $(self.node.controls).children(".fullscreen");
+        self.node.icon.normalScreen = $(self.node.controls).children(".normal_screen");
         // Playlist
         self.node.playlist = self.node.bottom.children(".playlist");
         self.node.header = self.node.playlist.children(".header");
@@ -33,11 +53,14 @@ function Player(task)
         self.node.list = self.node.playlist.children(".list");
 
         // Members
-        self.header; // Manages the header of the playlist
+        self.timeLine; // Manages the time line
         self.playlist; // Manages the playlist
+        self.header; // Manages the header of the playlist
+        self.audio; // Manages the audio player
         self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leave
         self.mouseOverPlayer; // True while the mouse is over the player
-        self.timeLineExpanded; // True if the time line is expanded
+        self.playerInterface; // The object that is playing the current file
+        self.fileIndex; // The index of the file currently played
         
         // Default values
         C.Desktop.bottomHeight = C.Player.defaultHeight;
@@ -46,12 +69,15 @@ function Player(task)
         self.node.played.width("0%");
         self.node.buffered.width("0%");
         self.node.after.width("100%");
-        self.node.numerator.innerHTML = "0";
-        self.node.denominator.innerHTML = "0";
-        self.node.elapsed.innerHTML = "0:00";
-        self.node.duration.innerHTML = "0:00";
+        self.node.numerator.html("0");
+        self.node.denominator.html("0");
+        self.node.elapsed.html("0:00");
+        self.node.duration.html("0:00");
+        self.node.filename.html("");
+        self.timeLine = new self.TimeLine(self);
         self.playlist = new self.Playlist(self);
         self.header = new self.Header(self);
+        self.audio = new self.Audio(self);
         self.generateIcons();
         
         // Events
@@ -79,7 +105,7 @@ function Player(task)
         }
         // Expands the timeline
         else if (!self.playlist.isDisplayed() && !gl_desktop.drag.isDragging())
-            self.expandTimeLine();
+            self.timeLine.expand();
     }
     
     // The mouse leaved the player area.
@@ -87,11 +113,11 @@ function Player(task)
     {
         self.mouseOverPlayer = false;
         // If the playlist is not displayed, we retract the time line after the delay
-        if (!self.playlist.isDisplayed() && self.timeLineExpanded)
+        if (!self.playlist.isDisplayed() && self.timeLine.isExpanded())
         {
             self.mouseLeaveTimeout = setTimeout(function ()
             {
-                self.retractTimeLine();
+                self.timeLine.retract();
                 self.mouseLeaveTimeout = 0;
             }, C.Player.mouseLeaveTimeout);
         }
@@ -105,47 +131,29 @@ function Player(task)
                 if (!self.mouseOverPlayer && !self.playlist.isPinned())
                 {
                     self.playlist.hide();
-                    self.retractTimeLine();
+                    self.timeLine.retract();
                 }
             });
         }
     }
     
-    // Expands the time line.
-    self.expandTimeLine = function ()
-    {
-        C.Desktop.bottomHeight = C.Player.defaultHeight + C.Player.timelineOverHeight;
-        self.node.timeline.height(C.Player.timelineHeight + C.Player.timelineOverHeight);
-        self.timeLineExpanded = true;
-        gl_desktop.onResize();
-    }
-    
-    // Retracts the time line.
-    self.retractTimeLine = function ()
-    {
-        C.Desktop.bottomHeight = C.Player.defaultHeight;
-        self.node.timeline.height(C.Player.timelineHeight);
-        self.timeLineExpanded = false;
-        gl_desktop.onResize();
-    }
-    
     // Generates the SVG icons of the player.
     self.generateIcons = function ()
     {
-        self.drawIcon($(self.node.play).children(".play").children("div")[0], 16, gl_svg.Player.play, 0, 0.3);
-      //self.drawIcon($(self.node.play).children(".play").children("div")[0], 16, gl_svg.Player.pause);
-        self.drawIcon($(self.node.play).children(".previous").children("div")[0], 14, gl_svg.Player.previous, 0.5);
-        self.drawIcon($(self.node.play).children(".next").children("div")[0], 14, gl_svg.Player.next, -0.1);
-        self.drawIcon($(self.node.controls).children(".volume").children("div")[0], 25, gl_svg.Player.volume);
-      //self.drawIcon($(self.node.controls).children(".volume").children("div")[0], 25, gl_svg.Player.mute);
-        self.drawIcon($(self.node.controls).children(".settings").children("div")[0], 21, gl_svg.Player.settings);
-      //self.drawIcon($(self.node.controls).children(".repeat").children("div")[0], 27, gl_svg.Player.repeat, 0.2);
-      //self.drawIcon($(self.node.controls).children(".repeat").children("div")[0], 27, gl_svg.Player.repeatOne, 0.2, 3.2);
-        self.drawIcon($(self.node.controls).children(".repeat").children("div")[0], 27, gl_svg.Player.noRepeat, 0.2);
-      //self.drawIcon($(self.node.controls).children(".random").children("div")[0], 27, gl_svg.Player.random);
-        self.drawIcon($(self.node.controls).children(".random").children("div")[0], 27, gl_svg.Player.linear);
-        self.drawIcon($(self.node.controls).children(".fullscreen").children("div")[0], 25, gl_svg.Player.fullscreen);
-      //self.drawIcon($(self.node.controls).children(".fullscreen").children("div")[0], 25, gl_svg.Player.normalScreen);
+        self.drawIcon(self.node.icon.play.children("div")[0], 16, gl_svg.Player.play, 0, 0.3);
+        self.drawIcon(self.node.icon.pause.children("div")[0], 16, gl_svg.Player.pause);
+        self.drawIcon(self.node.icon.previous.children("div")[0], 14, gl_svg.Player.previous, 0.5);
+        self.drawIcon(self.node.icon.next.children("div")[0], 14, gl_svg.Player.next, -0.1);
+        self.drawIcon(self.node.icon.volume.children("div")[0], 25, gl_svg.Player.volume);
+        self.drawIcon(self.node.icon.mute.children("div")[0], 25, gl_svg.Player.mute);
+        self.drawIcon(self.node.icon.settings.children("div")[0], 21, gl_svg.Player.settings);
+        self.drawIcon(self.node.icon.repeat.children("div")[0], 27, gl_svg.Player.repeat, 0.2);
+        self.drawIcon(self.node.icon.repeatOne.children("div")[0], 27, gl_svg.Player.repeatOne, 0.2, 3.2);
+        self.drawIcon(self.node.icon.noRepeat.children("div")[0], 27, gl_svg.Player.noRepeat, 0.2);
+        self.drawIcon(self.node.icon.random.children("div")[0], 27, gl_svg.Player.random);
+        self.drawIcon(self.node.icon.linear.children("div")[0], 27, gl_svg.Player.linear);
+        self.drawIcon(self.node.icon.fullscreen.children("div")[0], 25, gl_svg.Player.fullscreen);
+        self.drawIcon(self.node.icon.normalScreen.children("div")[0], 25, gl_svg.Player.normalScreen);
     }
 
     // Draws an SVG icon.
@@ -165,15 +173,28 @@ function Player(task)
         {
             icon.attr("fill", "#eeeeee");
         });
+        $(destination.parentNode).click(function (e) { self.mouseDown(e); });
     }
     
     // Mouse down on a button of the player.
     self.mouseDown = function (e)
     {
+        var target = $(e.delegateTarget);
+    
         if (e.which != 1)
             return ;
-        // Opens / close the playlist
-        if ($(e.delegateTarget).hasClass("number") || $(e.delegateTarget).hasClass("name"))
+        if (target.hasClass("play") && self.playerInterface)
+        {
+            self.playerInterface.play();
+            self.play();
+        }
+        else if (target.hasClass("pause") && self.playerInterface)
+        {
+            self.playerInterface.pause();
+            self.pause();
+        }
+        // Opens / closes the playlist
+        else if (target.hasClass("number") || target.hasClass("name"))
         {
             if (!self.playlist.isPinned())
             {
@@ -200,6 +221,180 @@ function Player(task)
         }
     }
 
+    // Converts the time in seconds to a string (0:00).
+    self.timeToString = function (seconds)
+    {
+        var sec = Math.floor(seconds % 60);
+        return (Math.floor(seconds / 60) + ":" + (sec < 10 ? "0" + sec : sec));
+    }
+    
+// Player interface
+    
+    // Adds a file to the playlist.
+    // @param playerInterface : The object that is playing the file. Must implement the player interface.
+    self.addFile = function (fileIndex, playerInterface)
+    {
+        self.playlist.addFile(fileIndex);
+        self.fileIndex = fileIndex;
+        self.playerInterface = playerInterface;
+        var type = gl_files.list[self.fileIndex].type;
+        if (type == "audio")
+            (self.playerInterface = self.audio).setFile(self.fileIndex);
+        if (self.node.time.hasClass("display"))
+        {
+            var media = self.playerInterface.getMedia();
+            self.timeLine.newMedia(media);
+        }
+    }
+    
+    // Starts to play the file.
+    self.play = function ()
+    {
+        self.node.icon.play.addClass("hide");
+        self.node.icon.pause.removeClass("hide");
+    }
+    
+    self.pause = function ()
+    {
+        self.node.icon.play.removeClass("hide");
+        self.node.icon.pause.addClass("hide");
+    }
+    
+
+// Manages the time line.
+self.TimeLine = function (player)
+{
+    var self = this;
+    var node = player.node; 
+    
+    self.init = function ()
+    {
+        // Members
+        self.media; // The media currently played
+        self.duration; // The duration of the media currently played
+        self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leaving the active area
+        
+        // Default values
+        
+        // Events
+        node.activeArea.mouseenter(function (e) { self.mouseEnter(e); });
+        node.activeArea.mouseleave(function (e) { self.mouseLeave(e); });
+        node.activeArea.mousemove(function (e) { self.mouseMove(e); });
+    }
+    
+    self.newMedia = function (media)
+    {
+        self.media = media;
+        self.duration = gl_files.list[player.fileIndex].duration;
+        $(media).bind("timeupdate", function (e) { self.onTimeUpdate(e); });
+    }
+    
+    self.clear = function ()
+    {
+        self.media = undefined;
+        self.duration = undefined;
+        node.before.width("0%");
+        node.played.width("0%");
+        node.buffered.width("0%");
+        node.after.width("100%");
+    }
+    
+    // The time of the media played has changed.
+    // Updates the time line based on the new time.
+    self.onTimeUpdate = function (e)
+    {
+        if (!self.media.buffered.length)
+            return ;
+        var elapsed = self.media.currentTime;
+        var buffered = self.media.buffered.end(0) - self.media.buffered.start(0) - elapsed;
+        var elapsedPct = elapsed / self.duration * 100;
+        var bufferedPct = buffered / self.duration * 100;
+        node.played.width(elapsedPct + "%");
+        node.buffered.width(bufferedPct + "%");
+        node.after.width((100 - elapsedPct - bufferedPct) + "%");
+        node.elapsed.html(player.timeToString(elapsed));
+    }
+    
+    // Mouse enter the time line.
+    self.mouseEnter = function (e)
+    {
+        if (!self.media || gl_desktop.drag.isDragging())
+            return ;
+        node.timeline.addClass("over");
+        node.activeArea.addClass("expand");
+        if (self.mouseLeaveTimeout)
+        {
+            clearTimeout(self.mouseLeaveTimeout);
+            self.mouseLeaveTimeout = 0;
+        }
+    }
+    
+    // Mouse leave the time line.
+    self.mouseLeave = function (e)
+    {
+        if (!self.media)
+            return ;
+        node.timeline.removeClass("over");
+        self.mouseLeaveTimeout = setTimeout(function ()
+        {
+            node.activeArea.removeClass("expand");
+            self.mouseLeaveTimeout = 0;
+        }, C.Player.mouseLeaveTimeout);
+    }
+    
+    // Mouse move on the time line.
+    self.mouseMove = function (e)
+    {
+        if (!self.media)
+            return ;
+        var seek = node.seek[0];
+        seek.firstChild.innerHTML = player.timeToString(e.pageX / gl_browserSize.width * self.duration);
+        var left = e.pageX - seek.offsetWidth / 2;
+        if (left <= 0)
+        {
+            left = 0;
+            node.seek.addClass("left");
+        }
+        else
+            node.seek.removeClass("left");
+        if (left + seek.offsetWidth > gl_browserSize.width)
+        {
+            left = gl_browserSize.width - seek.offsetWidth;
+            node.seek.addClass("right");
+        }
+        else
+            node.seek.removeClass("right");
+        seek.style.left = left + "px";
+    }
+    
+    // Expands the time line.
+    self.expand = function ()
+    {
+        C.Desktop.bottomHeight = C.Player.defaultHeight + C.Player.timelineOverHeight;
+        node.timeline.height(C.Player.timelineHeight + C.Player.timelineOverHeight);
+        node.timeline.addClass("expand");
+        gl_desktop.onResize();
+    }
+    
+    // Retracts the time line.
+    self.retract = function ()
+    {
+        C.Desktop.bottomHeight = C.Player.defaultHeight;
+        node.timeline.height(C.Player.timelineHeight);
+        node.timeline.removeClass("expand");
+        gl_desktop.onResize();
+    }
+    
+    // Returns trus if the time line is expanded.
+    self.isExpanded = function ()
+    {
+        return (node.timeline.hasClass("expand"));
+    }
+    
+    self.init();
+    return (self);
+}
+
 // Manages the playlist.
 self.Playlist = function (player)
 {
@@ -210,7 +405,8 @@ self.Playlist = function (player)
     {
         // Members
         self.height; // The height of the playlist
-        self.pinned; // True if the playlist is pinned.
+        self.pinned; // True if the playlist is pinned
+        self.rowTemplate = node.playlist.children(".row_template").html(); // The template used to create the rows.
         
         // Default values
         self.setHeight(C.Player.playlistHeight);
@@ -325,7 +521,7 @@ self.Playlist = function (player)
         node.bottom.css("padding-top", 0);
         node.playlist.css("top", -self.height);
         self.hide();
-        player.retractTimeLine();
+        player.timeLine.retract();
         gl_desktop.onResize();
     }
     
@@ -333,6 +529,16 @@ self.Playlist = function (player)
     self.isPinned = function ()
     {
         return (self.pinned);
+    }
+    
+    // Adds a file to the playlist.
+    self.addFile = function (fileIndex)
+    {
+        // Creates a new playlist if there is none
+        if (!player.header.tabFocused.length)
+            new player.Tab(player, T.Player.recentFiles);
+        // Adds the file to the current playlist
+        player.header.tabFocused[0].object.addFile(fileIndex);
     }
     
     self.init();
@@ -348,7 +554,7 @@ self.Header = function (player)
     self.init = function ()
     {
         // Members
-        self.tabTemplate = node.header.children(".tab_template")[0].innerHTML; // The template used to create the tabs
+        self.tabTemplate = node.header.children(".tab_template").html(); // The template used to create the tabs
         // Playlist resize
         self.element; // The initial y position of the header
         self.mouse; // The y position of the mouse in the header
@@ -697,6 +903,7 @@ self.Tab = function (player, name)
         // Members
         self.tab = self.create(name);
         self.tab[0].object = self;
+        self.files = new Array();
         // Drag tab
         self.element; // The initial position of the tab
         self.mouse; // The position of the mouse in the tab
@@ -830,6 +1037,8 @@ self.Tab = function (player, name)
                 player.header.focus(self.tab.next());
             else if (self.tab.prev().length)
                 player.header.focus(self.tab.prev());
+            else
+                player.header.tabFocused = $();
         }
         // Removes the tab and updates the others
         self.tab.remove();
@@ -937,10 +1146,102 @@ self.Tab = function (player, name)
             tab[0].object.remove();
     }
     
+// File management
+
+    // Adds a file to the list.
+    self.addFile = function (fileIndex)
+    {
+        var file = gl_files.list[fileIndex];
+        
+        // Adds the file to the list
+        self.files.push(fileIndex);
+        var row = $(node.list.children(":eq(" + (self.files.length - 1) + ")"));
+        row.html(player.playlist.rowTemplate);
+        row.children(".number").html(self.files.length);
+        row.children(".name").html(file.name);
+        row[0].fileIndex = fileIndex;
+        // Updates the player
+        node.numerator.html(self.files.length);
+        node.denominator.html(self.files.length);
+        if (file.type == "audio" || file.type == "video")
+        {
+            node.time.addClass("display");
+            node.elapsed.html("0:00");
+            node.duration.html(player.timeToString(file.duration));
+        }
+        else
+            node.time.removeClass("display");
+        node.filename.html(file.name);
+    }
+    
     self.init();
     return (self);
 }
+
+// Manages the audio player.
+self.Audio = function (player)
+{
+    var self = this;
+    var node = player.node; 
     
+    self.init = function ()
+    {
+        // Members
+        self.audio; // The audio player.
+        
+        // Default values
+        
+        // Events
+    }
+    
+    // Sets an audio file to play.
+    self.setFile = function (fileIndex)
+    {
+        // Creates the audio element
+        var file = gl_files.list[fileIndex];
+        node.audio.html("<audio preload=\"auto\" />");
+        self.audio = $(node.audio).children("audio")[0];
+		var ogg = "command/audio.ogg";
+        ogg += "?id=" + file.id + "&token=" + getToken(ogg);
+		var mp3 = "command/audio.mp3";
+        mp3 += "?id=" + file.id + "&token=" + getToken(mp3);
+        var html = "<source src=\"" + ogg + "\" type=\"audio/ogg\" />";
+        html += "<source src=\"" + mp3 + "\" type=\"audio/mpeg\" />";
+        self.audio.innerHTML = html;
+        self.play();
+        player.play();
+        // Replaces the file name by the title of the music and the artist if possible
+        if (file.title)
+        {
+            var filename = file.title;
+            if (file.artist)
+                filename += "<span class=\"secondary\"> - " + file.artist + "</span>";
+            node.filename.html(filename);
+        }
+    }
+    
+    // Player interface
+    {
+        self.play = function ()
+        {
+            self.audio.play();
+        }
+        
+        self.pause = function ()
+        {
+            self.audio.pause();
+        }
+        
+        self.getMedia = function ()
+        {
+            return (self.audio);
+        }
+    }
+    
+    self.init();
+    return (self);
+}
+
     self.init();
     return (self);
 }

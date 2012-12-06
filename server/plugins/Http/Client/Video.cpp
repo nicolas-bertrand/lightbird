@@ -2,21 +2,22 @@
 
 #include "Video.h"
 
-Video::Video(LightBird::IClient &client) : Media(client)
+Video::Video(LightBird::IClient &client)
+    : Media(client)
+    , video(NULL)
 {
     QString format;
     //qint32  width = this->file.getInformation("width").toInt();
     //quint32 quality = this->uri.queryItemValue("quality").toUInt();
     //quint32 seek = this->uri.queryItemValue("seek").toUInt();
 
-    this->video = NULL;
-    //this->response.getHeader().insert("content-length", "10000000");
+    //this->response.getHeader().insert("content-length", "100000000");
     this->response.getHeader().insert("transfer-encoding", "chunked");
     // Get the extensions that can transcode the file
     if (!(extensions = this->api.extensions().get("IVideo")).isEmpty())
     {
         this->video = static_cast<LightBird::IVideo *>(extensions.first());
-        this->video->setDuration(30);
+        //this->video->setDuration(10);
         // Set the quality of the video
         /*width -= 100;
         if (width < 0)

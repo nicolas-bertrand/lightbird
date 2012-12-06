@@ -21,6 +21,10 @@ var Translation =
         collections : "Collections",
         sessions : "Sessions",
     },
+    Player :
+    {
+        recentFiles : "Recent files",
+    },
     Tasks :
     {
         files : "Files",

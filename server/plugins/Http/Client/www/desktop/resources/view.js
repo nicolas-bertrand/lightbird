@@ -15,9 +15,9 @@ function ResourceView(task, fileIndex)
         // Displays the file
         resource.object = new resource[type]();
         
+        // Default values
         task.setResource(resource);
-        // Transparent background
-        task.setBackground(true);
+        gl_player.addFile(fileIndex, resource.object);
         
         // Events
         $(resource.root).mousedown(function (e) { resource.isFocus = task.isFocus(); });
@@ -48,6 +48,10 @@ resource.Image = function ()
         self.image; // The img element
         self.resize = self.keepRatio; // The function used to resize the image when onResize is called
         self.horizontalAlign = false; // False if the css class horizontal align is defined
+        
+        // Default values
+        $(task.content).addClass("view_image");
+        task.setBackground(true); // Transparent background
     
         // Displays the image
         var file = resource.file;
@@ -262,22 +266,27 @@ resource.Video = function ()
     {
         // Members
         self.video; // The video element
-        self.background = "transparent"; // The background currently displayed (transparent, black or default)
+        self.background = "transparent"; // The background currently displayed (transparent or black)
         
-        // Displays the video
+        // Defalut values
+        task.setOverflow(false);
+        self.changeBackground(null, "black");
+        $(task.content).addClass("view_video");
+        
+        // Creates the video
         var file = resource.file;
-		var url = "command/video.webm"
+		var url = "command/video.webm";
         url += "?id=" + file.id + "&token=" + getToken(url);
-        resource.root.innerHTML = "<video autoplay class=\"file\" />";
+        resource.root.innerHTML = "<video autoplay />";
         self.video = $(resource.root).children("video")[0];
         self.video.innerHTML = "<source src=\"" + url + "\" type='video/webm; codecs=\"vp8.0, vorbis\"'/>";
-        
+        gl_player.play();
         /*<source src="movie.webm" type='video/webm; codecs="vp8.0, vorbis"'/>
         <source src="movie.ogg" type='video/ogg; codecs="theora, vorbis"'/>
         <source src="movie.mp4" type='video/mp4; codecs="avc1.4D401E, mp4a.40.2"'/>*/
         
         // Events
-        $(resource.root).click(function (e) { self.changeBackground(e); });
+        $(resource.root.parentNode).click(function (e) { self.changeBackground(e); });
         $(self.video).click(function (e) { self.playPause(e); });
     }
     
@@ -285,6 +294,8 @@ resource.Video = function ()
     {
         var naturalWidth = self.video.videoWidth ? self.video.videoWidth : resource.file.width;
         var naturalHeight = self.video.videoHeight ? self.video.videoHeight : resource.file.height;
+        w += 2;
+        h += 2;
         var width = w;
         var height = h;
         
@@ -299,7 +310,7 @@ resource.Video = function ()
         var marginTop = 0;
         if (height < h)
             marginTop += Math.floor((h - height) / 2);
-        self.video.style.marginTop = marginTop + "px";
+        resource.root.style.marginTop = marginTop + "px";
         // Sets the minimal size
         if (height < C.View.minHeight)
         {
@@ -312,6 +323,8 @@ resource.Video = function ()
         // Resizes the video
         $(self.video).width(width);
         $(self.video).height(height);
+        $(resource.root).width(width - 2);
+        $(resource.root).height(height - 2);
     }
     
     self.playPause = function (e)
@@ -319,41 +332,56 @@ resource.Video = function ()
         if (e.which != 1)
             return ;
         if (self.video.paused)
+        {
             self.video.play();
+            gl_player.play();
+        }
         else
+        {
             self.video.pause();
+            gl_player.pause();
+        }
     }
     
     // Changes the color of the background.
-    // @param background : If the defined, the background is changed to this value.
+    // @param background : If defined, the background is changed to this value.
     self.changeBackground = function (e, background)
     {
         if ((e && e.which != 1) || !resource.isFocus)
             return ;
-        if (!e || e.target == resource.root)
+        if (!e || e.target == resource.root.parentNode)
         {
             if (self.background == "transparent")
             {
                 task.setBackground(false, "view_background_black");
                 self.background = "black";
-                task.setOverflow(false);
-            }
-            else if (self.background == "black")
-            {
-                task.setBackground();
-                self.background = "default";
-                task.setOverflow(true);
             }
             else
             {
                 task.setBackground(true);
                 self.background = "transparent";
-                task.setOverflow(true);
             }
-            self.onResize(task.left, task.top, task.width, task.height);
         }
     }
 
+    // Player interface
+    {
+        self.play = function ()
+        {
+            self.video.play();
+        }
+        
+        self.pause = function ()
+        {
+            self.video.pause();
+        }
+        
+        self.getMedia = function ()
+        {
+            return (self.video);
+        }
+    }
+ 
     self.init();
     return (self);
 }

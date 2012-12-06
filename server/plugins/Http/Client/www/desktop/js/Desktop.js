@@ -547,15 +547,9 @@ function Page()
             var taskBorder = C.Desktop.taskBorder * 2;
             var taskMargin = C.Desktop.taskMargin + taskBorder;
             var margin = taskMargin / 2;
-            // Creates the resize node that allows to resize the tasks
+            // Creates the resize bar that allows to resize the tasks
             if (!node.resize)
-            {
-                node.resize = document.createElement("div");
-                node.resize.className = "resize";
-                node.resize.taskNode = node;
-                $(node.resize).mousedown(function (e) { node.mouseDown(e); });
-                self.content.appendChild(node.resize);
-            }
+                node.createResize(self.content);
             // Splits vertically
             if (node.h >= 0)
             {
@@ -1126,6 +1120,7 @@ function Task(resource, html)
         self.content.object = undefined;
         for (var key in self)
             self[key] = undefined;
+        gl_desktop.taskButtons.removeTask(self);
     }
     
     // Removes the resistance and starts to drag the task.
@@ -1271,6 +1266,12 @@ function Task(resource, html)
         return ($(self.content).hasClass("focus"));
     }
     
+    // Returns true if the page is a window.
+    self.isWindow = function ()
+    {
+        return ($(self.content).hasClass("window"));
+    }
+    
     self.init();
     return (self);
 }
@@ -1305,6 +1306,19 @@ function TaskTreeNode(node)
         self.startResize;
     }
 
+    // Creates the resize bar that allows to resize the node.
+    // @param pageContent : The page in which the bar is inserted.
+    self.createResize = function (pageContent)
+    {
+        self.resize = document.createElement("div");
+        self.resize.className = "resize";
+        self.resize.taskNode = self;
+        $(self.resize).mousedown(function (e) { self.mouseDown(e); });
+        $(self.resize).mouseenter(function (e) { self.mouseEnter(e); });
+        $(self.resize).mouseleave(function (e) { self.mouseLeave(e); });
+        pageContent.appendChild(self.resize);
+    }
+    
     // Starts to resize the node.
     self.mouseDown = function (e)
     {
@@ -1326,6 +1340,7 @@ function TaskTreeNode(node)
                 self.bottomNode = { parent : node, v : node.v, height : node.height, level : level };
         // Ensures that the page has the focus
         self.resize.parentNode.object.display();
+        $(self.resize.parentNode).addClass("resize_node");
     }
 
     // Resizes the node according to the mouse position.
@@ -1478,13 +1493,26 @@ function TaskTreeNode(node)
         delete self.topNode;
         delete self.bottomNode;
         delete self.startResize;
+        $(self.resize.parentNode).removeClass("resize_node");
     }
 
+    // The mouse entered the resize bar.
+    self.mouseEnter = function (e)
+    {
+        $(self.resize.parentNode).addClass("over_resize");
+    }
+    
+    // The mouse leaved the resize bar.
+    self.mouseLeave = function (e)
+    {
+        $(self.resize.parentNode).removeClass("over_resize");
+    }
+    
     self.init();
     return (self);
 }
 
-// Manages the buttons of the tasks icons
+// Manages the buttons of the tasks icons.
 function TaskButtons()
 {
     var self = this;
@@ -1536,6 +1564,13 @@ function TaskButtons()
     {
         $(task.icon).mouseenter(function (e) { self.mouseEnter(e, task); });
         $(task.icon).mouseleave(function (e) { self.mouseLeave(e, task); });
+    }
+    
+    // Removes the last task if it has been closed.
+    self.removeTask = function (task)
+    {
+        if (task == self.task)
+            self.task = undefined;
     }
 
     // Activate a button
@@ -1637,7 +1672,8 @@ function TaskButtons()
     // Updates the position of the buttons according to the task icon.
     self.updatePosition = function ()
     {
-        self.buttons.style.top = $(self.task.icon).offset().top + "px";
+        if (self.task)
+            self.buttons.style.top = $(self.task.icon).offset().top + "px";
     }
 
     // Ensures that the buttons are not displayed while the tasks list is scrolling.
@@ -1688,7 +1724,10 @@ function TaskButtons()
     {
         $(self.buttons).addClass("display");
         $(self.task.icon).addClass("over");
-        $(self.task.content).addClass("over");
+        if (self.task.getPage().numberTasks > 1)
+            $(self.task.content).addClass("over");
+        else
+            $(self.task.content).removeClass("over");
     }
     self._hide = function (task)
     {
@@ -1701,7 +1740,7 @@ function TaskButtons()
     return (self);
 }
 
-// Manages the scroll of the tasks list
+// Manages the scroll of the tasks list.
 function TasksList()
 {
     var self = this;
