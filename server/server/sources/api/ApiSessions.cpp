@@ -9,7 +9,8 @@
 #include "Session.h"
 #include "Mutex.h"
 
-ApiSessions::ApiSessions(QObject *parent) : QObject(parent)
+ApiSessions::ApiSessions(QObject *parent)
+    : QObject(parent)
 {
     QSqlQuery   query;
 

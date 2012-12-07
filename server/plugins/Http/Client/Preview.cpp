@@ -3,7 +3,10 @@
 
 #include "Preview.h"
 
-Preview::Preview(LightBird::IClient &cl) : client(cl), uri(client.getRequest().getUri()), response(client.getResponse())
+Preview::Preview(LightBird::IClient &cl)
+    : client(cl)
+    , uri(client.getRequest().getUri())
+    , response(client.getResponse())
 {
 }
 

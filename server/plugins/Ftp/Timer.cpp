@@ -2,7 +2,8 @@
 #include "Timer.h"
 #include "TableFiles.h"
 
-Timer::Timer(LightBird::IApi &api) : api(api)
+Timer::Timer(LightBird::IApi &api)
+    : api(api)
 {
 }
 

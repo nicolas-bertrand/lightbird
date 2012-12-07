@@ -4,7 +4,8 @@
 #include "ParserClient.h"
 #include "Plugin.h"
 
-ParserClient::ParserClient(LightBird::IClient &client) : Parser(client)
+ParserClient::ParserClient(LightBird::IClient &client)
+    : Parser(client)
 {
     this->contentSent = 0;
 }

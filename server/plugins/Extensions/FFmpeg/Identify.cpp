@@ -2,7 +2,8 @@
 #include "Identify.h"
 #include "Plugin.h"
 
-Identify::Identify(LightBird::IApi *a) : api(a)
+Identify::Identify(LightBird::IApi *a)
+    : api(a)
 {
 }
 

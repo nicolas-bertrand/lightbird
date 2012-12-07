@@ -3,7 +3,8 @@
 #include "Log.h"
 #include "Server.h"
 
-Events::Events(QObject *parent) : QObject(parent)
+Events::Events(QObject *parent)
+    : QObject(parent)
 {
     LOG_TRACE("Events created", "Events", "Events");
 }

@@ -11,7 +11,8 @@ TableAccessors::~TableAccessors()
 {
 }
 
-TableAccessors::TableAccessors(const TableAccessors &table) : Table()
+TableAccessors::TableAccessors(const TableAccessors &table)
+    : Table()
 {
     *this = table;
 }

@@ -8,12 +8,13 @@
 #include "Threads.h"
 #include "Timer.h"
 
-Timer::Timer(QString i, QString n, unsigned int in, ApiTimers &timers) : id(i),
-                                                                         name(n),
-                                                                         timer(this),
-                                                                         interval(in),
-                                                                         apiTimers(timers),
-                                                                         stopped(false)
+Timer::Timer(QString i, QString n, unsigned int in, ApiTimers &timers)
+    : id(i)
+    , name(n)
+    , timer(this)
+    , interval(in)
+    , apiTimers(timers)
+    , stopped(false)
 {
     LOG_DEBUG("Loading the timer", Properties("name", this->name).add("id", this->id).add("interval", QString::number(this->interval)), "Timer", "Timer");
     this->timer.setSingleShot(true);

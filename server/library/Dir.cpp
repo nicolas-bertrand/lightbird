@@ -4,7 +4,8 @@
 
 using namespace LightBird;
 
-Dir::Dir() : Node(Node::DirNode)
+Dir::Dir()
+    : Node(Node::DirNode)
 {
 }
 
@@ -93,7 +94,8 @@ void Dir::setId(const QString &id)
         Node::setId(id);
 }
 
-DirIterator::DirIterator(Dir &dir, Node::NodeType nodeType) : it(dir.getStringList(nodeType))
+DirIterator::DirIterator(Dir &dir, Node::NodeType nodeType)
+    : it(dir.getStringList(nodeType))
 {
 }
 

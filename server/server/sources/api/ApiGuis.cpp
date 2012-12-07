@@ -7,7 +7,8 @@
 #include "Plugins.hpp"
 #include "Server.h"
 
-ApiGuis::ApiGuis(QObject *parent) : QObject(parent)
+ApiGuis::ApiGuis(QObject *parent)
+    : QObject(parent)
 {
     LOG_TRACE("ApiGuis created", "ApiGuis", "ApiGuis");
     QObject::connect(this, SIGNAL(showSignal(QString)), this, SLOT(_show(QString)), Qt::QueuedConnection);

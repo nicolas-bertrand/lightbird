@@ -14,7 +14,8 @@ TableTags::~TableTags()
 {
 }
 
-TableTags::TableTags(const TableTags &table) : Table()
+TableTags::TableTags(const TableTags &table)
+    : Table()
 {
     *this = table;
 }

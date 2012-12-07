@@ -8,7 +8,8 @@
 #include "Server.h"
 #include "Mutex.h"
 
-Network::Network(QObject *parent) : QObject(parent)
+Network::Network(QObject *parent)
+    : QObject(parent)
 {
 }
 

@@ -14,7 +14,8 @@
 #include <attachedpictureframe.h>
 #include <apetag.h>
 
-Identify::Identify(LightBird::IApi *a) : api(a)
+Identify::Identify(LightBird::IApi *a)
+    : api(a)
 {
     id3v2["TALB"] = "album";
     id3v2["TIT2"] = "title";

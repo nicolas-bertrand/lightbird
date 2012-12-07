@@ -33,20 +33,21 @@ void    Server::shutdown()
     Server::_instance = NULL;
 }
 
-Server::Server(Arguments args, QObject *parent) : QObject(parent),
-                                                  arguments(args),
-                                                  restart(false),
-                                                  apiGuis(NULL),
-                                                  apiPlugins(NULL),
-                                                  apiSessions(NULL),
-                                                  configurations(NULL),
-                                                  database(NULL),
-                                                  events(NULL),
-                                                  extensions(NULL),
-                                                  network(NULL),
-                                                  plugins(NULL),
-                                                  threadPool(NULL),
-                                                  threads(NULL)
+Server::Server(Arguments args, QObject *parent)
+    : QObject(parent)
+    , arguments(args)
+    , restart(false)
+    , apiGuis(NULL)
+    , apiPlugins(NULL)
+    , apiSessions(NULL)
+    , configurations(NULL)
+    , database(NULL)
+    , events(NULL)
+    , extensions(NULL)
+    , network(NULL)
+    , plugins(NULL)
+    , threadPool(NULL)
+    , threads(NULL)
 {
     Server::_instance = this;
     Log::info("Server starting", Properties("command line", this->arguments.toString()), "Server", "Server");

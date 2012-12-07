@@ -6,7 +6,8 @@
 #include "Server.h"
 #include "Mutex.h"
 
-Extensions::Extensions(QObject *parent) : QObject(parent)
+Extensions::Extensions(QObject *parent)
+    : QObject(parent)
 {
     LOG_TRACE("Extensions created", "Extensions", "Extensions");
     // Allows the library to use the extensions

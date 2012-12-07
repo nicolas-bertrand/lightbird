@@ -4,7 +4,8 @@
 #include "Content.h"
 #include "Log.h"
 
-Content::Content(QObject *parent) : QObject(parent)
+Content::Content(QObject *parent)
+    : QObject(parent)
 {
     this->storage = LightBird::IContent::BYTEARRAY;
     this->byteArray = new QByteArray();

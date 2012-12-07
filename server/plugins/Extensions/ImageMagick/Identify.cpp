@@ -5,7 +5,8 @@
 #include "Identify.h"
 #include "LightBird.h"
 
-Identify::Identify(LightBird::IApi *a) : api(a)
+Identify::Identify(LightBird::IApi *a)
+    : api(a)
 {
     // Get the path to ImageMagick from the configuration of the plugin
     this->imageMagickPath = this->api->configuration(true).get("image_magick_path");

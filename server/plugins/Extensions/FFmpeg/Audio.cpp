@@ -3,7 +3,9 @@
 #include "Audio.h"
 #include "Plugin.h"
 
-Audio::Audio(LightBird::IApi *a, QStringList &f) : api(a), formats(f)
+Audio::Audio(LightBird::IApi *a, QStringList &f)
+    : api(a)
+    , formats(f)
 {
     this->ioBuffer = (unsigned char *)av_malloc(IO_BUFFER_SIZE);
     this->_clear(false, true);

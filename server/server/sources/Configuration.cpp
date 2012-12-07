@@ -8,7 +8,8 @@
 #include "Log.h"
 #include "Mutex.h"
 
-Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent) : QObject(parent)
+Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent)
+    : QObject(parent)
 {
     this->_load(configurationPath, alternativePath);
     QObject::connect(this, SIGNAL(setParentSignal(QObject*)), this, SLOT(_setParent(QObject*)), Qt::QueuedConnection);

@@ -17,7 +17,8 @@ TableFiles::~TableFiles()
 {
 }
 
-TableFiles::TableFiles(const TableFiles &table) : TableObjects()
+TableFiles::TableFiles(const TableFiles &table)
+    : TableObjects()
 {
     *this = table;
 }

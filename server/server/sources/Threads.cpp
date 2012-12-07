@@ -3,7 +3,8 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-Threads::Threads(QObject *parent) : QObject(parent)
+Threads::Threads(QObject *parent)
+    : QObject(parent)
 {
 }
 

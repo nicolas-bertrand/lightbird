@@ -14,7 +14,8 @@ TableLimits::~TableLimits()
 {
 }
 
-TableLimits::TableLimits(const TableLimits &table) : Table()
+TableLimits::TableLimits(const TableLimits &table)
+    : Table()
 {
     *this = table;
 }

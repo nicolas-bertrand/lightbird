@@ -7,7 +7,8 @@
 #include "Plugin.h"
 #include "Preview.h"
 
-Preview::Preview(LightBird::IApi *a) : api(a)
+Preview::Preview(LightBird::IApi *a)
+    : api(a)
 {
     this->fileTemplate = this->api->configuration().get("temporaryPath") + "/" + "XXXXXX.jpeg";
 }

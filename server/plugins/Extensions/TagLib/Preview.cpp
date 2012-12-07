@@ -13,7 +13,8 @@
 #include <id3v2header.h>
 #include <attachedpictureframe.h>
 
-Preview::Preview(LightBird::IApi *a) : api(a)
+Preview::Preview(LightBird::IApi *a)
+    : api(a)
 {
     this->fileTemplate = this->api->configuration().get("temporaryPath") + "/" + "XXXXXX.jpeg";
 }

@@ -4,7 +4,8 @@
 #include "ParserServer.h"
 #include "Plugin.h"
 
-ParserServer::ParserServer(LightBird::IClient &client) : Parser(client)
+ParserServer::ParserServer(LightBird::IClient &client)
+    : Parser(client)
 {
     this->contentSent = 0;
     this->contentStored = 0;

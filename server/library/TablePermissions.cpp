@@ -14,7 +14,8 @@ TablePermissions::~TablePermissions()
 {
 }
 
-TablePermissions::TablePermissions(const TablePermissions &table) : Table()
+TablePermissions::TablePermissions(const TablePermissions &table)
+    : Table()
 {
     *this = table;
 }

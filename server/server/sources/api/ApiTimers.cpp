@@ -5,7 +5,8 @@
 #include "Defines.h"
 #include "Log.h"
 
-ApiTimers::ApiTimers(const QString &id, QObject *parent) : QObject(parent)
+ApiTimers::ApiTimers(const QString &id, QObject *parent)
+    : QObject(parent)
 {
     Configuration   *configuration;
     QDomNode        timer;

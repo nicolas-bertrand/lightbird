@@ -13,8 +13,9 @@
 #include "Plugins.hpp"
 #include "Mutex.h"
 
-Plugin::Plugin(const QString &identifier, QObject *parent) : QObject(parent),
-                                                             id(identifier)
+Plugin::Plugin(const QString &identifier, QObject *parent)
+    : QObject(parent)
+    , id(identifier)
 {
     LOG_TRACE("Plugin created", Properties("id", this->id), "Plugin", "Plugin");
     this->_initialize();

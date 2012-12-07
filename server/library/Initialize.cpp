@@ -2,7 +2,8 @@
 
 using namespace LightBird;
 
-Initialize::Initialize(bool initialize) : initialized(initialize)
+Initialize::Initialize(bool initialize)
+    : initialized(initialize)
 {
 }
 

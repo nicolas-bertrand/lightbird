@@ -6,7 +6,8 @@
 #include "LightBird.h"
 #include "Database.h"
 
-Database::Database(LightBird::IApi &api) : ITest(api)
+Database::Database(LightBird::IApi &api)
+    : ITest(api)
 {
 }
 

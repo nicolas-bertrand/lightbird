@@ -5,7 +5,9 @@
 #include "LightBird.h"
 #include "Plugins.hpp"
 
-Engine::Engine(Client &c) : client(c), data(c.getData())
+Engine::Engine(Client &c)
+    : client(c),
+      data(c.getData())
 {
 }
 

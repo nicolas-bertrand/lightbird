@@ -6,8 +6,8 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
-                 Port(port, LightBird::INetwork::UDP, protocols, maxClients)
+PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
+    : Port(port, LightBird::INetwork::UDP, protocols, maxClients)
 {
     this->moveToThread(this);
     this->socket.moveToThread(this);

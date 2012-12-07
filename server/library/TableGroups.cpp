@@ -14,7 +14,8 @@ TableGroups::~TableGroups()
 {
 }
 
-TableGroups::TableGroups(const TableGroups &table) : TableAccessors()
+TableGroups::TableGroups(const TableGroups &table)
+    : TableAccessors()
 {
     *this = table;
 }

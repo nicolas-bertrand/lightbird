@@ -2,7 +2,8 @@
 #include "Ftp.h"
 #include "TableAccounts.h"
 
-Ftp::Ftp(LightBird::IApi &api) : ITest(api)
+Ftp::Ftp(LightBird::IApi &api)
+    : ITest(api)
 {
     if (!(this->port = this->api.configuration(true).get("ftp/port").toUShort()))
         this->port = 21;

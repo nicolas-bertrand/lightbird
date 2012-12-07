@@ -18,7 +18,8 @@ Log *Log::instance(QObject *parent)
     return (Log::_instance);
 }
 
-Log::Log(QObject *parent) : mutex(QMutex::Recursive)
+Log::Log(QObject *parent)
+    : mutex(QMutex::Recursive)
 {
     this->parent = parent;
     this->display = false;

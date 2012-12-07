@@ -19,12 +19,13 @@ void Library::shutdown()
     Library::instance = NULL;
 }
 
-Library::Library() : _configuration(NULL),
-                     _database(NULL),
-                     _extension(NULL),
-                     _log(NULL),
-                     identify(NULL),
-                     preview(NULL)
+Library::Library()
+    : _configuration(NULL)
+    , _database(NULL)
+    , _extension(NULL)
+    , _log(NULL)
+    , identify(NULL)
+    , preview(NULL)
 {
     this->imageExtensions.insert(LightBird::IImage::BMP, "bmp");
     this->imageExtensions.insert(LightBird::IImage::GIF, "gif");

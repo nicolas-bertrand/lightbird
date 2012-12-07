@@ -10,12 +10,12 @@
 #include "Plugins.hpp"
 #include "Server.h"
 
-Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent) :
-         QObject(parent),
-         configurationApi(configuration),
-         databaseApi(id),
-         logsApi(id),
-         networkApi(id)
+Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent)
+    : QObject(parent)
+    , configurationApi(configuration)
+    , databaseApi(id)
+    , logsApi(id)
+    , networkApi(id)
 {
     this->id = id;
     this->eventsApi = new ApiEvents(this->id, event);

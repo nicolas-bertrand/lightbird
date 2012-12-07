@@ -3,7 +3,9 @@
 #include "LightBird.h"
 #include "Plugin.h"
 
-Files::Files(LightBird::IApi *a, const QString &t) : api(a), timerName(t)
+Files::Files(LightBird::IApi *a, const QString &t)
+    : api(a)
+    , timerName(t)
 {
     // Reads the configuration
     if (!(this->removeFileTimer = this->api->configuration(true).get("removeFileTimer").toUInt() * 60000))

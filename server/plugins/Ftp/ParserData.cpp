@@ -2,7 +2,8 @@
 #include "ParserData.h"
 #include "Plugin.h"
 
-ParserData::ParserData(LightBird::IApi &api, LightBird::IClient &client) : Parser(api, client)
+ParserData::ParserData(LightBird::IApi &api, LightBird::IClient &client)
+    : Parser(api, client)
 {
 }
 

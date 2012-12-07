@@ -5,7 +5,8 @@
 #include "Plugin.h"
 #include "Uploads.h"
 
-Uploads::Uploads(QObject *parent) : QObject(parent)
+Uploads::Uploads(QObject *parent)
+    : QObject(parent)
 {
     this->maxHeaderLength = MAX_HEADER_LENGTH;
 }

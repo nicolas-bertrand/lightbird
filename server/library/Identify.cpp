@@ -6,7 +6,8 @@
 #include "Library.h"
 #include "LightBird.h"
 
-Identify::Identify() : thread(NULL)
+Identify::Identify()
+    : thread(NULL)
 {
     this->mimeDocument.push_back("text/");
     this->mimeDocument.push_back("pdf");

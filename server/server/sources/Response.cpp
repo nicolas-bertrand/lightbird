@@ -1,6 +1,7 @@
 #include "Response.h"
 
-Response::Response(QObject *parent) : QObject(parent)
+Response::Response(QObject *parent)
+    : QObject(parent)
 {
     this->clear();
 }

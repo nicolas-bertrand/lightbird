@@ -6,7 +6,10 @@
 
 using namespace LightBird;
 
-Node::Node(Node::NodeType type) : id(QString()), type(type), valid(false)
+Node::Node(Node::NodeType type)
+    : id(QString())
+    , type(type)
+    , valid(false)
 {
 }
 

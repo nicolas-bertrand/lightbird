@@ -4,7 +4,10 @@
 #include "Parser.h"
 #include "Plugin.h"
 
-Parser::Parser(LightBird::IClient &c) : client(c), request(c.getRequest()), response(c.getResponse())
+Parser::Parser(LightBird::IClient &c)
+    : client(c)
+    , request(c.getRequest())
+    , response(c.getResponse())
 {
     this->contentSent = 0;
 }

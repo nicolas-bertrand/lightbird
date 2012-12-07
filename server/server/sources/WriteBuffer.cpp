@@ -1,6 +1,8 @@
 #include "WriteBuffer.h"
 
-WriteBuffer::WriteBuffer(Client *c, QByteArray *d, QThread *thread) : client(c), data(d)
+WriteBuffer::WriteBuffer(Client *c, QByteArray *d, QThread *thread)
+    : client(c)
+    , data(d)
 {
     this->written = 0;
     this->writing = false;

@@ -14,7 +14,8 @@ TableAccounts::~TableAccounts()
 {
 }
 
-TableAccounts::TableAccounts(const TableAccounts &t) : TableAccessors()
+TableAccounts::TableAccounts(const TableAccounts &t)
+    : TableAccessors()
 {
     *this = t;
 }

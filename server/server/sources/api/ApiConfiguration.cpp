@@ -6,8 +6,9 @@
 #include "Log.h"
 #include "Plugins.hpp"
 
-ApiConfiguration::ApiConfiguration(const QString &idPlugin) : id(Plugins::checkId(idPlugin)),
-                                                              configuration(*Configurations::instance())
+ApiConfiguration::ApiConfiguration(const QString &idPlugin)
+    : id(Plugins::checkId(idPlugin))
+    , configuration(*Configurations::instance())
 {
     // The plugin doesn't exists
     if (!QFileInfo(Configurations::instance()->get("pluginsPath") + "/" + this->id).isDir())

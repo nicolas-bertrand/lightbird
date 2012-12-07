@@ -5,7 +5,8 @@
 #include "Session.h"
 #include "Mutex.h"
 
-Session::Session(const QString &id) : destroyed(false)
+Session::Session(const QString &id)
+    : destroyed(false)
 {
     QSqlQuery               query;
     QVector<QVariantMap>    result;
@@ -32,8 +33,12 @@ Session::Session(const QString &id) : destroyed(false)
             this->informations[result[i]["name"].toString()] = result[i]["value"];
 }
 
-Session::Session(const QDateTime &e, const QString &a, const QStringList &c, const QVariantMap &informations) :
-                 expiration(e), id_account(a), creation(QDateTime::currentDateTime()), clients(c), destroyed(false)
+Session::Session(const QDateTime &e, const QString &a, const QStringList &c, const QVariantMap &informations)
+    : expiration(e)
+    , id_account(a)
+    , creation(QDateTime::currentDateTime())
+    , clients(c)
+    , destroyed(false)
 {
     QSqlQuery   query;
     QString     id;
@@ -54,7 +59,8 @@ Session::~Session()
 {
 }
 
-Session::Session(const Session &session) : LightBird::Table()
+Session::Session(const Session &session)
+    : LightBird::Table()
 {
     *this = session;
 }

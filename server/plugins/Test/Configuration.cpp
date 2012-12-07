@@ -1,7 +1,8 @@
 #include "LightBird.h"
 #include "Configuration.h"
 
-Configuration::Configuration(LightBird::IApi &api) : ITest(api)
+Configuration::Configuration(LightBird::IApi &api)
+    : ITest(api)
 {
 }
 

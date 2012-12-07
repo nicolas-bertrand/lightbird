@@ -15,7 +15,8 @@ TableEvents::~TableEvents()
 {
 }
 
-TableEvents::TableEvents(const TableEvents &table) : Table()
+TableEvents::TableEvents(const TableEvents &table)
+    : Table()
 {
     *this = table;
 }

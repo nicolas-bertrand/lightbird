@@ -20,9 +20,17 @@
 
 Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStringList &pr,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
-               const QString &pn, LightBird::IClient::Mode m, IReadWrite *r) :
-               transport(t), protocols(pr), port(p), socketDescriptor(sd), peerAddress(pa),
-               peerPort(pp), peerName(pn), mode(m), readWriteInterface(r), socket(s)
+               const QString &pn, LightBird::IClient::Mode m, IReadWrite *r)
+    : transport(t)
+    , protocols(pr)
+    , port(p)
+    , socketDescriptor(sd)
+    , peerAddress(pa)
+    , peerPort(pp)
+    , peerName(pn)
+    , mode(m)
+    , readWriteInterface(r)
+    , socket(s)
 {
     // Generates the uuid of the client
     this->id = LightBird::createUuid();

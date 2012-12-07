@@ -1,6 +1,7 @@
 #include "Context.h"
 
-Context::Context(QObject *parent) : QObject(parent)
+Context::Context(QObject *parent)
+    : QObject(parent)
 {
 }
 
@@ -8,7 +9,8 @@ Context::~Context()
 {
 }
 
-Context::Context(const Context &context) : QObject()
+Context::Context(const Context &context)
+    : QObject()
 {
     *this = context;
 }

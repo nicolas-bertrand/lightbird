@@ -1,7 +1,8 @@
 #include "ClientHandler.h"
 #include "ParserControl.h"
 
-ParserControl::ParserControl(LightBird::IApi &api, LightBird::IClient &client) : Parser(api, client)
+ParserControl::ParserControl(LightBird::IApi &api, LightBird::IClient &client)
+    : Parser(api, client)
 {
 }
 

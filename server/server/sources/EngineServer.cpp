@@ -12,7 +12,8 @@
 #include "EngineServer.h"
 #include "Plugins.hpp"
 
-EngineServer::EngineServer(Client &client) : Engine(client)
+EngineServer::EngineServer(Client &client)
+    : Engine(client)
 {
     // Initialize the Engine
     this->_clear();

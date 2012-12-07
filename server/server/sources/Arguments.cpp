@@ -1,12 +1,14 @@
 #include "Arguments.h"
 
-Arguments::Arguments() : argc(0),
-                         argv(NULL)
+Arguments::Arguments()
+    : argc(0)
+    , argv(NULL)
 {
 }
 
-Arguments::Arguments(int ac, char **av) : argc(ac),
-                                          argv(av)
+Arguments::Arguments(int ac, char **av)
+    : argc(ac)
+    , argv(av)
 {
     for (int i = 0; i < argc; ++i)
         this->raw << argv[i];

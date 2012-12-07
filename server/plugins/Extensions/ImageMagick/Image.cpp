@@ -6,7 +6,8 @@
 #include "LightBird.h"
 #include "Properties.h"
 
-Image::Image(LightBird::IApi *a) : api(a)
+Image::Image(LightBird::IApi *a)
+    : api(a)
 {
     // Get the path to ImageMagick from the configuration of the plugin
     this->imageMagickPath = this->api->configuration(true).get("image_magick_path");

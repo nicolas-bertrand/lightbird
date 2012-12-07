@@ -12,7 +12,8 @@
 
 const char *Commands::months[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-Commands::Commands(LightBird::IApi &api) : api(api)
+Commands::Commands(LightBird::IApi &api)
+    : api(api)
 {
     this->controlCommands["USER"] = &Commands::_user;
     this->controlCommands["PASS"] = &Commands::_pass;

@@ -10,8 +10,9 @@
 #include "Server.h"
 #include "Mutex.h"
 
-Configurations::Configurations(const QString &configurationPath, QObject *parent) : QObject(parent),
-                                                                                    mutex(QMutex::Recursive)
+Configurations::Configurations(const QString &configurationPath, QObject *parent)
+    : QObject(parent)
+    , mutex(QMutex::Recursive)
 {
     QString         path = configurationPath;
     Configuration   *instance;

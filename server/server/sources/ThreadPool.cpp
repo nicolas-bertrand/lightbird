@@ -5,7 +5,8 @@
 #include "Thread.h"
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool(QObject *parent) : QObject(parent)
+ThreadPool::ThreadPool(QObject *parent)
+    : QObject(parent)
 {
     this->threadsNumber = Configurations::instance()->get("threadsNumber").toUInt();
     for (unsigned int i = 0; i < this->threadsNumber; ++i)

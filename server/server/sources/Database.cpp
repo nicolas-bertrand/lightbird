@@ -14,7 +14,8 @@
 #include "Mutex.h"
 #include "Server.h"
 
-Database::Database(QObject *parent) : QObject(parent)
+Database::Database(QObject *parent)
+    : QObject(parent)
 {
     // Stores the names of the tables of the database
     this->tablesNames << "accounts" << "accounts_groups" << "accounts_informations" << "collections"

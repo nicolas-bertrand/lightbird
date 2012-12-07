@@ -6,8 +6,8 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients) :
-                 Port(port, LightBird::INetwork::TCP, protocols, maxClients)
+PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
+    : Port(port, LightBird::INetwork::TCP, protocols, maxClients)
 {
     this->moveToThread(this);
     this->tcpServer.moveToThread(this);

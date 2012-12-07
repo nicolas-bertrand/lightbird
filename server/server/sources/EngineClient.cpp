@@ -13,7 +13,8 @@
 #include "EngineClient.h"
 #include "Plugins.hpp"
 
-EngineClient::EngineClient(Client &client) : Engine(client)
+EngineClient::EngineClient(Client &client)
+    : Engine(client)
 {
     // Initialize the Engine
     this->_clear();

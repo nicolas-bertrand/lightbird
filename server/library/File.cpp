@@ -3,7 +3,8 @@
 
 using namespace LightBird;
 
-File::File() : Node(Node::FileNode)
+File::File()
+    : Node(Node::FileNode)
 {
 }
 

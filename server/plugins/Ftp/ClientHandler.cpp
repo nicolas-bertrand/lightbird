@@ -4,7 +4,8 @@
 
 #include "IClient.h"
 
-ClientHandler::ClientHandler(LightBird::IApi &api) : api(api)
+ClientHandler::ClientHandler(LightBird::IApi &api)
+    : api(api)
 {
     this->commands = new Commands(api);
 }

@@ -3,7 +3,8 @@
 #include "Plugins.hpp"
 #include "Server.h"
 
-ApiPlugins::ApiPlugins(QObject *parent) : QObject(parent)
+ApiPlugins::ApiPlugins(QObject *parent)
+    : QObject(parent)
 {
     LOG_TRACE("ApiPlugins created", "ApiPlugins", "ApiPlugins");
 }
