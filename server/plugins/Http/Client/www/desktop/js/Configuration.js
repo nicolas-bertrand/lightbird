@@ -53,7 +53,7 @@ var Configuration =
         defaultHeight : 45, // == C.Desktop.bottomHeight
         playlistHeight : 200, // The default height of the playlist.
         timelineHeight : 5, // The default height of the timeline.
-        timelineOverHeight : 5, // The additionnal height of the timeline when the mouse is over the player.
+        timelineExpandHeight : 5, // The additionnal height of the timeline when it is expanded.
         headerHeight : 24, // The height of the playlist header.
         listFileHeight : 25, // The height of each file of the playlist.
         tabOrigin : -30, // The original position of the tabs.
