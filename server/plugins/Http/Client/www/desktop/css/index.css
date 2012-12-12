@@ -626,32 +626,22 @@ a:visited
 
 #desktop>.bottom>.timeline>.seek
 {
-    height: 31px;
-    color: #222222;
-    background-color: rgba(255, 255, 255, 1);
-    box-shadow: 0 0px 3px rgba(0, 0, 0, 0.8);
-    border-radius: 5px 5px 5px 5px;
-    padding: 0px 10px 0px 10px;
     position: absolute;
-    top: -45px;
+    top: -47px;
+    width: 500px;
     display: none;
 }
 
-#desktop>.bottom>.timeline>.seek.black
+#desktop>.bottom>.timeline>.seek>.preview>img
 {
-    color: white;
-    background-color: rgba(34, 34, 34, 0.8);
-    box-shadow: 0px 0px 1px rgba(255, 255, 255, 1);
+    position: absolute;
 }
 
-#desktop>.bottom>.timeline>.seek.left
+#desktop>.bottom>.timeline>.seek>svg,
+#desktop>.bottom>.timeline>.seek>.middle
 {
-    border-radius: 0px 5px 5px 0px;
-}
-
-#desktop>.bottom>.timeline>.seek.right
-{
-    border-radius: 5px 0px 0px 5px;
+    float: left;
+    position: relative;
 }
 
 #desktop>.bottom>.timeline.over>.seek
@@ -659,13 +649,25 @@ a:visited
     display: block;
 }
 
-#desktop>.bottom>.timeline>.seek>div
+#desktop>.bottom>.timeline>.seek>.time
 {
-    padding-top: 7px;
+    padding: 7px 10px 0px 10px;
+    color: white;
     font-size: 15px;
     font-weight: bold;
     letter-spacing: 1px;
-    width: 100%;
+    position: absolute;
+}
+
+#desktop>.bottom>.timeline>.seek>.preview
+{
+    position: absolute;
+    display: none;
+}
+
+#desktop>.bottom>.timeline>.seek>.preview.display
+{
+    display: block;
 }
 
 #desktop>.bottom>.player
@@ -753,20 +755,20 @@ a:visited
     cursor: pointer;
 }
 
-#desktop>.bottom>.player>.controls
+#desktop>.bottom>.player>.settings
 {
     float: right;
     height: 100%;
 }
 
-#desktop>.bottom>.player>.controls>div
+#desktop>.bottom>.player>.settings>div
 {
     height: 100%;
     float: left;
     cursor: pointer;
 }
 
-#desktop>.bottom>.player>.controls>div>div
+#desktop>.bottom>.player>.settings>div>div
 {
     height: 20px;
     margin: 10px;
@@ -775,7 +777,7 @@ a:visited
 /* Hover */
 
 #desktop>.bottom>.player>.play>div:hover,
-#desktop>.bottom>.player>.controls>div:hover
+#desktop>.bottom>.player>.settings>div:hover
 {
     color: #222222;
     background-image: linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
@@ -791,7 +793,7 @@ a:visited
 }
 
 #desktop>.bottom>.player>.play>div>.line,
-#desktop>.bottom>.player>.controls>div>.line
+#desktop>.bottom>.player>.settings>div>.line
 {
     width: 100%;
     height: 10px;
@@ -810,7 +812,7 @@ a:visited
 }
 
 #desktop>.bottom>.player>.play>div:hover>.line,
-#desktop>.bottom>.player>.controls>div:hover>.line
+#desktop>.bottom>.player>.settings>div:hover>.line
 {
     display: block;
 }

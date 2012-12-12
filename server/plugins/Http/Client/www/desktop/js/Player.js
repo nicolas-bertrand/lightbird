@@ -13,10 +13,12 @@ function Player(task)
         self.node.bottom = $("#desktop>.bottom");
         self.node.timeline = self.node.bottom.children(".timeline");
         self.node.seek = self.node.timeline.children(".seek");
+        self.node.preview = self.node.seek.children(".preview");
+        self.node.seek_time = self.node.seek.children(".time");
         self.node.activeArea = self.node.timeline.children(".active_area");
         self.node.player = self.node.bottom.children(".player");
         self.node.play = self.node.player.children(".play");
-        self.node.controls = self.node.player.children(".controls");
+        self.node.settings = self.node.player.children(".settings");
         self.node.numerator = self.node.play.find(".numerator"); // The number of the current file played
         self.node.denominator = self.node.play.find(".denominator"); // The total number of files
         self.node.time = self.node.play.children(".time");
@@ -30,16 +32,16 @@ function Player(task)
         self.node.icon.pause = $(self.node.play).children(".pause");
         self.node.icon.previous = $(self.node.play).children(".previous");
         self.node.icon.next = $(self.node.play).children(".next");
-        self.node.icon.volume = $(self.node.controls).children(".volume");
-        self.node.icon.mute = $(self.node.controls).children(".mute");
-        self.node.icon.settings = $(self.node.controls).children(".settings");
-        self.node.icon.repeat = $(self.node.controls).children(".repeat");
-        self.node.icon.repeatOne = $(self.node.controls).children(".repeat_one");
-        self.node.icon.noRepeat = $(self.node.controls).children(".no_repeat");
-        self.node.icon.random = $(self.node.controls).children(".random");
-        self.node.icon.linear = $(self.node.controls).children(".linear");
-        self.node.icon.fullscreen = $(self.node.controls).children(".fullscreen");
-        self.node.icon.normalScreen = $(self.node.controls).children(".normal_screen");
+        self.node.icon.volume = $(self.node.settings).children(".volume");
+        self.node.icon.mute = $(self.node.settings).children(".mute");
+        self.node.icon.settings = $(self.node.settings).children(".settings");
+        self.node.icon.repeat = $(self.node.settings).children(".repeat");
+        self.node.icon.repeatOne = $(self.node.settings).children(".repeat_one");
+        self.node.icon.noRepeat = $(self.node.settings).children(".no_repeat");
+        self.node.icon.random = $(self.node.settings).children(".random");
+        self.node.icon.linear = $(self.node.settings).children(".linear");
+        self.node.icon.fullscreen = $(self.node.settings).children(".fullscreen");
+        self.node.icon.normalScreen = $(self.node.settings).children(".normal_screen");
         // Playlist
         self.node.playlist = self.node.bottom.children(".playlist");
         self.node.header = self.node.playlist.children(".header");
@@ -90,7 +92,7 @@ function Player(task)
     self.mouseEnter = function (e)
     {
         self.mouseOverPlayer = true;
-        // The player is already in the correct state
+        // The player is already expanded
         if (self.mouseLeaveTimeout)
         {
             clearTimeout(self.mouseLeaveTimeout);
@@ -217,8 +219,14 @@ function Player(task)
     // Converts the time in seconds to a string (0:00).
     self.timeToString = function (seconds)
     {
-        var sec = Math.floor(seconds % 60);
-        return (Math.floor(seconds / 60) + ":" + (sec < 10 ? "0" + sec : sec));
+        var second = Math.floor(seconds % 60);
+        var minute = Math.floor(seconds / 60);
+        var hour = Math.floor(minute / 60);
+        var minute = Math.floor(minute % 60);
+        var result = minute + ":" + (second < 10 ? "0" + second : second);
+        if (hour)
+            result = hour + ":" + (minute < 10 ? "0" : "") + result;
+        return (result);
     }
     
 // Player interface
@@ -280,18 +288,22 @@ self.TimeLine = function (player)
         self.before = 0; // The percentage of the before part of the timeline
         self.played = 0; // The percentage of the media played
         self.buffered = 0; // The percentage of the media buffered
+        self.previewHeight; // The height of the preview if it is displayed.
+        self.currentPreviewTime; // The time of the preview currently displayed.
         
         // Default values
-        self.draw();
+        self.drawTimeLine();
+        self.drawSeek();
         
         // Events
         node.activeArea.mouseenter(function (e) { self.mouseEnter(e); });
         node.activeArea.mouseleave(function (e) { self.mouseLeave(e); });
         node.activeArea.mousemove(function (e) { self.mouseMove(e); });
+        node.activeArea.mousedown(function (e) { self.mouseDown(e); });
     }
     
     // Draws the time line in SVG.
-    self.draw = function ()
+    self.drawTimeLine = function ()
     {
         var height = C.Player.timelineHeight + C.Player.timelineExpandHeight;
         var paper = Raphael(node.timeline[0], gl_browserSize.width, C.Player.timelineHeight);
@@ -300,15 +312,19 @@ self.TimeLine = function (player)
         svg.css("position", "absolute");
         var before = paper.rect(0, 0, 1, height);
         before.attr("stroke", "none");
+        before.attr("fill", "#4a4a4a");
         var played = paper.rect(0, 0, 1, height);
         played.attr("stroke", "none");
+        played.attr("fill", "#b91f1f");
         var buffered = paper.rect(0, 0, 1, height);
         buffered.attr("stroke", "none");
+        buffered.attr("fill", "#cccccc");
         var after = paper.rect(0, 0, 1, height);
         after.attr("stroke", "none");
+        after.attr("fill", "#4a4a4a");
         
         // Updates the time line SVG.
-        self.updateSVG = function ()
+        self.updateTimeLine = function ()
         {
             var width = gl_browserSize.width;
             var translate = 0;
@@ -328,67 +344,220 @@ self.TimeLine = function (player)
         }
         
         // Expands the time line.
-        self.expandSVG = function ()
+        self.expandTimeLine = function ()
         {
             paper.setSize(undefined, height);
-            svg.css("top", "-" + C.Player.timelineExpandHeight);
-            before.attr("fill", "#4a4a4a");
-            before.attr("opacity", "1.0");
-            played.attr("fill", "#00a2ff");
-            played.attr("opacity", "1.0");
-            buffered.attr("fill", "#dddddd");
-            buffered.attr("opacity", "1.0");
-            after.attr("fill", "#4a4a4a");
-            after.attr("opacity", "1.0");
+            svg.css("top", "-" + C.Player.timelineExpandHeight + "px");
         }
         
         // Retracts the time line.
-        self.retractSVG = function ()
+        self.retractTimeLine = function ()
         {
             paper.setSize(undefined, C.Player.timelineHeight);
-            svg.css("top", 0);
-            before.attr("fill", "#4a4a4a");
-            before.attr("opacity", "1.0");
-            played.attr("fill", "#00a2ff");
-            played.attr("opacity", "1.0");
-            buffered.attr("fill", "#dddddd");
-            buffered.attr("opacity", "1.0");
-            after.attr("fill", "#4a4a4a");
-            after.attr("opacity", "1.0");
+            svg.css("top", "0px");
         }
         
-        self.updateSVG();
-        self.retractSVG();
+        // Changes the color of the played part based on the file type.
+        self.setTimeLineType = function (type)
+        {
+            if (type == "audio")
+                played.attr("fill", "#20ba2f");
+            else if (type == "video")
+                played.attr("fill", "#b91f1f");
+        }
+        
+        self.updateTimeLine();
+        self.retractTimeLine();
+    }
+    
+    // Draws the seek box.
+    self.drawSeek = function ()
+    {
+        var border = C.Player.Seek.border;
+        var height = C.Player.Seek.height;
+        var attrSettings = { opacity : 0.9, fill : "#222222", stroke : "none" };
+        var glowSettings = { width : 1, color : "white", opacity : 0.2 };
+        var offset = 1000; // Random large number
+        var middleWidth = 30; // The width of the middle area
+        var currentWidth, currentPosition, currentHeight;
+        
+        // Right
+        {
+            var width = 10;
+            var rightPaper = Raphael(node.seek[0], width + border, height + border * 2);
+            var rightRect = rightPaper.rect(0, border, offset, height, C.Player.Seek.radius);
+            rightRect.attr(attrSettings);
+            var rightGlow = rightRect.glow(glowSettings);
+        }
+        // Middle
+        {
+            var middle = $("<div class=\"middle\"></div>");
+            node.seek.prepend(middle);
+            middle.width(middleWidth);
+            // Bottom (down arrow)
+            {
+                /*var paper = Raphael(middle[0], middleWidth, 16);
+                var path = paper.path(gl_svg.Player.seek);
+                path.attr(attrSettings);
+                path.transform("T-10,-9");
+                path.glow(glowSettings);
+                $(path.node.parentNode).css({ position : "absolute",
+                                              top : (height + border - 1) + "px",
+                                              left : "0px" });*/
+            }
+            // Middle top
+            {
+                var middlePaper = Raphael(middle[0], middleWidth, height + border * 2);
+                var middleRect = middlePaper.rect(-5, border, middleWidth + 10, height);
+                middleRect.attr(attrSettings);
+                middleGlow = middleRect.glow(glowSettings);
+            }
+        }
+        // Left
+        {
+            var width = 10;
+            var leftPaper = Raphael(node.seek[0], width + border * 2, height + border * 2);
+            var leftRect = leftPaper.rect(border, border, offset, height, C.Player.Seek.radius);
+            leftRect.attr(attrSettings);
+            var leftGlow = leftRect.glow(glowSettings);
+        }
+        // Top. Holds the preview when it is displayed.
+        {
+            var topPaper = Raphael(node.preview[0], middleWidth + 20, height);
+            var topRect = topPaper.rect(border, border, 1, 1);
+            topRect.attr(attrSettings);
+            topGlow = topRect.glow(glowSettings);
+        }
+        // Adjusts the positions
+        node.seek.css("top", -(C.Player.Seek.topPosition + C.Player.Seek.height + C.Player.Seek.border) + "px");
+        node.seek_time.css("top", border + "px");
+        node.seek_time.css("left", border + "px");
+        
+        // Updates the layout of the SVG depending on the width of the text,
+        // its position on the time line, and the height of the preview if there is one.
+        // @param width : The width of the text and its padding.
+        // @param position : "left" or "right" if the cursor is on the sides of the time line.
+        // @param height : The height of the preview above the seek box (if displayed).
+        self.updateSeek = function (width, position, height)
+        {
+            // Do nothing if there is no change
+            if (width == currentWidth && position == currentPosition && height == currentHeight)
+                return ;
+            // Updates the height of the SVG
+            if (height != currentHeight)
+            {
+                // Default values
+                var newHeight = C.Player.Seek.height
+                var newTop = border;
+                node.seek_time.css("left", border + "px");
+                node.preview.removeClass("display");
+                // Displays the preview
+                if (height)
+                {
+                    newHeight = C.Player.Seek.height + height;
+                    newTop = border - height;
+                    node.preview.addClass("display");
+                    node.preview.css("top", -height + "px");
+                    topPaper.setSize(width + border * 2, height);
+                    node.seek_time.css("left", Math.round(width / 2 - node.seek_time[0].offsetWidth / 2 + border) + "px");
+                }
+                // We need to recreate the rectangles with the new height
+                // Right
+                rightRect.remove();
+                rightRect = rightPaper.rect(0, newTop, offset, newHeight, C.Player.Seek.radius);
+                rightRect.attr(attrSettings);
+                // Middle
+                middleRect.remove();
+                middleRect = middlePaper.rect(-5, newTop, middleWidth + 10, newHeight);
+                middleRect.attr(attrSettings);
+                middleGlow.remove();
+                middleGlow = middleRect.glow(glowSettings);
+                // Left
+                leftRect.remove();
+                leftRect = leftPaper.rect(border, newTop, offset, newHeight, C.Player.Seek.radius);
+                leftRect.attr(attrSettings);
+            }
+            // Saves the new width, position and height
+            currentWidth = width;
+            currentPosition = position;
+            currentHeight = height;
+            // Updates the width of the SVGs
+            width -= middleWidth;
+            var halfWidth = Math.floor(width / 2);
+            leftPaper.setSize(halfWidth + width % 2 + border);
+            leftRect.transform("T0,0");
+            rightPaper.setSize(halfWidth + border);
+            rightRect.transform("T" + (halfWidth - offset) + ",0");
+            topPaper.setSize(currentWidth + border * 2);
+            topRect.remove();
+            topRect = topPaper.rect(border, border, currentWidth, height + border);
+            topRect.attr(attrSettings);
+            // Manages the left and right cases
+            if (position == "left")
+                leftRect.transform("T-" + (offset / 2) + ",0");
+            else if (position == "right")
+                rightRect.transform("T-" + (offset / 2) + ",0");
+            // Updates the glows
+            leftGlow.remove();
+            rightGlow.remove();
+            topGlow.remove();
+            leftGlow = leftRect.glow(glowSettings);
+            rightGlow = rightRect.glow(glowSettings);
+            topGlow = topRect.glow(glowSettings);
+        }
+        
+        // Sets the preview to display in the seek box.
+        self.setPreview = function (url)
+        {
+            var image = node.preview.children("img");
+            image[0].src = url;
+            image.width(currentWidth);
+            image.height(currentHeight);
+            image.css("top", border + "px");
+            image.css("left", border + "px");
+        }
     }
     
     // Updates the time line based on the width of the browser.
     self.onResize = function (width)
     {
-        self.updateSVG();
+        self.updateTimeLine();
     }
     
     // Changes the media displayed in the time line.
     self.newMedia = function (media)
     {
+        var file = gl_files.list[player.fileIndex];
         self.clear();
         self.media = media;
-        self.duration = gl_files.list[player.fileIndex].duration;
+        self.duration = file.duration;
         node.current_time.html("0:00");
         node.duration.html(player.timeToString(self.duration));
+        self.setTimeLineType(file.type);
+        if (file.type == "video")
+            self.previewHeight = Math.round(C.Player.Seek.previewWidth * file.height / file.width);
+        else
+            self.previewHeight = 0;
+        self.currentPreviewTime = undefined;
         $(media).bind("timeupdate", function (e) { self.onTimeUpdate(e); });
+        $(media).bind("progress", function (e) { self.onTimeUpdate(e); });
     }
     
     // Clears the time line.
     self.clear = function ()
     {
         if (self.media)
+        {
             $(self.media).unbind("timeupdate");
+            $(self.media).unbind("progress");
+        }
         self.media = undefined;
         self.duration = 0;
         self.before = 0;
         self.played = 0;
         self.buffered = 0;
-        self.updateSVG();
+        self.currentPreviewTime = undefined;
+        self.updateTimeLine();
         node.current_time.html("0:00");
         node.duration.html("0:00");
     }
@@ -397,13 +566,13 @@ self.TimeLine = function (player)
     // Updates the time line based on the new time.
     self.onTimeUpdate = function (e)
     {
-        if (!self.media.buffered.length)
-            return ;
         var currentTime = self.media.currentTime;
-        var buffered = self.media.buffered.end(0) - self.media.buffered.start(0) - currentTime;
+        var buffered = 0;
+        if (self.media.buffered.length)
+            buffered = self.media.buffered.end(0) - self.media.buffered.start(0) - currentTime;
         self.played = currentTime / self.duration;
         self.buffered = buffered / self.duration;
-        self.updateSVG();
+        self.updateTimeLine();
         node.current_time.html(player.timeToString(currentTime));
     }
     
@@ -434,43 +603,66 @@ self.TimeLine = function (player)
         }, C.Player.mouseLeaveTimeout);
     }
     
-    // Mouse move on the time line.
+    // Mouse move over the time line.
     self.mouseMove = function (e)
     {
         if (!self.media)
             return ;
         var seek = node.seek[0];
-        seek.firstChild.innerHTML = player.timeToString(e.pageX / gl_browserSize.width * self.duration);
-        var left = e.pageX - seek.offsetWidth / 2;
-        if (left <= 0)
+        var time = node.seek_time[0];
+        var width = self.previewHeight ? C.Player.Seek.previewWidth : time.offsetWidth;
+        
+        // Updates the time
+        time.innerHTML = player.timeToString(e.pageX / gl_browserSize.width * self.duration);
+        // Manages the left and right borders of the time line
+        var left = e.pageX - width / 2 - C.Player.Seek.border - 2;
+        var position;
+        if (left <= -C.Player.Seek.positionLimit - C.Player.Seek.border)
         {
-            left = 0;
-            node.seek.addClass("left");
+            left = -C.Player.Seek.positionLimit - C.Player.Seek.border;
+            position = "left";
         }
-        else if (left + seek.offsetWidth > gl_browserSize.width)
+        else if (left + width + C.Player.Seek.border > gl_browserSize.width + C.Player.Seek.positionLimit)
         {
-            left = gl_browserSize.width - seek.offsetWidth;
-            node.seek.addClass("right");
+            left = gl_browserSize.width + C.Player.Seek.positionLimit - C.Player.Seek.border - width;
+            position = "right";
         }
-        else
-        {
-            node.seek.removeClass("left");
-            node.seek.removeClass("right");
-        }
+        // Updates the seek box
+        self.updateSeek(width, position, self.previewHeight);
         seek.style.left = left + "px";
+        // Updates the preview
+        if (self.previewHeight)
+        {
+            // Computes the time of the preview under the cursor
+            var previewTime = Math.round(Math.floor(e.pageX / (gl_browserSize.width / C.Player.Seek.numberPreviews) + 1) * self.duration / C.Player.Seek.numberPreviews);
+            // Gets the new preview if the current one doesn't match
+            if (self.currentPreviewTime != previewTime)
+                self.setPreview("command/preview?id=" + gl_files.list[player.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&time=" + previewTime + getSession());
+            self.currentPreviewTime = previewTime;
+        }
+    }
+    
+    // Seeks to the position on the cursor.
+    self.mouseDown = function (e)
+    {
+        if (!self.media || e.which != 1)
+            return ;
+        var time = e.pageX / gl_browserSize.width * self.duration;
+        if (self.media.buffered.length > 0 && self.media.buffered.end(0) > time)
+            self.media.currentTime = time;
     }
     
     // Expands the time line.
     self.expand = function ()
     {
-        self.expandSVG();
+        self.expandTimeLine();
         node.timeline.addClass("expand");
     }
     
     // Retracts the time line.
     self.retract = function ()
     {
-        self.retractSVG();
+        self.retractTimeLine();
         node.timeline.removeClass("expand");
     }
     
@@ -552,7 +744,7 @@ self.Playlist = function (player)
         node.list.height(listHeight);
         // Updates the desktop
         C.Desktop.bottomHeight = self.height + C.Player.defaultHeight + C.Player.timelineExpandHeight;
-        node.bottom.css("padding-top", self.height + C.Player.timelineExpandHeight);
+        node.bottom.css("padding-top", self.height + C.Player.timelineExpandHeight + "px");
         gl_desktop.onResize();
         return (listHeight);
     }
@@ -595,7 +787,7 @@ self.Playlist = function (player)
     self.pin = function ()
     {
         self.pinned = true;
-        node.playlist.css("top", 0);
+        node.playlist.css("top", "0px");
         self.setHeight(self.height);
     }
     
@@ -603,8 +795,8 @@ self.Playlist = function (player)
     self.unpin = function ()
     {
         self.pinned = false;
-        node.bottom.css("padding-top", 0);
-        node.playlist.css("top", -(self.height + C.Player.timelineExpandHeight));
+        node.bottom.css("padding-top", "0px");
+        node.playlist.css("top", -(self.height + C.Player.timelineExpandHeight) + "px");
         self.hide();
         player.timeLine.retract();
         C.Desktop.bottomHeight = C.Player.defaultHeight;
@@ -817,7 +1009,7 @@ self.Header = function (player)
             {
                 if (lastTab.offsetWidth && lastTab.offsetLeft)
                 {
-                    node.add.css("left", lastTab.offsetLeft + lastTab.offsetWidth - C.Player.addIconMargin);
+                    node.add.css("left", (lastTab.offsetLeft + lastTab.offsetWidth - C.Player.addIconMargin) + "px");
                     clearInterval(node.add.addTabInterval);
                 }
             }, C.Player.tabOffsetInterval);
@@ -827,7 +1019,7 @@ self.Header = function (player)
         else
         {
             node.add.addIconNoTabStyle();
-            node.add.css("left", C.Player.addIconOrigin);
+            node.add.css("left", C.Player.addIconOrigin + "px");
         }
     }
     
@@ -1029,7 +1221,7 @@ self.Tab = function (player, name)
                         if (lastTab.offsetWidth && lastTab.offsetLeft)
                         {
                             // Sets the position of the tab relative to the previous one
-                            tab.css("left", C.Player.tabOrigin + lastTab.offsetLeft + lastTab.offsetWidth - C.Player.tabMargin);
+                            tab.css("left", (C.Player.tabOrigin + lastTab.offsetLeft + lastTab.offsetWidth - C.Player.tabMargin) + "px");
                             clearInterval(tab.addTabInterval);
                             tab.addClass("display");
                             // Puts the add icon after the new tab
@@ -1041,7 +1233,7 @@ self.Tab = function (player, name)
         // The first tab can be directly displayed
         if (!lastTab)
         {
-            tab.css("left", C.Player.tabOrigin);
+            tab.css("left", C.Player.tabOrigin + "px");
             tab.addClass("display");
             player.header.updateAdd();
         }
@@ -1115,7 +1307,7 @@ self.Tab = function (player, name)
         
         // Moves the next tabs to replace the removed tab
         for (var nextTab = self.tab.next(); nextTab.length; nextTab = nextTab.next())
-            nextTab.css("left", nextTab[0].offsetLeft - offset);
+            nextTab.css("left", (nextTab[0].offsetLeft - offset) + "px");
         // Ensures that the focus is always on a tab
         if (self.tab.hasClass("focus"))
         {
@@ -1218,9 +1410,9 @@ self.Tab = function (player, name)
     {
         node.add.removeClass("hide");
         if (self.tab.prev().length)
-            self.tab.css("left", C.Player.tabOrigin + self.tab.prev()[0].offsetLeft + self.tab.prev().width() - C.Player.tabMargin);
+            self.tab.css("left", (C.Player.tabOrigin + self.tab.prev()[0].offsetLeft + self.tab.prev().width() - C.Player.tabMargin) + "px");
         else
-            self.tab.css("left", C.Player.tabOrigin);
+            self.tab.css("left", C.Player.tabOrigin + "px");
     }
     
     // Removes a tab.
@@ -1278,10 +1470,8 @@ self.Audio = function (player)
         var file = gl_files.list[fileIndex];
         node.audio.html("<audio preload=\"auto\" />");
         self.audio = $(node.audio).children("audio")[0];
-		var ogg = "command/audio.ogg";
-        ogg += "?id=" + file.id + "&token=" + getToken(ogg);
-		var mp3 = "command/audio.mp3";
-        mp3 += "?id=" + file.id + "&token=" + getToken(mp3);
+        var ogg = "command/audio.ogg?id=" + file.id + getSession();
+        var mp3 = "command/audio.mp3?id=" + file.id + getSession();
         var html = "<source src=\"" + ogg + "\" type=\"audio/ogg\" />";
         html += "<source src=\"" + mp3 + "\" type=\"audio/mpeg\" />";
         self.audio.innerHTML = html;

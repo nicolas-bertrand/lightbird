@@ -67,6 +67,16 @@ var Configuration =
         playlistResizeResistance : 20, // The number of pixels the mouse needs to move in order to start the resizing.
         playlistResizeEdges : -2, // The distance from the edge of the header where the resize takes effect.
         mouseLeaveTimeout : 1000, // The delay before the effect of the mouse leave.
+        Seek :
+        {
+            border : 20, // The width of the borders (not visible).
+            topPosition : 15, // The position of the seek box above the time line.
+            positionLimit : 1, // The number of pixels the seek box can exceed left and right relative to the browser width.
+            height : 31, // The default height of the box.
+            radius : 5, // The radius of the box corners.
+            previewWidth : 200, // The width of the preview displayed above the box.
+            numberPreviews : 100, // The number of previews generated for each videos.
+        }
     },
     Uploads :
     {
