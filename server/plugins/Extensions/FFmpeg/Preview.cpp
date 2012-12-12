@@ -34,11 +34,12 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
     Properties      properties;
     int             ret;
     bool            result = false;
+    Mutex           mutex(Plugin::getMutex(), this->api->getId(), "Preview", "generate");
 
     try
     {
         // Checks the source and the destination
-        if (!QFileInfo(source).isFile() || source == destination || destination.isEmpty())
+        if (!mutex || !QFileInfo(source).isFile() || source == destination || destination.isEmpty())
             throw false;
         properties.add("source", source).add("destination", destination).add("format", fmt);
         // Opens the source and its video stream

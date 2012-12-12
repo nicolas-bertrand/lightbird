@@ -38,6 +38,8 @@ public:
 
     /// @brief Calls avcodec_open2 in a thread safe way.
     static int  avcodec_open2(AVCodecContext *avctx, const AVCodec *codec, AVDictionary **options);
+    /// @brief Returns the mutex of the plugin.
+    static QMutex &getMutex();
 
 private:
     void        _loadConfiguration();

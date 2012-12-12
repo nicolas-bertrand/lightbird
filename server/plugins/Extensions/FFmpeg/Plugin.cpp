@@ -5,6 +5,7 @@
 Plugin  *Plugin::instance = NULL;
 
 Plugin::Plugin()
+    : mutex(QMutex::Recursive)
 {
     this->identify = NULL;
     this->preview = NULL;
@@ -131,6 +132,11 @@ int     Plugin::avcodec_open2(AVCodecContext *avctx, const AVCodec *codec, AVDic
     result = ::avcodec_open2(avctx, codec, options);
     Plugin::instance->mutex.unlock();
     return (result);
+}
+
+QMutex  &Plugin::getMutex()
+{
+    return (Plugin::instance->mutex);
 }
 
 void    Plugin::_loadConfiguration()
