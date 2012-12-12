@@ -112,15 +112,11 @@ function request(method, url, callback, data, type)
 				callback(HttpRequest);
 	}
 
-	// Adds a random string in the uri to prevent the result being cached
+	// Adds a random string in the uri to prevent the result from being cached
 	url += (url.indexOf("?") == -1 ? "?" : "&");
 	url += "r=" + Math.random();
-	// Adds the token that identify the client : SHA256(identifiant + date + url)
-	if (localStorage.getItem("identifiant") != undefined)
-	{
-		var location = url.substring(0, (url.indexOf("?") != -1 ? url.indexOf("?") : url.length));
-		url += "&token=" + getToken(location);
-	}
+	// Adds the session information that identify the user
+    url += getSession();
 
 	// Executes the request
 	HttpRequest.open(method, "/Client/" + url, true);
@@ -148,40 +144,6 @@ function nl2br(text)
 		return unescape(text);
 	else
 		return unescape(text.replace(renlchar, '<br />'));
-}
-
-// Creates a cookie using the parameters.
-// @name : The name of the cookie.
-// @value : The value of the cookie.
-// @expireDays : The number of days after which the cookie will be destroyed.
-// The default value is two years.
-function setCookie(name, value, expireDays)
-{
-	var exdate = new Date();
-	if (expireDays == null)
-		expireDays = 2 * 365;
-	exdate.setDate(exdate.getDate() + expireDays);
-	document.cookie = name+ "=" + escape(value) + ((expireDays == null) ? "" : ";expires=" + exdate.toUTCString());
-}
-
-// Returns the value of a cookie.
-// @param name : The name of the cookie.
-// @return The value of the cookie.
-function getCookie(name)
-{
-	if (document.cookie.length > 0)
-	{
-		c_start = document.cookie.indexOf(name + "=");
-		if (c_start != -1)
-		{
-			c_start = c_start + name.length + 1;
-			c_end = document.cookie.indexOf(";", c_start);
-			if (c_end == -1)
-				c_end = document.cookie.length;
-			return (unescape(document.cookie.substring(c_start, c_end)));
-		}
-	}
-	return ("");
 }
 
 // Changes the opacity of the node, if the browser support it.
@@ -272,10 +234,19 @@ function ISODateString(d)
       + pad(d.getUTCMinutes());
 }
 
-// Returns a valid token to communicate with the server.
-function getToken(location)
+// Returns the session information that have to be added at the end of the URLs in order to communicate with the server.
+// @param useQuestionMark : Prepends the session url a "?". Otherwise a "&" is prepended.
+function getSession(useQuestionMark)
 {
-    return (SHA256(localStorage.getItem("identifiant") + ISODateString(new Date()) + location));
+    var result;
+
+    // The user is not identified
+    if (!localStorage.getItem("sid"))
+        return (useQuestionMark ? "?" : "");
+    result = (useQuestionMark ? "?" : "&") + "sid=" + localStorage.getItem("sid");
+    if (localStorage.getItem("identifiant"))
+        result += "&identifiant=" + localStorage.getItem("identifiant");
+    return (result);
 }
 
 // Generate a random string.

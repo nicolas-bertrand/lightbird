@@ -14,11 +14,11 @@ Preview::~Preview()
 {
 }
 
-void    Preview::go()
+void    Preview::generate()
 {
-    unsigned int position;
+    unsigned int time;
 
-    // Extract the file id from the uri
+    // Extracts the file id from the uri
     this->file.setId(this->uri.queryItemValue("id"));
     // If the file doesn't exists, an error occured
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
@@ -28,13 +28,13 @@ void    Preview::go()
         return this->_error("Preview", 403, "Forbidden", "Access to the file denied.");
     // Defines the width and the height of the image
     this->_size();
-    // Get the position of the preview
-    position = this->uri.queryItemValue("position").toUInt();
+    // Gets the time of the preview
+    time = this->uri.queryItemValue("time").toUInt();
     // Generates a preview of the file
-    this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position);
+    this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, time);
     // No extensions has been able to generate the preview
     if (this->previewFileName.isEmpty())
-        return this->_error("Preview", 501, "Not Implemented", "Unable to generate a preview from this file.");
+        return this->_error("Preview", 404, "Not Found", "Unable to generate a preview from this file.");
     // Put the preview in the response
     this->response.getContent().setStorage(LightBird::IContent::FILE, this->previewFileName);
     this->response.setType("image/jpeg");
@@ -64,5 +64,5 @@ void    Preview::_error(const QString &method, int code, const QString &message,
     if (!content.isEmpty())
         this->response.getContent().setData(content);
     if (!log.isEmpty())
-        Plugin::api().log().write(level, log, this->properties, "Preview", method);
+        Plugin::api().log().write(level, log, Properties("fileId", this->file.getId()).toMap(), "Preview", method);
 }

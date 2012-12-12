@@ -95,9 +95,9 @@ void        Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDese
         // Gets the uri of the request
         uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority | QUrl::RemoveQuery | QUrl::RemoveFragment);
         uri = LightBird::cleanPath(uri.remove(".."), true).remove(QRegExp("^Client/"));
-        client.getInformations().insert("uri", uri);
-        // Manages the session cookie
-        this->_session(client, uri);
+        client.getRequest().getInformations().insert("uri", uri);
+        // Manages the session
+        this->_session(client);
     }
     // If an error occured we don't execute the request
     else if (type == LightBird::IOnDeserialize::IDoDeserialize && client.getResponse().getCode() >= 400)
@@ -123,7 +123,7 @@ void        Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDese
 
 bool        Plugin::doExecution(LightBird::IClient &client)
 {
-    QString uri = client.getInformations().value("uri").toString();
+    QString uri = client.getRequest().getInformations().value("uri").toString();
     QString interface;
     QString path;
 
@@ -177,9 +177,6 @@ void        Plugin::onFinish(LightBird::IClient &client)
 {
     this->_medias.onFinish(client);
     this->_uploads.onFinish(client);
-    // The session is destroyed and all the clients associated to it are disconnected
-    if (client.getInformations().contains("disconnect") && !client.getSessions().isEmpty())
-        this->_api->sessions().destroy(client.getSessions().first(), true);
 }
 
 void    Plugin::onDestroy(LightBird::IClient &client)
@@ -206,19 +203,17 @@ bool    Plugin::timer(const QString &name)
     return (true);
 }
 
-void        Plugin::_session(LightBird::IClient &client, const QString &uri)
+void    Plugin::_session(LightBird::IClient &client)
 {
     QString id;
-    QString sid = this->getCookie(client, "sid");
-    QString token = client.getRequest().getUri().queryItemValue("token");
+    QString sid = client.getRequest().getUri().queryItemValue("sid");
+    QString identifiant = client.getRequest().getUri().queryItemValue("identifiant");
     LightBird::Session session;
 
-    // If the session or the token doesn't exists, the cookie and the account are cleared
+    // If the session id or the identifiant doesn't exists, the account is cleared
     if (sid.isEmpty() || (session = this->_api->sessions().getSession(sid)).isNull() ||
-        (!token.isEmpty() && !this->_checkToken(client, session, token.toAscii(), uri)))
+        (!identifiant.isEmpty() && !this->_checkIdentifiant(client, session, identifiant)))
     {
-        client.getResponse().getHeader().remove("set-cookie");
-        this->addCookie(client, "sid");
         // Ensures that the client is not associated with a session
         if (!(id = client.getAccount().getId()).isEmpty() && !client.getSessions(id).isEmpty())
         {
@@ -229,7 +224,7 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
         client.getAccount().clear();
     }
     // Otherwise the client is identified
-    else if (!token.isEmpty())
+    else if (!identifiant.isEmpty())
     {
         // Ensures that it is associated to the session
         session->setClient(client.getId());
@@ -241,19 +236,14 @@ void        Plugin::_session(LightBird::IClient &client, const QString &uri)
     }
 }
 
-bool            Plugin::_checkToken(LightBird::IClient &client, LightBird::Session &session, const QByteArray &token, const QString &uri)
+bool    Plugin::_checkIdentifiant(LightBird::IClient &client, LightBird::Session &session, const QString &identifiant)
 {
-    QByteArray  identifiant = session->getInformation("identifiant").toByteArray();
-    QDateTime   date = QDateTime::currentDateTimeUtc();
-
-    // The token is the combination of the identifiant, the current date (+/- 1 minute), and a part of the URI
-    if (token == LightBird::sha256(identifiant + date.toString(TOKEN_DATE_FORMAT).toAscii() + uri.toAscii()) ||
-        token == LightBird::sha256(identifiant + date.addSecs(-60).toString(TOKEN_DATE_FORMAT).toAscii() + uri.toAscii()))
+    if (identifiant == session->getInformation("identifiant"))
         return (true);
     this->identificationFailed(client);
     client.getResponse().setError(true);
     // Tells the client that it is not identified
-    if (uri == "blank")
+    if (client.getRequest().getInformations().value("uri").toString() == "blank")
         this->response(client, 403, "Forbidden");
     return (false);
 }
@@ -301,8 +291,7 @@ void    Plugin::_getFile(LightBird::IClient &client)
     QString path;
 
     // Checks that the user can access to the file
-    if (client.getRequest().getUri().queryItemValue("token").isEmpty() ||
-        !file.isAllowed(client.getAccount().getId(), "read"))
+    if (client.getAccount().getId().isEmpty() || !file.isAllowed(client.getAccount().getId(), "read"))
         return (this->response(client, 403, "Forbidden", "Access denied."));
     path = file.getFullPath();
     // Checks that the file exists on the file system

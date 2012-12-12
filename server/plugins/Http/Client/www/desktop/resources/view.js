@@ -55,7 +55,7 @@ resource.Image = function ()
     
         // Displays the image
         var file = resource.file;
-		var url = file.name + "?id=" + file.id + "&token=" + getToken(file.name);
+		var url = file.name + "?id=" + file.id + getSession();
         resource.root.innerHTML = "<img src=\"" + url + "\" alt=\"" + file.name + "\" class=\"file\" />";
         self.image = $(resource.root).children("img")[0];
         self.setOverflow(false);
@@ -275,8 +275,7 @@ resource.Video = function ()
         
         // Creates the video
         var file = resource.file;
-		var url = "command/video.webm";
-        url += "?id=" + file.id + "&token=" + getToken(url);
+        url = "command/video.webm?id=" + file.id + getSession();
         resource.root.innerHTML = "<video autoplay />";
         self.video = $(resource.root).children("video")[0];
         self.video.innerHTML = "<source src=\"" + url + "\" type='video/webm; codecs=\"vp8.0, vorbis\"'/>";

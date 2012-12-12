@@ -21,7 +21,6 @@
 
 # define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser should download the content.
 # define DEFAULT_INTERFACE_NAME  "desktop"
-# define TOKEN_DATE_FORMAT       "yyyy-MM-dd hh:mm"
 # define IDENTIFICATION_ATTEMPTS 10 // Number of identifications attempts that can be done before the connection is systematically refused.
 # define IDENTIFICATION_TIME     60 // The period during which the failed identifications are kept.
 
@@ -85,9 +84,9 @@ public:
 
 private:
     /// @brief Manages the session.
-    void    _session(LightBird::IClient &client, const QString &uri);
-    /// @brief Checks that the token is correct.
-    bool    _checkToken(LightBird::IClient &client, LightBird::Session &session, const QByteArray &token, const QString &uri);
+    void    _session(LightBird::IClient &client);
+    /// @brief Checks if the client identifiant is valid.
+    bool    _checkIdentifiant(LightBird::IClient &client, LightBird::Session &session, const QString &identifiant);
     /// @brief Returns the name of the interface used by the user.
     QString _getInterface(LightBird::IClient &client);
     /// @brief Returns the correct translation of the client.

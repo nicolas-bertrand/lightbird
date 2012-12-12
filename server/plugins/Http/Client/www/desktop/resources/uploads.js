@@ -374,10 +374,9 @@ function UploadsSession(uploads)
     self.start = function ()
     {
         // Submit the form
-        var uri = "command/uploads";
         var id = self.id;
         var path = encodeURIComponent(self.path);
-        self.uploads.node.form.action = "/Client/" + uri + "?id=" + id + "&path=" + path + "&token=" + getToken(uri);
+        self.uploads.node.form.action = "/Client/command/uploads?id=" + id + "&path=" + path + getSession();
         self.uploads.node.form.submit();
         // Updates the progress bar in one second
         setTimeout(function () { self.requestProgress(); }, C.Uploads.requestProgressInterval);

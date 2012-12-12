@@ -37,19 +37,16 @@ function Account()
             // Tells the server that the session can be destroyed
             if (!gl_loaded)
                 request("GET", "command/disconnect");
-            // Deletes the session cookie and the identifiant
-            setCookie("sid", "", 0);
+            // Deletes the sid and the identifiant
+            localStorage.removeItem("sid");
             localStorage.removeItem("identifiant");
             document.getElementById("identification_icon_blue_lock").style.display = "none";
         }
         else
             document.getElementById("identification_icon_blue_unlock").style.display = "none";
         
-        // Gets the value of the session cookie
-        var sid = getCookie("sid");
-        var identifiant = localStorage.getItem("identifiant");
-        // If the sid and the identifiant cookies are defined, we try to identify the user
-        if (sid.length > 0 && identifiant != undefined)
+        // If the sid and the identifiant are defined, we try to identify the user
+        if (localStorage.getItem("sid") && localStorage.getItem("identifiant"))
         {
             var callback = function (HttpRequest)
             {
@@ -158,6 +155,7 @@ function Account()
                 animation(yellowIcon, 500, animationOpacity, false);
                 animation(redButton, 500, animationOpacity, true, function() { self.identification = false; });
                 animation(redIcon, 500, animationOpacity, true);
+                localStorage.removeItem("sid");
                 localStorage.removeItem("identifiant");
             }
         }
@@ -165,7 +163,9 @@ function Account()
         // Now that we have the salt, we can generate the identifiant using the data privided by the user
         var generateIdentifiant = function(HttpRequest)
         {
-            localStorage.setItem("identifiant", SHA256(name + SHA256(password + HttpRequest.responseText) + getCookie("sid")));
+            var response = jsonParse(HttpRequest.responseText);
+            localStorage.setItem("sid", response.sid);
+            localStorage.setItem("identifiant", SHA256(name + SHA256(password + response.salt) + response.sid));
             request("GET", "command/identify", identify);
         }
 
@@ -214,7 +214,7 @@ function Account()
         self.disconnecting = true;
         // We are no longer identified
         self.identified = false;
-        setCookie("sid", "", 0);
+        localStorage.removeItem("sid");
         localStorage.removeItem("identifiant");
         // Closes the all the pages
         gl_desktop.disconnect();

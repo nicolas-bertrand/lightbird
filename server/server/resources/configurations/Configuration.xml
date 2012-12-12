@@ -10,6 +10,28 @@
   <language>fr</language>
   <threadsNumber>10</threadsNumber>
   <hashSizeLimit>-1</hashSizeLimit>
+  <ports>
+    <port protocol="HTTP" transport="TCP" maxClients="100">80</port>
+    <port protocol="HTTP" transport="TCP" maxClients="100">4242</port>
+  </ports>
+  <plugins>
+    <plugin>Extensions/Mime</plugin>
+    <plugin>Files</plugin>
+    <plugin>Http/Client</plugin>
+    <plugin>Http/Parser</plugin>
+    <plugin>Json</plugin>
+    <plugin>Log/File</plugin>
+    <!--plugin>Test</plugin-->
+  </plugins>
+  <log>
+    <level>Trace</level>
+    <display>true</display>
+    <file>server.log</file>
+    <path>logs</path>
+    <maxNbOfFile>10</maxNbOfFile>
+    <maxSize>1M</maxSize>
+    <expires>30</expires>
+  </log>
   <database>
     <name/>
     <file>database.sqlite</file>
@@ -33,33 +55,11 @@
     <ownerInheritance>true</ownerInheritance>
     <groupInheritance>true</groupInheritance>
   </permissions>
-  <log>
-    <level>Trace</level>
-    <display>true</display>
-    <file>server.log</file>
-    <path>logs</path>
-    <maxNbOfFile>10</maxNbOfFile>
-    <maxSize>1M</maxSize>
-    <expires>30</expires>
-  </log>
   <preview>
     <cacheEnabled>true</cacheEnabled>
     <cachePath>cache</cachePath>
     <cacheSizeLimit>100</cacheSizeLimit>
   </preview>
-  <ports>
-    <port protocol="HTTP" transport="TCP" maxClients="100">80</port>
-    <port protocol="HTTP" transport="TCP" maxClients="100">4242</port>
-  </ports>
-  <plugins>
-    <plugin>Extensions/Mime</plugin>
-    <plugin>Files</plugin>
-    <plugin>Http/Client</plugin>
-    <plugin>Http/Parser</plugin>
-    <plugin>Json</plugin>
-    <plugin>Log/File</plugin>
-    <!--plugin>Test</plugin-->
-  </plugins>
   <configurations>
     <plugin id="Extensions/Mime"/>
     <plugin id="Files"/>
