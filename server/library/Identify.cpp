@@ -180,8 +180,10 @@ bool    Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentif
         QListIterator<QVariantMap> i(info.values(type));
         while (i.hasNext())
         {
-            result.data = i.peekNext();
-            i.next();
+            QMapIterator<QString, QVariant> j(i.next());
+            while (j.hasNext())
+                if (!j.next().value().toString().isEmpty())
+                    result.data.insert(j.peekPrevious().key(), j.peekPrevious().value());
         }
         if (!result.data.isEmpty() || type == LightBird::IIdentify::DOCUMENT)
         {
