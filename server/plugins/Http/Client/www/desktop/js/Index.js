@@ -241,9 +241,9 @@ function getSession(useQuestionMark)
     var result;
 
     // The user is not identified
-    if (!localStorage.getItem("sid"))
+    if (!localStorage.getItem("sessionId"))
         return (useQuestionMark ? "?" : "");
-    result = (useQuestionMark ? "?" : "&") + "sid=" + localStorage.getItem("sid");
+    result = (useQuestionMark ? "?" : "&") + "sessionId=" + localStorage.getItem("sessionId");
     if (localStorage.getItem("identifiant"))
         result += "&identifiant=" + localStorage.getItem("identifiant");
     return (result);

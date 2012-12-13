@@ -20,7 +20,7 @@ void    Preview::generate()
     float        quality;
 
     // Extracts the file id from the uri
-    this->file.setId(this->uri.queryItemValue("id"));
+    this->file.setId(this->uri.queryItemValue("fileId"));
     // If the file doesn't exists, an error occured
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
         return this->_error("Preview", 404, "Not Found", "File not found.");

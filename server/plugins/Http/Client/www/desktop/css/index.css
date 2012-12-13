@@ -612,6 +612,7 @@ a:visited
     position: absolute;
     top: 0px;
     z-index: 1;
+    background-color: rgba(255, 0, 0, 0);
 }
 #desktop>.bottom>.timeline.expand>.active_area
 {
@@ -620,7 +621,7 @@ a:visited
 }
 #desktop>.bottom>.timeline.expand>.active_area.expand
 {
-    height: 20px;
+    height: 30px;
     top: -15px;
 }
 

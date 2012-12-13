@@ -179,14 +179,10 @@ function Player(task)
         if (e.which != 1)
             return ;
         if (target.hasClass("play") && self.playerInterface)
-        {
             self.playerInterface.play();
-            self.play();
-        }
         else if (target.hasClass("pause") && self.playerInterface)
         {
             self.playerInterface.pause();
-            self.pause();
         }
         // Opens / closes the playlist
         else if (target.hasClass("number") || target.hasClass("name"))
@@ -251,6 +247,8 @@ function Player(task)
             var media = self.playerInterface.getMedia();
             self.timeLine.newMedia(media);
             self.node.time.addClass("display");
+            $(media).bind("play", function (e) { self.play(e); });
+            $(media).bind("pause", function (e) { self.pause(e); });
         }
         else
         {
@@ -259,13 +257,14 @@ function Player(task)
         }
     }
     
-    // Starts to play the file.
+    // Called by the media play event.
     self.play = function ()
     {
         self.node.icon.play.addClass("hide");
         self.node.icon.pause.removeClass("hide");
     }
     
+    // Called by the media pause event.
     self.pause = function ()
     {
         self.node.icon.play.removeClass("hide");
@@ -290,6 +289,7 @@ self.TimeLine = function (player)
         self.buffered = 0; // The percentage of the media buffered
         self.previewHeight; // The height of the preview if it is displayed.
         self.currentPreviewTime; // The time of the preview currently displayed.
+        self.timeOffset = 0; // The offset that have to be applied to the time line due to the server side seeking
         
         // Default values
         self.drawTimeLine();
@@ -323,24 +323,29 @@ self.TimeLine = function (player)
         after.attr("stroke", "none");
         after.attr("fill", "#4a4a4a");
         
+
         // Updates the time line SVG.
+        var drawElement;
         self.updateTimeLine = function ()
         {
-            var width = gl_browserSize.width;
-            var translate = 0;
-            var scale = self.before;
+            var transform = { translate : 0, scale : 0 };
 
-            paper.setSize(width);
-            before.transform("S" + scale + ",1,0,0T" + translate + ",0");
-            translate += scale;
-            scale = width * self.played;
-            played.transform("S" + scale + ",1,0,0T" + translate + ",0");
-            translate += scale;
-            scale = width * self.buffered;
-            buffered.transform("S" + scale + ",1,0,0T" + translate + ",0");
-            translate += scale;
-            scale = width - translate;
-            after.transform("S" + scale + ",1,0,0T" + translate + ",0");
+            transform = drawElement(before, self.before, transform);
+            transform = drawElement(played, self.played, transform);
+            transform = drawElement(buffered, self.buffered, transform);
+            transform = drawElement(after, gl_browserSize.width - transform.translate, transform);
+            paper.setSize(gl_browserSize.width);
+        }
+        // Draws an element of the time line.
+        drawElement = function (element, percent, transform)
+        {
+            transform.translate += transform.scale;
+            transform.scale = gl_browserSize.width * percent;
+            if (transform.scale > 0)
+                element.transform("S" + transform.scale + ",1,0,0T" + transform.translate + ",0");
+            else
+                element.transform("T0,1000");
+            return (transform);
         }
         
         // Expands the time line.
@@ -533,6 +538,7 @@ self.TimeLine = function (player)
         self.duration = file.duration;
         node.current_time.html("0:00");
         node.duration.html(player.timeToString(self.duration));
+        self.timeOffset = 0;
         self.setTimeLineType(file.type);
         if (file.type == "video")
             self.previewHeight = Math.round(C.Player.Seek.previewWidth * file.height / file.width);
@@ -564,12 +570,13 @@ self.TimeLine = function (player)
     
     // The time of the media played has changed.
     // Updates the time line based on the new time.
-    self.onTimeUpdate = function (e)
+    self.onTimeUpdate = function ()
     {
         var currentTime = self.media.currentTime;
         var buffered = 0;
         if (self.media.buffered.length)
             buffered = self.media.buffered.end(0) - self.media.buffered.start(0) - currentTime;
+        self.before = self.timeOffset / self.duration;
         self.played = currentTime / self.duration;
         self.buffered = buffered / self.duration;
         self.updateTimeLine();
@@ -615,7 +622,7 @@ self.TimeLine = function (player)
         // Updates the time
         time.innerHTML = player.timeToString(e.pageX / gl_browserSize.width * self.duration);
         // Manages the left and right borders of the time line
-        var left = e.pageX - width / 2 - C.Player.Seek.border - 2;
+        var left = e.pageX - width / 2 - C.Player.Seek.border;
         var position;
         if (left <= -C.Player.Seek.positionLimit - C.Player.Seek.border)
         {
@@ -637,7 +644,7 @@ self.TimeLine = function (player)
             var previewTime = Math.round(Math.floor(e.pageX / (gl_browserSize.width / C.Player.Seek.numberPreviews) + 1) * self.duration / C.Player.Seek.numberPreviews);
             // Gets the new preview if the current one doesn't match
             if (self.currentPreviewTime != previewTime)
-                self.setPreview("command/preview?id=" + gl_files.list[player.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + getSession());
+                self.setPreview("command/preview?fileId=" + gl_files.list[player.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + getSession());
             self.currentPreviewTime = previewTime;
         }
     }
@@ -647,9 +654,17 @@ self.TimeLine = function (player)
     {
         if (!self.media || e.which != 1)
             return ;
-        var time = e.pageX / gl_browserSize.width * self.duration;
-        if (self.media.buffered.length > 0 && self.media.buffered.end(0) > time)
+        var time = e.pageX / gl_browserSize.width * self.duration - self.timeOffset;
+        // Tries to seek on the data already received
+        if (self.media.seekable.length > 0 && self.media.seekable.end(0) > time)
             self.media.currentTime = time;
+        // Otherwise we perform a server side seeking
+        if (self.media.currentTime != time)
+        {
+            player.playerInterface.seek(time + self.timeOffset);
+            self.timeOffset = time + self.timeOffset;
+            self.onTimeUpdate();
+        }
     }
     
     // Expands the time line.
@@ -1456,27 +1471,29 @@ self.Audio = function (player)
     self.init = function ()
     {
         // Members
-        self.audio; // The audio player.
+        self.audio = $(node.audio).children("audio")[0]; // The audio player
+        self.audio.mediaId; // The id of the media, used to communicate with the server
+        self.format = "ogg"; // The format of the audio.
         
-        // Default values
-        
-        // Events
+        // Checks the supported audio formats
+        if (self.audio.canPlayType("audio/ogg"))
+            self.format = "ogg";
+        else if (self.audio.canPlayType("audio/mpeg"))
+            self.format = "mp3";
+        // The browser can't play ogg and mp3
+        else
+            ;
     }
     
     // Sets an audio file to play.
     self.setFile = function (fileIndex)
     {
-        // Creates the audio element
         var file = gl_files.list[fileIndex];
-        node.audio.html("<audio preload=\"auto\" />");
-        self.audio = $(node.audio).children("audio")[0];
-        var ogg = "command/audio.ogg?id=" + file.id + getSession();
-        var mp3 = "command/audio.mp3?id=" + file.id + getSession();
-        var html = "<source src=\"" + ogg + "\" type=\"audio/ogg\" />";
-        html += "<source src=\"" + mp3 + "\" type=\"audio/mpeg\" />";
-        self.audio.innerHTML = html;
-        self.play();
-        player.play();
+        
+        //  Sets the source of the audio element
+        self.audio.mediaId = getUuid();
+        self.audio.src = "command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
+        self.audio.play();
         // Replaces the file name by the title of the music and the artist if possible
         if (file.title)
         {
@@ -1490,7 +1507,10 @@ self.Audio = function (player)
     // Clears the audio.
     self.clear = function ()
     {
-        $(self.audio).remove();
+        self.audio.pause();
+        self.audio.src = "";
+        request("GET", "command/audio/stop?mediaId=" + self.audio.mediaId);
+        self.audio.mediaId = undefined;
     }
     
     // Player interface
@@ -1508,6 +1528,17 @@ self.Audio = function (player)
         self.getMedia = function ()
         {
             return (self.audio);
+        }
+        
+        self.seek = function (time)
+        {
+            var paused = self.audio.paused;
+            
+            self.clear();
+            self.audio.mediaId = getUuid();
+            self.audio.src = "command/audio." + self.format + "?fileId=" + gl_files.list[player.fileIndex].id + "&mediaId=" + self.audio.mediaId + "&start=" + time + getSession();
+            if (!paused)
+                self.audio.play();
         }
     }
     

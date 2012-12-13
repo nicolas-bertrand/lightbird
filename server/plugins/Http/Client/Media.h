@@ -17,7 +17,7 @@ public:
     virtual void    read() = 0;
     /// @brief Returns true if there is an error at some point.
     bool            isError();
-    /// @brief Returns the id of the stream.
+    /// @brief Returns the media id.
     const QString   &getId();
 
 protected:
@@ -31,7 +31,7 @@ protected:
     LightBird::IResponse  &response;  ///< The response that will be sent.
     bool                  error;      ///< True if an error occured at some point.
     QList<void *>         extensions; ///< The list of the extensions that implements IVideo or IAudio.
-    QString               id;         ///< The id of the media stream. Used by the client to stop the transcode.
+    QString               mediaId;    ///< The media id allows the clients to manipulate the media later.
 };
 
 #endif // MEDIA_H

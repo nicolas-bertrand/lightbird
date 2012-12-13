@@ -73,7 +73,7 @@ void        Medias::update(LightBird::IClient &client)
 void    Medias::stop(LightBird::IClient &client)
 {
     this->mutex.lock();
-    this->stopList << (client.getInformations().value("sid").toString() + client.getRequest().getUri().queryItemValue("streamId"));
+    this->stopList << (client.getSession()->getInformation("identifiant").toString() + ":" + client.getRequest().getUri().queryItemValue("mediaId"));
     this->mutex.unlock();
 }
 

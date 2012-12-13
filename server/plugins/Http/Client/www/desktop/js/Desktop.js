@@ -2203,6 +2203,8 @@ function Sessions()
     // @param name : The name of the session to load.
     self.load = function (name)
     {
+        if (!self.pages[name])
+            return ($());
         // Removes the pages that no longer exists
         var pages = new Array();
         self.pages[name].each(function () { if (this.parentNode) pages.push(this); })

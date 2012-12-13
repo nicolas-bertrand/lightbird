@@ -1,4 +1,5 @@
 #include <QFileInfo>
+#include <qmath.h>
 
 #include "Video.h"
 
@@ -9,7 +10,6 @@ Video::Video(LightBird::IClient &client)
     QString format;
     //qint32  width = this->file.getInformation("width").toInt();
     //quint32 quality = this->uri.queryItemValue("quality").toUInt();
-    //quint32 seek = this->uri.queryItemValue("seek").toUInt();
 
     //this->response.getHeader().insert("content-length", "100000000");
     this->response.getHeader().insert("transfer-encoding", "chunked");
@@ -17,6 +17,7 @@ Video::Video(LightBird::IClient &client)
     if (!(extensions = this->api.extensions().get("IVideo")).isEmpty())
     {
         this->video = static_cast<LightBird::IVideo *>(extensions.first());
+        this->video->setStart(qFloor(this->uri.queryItemValue("start").toFloat()));
         //this->video->setDuration(10);
         // Set the quality of the video
         /*width -= 100;

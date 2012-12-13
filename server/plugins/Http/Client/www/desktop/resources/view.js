@@ -55,7 +55,7 @@ resource.Image = function ()
     
         // Displays the image
         var file = resource.file;
-		var url = file.name + "?id=" + file.id + getSession();
+		var url = file.name + "?fileId=" + file.id + getSession();
         resource.root.innerHTML = "<img src=\"" + url + "\" alt=\"" + file.name + "\" class=\"file\" />";
         self.image = $(resource.root).children("img")[0];
         self.setOverflow(false);
@@ -266,7 +266,9 @@ resource.Video = function ()
     {
         // Members
         self.video; // The video element
+      //self.video.mediaId; // The id of the media, used to communicate with the server
         self.background = "transparent"; // The background currently displayed (transparent or black)
+        self.format = "webm";
         
         // Defalut values
         task.setOverflow(false);
@@ -275,14 +277,20 @@ resource.Video = function ()
         
         // Creates the video
         var file = resource.file;
-        url = "command/video.webm?id=" + file.id + getSession();
         resource.root.innerHTML = "<video autoplay />";
         self.video = $(resource.root).children("video")[0];
-        self.video.innerHTML = "<source src=\"" + url + "\" type='video/webm; codecs=\"vp8.0, vorbis\"'/>";
-        gl_player.play();
-        /*<source src="movie.webm" type='video/webm; codecs="vp8.0, vorbis"'/>
-        <source src="movie.ogg" type='video/ogg; codecs="theora, vorbis"'/>
-        <source src="movie.mp4" type='video/mp4; codecs="avc1.4D401E, mp4a.40.2"'/>*/
+        self.video.mediaId = getUuid();
+        // Checks the supported video formats
+        if (self.video.canPlayType("video/webm; codecs=\"vp8.0, vorbis\""))
+            self.format = "webm";
+        else if (self.video.canPlayType("video/ogg; codecs=\"theora, vorbis\""))
+            self.format = "ogg";
+        else if (self.video.canPlayType("video/mp4; codecs=\"avc1.4D401E, mp4a.40.2\""))
+            self.format = "mp4";
+        // The browser can't play any common formats
+        else
+            ;
+        self.video.src = "command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
         
         // Events
         $(resource.root.parentNode).click(function (e) { self.changeBackground(e); });
@@ -331,15 +339,9 @@ resource.Video = function ()
         if (e.which != 1)
             return ;
         if (self.video.paused)
-        {
             self.video.play();
-            gl_player.play();
-        }
         else
-        {
             self.video.pause();
-            gl_player.pause();
-        }
     }
     
     // Changes the color of the background.
@@ -378,6 +380,21 @@ resource.Video = function ()
         self.getMedia = function ()
         {
             return (self.video);
+        }
+        
+        self.seek = function (time)
+        {
+            var paused = self.video.paused;
+            
+            // Clears the current play back
+            self.video.pause();
+            self.video.src = "";
+            request("GET", "command/video/stop?mediaId=" + self.video.mediaId);
+            // Seeks to the new position
+            self.video.mediaId = getUuid();
+            self.video.src = "command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + getSession();
+            if (!paused)
+                self.video.play();
         }
     }
  

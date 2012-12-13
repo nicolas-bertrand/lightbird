@@ -143,8 +143,8 @@ bool        Plugin::doExecution(LightBird::IClient &client)
         if (uri.isEmpty())
             uri = "index.html";
         path = this->_api->getPluginPath() + this->wwwDir + "/" + interface + "/" + uri;
-        // If there an id in the uri, the file is in the filesPath
-        if (!client.getRequest().getUri().queryItemValue("id").isEmpty())
+        // If there a file id in the uri, the file is in the filesPath
+        if (!client.getRequest().getUri().queryItemValue("fileId").isEmpty())
             this->_getFile(client);
         // If the file exists in the www directory
         else if (QFileInfo(path).isFile())
@@ -206,12 +206,12 @@ bool    Plugin::timer(const QString &name)
 void    Plugin::_session(LightBird::IClient &client)
 {
     QString id;
-    QString sid = client.getRequest().getUri().queryItemValue("sid");
+    QString sessionId = client.getRequest().getUri().queryItemValue("sessionId");
     QString identifiant = client.getRequest().getUri().queryItemValue("identifiant");
     LightBird::Session session;
 
     // If the session id or the identifiant doesn't exists, the account is cleared
-    if (sid.isEmpty() || (session = this->_api->sessions().getSession(sid)).isNull() ||
+    if (sessionId.isEmpty() || (session = this->_api->sessions().getSession(sessionId)).isNull() ||
         (!identifiant.isEmpty() && !this->_checkIdentifiant(client, session, identifiant)))
     {
         // Ensures that the client is not associated with a session
@@ -287,7 +287,7 @@ void    Plugin::_translation(LightBird::IClient &client, const QString &interfac
 
 void    Plugin::_getFile(LightBird::IClient &client)
 {
-    LightBird::TableFiles   file(client.getRequest().getUri().queryItemValue("id"));
+    LightBird::TableFiles   file(client.getRequest().getUri().queryItemValue("fileId"));
     QString path;
 
     // Checks that the user can access to the file

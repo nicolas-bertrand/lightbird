@@ -10,10 +10,9 @@ Media::Media(LightBird::IClient &cl)
     , response(client.getResponse())
 {
     this->error = false;
-    this->id = this->client.getInformations().value("sid").toString() + this->uri.queryItemValue("streamId");
     this->response.getContent().setStorage(LightBird::IContent::BYTEARRAY);
     // Extract the file id from the uri
-    this->file.setId(this->uri.queryItemValue("id"));
+    this->file.setId(this->uri.queryItemValue("fileId"));
     // If the file doesn't exists, an error occured
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
     {
@@ -26,6 +25,8 @@ Media::Media(LightBird::IClient &cl)
         this->_error(403, "Forbidden", "Access to the file denied.");
         return ;
     }
+    // Gets the media id (identifiant:mediaId)
+    this->mediaId = this->client.getSession()->getInformation("identifiant").toString() + ":" + this->uri.queryItemValue("mediaId");
 }
 
 Media::~Media()
@@ -39,7 +40,7 @@ bool    Media::isError()
 
 const QString   &Media::getId()
 {
-    return (this->id);
+    return (this->mediaId);
 }
 
 void    Media::_error(int code, const QString &message, const QByteArray &content)
