@@ -16,7 +16,7 @@ public:
     ~Preview();
 
     /// @see LightBird::preview
-    QString generate(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0);
+    QString generate(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
 private:
     Preview(const Preview &);
@@ -44,10 +44,10 @@ private:
     /// @brief Manages the cache.
     void    _cache();
 
-    bool         cacheEnabled;    ///< True if the cache is enabled.
-    QString      cachePath;       ///< The path to the directory where is stored the cache.
-    unsigned int cacheSizeLimit;  ///< Maximum size of the cache directory.
-    QMutex       mutex;           ///< Ensure that the management of the cache is atomic.
+    bool         cacheEnabled;   ///< True if the cache is enabled.
+    QString      cachePath;      ///< The path to the directory where is stored the cache.
+    unsigned int cacheSizeLimit; ///< Maximum size of the cache directory.
+    QMutex       mutex;          ///< Ensure that the management of the cache is atomic.
 };
 
 #endif // PREVIEWS_H

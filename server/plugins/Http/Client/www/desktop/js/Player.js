@@ -637,7 +637,7 @@ self.TimeLine = function (player)
             var previewTime = Math.round(Math.floor(e.pageX / (gl_browserSize.width / C.Player.Seek.numberPreviews) + 1) * self.duration / C.Player.Seek.numberPreviews);
             // Gets the new preview if the current one doesn't match
             if (self.currentPreviewTime != previewTime)
-                self.setPreview("command/preview?id=" + gl_files.list[player.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&time=" + previewTime + getSession());
+                self.setPreview("command/preview?id=" + gl_files.list[player.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + getSession());
             self.currentPreviewTime = previewTime;
         }
     }

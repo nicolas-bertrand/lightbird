@@ -22,9 +22,12 @@ namespace LightBird
         /// @param width : The width of the preview. If it is 0, it will be proportional to the height.
         /// @param height : The height of the preview. If it is 0, it will be proportional to the width.
         /// @param position : For a video, this parameter could be the time where the preview is captured.
+        /// @param quality : The quality factor must be in the range 0 to 1 or -1.
+        /// Specify 0 to obtain small compressed files, 1 for large uncompressed files,
+        /// and -1 (the default) to use the default settings.
         /// @return False if the extension doesn't know how to make a preview from the file.
         /// True is returned if the preview has been generated.
-        virtual bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0) = 0;
+        virtual bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1) = 0;
     };
 }
 

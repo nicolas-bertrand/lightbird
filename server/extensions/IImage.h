@@ -31,8 +31,11 @@ namespace LightBird
         /// @param format : The format in which the source will be converted.
         /// @param width : The width of the new image. If it is 0, it will be proportional to the height.
         /// @param height : The height of the new image. If it is 0, it will be proportional to the width.
+        /// @param quality : The quality factor must be in the range 0 to 1 or -1.
+        /// Specify 0 to obtain small compressed files, 1 for large uncompressed files,
+        /// and -1 (the default) to use the default settings.
         /// @return True is returned if the image has been successfully converted.
-        virtual bool    convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0) = 0;
+        virtual bool    convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, float quality = -1) = 0;
     };
 }
 

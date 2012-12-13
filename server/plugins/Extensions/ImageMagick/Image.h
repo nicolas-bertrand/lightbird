@@ -15,12 +15,14 @@ public:
     Image(LightBird::IApi *api);
     ~Image();
 
-    bool    convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0);
-    bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0);
+    bool    convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, float quality = -1);
+    bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
 private:
     /// @brief Returns the size to give to the command line tool.
     QString _resize(unsigned int width, unsigned int height);
+    /// @brief Returns the quality option if the quality is positive.
+    QString _quality(float quality);
 
     LightBird::IApi *api;            ///< The LightBird API.
     QString         imageMagickPath; ///< The path to the ImageMagick binaries.

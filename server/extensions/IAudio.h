@@ -31,7 +31,7 @@ namespace LightBird
         /// @return The transcoded data. Empty when the transcoding is finished.
         virtual QByteArray transcode() = 0;
         /// @brief Returns the number of seconds transcoded so far.
-        virtual int     getPosition() = 0;
+        virtual int     getTime() = 0;
         /// @brief Sets all settings to their default values, and free all the
         /// data allocated so far.
         virtual void    clear() = 0;
@@ -55,8 +55,8 @@ namespace LightBird
         /// @brief Sets the number of audio channels.
         /// @example 2 for stereo, 1 for mono, 6 for 5.1
         virtual void    setChannels(unsigned int channels) = 0;
-        /// @brief Sets the position in the source where the transcoding will
-        /// start, in seconds.
+        /// @brief Sets the position in the source where the transcoding will start,
+        /// in seconds.
         virtual void    setStart(double start) = 0;
         /// @brief Sets the duration of the audio in seconds. The whole
         /// audio is transcoded if the value is 0.

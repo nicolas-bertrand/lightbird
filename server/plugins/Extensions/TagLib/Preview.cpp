@@ -23,7 +23,7 @@ Preview::~Preview()
 {
 }
 
-bool    Preview::generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int)
+bool    Preview::generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int, float quality)
 {
     QImage                  image;
     QTemporaryFile          tmp;
@@ -44,7 +44,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
     TagLib::ID3v2::AttachedPictureFrame *pic = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(l.front());
     image.loadFromData((const uchar *)pic->picture().data(), (int)pic->picture().size());
     // Tries to save the image using Qt
-    if (LightBird::saveImage(image, destination, format))
+    if (LightBird::saveImage(image, destination, format, quality))
         return (true);
     // Otherwise converts the jpeg file generated into the requested format using the IImage extension
     tmp.setFileTemplate(this->fileTemplate);
@@ -57,7 +57,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
         return (false);
     QListIterator<void *> it(extensions = this->api->extensions().get("IImage"));
     while (it.hasNext() && !result)
-        result = static_cast<LightBird::IImage *>(it.next())->convert(tmp.fileName(), destination, format, width, height);
+        result = static_cast<LightBird::IImage *>(it.next())->convert(tmp.fileName(), destination, format, width, height, quality);
     this->api->extensions().release(extensions);
     return (result);
 }

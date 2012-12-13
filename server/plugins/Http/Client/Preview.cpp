@@ -16,7 +16,8 @@ Preview::~Preview()
 
 void    Preview::generate()
 {
-    unsigned int time;
+    unsigned int position;
+    float        quality;
 
     // Extracts the file id from the uri
     this->file.setId(this->uri.queryItemValue("id"));
@@ -28,10 +29,12 @@ void    Preview::generate()
         return this->_error("Preview", 403, "Forbidden", "Access to the file denied.");
     // Defines the width and the height of the image
     this->_size();
-    // Gets the time of the preview
-    time = this->uri.queryItemValue("time").toUInt();
+    // Gets the time and the quality of the preview
+    position = this->uri.queryItemValue("position").toUInt();
+    if (!(quality = this->uri.queryItemValue("quality").toFloat()))
+        quality = -1;
     // Generates a preview of the file
-    this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, time);
+    this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position, quality);
     // No extensions has been able to generate the preview
     if (this->previewFileName.isEmpty())
         return this->_error("Preview", 404, "Not Found", "Unable to generate a preview from this file.");

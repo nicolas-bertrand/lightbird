@@ -17,7 +17,7 @@ Preview::~Preview()
 {
 }
 
-bool    Preview::generate(const QString &source, QString &destination, LightBird::IImage::Format fmt, unsigned int width, unsigned int height, unsigned int position)
+bool    Preview::generate(const QString &source, QString &destination, LightBird::IImage::Format fmt, unsigned int width, unsigned int height, unsigned int position, float quality)
 {
     QTemporaryFile  tmp;
     QList<void *>   extensions;
@@ -121,7 +121,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
         }
         sws_scale(swsContext, frame->data, frame->linesize, 0, context->height, &data, linesize);
         // Saves the image to the destination file if the format is supported by Qt
-        if (!LightBird::saveImage(image, destination, fmt))
+        if (!LightBird::saveImage(image, destination, fmt, quality))
         // Otherwise converts the image into the requested format using the IImage extension
         {
             // Opens the temporary file
@@ -136,7 +136,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
             // And tries to convert the image
             QListIterator<void *> it(extensions = this->api->extensions().get("IImage"));
             while (it.hasNext() && !result)
-                result = static_cast<LightBird::IImage *>(it.next())->convert(tmp.fileName(), destination, fmt, width, height);
+                result = static_cast<LightBird::IImage *>(it.next())->convert(tmp.fileName(), destination, fmt, width, height, quality);
             this->api->extensions().release(extensions);
             if (!result)
             {

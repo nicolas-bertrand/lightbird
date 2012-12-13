@@ -28,7 +28,7 @@ Image::~Image()
 {
 }
 
-bool    Image::convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height)
+bool    Image::convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height, float quality)
 {
     QString         extension = LightBird::getImageExtension(format);
     QProcess        process;
@@ -53,7 +53,7 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
         destination = tmp.fileName();
     }
     // Defines the command line
-    commandLine = this->imageMagickPath + "/" + this->binaryName + " " + source + " " + this->_resize(width, height) + destination;
+    commandLine = this->imageMagickPath + "/" + this->binaryName + " " + source + " " + this->_resize(width, height) + this->_quality(quality) + destination;
     properties.add("commandLine", commandLine);
     if (!destination.contains(QRegExp("\\." + extension + "$")))
         commandLine += "." + extension;
@@ -96,11 +96,11 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     return (true);
 }
 
-bool    Image::generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int)
+bool    Image::generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int, float quality)
 {
     if (destination.isEmpty() || source.endsWith(".txt"))
         return (false);
-    return (this->convert(source, destination, format, width, height));
+    return (this->convert(source, destination, format, width, height, quality));
 }
 
 QString Image::_resize(unsigned int width, unsigned int height)
@@ -112,4 +112,16 @@ QString Image::_resize(unsigned int width, unsigned int height)
     if (!height)
         return ("-resize " + QString::number(width) + " ");
     return ("-resize " + QString::number(width) + "x" + QString::number(height) + "! ");
+}
+
+QString Image::_quality(float quality)
+{
+    quality = qRound(quality * 100);
+    if (quality < 0)
+        return ("");
+    if (quality < 1)
+        quality = 1;
+    if (quality > 100)
+        quality = 100;
+    return ("-quality " + QString::number(quality) + " ");
 }

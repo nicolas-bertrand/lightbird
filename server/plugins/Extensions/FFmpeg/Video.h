@@ -20,7 +20,7 @@ public:
     // IVideo
     bool        initialize(const QString &source);
     QByteArray  transcode();
-    int         getPosition();
+    int         getTime();
     void        clear();
     bool        setFormat(const QString &format);
     bool        setVideoCodec(const QString &codec);
@@ -102,7 +102,7 @@ private:
     QString         source;          ///< The input file name.
     QList<QByteArray> buffers;       ///< The transcoded data not returned yet. Each element contains approximately one second of encoded video and audio streams.
     int             framesToEncode;  ///< The number of frames to encode in the transcode method.
-    int             position;        ///< The number of second transcoded so far.
+    int             time;            ///< The number of second transcoded so far.
     qint64          seek;            ///< The position in the transcoded data.
     qint64          bytesTranscoded; ///< The number of bytes returned by the transcode method so far.
     bool            finished;        ///< The transcoding is finished.

@@ -19,7 +19,7 @@ public:
     // IAudio
     bool        initialize(const QString &source);
     QByteArray  transcode();
-    int         getPosition();
+    int         getTime();
     void        clear();
     bool        setFormat(const QString &format);
     bool        setCodec(const QString &codec);

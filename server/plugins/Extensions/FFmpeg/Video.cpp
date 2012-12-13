@@ -59,7 +59,7 @@ QByteArray  Video::transcode()
         while (this->buffers.size() < BUFFERS_NUMBER && !this->finished && read >= 0)
         {
             // The number of frames to encode for this buffer to make one second
-            this->framesToEncode = (this->position + 1) * av_q2d(this->videoStreamOut->r_frame_rate) - this->videoFramePts;
+            this->framesToEncode = (this->time + 1) * av_q2d(this->videoStreamOut->r_frame_rate) - this->videoFramePts;
             // Transcodes one second of the source
             while ((this->framesToEncode > 0 || this->buffers.last().isEmpty()) && (read = av_read_frame(this->formatIn, &this->packetIn)) >= 0)
             {
@@ -69,7 +69,7 @@ QByteArray  Video::transcode()
                     this->_transcodeAudio();
                 av_free_packet(&this->packetIn);
             }
-            this->position++;
+            this->time++;
             // The transcodage duration has been reached
             if (this->duration && this->duration <= this->videoFramePts)
                 read = -1;
@@ -112,11 +112,11 @@ QByteArray  Video::transcode()
     return (result);
 }
 
-int     Video::getPosition()
+int     Video::getTime()
 {
     if (this->buffers.isEmpty() && this->videoStreamOut && av_q2d(this->videoStreamOut->r_frame_rate))
         return (this->videoFramePts / av_q2d(this->videoStreamOut->r_frame_rate));
-    return (this->position - this->buffers.size());
+    return (this->time - this->buffers.size());
 }
 
 void    Video::clear()
@@ -301,7 +301,7 @@ int64_t Video::seekPacket(void *opaque, int64_t offset, int whence)
 void    Video::_clear(bool free, bool settings)
 {
     this->buffers.clear();
-    this->position = 0;
+    this->time = 0;
     this->seek = 0;
     this->bytesTranscoded = 0;
     this->finished = false;
@@ -434,11 +434,11 @@ void    Video::_initializeOutput()
         LOG_ERROR("Could not write the format header", this->_getProperties(ret), "Video", "transcode");
         throw false;
     }
-    // Seeks the source to the start position
+    // Seeks the source to the starting position
     this->start *= qRound64(1 / av_q2d(this->videoStreamIn->time_base));
     if (this->start && av_seek_frame(this->formatIn, this->videoStreamIn->index, this->start, 0) < 0)
     {
-        LOG_ERROR("Could not seek to the start position", this->_getProperties(0, Properties("start", this->start)), "Video", "transcode");
+        LOG_ERROR("Could not seek to the starting position", this->_getProperties(0, Properties("start", this->start)), "Video", "transcode");
         throw false;
     }
     LOG_DEBUG("Transcoding started", this->_getProperties(), "Video", "transcode");

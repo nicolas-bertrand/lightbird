@@ -95,7 +95,7 @@ QByteArray  Audio::transcode()
     return (result);
 }
 
-int     Audio::getPosition()
+int     Audio::getTime()
 {
     if (!this->encoder)
         return (0);
@@ -284,11 +284,11 @@ void    Audio::_initializeOutput()
         LOG_ERROR("Could not write the format header", this->_getProperties(ret), "Audio", "transcode");
         throw false;
     }
-    // Seeks the source to the start position
+    // Seeks the source to the starting position
     this->start *= qRound64(1 / av_q2d(this->streamIn->time_base));
     if (this->start && av_seek_frame(this->formatIn, this->streamIn->index, this->start, 0) < 0)
     {
-        LOG_ERROR("Could not seek to the start position", this->_getProperties(0, Properties("start", this->start)), "Audio", "transcode");
+        LOG_ERROR("Could not seek to the starting position", this->_getProperties(0, Properties("start", this->start)), "Audio", "transcode");
         throw false;
     }
     LOG_DEBUG("Transcoding started", this->_getProperties(), "Audio", "transcode");
