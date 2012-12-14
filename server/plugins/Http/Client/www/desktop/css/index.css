@@ -481,10 +481,13 @@ a:visited
 {
     cursor: e-resize;
 }
-#desktop>.middle>.pages>.page.over_resize>.resize,
+#desktop>.middle>.pages>.page.over_resize>.resize
+{
+    opacity: 0.25;
+}
 #desktop>.middle>.pages>.page.resize_node>.resize
 {
-    /*opacity: 0.25;*/
+    opacity: 0.5;
 }
 
 /* Tasks */
@@ -527,17 +530,24 @@ a:visited
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.transparent_background,
-#desktop>.middle>.tasks>.task.transparent_background.over
+#desktop>.middle>.tasks>.task.no_background,
+#desktop>.middle>.tasks>.task.no_background.over
 {
     background-color: inherit;
     border: 1px solid rgba(255, 255, 255, 0);
     box-shadow: none;
 }
 
-#desktop>.middle>.tasks>.task.transparent_background.create_page
+#desktop>.middle>.tasks>.task.no_background.create_page
 {
     background-color: rgba(255, 255, 255, 0.33); /* #windows>.window */
+}
+
+#desktop>.middle>.tasks>.task.no_border,
+#desktop>.middle>.tasks>.task.no_border.over
+{
+    border: none;
+    box-shadow: none;
 }
 
 #desktop>.middle>.tasks>.task.disable_overflow
@@ -546,7 +556,7 @@ a:visited
 }
 
 #desktop>.middle>.tasks>.task.hide_border,
-#desktop>.middle>.tasks>.task.over.hide_border
+#desktop>.middle>.tasks>.task.hide_border.over
 {
     border: none;
     box-shadow: none;

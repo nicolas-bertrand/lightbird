@@ -134,8 +134,8 @@ function Window(page)
         self.element.style.left = self.left - C.Window.border + "px";
         self.element.style.top = self.top - self.topHeight + "px";
         self.element.style.width = self.width + (C.Window.border + C.Desktop.taskBorder) * 2 + "px";
-        self.element.style.height = self.height + C.Desktop.taskBorder * 2 + self.topHeight + C.Window.border + "px";
-        self.node.middle.style.height = self.height + C.Desktop.taskBorder * 2 + C.Window.border - self.bottomHeight + "px";
+        self.element.style.height = Math.max(self.height + C.Desktop.taskBorder * 2 + self.topHeight + C.Window.border, 0) + "px";
+        self.node.middle.style.height = Math.max(self.height + C.Desktop.taskBorder * 2 + C.Window.border - self.bottomHeight, 0) + "px";
         self.page.onResize();
     }
     

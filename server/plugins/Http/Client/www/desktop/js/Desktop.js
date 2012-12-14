@@ -245,9 +245,9 @@ function Page()
         }
         // Puts the focus on it
         var pages = $(gl_desktop.node.tasks_list).children(".page.focus").removeClass("focus");
-        pages.each(function () { $(this).children(".task").each(function () { $(this.object.content).removeClass("focus"); }); });
+        pages.each(function () { if (this != self.icon) $(this).children(".task").each(function () { this.object.focus(false); }); });
         $(self.icon).addClass("focus");
-        $(self.icon).children(".task").each(function () { $(this.object.content).addClass("focus"); });
+        $(self.icon).children(".task").each(function () { this.object.focus(true); });
     }
 
     // Hides the page and its tasks.
@@ -575,8 +575,8 @@ function Page()
                 $(node.resize).addClass("vertical");
                 node.resize.style.left = Math.max(l - taskMargin, left) + taskBorder + "px";
                 node.resize.style.top = top + "px";
-                node.resize.style.width = Math.min(taskMargin, width) - taskBorder + "px";
-                node.resize.style.height = height + taskBorder + "px";
+                node.resize.style.width = Math.max(Math.min(taskMargin, width) - taskBorder, 0) + "px";
+                node.resize.style.height = (height > 0 ? height + taskBorder : 0) + "px";
             }
             // Splits horizontally
             else
@@ -603,8 +603,8 @@ function Page()
                 $(node.resize).addClass("horizontal");
                 node.resize.style.left = left + "px";
                 node.resize.style.top = Math.max(t - taskMargin, top) + taskBorder + "px";
-                node.resize.style.width = width + taskBorder + "px";
-                node.resize.style.height = Math.min(taskMargin, height) - taskBorder + "px";
+                node.resize.style.width = (width > 0 ? width + taskBorder : 0) + "px";
+                node.resize.style.height = Math.max(Math.min(taskMargin, height) - taskBorder, 0) + "px";
             }
         }
         // Saves the coordinates of the node
@@ -659,6 +659,7 @@ function Task(resource, html)
         self.icon; // The icon element of the task in the tasks list, inside the icon of the page
         self.content; // The content of the task, which stores its resource
         self.resource = new Object(); // The instance of the resource that manages the content
+        self.lastFocusDate = 0; // The date of the last time the task was focused. Used by isFocus to tell if the task has the focus regardless of the events timing.
         // The following members are used when the task icon is being dragged
         self.mouse; // The position of the mouse in the icon {x, y}
         self.element; // The initial position of the element {x, y}
@@ -1036,7 +1037,7 @@ function Task(resource, html)
                     self.getPage().removeTask(self, true);
                     preview.page.addTask(self, preview.position);
                     $(self.icon).insertBefore(self.ghost);
-                    $(self.content).addClass("focus");
+                    self.focus(true);
                     preview.page.onResize();
                 }
                 // The task is moved on the edge of another page
@@ -1103,6 +1104,23 @@ function Task(resource, html)
         $(self.content).addClass("display");
     }
 
+    // Adds / removes the focus on the content of the task.
+    self.focus = function (focus)
+    {
+        if (focus && $(self.content).hasClass("focus"))
+            return ;
+        if (focus)
+        {
+            $(self.content).addClass("focus");
+            self.lastFocusDate = new Date().getTime();
+        }
+        else
+        {
+            $(self.content).removeClass("focus");
+            self.lastFocusDate = 0;
+        }
+    }
+    
     // Hides the content of the task.
     self.hide = function ()
     {
@@ -1167,6 +1185,13 @@ function Task(resource, html)
     // Sets the coordinates of the content of the task.
     self.setCoordinates = function(left, top, width, height)
     {
+        // Compensates the lack of task border
+        if ($(self.content).hasClass("no_border") && height > 0 && width > 0)
+        {
+            width += C.Desktop.taskBorder * 2;
+            height += C.Desktop.taskBorder * 2;
+        }
+        // Sets the new coordinates
         self.left = left;
         self.top = top;
         self.width = width;
@@ -1192,7 +1217,7 @@ function Task(resource, html)
             $(self.content).addClass("window");
         else
             $(self.content).removeClass("window");
-        $(self.content).removeClass("focus");
+        self.focus(false);
     }
     
     // Sets the z-indes of the content of the task.
@@ -1221,9 +1246,9 @@ function Task(resource, html)
     }
     
     // Sets the background of the task.
-    // @param transparent : If true the background and the border will be transparent.
+    // @param display : If false the background and the border will be transparent.
     // @param background : The css class that will be applied to the task in order to modify its background and its border.
-    self.setBackground = function (transparent, background)
+    self.setBackground = function (display, background)
     {
         // Remove the previous background
         if (self.lastBackgroundSet)
@@ -1231,19 +1256,29 @@ function Task(resource, html)
             $(self.content).removeClass(self.lastBackgroundSet);
             delete self.lastBackgroundSet;
         }
-        // Transparent background
-        if (transparent)
-            $(self.content).addClass("transparent_background");
+        // No background
+        if (!display)
+            $(self.content).addClass("no_background");
         // Custom background
         else
         {
-            $(self.content).removeClass("transparent_background");
+            $(self.content).removeClass("no_background");
             if (background)
             {
                 self.lastBackgroundSet = background;
                 $(self.content).addClass(background);
             }
         }
+    }
+    
+    // Displays / hides the task borders.
+    // @param border : True to display the task border.
+    self.setBorder = function (border)
+    {
+        if (border)
+            $(self.content).removeClass("no_border");
+        else
+            $(self.content).addClass("no_border");
     }
     
     // Allows the resources to disable the overflow of the content.
@@ -1260,10 +1295,11 @@ function Task(resource, html)
         }
     }
     
-    // Returns true if the page have the focus.
+    // Returns true if the page has the focus.
     self.isFocus = function ()
     {
-        return ($(self.content).hasClass("focus"));
+        // The focus also have to be on the task for more that 10 milliseconds, in order to avoid event order problems
+        return ($(self.content).hasClass("focus") && (new Date().getTime() - self.lastFocusDate) > 10);
     }
     
     // Returns true if the page is a window.

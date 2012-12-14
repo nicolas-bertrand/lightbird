@@ -20,7 +20,7 @@ function ResourceView(task, fileIndex)
         gl_player.addFile(fileIndex, resource.object);
         
         // Events
-        $(resource.root).mousedown(function (e) { resource.isFocus = task.isFocus(); });
+        $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
     }
     
     // The task have been resized.
@@ -44,24 +44,25 @@ resource.Image = function ()
     {
         // Members
         self.background = "transparent"; // The background currently displayed (transparent, black or default)
-        self.oldBackground; // Used by changeResize to get back to the previous background
         self.image; // The img element
+        self.container; // The div that contains the image element
         self.resize = self.keepRatio; // The function used to resize the image when onResize is called
-        self.horizontalAlign = false; // False if the css class horizontal align is defined
         
         // Default values
         $(task.content).addClass("view_image");
-        task.setBackground(true); // Transparent background
+        task.setBackground(false); // No background
+        task.setBorder(false); // No borders
+        task.setOverflow(false); // No overflow
     
         // Displays the image
         var file = resource.file;
 		var url = file.name + "?fileId=" + file.id + getSession();
-        resource.root.innerHTML = "<img src=\"" + url + "\" alt=\"" + file.name + "\" class=\"file\" />";
-        self.image = $(resource.root).children("img")[0];
-        self.setOverflow(false);
+        resource.root.innerHTML = "<div class=\"image\"><img src=\"" + url + "\" alt=\"" + file.name + "\" /></div>";
+        self.container = $(resource.root).children(".image")[0];
+        self.image = $(self.container).children("img")[0];
         
         // Events
-        $(resource.root).click(function (e) { self.changeBackground(e); });
+        $(task.content).click(function (e) { self.changeBackground(e); });
         $(self.image).click(function (e) { self.changeResize(e); });
     }
     
@@ -97,37 +98,32 @@ resource.Image = function ()
             width = naturalWidth;
             height = naturalHeight;
         }
-        // Centers the image vertically
-        var marginTop = 0;
-        if (height < h)
-            marginTop += Math.floor((h - height) / 2);
-        self.image.style.marginTop = marginTop + "px";
         // Sets the minimal size
         if (height < C.View.minHeight)
         {
             height = C.View.minHeight;
             width = Math.floor(height * naturalWidth / naturalHeight);
-            self.setOverflow(true);
+            task.setOverflow(true);
         }
         else
-            self.setOverflow(false);
-        // Adjust the horizontal alignment
-        if (height == h || width != w)
-        {
-            if (!self.horizontalAlign)
-            {
-                self.horizontalAlign = true;
-                $(self.image).addClass("horizontal_align");
-            }
-        }
-        else if (self.horizontalAlign)
-        {
-            self.horizontalAlign = false;
-            $(self.image).removeClass("horizontal_align");
-        }
+            task.setOverflow(false);
+        // Centers the image
+        var marginLeft = (width < w ? Math.floor((w - width) / 2) : 0);
+        var marginTop = (height < h ? Math.floor((h - height) / 2) : 0);
+        self.center(marginLeft, marginTop);
         // Resizes the image
-        $(self.image).width(width);
-        $(self.image).height(height);
+        $(self.container).width(width);
+        $(self.container).height(height);
+        if (self.background == "transparent")
+        {
+            $(resource.root).width(width - 2 < w - 2 ? width - 2 : w - 2); // (w - 2) and (h - 2) takes the minimal size into account
+            $(resource.root).height(height - 2 < h - 2 ? height - 2 : h - 2);
+        }
+        else
+        {
+            $(resource.root).width(w - 2);
+            $(resource.root).height(h - 2);
+        }
     }
     
     // Displays the image with its natural size.
@@ -136,34 +132,30 @@ resource.Image = function ()
         var naturalWidth = self.image.naturalWidth ? self.image.naturalWidth : resource.file.width;
         var naturalHeight = self.image.naturalHeight ? self.image.naturalHeight : resource.file.height;
         
-        // Centers the image vertically
-        var marginTop = 0;
-        if (naturalHeight < height)
-            marginTop += Math.floor((height - naturalHeight) / 2);
-        self.image.style.marginTop = marginTop + "px";
-        // Adjust the horizontal alignment
-        if (height == naturalHeight || width > naturalWidth)
-        {
-            if (!self.horizontalAlign)
-            {
-                self.horizontalAlign = true;
-                $(self.image).addClass("horizontal_align");
-            }
-        }
-        else if (self.horizontalAlign)
-        {
-            self.horizontalAlign = false;
-            $(self.image).removeClass("horizontal_align");
-        }
+        // Centers the image
+        var marginLeft = (naturalWidth < width ? Math.floor((width - naturalWidth) / 2) : 0);
+        var marginTop = (naturalHeight < height ? Math.floor((height - naturalHeight) / 2) : 0);
+        self.center(marginLeft, marginTop);
+        $(self.container).width(width);
+        $(self.container).height(height);
+        $(resource.root).width(width - 2);
+        $(resource.root).height(height - 2);
     }
     
     // Resizes the image so that it fills all the space.
     self.scale = function (left, top, width, height)
     {
+        $(resource.root).width(width - 2);
+        $(resource.root).height(height - 2);
         if (height < C.View.minHeight)
+        {
+            task.setOverflow(true);
             height = C.View.minHeight;
-        $(self.image).width(width);
-        $(self.image).height(height);
+        }
+        else
+            task.setOverflow(false);
+        $(self.container).width(width);
+        $(self.container).height(height);
     }
     
     // Changes the color of the background.
@@ -181,31 +173,26 @@ resource.Image = function ()
             else if (background == "default")
                 self.background = "black";
         }
-        if (!e || e.target == resource.root)
+        if (!e || e.target != self.image)
         {
             if (self.background == "transparent")
             {
-                task.setBackground(false, "view_background_black");
+                task.setBackground(true, "view_background_black");
                 self.background = "black";
-                self.setOverflow(false);
             }
             else if (self.background == "black")
             {
-                task.setBackground();
+                task.setBackground(true);
                 self.background = "default";
-                self.setOverflow(true);
             }
             else
             {
-                task.setBackground(true);
+                task.setBackground(false);
                 self.background = "transparent";
-                self.setOverflow(true);
             }
+            self.center(0, 0, true);
             self.onResize(task.left, task.top, task.width, task.height);
         }
-        // If the background changed in naturalSize, we save it
-        if (self.resize == self.naturalSize)
-            self.oldBackground = self.background;
     }
     
     // Changes the resize function of the image.
@@ -213,14 +200,13 @@ resource.Image = function ()
     {
         if (e.which != 1 || !resource.isFocus)
             return ;
+        // Default values
         $(resource.root).removeClass("scroll");
+        self.image.style.width = "100%";
+        self.image.style.height = "100%";
         // Go to scale from keepRatio, or from naturalSize if the image is smaller than the task
         if (self.resize == self.keepRatio || (self.resize == self.naturalSize && self.image.naturalWidth < task.width && self.image.naturalHeight < task.height))
-        {
             self.resize = self.scale;
-            self.oldBackground = self.background;
-            self.changeBackground(undefined, "default");
-        }
         // Go to naturalSize only if the image doesn't fit the task size
         else if (self.resize == self.scale && (self.image.naturalWidth > task.width || self.image.naturalHeight > task.height))
         {
@@ -228,30 +214,45 @@ resource.Image = function ()
             self.image.style.width = "auto";
             self.image.style.height = "auto";
             $(resource.root).addClass("scroll");
-            if (self.oldBackground)
-                self.changeBackground(undefined, self.oldBackground);
         }
         else
-        {
             self.resize = self.keepRatio;
-            // Restores the background
-            if (self.oldBackground)
-            {
-                self.changeBackground(undefined, self.oldBackground);
-                delete self.oldBackground;
-            }
-        }
-        self.setOverflow(true);
-        self.image.style.marginTop = "0px";
+        self.center(0, 0, true);
         self.onResize(task.left, task.top, task.width, task.height);
     }
     
-    // Sets the overflow of the task.
-    self.setOverflow = function (overflow)
+    // Centers the image horizontally and vertically based on the resize method and the background.
+    // @param reset : Resets the centering.
+    self.center = function (marginLeft, marginTop, reset)
     {
-        // The overflow is only disabled in keepRatio mode
-        if (overflow || self.resize == self.keepRatio)
-            task.setOverflow(overflow);
+        if (reset)
+        {
+            self.image.style.marginLeft = "0px";
+            self.image.style.marginTop = "0px";
+            self.container.style.marginLeft = "0px";
+            self.container.style.top = "-1px";
+            resource.root.style.marginLeft = "0px";
+            resource.root.style.marginTop = "0px";
+            return ;
+        }
+        if (self.resize == self.keepRatio)
+        {
+            if (self.background == "transparent")
+            {
+                resource.root.style.marginLeft = marginLeft + "px";
+                resource.root.style.marginTop = marginTop + "px";
+            }
+            else
+            {
+                self.container.style.marginLeft = marginLeft + "px";
+                self.container.style.top = (marginTop - 1) + "px";
+            }
+        }
+        else
+        {
+            self.image.style.marginLeft = marginLeft + "px";
+            self.image.style.marginTop = marginTop + "px";
+        }
     }
 
     self.init();
@@ -266,19 +267,22 @@ resource.Video = function ()
     {
         // Members
         self.video; // The video element
+        self.container; // The div that contains the video element
       //self.video.mediaId; // The id of the media, used to communicate with the server
-        self.background = "transparent"; // The background currently displayed (transparent or black)
+        self.background = "black"; // The background currently displayed (black or transparent)
         self.format = "webm";
         
         // Defalut values
-        task.setOverflow(false);
-        self.changeBackground(null, "black");
         $(task.content).addClass("view_video");
+        task.setBackground(true, "view_background_black");
+        task.setBorder(false);
+        task.setOverflow(false);
         
         // Creates the video
         var file = resource.file;
-        resource.root.innerHTML = "<video autoplay />";
-        self.video = $(resource.root).children("video")[0];
+        resource.root.innerHTML = "<div class=\"video\"><video /></div>";
+        self.container = $(resource.root).children(".video")[0];
+        self.video = $(self.container).children("video")[0];
         self.video.mediaId = getUuid();
         // Checks the supported video formats
         if (self.video.canPlayType("video/webm; codecs=\"vp8.0, vorbis\""))
@@ -291,9 +295,10 @@ resource.Video = function ()
         else
             ;
         self.video.src = "command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
+        self.video.play();
         
         // Events
-        $(resource.root.parentNode).click(function (e) { self.changeBackground(e); });
+        $(task.content).click(function (e) { self.changeBackground(e); });
         $(self.video).click(function (e) { self.playPause(e); });
     }
     
@@ -301,8 +306,6 @@ resource.Video = function ()
     {
         var naturalWidth = self.video.videoWidth ? self.video.videoWidth : resource.file.width;
         var naturalHeight = self.video.videoHeight ? self.video.videoHeight : resource.file.height;
-        w += 2;
-        h += 2;
         var width = w;
         var height = h;
         
@@ -313,11 +316,6 @@ resource.Video = function ()
             width = Math.floor(h * naturalWidth / naturalHeight);
             height = h;
         }
-        // Centers the video vertically
-        var marginTop = 0;
-        if (height < h)
-            marginTop += Math.floor((h - height) / 2);
-        resource.root.style.marginTop = marginTop + "px";
         // Sets the minimal size
         if (height < C.View.minHeight)
         {
@@ -327,16 +325,32 @@ resource.Video = function ()
         }
         else
             task.setOverflow(false);
+        // Centers the video 
+        var marginLeft = (width < w ? Math.floor((w - width) / 2) : 0);
+        var marginTop = (height < h ? Math.floor((h - height) / 2) : 0);
         // Resizes the video
-        $(self.video).width(width);
-        $(self.video).height(height);
-        $(resource.root).width(width - 2);
-        $(resource.root).height(height - 2);
+        $(self.container).width(width);
+        $(self.container).height(height);
+        if (self.background == "transparent")
+        {
+            resource.root.style.marginLeft = marginLeft + "px";
+            resource.root.style.marginTop = marginTop + "px";
+            $(resource.root).width(width - 2 < w - 2 ? width - 2 : w - 2); // (w - 2) and (h - 2) takes the minimal size into account
+            $(resource.root).height(height - 2 < h - 2 ? height - 2 : h - 2);
+        }
+        else
+        {
+            self.container.style.marginLeft = marginLeft + "px";
+            self.container.style.top = (marginTop - 1) + "px";
+            $(resource.root).width(w - 2);
+            $(resource.root).height(h - 2);
+        }
     }
     
+    // Play / pause the video.
     self.playPause = function (e)
     {
-        if (e.which != 1)
+        if (e.which != 1 || !resource.isFocus)
             return ;
         if (self.video.paused)
             self.video.play();
@@ -344,25 +358,26 @@ resource.Video = function ()
             self.video.pause();
     }
     
-    // Changes the color of the background.
-    // @param background : If defined, the background is changed to this value.
-    self.changeBackground = function (e, background)
+    // Changes the background color.
+    self.changeBackground = function (e)
     {
-        if ((e && e.which != 1) || !resource.isFocus)
+        if (e.which != 1 || !resource.isFocus || e.target == self.video)
             return ;
-        if (!e || e.target == resource.root.parentNode)
+        if (self.background == "transparent")
         {
-            if (self.background == "transparent")
-            {
-                task.setBackground(false, "view_background_black");
-                self.background = "black";
-            }
-            else
-            {
-                task.setBackground(true);
-                self.background = "transparent";
-            }
+            task.setBackground(true, "view_background_black");
+            self.background = "black";
         }
+        else
+        {
+            task.setBackground(false);
+            self.background = "transparent";
+        }
+        resource.root.style.marginLeft = "0px";
+        resource.root.style.marginTop = "0px";
+        self.container.style.marginLeft = "0px";
+        self.container.style.top = "-1px";
+        self.onResize(task.left, task.top, task.width, task.height);
     }
 
     // Player interface
