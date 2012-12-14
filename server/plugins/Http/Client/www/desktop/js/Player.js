@@ -17,21 +17,21 @@ function Player(task)
         self.node.seek_time = self.node.seek.children(".time");
         self.node.activeArea = self.node.timeline.children(".active_area");
         self.node.player = self.node.bottom.children(".player");
-        self.node.play = self.node.player.children(".play");
+        self.node.playback = self.node.player.children(".playback");
         self.node.settings = self.node.player.children(".settings");
-        self.node.numerator = self.node.play.find(".numerator"); // The number of the current file played
-        self.node.denominator = self.node.play.find(".denominator"); // The total number of files
-        self.node.time = self.node.play.children(".time");
-        self.node.current_time = self.node.play.find(".current_time"); // The current time of the file played
-        self.node.duration = self.node.play.find(".duration"); // The duration of the file
+        self.node.numerator = self.node.playback.find(".numerator"); // The number of the current file played
+        self.node.denominator = self.node.playback.find(".denominator"); // The total number of files
+        self.node.time = self.node.playback.children(".time");
+        self.node.current_time = self.node.playback.find(".current_time"); // The current time of the file played
+        self.node.duration = self.node.playback.find(".duration"); // The duration of the file
         self.node.filename = self.node.player.children(".name");
         self.node.audio = self.node.bottom.children(".audio");
         // Icons
         self.node.icon = new Object();
-        self.node.icon.play = $(self.node.play).children(".play");
-        self.node.icon.pause = $(self.node.play).children(".pause");
-        self.node.icon.previous = $(self.node.play).children(".previous");
-        self.node.icon.next = $(self.node.play).children(".next");
+        self.node.icon.play = $(self.node.playback).children(".play").children(".play");
+        self.node.icon.pause = $(self.node.playback).children(".play").children(".pause");
+        self.node.icon.previous = $(self.node.playback).children(".previous");
+        self.node.icon.next = $(self.node.playback).children(".next");
         self.node.icon.volume = $(self.node.settings).children(".volume");
         self.node.icon.mute = $(self.node.settings).children(".mute");
         self.node.icon.settings = $(self.node.settings).children(".settings");
@@ -77,7 +77,7 @@ function Player(task)
         // Events
         self.node.bottom.mouseenter(function (e) { self.mouseEnter(e); });
         self.node.bottom.mouseleave(function (e) { self.mouseLeave(e); });
-        self.node.play.children(".number").mousedown(function (e) { self.mouseDown(e); });
+        self.node.playback.children(".number").mousedown(function (e) { self.mouseDown(e); });
         self.node.player.children(".name").mousedown(function (e) { self.mouseDown(e); });
     }
     
@@ -135,8 +135,9 @@ function Player(task)
     // Generates the SVG icons of the player.
     self.generateIcons = function ()
     {
-        self.drawIcon(self.node.icon.play.children("div")[0], 16, gl_svg.Player.play, 0, 0.3);
-        self.drawIcon(self.node.icon.pause.children("div")[0], 16, gl_svg.Player.pause);
+        self.drawIcon(self.node.icon.play[0], 16, gl_svg.Player.play, 0, 0.3);
+        self.node.icon.play.parent().unbind("click"); // The play and pause icons share the same parent
+        self.drawIcon(self.node.icon.pause[0], 16, gl_svg.Player.pause);
         self.drawIcon(self.node.icon.previous.children("div")[0], 14, gl_svg.Player.previous, 0.5);
         self.drawIcon(self.node.icon.next.children("div")[0], 14, gl_svg.Player.next, -0.1);
         self.drawIcon(self.node.icon.volume.children("div")[0], 25, gl_svg.Player.volume);
@@ -175,14 +176,18 @@ function Player(task)
     self.mouseDown = function (e)
     {
         var target = $(e.delegateTarget);
-    
+        var media;
+        
         if (e.which != 1)
             return ;
-        if (target.hasClass("play") && self.playerInterface)
-            self.playerInterface.play();
-        else if (target.hasClass("pause") && self.playerInterface)
+        if (self.playerInterface)
+            media = self.playerInterface.getMedia();
+        if (target.hasClass("play") && media)
         {
-            self.playerInterface.pause();
+            if (media.paused)
+                self.playerInterface.play();
+            else
+                self.playerInterface.pause();
         }
         // Opens / closes the playlist
         else if (target.hasClass("number") || target.hasClass("name"))
@@ -249,6 +254,7 @@ function Player(task)
             self.node.time.addClass("display");
             $(media).bind("play", function (e) { self.play(e); });
             $(media).bind("pause", function (e) { self.pause(e); });
+            media.paused ? self.pause() : self.play();
         }
         else
         {

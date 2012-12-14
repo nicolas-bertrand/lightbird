@@ -109,7 +109,6 @@ a:visited
     background-image: -webkit-linear-gradient(top, #303030 0%, #202020 100%);
     background-image: -o-linear-gradient(top, #303030 0%, #202020 100%);
     background-image: -ms-linear-gradient(top, #303030 0%, #202020 100%);
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.33);
     position: relative;
     z-index: 1000000;
 }
@@ -691,60 +690,60 @@ a:visited
     color: #aaaaaa;
 }
 
-#desktop>.bottom>.player>div>.hide
+#desktop>.bottom>.player>div .hide
 {
     display: none;
 }
 
-#desktop>.bottom>.player>.play
+#desktop>.bottom>.player>.playback
 {
     float: left;
     height: 100%;
 }
 
-#desktop>.bottom>.player>.play>div
+#desktop>.bottom>.player>.playback>div
 {
     height: 100%;
     float: left;
     cursor: pointer;
 }
 
-#desktop>.bottom>.player>.play>div>div
+#desktop>.bottom>.player>.playback>div>div
 {
     height: 20px;
     margin: 10px;
 }
 
-#desktop>.bottom>.player>.play>.previous>div
+#desktop>.bottom>.player>.playback>.previous>div
 {
     margin-right: 5px;
 }
 
-#desktop>.bottom>.player>.play>.number>div
+#desktop>.bottom>.player>.playback>.number>div
 {
     margin: 0px;
     padding: 11px 5px 0px 5px;
     background-image: none;
 }
 
-#desktop>.bottom>.player>.play>.next>div
+#desktop>.bottom>.player>.playback>.next>div
 {
     margin-left: 5px;
 }
 
-#desktop>.bottom>.player>.play>.time>div
+#desktop>.bottom>.player>.playback>.time>div
 {
     margin: 0px;
     padding: 11px 10px 0px 10px;
     background-image: none;
 }
 
-#desktop>.bottom>.player>.play>.time
+#desktop>.bottom>.player>.playback>.time
 {
     display: none;
 }
 
-#desktop>.bottom>.player>.play>.time.display
+#desktop>.bottom>.player>.playback>.time.display
 {
     display: block;
 }
@@ -777,7 +776,7 @@ a:visited
 
 /* Hover */
 
-#desktop>.bottom>.player>.play>div:hover,
+#desktop>.bottom>.player>.playback>div:hover,
 #desktop>.bottom>.player>.settings>div:hover
 {
     color: #222222;
@@ -788,12 +787,12 @@ a:visited
     background-image: -ms-linear-gradient(top, #FFFFFF 0%, #e5e5e5 100%);
 }
 
-#desktop>.bottom>.player>.play>div:hover span.secondary
+#desktop>.bottom>.player>.playback>div:hover span.secondary
 {
     color: #666666;
 }
 
-#desktop>.bottom>.player>.play>div>.line,
+#desktop>.bottom>.player>.playback>div>.line,
 #desktop>.bottom>.player>.settings>div>.line
 {
     width: 100%;
@@ -805,14 +804,14 @@ a:visited
     background-image: none;
 }
 
-#desktop>.bottom>.player>.play>.number>.line,
-#desktop>.bottom>.player>.play>.time>.line
+#desktop>.bottom>.player>.playback>.number>.line,
+#desktop>.bottom>.player>.playback>.time>.line
 {
     top: -41px;
     padding: 0px;
 }
 
-#desktop>.bottom>.player>.play>div:hover>.line,
+#desktop>.bottom>.player>.playback>div:hover>.line,
 #desktop>.bottom>.player>.settings>div:hover>.line
 {
     display: block;
