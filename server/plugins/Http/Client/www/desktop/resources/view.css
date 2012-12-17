@@ -21,7 +21,7 @@
     top: 1px;
 }
 
-#desktop>.middle>.tasks>.task.view_image.over>.view
+#desktop>.middle>.tasks>.task.view_image.highlight>.view
 {
     overflow: hidden;
     left: 0px;
@@ -29,12 +29,12 @@
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
-#desktop>.middle>.tasks>.task.view_image.over.window>.view
+#desktop>.middle>.tasks>.task.view_image.highlight.window>.view
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
-#desktop>.middle>.tasks>.task.view_image.over.focus>.view
+#desktop>.middle>.tasks>.task.view_image.highlight.focus>.view
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
@@ -72,7 +72,7 @@
     left: 1px;
     top: 1px;
 }
-#desktop>.middle>.tasks>.task.view_video.over>.view
+#desktop>.middle>.tasks>.task.view_video.highlight>.view
 {
     overflow: hidden;
     left: 0px;
@@ -80,12 +80,12 @@
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
-#desktop>.middle>.tasks>.task.view_video.over.window>.view
+#desktop>.middle>.tasks>.task.view_video.highlight.window>.view
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
-#desktop>.middle>.tasks>.task.view_video.over.focus>.view
+#desktop>.middle>.tasks>.task.view_video.highlight.focus>.view
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);

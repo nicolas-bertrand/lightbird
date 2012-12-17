@@ -36,6 +36,7 @@ function ResourceView(task, fileIndex)
             resource[key] = undefined;
     }
 
+// Displays the image using several resize methods and backgrounds.
 resource.Image = function ()
 {
     var self = this;
@@ -136,6 +137,7 @@ resource.Image = function ()
         var marginLeft = (naturalWidth < width ? Math.floor((width - naturalWidth) / 2) : 0);
         var marginTop = (naturalHeight < height ? Math.floor((height - naturalHeight) / 2) : 0);
         self.center(marginLeft, marginTop);
+        // Resizes the containers
         $(self.container).width(width);
         $(self.container).height(height);
         $(resource.root).width(width - 2);
@@ -233,9 +235,8 @@ resource.Image = function ()
             self.container.style.top = "-1px";
             resource.root.style.marginLeft = "0px";
             resource.root.style.marginTop = "0px";
-            return ;
         }
-        if (self.resize == self.keepRatio)
+        else if (self.resize == self.keepRatio)
         {
             if (self.background == "transparent")
             {
@@ -259,6 +260,7 @@ resource.Image = function ()
     return (self);
 }
 
+// Plays the video.
 resource.Video = function ()
 {
     var self = this;

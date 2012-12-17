@@ -1178,7 +1178,7 @@ function Task(resource, html)
         self.ghost = $("<div></div>")[0];
         $(self.ghost).addClass("ghost");
         $(self.ghost).insertAfter(self.icon);
-        gl_desktop.taskButtons.startDrag();
+        gl_desktop.taskButtons.startDrag(self);
         return (y);
     }
     
@@ -1686,9 +1686,10 @@ function TaskButtons()
     }
         
     // Hides the buttons while the task is being dragged.
-    self.startDrag = function ()
+    // @param task : The task being dragged.
+    self.startDrag = function (task)
     {
-        $(self.buttons).removeClass("display");
+        self._hide(task);
     }
     
     // When the drag is finished, we display the buttons if the mouse is over the task
@@ -1756,20 +1757,23 @@ function TaskButtons()
         $(self.buttons).removeClass("display");
     }
     
+    // Displays the buttons and highlights the content of the task
     self._display = function ()
     {
         $(self.buttons).addClass("display");
         $(self.task.icon).addClass("over");
+        // The highlight on the content is only added if there is more than one task in the page
         if (self.task.getPage().numberTasks > 1)
-            $(self.task.content).addClass("over");
+            $(self.task.content).addClass("highlight");
         else
-            $(self.task.content).removeClass("over");
+            $(self.task.content).removeClass("highlight");
     }
+    // Hides the buttons and the highlight
     self._hide = function (task)
     {
         $(self.buttons).removeClass("display");
         $(task.icon).removeClass("over");
-        $(task.content).removeClass("over");
+        $(task.content).removeClass("highlight");
     }
     
     self.init();

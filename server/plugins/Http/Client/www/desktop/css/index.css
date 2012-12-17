@@ -512,26 +512,26 @@ a:visited
     display: block;
 }
 
-#desktop>.middle>.tasks>.task.over
+#desktop>.middle>.tasks>.task.highlight
 {
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.window.over
+#desktop>.middle>.tasks>.task.highlight.window
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.focus.over
+#desktop>.middle>.tasks>.task.highlight.focus
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
 #desktop>.middle>.tasks>.task.no_background,
-#desktop>.middle>.tasks>.task.no_background.over
+#desktop>.middle>.tasks>.task.no_background.highlight
 {
     background-color: inherit;
     border: 1px solid rgba(255, 255, 255, 0);
@@ -544,7 +544,7 @@ a:visited
 }
 
 #desktop>.middle>.tasks>.task.no_border,
-#desktop>.middle>.tasks>.task.no_border.over
+#desktop>.middle>.tasks>.task.no_border.highlight
 {
     border: none;
     box-shadow: none;
@@ -556,7 +556,7 @@ a:visited
 }
 
 #desktop>.middle>.tasks>.task.hide_border,
-#desktop>.middle>.tasks>.task.hide_border.over
+#desktop>.middle>.tasks>.task.hide_border.highlight
 {
     border: none;
     box-shadow: none;
