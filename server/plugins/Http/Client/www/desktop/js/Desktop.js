@@ -1236,78 +1236,88 @@ function Task(resource, html)
     }
 
 // Resource interface
-// These methods are called by the resource in order to interact with the task.
-    
-    // Sets the instance of the resource that manages the content.
-    // Allows the task to call the methods onResize and close of the resource.
-    self.setResource = function (resource)
+// The resources have to implement this interface in order to receive the task events.
     {
-        self.resource = resource;
+        // Closes the resource.
+        function close() {}
+        // The task have been resized.
+        function onResize(left, top, width, height) {}
     }
-    
-    // Sets the background of the task.
-    // @param display : If false the background and the border will be transparent.
-    // @param background : The css class that will be applied to the task in order to modify its background and its border.
-    self.setBackground = function (display, background)
+
+// Resource api
+// These methods are called by the resources in order to interact with the task.
     {
-        // Remove the previous background
-        if (self.lastBackgroundSet)
+        // Sets the instance of the resource that manages the content.
+        // Allows the task to call the methods onResize and close of the resource.
+        self.setResource = function (resource)
         {
-            $(self.content).removeClass(self.lastBackgroundSet);
-            delete self.lastBackgroundSet;
+            self.resource = resource;
         }
-        // No background
-        if (!display)
-            $(self.content).addClass("no_background");
-        // Custom background
-        else
+        
+        // Sets the background of the task.
+        // @param display : If false the background and the border will be transparent.
+        // @param background : The css class that will be applied to the task in order to modify its background and its border.
+        self.setBackground = function (display, background)
         {
-            $(self.content).removeClass("no_background");
-            if (background)
+            // Remove the previous background
+            if (self.lastBackgroundSet)
             {
-                self.lastBackgroundSet = background;
-                $(self.content).addClass(background);
+                $(self.content).removeClass(self.lastBackgroundSet);
+                delete self.lastBackgroundSet;
+            }
+            // No background
+            if (!display)
+                $(self.content).addClass("no_background");
+            // Custom background
+            else
+            {
+                $(self.content).removeClass("no_background");
+                if (background)
+                {
+                    self.lastBackgroundSet = background;
+                    $(self.content).addClass(background);
+                }
             }
         }
-    }
-    
-    // Displays / hides the task borders.
-    // @param border : True to display the task border.
-    self.setBorder = function (border)
-    {
-        if (border)
-            $(self.content).removeClass("no_border");
-        else
-            $(self.content).addClass("no_border");
-    }
-    
-    // Allows the resources to disable the overflow of the content.
-    // @param overflow : True if the overflow is enabled.
-    self.setOverflow = function (overflow)
-    {
-        if (overflow != self.overflow)
+        
+        // Displays / hides the task borders.
+        // @param border : True to display the task border.
+        self.setBorder = function (border)
         {
-            self.overflow = overflow;
-            if (!overflow)
-                $(self.content).addClass("disable_overflow");
+            if (border)
+                $(self.content).removeClass("no_border");
             else
-                $(self.content).removeClass("disable_overflow");
+                $(self.content).addClass("no_border");
+        }
+        
+        // Allows the resources to disable the overflow of the content.
+        // @param overflow : True if the overflow is enabled.
+        self.setOverflow = function (overflow)
+        {
+            if (overflow != self.overflow)
+            {
+                self.overflow = overflow;
+                if (!overflow)
+                    $(self.content).addClass("disable_overflow");
+                else
+                    $(self.content).removeClass("disable_overflow");
+            }
+        }
+        
+        // Returns true if the page has the focus.
+        self.isFocus = function ()
+        {
+            // The focus also have to be on the task for more that 10 milliseconds, in order to avoid event order problems
+            return ($(self.content).hasClass("focus") && (new Date().getTime() - self.lastFocusDate) > 10);
+        }
+        
+        // Returns true if the page is a window.
+        self.isWindow = function ()
+        {
+            return ($(self.content).hasClass("window"));
         }
     }
-    
-    // Returns true if the page has the focus.
-    self.isFocus = function ()
-    {
-        // The focus also have to be on the task for more that 10 milliseconds, in order to avoid event order problems
-        return ($(self.content).hasClass("focus") && (new Date().getTime() - self.lastFocusDate) > 10);
-    }
-    
-    // Returns true if the page is a window.
-    self.isWindow = function ()
-    {
-        return ($(self.content).hasClass("window"));
-    }
-    
+        
     self.init();
     return (self);
 }

@@ -1,4 +1,4 @@
-function ResourceView(task, fileIndex)
+function ResourceView(task, playlistInterface, fileIndex)
 {
     var resource = this;
     
@@ -8,7 +8,8 @@ function ResourceView(task, fileIndex)
         resource.root = $(task.content).children(".view")[0]; // The root element of the resource
         resource.file = gl_files.list[fileIndex]; // The file displayed by the resource
         resource.isFocus = true; // If the task had the focus in the last mouse down event
-        resource.object; // The object that displays the file, based on its type
+        resource.object; // The object that displays the file, based on its type. Implements the player interface.
+        resource.playlistInterface = playlistInterface; // The playlist that manages this file (may be undefined)
         
         // Capitalizes the first char of the type, to get the name of the object
         var type = resource.file.type[0].toUpperCase() + resource.file.type.slice(1);
@@ -17,7 +18,7 @@ function ResourceView(task, fileIndex)
         
         // Default values
         task.setResource(resource);
-        gl_player.addFile(fileIndex, resource.object);
+        resource.playlistInterface.readyToPlay(resource.object, fileIndex);
         
         // Events
         $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
@@ -32,6 +33,9 @@ function ResourceView(task, fileIndex)
     // Closes the resource.
     resource.close = function ()
     {
+        gl_player.closeFile(resource.playlistInterface, resource.object);
+        if (resource.object.close)
+            resource.object.close();
         for (var key in resource)
             resource[key] = undefined;
     }
@@ -255,6 +259,30 @@ resource.Image = function ()
             self.image.style.marginTop = marginTop + "px";
         }
     }
+    
+// Player interface
+    {
+        self.play = function ()
+        {
+        }
+        
+        self.pause = function ()
+        {
+        }
+        
+        self.seek = function (time)
+        {
+        }
+        
+        self.getMedia = function ()
+        {
+        }
+        
+        self.setPlaylist = function (playlistInterface)
+        {
+            resource.playlistInterface = playlistInterface;
+        }
+    }
 
     self.init();
     return (self);
@@ -297,11 +325,19 @@ resource.Video = function ()
         else
             ;
         self.video.src = "command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
-        self.video.play();
         
         // Events
         $(task.content).click(function (e) { self.changeBackground(e); });
         $(self.video).click(function (e) { self.playPause(e); });
+    }
+    
+    // Closes the video player.
+    self.close = function ()
+    {
+        self.video.pause();
+        self.video.src = "";
+        for (var key in self)
+            self[key] = undefined;
     }
     
     self.onResize = function (left, top, w, h)
@@ -382,7 +418,7 @@ resource.Video = function ()
         self.onResize(task.left, task.top, task.width, task.height);
     }
 
-    // Player interface
+// Player interface
     {
         self.play = function ()
         {
@@ -392,11 +428,6 @@ resource.Video = function ()
         self.pause = function ()
         {
             self.video.pause();
-        }
-        
-        self.getMedia = function ()
-        {
-            return (self.video);
         }
         
         self.seek = function (time)
@@ -413,6 +444,16 @@ resource.Video = function ()
             if (!paused)
                 self.video.play();
         }
+        
+        self.getMedia = function ()
+        {
+            return (self.video);
+        }
+        
+        self.setPlaylist = function (playlistInterface)
+        {
+            resource.playlistInterface = playlistInterface;
+        }
     }
  
     self.init();
@@ -423,5 +464,5 @@ resource.Video = function ()
     return (resource);
 }
 
-function initialize_resource_view(task, fileIndex) { return new ResourceView(task, fileIndex); }
+function initialize_resource_view(task, parameters) { return new ResourceView(task, parameters.playlistInterface, parameters.fileIndex); }
 gl_resources.jsLoaded("view");

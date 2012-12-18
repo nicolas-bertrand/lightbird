@@ -57,7 +57,8 @@ function Player(task)
         self.audio; // Manages the audio player
         self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leave
         self.mouseOverPlayer; // True while the mouse is over the player
-        self.playerInterface; // The object that is playing the current file
+        self.playlistInterface; // The current playlist, from which the current file is played
+        self.playerInterface; // The player that is playing the current file
         self.fileIndex; // The index of the file currently played
         
         // Default values
@@ -230,39 +231,6 @@ function Player(task)
         return (result);
     }
     
-// Player interface
-    
-    // Adds a file to the playlist.
-    // @param playerInterface : The object that is playing the file. Must implement the player interface.
-    self.addFile = function (fileIndex, playerInterface)
-    {
-        self.playlist.addFile(fileIndex);
-        self.fileIndex = fileIndex;
-        self.playerInterface = playerInterface;
-        var file = gl_files.list[self.fileIndex];
-        self.node.filename.html(file.name);
-        // The audio files have to use our player
-        if (file.type == "audio")
-            (self.playerInterface = self.audio).setFile(self.fileIndex);
-        else
-            self.audio.clear();
-        // Displays the time and initializes the time line if the file is a media
-        if (file.type == "audio" || file.type == "video")
-        {
-            var media = self.playerInterface.getMedia();
-            self.timeLine.newMedia(media);
-            self.node.time.addClass("display");
-            $(media).bind("play", function (e) { self.play(e); });
-            $(media).bind("pause", function (e) { self.pause(e); });
-            media.paused ? self.pause() : self.play();
-        }
-        else
-        {
-            self.timeLine.clear();
-            self.node.time.removeClass("display");
-        }
-    }
-    
     // Called by the media play event.
     self.play = function ()
     {
@@ -275,6 +243,128 @@ function Player(task)
     {
         self.node.icon.play.removeClass("hide");
         self.node.icon.pause.addClass("hide");
+    }
+
+    // Puts the player in its initial state
+    self.clear = function ()
+    {
+        self.timeLine.clear();
+        self.pause();
+        if (self.playerInterface)
+        {
+            $(self.playerInterface.getMedia()).unbind("play");
+            $(self.playerInterface.getMedia()).unbind("pause");
+        }
+        self.playlistInterface = undefined;
+        self.playerInterface = undefined;
+        self.fileIndex = 0;
+        self.node.time.removeClass("display");
+        self.node.numerator.html(0);
+        self.node.denominator.html(0);
+        self.node.filename.html("");
+    }
+    
+// Player interface
+    {
+        // Asks the player to start the playback.
+        function play() {}
+        // Asks the player to pause the playback.
+        function pause() {}
+        // Seeks the media to the given time in second (float).
+        function seek(time) {}
+        // Returns the media of the player (the audio or the video element).
+        function getMedia() {}
+        // Changes the playlist of the player.
+        function setPlaylist(playlistInterface) {}
+    }
+    
+// Playlist interface
+    {
+        // Returns the number of files in the playlist and the number of file currently played.
+        function getNumberFiles() { return ({ numerator : "fileNumber", denominator : "numberOfFiles" }); }
+        // Called by the player interface to tell the playlist that it is ready to play the file.
+        // @param fileIndex : The index of the file to play.
+        function readyToPlay(playerInterface, fileIndex) {}
+    }
+    
+// Player api
+    {
+        // Plays a file within a playlist. The current playlist is replaced by the one given.
+        // @param playlistInterface : The playlist from which the file is played. Muts implement the playlist interface.
+        // @param playerInterface : The object that is playing the file. Must implement the player interface.
+        // @param fileIndex : The index of the file to play, from gl_files.
+        self.playFile = function (playlistInterface, playerInterface, fileIndex)
+        {
+            self.playlistInterface = playlistInterface;
+            self.playerInterface = playerInterface;
+            self.fileIndex = fileIndex;
+            var file = gl_files.list[self.fileIndex];
+            self.node.filename.html(file.name);
+            self.node.numerator.html(playlistInterface.getNumberFiles().numerator);
+            self.node.denominator.html(playlistInterface.getNumberFiles().denominator);
+            // Displays the time and initializes the time line if the file is a media
+            var media = self.playerInterface.getMedia();
+            if (media)
+            {
+                self.timeLine.newMedia(media);
+                self.node.time.addClass("display");
+                $(media).bind("play", function (e) { self.play(e); });
+                $(media).bind("pause", function (e) { self.pause(e); });
+                // Starts the playback
+                media.play();
+            }
+            else
+            {
+                self.timeLine.clear();
+                self.node.time.removeClass("display");
+            }
+            // Adds the file to the recent files playlist
+            self.playlist.addRecentFile(fileIndex);
+        }
+        
+        // Stops the current playback of the playlist.
+        self.closeFile = function (playlistInterface, playerInterface)
+        {
+            if (self.playlistInterface == playlistInterface && self.playerInterface == playerInterface)
+            {
+                if (playlistInterface)
+                {
+                    self.timeLine.clear(true);
+                    if (playerInterface)
+                    {
+                        $(playerInterface.getMedia()).unbind("play");
+                        $(playerInterface.getMedia()).unbind("pause");
+                    }
+                    self.pause();
+                    self.playerInterface = undefined;
+                }
+                else
+                    self.clear();
+            }
+        }
+        
+        // Closes the current playlist.
+        self.closePlaylist = function (playlistInterface)
+        {
+            if (self.playlistInterface == playlistInterface)
+            {
+                if (self.playerInterface)
+                {
+                    self.playlistInterface = undefined;
+                    self.playerInterface.setPlaylist(undefined);
+                    self.node.numerator.html(1);
+                    self.node.denominator.html(1);
+                }
+                else
+                    self.clear()
+            }
+        }
+        
+        // Initializes the global audio player.
+        self.openAudio = function (playlistInterface, fileIndex)
+        {
+            self.audio.setFile(playlistInterface, fileIndex);
+        }
     }
     
 
@@ -556,7 +646,8 @@ self.TimeLine = function (player)
     }
     
     // Clears the time line.
-    self.clear = function ()
+    // @param keepDuration : True if the duration have to be keeped.
+    self.clear = function (keepDuration)
     {
         if (self.media)
         {
@@ -571,7 +662,8 @@ self.TimeLine = function (player)
         self.currentPreviewTime = undefined;
         self.updateTimeLine();
         node.current_time.html("0:00");
-        node.duration.html("0:00");
+        if (!keepDuration)
+            node.duration.html("0:00");
     }
     
     // The time of the media played has changed.
@@ -586,7 +678,7 @@ self.TimeLine = function (player)
         self.played = currentTime / self.duration;
         self.buffered = buffered / self.duration;
         self.updateTimeLine();
-        node.current_time.html(player.timeToString(currentTime));
+        node.current_time.html(player.timeToString(currentTime + self.timeOffset));
     }
     
     // Mouse enter the time line.
@@ -709,6 +801,7 @@ self.Playlist = function (player)
         self.height; // The height of the playlist
         self.pinned; // True if the playlist is pinned
         self.rowTemplate = node.playlist.children(".row_template").html(); // The template used to create the rows.
+        self.recentFilesPlaylist; // This playlist stores all the files recently played. It is created automatically and filled by addRecentFile.
         
         // Default values
         self.setHeight(C.Player.playlistHeight);
@@ -830,12 +923,12 @@ self.Playlist = function (player)
         return (self.pinned);
     }
     
-    // Adds a file to the playlist.
-    self.addFile = function (fileIndex)
+    // Adds a file to the recent files playlist.
+    self.addRecentFile = function (fileIndex)
     {
-        // Creates a new playlist if there is none
+        // Creates the recent files playlist if it doesn't exists
         if (!player.header.tabFocused.length)
-            new player.Tab(player, T.Player.recentFiles);
+            self.recentFilesPlaylist = new player.Tab(player, T.Player.recentFiles);
         // Adds the file to the current playlist
         player.header.tabFocused[0].object.addFile(fileIndex);
     }
@@ -1190,8 +1283,9 @@ self.Header = function (player)
     return (self);
 }
 
-// Creates and manages a tab.
-// name : The name of the tab.
+// Creates and manages a tab and the playlist it represents.
+// Implements the playlist interface.
+// @param name : The name of the tab.
 self.Tab = function (player, name)
 {
     var self = this;
@@ -1200,9 +1294,10 @@ self.Tab = function (player, name)
     self.init = function ()
     {
         // Members
-        self.tab = self.create(name);
-        self.tab[0].object = self;
-        self.files = new Array();
+        self.tab = self.create(name); // The tab element
+        self.tab[0].object = self; // Allows to access the object from the tab element
+        self.files = new Array(); // The list of the files in the playlist
+        self.fileNumber = 0; // The number of the last file played in the playlist
         // Drag tab
         self.element; // The initial position of the tab
         self.mouse; // The position of the mouse in the tab
@@ -1343,6 +1438,9 @@ self.Tab = function (player, name)
         self.tab.remove();
         player.header.updateOddEvenTab();
         player.header.updateAdd();
+        // This playlist is the recent files one
+        if (player.playlist.recentFilesPlaylist == self)
+            player.playlist.recentFilesPlaylist = undefined;
     }
 
     // Starts the dragging of the tab.
@@ -1452,16 +1550,26 @@ self.Tab = function (player, name)
     {
         var file = gl_files.list[fileIndex];
         
-        // Adds the file to the list
         self.files.push(fileIndex);
         var row = $(node.list.children(":eq(" + (self.files.length - 1) + ")"));
         row.html(player.playlist.rowTemplate);
         row.children(".number").html(self.files.length);
         row.children(".name").html(file.name);
         row[0].fileIndex = fileIndex;
-        // Updates the player
-        node.numerator.html(self.files.length);
-        node.denominator.html(self.files.length);
+        self.fileNumber = self.files.length;
+    }
+    
+// Playlist interface
+    {
+        self.getNumberFiles = function ()
+        {
+            return ({ numerator : self.fileNumber, denominator : self.files.length });
+        }
+        
+        self.readyToPlay = function (playerInterface, fileIndex)
+        {
+            gl_player.playFile(self, playerInterface, fileIndex);
+        }
     }
     
     self.init();
@@ -1479,7 +1587,8 @@ self.Audio = function (player)
         // Members
         self.audio = $(node.audio).children("audio")[0]; // The audio player
         self.audio.mediaId; // The id of the media, used to communicate with the server
-        self.format = "ogg"; // The format of the audio.
+        self.format = "ogg"; // The format of the audio
+        self.playlistInterface; // The playlist from which the audio is played
         
         // Checks the supported audio formats
         if (self.audio.canPlayType("audio/ogg"))
@@ -1492,14 +1601,13 @@ self.Audio = function (player)
     }
     
     // Sets an audio file to play.
-    self.setFile = function (fileIndex)
+    self.setFile = function (playlistInterface, fileIndex)
     {
         var file = gl_files.list[fileIndex];
         
         //  Sets the source of the audio element
         self.audio.mediaId = getUuid();
         self.audio.src = "command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
-        self.audio.play();
         // Replaces the file name by the title of the music and the artist if possible
         if (file.title)
         {
@@ -1508,6 +1616,8 @@ self.Audio = function (player)
                 filename += "<span class=\"secondary\"> - " + file.artist + "</span>";
             node.filename.html(filename);
         }
+        self.playlistInterface = playlistInterface;
+        playlistInterface.readyToPlay(self, fileIndex);
     }
     
     // Clears the audio.
@@ -1519,7 +1629,7 @@ self.Audio = function (player)
         self.audio.mediaId = undefined;
     }
     
-    // Player interface
+// Player interface
     {
         self.play = function ()
         {
@@ -1531,11 +1641,6 @@ self.Audio = function (player)
             self.audio.pause();
         }
         
-        self.getMedia = function ()
-        {
-            return (self.audio);
-        }
-        
         self.seek = function (time)
         {
             var paused = self.audio.paused;
@@ -1545,6 +1650,16 @@ self.Audio = function (player)
             self.audio.src = "command/audio." + self.format + "?fileId=" + gl_files.list[player.fileIndex].id + "&mediaId=" + self.audio.mediaId + "&start=" + time + getSession();
             if (!paused)
                 self.audio.play();
+        }
+        
+        self.getMedia = function ()
+        {
+            return (self.audio);
+        }
+        
+        self.setPlaylist = function (playlistInterface)
+        {
+            self.playlistInterface = playlistInterface;
         }
     }
     
