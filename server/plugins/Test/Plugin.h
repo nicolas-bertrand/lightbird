@@ -12,6 +12,7 @@ class Plugin : public QObject,
                public LightBird::IEvent
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Test")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IEvent)
 

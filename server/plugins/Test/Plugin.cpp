@@ -1,5 +1,4 @@
 #include <QStringList>
-#include <QtPlugin>
 
 #include "Configuration.h"
 #include "Database.h"
@@ -76,5 +75,3 @@ void    Plugin::event(const QString &, const QVariant &)
     else
         LOG_ERROR("At least one test failed!", Properties("class", test.peekPrevious().first).add("line", line).toMap(), "Plugin", "event");
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

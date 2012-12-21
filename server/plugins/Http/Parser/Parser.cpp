@@ -47,7 +47,7 @@ bool    Parser::doSerializeContent(LightBird::IContent &content, QByteArray &dat
         // Writes a new chunk
         if (size)
         {
-            data = QString::number(size, 16).toAscii() + END_OF_LINE;
+            data = QString::number(size, 16).toLatin1() + END_OF_LINE;
             data += content.getData(size) + END_OF_LINE;
             return (false);
         }

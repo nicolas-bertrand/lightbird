@@ -1,4 +1,5 @@
 #include <QFileInfo>
+#include <QUrlQuery>
 #include "LightBird.h"
 
 #include "Preview.h"
@@ -18,9 +19,10 @@ void    Preview::generate()
 {
     unsigned int position;
     float        quality;
+    QUrlQuery    query(this->uri);
 
     // Extracts the file id from the uri
-    this->file.setId(this->uri.queryItemValue("fileId"));
+    this->file.setId(query.queryItemValue("fileId"));
     // If the file doesn't exists, an error occured
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
         return this->_error("Preview", 404, "Not Found", "File not found.");
@@ -30,8 +32,8 @@ void    Preview::generate()
     // Defines the width and the height of the image
     this->_size();
     // Gets the time and the quality of the preview
-    position = this->uri.queryItemValue("position").toUInt();
-    if (!(quality = this->uri.queryItemValue("quality").toFloat()))
+    position = query.queryItemValue("position").toUInt();
+    if (!(quality = query.queryItemValue("quality").toFloat()))
         quality = -1;
     // Generates a preview of the file
     this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position, quality);
@@ -45,8 +47,8 @@ void    Preview::generate()
 
 void    Preview::_size()
 {
-    this->width = this->uri.queryItemValue("width").toUInt();
-    this->height = this->uri.queryItemValue("height").toUInt();
+    this->width = QUrlQuery(this->uri).queryItemValue("width").toUInt();
+    this->height = QUrlQuery(this->uri).queryItemValue("height").toUInt();
     if (!this->width && !this->height)
     {
         this->width = 100;

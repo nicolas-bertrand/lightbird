@@ -1,12 +1,10 @@
-#include <QtPlugin>
+#include "Plugin.h"
 #include <QDir>
 #include <errno.h>
 #include <gnutls/abstract.h>
 #include <gnutls/crypto.h>
 #include <gnutls/x509.h>
-
 #include "LightBird.h"
-#include "Plugin.h"
 
 #ifdef Q_OS_WIN32
 # include <winsock2.h>
@@ -14,7 +12,9 @@
 # include <sys/socket.h>
 #endif // Q_OS_WIN32
 typedef unsigned int SOCKET;
-
+// gnutls_session_t needs to be fully defined for Q_DECLARE_METATYPE, but gnutls_session_int is not a public struct,
+// so we declare a fake one (which does not affect the size of gnutls_session_t).
+struct gnutls_session_int { };
 Q_DECLARE_METATYPE(gnutls_session_t)
 
 Plugin *Plugin::instance = NULL;
@@ -29,7 +29,7 @@ Plugin::~Plugin()
     Plugin::instance = NULL;
 }
 
-bool            Plugin::onLoad(LightBird::IApi *api)
+bool    Plugin::onLoad(LightBird::IApi *api)
 {
     int         error;
     const char  *err_pos = NULL;
@@ -260,15 +260,15 @@ void    Plugin::log(gnutls_session_t, const char *log)
 void    Plugin::_loadConfiguration()
 {
     QMap<QString, gnutls_sec_param_t> secParams;
-    unsigned int expiration;
-    int          i;
+    int expiration;
+    int i;
 
     secParams.insert("LOW", GNUTLS_SEC_PARAM_LOW);
     secParams.insert("LEGACY", GNUTLS_SEC_PARAM_LEGACY);
     secParams.insert("NORMAL", GNUTLS_SEC_PARAM_NORMAL);
     secParams.insert("HIGH", GNUTLS_SEC_PARAM_HIGH);
     secParams.insert("ULTRA", GNUTLS_SEC_PARAM_ULTRA);
-    if ((this->priorityStrings = this->api->configuration(true).get("priority_strings").toAscii()).isEmpty())
+    if ((this->priorityStrings = this->api->configuration(true).get("priority_strings").toLatin1()).isEmpty())
         this->priorityStrings = "SECURE128:-VERS-SSL3.0";
     if ((this->crtFile = this->api->configuration(true).get("crt")).isEmpty())
         this->crtFile = "crt.pem";
@@ -282,7 +282,7 @@ void    Plugin::_loadConfiguration()
         expiration = 90;
     if (!(this->handshakeTimeout = this->api->configuration(true).get("handshake_timeout").toInt()))
         this->handshakeTimeout = 5000;
-    if ((this->keyPassword = this->api->configuration(true).get("private_key_password").toAscii()).isEmpty())
+    if ((this->keyPassword = this->api->configuration(true).get("private_key_password").toLatin1()).isEmpty())
         this->api->configuration(true).set("private_key_password", (this->keyPassword = this->_generatePassword())).save();
     this->dhParamsExpiration = QDateTime::currentDateTime().addDays(-expiration);
     this->crtFile.prepend(this->api->getPluginPath());
@@ -489,5 +489,3 @@ void    Plugin::_deinit()
         gnutls_global_deinit();
     this->init.clear();
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

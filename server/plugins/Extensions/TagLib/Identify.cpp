@@ -38,10 +38,10 @@ bool    Identify::identify(const QString &fileName, LightBird::IIdentify::Inform
     information.data.clear();
     information.type = LightBird::IIdentify::OTHER;
     // Gets The meta data of the file
-    TagLib::FileRef file(fileName.toAscii().data());
+    TagLib::FileRef file(fileName.toLatin1().data());
     if (!file.isNull())
         this->_addTags(information, file);
-    TagLib::MPEG::File mpeg(fileName.toAscii().data());
+    TagLib::MPEG::File mpeg(fileName.toLatin1().data());
     if (mpeg.isOpen())
     {
         this->_addApe(information, mpeg);

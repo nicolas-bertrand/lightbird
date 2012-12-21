@@ -20,6 +20,7 @@ class File : public QObject,
              public LightBird::ITimer
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Log.File")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::ILog
                  LightBird::ITimer)

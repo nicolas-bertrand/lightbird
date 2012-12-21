@@ -9,6 +9,7 @@ class Plugin : public QObject,
                public LightBird::IPlugin
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Example.Basic")
     Q_INTERFACES(LightBird::IPlugin)
 
 public:

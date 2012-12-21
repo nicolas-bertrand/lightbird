@@ -18,6 +18,7 @@ class Plugin : public QObject,
                public LightBird::IExtension
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Extensions.FFmpeg")
     Q_INTERFACES(LightBird::IPlugin LightBird::IExtension)
 
 public:

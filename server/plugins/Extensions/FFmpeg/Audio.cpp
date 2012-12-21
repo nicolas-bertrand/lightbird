@@ -337,7 +337,8 @@ bool    Audio::_openEncoder()
     this->encoder->sample_rate = this->filterOut->inputs[0]->sample_rate;
     this->encoder->channel_layout = this->filterOut->inputs[0]->channel_layout;
     this->encoder->channels = av_get_channel_layout_nb_channels(this->encoder->channel_layout);
-    this->encoder->time_base = (AVRational){ 1, this->decoder->sample_rate };
+    this->encoder->time_base.num = 1;
+    this->encoder->time_base.den = this->decoder->sample_rate;
     this->duration *= this->decoder->sample_rate;
     if (this->formatOut->oformat->flags & AVFMT_GLOBALHEADER)
         this->encoder->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -384,7 +385,7 @@ bool    Audio::_configureInputFilter(AVFilterInOut *inputs)
     args = QString("time_base=1/%1:sample_rate=%1:sample_fmt=%2:channel_layout=0x%3")
                   .arg(QString::number(this->decoder->sample_rate),
                        av_get_sample_fmt_name(this->decoder->sample_fmt),
-                       QString::number(this->decoder->channel_layout, 16)).toAscii();
+                       QString::number(this->decoder->channel_layout, 16)).toLatin1();
     if ((ret = avfilter_graph_create_filter(&this->filterIn, avfilter_get_by_name("abuffer"), "abuffer", args.data(), NULL, this->filterGraph)) < 0)
     {
         LOG_ERROR("Could not create the abuffer filter", this->_getProperties(ret, Properties("args", args)), "Audio", "_configureInputFilter");
@@ -459,7 +460,7 @@ QByteArray  Audio::_getSampleRates(const AVCodec *codec, unsigned int prefered)
         result.append(QString::number(*(p++)));
     if (prefered && (result.isEmpty() || result.contains(QString::number(prefered))))
         result = QStringList() << QString::number(prefered);
-    return (result.join(",").toAscii());
+    return (result.join(",").toLatin1());
 }
 
 QByteArray  Audio::_getChannelLayouts(const AVCodec *codec, unsigned int prefered)
@@ -471,7 +472,7 @@ QByteArray  Audio::_getChannelLayouts(const AVCodec *codec, unsigned int prefere
         result.append("0x" + QString::number(*(p++), 16));
     if (prefered && (result.isEmpty() || result.contains("0x" + QString::number(prefered, 16))))
         result = QStringList() << ("0x" + QString::number(prefered, 16));
-    return (result.join(",").toAscii());
+    return (result.join(",").toLatin1());
 }
 
 void    Audio::_transcode(bool flush)

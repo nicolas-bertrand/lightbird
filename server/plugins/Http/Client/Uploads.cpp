@@ -1,5 +1,8 @@
-#include <QUuid>
 #include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QUrlQuery>
+#include <QUuid>
 
 #include "LightBird.h"
 #include "Plugin.h"
@@ -17,7 +20,7 @@ Uploads::~Uploads()
 
 void        Uploads::onDeserializeHeader(LightBird::IClient &client)
 {
-    QString id = client.getRequest().getUri().queryItemValue("id");
+    QString id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
     Upload  upload;
 
     // Gets some data on the files to upload
@@ -26,7 +29,7 @@ void        Uploads::onDeserializeHeader(LightBird::IClient &client)
     upload.idAccount = client.getAccount().getId();
     upload.file = QSharedPointer<QFile>(new QFile());
     upload.progress = 0;
-    upload.path = LightBird::cleanPath(QUrl::fromPercentEncoding(client.getRequest().getUri().queryItemValue("path").toAscii()), true) + "/";
+    upload.path = LightBird::cleanPath(QUrl::fromPercentEncoding(QUrlQuery(client.getRequest().getUri()).queryItemValue("path").toLatin1()), true) + "/";
     upload.size = client.getRequest().getHeader().value("content-length").toULongLong();
     upload.boundary = client.getRequest().getInformations().value("media-type").toMap().value("boundary").toByteArray();
     upload.boundary = "--" + upload.boundary.right(upload.boundary.size() - upload.boundary.indexOf('=') - 1);
@@ -189,9 +192,9 @@ void        Uploads::doExecution(LightBird::IClient &client)
     this->mutex.unlock();
 }
 
-void                Uploads::check(LightBird::IClient &client)
+void            Uploads::check(LightBird::IClient &client)
 {
-    QVariantList    result;
+    QJsonArray  array;
     LightBird::TableFiles file;
     LightBird::TableDirectories directory;
 
@@ -200,23 +203,23 @@ void                Uploads::check(LightBird::IClient &client)
     while (it.hasNext())
     {
         file.setId(it.next());
-        result << file.getName();
+        array.append(file.getName());
     }
     // Sends the list
     client.getResponse().setType("application/json");
-    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = result;
+    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(array);
 }
 
 void        Uploads::progress(LightBird::IClient &client)
 {
-    QString id = client.getRequest().getUri().queryItemValue("id");
+    QString id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
 
     client.getResponse().setType("application/json");
     this->mutex.lock();
     if (this->uploads.contains(id) && this->uploads[id].idAccount == client.getAccount().getId())
         client.getResponse().getContent().setData("{\"size\":" + QByteArray::number(this->uploads[id].size) +
                                                   ",\"progress\":" + QByteArray::number(this->uploads[id].progress) +
-                                                  ",\"complete\":" + QVariant(this->uploads[id].complete).toString().toAscii() + "}");
+                                                  ",\"complete\":" + QVariant(this->uploads[id].complete).toString().toLatin1() + "}");
     // The upload request is not yet arrived.
     else
         client.getResponse().getContent().setData("{\"complete\":false}");
@@ -225,7 +228,7 @@ void        Uploads::progress(LightBird::IClient &client)
 
 void        Uploads::stop(LightBird::IClient &client)
 {
-    QString id = client.getRequest().getUri().queryItemValue("id");
+    QString id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
 
     this->mutex.lock();
     if (this->uploads.contains(id) && this->uploads[id].idAccount == client.getAccount().getId())
@@ -241,7 +244,7 @@ void        Uploads::stop(LightBird::IClient &client)
 
 void                Uploads::cancel(LightBird::IClient &client)
 {
-    QString         id = client.getRequest().getUri().queryItemValue("id");
+    QString         id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
     QVariantList    files;
     LightBird::TableFiles file;
 

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <QDateTime>
-#include <QtPlugin>
 
 #include "File.h"
 
@@ -173,7 +172,7 @@ unsigned int     File::_toBytes(const QString &str)
     if (string.at(string.size() - 1).isLetter())
     {
         bytes = string.left(string.size() - 1).toInt();
-        type = string.at(string.size() - 1).toUpper().toAscii();
+        type = string.at(string.size() - 1).toUpper().toLatin1();
         if (type == 'K')
             bytes *= 1024;
         else if (type == 'M')
@@ -304,5 +303,3 @@ QString File::_mapToString(const QMap<QString, QString> &properties)
     }
     return (result);
 }
-
-Q_EXPORT_PLUGIN2(File, File)

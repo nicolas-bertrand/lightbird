@@ -3,6 +3,12 @@
 
 # include <QObject>
 # include <QReadWriteLock>
+
+// Windows does not define ssize_t
+# ifdef Q_OS_WIN
+#  define ssize_t int
+# endif // Q_OS_WIN32
+
 # include "gnutls/gnutls.h"
 
 # include "IPlugin.h"
@@ -24,6 +30,7 @@ class Plugin : public QObject,
                public LightBird::IDoWrite
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Tls")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
                  LightBird::IOnDestroy

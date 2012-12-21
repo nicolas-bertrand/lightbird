@@ -22,11 +22,11 @@ void            ParserClient::doSerializeHeader(QByteArray &data)
     QByteArray  type;
 
     // Defines the first line
-    if ((method = this->request.getMethod().toAscii()).isEmpty())
+    if ((method = this->request.getMethod().toLatin1()).isEmpty())
         method = "GET";
-    if ((uri = this->request.getUri().toString().toAscii()).isEmpty())
+    if ((uri = this->request.getUri().toString().toLatin1()).isEmpty())
         uri = "/";
-    if ((version = this->request.getVersion().toAscii()).isEmpty())
+    if ((version = this->request.getVersion().toLatin1()).isEmpty())
         version = "HTTP/1.1";
     data.append(method + " " + uri + " " + version + END_OF_LINE);
     // There is no content-length in chunk transfer encoding
@@ -36,7 +36,7 @@ void            ParserClient::doSerializeHeader(QByteArray &data)
     else if (!this->request.getHeader().contains("content-length"))
         this->request.getHeader().insert("content-length", QString::number(this->request.getContent().size()));
     // Adds the type
-    if (!(type = this->request.getType().toAscii()).isEmpty())
+    if (!(type = this->request.getType().toLatin1()).isEmpty())
         this->request.getHeader().insert("content-type", type);
     // Write the properties
     QMapIterator<QString, QString> it(this->request.getHeader());

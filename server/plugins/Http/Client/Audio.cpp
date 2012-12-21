@@ -1,5 +1,6 @@
 #include <QFileInfo>
 #include <qmath.h>
+#include <QUrlQuery>
 
 #include "Audio.h"
 
@@ -26,7 +27,7 @@ Audio::Audio(LightBird::IClient &client)
     {
         this->audio = static_cast<LightBird::IAudio *>(extensions.first());
         this->audio->setFormat(format);
-        this->audio->setStart(qFloor(this->uri.queryItemValue("start").toFloat()));
+        this->audio->setStart(qFloor(QUrlQuery(this->uri).queryItemValue("start").toFloat()));
         if (format == "ogg")
             this->audio->setCodec("libvorbis");
         else

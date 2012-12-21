@@ -53,7 +53,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
             data.insert("format", format->iformat->name);
             data.insert("format name", format->iformat->long_name);
             if (format->duration)
-                data.insert("duration", format->duration * av_q2d(AV_TIME_BASE_Q));
+                data.insert("duration", format->duration * (1.0 / (double)AV_TIME_BASE));
             if (format->bit_rate)
                 data.insert("bit rate", format->bit_rate);
             data.insert("streams", format->nb_streams);

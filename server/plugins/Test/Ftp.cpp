@@ -312,9 +312,9 @@ bool        Ftp::_command(QTcpSocket &s, const QString &request, const QString &
 {
     QString result;
 
-    if (s.write(QString(request + "\r\n").toAscii()) == -1 || !s.waitForBytesWritten(MSEC))
+    if (s.write(QString(request + "\r\n").toLatin1()) == -1 || !s.waitForBytesWritten(MSEC))
         return (false);
-    if (!response.isEmpty() && (!s.waitForReadyRead(MSEC) || !(result = s.readAll()).contains(response.toAscii())))
+    if (!response.isEmpty() && (!s.waitForReadyRead(MSEC) || !(result = s.readAll()).contains(response.toLatin1())))
     {
         this->log.error("Test failed", Properties("response", result.trimmed()).toMap(), "Ftp", "_command");
         return (false);
@@ -326,7 +326,7 @@ QString     Ftp::_command(QTcpSocket &s, const QString &request)
 {
     QString result;
 
-    if (s.write(QString(request + "\r\n").toAscii()) > 0 && s.waitForBytesWritten(MSEC) && s.waitForReadyRead(MSEC))
+    if (s.write(QString(request + "\r\n").toLatin1()) > 0 && s.waitForBytesWritten(MSEC) && s.waitForReadyRead(MSEC))
         result = s.readAll();
     return (result);
 }
@@ -389,7 +389,7 @@ QString     Ftp::_print(QTcpSocket &s, const QString &request)
     QString result;
 
     if (!request.isEmpty())
-        if (s.write(QString(request + "\r\n").toAscii()) == -1 || !s.waitForBytesWritten(MSEC))
+        if (s.write(QString(request + "\r\n").toLatin1()) == -1 || !s.waitForBytesWritten(MSEC))
             return (result);
 #ifdef WIN32
     Sleep(1000);

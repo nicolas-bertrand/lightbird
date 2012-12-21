@@ -290,7 +290,7 @@ int     Video::readPacket(void *opaque, uint8_t *, int buf_size)
     return (buf_size);
 }
 
-int64_t Video::seekPacket(void *opaque, int64_t offset, int whence)
+int64_t Video::seekPacket(void *opaque, int64_t offset, int)
 {
     Video   *instance = static_cast<Video *>(opaque);
 
@@ -542,7 +542,8 @@ bool    Video::_openAudioEncoder()
     this->audioEnc->sample_rate = this->audioFilterOut->inputs[0]->sample_rate;
     this->audioEnc->channel_layout = this->audioFilterOut->inputs[0]->channel_layout;
     this->audioEnc->channels = av_get_channel_layout_nb_channels(this->audioEnc->channel_layout);
-    this->audioEnc->time_base = (AVRational){ 1, this->audioDec->sample_rate };
+    this->audioEnc->time_base.num = 1;
+    this->audioEnc->time_base.den = this->audioDec->sample_rate;
     if (this->formatOut->oformat->flags & AVFMT_GLOBALHEADER)
         this->audioEnc->flags |= CODEC_FLAG_GLOBAL_HEADER;
     this->audioEnc->bit_rate = this->audioBitRate;
@@ -591,7 +592,7 @@ bool    Video::_configureInputVideoFilter(AVFilterInOut *inputs)
                     QString::number(SWS_BILINEAR + ((this->videoDec->flags & CODEC_FLAG_BITEXACT) ? SWS_BITEXACT : 0)));
     if (this->videoStreamIn->r_frame_rate.num && this->videoStreamIn->r_frame_rate.den)
         args.append(QString(":frame_rate=%1/%2").arg(QString::number(this->videoStreamIn->r_frame_rate.num), QString::number(this->videoStreamIn->r_frame_rate.den)));
-    if ((ret = avfilter_graph_create_filter(&this->videoFilterIn, avfilter_get_by_name("buffer"), "buffer", args.toAscii().data(), NULL, this->videoFilterGraph)) < 0)
+    if ((ret = avfilter_graph_create_filter(&this->videoFilterIn, avfilter_get_by_name("buffer"), "buffer", args.toLatin1().data(), NULL, this->videoFilterGraph)) < 0)
     {
         LOG_ERROR("Could not create the buffer filter", this->_getProperties(ret, Properties("args", args)), "Video", "_configureInputVideoFilter");
         return (false);
@@ -623,7 +624,7 @@ bool    Video::_configureOutputVideoFilter(AVFilterInOut *outputs)
     if ((this->width || this->height) && (this->width != -1 || this->height != -1))
     {
         args = QString("%1:%2:flags=0x%3").arg(QString::number(this->width),
-               QString::number(this->height), QString::number(SWS_BICUBIC, 16)).toAscii();
+               QString::number(this->height), QString::number(SWS_BICUBIC, 16)).toLatin1();
         if ((ret = avfilter_graph_create_filter(&scale, avfilter_get_by_name("scale"), "scale", args.data(), NULL, this->videoFilterGraph)) < 0)
         {
             LOG_ERROR("Could not create the scale filter", this->_getProperties(ret, Properties("args", args)), "Video", "_configureOutputVideoFilter");
@@ -652,7 +653,7 @@ bool    Video::_configureOutputVideoFilter(AVFilterInOut *outputs)
     }
     if (this->frameRate)
     {
-        args = QString("fps=%1/1").arg(QString::number(this->frameRate)).toAscii();
+        args = QString("fps=%1/1").arg(QString::number(this->frameRate)).toLatin1();
         if ((ret = avfilter_graph_create_filter(&fps, avfilter_get_by_name("fps"), "fps", args.data(), NULL, this->videoFilterGraph)) < 0)
         {
             LOG_ERROR("Could not create the fps filter", this->_getProperties(ret, Properties("args", args)), "Video", "_configureOutputVideoFilter");
@@ -706,7 +707,7 @@ bool    Video::_configureInputAudioFilter(AVFilterInOut *inputs)
     args = QString("time_base=1/%1:sample_rate=%1:sample_fmt=%2:channel_layout=0x%3")
                   .arg(QString::number(this->audioDec->sample_rate),
                        av_get_sample_fmt_name(this->audioDec->sample_fmt),
-                       QString::number(this->audioDec->channel_layout, 16)).toAscii();
+                       QString::number(this->audioDec->channel_layout, 16)).toLatin1();
     if ((ret = avfilter_graph_create_filter(&this->audioFilterIn, avfilter_get_by_name("abuffer"), "abuffer", args.data(), NULL, this->audioFilterGraph)) < 0)
     {
         LOG_ERROR("Could not create the abuffer filter", this->_getProperties(ret, Properties("args", args)), "Video", "_configureInputAudioFilter");
@@ -795,7 +796,7 @@ QByteArray  Video::_getSampleRates(const AVCodec *codec, unsigned int prefered)
         result.append(QString::number(*(p++)));
     if (prefered && (result.isEmpty() || result.contains(QString::number(prefered))))
         result = QStringList() << QString::number(prefered);
-    return (result.join(",").toAscii());
+    return (result.join(",").toLatin1());
 }
 
 QByteArray  Video::_getChannelLayouts(const AVCodec *codec, unsigned int prefered)
@@ -807,7 +808,7 @@ QByteArray  Video::_getChannelLayouts(const AVCodec *codec, unsigned int prefere
         result.append("0x" + QString::number(*(p++), 16));
     if (prefered && (result.isEmpty() || result.contains("0x" + QString::number(prefered, 16))))
         result = QStringList() << ("0x" + QString::number(prefered, 16));
-    return (result.join(",").toAscii());
+    return (result.join(",").toLatin1());
 }
 
 bool    Video::_transcodeVideo()

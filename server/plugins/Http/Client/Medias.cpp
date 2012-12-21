@@ -1,3 +1,5 @@
+#include <QUrlQuery>
+
 #include "Audio.h"
 #include "LightBird.h"
 #include "Medias.h"
@@ -12,7 +14,7 @@ Medias::~Medias()
 {
     QMapIterator<QString, Media *> it(this->medias);
     while (it.hasNext())
-        delete it.next();
+        delete it.next().value();
 }
 
 void    Medias::start(LightBird::IClient &client, Medias::Type type)
@@ -32,7 +34,10 @@ void    Medias::start(LightBird::IClient &client, Medias::Type type)
     else if (type == Medias::VIDEO)
         media = new Video(client);
     if (!media || media->isError())
-        return (delete media);
+    {
+        delete media;
+        return ;
+    }
     this->medias[client.getId()] = media;
 }
 
@@ -73,7 +78,7 @@ void        Medias::update(LightBird::IClient &client)
 void    Medias::stop(LightBird::IClient &client)
 {
     this->mutex.lock();
-    this->stopList << (client.getSession()->getInformation("identifiant").toString() + ":" + client.getRequest().getUri().queryItemValue("mediaId"));
+    this->stopList << (client.getSession()->getInformation("identifiant").toString() + ":" + QUrlQuery(client.getRequest().getUri()).queryItemValue("mediaId"));
     this->mutex.unlock();
 }
 

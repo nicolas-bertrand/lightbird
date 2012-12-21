@@ -1,5 +1,3 @@
-#include <QtPlugin>
-
 #include "Plugin.h"
 
 Plugin  *Plugin::instance = NULL;
@@ -156,5 +154,3 @@ void    Plugin::_loadConfiguration()
         logLevel = "FATAL";
     av_log_set_level(logLevels.value(logLevel));
 }
-
-Q_EXPORT_PLUGIN2(plugin, Plugin)

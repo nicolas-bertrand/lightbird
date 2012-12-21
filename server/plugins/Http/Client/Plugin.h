@@ -34,6 +34,7 @@ class Plugin : public QObject,
                public LightBird::ITimer
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Client")
     Q_INTERFACES(LightBird::IPlugin LightBird::IOnDeserialize LightBird::IDoExecution LightBird::IOnSerialize
                  LightBird::IOnFinish LightBird::IOnDestroy LightBird::ITimer)
 

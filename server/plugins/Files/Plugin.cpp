@@ -1,5 +1,3 @@
-#include <QtPlugin>
-
 #include "Plugin.h"
 
 Plugin::Plugin()
@@ -53,5 +51,3 @@ bool    Plugin::timer(const QString &name)
     this->files->timer();
     return (true);
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

@@ -13,6 +13,7 @@ class Plugin : public QObject,
                public LightBird::IMime
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Extensions.Mime")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IExtension)
 

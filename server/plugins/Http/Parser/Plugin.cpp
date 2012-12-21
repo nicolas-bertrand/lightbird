@@ -1,4 +1,3 @@
-#include <QtPlugin>
 #include <QDomNode>
 
 #include "ParserClient.h"
@@ -130,5 +129,3 @@ Parser      *Plugin::_getParser(const LightBird::IClient &client)
     this->mutex.unlock();
     return (parser);
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

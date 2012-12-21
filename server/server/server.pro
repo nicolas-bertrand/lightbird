@@ -3,7 +3,6 @@ TEMPLATE = app
 CONFIG += qt \
     console \
     thread \
-    sql \
     warn_on
 DEPENDPATH += sources \
     headers \
@@ -20,7 +19,10 @@ INCLUDEPATH += headers \
     ../library
 
 # Qt Modules
-QT += xml \
+QT += core \
+    gui \
+    widgets \
+    xml \
     network \
     sql
 

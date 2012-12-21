@@ -1,4 +1,3 @@
-#include <QCryptographicHash>
 #include <QSharedPointer>
 #include <QSqlQuery>
 #include <QStringList>
@@ -101,14 +100,14 @@ void            Database::_accounts()
         ASSERT(a2.setIdFromNameAndPassword("a3", "p1"));
         ASSERT(a2.getId() == a1.getId());
         ASSERT(a2.setIdFromNameAndPassword("a2", ""));
-        ASSERT(a2.setIdFromIdentifiantAndSalt(LightBird::sha256("a3" + LightBird::sha256("p1" + a2.getIdFromName("a3").toAscii()) + "salt").data(), "salt"));
-        ASSERT(a2.setIdFromIdentifiantAndSalt(LightBird::sha256(QByteArray("a3") + a1.getPassword().toAscii() + "salt").data(), "salt"));
+        ASSERT(a2.setIdFromIdentifiantAndSalt(LightBird::sha256("a3" + LightBird::sha256("p1" + a2.getIdFromName("a3").toLatin1()) + "salt").data(), "salt"));
+        ASSERT(a2.setIdFromIdentifiantAndSalt(LightBird::sha256(QByteArray("a3") + a1.getPassword().toLatin1() + "salt").data(), "salt"));
         ASSERT(a2.setIdFromIdentifiantAndSalt(LightBird::sha256(QByteArray("a2") + "salt").data(), "salt"));
-        ASSERT(a1.getPassword() == LightBird::sha256("p1" + a2.getIdFromName("a3").toAscii()));
+        ASSERT(a1.getPassword() == LightBird::sha256("p1" + a2.getIdFromName("a3").toLatin1()));
         ASSERT(a1.setPassword(""));
         ASSERT(a1.getPassword().isEmpty());
         ASSERT(a1.setPassword("p2"));
-        ASSERT(a1.getPassword() == LightBird::sha256("p2" + a2.getIdFromName("a3").toAscii()));
+        ASSERT(a1.getPassword() == LightBird::sha256("p2" + a2.getIdFromName("a3").toLatin1()));
         ASSERT(a1.isActive());
         ASSERT(a1.isActive(false));
         ASSERT(!a1.isActive());

@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <cstddef>
-#include <QtPlugin>
 #include <QDomNode>
 
 #include "Plugin.h"
@@ -217,5 +216,3 @@ Plugin::Configuration   &Plugin::getConfiguration()
 {
     return (Plugin::configuration);
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

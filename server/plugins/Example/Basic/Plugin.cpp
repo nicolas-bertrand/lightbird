@@ -1,5 +1,3 @@
-#include <QtPlugin>
-
 #include "LightBird.h"
 #include "Plugin.h"
 
@@ -43,5 +41,3 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.version = "1.0";
     metadata.licence = "CC BY-NC-SA 3.0";
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

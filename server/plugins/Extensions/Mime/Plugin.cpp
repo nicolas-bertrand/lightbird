@@ -1,5 +1,3 @@
-#include <QtPlugin>
-
 #include "Plugin.h"
 
 Plugin::Plugin()
@@ -72,5 +70,3 @@ QString     Plugin::getMime(const QString &file)
     }
     return ("application/octet-stream");
 }
-
-Q_EXPORT_PLUGIN2(plugin, Plugin)

@@ -1,4 +1,3 @@
-#include <QtPlugin>
 #include <QFileInfo>
 #include <qmath.h>
 
@@ -143,14 +142,14 @@ bool    Plugin::doExecution(LightBird::IClient &client)
     {
         html = this->content.arg(title, body);
         response.getHeader().insert("content-type", "text/html");
-        response.getContent().setData(html.toAscii());
+        response.getContent().setData(html.toLatin1());
     }
     return (true);
 }
 
 bool    Plugin::_authenticate(LightBird::IClient &client, LightBird::IRequest &request, LightBird::IResponse &response)
 {
-    QString password = QByteArray::fromBase64(QString(request.getHeader().value("authorization")).remove("Basic ").toAscii());
+    QString password = QByteArray::fromBase64(QString(request.getHeader().value("authorization")).remove("Basic ").toLatin1());
     QString name = password.left(password.indexOf(':'));
 
     password = password.right(password.size() - name.size() - 1);
@@ -201,5 +200,3 @@ QString Plugin::_size(quint64 s)
         result += " TB";
     return (result);
 }
-
-Q_EXPORT_PLUGIN2(Plugin, Plugin)

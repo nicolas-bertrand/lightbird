@@ -80,7 +80,7 @@ QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifian
         // Check the identifiant of all the account
         for (i = 0, s = result.size(); i < s; ++i)
             // If the identifiant of the account match, it is connected
-            if (identifiant == sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toAscii()))
+            if (identifiant == sha256(result[i]["name"].toByteArray() + result[i]["password"].toByteArray() + salt.toLatin1()))
                 return (result[i]["id"].toString());
     return ("");
 }
@@ -331,6 +331,6 @@ QString         TableAccounts::passwordHash(const QString &password, const QStri
     if (password.isEmpty())
         return (QString());
     if (id.isEmpty())
-        return (sha256(password.toAscii()));
-    return (sha256(password.toAscii() + id.toAscii()));
+        return (sha256(password.toLatin1()));
+    return (sha256(password.toLatin1() + id.toLatin1()));
 }

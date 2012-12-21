@@ -9,7 +9,7 @@
         <getSession>SELECT expiration, id_account, created FROM sessions WHERE id=:id</getSession>
         <getInformations>SELECT name, value FROM sessions_informations WHERE id_session=:id_session</getInformations>
         <add>INSERT INTO sessions (id, expiration, id_account) VALUES (:id, :expiration, :id_account)</add>
-        <getSessions>SELECT id FROM sessions WHERE id_account=:id_account OR :ignore_account="true"</getSessions>
+        <getSessions>SELECT id FROM sessions WHERE id_account=:id_account OR :ignore_account=1</getSessions>
         <delete>DELETE FROM sessions WHERE id=:id</delete>
         <deleteExpiredSessions>DELETE FROM sessions WHERE expiration&lt;:expiration OR expiration=""</deleteExpiredSessions>
         <setAccount>UPDATE sessions SET id_account=:id_account WHERE id=:id</setAccount>
@@ -121,7 +121,7 @@
         <getAccounts>SELECT id_account FROM accounts_groups WHERE id_group=:id_group</getAccounts>
     </TableGroups>
     <TableLimits>
-        <add>INSERT INTO limits (id, name, value, id_accessor, id_object) VALUES (:id, :name, :value, :id_accessor, :object)</add>
+        <add>INSERT INTO limits (id, name, value, id_accessor, id_object) VALUES (:id, :name, :value, :id_accessor, :id_object)</add>
         <getName>SELECT name FROM limits WHERE id=:id</getName>
         <setName>UPDATE limits SET name=:name WHERE id=:id</setName>
         <getValue>SELECT value FROM limits WHERE id=:id</getValue>

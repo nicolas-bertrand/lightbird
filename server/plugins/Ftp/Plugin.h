@@ -41,6 +41,7 @@ class Plugin : public QObject,
                public LightBird::ITimer
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Ftp")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
                  LightBird::IOnDisconnect

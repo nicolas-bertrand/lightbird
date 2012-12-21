@@ -41,7 +41,6 @@ SOURCES = Identify.cpp \
     Mutex.cpp \
     Preview.cpp \
     Properties.cpp \
-    Sha256.cpp \
     Table.cpp \
     TableAccessors.cpp \
     TableAccounts.cpp \

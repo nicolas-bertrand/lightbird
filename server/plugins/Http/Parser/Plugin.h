@@ -31,6 +31,7 @@ class Plugin : public QObject,
                public LightBird::IOnDisconnect
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Parser")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
                  LightBird::IOnProtocol

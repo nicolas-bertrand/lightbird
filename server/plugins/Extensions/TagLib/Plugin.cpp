@@ -1,5 +1,3 @@
-#include <QtPlugin>
-
 #include "Plugin.h"
 
 Plugin::Plugin()
@@ -72,5 +70,3 @@ void    *Plugin::getExtension(const QString &name)
 void    Plugin::releaseExtension(const QString &, void *)
 {
 }
-
-Q_EXPORT_PLUGIN2(plugin, Plugin)

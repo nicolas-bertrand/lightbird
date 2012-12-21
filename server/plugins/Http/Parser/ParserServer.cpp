@@ -113,20 +113,20 @@ bool        ParserServer::doDeserializeContent(const QByteArray &data, quint64 &
 
 void            ParserServer::doSerializeHeader(QByteArray &data)
 {
-    QByteArray  version = this->request.getVersion().toAscii();
+    QByteArray  version = this->request.getVersion().toLatin1();
     QByteArray  code = "200";
     QByteArray  message = "OK";
     QString     type;
 
     // Defines the first line
     if (!this->response.getVersion().isEmpty())
-        version = this->response.getVersion().toAscii();
+        version = this->response.getVersion().toLatin1();
     else if (version.isEmpty())
         version = "HTTP/1.1";
     if (this->response.getCode())
         code = QByteArray::number(this->response.getCode());
     if (!this->response.getMessage().isEmpty())
-        message = this->response.getMessage().toAscii();
+        message = this->response.getMessage().toLatin1();
     data.append(version + " " + code + " " + message + END_OF_LINE);
     // There is no content-length in chunk transfer encoding
     if ((this->chunkEncoding = (this->response.getHeader().value("transfer-encoding") == "chunked")))

@@ -13,6 +13,7 @@ class Plugin : public QObject,
                public LightBird::IDoExecution
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Files")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IDoExecution)
 

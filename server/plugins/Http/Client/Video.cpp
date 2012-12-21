@@ -1,5 +1,6 @@
 #include <QFileInfo>
 #include <qmath.h>
+#include <QUrlQuery>
 
 #include "Video.h"
 
@@ -17,7 +18,7 @@ Video::Video(LightBird::IClient &client)
     if (!(extensions = this->api.extensions().get("IVideo")).isEmpty())
     {
         this->video = static_cast<LightBird::IVideo *>(extensions.first());
-        this->video->setStart(qFloor(this->uri.queryItemValue("start").toFloat()));
+        this->video->setStart(qFloor(QUrlQuery(this->uri).queryItemValue("start").toFloat()));
         //this->video->setDuration(10);
         // Set the quality of the video
         /*width -= 100;

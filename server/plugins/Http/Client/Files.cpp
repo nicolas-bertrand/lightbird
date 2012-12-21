@@ -1,3 +1,7 @@
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+
 #include "IDatabase.h"
 
 #include "Files.h"
@@ -12,13 +16,12 @@ Files::~Files()
 {
 }
 
-void                Files::get(LightBird::IClient &client)
+void    Files::get(LightBird::IClient &client)
 {
     LightBird::TableFiles file;
     QSqlQuery             query;
     QVector<QVariantMap>  result;
-    QVariantMap           row;
-    QVariantList          rows;
+    QJsonArray            array;
 
     query.prepare(Plugin::api().database().getQuery("HttpClient", "select_all_files"));
     if (!Plugin::api().database().query(query, result))
@@ -26,11 +29,22 @@ void                Files::get(LightBird::IClient &client)
     QVectorIterator<QVariantMap> it(result);
     while (it.hasNext())
     {
+        QJsonObject object;
         file.setId(it.peekNext()["id"].toString());
-        row = file.getInformations();
-        row.unite(it.next());
-        rows.push_back(row);
+        QMapIterator<QString, QVariant> info(file.getInformations());
+        while (info.hasNext())
+        {
+            object.insert(info.peekNext().key(), info.peekNext().value().toString());
+            info.next();
+        }
+        object.insert("id", it.peekNext()["id"].toString());
+        object.insert("name", it.peekNext()["name"].toString());
+        object.insert("type", it.peekNext()["type"].toString());
+        object.insert("id_directory", it.peekNext()["id_directory"].toString());
+        object.insert("created", it.peekNext()["created"].toString());
+        array.append(object);
+        it.next();
     }
     client.getResponse().setType("application/json");
-    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = rows;
+    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(array);
 }

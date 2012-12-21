@@ -34,7 +34,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
     if (!QFileInfo(source).isFile() || source == destination || destination.isEmpty())
         return (false);
     // Gets the image of the music if there is one
-    TagLib::MPEG::File f(source.toAscii().data());
+    TagLib::MPEG::File f(source.toLatin1().data());
     TagLib::ID3v2::Tag *id3v2tag = f.ID3v2Tag();
     if(!id3v2tag)
         return (false);

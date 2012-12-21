@@ -43,7 +43,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
             throw false;
         properties.add("source", source).add("destination", destination).add("format", fmt);
         // Opens the source and its video stream
-        if ((ret = avformat_open_input(&format, source.toAscii().data(), NULL, NULL)) < 0)
+        if ((ret = avformat_open_input(&format, source.toLatin1().data(), NULL, NULL)) < 0)
         {
             LOG_DEBUG("Could not open source file", properties.add("error", ret).toMap(), "Preview", "generate");
             throw false;

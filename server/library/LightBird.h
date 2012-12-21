@@ -89,10 +89,8 @@ namespace LightBird
     /// @return True on success.
     LIB bool        saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format, float quality = -1);
 
-    /// @brief Implementation of SHA-256.
-    /// @author jagatsastry.nitk@gmail.com
-    /// @return The hash of data in hex.
-    LIB QByteArray  sha256(QByteArray data);
+    /// @brief Generates the SHA-256 of data.
+    LIB QByteArray  sha256(const QByteArray &data);
 
     /// @brief Replaces the unprintable ascii characteres of data by a dot (by default)
     /// and truncates the data if necessary.

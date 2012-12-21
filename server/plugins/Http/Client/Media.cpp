@@ -1,4 +1,5 @@
 #include <QFileInfo>
+#include <QUrlQuery>
 
 #include "Media.h"
 #include "Plugin.h"
@@ -12,7 +13,7 @@ Media::Media(LightBird::IClient &cl)
     this->error = false;
     this->response.getContent().setStorage(LightBird::IContent::BYTEARRAY);
     // Extract the file id from the uri
-    this->file.setId(this->uri.queryItemValue("fileId"));
+    this->file.setId(QUrlQuery(this->uri).queryItemValue("fileId"));
     // If the file doesn't exists, an error occured
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
     {
@@ -26,7 +27,7 @@ Media::Media(LightBird::IClient &cl)
         return ;
     }
     // Gets the media id (identifiant:mediaId)
-    this->mediaId = this->client.getSession()->getInformation("identifiant").toString() + ":" + this->uri.queryItemValue("mediaId");
+    this->mediaId = this->client.getSession()->getInformation("identifiant").toString() + ":" + QUrlQuery(this->uri).queryItemValue("mediaId");
 }
 
 Media::~Media()

@@ -1,8 +1,8 @@
-#include <QtPlugin>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
+#include <QUrlQuery>
 
 #include "IMime.h"
 
@@ -144,7 +144,7 @@ bool        Plugin::doExecution(LightBird::IClient &client)
             uri = "index.html";
         path = this->_api->getPluginPath() + this->wwwDir + "/" + interface + "/" + uri;
         // If there a file id in the uri, the file is in the filesPath
-        if (!client.getRequest().getUri().queryItemValue("fileId").isEmpty())
+        if (!QUrlQuery(client.getRequest().getUri()).queryItemValue("fileId").isEmpty())
             this->_getFile(client);
         // If the file exists in the www directory
         else if (QFileInfo(path).isFile())
@@ -206,8 +206,8 @@ bool    Plugin::timer(const QString &name)
 void    Plugin::_session(LightBird::IClient &client)
 {
     QString id;
-    QString sessionId = client.getRequest().getUri().queryItemValue("sessionId");
-    QString identifiant = client.getRequest().getUri().queryItemValue("identifiant");
+    QString sessionId = QUrlQuery(client.getRequest().getUri()).queryItemValue("sessionId");
+    QString identifiant = QUrlQuery(client.getRequest().getUri()).queryItemValue("identifiant");
     LightBird::Session session;
 
     // If the session id or the identifiant doesn't exists, the account is cleared
@@ -287,7 +287,7 @@ void    Plugin::_translation(LightBird::IClient &client, const QString &interfac
 
 void    Plugin::_getFile(LightBird::IClient &client)
 {
-    LightBird::TableFiles   file(client.getRequest().getUri().queryItemValue("fileId"));
+    LightBird::TableFiles   file(QUrlQuery(client.getRequest().getUri()).queryItemValue("fileId"));
     QString path;
 
     // Checks that the user can access to the file
@@ -298,7 +298,7 @@ void    Plugin::_getFile(LightBird::IClient &client)
     if (!QFileInfo(path).isFile())
         return (this->response(client, 404, "Not Found", "File not found."));
     // If the file has to be downloaded by the browser, a special MIME is used
-    if (client.getRequest().getUri().queryItemValue("download") != "true")
+    if (QUrlQuery(client.getRequest().getUri()).queryItemValue("download") != "true")
         client.getResponse().setType(this->_getMime(path));
     else
         client.getResponse().setType(DEFAULT_CONTENT_TYPE);
@@ -410,5 +410,3 @@ Uploads &Plugin::uploads()
 {
     return (Plugin::_instance->_uploads);
 }
-
-Q_EXPORT_PLUGIN2(plugin, Plugin)

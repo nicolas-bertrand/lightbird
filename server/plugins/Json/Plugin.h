@@ -13,6 +13,7 @@ class Plugin : public QObject,
                public LightBird::IOnSerialize
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "cc.lightbird.Json")
     Q_INTERFACES(LightBird::IPlugin LightBird::IOnDeserialize LightBird::IOnSerialize)
 
 public:
@@ -31,9 +32,6 @@ public:
     bool        onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
 
 private:
-    QByteArray  _serializer(const QVariant &toAnalyze);
-    QByteArray  _replace(QByteArray str);
-
     LightBird::IApi *api; ///< The LightBird's Api.
 };
 

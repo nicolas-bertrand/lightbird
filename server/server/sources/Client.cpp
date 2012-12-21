@@ -218,7 +218,10 @@ bool    Client::_read()
 void    Client::write(QByteArray *data)
 {
     if (data->size() == 0)
-        return (delete data);
+    {
+        delete data;
+        return ;
+    }
     if (Log::instance()->isTrace())
         Log::trace("Writing data", Properties("id", this->id).add("data", LightBird::simplify(*data)).add("size", data->size()), "Client", "write");
     else if (Log::instance()->isDebug())

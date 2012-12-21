@@ -1,3 +1,4 @@
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QImageWriter>
@@ -84,13 +85,18 @@ bool    LightBird::saveImage(QImage &image, QString &fileName, LightBird::IImage
     QList<QByteArray> supported = QImageWriter::supportedImageFormats();
     QString extension = LightBird::getImageExtension(format);
 
-    if (!supported.contains(extension.toAscii()))
+    if (!supported.contains(extension.toLatin1()))
         return (false);
     if (!fileName.contains(QRegExp("\\." + extension + "$")))
         fileName.append("." + extension);
     if (quality >= 0)
         quality = qRound(quality * 100);
-    return (image.save(fileName, extension.toAscii().data(), (int)quality));
+    return (image.save(fileName, extension.toLatin1().data(), (int)quality));
+}
+
+QByteArray  LightBird::sha256(const QByteArray &data)
+{
+    return (QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex());
 }
 
 QByteArray LightBird::simplify(QByteArray data, char replace, quint64 maxSize)
