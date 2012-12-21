@@ -130,20 +130,21 @@ function request(method, url, callback, data, type)
 	return (HttpRequest);
 }
 
-function nl2br(text)
+// Replaces the end of line characters of the text (\r\n \n or \r) by the HTML equivalent (<br />).
+function newLineToBr(text)
 {
-	return (text);
+    var regexp;
+    
 	text = escape(text);
-	if (text.indexOf('%0D%0A') > -1)
-		re_nlchar = /%0D%0A/g;
-	else if (text.indexOf('%0A') > -1)
-		re_nlchar = /%0A/g;
-	else if (text.indexOf('%0D') > -1)
-		re_nlchar = /%0D/g;
-	if (typeof(renlchar) == "undefined")
-		return unescape(text);
-	else
-		return unescape(text.replace(renlchar, '<br />'));
+	if (text.indexOf("%0D%0A") > -1)
+		regexp = /%0D%0A/g;
+	else if (text.indexOf("%0A") > -1)
+		regexp = /%0A/g;
+	else if (text.indexOf("%0D") > -1)
+		regexp = /%0D/g;
+	if (regexp)
+		return unescape(text.replace(regexp, "<br />"));
+    return unescape(text);
 }
 
 // Changes the opacity of the node, if the browser support it.

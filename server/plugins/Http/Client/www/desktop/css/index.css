@@ -492,7 +492,7 @@ a:visited
 
 /* Tasks */
 
-#desktop>.middle>.tasks>.task
+#tasks>.task
 {
     position: absolute;
     background-color: #FFFFFF;
@@ -501,62 +501,62 @@ a:visited
     border: 1px solid #c4d1e0;
 }
 
-#desktop>.middle>.tasks>.task.window
+#tasks>.task.window
 {
     border: 1px solid rgba(139, 161, 190, 0.5);
     background-clip: padding-box;
 }
 
-#desktop>.middle>.tasks>.task.display
+#tasks>.task.display
 {
     display: block;
 }
 
-#desktop>.middle>.tasks>.task.highlight
+#tasks>.task.highlight
 {
     border: 1px solid rgba(89, 202, 255, 1);
     box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.highlight.window
+#tasks>.task.highlight.window
 {
     border: 1px solid rgba(77, 255, 97, 1);
     box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.highlight.focus
+#tasks>.task.highlight.focus
 {
     border: 1px solid rgba(255, 193, 0, 1);
     box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
 }
 
-#desktop>.middle>.tasks>.task.no_background,
-#desktop>.middle>.tasks>.task.no_background.highlight
+#tasks>.task.no_background,
+#tasks>.task.no_background.highlight
 {
     background-color: inherit;
     border: 1px solid rgba(255, 255, 255, 0);
     box-shadow: none;
 }
 
-#desktop>.middle>.tasks>.task.no_background.create_page
+#tasks>.task.no_background.create_page
 {
     background-color: rgba(255, 255, 255, 0.33); /* #windows>.window */
 }
 
-#desktop>.middle>.tasks>.task.no_border,
-#desktop>.middle>.tasks>.task.no_border.highlight
+#tasks>.task.no_border,
+#tasks>.task.no_border.highlight
 {
     border: none;
     box-shadow: none;
 }
 
-#desktop>.middle>.tasks>.task.disable_overflow
+#tasks>.task.disable_overflow
 {
     overflow: visible;
 }
 
-#desktop>.middle>.tasks>.task.hide_border,
-#desktop>.middle>.tasks>.task.hide_border.highlight
+#tasks>.task.hide_border,
+#tasks>.task.hide_border.highlight
 {
     border: none;
     box-shadow: none;

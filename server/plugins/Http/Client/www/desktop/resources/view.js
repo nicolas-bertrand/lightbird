@@ -5,8 +5,8 @@ function ResourceView(task, playlistInterface, fileIndex)
     resource.init = function ()
     {
         // Members
-        resource.root = $(task.content).children(".view")[0]; // The root element of the resource
         resource.file = gl_files.list[fileIndex]; // The file displayed by the resource
+        resource.root = $(task.content).children("." + resource.file.type)[0]; // The root element of the resource
         resource.isFocus = true; // If the task had the focus in the last mouse down event
         resource.object; // The object that displays the file, based on its type. Implements the player interface.
         resource.playlistInterface = playlistInterface; // The playlist that manages this file (may be undefined)
@@ -19,6 +19,7 @@ function ResourceView(task, playlistInterface, fileIndex)
         // Default values
         task.setResource(resource);
         resource.playlistInterface.readyToPlay(resource.object, fileIndex);
+        $(task.content).addClass("view_" + resource.file.type);
         
         // Events
         $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
@@ -40,6 +41,64 @@ function ResourceView(task, playlistInterface, fileIndex)
             resource[key] = undefined;
     }
 
+    // Replaces < and > by their HTML equivalent.
+    resource.escape = function (text)
+    {
+        return (text.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
+    }
+    
+// Displays a document.
+resource.Document = function ()
+{
+    var self = this;
+    
+    self.init = function ()
+    {
+        // Members
+        self.pre = $(resource.root).children("pre"); // The element that stores the text of the document
+        
+        request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
+        {
+            self.pre.html(resource.escape(HttpRequest.responseText));
+        });
+    }
+    
+    self.close = function ()
+    {
+    }
+    
+    self.onResize = function (left, top, width, height)
+    {
+    }
+    
+// Player interface
+    {
+        self.play = function ()
+        {
+        }
+        
+        self.pause = function ()
+        {
+        }
+        
+        self.seek = function (time)
+        {
+        }
+        
+        self.getMedia = function ()
+        {
+        }
+        
+        self.setPlaylist = function (playlistInterface)
+        {
+            resource.playlistInterface = playlistInterface;
+        }
+    }
+ 
+    self.init();
+    return (self);
+}
+
 // Displays the image using several resize methods and backgrounds.
 resource.Image = function ()
 {
@@ -49,22 +108,18 @@ resource.Image = function ()
     {
         // Members
         self.background = "transparent"; // The background currently displayed (transparent, black or default)
-        self.image; // The img element
-        self.container; // The div that contains the image element
+        self.container = $(resource.root).children(".container")[0]; // The div that contains the image element
+        self.image = $(self.container).children("img")[0]; // The img element
         self.resize = self.keepRatio; // The function used to resize the image when onResize is called
         
         // Default values
-        $(task.content).addClass("view_image");
         task.setBackground(false); // No background
         task.setBorder(false); // No borders
         task.setOverflow(false); // No overflow
     
         // Displays the image
-        var file = resource.file;
-		var url = file.name + "?fileId=" + file.id + getSession();
-        resource.root.innerHTML = "<div class=\"image\"><img src=\"" + url + "\" alt=\"" + file.name + "\" /></div>";
-        self.container = $(resource.root).children(".image")[0];
-        self.image = $(self.container).children("img")[0];
+        self.image.src = resource.file.name + "?fileId=" + resource.file.id + getSession();
+        self.image.alt = resource.file.name;
         
         // Events
         $(task.content).click(function (e) { self.changeBackground(e); });
@@ -288,6 +343,58 @@ resource.Image = function ()
     return (self);
 }
 
+// Displays the other files types.
+resource.Other = function ()
+{
+    var self = this;
+    
+    self.init = function ()
+    {
+        // Members
+        self.pre = $(resource.root).children("pre"); // The element that stores the text of the file
+        
+        request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
+        {
+            self.pre.html(resource.escape(HttpRequest.responseText));
+        });
+    }
+    
+    self.close = function ()
+    {
+    }
+    
+    self.onResize = function (left, top, width, height)
+    {
+    }
+    
+// Player interface
+    {
+        self.play = function ()
+        {
+        }
+        
+        self.pause = function ()
+        {
+        }
+        
+        self.seek = function (time)
+        {
+        }
+        
+        self.getMedia = function ()
+        {
+        }
+        
+        self.setPlaylist = function (playlistInterface)
+        {
+            resource.playlistInterface = playlistInterface;
+        }
+    }
+ 
+    self.init();
+    return (self);
+}
+
 // Plays the video.
 resource.Video = function ()
 {
@@ -296,23 +403,19 @@ resource.Video = function ()
     self.init = function ()
     {
         // Members
-        self.video; // The video element
-        self.container; // The div that contains the video element
+        self.container = $(resource.root).children(".container")[0]; // The div that contains the video element
+        self.video = $(self.container).children("video")[0]; // The video element
       //self.video.mediaId; // The id of the media, used to communicate with the server
         self.background = "black"; // The background currently displayed (black or transparent)
         self.format = "webm";
         
         // Defalut values
-        $(task.content).addClass("view_video");
         task.setBackground(true, "view_background_black");
         task.setBorder(false);
         task.setOverflow(false);
         
         // Creates the video
         var file = resource.file;
-        resource.root.innerHTML = "<div class=\"video\"><video /></div>";
-        self.container = $(resource.root).children(".video")[0];
-        self.video = $(self.container).children("video")[0];
         self.video.mediaId = getUuid();
         // Checks the supported video formats
         if (self.video.canPlayType("video/webm; codecs=\"vp8.0, vorbis\""))

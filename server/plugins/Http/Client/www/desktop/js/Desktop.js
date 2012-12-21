@@ -18,7 +18,7 @@ function Desktop(task)
         self.node.tasks_list.top = $(self.node.tasks_list).children(".top")[0];
         self.node.tasks_list.bottom = $(self.node.tasks_list).children(".bottom")[0];
         self.node.pages = $(self.node.middle).children(".pages")[0];
-        self.node.tasks = $(self.node.middle).children(".tasks")[0];
+        self.node.tasks = $(self.node.middle).children("#tasks")[0];
         self.node.resize_layer = $(self.node.middle).children(".resize_layer")[0];
         self.node.preview = $("#desktop>#preview")[0];
 
