@@ -212,6 +212,8 @@ function Account()
         if (self.disconnecting == true)
             return ;
         self.disconnecting = true;
+        // Tells the server that the client want to disconnect
+        request("GET", "command/disconnect");
         // We are no longer identified
         self.identified = false;
         localStorage.removeItem("sessionId");
@@ -223,8 +225,6 @@ function Account()
         animation(self.background, 0, animationOpacity, false, null, 0);
         // Displays the identification background
         self.idenfificationBackground.style.display = "block";
-        // Tells the server that the client want to disconnect
-        request("GET", "command/disconnect");
     }
 
     // Handles the lock/unlock button that allows user to stay connected when the page is refreshed.

@@ -6,12 +6,13 @@
 # include <QMutex>
 # include <QObject>
 
-# include "IDoExecution.h"
-# include "IOnDestroy.h"
-# include "IOnFinish.h"
-# include "IOnSerialize.h"
-# include "IOnDeserialize.h"
 # include "IPlugin.h"
+# include "IOnDeserialize.h"
+# include "IDoExecution.h"
+# include "IOnSerialize.h"
+# include "IOnFinish.h"
+# include "IOnDisconnect.h"
+# include "IOnDestroy.h"
 # include "ITimer.h"
 
 # include "Commands.h"
@@ -30,13 +31,20 @@ class Plugin : public QObject,
                public LightBird::IDoExecution,
                public LightBird::IOnSerialize,
                public LightBird::IOnFinish,
+               public LightBird::IOnDisconnect,
                public LightBird::IOnDestroy,
                public LightBird::ITimer
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Client")
-    Q_INTERFACES(LightBird::IPlugin LightBird::IOnDeserialize LightBird::IDoExecution LightBird::IOnSerialize
-                 LightBird::IOnFinish LightBird::IOnDestroy LightBird::ITimer)
+    Q_INTERFACES(LightBird::IPlugin
+                 LightBird::IOnDeserialize
+                 LightBird::IDoExecution
+                 LightBird::IOnSerialize
+                 LightBird::IOnFinish
+                 LightBird::IOnDisconnect
+                 LightBird::IOnDestroy
+                 LightBird::ITimer)
 
 public:
     Plugin();
@@ -54,6 +62,7 @@ public:
     bool    doExecution(LightBird::IClient &client);
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
     void    onFinish(LightBird::IClient &client);
+    bool    onDisconnect(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
     bool    timer(const QString &name);
 

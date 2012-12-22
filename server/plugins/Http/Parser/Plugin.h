@@ -7,15 +7,15 @@
 # include <QString>
 # include <QStringList>
 
-# include "IDoSerializeContent.h"
-# include "IDoSerializeHeader.h"
-# include "IDoDeserializeContent.h"
-# include "IDoDeserializeHeader.h"
-# include "IOnConnect.h"
-# include "IOnDisconnect.h"
-# include "IOnFinish.h"
-# include "IOnProtocol.h"
 # include "IPlugin.h"
+# include "IOnConnect.h"
+# include "IOnProtocol.h"
+# include "IDoDeserializeHeader.h"
+# include "IDoDeserializeContent.h"
+# include "IDoSerializeHeader.h"
+# include "IDoSerializeContent.h"
+# include "IOnFinish.h"
+# include "IOnDestroy.h"
 
 # include "Parser.h"
 
@@ -28,7 +28,7 @@ class Plugin : public QObject,
                public LightBird::IDoSerializeHeader,
                public LightBird::IDoSerializeContent,
                public LightBird::IOnFinish,
-               public LightBird::IOnDisconnect
+               public LightBird::IOnDestroy
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Parser")
@@ -40,7 +40,7 @@ class Plugin : public QObject,
                  LightBird::IDoSerializeHeader
                  LightBird::IDoSerializeContent
                  LightBird::IOnFinish
-                 LightBird::IOnDisconnect)
+                 LightBird::IOnDestroy)
 
 public:
     /// Stores the configuration of the plugin.
@@ -63,9 +63,9 @@ public:
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
 
-    // Connect / Disconnect
+    // Connect / Destroy
     bool    onConnect(LightBird::IClient &client);
-    bool    onDisconnect(LightBird::IClient &client);
+    void    onDestroy(LightBird::IClient &client);
 
     // Deserialize
     bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error);

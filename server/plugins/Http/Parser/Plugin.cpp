@@ -75,13 +75,12 @@ bool    Plugin::onConnect(LightBird::IClient &client)
     return (true);
 }
 
-bool    Plugin::onDisconnect(LightBird::IClient &client)
+void    Plugin::onDestroy(LightBird::IClient &client)
 {
     this->mutex.lockForWrite();
     delete this->parsers.value(client.getId());
     this->parsers.remove(client.getId());
     this->mutex.unlock();
-    return (true);
 }
 
 bool    Plugin::onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error)

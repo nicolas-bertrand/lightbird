@@ -179,6 +179,11 @@ void        Plugin::onFinish(LightBird::IClient &client)
     this->_uploads.onFinish(client);
 }
 
+bool    Plugin::onDisconnect(LightBird::IClient &client)
+{
+    return (!client.getInformations().contains("delay_disconnection"));
+}
+
 void    Plugin::onDestroy(LightBird::IClient &client)
 {
     this->_medias.disconnected(client);

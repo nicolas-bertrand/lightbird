@@ -67,6 +67,8 @@ void    Commands::_disconnect(LightBird::IClient &client, const QString &)
 {
     // The session is destroyed and all the clients associated to it are disconnected
     Plugin::api().sessions().destroy(client.getSessions().first(), true);
+    // Tells onDisconnect that we want the final response to be sent before the disconnection of this client
+    client.getInformations().insert("delay_disconnection", true);
 }
 
 void    Commands::_identify(LightBird::IClient &client, const QString &)
