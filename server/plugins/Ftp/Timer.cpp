@@ -65,7 +65,7 @@ bool          Timer::_timeout()
     QDateTime currentTime;
     bool      result;
 
-    this->mutex.unlock();
+    this->mutex.lock();
     this->nextTimeout = QDateTime();
     currentTime = QDateTime::currentDateTime().addSecs(1);
     QMutableHashIterator<QString, QDateTime> it(this->timeout);

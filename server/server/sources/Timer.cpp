@@ -49,26 +49,26 @@ unsigned int    Timer::getInterval() const
     return (this->interval);
 }
 
-void            Timer::setInterval(unsigned int interval)
+void    Timer::setInterval(unsigned int interval)
 {
     this->interval = interval;
     emit this->setIntervalSignal();
 }
 
-void            Timer::_setInterval()
+void    Timer::_setInterval()
 {
     this->timer.setInterval(this->interval);
 }
 
-void            Timer::stop()
+void    Timer::stop()
 {
     this->stopped = true;
 }
 
-void                    Timer::_timeout()
+void    Timer::_timeout()
 {
-    LightBird::ITimer   *instance;
-    bool                result;
+    LightBird::ITimer *instance;
+    bool              result;
 
     //LOG_TRACE("Timer timeout", Properties("id", this->id).add("name", this->name), "Timer", "_timeout");
     if (this->stopped || !(instance = Plugins::instance()->getInstance<LightBird::ITimer>(this->id)))

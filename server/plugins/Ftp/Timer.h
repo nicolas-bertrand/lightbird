@@ -6,7 +6,7 @@
 # include "IApi.h"
 # include "ITimer.h"
 
-# define TIMER_TIMEOUT  "timeout"  // The name of the timer that disconnects the inactive clients.
+# define TIMER_TIMEOUT "timeout" // The name of the timer that disconnects the inactive clients.
 
 /// @brief Manages the connections timeout.
 class Timer : public LightBird::ITimer
