@@ -7,7 +7,8 @@
 #include "LightBird.h"
 
 Identify::Identify()
-    : thread(NULL)
+    : identifyThread(NULL)
+    , hashThread(NULL)
 {
     this->mimeDocument.push_back("text/");
     this->mimeDocument.push_back("pdf");
@@ -30,14 +31,21 @@ Identify::Identify()
 
 Identify::~Identify()
 {
-    Thread  *thread;
+    Thread  *identifyThread;
+    Thread  *hashThread;
 
     // Waits for the thread to finish
     this->mutex.lock();
-    if ((thread = this->thread))
+    if ((identifyThread = this->identifyThread))
     {
         this->mutex.unlock();
-        thread->wait();
+        identifyThread->wait();
+        this->mutex.lock();
+    }
+    if ((hashThread = this->hashThread))
+    {
+        this->mutex.unlock();
+        hashThread->wait();
         this->mutex.lock();
     }
     this->mutex.unlock();
@@ -48,18 +56,33 @@ void    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
     // Identifies the file directly
     if (information)
     {
-        *information = this->_identify(file);
+        *information = this->_identify(file, true);
         return ;
     }
-    // Identifies the file via the thread
+    // Identifies the file via a thread
     this->mutex.lock();
-    this->files << file;
-    // Starts the thread
-    if (!this->thread)
+    // Starts the identification thread
+    if (!this->identifyThread)
     {
-        this->thread = new Thread();
-        this->thread->start();
+        this->identifyThread = new Thread();
+        this->identifyThread->files << file;
+        this->identifyThread->thread = &this->identifyThread;
+        this->identifyThread->method = &Identify::_identifyThread;
+        this->identifyThread->start();
     }
+    else
+        this->identifyThread->files << file;
+    // Starts the hash thread
+    if (!this->hashThread)
+    {
+        this->hashThread = new Thread();
+        this->hashThread->files << file;
+        this->hashThread->thread = &this->hashThread;
+        this->hashThread->method = &Identify::_hashThread;
+        this->hashThread->start();
+    }
+    else
+        this->hashThread->files << file;
     this->mutex.unlock();
 }
 
@@ -68,43 +91,53 @@ void    Identify::Thread::run()
     Identify              *instance = LightBird::Library::getIdentify();
     QStringList           files;
     LightBird::TableFiles file;
-    LightBird::IIdentify::Information information;
+    Identify::Info        information;
 
-    // Gets the files to identify
+    // Gets the files to identify or hash
     instance->mutex.lock();
-    (files = instance->files).removeDuplicates();
-    instance->files.clear();
+    (files = this->files).removeDuplicates();
+    this->files.clear();
     instance->mutex.unlock();
-    // While there are files to identify
+    // While there are files to process
     while (!files.isEmpty())
     {
         QStringListIterator it(files);
         while (it.hasNext())
-            // Identify the file
+            // Identify or hash the file
             if (file.setId(it.next()))
             {
-                information = instance->_identify(file.getFullPath());
-                file.setType(instance->typeString.value(information.type));
+                (instance->*(this->method))(file, information);
                 file.setInformations(information.data);
                 information.data.clear();
             }
         files.clear();
-        // If some files have been added in the meantime, we continue the identification
+        // If some files have been added in the meantime, we continue the processing
         instance->mutex.lock();
-        (files = instance->files).removeDuplicates();
+        (files = this->files).removeDuplicates();
         if (!files.isEmpty())
-            instance->files.clear();
-        // No more file to identify
+            this->files.clear();
+        // No more file to process
         else
         {
-            instance->thread = NULL;
+            *(this->thread) = NULL;
             this->deleteLater();
         }
         instance->mutex.unlock();
     }
 }
 
-LightBird::IIdentify::Information Identify::_identify(const QString &file)
+void    Identify::_identifyThread(LightBird::TableFiles &file, Identify::Info &information)
+{
+    information = this->_identify(file.getFullPath(), false);
+    file.setType(this->typeString.value(information.type));
+}
+
+void    Identify::_hashThread(LightBird::TableFiles &file, Identify::Info &information)
+{
+    this->_hash(file.getFullPath(), information);
+}
+
+Identify::Info  Identify::_identify(const QString &file, bool computeHash)
 {
     Info            result;
     Info            tmp;
@@ -122,7 +155,7 @@ LightBird::IIdentify::Information Identify::_identify(const QString &file)
     {
         tmp.data.clear();
         tmp.type = LightBird::IIdentify::OTHER;
-        // If the plugin could identify the file, add it to the map
+        // If the plugin could identify the file, adds it to the map
         if (static_cast<LightBird::IIdentify *>(it.peekNext())->identify(file, tmp))
             info.insertMulti(tmp.type, tmp.data);
         it.next();
@@ -149,7 +182,8 @@ LightBird::IIdentify::Information Identify::_identify(const QString &file)
     if (result.type == LightBird::IIdentify::OTHER)
         this->_typeFromMime(result);
     // Computes the hashes of the file
-    this->_hash(file, result);
+    if (computeHash)
+        this->_hash(file, result);
     // Debug
     /**this->api.log().debug("Type: " + QString::number(result.type));
     QMapIterator<QString, QVariant> i(result.data);
