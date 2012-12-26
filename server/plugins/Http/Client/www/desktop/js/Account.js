@@ -212,7 +212,7 @@ function Account()
         if (self.disconnecting == true)
             return ;
         self.disconnecting = true;
-        // Tells the server that the client want to disconnect
+        // Tells the server that the client wants to disconnect
         request("GET", "command/disconnect");
         // We are no longer identified
         self.identified = false;

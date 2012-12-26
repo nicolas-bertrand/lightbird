@@ -2,6 +2,7 @@
 var Configuration =
 {
 	animationFPS : 20, // Default animation FPS.
+    focusBeforeAction : true, // If the page have to be focused before doing any action when the mouse clicks on a task.
     // The configuration of the desktop.
     Desktop :
     {

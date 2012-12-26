@@ -6,9 +6,10 @@ function ResourceView(task, playlistInterface, fileIndex)
     {
         // Members
         resource.file = gl_files.list[fileIndex]; // The file displayed by the resource
+        resource.fileIndex = fileIndex; // The index of the file displayed
         resource.root = $(task.content).children("." + resource.file.type)[0]; // The root element of the resource
         resource.isFocus = true; // If the task had the focus in the last mouse down event
-        resource.object; // The object that displays the file, based on its type. Implements the player interface.
+        resource.object; // The object that displays the file, based on its type. Implements the file and the player interfaces.
         resource.playlistInterface = playlistInterface; // The playlist that manages this file (may be undefined)
         
         // Capitalizes the first char of the type, to get the name of the object
@@ -18,11 +19,14 @@ function ResourceView(task, playlistInterface, fileIndex)
         
         // Default values
         task.setResource(resource);
-        resource.playlistInterface.readyToPlay(resource.object, fileIndex);
+        resource.playlistInterface.readyToPlay(resource.object);
         $(task.content).addClass("view_" + resource.file.type);
         
         // Events
-        $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
+        if (C.focusBeforeAction)
+            $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
+        $(task.content).mouseenter(function (e) { gl_player.setFileName(resource.fileIndex); });
+        $(task.content).mouseleave(function (e) { gl_player.setFileName(); });
     }
     
     // The task have been resized.
@@ -34,7 +38,7 @@ function ResourceView(task, playlistInterface, fileIndex)
     // Closes the resource.
     resource.close = function ()
     {
-        gl_player.closeFile(resource.playlistInterface, resource.object);
+        gl_player.closeFile(resource.object);
         if (resource.object.close)
             resource.object.close();
         for (var key in resource)
@@ -71,22 +75,11 @@ resource.Document = function ()
     {
     }
     
-// Player interface
+// File interface
     {
-        self.play = function ()
+        self.getFileIndex = function ()
         {
-        }
-        
-        self.pause = function ()
-        {
-        }
-        
-        self.seek = function (time)
-        {
-        }
-        
-        self.getMedia = function ()
-        {
+            return (resource.fileIndex);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -315,22 +308,11 @@ resource.Image = function ()
         }
     }
     
-// Player interface
+// File interface
     {
-        self.play = function ()
+        self.getFileIndex = function ()
         {
-        }
-        
-        self.pause = function ()
-        {
-        }
-        
-        self.seek = function (time)
-        {
-        }
-        
-        self.getMedia = function ()
-        {
+            return (resource.fileIndex);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -367,22 +349,11 @@ resource.Other = function ()
     {
     }
     
-// Player interface
+// File interface
     {
-        self.play = function ()
+        self.getFileIndex = function ()
         {
-        }
-        
-        self.pause = function ()
-        {
-        }
-        
-        self.seek = function (time)
-        {
-        }
-        
-        self.getMedia = function ()
-        {
+            return (resource.fileIndex);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -405,7 +376,8 @@ resource.Video = function ()
         // Members
         self.container = $(resource.root).children(".container")[0]; // The div that contains the video element
         self.video = $(self.container).children("video")[0]; // The video element
-      //self.video.mediaId; // The id of the media, used to communicate with the server
+        self.video.mediaId; // The id of the media, used to communicate with the server
+        self.video.timeOffset = 0; // The server side seek
         self.background = "black"; // The background currently displayed (black or transparent)
         self.format = "webm";
         
@@ -491,10 +463,13 @@ resource.Video = function ()
     // Play / pause the video.
     self.playPause = function (e)
     {
-        if (e.which != 1 || !resource.isFocus)
+        if (e.which != 1)
             return ;
         if (self.video.paused)
+        {
             self.video.play();
+            gl_player.resumeFile(self);
+        }
         else
             self.video.pause();
     }
@@ -521,8 +496,18 @@ resource.Video = function ()
         self.onResize(task.left, task.top, task.width, task.height);
     }
 
-// Player interface
+// File and Player interfaces
     {
+        self.getFileIndex = function ()
+        {
+            return (resource.fileIndex);
+        }
+        
+        self.setPlaylist = function (playlistInterface)
+        {
+            resource.playlistInterface = playlistInterface;
+        }
+        
         self.play = function ()
         {
             self.video.play();
@@ -542,6 +527,7 @@ resource.Video = function ()
             self.video.src = "";
             request("GET", "command/video/stop?mediaId=" + self.video.mediaId);
             // Seeks to the new position
+            self.video.timeOffset = time;
             self.video.mediaId = getUuid();
             self.video.src = "command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + getSession();
             if (!paused)
@@ -551,11 +537,6 @@ resource.Video = function ()
         self.getMedia = function ()
         {
             return (self.video);
-        }
-        
-        self.setPlaylist = function (playlistInterface)
-        {
-            resource.playlistInterface = playlistInterface;
         }
     }
  

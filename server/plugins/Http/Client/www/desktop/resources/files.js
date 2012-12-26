@@ -16,7 +16,8 @@ function ResourceFiles(task)
         resource.layout = new Layout(); // Manages the layout of the columns
         resource.header = new Header(); // The header of the files list
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
-        resource.fileNumber = 0; // The number of the last file played in the playlist
+        resource.fileNumber = 0; // The number of the current file of the playlist
+        resource.fileIndex = 0; // The index of the current file of the playlist
         
         // Sets the resource instance to the task, so that it can call close and onResize
         task.setResource(resource);
@@ -40,12 +41,14 @@ function ResourceFiles(task)
     {
         resource.getNumberFiles = function ()
         {
-            return ({ numerator : resource.fileNumber, denominator : gl_files.list.length });
+            return ({ fileNumber : resource.fileNumber,
+                      numberOfFiles : gl_files.list.length,
+                      fileIndex : resource.fileIndex });
         }
         
-        resource.readyToPlay = function (playerInterface, fileIndex)
+        resource.readyToPlay = function (fileInterface)
         {
-            gl_player.playFile(resource, playerInterface, fileIndex);
+            gl_player.playFile(resource, fileInterface);
         }
     }
     
@@ -455,6 +458,7 @@ function List()
             file = self.table.rows[n];
         }
         resource.fileNumber = file.rowIndex + 1;
+        resource.fileIndex = file.fileIndex;
         // If it is an audio file we play it in the global player
         if (gl_files.list[file.fileIndex].type == "audio")
             gl_player.openAudio(resource, file.fileIndex);
