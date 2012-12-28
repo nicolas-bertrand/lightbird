@@ -1,5 +1,5 @@
-#ifndef IONFINISH_H
-# define IONFINISH_H
+#ifndef LIGHTBIRD_IONFINISH_H
+# define LIGHTBIRD_IONFINISH_H
 
 # include "IClient.h"
 
@@ -21,4 +21,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnFinish, "cc.lightbird.IOnFinish")
 
-#endif // IONFINISH_H
+#endif // LIGHTBIRD_IONFINISH_H

@@ -1,5 +1,5 @@
-#ifndef IONWRITE_H
-# define IONWRITE_H
+#ifndef LIGHTBIRD_IONWRITE_H
+# define LIGHTBIRD_IONWRITE_H
 
 # include <QByteArray>
 
@@ -24,4 +24,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnWrite, "cc.lightbird.IOnWrite")
 
-#endif // IONWRITE_H
+#endif // LIGHTBIRD_IONWRITE_H

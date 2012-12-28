@@ -1,5 +1,5 @@
-#ifndef IGUI_H
-# define IGUI_H
+#ifndef LIGHTBIRD_IGUI_H
+# define LIGHTBIRD_IGUI_H
 
 namespace LightBird
 {
@@ -33,4 +33,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IGui, "cc.lightbird.IGui")
 
-#endif // IGUI_H
+#endif // LIGHTBIRD_IGUI_H

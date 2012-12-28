@@ -1,5 +1,5 @@
-#ifndef ILOG_H
-# define ILOG_H
+#ifndef LIGHTBIRD_ILOG_H
+# define LIGHTBIRD_ILOG_H
 
 # include <QDateTime>
 # include <QMap>
@@ -32,4 +32,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::ILog, "cc.lightbird.ILog")
 
-#endif // ILOG_H
+#endif // LIGHTBIRD_ILOG_H

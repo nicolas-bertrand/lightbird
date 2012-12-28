@@ -1,5 +1,5 @@
-#ifndef IONDESTROY_H
-# define IONDESTROY_H
+#ifndef LIGHTBIRD_IONDESTROY_H
+# define LIGHTBIRD_IONDESTROY_H
 
 # include "IClient.h"
 
@@ -26,4 +26,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnDestroy, "cc.lightbird.IOnDestroy")
 
-# endif // IONDESTROY_H
+#endif // LIGHTBIRD_IONDESTROY_H

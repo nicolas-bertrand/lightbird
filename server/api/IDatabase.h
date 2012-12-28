@@ -1,5 +1,5 @@
-#ifndef IDATABASE_H
-# define IDATABASE_H
+#ifndef LIGHTBIRD_IDATABASE_H
+# define LIGHTBIRD_IDATABASE_H
 
 # include <QDateTime>
 # include <QMap>
@@ -93,4 +93,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDatabase, "cc.lightbird.IDatabase")
 
-#endif // IDATABASE_H
+#endif // LIGHTBIRD_IDATABASE_H

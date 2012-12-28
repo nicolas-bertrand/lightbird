@@ -1,5 +1,5 @@
-#ifndef ICLIENT_H
-# define ICLIENT_H
+#ifndef LIGHTBIRD_ICLIENT_H
+# define LIGHTBIRD_ICLIENT_H
 
 # include <QAbstractSocket>
 # include <QDateTime>
@@ -92,4 +92,4 @@ namespace LightBird
     };
 }
 
-#endif // ICLIENT_H
+#endif // LIGHTBIRD_ICLIENT_H

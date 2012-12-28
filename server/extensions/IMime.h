@@ -1,5 +1,5 @@
-#ifndef IMIME_H
-# define IMIME_H
+#ifndef LIGHTBIRD_IMIME_H
+# define LIGHTBIRD_IMIME_H
 
 # include <QString>
 
@@ -19,4 +19,4 @@ namespace LightBird
     };
 }
 
-#endif // IMIME_H
+#endif // LIGHTBIRD_IMIME_H

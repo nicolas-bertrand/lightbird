@@ -1,5 +1,5 @@
-#ifndef IEXTENSION_H
-# define IEXTENSION_H
+#ifndef LIGHTBIRD_IEXTENSION_H
+# define LIGHTBIRD_IEXTENSION_H
 
 # include <QString>
 # include <QStringList>
@@ -32,4 +32,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IExtension, "cc.lightbird.IExtension")
 
-#endif // IEXTENSION_H
+#endif // LIGHTBIRD_IEXTENSION_H

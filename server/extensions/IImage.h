@@ -1,5 +1,5 @@
-#ifndef IIMAGE_H
-# define IIMAGE_H
+#ifndef LIGHTBIRD_IIMAGE_H
+# define LIGHTBIRD_IIMAGE_H
 
 # include <QString>
 
@@ -39,4 +39,4 @@ namespace LightBird
     };
 }
 
-#endif // IIMAGE_H
+#endif // LIGHTBIRD_IIMAGE_H

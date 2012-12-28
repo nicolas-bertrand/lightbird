@@ -1,5 +1,5 @@
-#ifndef IDODESERIALIZECONTENT_H
-# define IDODESERIALIZECONTENT_H
+#ifndef LIGHTBIRD_IDODESERIALIZECONTENT_H
+# define LIGHTBIRD_IDODESERIALIZECONTENT_H
 
 # include <QByteArray>
 
@@ -36,4 +36,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoDeserializeContent, "cc.lightbird.IDoDeserializeContent")
 
-#endif // IDODESERIALIZECONTENT_H
+#endif // LIGHTBIRD_IDODESERIALIZECONTENT_H

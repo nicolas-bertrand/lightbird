@@ -1,5 +1,5 @@
-#ifndef IONEXECUTION_H
-# define IONEXECUTION_H
+#ifndef LIGHTBIRD_IONEXECUTION_H
+# define LIGHTBIRD_IONEXECUTION_H
 
 # include "IClient.h"
 
@@ -21,4 +21,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnExecution, "cc.lightbird.IOnExecution")
 
-#endif // IONEXECUTION_H
+#endif // LIGHTBIRD_IONEXECUTION_H

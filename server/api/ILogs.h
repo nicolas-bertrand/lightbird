@@ -1,5 +1,5 @@
-#ifndef ILOGS_H
-# define ILOGS_H
+#ifndef LIGHTBIRD_ILOGS_H
+# define LIGHTBIRD_ILOGS_H
 
 # include <QString>
 # include <QMap>
@@ -105,4 +105,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::ILogs, "cc.lightbird.ILogs")
 
-#endif // ILOGS_H
+#endif // LIGHTBIRD_ILOGS_H

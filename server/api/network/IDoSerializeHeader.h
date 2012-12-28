@@ -1,5 +1,5 @@
-#ifndef IDOSERIALIZEHEADER_H
-# define IDOSERIALIZEHEADER_H
+#ifndef LIGHTBIRD_IDOSERIALIZEHEADER_H
+# define LIGHTBIRD_IDOSERIALIZEHEADER_H
 
 # include <QByteArray>
 
@@ -25,4 +25,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoSerializeHeader, "cc.lightbird.IDoSerializeHeader")
 
-#endif // IDOSERIALIZEHEADER_H
+#endif // LIGHTBIRD_IDOSERIALIZEHEADER_H

@@ -1,5 +1,5 @@
-#ifndef IONREAD_H
-# define IONREAD_H
+#ifndef LIGHTBIRD_IONREAD_H
+# define LIGHTBIRD_IONREAD_H
 
 # include <QByteArray>
 
@@ -22,4 +22,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnRead, "cc.lightbird.IOnRead")
 
-#endif // IONREAD_H
+#endif // LIGHTBIRD_IONREAD_H

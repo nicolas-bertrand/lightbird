@@ -1,5 +1,5 @@
-#ifndef INITIALIZE_H
-# define INITIALIZE_H
+#ifndef LIGHTBIRD_INITIALIZE_H
+# define LIGHTBIRD_INITIALIZE_H
 
 # include <QObject>
 
@@ -29,4 +29,4 @@ namespace LightBird
     };
 }
 
-#endif // INITIALIZE_H
+#endif // LIGHTBIRD_INITIALIZE_H

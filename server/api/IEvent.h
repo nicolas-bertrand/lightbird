@@ -1,5 +1,5 @@
-#ifndef IEVENT_H
-# define IEVENT_H
+#ifndef LIGHTBIRD_IEVENT_H
+# define LIGHTBIRD_IEVENT_H
 
 # include <QString>
 # include <QVariant>
@@ -28,4 +28,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IEvent, "cc.lightbird.IEvent")
 
-#endif // IEVENT_H
+#endif // LIGHTBIRD_IEVENT_H

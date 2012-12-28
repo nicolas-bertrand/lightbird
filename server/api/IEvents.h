@@ -1,5 +1,5 @@
-#ifndef IEVENTS_H
-# define IEVENTS_H
+#ifndef LIGHTBIRD_IEVENTS_H
+# define LIGHTBIRD_IEVENTS_H
 
 # include <QList>
 # include <QPair>
@@ -49,4 +49,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IEvents, "cc.lightbird.IEvents")
 
-#endif // IEVENTS_H
+#endif // LIGHTBIRD_IEVENTS_H

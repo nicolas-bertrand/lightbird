@@ -1,5 +1,5 @@
-#ifndef IONPROTOCOL_H
-# define IONPROTOCOL_H
+#ifndef LIGHTBIRD_IONPROTOCOL_H
+# define LIGHTBIRD_IONPROTOCOL_H
 
 # include <QByteArray>
 # include <QString>
@@ -38,4 +38,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnProtocol, "cc.lightbird.IOnProtocol")
 
-#endif // IONPROTOCOL_H
+#endif // LIGHTBIRD_IONPROTOCOL_H

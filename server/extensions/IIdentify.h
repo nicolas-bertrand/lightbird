@@ -1,5 +1,5 @@
-#ifndef IIDENTIFY_H
-# define IIDENTIFY_H
+#ifndef LIGHTBIRD_IIDENTIFY_H
+# define LIGHTBIRD_IIDENTIFY_H
 
 # include <QMap>
 # include <QString>
@@ -39,4 +39,4 @@ namespace LightBird
     };
 }
 
-#endif // IIDENTIFY_H
+#endif // LIGHTBIRD_IIDENTIFY_H

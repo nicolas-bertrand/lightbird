@@ -1,5 +1,5 @@
-#ifndef ITIMERS_H
-# define ITIMERS_H
+#ifndef LIGHTBIRD_ITIMERS_H
+# define LIGHTBIRD_ITIMERS_H
 
 # include <QMap>
 # include <QString>
@@ -34,4 +34,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::ITimers, "cc.lightbird.ITimers")
 
-#endif // ITIMERS_H
+#endif // LIGHTBIRD_ITIMERS_H

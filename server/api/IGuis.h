@@ -1,5 +1,5 @@
-#ifndef IGUIS_H
-# define IGUIS_H
+#ifndef LIGHTBIRD_IGUIS_H
+# define LIGHTBIRD_IGUIS_H
 
 # include <QString>
 
@@ -29,4 +29,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IGuis, "cc.lightbird.IGuis")
 
-#endif // IGUIS_H
+#endif // LIGHTBIRD_IGUIS_H

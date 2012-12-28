@@ -1,5 +1,5 @@
-#ifndef IDOSEND_H
-# define IDOSEND_H
+#ifndef LIGHTBIRD_IDOSEND_H
+# define LIGHTBIRD_IDOSEND_H
 
 # include "IClient.h"
 
@@ -25,4 +25,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoSend, "cc.lightbird.IDoSend")
 
-#endif // IDOSEND_H
+#endif // LIGHTBIRD_IDOSEND_H

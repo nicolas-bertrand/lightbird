@@ -1,5 +1,5 @@
-#ifndef IDOEXECUTION_H
-# define IDOEXECUTION_H
+#ifndef LIGHTBIRD_IDOEXECUTION_H
+# define LIGHTBIRD_IDOEXECUTION_H
 
 # include "IClient.h"
 
@@ -23,4 +23,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoExecution, "cc.lightbird.IDoExecution")
 
-#endif // IDOEXECUTION_H
+#endif // LIGHTBIRD_IDOEXECUTION_H

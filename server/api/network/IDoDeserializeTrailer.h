@@ -1,5 +1,5 @@
-#ifndef IDODESERIALIZETRAILER_H
-# define IDODESERIALIZETRAILER_H
+#ifndef LIGHTBIRD_IDODESERIALIZETRAILER_H
+# define LIGHTBIRD_IDODESERIALIZETRAILER_H
 
 # include <QByteArray>
 
@@ -37,4 +37,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoDeserializeTrailer, "cc.lightbird.IDoDeserializeTrailer")
 
-#endif // IDODESERIALIZETRAILER_H
+#endif // LIGHTBIRD_IDODESERIALIZETRAILER_H

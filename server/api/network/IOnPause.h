@@ -1,5 +1,5 @@
-#ifndef IONPAUSE_H
-# define IONPAUSE_H
+#ifndef LIGHTBIRD_IONPAUSE_H
+# define LIGHTBIRD_IONPAUSE_H
 
 # include "IClient.h"
 
@@ -27,4 +27,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnPause, "cc.lightbird.IOnPause")
 
-# endif // IONPAUSE_H
+#endif // LIGHTBIRD_IONPAUSE_H

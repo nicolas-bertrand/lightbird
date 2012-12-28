@@ -1,5 +1,5 @@
-#ifndef IAUDIO_H
-# define IAUDIO_H
+#ifndef LIGHTBIRD_IAUDIO_H
+# define LIGHTBIRD_IAUDIO_H
 
 # include <QByteArray>
 # include <QVariantHash>
@@ -66,4 +66,4 @@ namespace LightBird
     };
 }
 
-#endif // IAUDIO_H
+#endif // LIGHTBIRD_IAUDIO_H

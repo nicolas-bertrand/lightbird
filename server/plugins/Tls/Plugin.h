@@ -7,7 +7,7 @@
 // Windows does not define ssize_t
 # ifdef Q_OS_WIN
 #  define ssize_t int
-# endif // Q_OS_WIN32
+# endif // Q_OS_WIN
 
 # include "gnutls/gnutls.h"
 

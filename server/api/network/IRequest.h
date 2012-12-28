@@ -1,5 +1,5 @@
-#ifndef IREQUEST_H
-# define IREQUEST_H
+#ifndef LIGHTBIRD_IREQUEST_H
+# define LIGHTBIRD_IREQUEST_H
 
 # include <QMap>
 # include <QString>
@@ -51,4 +51,4 @@ namespace LightBird
     };
 }
 
-#endif // IREQUEST_H
+#endif // LIGHTBIRD_IREQUEST_H

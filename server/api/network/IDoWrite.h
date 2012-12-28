@@ -1,5 +1,5 @@
-#ifndef IDOWRITE_H
-# define IDOWRITE_H
+#ifndef LIGHTBIRD_IDOWRITE_H
+# define LIGHTBIRD_IDOWRITE_H
 
 # include <QByteArray>
 
@@ -26,4 +26,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoWrite, "cc.lightbird.IDoWrite")
 
-#endif // IDOWRITE_H
+#endif // LIGHTBIRD_IDOWRITE_H

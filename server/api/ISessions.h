@@ -1,5 +1,5 @@
-#ifndef ISESSIONS_H
-# define ISESSIONS_H
+#ifndef LIGHTBIRD_ISESSIONS_H
+# define LIGHTBIRD_ISESSIONS_H
 
 # include <QDateTime>
 # include <QSharedPointer>
@@ -58,4 +58,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::ISessions, "cc.lightbird.ISessions")
 
-#endif // ISESSIONS_H
+#endif // LIGHTBIRD_ISESSIONS_H

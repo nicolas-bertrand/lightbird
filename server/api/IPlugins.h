@@ -1,5 +1,5 @@
-#ifndef IPLUGINS_H
-# define IPLUGINS_H
+#ifndef LIGHTBIRD_IPLUGINS_H
+# define LIGHTBIRD_IPLUGINS_H
 
 # include <QSharedPointer>
 # include <QString>
@@ -84,4 +84,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IPlugins, "cc.lightbird.IPlugins")
 
-#endif // IPLUGINS_H
+#endif // LIGHTBIRD_IPLUGINS_H

@@ -1,5 +1,5 @@
-#ifndef IONSERIALIZE_H
-# define IONSERIALIZE_H
+#ifndef LIGHTBIRD_IONSERIALIZE_H
+# define LIGHTBIRD_IONSERIALIZE_H
 
 # include "IClient.h"
 
@@ -37,4 +37,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnSerialize, "cc.lightbird.IOnSerialize")
 
-#endif // IONSERIALIZE_H
+#endif // LIGHTBIRD_IONSERIALIZE_H

@@ -1,5 +1,5 @@
-#ifndef IDOREAD_H
-# define IDOREAD_H
+#ifndef LIGHTBIRD_IDOREAD_H
+# define LIGHTBIRD_IDOREAD_H
 
 # include <QByteArray>
 
@@ -26,4 +26,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IDoRead, "cc.lightbird.IDoRead")
 
-#endif // IDOREAD_H
+#endif // LIGHTBIRD_IDOREAD_H

@@ -1,5 +1,5 @@
-#ifndef IMETADATA_H
-# define IMETADATA_H
+#ifndef LIGHTBIRD_IMETADATA_H
+# define LIGHTBIRD_IMETADATA_H
 
 # include <QString>
 # include <QVariantMap>
@@ -22,4 +22,4 @@ namespace LightBird
     };
 }
 
-#endif // IMETADATA_H
+#endif // LIGHTBIRD_IMETADATA_H

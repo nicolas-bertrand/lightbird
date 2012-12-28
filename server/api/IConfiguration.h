@@ -1,5 +1,5 @@
-#ifndef ICONFIGURATION_H
-# define ICONFIGURATION_H
+#ifndef LIGHTBIRD_ICONFIGURATION_H
+# define LIGHTBIRD_ICONFIGURATION_H
 
 # include <QDomElement>
 # include <QString>
@@ -65,4 +65,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IConfiguration, "cc.lightbird.IConfiguration")
 
-#endif // ICONFIGURATION_H
+#endif // LIGHTBIRD_ICONFIGURATION_H

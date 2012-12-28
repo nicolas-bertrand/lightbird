@@ -1,5 +1,5 @@
-#ifndef IRESPONSE_H
-# define IRESPONSE_H
+#ifndef LIGHTBIRD_IRESPONSE_H
+# define LIGHTBIRD_IRESPONSE_H
 
 # include <QMap>
 # include <QString>
@@ -49,4 +49,4 @@ namespace LightBird
     };
 }
 
-#endif // IRESPONSE_H
+#endif // LIGHTBIRD_IRESPONSE_H

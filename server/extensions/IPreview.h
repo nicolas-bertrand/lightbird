@@ -1,5 +1,5 @@
-#ifndef IPREVIEW_H
-# define IPREVIEW_H
+#ifndef LIGHTBIRD_IPREVIEW_H
+# define LIGHTBIRD_IPREVIEW_H
 
 # include <QString>
 
@@ -31,4 +31,4 @@ namespace LightBird
     };
 }
 
-#endif // IPREVIEW_H
+#endif // LIGHTBIRD_IPREVIEW_H

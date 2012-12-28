@@ -1,5 +1,5 @@
-#ifndef IONRESUME_H
-# define IONRESUME_H
+#ifndef LIGHTBIRD_IONRESUME_H
+# define LIGHTBIRD_IONRESUME_H
 
 # include "IClient.h"
 
@@ -24,4 +24,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnResume, "cc.lightbird.IOnResume")
 
-# endif // IONRESUME_H
+#endif // LIGHTBIRD_IONRESUME_H

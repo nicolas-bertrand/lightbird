@@ -1,5 +1,5 @@
-#ifndef IPLUGIN_H
-# define IPLUGIN_H
+#ifndef LIGHTBIRD_IPLUGIN_H
+# define LIGHTBIRD_IPLUGIN_H
 
 # include "IApi.h"
 # include "IMetadata.h"
@@ -39,4 +39,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IPlugin, "cc.lightbird.IPlugin")
 
-#endif // IPLUGIN_H
+#endif // LIGHTBIRD_IPLUGIN_H

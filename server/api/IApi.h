@@ -1,5 +1,5 @@
-#ifndef IAPI_H
-# define IAPI_H
+#ifndef LIGHTBIRD_IAPI_H
+# define LIGHTBIRD_IAPI_H
 
 # include <QObject>
 # include <QString>
@@ -84,4 +84,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IApi, "cc.lightbird.IApi")
 
-#endif // IAPI_H
+#endif // LIGHTBIRD_IAPI_H

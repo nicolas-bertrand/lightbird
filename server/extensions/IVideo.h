@@ -1,5 +1,5 @@
-#ifndef IVIDEO_H
-# define IVIDEO_H
+#ifndef LIGHTBIRD_IVIDEO_H
+# define LIGHTBIRD_IVIDEO_H
 
 # include <QByteArray>
 # include <QVariantHash>
@@ -85,4 +85,4 @@ namespace LightBird
     };
 }
 
-#endif // IVIDEO_H
+#endif // LIGHTBIRD_IVIDEO_H

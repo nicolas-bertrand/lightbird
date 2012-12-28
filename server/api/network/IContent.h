@@ -1,5 +1,5 @@
-#ifndef ICONTENT_H
-# define ICONTENT_H
+#ifndef LIGHTBIRD_ICONTENT_H
+# define LIGHTBIRD_ICONTENT_H
 
 # include <QByteArray>
 # include <QFile>
@@ -64,4 +64,4 @@ namespace LightBird
     };
 }
 
-#endif // ICONTENT_H
+#endif // LIGHTBIRD_ICONTENT_H

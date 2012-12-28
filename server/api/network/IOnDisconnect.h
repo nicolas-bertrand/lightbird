@@ -1,5 +1,5 @@
-#ifndef IONDISCONNECT_H
-# define IONDISCONNECT_H
+#ifndef LIGHTBIRD_IONDISCONNECT_H
+# define LIGHTBIRD_IONDISCONNECT_H
 
 # include "IClient.h"
 
@@ -31,4 +31,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnDisconnect, "cc.lightbird.IOnDisconnect")
 
-# endif // IONDISCONNECT_H
+#endif // LIGHTBIRD_IONDISCONNECT_H

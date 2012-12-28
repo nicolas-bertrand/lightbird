@@ -1,5 +1,5 @@
-#ifndef IONSEND_H
-# define IONSEND_H
+#ifndef LIGHTBIRD_IONSEND_H
+# define LIGHTBIRD_IONSEND_H
 
 # include "IClient.h"
 
@@ -23,4 +23,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnSend, "cc.lightbird.IOnSend")
 
-#endif // IONSEND_H
+#endif // LIGHTBIRD_IONSEND_H

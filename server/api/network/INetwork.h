@@ -1,5 +1,5 @@
-#ifndef INETWORK_H
-# define INETWORK_H
+#ifndef LIGHTBIRD_INETWORK_H
+# define LIGHTBIRD_INETWORK_H
 
 # include <QDateTime>
 # include <QHostAddress>
@@ -212,4 +212,4 @@ namespace LightBird
     };
 }
 
-#endif // INETWORK_H
+#endif // LIGHTBIRD_INETWORK_H

@@ -1,5 +1,5 @@
-#ifndef IFUTURE_H
-# define IFUTURE_H
+#ifndef LIGHTBIRD_IFUTURE_H
+# define LIGHTBIRD_IFUTURE_H
 
 # include <limits.h>
 
@@ -32,4 +32,4 @@ namespace LightBird
     };
 }
 
-#endif // IFUTURE_H
+#endif // LIGHTBIRD_IFUTURE_H

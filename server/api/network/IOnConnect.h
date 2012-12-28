@@ -1,5 +1,5 @@
-#ifndef IONCONNECT_H
-# define IONCONNECT_H
+#ifndef LIGHTBIRD_IONCONNECT_H
+# define LIGHTBIRD_IONCONNECT_H
 
 # include "IClient.h"
 
@@ -24,4 +24,4 @@ namespace LightBird
 
 Q_DECLARE_INTERFACE(LightBird::IOnConnect, "cc.lightbird.IOnConnect")
 
-#endif // IONCONNECT_H
+#endif // LIGHTBIRD_IONCONNECT_H
