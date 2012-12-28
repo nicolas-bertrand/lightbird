@@ -36,6 +36,10 @@ public:
     /// @brief Tries to send a response without waiting for a request.
     /// @see LightBird::INetwork::send
     bool            send(const QString &id, const QString &protocol, const QVariantMap &informations);
+    /// @see LightBird::INetwork::pause
+    bool            pause(const QString &idClient, int msec = -1);
+    /// @see LightBird::INetwork::resume
+    bool            resume(const QString &idClient);
     /// @brief Closes the port. Denies all the new connections to the port and
     /// remove all the clients currently connected.
     virtual void    close();

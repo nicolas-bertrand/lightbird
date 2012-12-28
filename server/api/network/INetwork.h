@@ -57,6 +57,7 @@ namespace LightBird
         virtual bool    openPort(unsigned short port, const QStringList &protocols = QStringList(),
                                  LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                                  unsigned int maxClients = ~0) = 0;
+
         /// @brief Closes a port. This may take some time since all the operations
         /// made on the closed port have to be finished.
         /// @param port : The number of the port to close.
@@ -64,6 +65,7 @@ namespace LightBird
         /// @return False if the port is not valid. This method may return before
         /// the port is actually closed.
         virtual bool    closePort(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) = 0;
+
         /// @brief Allows to get informations on an opened port.
         /// @param port : The number of the port to get.
         /// @param protocols : The names of the protocols used by the port.
@@ -73,26 +75,31 @@ namespace LightBird
         /// @return True if the port exists.
         virtual bool    getPort(unsigned short port, QStringList &protocols, unsigned int &maxClients,
                                 LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
+
         /// @brief Returns the list of the open ports in TCP or UDP. One can use
         /// getPort() to get more detailed informations about a specific port.
         /// @param transport : The transport protocol of the ports to get.
         /// @return The list of the opened ports on the server.
         virtual QList<unsigned short>   getPorts(LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
+
         /// @brief Returns the informations of a client.
         /// @param id : The id of the client.
         /// @param client : The informations of the client are stored in this structure.
         /// @return True if the client exists.
         virtual bool    getClient(const QString &id, LightBird::INetwork::Client &client) const = 0;
+
         /// @brief Returns the list of the clients to which the server is connected.
         /// These clients are not connected to an opened port since the server
         /// initiated the connection.
         /// @return The list of the id of the clients in CLIENT mode.
         virtual QStringList getClients() const = 0;
+
         /// @brief Returns the list of the clients connected to a particular port.
         /// @param port : The port of the clients.
         /// @param transport : The transport protocol of the port.
         /// @return The list of the id of the clients connected to the port.
         virtual QStringList getClients(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
+
         /// @brief Connects the server to an other server.
         /// IOnConnection is called if the connection was successful.
         /// The client is created using the CLIENT mode which uses a different
@@ -116,6 +123,7 @@ namespace LightBird
                                                                      const QStringList &protocols = QStringList(),
                                                                      LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
                                                                      int wait = 30000) = 0;
+
         /// @brief Disconnects the client identified by the id in parameter.
         /// If a request is executing for this client, it is interrupted.
         /// The interface IOnDisconnect is called when the client has been
@@ -124,6 +132,7 @@ namespace LightBird
         /// if it is already disconnected.
         /// @return True if the client exists.
         virtual bool    disconnect(const QString &id) = 0;
+
         /// @brief The behaviour of this method depends on the mode of the client.
         /// * In SERVER mode it allows to bypass the deserialization of the requests
         /// and to call directly LightBird::IOnDeserialize followed by IDoExecution,
@@ -150,6 +159,7 @@ namespace LightBird
         /// @see LightBird::IDoSend
         /// @see LightBird::INetwork::connect
         virtual bool    send(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap()) = 0;
+
         /// @brief If the client is in CLIENT mode, the server will try to bypass
         /// the serialization of the request, and call directly LightBird::IOnSerialize
         /// followed by IDoDeserializeHeader in order to read the response of
@@ -169,6 +179,36 @@ namespace LightBird
         /// @see LightBird::IClient::Mode
         /// @see LightBird::INetwork::connect
         virtual bool    receive(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap()) = 0;
+
+        /// @brief Allows to pause the network workflow of a client. No more
+        /// network interface is called for the client until the resume method
+        /// is called, the time has elapsed or the client is disconnected.
+        /// In the latter case IOnDisconnect is called, but the workflow will
+        /// still be paused until one of the other conditions is met, except if
+        /// onDisconnect returned true, in which case IOnResume is called
+        /// followed by IOnDestroy.
+        /// In any cases the IOnResume interface is called when the pause ends.
+        /// The IOnPause interface is called just after this method.
+        /// @param id : The id of the client to pause.
+        /// @param msec : The maximum duration of the pause in milliseconds.
+        /// If the value is negative or zero, the pause will never timeout
+        /// (resume must be called).
+        /// @see resume
+        /// @see LightBird::IOnPause
+        /// @see LightBird::IOnResume
+        /// @see LightBird::IClient::isPaused
+        /// @see LightBird::IOnDisconnect
+        /// @return False if the client does not exists or is already paused.
+        virtual bool    pause(const QString &id, int msec = -1) = 0;
+
+        /// @brief Resumes the network workflow of a client paused.
+        /// The IOnResume interface is called just after this method.
+        /// @param id : The id of the client to resume.
+        /// @see pause
+        /// @see LightBird::IOnPause
+        /// @see LightBird::IOnResume
+        /// @return False if the client does not exists or is not paused.
+        virtual bool    resume(const QString &id) = 0;
     };
 }
 

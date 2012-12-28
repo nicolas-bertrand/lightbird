@@ -194,6 +194,44 @@ bool    Network::receive(const QString &idClient, const QString &protocol, const
     return (this->clients.receive(idClient, protocol, informations));
 }
 
+bool    Network::pause(const QString &idClient, int msec)
+{
+    Mutex   mutex(this->mutex, Mutex::READ, "Network", "pause");
+
+    if (!mutex)
+        return (false);
+    if (this->clients.pause(idClient, msec))
+        return (true);
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->pause(idClient, msec))
+                return (true);
+    }
+    return (false);
+}
+
+bool    Network::resume(const QString &idClient)
+{
+    Mutex   mutex(this->mutex, Mutex::READ, "Network", "resume");
+
+    if (!mutex)
+        return (false);
+    if (this->clients.resume(idClient))
+        return (true);
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->resume(idClient))
+                return (true);
+    }
+    return (false);
+}
+
 void    Network::shutdown()
 {
     Mutex   mutex(this->mutex, "Network", "shutdown");

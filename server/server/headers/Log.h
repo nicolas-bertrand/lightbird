@@ -143,7 +143,7 @@ private:
 # undef LOG_DEBUG
 # undef LOG_TRACE
 /// Optimizes the use of the log by checking its level before issuing the log.
-/// This way, the parameters of the log are ondly evaluate when the level is correct,
+/// This way the parameters of the log are only evaluated when the level is correct,
 /// which avoids unnecessary computation in higher log levels.
 # define LOG_FATAL   Log::fatal
 # define LOG_ERROR   if (Log::instance()->isError())   Log::error

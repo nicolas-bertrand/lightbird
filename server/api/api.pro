@@ -40,8 +40,10 @@ HEADERS = IApi.h \
     network/IOnDisconnect.h \
     network/IOnExecution.h \
     network/IOnFinish.h \
+    network/IOnPause.h \
     network/IOnProtocol.h \
     network/IOnRead.h \
+    network/IOnResume.h \
     network/IOnSend.h \
     network/IOnSerialize.h \
     network/IOnWrite.h \

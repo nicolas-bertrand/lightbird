@@ -5,8 +5,10 @@
 #include "IOnConnect.h"
 #include "IDoRead.h"
 #include "IDoWrite.h"
-#include "IOnDestroy.h"
+#include "IOnPause.h"
+#include "IOnResume.h"
 #include "IOnDisconnect.h"
+#include "IOnDestroy.h"
 
 #include "ApiSessions.h"
 #include "Client.h"
@@ -37,11 +39,12 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     this->reading = false;
     this->running = false;
     this->writing = NULL;
-    this->finish = false;
-    this->disconnecting = false;
-    this->disconnected = false;
     this->state = Client::NONE;
-    this->oldTask = Client::NONE;
+    this->pauseState = Pause::NONE;
+    this->disconnectState = Disconnect::NONE;
+    // Connects the resume slot
+    this->pauseTimer.setSingleShot(true);
+    QObject::connect(&this->pauseTimer, SIGNAL(timeout()), this, SLOT(resume()), Qt::QueuedConnection);
     // Sets the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
     // Creates the engine
@@ -122,13 +125,21 @@ void    Client::run()
                 return (this->_write(newTask));
             break;
 
+        case Client::PAUSE :
+            this->_onPause();
+            if (this->_pause())
+                return ;
+            break ;
+
+        case Client::RESUME :
+            this->_onResume();
+            newTask = this->oldTaskResume;
+            break;
+
         case Client::DISCONNECT :
-            if (this->_onDisconnect())
-                // The client is destroyed now
-                return this->_finish();
-            // Otherwise it will be destroyed when all the data have been processed
-            this->disconnecting = true;
-            newTask = this->oldTask;
+            if (this->_disconnect())
+                return ;
+            newTask = this->oldTaskDisconnect;
             break;
 
         default:
@@ -142,10 +153,19 @@ void    Client::run()
     // Fills the pending informations requests
     if (!this->informationsRequests.isEmpty())
         this->_getInformations();
-    // The client must be disconnected
-    if (this->finish && !this->disconnecting)
+    // The network workflow is being paused
+    if (this->pauseState == Pause::PAUSING)
     {
-        this->oldTask = newTask;
+        this->oldTaskResume = newTask;
+        newTask = Client::PAUSE;
+    }
+    // The network workflow is being resumed
+    else if (this->pauseState == Pause::RESUMING)
+        newTask = Client::RESUME;
+    // The client must be disconnected
+    else if (this->disconnectState == Disconnect::DISCONNECT)
+    {
+        this->oldTaskDisconnect = newTask;
         newTask = Client::DISCONNECT;
     }
     // A new task has already been assigned
@@ -161,7 +181,7 @@ void    Client::run()
     else if (this->reading)
         newTask = Client::READING;
     // The client is disconnecting and there is nothing left to do
-    else if (this->disconnecting)
+    else if (this->disconnectState == Disconnect::DISCONNECTING)
     {
         mutex.unlock();
         return this->_finish();
@@ -340,17 +360,116 @@ bool    Client::_receive()
     return (run);
 }
 
+bool    Client::pause(int msec)
+{
+    Mutex   mutex(this->mutex, "Client", "pause");
+
+    if (!mutex || this->pauseState != Pause::NONE)
+        return (false);
+    this->pauseState = Pause::PAUSING;
+    this->oldTaskResume = Client::NONE;
+    if (msec > 0)
+        this->pauseTimer.start(msec);
+    // When interval is 0 there is no timer
+    else
+        this->pauseTimer.setInterval(0);
+    if (!this->running)
+        this->_newTask(Client::PAUSE);
+    return (true);
+}
+
+bool    Client::_pause()
+{
+    Mutex   mutex(this->mutex, "Client", "_pause");
+
+    if (!mutex)
+        return (false);
+    // The workflow has already been resumed
+    if (this->pauseState == Pause::RESUMING)
+        return (false);
+    this->pauseState = Pause::PAUSED;
+    // The client has been disconnected while we were pausing
+    if (this->disconnectState == Disconnect::DISCONNECT)
+        return (false);
+    return (true);
+}
+
+void    Client::_onPause()
+{
+    QPair<QString, LightBird::IOnPause *> instance;
+
+    if ((instance = Plugins::instance()->getInstance<LightBird::IOnPause>(this->mode, this->transport, this->protocols, this->port)).second)
+    {
+        LOG_TRACE("Calling IOnPause::onPause()", Properties("id", this->id).add("plugin", instance.first), "Client", "_onPause");
+        instance.second->onPause(*this);
+        Plugins::instance()->release(instance.first);
+    }
+    this->pauseState = Pause::NONE;
+}
+
+bool    Client::resume()
+{
+    Mutex        mutex(this->mutex, "Client", "resume");
+    Pause::State oldPauseState = this->pauseState;
+
+    if (!mutex || this->pauseState == Pause::NONE || this->pauseState == Pause::RESUMING)
+        return (false);
+    this->pauseState = Pause::RESUMING;
+    // Stops the timer. By setting the interval to 0, we tell that the timer has not elapsed.
+    if (this->pauseTimer.isActive())
+    {
+        this->pauseTimer.stop();
+        this->pauseTimer.setInterval(0);
+    }
+    // Runs the RESUME task is we are not PAUSING and the client is not being disconnected
+    if (oldPauseState == Pause::PAUSED && this->disconnectState == Disconnect::NONE)
+        this->_newTask(Client::RESUME);
+    return (true);
+}
+
+void    Client::_onResume()
+{
+    QPair<QString, LightBird::IOnResume *> instance;
+    bool    timeout = !this->pauseTimer.isActive() && this->pauseTimer.interval();
+
+    if ((instance = Plugins::instance()->getInstance<LightBird::IOnResume>(this->mode, this->transport, this->protocols, this->port)).second)
+    {
+        LOG_TRACE("Calling IOnResume::onResume()", Properties("id", this->id).add("plugin", instance.first), "Client", "_onResume");
+        instance.second->onResume(*this, timeout);
+        Plugins::instance()->release(instance.first);
+    }
+    this->pauseState = Pause::NONE;
+}
+
 void    Client::disconnect()
 {
     Mutex  mutex(this->mutex, "Client", "disconnect");
 
-    if (!mutex || this->disconnecting)
+    if (!mutex || this->disconnectState != Disconnect::NONE)
         return ;
+    this->oldTaskDisconnect = Client::NONE;
     // If the client is not running, a new task can be created to disconnect it.
     // Otherwise it will be disconnected after the current task is completed.
-    this->finish = true;
-    if (!this->running)
+    this->disconnectState = Disconnect::DISCONNECT;
+    if (!this->running || this->pauseState == Pause::PAUSED)
         this->_newTask(Client::DISCONNECT);
+}
+
+bool    Client::_disconnect()
+{
+    // If IOnDisconnect returns true the client is destroyed now
+    if (this->_onDisconnect())
+    {
+        this->_finish();
+        return (true);
+    }
+    // Otherwise it will be destroyed when all the data have been processed
+    Mutex  mutex(this->mutex, "Client", "_disconnect");
+    this->disconnectState = Disconnect::DISCONNECTING;
+    // The network workflow is paused
+    if (this->pauseState == Pause::PAUSED)
+        return (true);
+    return (false);
 }
 
 bool    Client::doRead(QByteArray &data)
@@ -434,7 +553,7 @@ void    Client::_onDestroy()
 
 bool    Client::isFinished() const
 {
-    return (this->disconnected);
+    return (this->disconnectState == Disconnect::DISCONNECTED);
 }
 
 const QString   &Client::getId() const
@@ -532,9 +651,14 @@ LightBird::Session  Client::getSession(const QString &id_account) const
     return (session);
 }
 
+bool    Client::isPaused() const
+{
+    return (this->pauseState == Pause::PAUSING || this->pauseState == Pause::PAUSED);
+}
+
 bool    Client::isDisconnecting() const
 {
-    return (this->disconnecting);
+    return (this->disconnectState == Disconnect::DISCONNECTING);
 }
 
 QByteArray  &Client::getData()
@@ -612,7 +736,11 @@ void    Client::_getInformations(LightBird::INetwork::Client &client, Future<boo
 
 void    Client::_finish()
 {
+    // Calls IOnResume before finishing the client if it is paused
+    if (this->pauseState != Pause::NONE)
+        this->_onResume();
+    // Finishes the client
     this->_onDestroy();
-    this->disconnected = true;
+    this->disconnectState = Disconnect::DISCONNECTED;
     emit this->finished();
 }

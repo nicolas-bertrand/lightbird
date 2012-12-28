@@ -284,7 +284,6 @@ bool    Database::_connection()
         e = e.nextSiblingElement("pragma");
     }
     Configurations::instance()->release();
-    database.setConnectOptions(options);
     return (true);
 }
 

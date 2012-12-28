@@ -143,6 +143,32 @@ bool    Clients::receive(const QString &id, const QString &p, const QVariantMap 
     return (client->receive(protocol, informations));
 }
 
+bool    Clients::pause(const QString &idClient, int msec)
+{
+    Mutex   mutex(this->mutex, "Clients", "pause");
+
+    if (!mutex)
+        return (false);
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext())
+        if (it.next()->getId() == idClient)
+            return (it.peekPrevious()->pause(msec));
+    return (false);
+}
+
+bool    Clients::resume(const QString &idClient)
+{
+    Mutex   mutex(this->mutex, "Clients", "resume");
+
+    if (!mutex)
+        return (false);
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext())
+        if (it.next()->getId() == idClient)
+            return (it.peekPrevious()->resume());
+    return (false);
+}
+
 Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
 {
     Mutex   mutex(this->mutex, "Clients", "getClient");

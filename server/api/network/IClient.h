@@ -86,6 +86,9 @@ namespace LightBird
         /// remaining data to be processed normally.
         /// @see LightBird::IOnDisconnect
         virtual bool                 isDisconnecting() const = 0;
+        /// @brief Returns true if the client has been paused using INetwork::pause.
+        /// @see LightBird::INetwork::pause
+        virtual bool                 isPaused() const = 0;
     };
 }
 

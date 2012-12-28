@@ -105,7 +105,7 @@ QByteArray  Video::transcode()
                 this->buffers.removeLast();
         }
     }
-    catch (bool e)
+    catch (bool)
     {
         this->_clear();
     }

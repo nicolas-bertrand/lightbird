@@ -88,7 +88,7 @@ QByteArray  Audio::transcode()
         }
         result = this->buffer;
     }
-    catch (bool e)
+    catch (bool)
     {
         this->_clear();
     }

@@ -4,6 +4,7 @@
 # include <QList>
 # include <QMap>
 # include <QMutex>
+# include <QTimer>
 
 # include "IClient.h"
 # include "INetwork.h"
@@ -55,7 +56,9 @@ public:
     /// @brief Asks the engine to read a response without sending a request.
     /// @see LightBird::INetwork::receive
     bool                    receive(const QString &protocol, const QVariantMap &informations);
-    /// @brief Disconnect the client
+    /// @see LightBird::INetwork::pause
+    bool                    pause(int msec = -1);
+    /// @brief Disconnects the client.
     void                    disconnect();
     /// @brief Calls the IDoRead interface of the plugins.
     bool                    doRead(QByteArray &data);
@@ -101,6 +104,7 @@ public:
     LightBird::IResponse    &getResponse();
     QStringList             getSessions(const QString &id_account = QString()) const;
     LightBird::Session      getSession(const QString &id_account = QString()) const;
+    bool                    isPaused() const;
     bool                    isDisconnecting() const;
 
 public slots:
@@ -112,6 +116,10 @@ public slots:
     /// @brief Tells the Client that the data have been written on the network,
     /// and that it can resume its processing.
     void                    bytesWritten();
+    /// @brief Resumes the paused network workflow. Can be called directly, or
+    /// via the pause timer.
+    /// @see LightBird::INetwork::resume
+    bool                    resume();
 
 signals:
     /// @brief The client has been disconnected and can be safely destroyed.
@@ -133,7 +141,31 @@ private:
         RECEIVE,    ///< Data have to be received without sending a request.
         RUN,        ///< The engine is running.
         DISCONNECT, ///< The client is going to be disconnected.
+        PAUSE,      ///< The network workflow has to be paused.
+        RESUME,     ///< The network workflow has to be resumed.
         NONE        ///< The client is idle.
+    };
+    /// @brief The pause states of the network workflow.
+    struct Pause
+    {
+        enum State
+        {
+            NONE,    ///< The network workflow is running normally.
+            PAUSING, ///< Is being paused. The current task have to be finished.
+            PAUSED,  ///< Has been paused. No more network interface is called, except IOnDisconnect.
+            RESUMING ///< Is being resumed.
+        };
+    };
+    /// @brief The disconnect states of the client.
+    struct Disconnect
+    {
+        enum State
+        {
+            NONE,          ///< The client is connected.
+            DISCONNECT,    ///< The client is going to be disconnected.
+            DISCONNECTING, ///< The client is disconnected from the server, but there is still data to process.
+            DISCONNECTED   ///< The client has been disconnected and can be safely destroyed.
+        };
     };
 
     /// @brief Run a new task in the threadpool and modify the state of the client
@@ -151,8 +183,16 @@ private:
     /// @brief Asks the Engine to read a response without sending a request.
     /// @return True if the Engine is ready to read the response.
     bool    _receive();
+    /// @brief Pauses the network workflow.
+    bool    _pause();
+    /// @brief Calls IOnPause.
+    void    _onPause();
+    /// @brief Calls IOnResume.
+    void    _onResume();
     /// @brief Calls IOnConnect.
     bool    _onConnect();
+    /// @brief Disconnects the client.
+    bool    _disconnect();
     /// @brief Calls IOnDisconnect.
     bool    _onDisconnect();
     /// @brief Calls IOnDestroy.
@@ -181,14 +221,15 @@ private:
     QByteArray               data;                ///< The data read on the network, waiting to be processed.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
-    State                    oldTask;             ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
+    State                    oldTaskResume;       ///< Used to restore the old state of the client in order to complete its tasks after resuming.
+    State                    oldTaskDisconnect;   ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     reading;             ///< Data are available on the network.
     QByteArray               *writing;            ///< Stores the data to write. The client's task is paused while the data are being written on the network (i.e. while writing is not NULL).
     State                    written;             ///< The state to resume after the data have been written on the socket.
-    bool                     finish;              ///< If true, the client is going to be disconnected.
-    bool                     disconnecting;       ///< The client is disconnected from the server, but there is still data to process.
-    bool                     disconnected;        ///< The client has been disconnected and and can be safely destroyed.
+    Pause::State             pauseState;          ///< The pause state of the network workflow.
+    QTimer                   pauseTimer;          ///< Resumes the network workflow when the pause duration elapsed.
+    Disconnect::State        disconnectState;     ///< The disconnect state of the client.
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.
     QList<QVariantMap>       receiveResponses;    ///< Stores the protocol and the informations of the responses that are going to be received.

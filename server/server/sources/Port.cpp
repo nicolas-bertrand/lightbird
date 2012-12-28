@@ -102,6 +102,32 @@ bool    Port::send(const QString &id, const QString &p, const QVariantMap &infor
     return (client->send(protocol, informations));
 }
 
+bool    Port::pause(const QString &idClient, int msec)
+{
+    Mutex   mutex(this->mutex, Mutex::READ, "Port", "pause");
+
+    if (!mutex)
+        return (false);
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext())
+        if (it.next()->getId() == idClient)
+            return (it.peekPrevious()->pause(msec));
+    return (false);
+}
+
+bool    Port::resume(const QString &idClient)
+{
+    Mutex   mutex(this->mutex, Mutex::READ, "Port", "resume");
+
+    if (!mutex)
+        return (false);
+    QListIterator<Client *> it(this->clients);
+    while (it.hasNext())
+        if (it.next()->getId() == idClient)
+            return (it.peekPrevious()->resume());
+    return (false);
+}
+
 void    Port::close()
 {
     QListIterator<Client *> it(this->clients);

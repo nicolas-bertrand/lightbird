@@ -50,6 +50,10 @@ public:
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     /// @see LightBird::INetwork::receive
     bool            receive(const QString &idClient, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
+    /// @see LightBird::INetwork::pause
+    bool            pause(const QString &idClient, int msec = -1);
+    /// @see LightBird::INetwork::resume
+    bool            resume(const QString &idClient);
     /// @brief Quits all the ports threads and delete them.
     void            shutdown();
     /// @brief Returns the instance of this class created by the Server.

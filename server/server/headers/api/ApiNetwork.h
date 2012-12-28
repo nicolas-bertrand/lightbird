@@ -33,6 +33,8 @@ public:
     bool                  disconnect(const QString &id);
     bool                  send(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     bool                  receive(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
+    bool                  pause(const QString &idClient, int msec = -1);
+    bool                  resume(const QString &idClient);
 
 private:
     ApiNetwork();

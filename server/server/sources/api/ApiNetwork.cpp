@@ -75,3 +75,13 @@ bool    ApiNetwork::receive(const QString &idClient, const QString &protocol, co
 {
     return (Network::instance()->receive(idClient, protocol, informations));
 }
+
+bool    ApiNetwork::pause(const QString &idClient, int msec)
+{
+    return (Network::instance()->pause(idClient, msec));
+}
+
+bool    ApiNetwork::resume(const QString &idClient)
+{
+    return (Network::instance()->resume(idClient));
+}
