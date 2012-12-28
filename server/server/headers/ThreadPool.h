@@ -8,7 +8,7 @@
 
 class Thread;
 
-/// @brief Manages a pool of thread used to execute any task.
+/// @brief Manages a pool of threads used to execute any task.
 class ThreadPool : public QObject
 {
     Q_OBJECT
@@ -57,7 +57,7 @@ public:
     class ITask
     {
     public:
-        /// @brief Run the task.
+        /// @brief Runs the task.
         virtual void    run() = 0;
         /// @brief Returns the thread in which the task is running, or NULL
         /// if it is not running.

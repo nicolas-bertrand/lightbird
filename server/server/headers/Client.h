@@ -167,6 +167,14 @@ private:
             DISCONNECTED   ///< The client has been disconnected and can be safely destroyed.
         };
     };
+    /// @brief Allows to save temporarily the state of the variables in the run method.
+    struct RunState
+    {
+        RunState() : newTask(Client::NONE), send(true), receive(true) {}
+        State   newTask;
+        bool    send;
+        bool    receive;
+    };
 
     /// @brief Run a new task in the threadpool and modify the state of the client
     /// if the parameter is different from NONE. This method returns immediatly, and
@@ -221,8 +229,8 @@ private:
     QByteArray               data;                ///< The data read on the network, waiting to be processed.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
-    State                    oldTaskResume;       ///< Used to restore the old state of the client in order to complete its tasks after resuming.
-    State                    oldTaskDisconnect;   ///< Used to restore the old state of the client in order to complete its tasks before disconnecting.
+    RunState                 runStatePause;       ///< Used to restore the state of the client in order to complete its tasks after resuming.
+    RunState                 runStateDisconnect;  ///< Used to restore the state of the client in order to complete its tasks before disconnecting.
     bool                     running;             ///< A task is running in a thread of the threadpool.
     bool                     reading;             ///< Data are available on the network.
     QByteArray               *writing;            ///< Stores the data to write. The client's task is paused while the data are being written on the network (i.e. while writing is not NULL).

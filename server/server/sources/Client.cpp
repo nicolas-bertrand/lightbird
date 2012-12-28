@@ -66,9 +66,10 @@ Client::~Client()
 
 void    Client::run()
 {
-    State   newTask = Client::NONE;
-    bool    send = true;
-    bool    receive = true;
+    RunState s;
+    State    &newTask = s.newTask;
+    bool     &send = s.send;
+    bool     &receive = s.receive;
 
     // Performs different actions depending on the client's state
     switch (this->state)
@@ -133,13 +134,13 @@ void    Client::run()
 
         case Client::RESUME :
             this->_onResume();
-            newTask = this->oldTaskResume;
+            s = this->runStatePause;
             break;
 
         case Client::DISCONNECT :
             if (this->_disconnect())
                 return ;
-            newTask = this->oldTaskDisconnect;
+            s = this->runStateDisconnect;
             break;
 
         default:
@@ -156,7 +157,7 @@ void    Client::run()
     // The network workflow is being paused
     if (this->pauseState == Pause::PAUSING)
     {
-        this->oldTaskResume = newTask;
+        this->runStatePause = s;
         newTask = Client::PAUSE;
     }
     // The network workflow is being resumed
@@ -165,7 +166,7 @@ void    Client::run()
     // The client must be disconnected
     else if (this->disconnectState == Disconnect::DISCONNECT)
     {
-        this->oldTaskDisconnect = newTask;
+        this->runStateDisconnect = s;
         newTask = Client::DISCONNECT;
     }
     // A new task has already been assigned
@@ -367,7 +368,7 @@ bool    Client::pause(int msec)
     if (!mutex || this->pauseState != Pause::NONE)
         return (false);
     this->pauseState = Pause::PAUSING;
-    this->oldTaskResume = Client::NONE;
+    this->runStatePause = RunState();
     if (msec > 0)
         this->pauseTimer.start(msec);
     // When interval is 0 there is no timer
@@ -447,7 +448,7 @@ void    Client::disconnect()
 
     if (!mutex || this->disconnectState != Disconnect::NONE)
         return ;
-    this->oldTaskDisconnect = Client::NONE;
+    this->runStateDisconnect = RunState();
     // If the client is not running, a new task can be created to disconnect it.
     // Otherwise it will be disconnected after the current task is completed.
     this->disconnectState = Disconnect::DISCONNECT;
