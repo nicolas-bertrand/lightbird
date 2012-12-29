@@ -1,5 +1,4 @@
 #include <QDir>
-#include <QSqlQuery>
 
 #include "Dir.h"
 #include "Commands.h"
@@ -281,10 +280,13 @@ Commands::Result Commands::_size(const QString &path, LightBird::Session &sessio
 Commands::Result Commands::_mdtm(const QString &path, LightBird::Session &session, LightBird::IClient &)
 {
     LightBird::TableFiles   file;
+    QDateTime               lastModified;
 
     if (!(file = this->_getFile(path, session)))
         return (Result(550, QString("File not found.")));
-    return (Result(213, QFileInfo(file.getFullPath()).lastModified().toUTC().toString("yyyyMMddhhmmss")));
+    if (!(lastModified = QFileInfo(file.getFullPath()).lastModified()).isValid())
+        lastModified = file.getModified();
+    return (Result(213, lastModified.toUTC().toString("yyyyMMddhhmmss")));
 }
 
 Commands::Result Commands::_syst(const QString &, LightBird::Session &, LightBird::IClient &)
