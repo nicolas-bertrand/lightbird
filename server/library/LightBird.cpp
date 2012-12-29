@@ -13,6 +13,11 @@
 // The maximum number of bytes copied each time
 static const unsigned READ_WRITE_SIZE = 1048576;
 
+QString LightBird::addressToString(void *address)
+{
+    return (QString::number((quint64)address, 16).toLower());
+}
+
 bool    LightBird::copy(const QString &sourceName, const QString &destinationName)
 {
     QFile       source(sourceName);

@@ -4,6 +4,7 @@
 # include <QDateTime>
 # include <QMap>
 # include <QSharedPointer>
+# include <QSqlDatabase>
 # include <QSqlQuery>
 # include <QString>
 # include <QStringList>
@@ -34,6 +35,10 @@ namespace LightBird
         /// are the rows, and the last is the field/value pairs.
         typedef QMap<QString, QMap<LightBird::IDatabase::State, QList<QMap<QString, QVariant> > > > Updates;
 
+        /// @brief Returns the database connection of the current thread. Each
+        /// thread has its own database connection which must be given to
+        /// QSqlQuery during its creation.
+        virtual QSqlDatabase getDatabase() = 0;
         /// @brief Executes a SQL query. The QSqlQuery in parameter allows to secure
         /// the variables into the request by calling prepare() and bindValue(). This
         /// prevent SQL injections. You can also use it to get the error of the last

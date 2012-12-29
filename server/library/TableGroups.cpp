@@ -26,13 +26,13 @@ TableGroups &TableGroups::operator=(const TableGroups &table)
     return (*this);
 }
 
-QStringList     TableGroups::getIdFromName(const QString &name) const
+QStringList TableGroups::getIdFromName(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             groups;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          groups;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableGroups", "getId"));
     query.bindValue(":name", name);
@@ -42,9 +42,9 @@ QStringList     TableGroups::getIdFromName(const QString &name) const
     return (groups);
 }
 
-bool            TableGroups::add(const QString &name, const QString &id_group)
+bool    TableGroups::add(const QString &name, const QString &id_group)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     id = createUuid();
@@ -58,10 +58,10 @@ bool            TableGroups::add(const QString &name, const QString &id_group)
     return (true);
 }
 
-QString         TableGroups::getIdGroup() const
+QString TableGroups::getIdGroup() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableGroups", "getIdGroup"));
     query.bindValue(":id", this->id);
@@ -70,9 +70,9 @@ QString         TableGroups::getIdGroup() const
     return ("");
 }
 
-bool            TableGroups::setIdGroup(const QString &id_group)
+bool    TableGroups::setIdGroup(const QString &id_group)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableGroups", "setIdGroup"));
     query.bindValue(":id", this->id);
@@ -80,9 +80,9 @@ bool            TableGroups::setIdGroup(const QString &id_group)
     return (Library::database().query(query));
 }
 
-bool            TableGroups::addAccount(const QString &id_account)
+bool    TableGroups::addAccount(const QString &id_account)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     id = createUuid();
@@ -93,9 +93,9 @@ bool            TableGroups::addAccount(const QString &id_account)
     return (Library::database().query(query));
 }
 
-bool            TableGroups::removeAccount(const QString &id_account)
+bool    TableGroups::removeAccount(const QString &id_account)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableGroups", "removeAccount"));
     query.bindValue(":id_group", this->id);
@@ -103,13 +103,13 @@ bool            TableGroups::removeAccount(const QString &id_account)
     return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
-QStringList     TableGroups::getAccounts() const
+QStringList TableGroups::getAccounts() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             accounts;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          accounts;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableGroups", "getAccounts"));
     query.bindValue(":id_group", this->id);
@@ -119,7 +119,7 @@ QStringList     TableGroups::getAccounts() const
     return (accounts);
 }
 
-QStringList     TableGroups::getParents() const
+QStringList TableGroups::getParents() const
 {
     TableGroups group(this->id);
     QString     id;

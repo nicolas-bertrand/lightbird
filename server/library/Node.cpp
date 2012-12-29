@@ -21,7 +21,7 @@ QString Node::getId() const
 void            Node::setId(const QString &id)
 {
     IDatabase   &db = Library::database();
-    QSqlQuery   sqlQuery(db.getQuery("VFS", "select_node").replace(":table", getTableName()));
+    QSqlQuery   sqlQuery(db.getQuery("VFS", "select_node").replace(":table", getTableName()), db.getDatabase());
     QVariantMap result;
 
     sqlQuery.bindValue(":id", id);
@@ -45,7 +45,7 @@ Node::NodeType  Node::getNodeType() const
 QString         Node::getColumn(QString column) const
 {
     IDatabase   &db = Library::database();
-    QSqlQuery   sqlQuery(db.getQuery("VFS", "select_node").replace(":table", getTableName()));
+    QSqlQuery   sqlQuery(db.getQuery("VFS", "select_node").replace(":table", getTableName()), db.getDatabase());
     QVariantMap result;
 
     sqlQuery.bindValue(":id", this->getId());
@@ -95,7 +95,7 @@ Node            *Node::byPath(const QString &p, const Dir &parent)
 {
     IDatabase   &db = Library::database();
     QVariantMap result;
-    QSqlQuery   query;
+    QSqlQuery   query(db.getDatabase());
     QString     path = p;
     QString     id = parent.getId();
     bool        ok = true;
@@ -161,7 +161,7 @@ Node            *Node::byPath(const QString &p, const Dir &parent)
 QString         Node::getOwner() const
 {
     IDatabase   &db = Library::database();
-    QSqlQuery   sqlQuery(db.getQuery("VFS", "select_node_owner").replace(":table", getTableName()));
+    QSqlQuery   sqlQuery(db.getQuery("VFS", "select_node_owner").replace(":table", getTableName()), db.getDatabase());
     QVariantMap result;
 
     sqlQuery.bindValue(":id", this->getId());

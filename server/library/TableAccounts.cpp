@@ -27,10 +27,10 @@ TableAccounts &TableAccounts::operator=(const TableAccounts &table)
     return (*this);
 }
 
-QString     TableAccounts::getIdFromName(const QString &name) const
+QString TableAccounts::getIdFromName(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccounts", "getIdFromName"));
     query.bindValue(":name", name);
@@ -39,7 +39,7 @@ QString     TableAccounts::getIdFromName(const QString &name) const
     return (result[0]["id"].toString());
 }
 
-bool        TableAccounts::setIdFromName(const QString &name)
+bool    TableAccounts::setIdFromName(const QString &name)
 {
     QString id;
 
@@ -49,7 +49,7 @@ bool        TableAccounts::setIdFromName(const QString &name)
     return (true);
 }
 
-QString     TableAccounts::getIdFromNameAndPassword(const QString &name, const QString &password) const
+QString TableAccounts::getIdFromNameAndPassword(const QString &name, const QString &password) const
 {
     TableAccounts   account;
 
@@ -58,7 +58,7 @@ QString     TableAccounts::getIdFromNameAndPassword(const QString &name, const Q
     return (account.getId());
 }
 
-bool        TableAccounts::setIdFromNameAndPassword(const QString &name, const QString &password)
+bool    TableAccounts::setIdFromNameAndPassword(const QString &name, const QString &password)
 {
     QString id;
 
@@ -68,12 +68,12 @@ bool        TableAccounts::setIdFromNameAndPassword(const QString &name, const Q
     return (true);
 }
 
-QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) const
+QString TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableAccounts", "getIdFromIdentifiantAndSalt"));
     if (Library::database().query(query, result))
@@ -85,7 +85,7 @@ QString     TableAccounts::getIdFromIdentifiantAndSalt(const QString &identifian
     return ("");
 }
 
-bool        TableAccounts::setIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt)
+bool    TableAccounts::setIdFromIdentifiantAndSalt(const QString &identifiant, const QString &salt)
 {
     QString id;
 
@@ -95,10 +95,10 @@ bool        TableAccounts::setIdFromIdentifiantAndSalt(const QString &identifian
     return (true);
 }
 
-bool            TableAccounts::add(const QString &name, const QVariantMap &informations,
+bool    TableAccounts::add(const QString &name, const QVariantMap &informations,
                                               const QString &password, bool administrator, bool active)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     id = createUuid();
@@ -116,15 +116,15 @@ bool            TableAccounts::add(const QString &name, const QVariantMap &infor
     return (true);
 }
 
-bool        TableAccounts::add(const QString &name, const QString &password, bool administrator, bool active)
+bool    TableAccounts::add(const QString &name, const QString &password, bool administrator, bool active)
 {
     return (this->add(name, QVariantMap(), password, administrator, active));
 }
 
-QString         TableAccounts::getPassword() const
+QString TableAccounts::getPassword() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccounts", "getPassword"));
     query.bindValue(":id", this->id);
@@ -133,9 +133,9 @@ QString         TableAccounts::getPassword() const
     return ("");
 }
 
-bool            TableAccounts::setPassword(const QString &password)
+bool    TableAccounts::setPassword(const QString &password)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableAccounts", "setPassword"));
     query.bindValue(":password", this->passwordHash(password, this->id));
@@ -143,10 +143,10 @@ bool            TableAccounts::setPassword(const QString &password)
     return (Library::database().query(query));
 }
 
-bool            TableAccounts::isAdministrator() const
+bool    TableAccounts::isAdministrator() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccounts", "isAdministrator_select"));
     query.bindValue(":id", this->id);
@@ -155,9 +155,9 @@ bool            TableAccounts::isAdministrator() const
     return (false);
 }
 
-bool            TableAccounts::isAdministrator(bool administrator)
+bool    TableAccounts::isAdministrator(bool administrator)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableAccounts", "isAdministrator_update"));
     query.bindValue(":administrator", QString::number(administrator));
@@ -165,10 +165,10 @@ bool            TableAccounts::isAdministrator(bool administrator)
     return (Library::database().query(query));
 }
 
-bool            TableAccounts::isActive() const
+bool    TableAccounts::isActive() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccounts", "isActive_select"));
     query.bindValue(":id", this->id);
@@ -177,9 +177,9 @@ bool            TableAccounts::isActive() const
     return (false);
 }
 
-bool            TableAccounts::isActive(bool active)
+bool    TableAccounts::isActive(bool active)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableAccounts", "isActive_update"));
     query.bindValue(":active", QString::number(active));
@@ -187,10 +187,10 @@ bool            TableAccounts::isActive(bool active)
     return (Library::database().query(query));
 }
 
-QVariant        TableAccounts::getInformation(const QString &name) const
+QVariant    TableAccounts::getInformation(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccounts", "getInformation"));
     query.bindValue(":id_account", this->id);
@@ -200,13 +200,13 @@ QVariant        TableAccounts::getInformation(const QString &name) const
     return ("");
 }
 
-QVariantMap     TableAccounts::getInformations() const
+QVariantMap TableAccounts::getInformations() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QVariantMap             informations;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QVariantMap          informations;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableAccounts", "getInformations"));
     query.bindValue(":id_account", this->id);
@@ -216,10 +216,10 @@ QVariantMap     TableAccounts::getInformations() const
     return (informations);
 }
 
-bool            TableAccounts::setInformation(const QString &name, const QVariant &value)
+bool    TableAccounts::setInformation(const QString &name, const QVariant &value)
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccounts", "setInformation_select"));
     query.bindValue(":id_account", this->id);
@@ -243,7 +243,7 @@ bool            TableAccounts::setInformation(const QString &name, const QVarian
     return (Library::database().query(query));
 }
 
-bool            TableAccounts::setInformations(const QVariantMap &informations)
+bool    TableAccounts::setInformations(const QVariantMap &informations)
 {
     QMapIterator<QString, QVariant> it(informations);
     bool                            result = true;
@@ -257,9 +257,9 @@ bool            TableAccounts::setInformations(const QVariantMap &informations)
     return (result);
 }
 
-bool            TableAccounts::removeInformation(const QString &name)
+bool    TableAccounts::removeInformation(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableAccounts", "removeInformation"));
     query.bindValue(":id_account", this->id);
@@ -267,9 +267,9 @@ bool            TableAccounts::removeInformation(const QString &name)
     return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
-bool            TableAccounts::removeInformations(const QStringList &informations)
+bool    TableAccounts::removeInformations(const QStringList &informations)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     bool        result = true;
 
     if (informations.isEmpty())
@@ -287,13 +287,13 @@ bool            TableAccounts::removeInformations(const QStringList &information
     return (result);
 }
 
-QStringList     TableAccounts::getGroups() const
+QStringList TableAccounts::getGroups() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             groups;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          groups;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableAccounts", "getGroups"));
     query.bindValue(":id_account", this->id);
@@ -303,9 +303,9 @@ QStringList     TableAccounts::getGroups() const
     return (groups);
 }
 
-bool            TableAccounts::addGroup(const QString &id_group)
+bool    TableAccounts::addGroup(const QString &id_group)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     id = createUuid();
@@ -316,9 +316,9 @@ bool            TableAccounts::addGroup(const QString &id_group)
     return (Library::database().query(query));
 }
 
-bool            TableAccounts::removeGroup(const QString &id_group)
+bool    TableAccounts::removeGroup(const QString &id_group)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableAccounts", "removeGroup"));
     query.bindValue(":id_account", this->id);
@@ -326,7 +326,7 @@ bool            TableAccounts::removeGroup(const QString &id_group)
     return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
-QString         TableAccounts::passwordHash(const QString &password, const QString &id) const
+QString TableAccounts::passwordHash(const QString &password, const QString &id) const
 {
     if (password.isEmpty())
         return (QString());

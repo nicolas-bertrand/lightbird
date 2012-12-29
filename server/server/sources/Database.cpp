@@ -1,4 +1,5 @@
 #include <iostream>
+#include <QCoreApplication>
 #include <QDir>
 #include <QSqlError>
 #include <QSqlRecord>
@@ -22,7 +23,7 @@ Database::Database(QObject *parent)
                       << "directories" << "events" << "events_informations" << "files" << "files_collections"
                       << "files_informations" << "groups" << "limits" << "permissions" << "tags";
     // Connects the server to the database
-    if (this->_connection())
+    if (this->getDatabase().isOpen())
         this->isInitialized();
     else
         LOG_ERROR("Connection to the database failed", "Database", "Database");
@@ -32,8 +33,25 @@ Database::Database(QObject *parent)
 
 Database::~Database()
 {
-    QSqlDatabase::database().close();
+    // Removes all the databases connections
+    QStringListIterator it(QSqlDatabase::connectionNames());
+    while (it.hasNext())
+        QSqlDatabase::removeDatabase(it.next());
     LOG_TRACE("Database destroyed!", "Database", "~Database");
+}
+
+QSqlDatabase    Database::getDatabase()
+{
+    // The connection name is the thread address
+    QString connectionName = LightBird::addressToString(QThread::currentThread());
+
+    // Uses the default connection if we are in the main thread
+    if (QThread::currentThread() == QCoreApplication::instance()->thread())
+        connectionName = QLatin1String(QSqlDatabase::defaultConnection);
+    // Creates the database connection if it does not exists
+    if (!QSqlDatabase::contains(connectionName))
+        this->_addDatabase(connectionName);
+    return (QSqlDatabase::database(connectionName));
 }
 
 bool    Database::query(QSqlQuery &query)
@@ -41,7 +59,7 @@ bool    Database::query(QSqlQuery &query)
     bool    error;
 
     this->_checkBoundValues(query);
-    // Execute the request
+    // Executes the request
     if ((error = query.exec()) == false)
         Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
     else
@@ -57,10 +75,10 @@ bool    Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
     QVariantMap row;
 
     this->_checkBoundValues(query);
-    // Execute the query
+    // Executes the query
     if ((error = query.exec()) == false)
         Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
-    // Put the result in the reference
+    // Puts the result in the reference
     else
     {
         result.clear();
@@ -84,10 +102,10 @@ bool    Database::query(QSqlQuery &query, QVariantMap &result)
     int     count;
 
     this->_checkBoundValues(query);
-    // Execute the query
+    // Executes the query
     if ((error = query.exec()) == false)
         Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
-    // Put the result in the reference
+    // Puts the result in the reference
     else
     {
         result.clear();
@@ -106,7 +124,7 @@ LightBird::Table    *Database::getTable(LightBird::Table::Id table, const QStrin
 {
     QStringList          tables;
     QString              name;
-    QSqlQuery            query;
+    QSqlQuery            query(this->getDatabase());
     QVector<QVariantMap> result;
 
     // If the table is unknow, tries to find it using the id of the row
@@ -119,7 +137,7 @@ LightBird::Table    *Database::getTable(LightBird::Table::Id table, const QStrin
             tables << "files" << "directories" << "collections";
         else
             tables = this->tablesNames;
-        // Search the id
+        // Searches the id
         QStringListIterator it(tables);
         while (it.hasNext() && name.isEmpty())
         {
@@ -178,7 +196,7 @@ bool    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTim
     LightBird::IDatabase::State state;
     QDateTime                   utc = d.toUTC();
     QString                     date = utc.toString(DATE_FORMAT);
-    QSqlQuery                   query;
+    QSqlQuery                   query(this->getDatabase());
     QVector<QVariantMap>        result;
     QStringList                 tables = t;
     QString                     table;
@@ -188,7 +206,7 @@ bool    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTim
     // If empty, all the tables are checked
     if (tables.isEmpty())
         tables = this->tablesNames;
-    // Get the updated row of the requested tables
+    // Gets the updated row of the requested tables
     QStringListIterator it(tables);
     while (it.hasNext())
     {
@@ -214,7 +232,7 @@ bool    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTim
         result.clear();
         it.next();
     }
-    // Get the deleted rows
+    // Gets the deleted rows
     if (utc.isValid())
     {
         query.prepare(this->getQuery("Database", "update_select_deleted"));
@@ -233,28 +251,30 @@ bool    Database::updates(LightBird::IDatabase::Updates &updates, const QDateTim
     return (false);
 }
 
-bool    Database::_connection()
+bool    Database::_addDatabase(const QString &connectionName)
 {
-    QSqlDatabase    database;
-    QString         name;
-    QDomElement     e;
-    QString         options;
+    QSqlDatabase database;
+    QString      name;
+    QDomElement  e;
+    QString      options;
 
     // Creates the database manager
-    if (!(database = QSqlDatabase::addDatabase(Configurations::instance()->get("database/type"))).isValid())
+    if (!(database = QSqlDatabase::addDatabase(Configurations::instance()->get("database/type"), connectionName)).isValid())
     {
-        LOG_ERROR("Unvalid database type", Properties("type", Configurations::instance()->get("database/type")), "Database", "_connection");
+        LOG_ERROR("Unvalid database type", Properties("type", Configurations::instance()->get("database/type")), "Database", "_addDatabase");
         return (false);
     }
-    // Set the database informations from the configutation
+    // Calls the _removeDatabase slot when the current thread is finiched
+    QObject::connect(QThread::currentThread(), SIGNAL(finished()), this, SLOT(_removeDatabase()), Qt::DirectConnection);
+    // Sets the database informations from the configutation
     database.setUserName(Configurations::instance()->get("database/user"));
     database.setPassword(Configurations::instance()->get("database/password"));
     database.setHostName(Configurations::instance()->get("database/host"));
     database.setPort(Configurations::instance()->get("database/port").toInt());
-    if (!this->_name(name))
+    if (!this->_getDatabaseName(name))
         return (false);
     database.setDatabaseName(name);
-    // Set the connection options
+    // Sets the connection options
     e = Configurations::instance()->readDom().firstChildElement("database").firstChildElement("options").firstChildElement();
     while (!e.isNull())
     {
@@ -265,20 +285,20 @@ bool    Database::_connection()
     }
     Configurations::instance()->release();
     database.setConnectOptions(options);
-    // Open the connection
+    // Opens the connection
     if (!database.open())
     {
         LOG_ERROR("Cannot open the database", Properties("name", database.databaseName()).add("type", Configurations::instance()->get("database/type")).add("port", QString::number(database.port()))
-                   .add("user", database.userName()).add("password", database.password()).add("host", database.hostName()).add("options", options), "Database", "_connection");
+                  .add("user", database.userName()).add("password", database.password()).add("host", database.hostName()).add("options", options).add("error", database.lastError().text()), "Database", "_addDatabase");
         return (false);
     }
     LOG_DEBUG("Database connected", Properties("name", database.databaseName()).add("type", Configurations::instance()->get("database/type"))
-               .add("port", QString::number(database.port())).add("user", database.userName()).add("host", database.hostName()).add("options", options), "Database", "_connection");
-    // Execute pragmas
+               .add("port", QString::number(database.port())).add("user", database.userName()).add("host", database.hostName()).add("options", options), "Database", "_addDatabase");
+    // Executes pragmas
     e = Configurations::instance()->readDom().firstChildElement("database").firstChildElement("pragmas").firstChildElement("pragma");
     while (!e.isNull())
     {
-        QSqlQuery query;
+        QSqlQuery query(this->getDatabase());
         query.prepare(e.text());
         this->query(query);
         e = e.nextSiblingElement("pragma");
@@ -287,7 +307,14 @@ bool    Database::_connection()
     return (true);
 }
 
-bool    Database::_name(QString &name)
+void    Database::_removeDatabase()
+{
+    QString connectionName = LightBird::addressToString(QThread::currentThread());
+    if (QSqlDatabase::contains(connectionName))
+        QSqlDatabase::removeDatabase(connectionName);
+}
+
+bool    Database::_getDatabaseName(QString &databaseName)
 {
     QDir    dir;
     QString file;
@@ -296,14 +323,14 @@ bool    Database::_name(QString &name)
     QString databaseResource;
 
     // If the name is defined, the database is server based (like MySQL), not file based (like SQLite)
-    if (!(name = Configurations::instance()->get("database/name")).isEmpty())
+    if (!(databaseName = Configurations::instance()->get("database/name")).isEmpty())
     {
-        LOG_DEBUG("The database is server based", "Database", "_name");
+        LOG_DEBUG("The database is server based", "Database", "_getDatabaseName");
         return (true);
     }
-    LOG_DEBUG("The database is file based", "Database", "_name");
+    LOG_DEBUG("The database is file based", "Database", "_getDatabaseName");
 
-    // Get the path and the file name of the database
+    // Gets the path and the file name of the database
     databasePath = Configurations::instance()->get("database/path");
     databaseFile = Configurations::instance()->get("database/file");
     file = databasePath + "/" + databaseFile;
@@ -311,30 +338,30 @@ bool    Database::_name(QString &name)
     // If the database directory doesn't exists, we creates it
     if (dir.exists(databasePath) == false && dir.mkpath(databasePath) == false)
     {
-        LOG_ERROR("Cannot creates the database directory", Properties("directory", databasePath), "Database", "_name");
+        LOG_ERROR("Cannot creates the database directory", Properties("directory", databasePath), "Database", "_getDatabaseName");
         return (false);
     }
 
     // If the database file doesn't exists, we creates it using the resource
     if (!QFileInfo(file).isFile())
     {
-        // Get the resource of the database
+        // Gets the resource of the database
         databaseResource = Configurations::instance()->get("database/resource");
-        LOG_DEBUG("The database file doesn't exists, so it will be created using the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_name");
+        LOG_DEBUG("The database file doesn't exists, so it will be created using the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_getDatabaseName");
         // If the resource file doesn't exists either
         if (!QFileInfo(databaseResource).isFile())
         {
-            LOG_ERROR("The alternative database file doesn't exists either", Properties("alternative", databaseResource), "Database", "Database");
+            LOG_ERROR("The alternative database file doesn't exists either", Properties("alternative", databaseResource), "Database", "_getDatabaseName");
             return (false);
         }
-        // Copy the resource file to the database file
+        // Copies the resource file to the database file
         if (LightBird::copy(databaseResource, file) == false)
         {
-            LOG_ERROR("Cannot creates the database file from the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_name");
+            LOG_ERROR("Cannot creates the database file from the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_getDatabaseName");
             return (false);
         }
     }
-    name = file;
+    databaseName = file;
     return (true);
 }
 
@@ -360,7 +387,7 @@ bool    Database::_loadQueries(const QString &id)
     }
     else
         path = id;
-    // Search the queries file using the database type
+    // Searches the queries file using the database type
     if (QFileInfo(path + "/" + type + ".xml").isFile())
         file.setFileName(path + "/" + type + ".xml");
     // Using the default file name
@@ -382,13 +409,13 @@ bool    Database::_loadQueries(const QString &id)
         return (false);
     }
 
-    // Open the queries file
+    // Opens the queries file
     if (!file.open(QIODevice::ReadOnly))
     {
         LOG_ERROR("Unable to load the file" + file.fileName(), "Database", "_loadQueries");
         return (false);
     }
-    // Parse the XML file
+    // Parses the XML file
     if (this->queries[id].setContent(&file, false, &errorMsg, &errorLine, &errorColumn) == false)
     {
         LOG_ERROR("An error occured while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())

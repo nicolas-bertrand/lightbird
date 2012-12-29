@@ -30,10 +30,10 @@ TableDirectories &TableDirectories::operator=(const TableDirectories &table)
 
 QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QString                 path;
-    QString                 id_directory = "";
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QString              path;
+    QString              id_directory = "";
 
     path = cleanPath(virtualPath);
     QStringListIterator it(path.split('/'));
@@ -53,7 +53,7 @@ QString TableDirectories::getIdFromVirtualPath(const QString &virtualPath) const
     return (id_directory);
 }
 
-bool        TableDirectories::setIdFromVirtualPath(const QString &virtualPath)
+bool    TableDirectories::setIdFromVirtualPath(const QString &virtualPath)
 {
     QString id;
 
@@ -65,7 +65,7 @@ bool        TableDirectories::setIdFromVirtualPath(const QString &virtualPath)
 
 bool    TableDirectories::add(const QString &name, const QString &id_directory, const QString &id_account)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     if (!LightBird::isValidName(name))
@@ -87,7 +87,7 @@ bool    TableDirectories::remove(const QString &id)
     return (Table::remove(id));
 }
 
-bool            TableDirectories::remove(bool removeFiles)
+bool    TableDirectories::remove(bool removeFiles)
 {
     QStringList paths;
     TableEvents event;
@@ -116,8 +116,8 @@ bool            TableDirectories::remove(bool removeFiles)
 
 QString TableDirectories::getIdDirectory() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableDirectories", "getIdDirectory"));
     query.bindValue(":id", this->id);
@@ -128,7 +128,7 @@ QString TableDirectories::getIdDirectory() const
 
 bool    TableDirectories::setIdDirectory(const QString &id_directory)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableDirectories", "setIdDirectory"));
     query.bindValue(":id", this->id);
@@ -138,9 +138,9 @@ bool    TableDirectories::setIdDirectory(const QString &id_directory)
 
 QString TableDirectories::getVirtualPath(bool initialSlash, bool finalSlash) const
 {
-    TableDirectories    directory;
-    QString             id_directory;
-    QString             virtualPath;
+    TableDirectories directory;
+    QString          id_directory;
+    QString          virtualPath;
 
     id_directory = this->getIdDirectory();
     virtualPath = this->getName();
@@ -160,7 +160,7 @@ QString TableDirectories::getVirtualPath(bool initialSlash, bool finalSlash) con
     return (virtualPath);
 }
 
-bool        TableDirectories::setVirtualPath(const QString &virtualPath)
+bool    TableDirectories::setVirtualPath(const QString &virtualPath)
 {
     QString id_directory;
     QString path;
@@ -175,12 +175,12 @@ bool        TableDirectories::setVirtualPath(const QString &virtualPath)
 
 QStringList TableDirectories::getDirectories(const QString &id_accessor, const QString &right) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             directories;
-    int                     i;
-    int                     s;
-    TablePermissions        p;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          directories;
+    int                  i;
+    int                  s;
+    TablePermissions     p;
 
     query.prepare(Library::database().getQuery("TableDirectories", "getDirectories"));
     query.bindValue(":id_directory", this->id);
@@ -193,12 +193,12 @@ QStringList TableDirectories::getDirectories(const QString &id_accessor, const Q
 
 QStringList TableDirectories::getFiles(const QString &id_accessor, const QString &right) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             files;
-    int                     i;
-    int                     s;
-    TablePermissions        p;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          files;
+    int                  i;
+    int                  s;
+    TablePermissions     p;
 
     query.prepare(Library::database().getQuery("TableDirectories", "getFiles"));
     query.bindValue(":id_directory", this->id);
@@ -209,7 +209,7 @@ QStringList TableDirectories::getFiles(const QString &id_accessor, const QString
     return (files);
 }
 
-QStringList     TableDirectories::getAllFiles(const QString &id_accessor, const QString &right) const
+QStringList TableDirectories::getAllFiles(const QString &id_accessor, const QString &right) const
 {
     QStringList result;
 
@@ -220,10 +220,10 @@ QStringList     TableDirectories::getAllFiles(const QString &id_accessor, const 
     return (result);
 }
 
-QString     TableDirectories::getDirectory(const QString &name) const
+QString TableDirectories::getDirectory(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableDirectories", "getDirectory"));
     query.bindValue(":id_directory", this->id);
@@ -233,10 +233,10 @@ QString     TableDirectories::getDirectory(const QString &name) const
     return (QString());
 }
 
-QString     TableDirectories::getFile(const QString &name) const
+QString TableDirectories::getFile(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableDirectories", "getFile"));
     query.bindValue(":id_directory", this->id);
@@ -246,11 +246,11 @@ QString     TableDirectories::getFile(const QString &name) const
     return (QString());
 }
 
-QStringList             TableDirectories::getParents() const
+QStringList TableDirectories::getParents() const
 {
-    TableDirectories    directory(this->id);
-    QString             id;
-    QStringList         result;
+    TableDirectories directory(this->id);
+    QString          id;
+    QStringList      result;
 
     while (!(id = directory.getIdDirectory()).isEmpty())
     {
@@ -260,10 +260,10 @@ QStringList             TableDirectories::getParents() const
     return (result);
 }
 
-QString                 TableDirectories::createVirtualPath(const QString &virtualPath, const QString &id_account)
+QString TableDirectories::createVirtualPath(const QString &virtualPath, const QString &id_account)
 {
-    TableDirectories    directory;
-    QString             id;
+    TableDirectories directory;
+    QString          id;
 
     directory.setId(this->getId());
     QStringListIterator it(cleanPath(virtualPath).split('/'));
@@ -281,10 +281,10 @@ QString                 TableDirectories::createVirtualPath(const QString &virtu
     return (directory.getId());
 }
 
-bool                    TableDirectories::cd(const QString &path)
+bool    TableDirectories::cd(const QString &path)
 {
-    TableDirectories    directory(this->id);
-    QString             id;
+    TableDirectories directory(this->id);
+    QString          id;
 
     if (LightBird::cleanPath(path).startsWith('/'))
         directory.clear();

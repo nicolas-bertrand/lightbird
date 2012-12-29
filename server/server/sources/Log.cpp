@@ -5,6 +5,7 @@
 #include "ApiLogs.h"
 #include "Configurations.h"
 #include "Library.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Plugins.hpp"
 #include "Threads.h"
@@ -59,21 +60,21 @@ void    Log::write(LightBird::ILogs::Level level, const QString &message, const 
         case Log::WRITE:
             if (this->levels.contains(level) && this->level <= level)
             {
-                emit writeLog(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method);
-                this->_print(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method);
+                emit writeLog(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
+                this->_print(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
             }
             break;
         case Log::BUFFER:
             this->mutex.lock();
             if (this->mode == Log::BUFFER)
-                this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method));
+                this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method));
             else
                 this->write(level, message, plugin, properties, object, method);
             this->mutex.unlock();
             break;
         default:
             if (this->levels.contains(level) && this->level <= level)
-                this->_print(level, QDateTime::currentDateTime(), message, properties, QString::number((quint64)this->currentThread(), 16).toLower(), plugin, object, method);
+                this->_print(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
     }
 }
 

@@ -60,7 +60,7 @@ QStringList Dir::getStringList(Node::NodeType nodeType)
 
     LightBird::IDatabase &db = LightBird::Library::database();
     QVector<QVariantMap> result;
-    QSqlQuery query;
+    QSqlQuery query(db.getDatabase());
 
     QStringListIterator tableIt(tables);
     while (tableIt.hasNext())

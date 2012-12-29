@@ -6,6 +6,7 @@
 # include <QMap>
 # include <QMutex>
 # include <QObject>
+# include <QSqlDatabase>
 # include <QString>
 # include <QStringList>
 # include <QVariant>
@@ -15,7 +16,8 @@
 
 # include "Initialize.h"
 
-/// @brief Manage all the operations made on the database by the server and its plugins.
+/// @brief Manages all the operations made on the database by the server and
+/// its plugins. Opens one database connection per thread using it.
 class Database : public QObject,
                  public LightBird::Initialize
 {
@@ -25,6 +27,8 @@ public:
     Database(QObject *parent = 0);
     ~Database();
 
+    /// @see LightBird::IDatabase::getDatabase
+    QSqlDatabase    getDatabase();
     /// @see LightBird::IDatabase::query
     bool            query(QSqlQuery &query);
     /// @see LightBird::IDatabase::query
@@ -40,27 +44,34 @@ public:
     /// @brief Returns the instance of this class created by the Server.
     static Database *instance();
 
+private slots:
+    /// @brief Removes the database connection of the caller thread. This slot
+    /// is called when a thread that opened a database connection is finished.
+    void            _removeDatabase();
+
 private:
     Database(const Database &);
     Database &operator=(const Database &);
 
-    /// @brief Get the name of the database, and manage the database file if their is one (for example with SQLite).
-    /// @param name : The name of the database, which can be the path to its file (with SQLite).
+    /// @brief Etablishes a new connection between the server and the database.
+    /// @return True if the connection to the database has succeeded.
+    bool            _addDatabase(const QString &connectionName);
+    /// @brief Gets the name of the database, and manage the database file if
+    /// their is one (for example with SQLite).
+    /// @param name : The name of the database, which can be the path to its
+    /// file (with SQLite).
     /// @return If an error occured while managing the database file.
-    bool            _name(QString &name);
-    /// @brief Etablish the connection between the server and the database.
-    /// @return True if the connection to the database success
-    bool            _connection();
-    /// @brief Load a query file.
-    /// @param id : The id of the plugin for which the quety will be loaded. If empty,
-    /// the queries of the server are loaded.
+    bool            _getDatabaseName(QString &databaseName);
+    /// @brief Loads a query file.
+    /// @param id : The id of the plugin for which the quety will be loaded.
+    /// If empty, the queries of the server are loaded.
     /// @return True if the file is loaded.
     bool            _loadQueries(const QString &id);
-    /// @brief Ensure that there is no NULL values in the bound values, and replace them by
-    /// an empty string.
+    /// @brief Ensures that there is no NULL values in the bound values,
+    /// by replacing them by an empty string.
     /// @param query : The query to check.
     void            _checkBoundValues(QSqlQuery &query) const;
-    /// @brief Display the updates. For debug purpose only.
+    /// @brief Displays the updates. For debug purpose only.
     void            _displayUpdates(LightBird::IDatabase::Updates &updates) const;
 
     QMap<QString, QDomDocument> queries;     ///< Contains the doms representations of the queries.

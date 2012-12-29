@@ -16,6 +16,7 @@ public:
     ApiDatabase(const QString &id = "");
     ~ApiDatabase();
 
+    QSqlDatabase        getDatabase();
     bool                query(QSqlQuery &query);
     bool                query(QSqlQuery &query, QVector<QVariantMap> &result);
     bool                query(QSqlQuery &query, QVariantMap &result);

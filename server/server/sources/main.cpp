@@ -11,7 +11,7 @@ int                     main(int argc, char **argv)
 {
     Arguments           arguments(argc, argv);
     QCoreApplication    *application;
-    int                 result;
+    int                 result = 0;
 
     // Instanciates Qt core class
     application = ::loadQt(arguments);

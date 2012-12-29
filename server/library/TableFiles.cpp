@@ -35,11 +35,11 @@ TableFiles &TableFiles::operator=(const TableFiles &table)
 
 QString TableFiles::getIdFromVirtualPath(const QString &virtualPath) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QString                 name;
-    QString                 path;
-    QString                 id_directory = "";
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QString              name;
+    QString              path;
+    QString              id_directory = "";
 
     path = cleanPath(virtualPath);
     name = path;
@@ -60,7 +60,7 @@ QString TableFiles::getIdFromVirtualPath(const QString &virtualPath) const
     return (result[0]["id"].toString());
 }
 
-bool        TableFiles::setIdFromVirtualPath(const QString &virtualPath)
+bool    TableFiles::setIdFromVirtualPath(const QString &virtualPath)
 {
     QString id;
 
@@ -70,10 +70,10 @@ bool        TableFiles::setIdFromVirtualPath(const QString &virtualPath)
     return (true);
 }
 
-QString     TableFiles::getIdFromPath(const QString &path) const
+QString TableFiles::getIdFromPath(const QString &path) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableFiles", "getIdFromPath"));
     query.bindValue(":path", path);
@@ -82,7 +82,7 @@ QString     TableFiles::getIdFromPath(const QString &path) const
     return (result[0]["id"].toString());
 }
 
-bool        TableFiles::setIdFromPath(const QString &path)
+bool    TableFiles::setIdFromPath(const QString &path)
 {
     QString id;
 
@@ -95,7 +95,7 @@ bool        TableFiles::setIdFromPath(const QString &path)
 bool    TableFiles::add(const QString &name, const QString &path, const QVariantMap &informations,
                         const QString &type, const QString &id_directory, const QString &id_account)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     if (!LightBird::isValidName(name))
@@ -127,7 +127,7 @@ bool    TableFiles::remove(const QString &id)
     return (Table::remove(id));
 }
 
-bool            TableFiles::remove(bool removeFile)
+bool    TableFiles::remove(bool removeFile)
 {
     QString     path;
     TableEvents event;
@@ -148,8 +148,8 @@ bool            TableFiles::remove(bool removeFile)
 
 QString TableFiles::getPath() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableFiles", "getPath"));
     query.bindValue(":id", this->id);
@@ -173,7 +173,7 @@ QString TableFiles::getFullPath() const
 
 bool    TableFiles::setPath(const QString &path)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "setPath"));
     query.bindValue(":id", this->id);
@@ -183,8 +183,8 @@ bool    TableFiles::setPath(const QString &path)
 
 QString TableFiles::getType() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableFiles", "getType"));
     query.bindValue(":id", this->id);
@@ -195,7 +195,7 @@ QString TableFiles::getType() const
 
 bool    TableFiles::setType(const QString &type)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "setType"));
     query.bindValue(":id", this->id);
@@ -208,8 +208,8 @@ bool    TableFiles::setType(const QString &type)
 
 QString TableFiles::getIdDirectory() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableFiles", "getIdDirectory"));
     query.bindValue(":id", this->id);
@@ -220,7 +220,7 @@ QString TableFiles::getIdDirectory() const
 
 bool    TableFiles::setIdDirectory(const QString &id_directory)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "setIdDirectory"));
     query.bindValue(":id", this->id);
@@ -230,8 +230,8 @@ bool    TableFiles::setIdDirectory(const QString &id_directory)
 
 QVariant TableFiles::getInformation(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableFiles", "getInformation"));
     query.bindValue(":id_file", this->id);
@@ -243,11 +243,11 @@ QVariant TableFiles::getInformation(const QString &name) const
 
 QMap<QString, QVariant> TableFiles::getInformations() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QVariantMap             informations;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QVariantMap          informations;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableFiles", "getInformations"));
     query.bindValue(":id_file", this->id);
@@ -259,8 +259,8 @@ QMap<QString, QVariant> TableFiles::getInformations() const
 
 bool    TableFiles::setInformation(const QString &name, const QVariant &value)
 {
-    QVector<QVariantMap>    result;
-    QSqlQuery               query;
+    QVector<QVariantMap> result;
+    QSqlQuery            query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "setInformation_select"));
     query.bindValue(":id_file", this->id);
@@ -301,7 +301,7 @@ bool    TableFiles::setInformations(const QVariantMap &informations)
 
 bool    TableFiles::removeInformation(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "removeInformation"));
     query.bindValue(":id_file", this->id);
@@ -311,7 +311,7 @@ bool    TableFiles::removeInformation(const QString &name)
 
 bool    TableFiles::removeInformations(const QStringList &informations)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     bool        result = true;
 
     if (informations.isEmpty())
@@ -331,8 +331,8 @@ bool    TableFiles::removeInformations(const QStringList &informations)
 
 QString TableFiles::getVirtualPath(bool initialSlash, bool fileName) const
 {
-    TableDirectories    directory;
-    QString             virtualPath;
+    TableDirectories directory;
+    QString          virtualPath;
 
     // Get the path of the directory of the file
     directory.setId(this->getIdDirectory());
@@ -364,11 +364,11 @@ bool    TableFiles::setVirtualPath(const QString &virtualPath)
 
 QStringList TableFiles::getCollections() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             collections;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          collections;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableFiles", "getCollections"));
     query.bindValue(":id_file", this->id);
@@ -378,9 +378,9 @@ QStringList TableFiles::getCollections() const
     return (collections);
 }
 
-bool            TableFiles::addCollection(const QString &id_collection)
+bool    TableFiles::addCollection(const QString &id_collection)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "addCollection"));
     query.bindValue(":id", createUuid());
@@ -389,9 +389,9 @@ bool            TableFiles::addCollection(const QString &id_collection)
     return (Library::database().query(query));
 }
 
-bool            TableFiles::removeCollection(const QString &id_collection)
+bool    TableFiles::removeCollection(const QString &id_collection)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableFiles", "removeCollection"));
     query.bindValue(":id_file", this->id);

@@ -8,10 +8,10 @@
 Session::Session(const QString &id)
     : destroyed(false)
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Database::instance()->getDatabase());
+    QVector<QVariantMap> result;
+    int                  i;
+    int                  s;
 
     this->tableName = "sessions";
     this->tableId = LightBird::Table::Unknow;
@@ -40,7 +40,7 @@ Session::Session(const QDateTime &e, const QString &a, const QStringList &c, con
     , clients(c)
     , destroyed(false)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     QString     id;
 
     id = LightBird::createUuid();
@@ -96,7 +96,7 @@ QString Session::getAccount() const
 
 bool    Session::setAccount(const QString &id_account)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "setAccount");
 
     if (!mutex)
@@ -131,7 +131,7 @@ QDateTime   Session::getExpiration() const
 
 bool    Session::setExpiration(const QDateTime &expiration)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "setExpiration");
 
     if (!mutex)
@@ -242,7 +242,7 @@ QVariantMap Session::getInformations() const
 
 bool    Session::setInformation(const QString &name, const QVariant &value)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "setInformation");
 
     if (!mutex)
@@ -283,7 +283,7 @@ bool    Session::setInformations(const QVariantMap &informations)
 
 bool    Session::removeInformation(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "removeInformation");
 
     if (!mutex)
@@ -299,7 +299,7 @@ bool    Session::removeInformation(const QString &name)
 
 bool    Session::removeInformations(const QStringList &informations)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     bool        result = true;
 
     if (informations.isEmpty())
@@ -328,7 +328,7 @@ bool    Session::destroy(bool disconnect)
 
 bool    Session::remove()
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
     Mutex       mutex(this->mutex, Mutex::WRITE, "Session", "destroy");
 
     if (!mutex)

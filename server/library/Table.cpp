@@ -34,7 +34,7 @@ const QString   &Table::getId() const
     return (this->id);
 }
 
-bool            Table::setId(const QString &id)
+bool    Table::setId(const QString &id)
 {
     if (!this->exists(id))
         return (false);
@@ -42,10 +42,10 @@ bool            Table::setId(const QString &id)
     return (true);
 }
 
-bool            Table::exists(const QString &id)
+bool    Table::exists(const QString &id)
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     if (id.isEmpty() && this->id.isEmpty())
         return (false);
@@ -66,14 +66,14 @@ Table::operator bool()
     return (this->exists());
 }
 
-void            Table::clear()
+void    Table::clear()
 {
     this->id.clear();
 }
 
-bool            Table::remove(const QString &id)
+bool    Table::remove(const QString &id)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     if (this->id.isEmpty() && id.isEmpty())
         return (false);
@@ -88,28 +88,30 @@ bool            Table::remove(const QString &id)
     return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
-QDateTime       Table::getModified() const
+QDateTime   Table::getModified() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QDateTime            modified;
 
     query.prepare(Library::database().getQuery("Table", "getModified").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
     if (Library::database().query(query, result) && result.size() > 0)
-        return (result[0]["modified"].toDateTime());
-    return (QDateTime());
+        modified = result[0]["modified"].toDateTime();
+    return (QDateTime(modified.date(), modified.time(), Qt::UTC));
 }
 
-QDateTime       Table::getCreated() const
+QDateTime   Table::getCreated() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QDateTime            created;
 
     query.prepare(Library::database().getQuery("Table", "getCreated").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
     if (Library::database().query(query, result) && result.size() > 0)
-        return (result[0]["created"].toDateTime());
-    return (QDateTime());
+        created = result[0]["created"].toDateTime();
+    return (QDateTime(created.date(), created.time(), Qt::UTC));
 }
 
 const QString   &Table::getTableName() const
@@ -117,76 +119,76 @@ const QString   &Table::getTableName() const
     return (this->tableName);
 }
 
-Table::Id    Table::getTableId() const
+Table::Id   Table::getTableId() const
 {
     return (this->tableId);
 }
 
-bool            Table::isTable(const QString &tableName) const
+bool    Table::isTable(const QString &tableName) const
 {
     if (this->tableName != tableName)
         return (false);
     return (true);
 }
 
-bool            Table::isTable(Table::Id tableId) const
+bool    Table::isTable(Table::Id tableId) const
 {
     if (this->tableId != tableId)
         return (false);
     return (true);
 }
 
-TableAccessors   *Table::toAccessors()
+TableAccessors  *Table::toAccessors()
 {
     return (dynamic_cast<TableAccessors *>(this));
 }
 
-TableAccounts    *Table::toAccounts()
+TableAccounts   *Table::toAccounts()
 {
     return (dynamic_cast<TableAccounts *>(this));
 }
 
-TableCollections *Table::toCollections()
+TableCollections    *Table::toCollections()
 {
     return (dynamic_cast<TableCollections *>(this));
 }
 
-TableDirectories *Table::toDirectories()
+TableDirectories    *Table::toDirectories()
 {
     return (dynamic_cast<TableDirectories *>(this));
 }
 
-TableEvents      *Table::toEvents()
+TableEvents *Table::toEvents()
 {
     return (dynamic_cast<TableEvents *>(this));
 }
 
-TableFiles       *Table::toFiles()
+TableFiles  *Table::toFiles()
 {
     return (dynamic_cast<TableFiles *>(this));
 }
 
-TableGroups      *Table::toGroups()
+TableGroups *Table::toGroups()
 {
     return (dynamic_cast<TableGroups *>(this));
 }
 
-TableLimits      *Table::toLimits()
+TableLimits *Table::toLimits()
 {
     return (dynamic_cast<TableLimits *>(this));
 }
 
-TableObjects     *Table::toObjects()
+TableObjects    *Table::toObjects()
 {
     return (dynamic_cast<TableObjects *>(this));
 }
 
-TablePermissions *Table::toPermissions()
+TablePermissions    *Table::toPermissions()
 {
     return (dynamic_cast<TablePermissions *>(this));
 }
 
-TableTags        *Table::toTags()
+TableTags   *Table::toTags()
 {
     return (dynamic_cast<TableTags *>(this));
 }

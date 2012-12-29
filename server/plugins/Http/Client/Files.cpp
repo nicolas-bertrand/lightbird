@@ -19,7 +19,7 @@ Files::~Files()
 void    Files::get(LightBird::IClient &client)
 {
     LightBird::TableFiles file;
-    QSqlQuery             query;
+    QSqlQuery             query(Plugin::api().database().getDatabase());
     QVector<QVariantMap>  result;
     QJsonArray            array;
 

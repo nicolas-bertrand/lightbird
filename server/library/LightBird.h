@@ -25,6 +25,9 @@
 
 namespace LightBird
 {
+    /// @brief Converts an address into a hexadecimal lowercase string.
+    LIB QString     addressToString(void *address);
+
     /// @brief LightBird's implementation of Qt::copy.
     LIB bool        copy(const QString &source, const QString &destination);
 

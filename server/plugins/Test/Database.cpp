@@ -44,7 +44,7 @@ void            Database::_accounts()
     LightBird::TableAccounts a1;
     LightBird::TableAccounts a2;
     LightBird::TableGroups g;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QString     id1;
     QString     id2;
 
@@ -164,7 +164,7 @@ void            Database::_collections()
     LightBird::TableAccounts a;
     LightBird::TableFiles f;
     LightBird::TablePermissions p;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QStringList l;
 
     this->log.trace("Running unit tests of the collections...", "Database", "_collections");
@@ -265,7 +265,7 @@ void            Database::_directories()
     LightBird::TableFiles f;
     LightBird::TableAccounts a;
     LightBird::TablePermissions p;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QStringList l;
     QStringList m;
     QString     d;
@@ -397,7 +397,7 @@ void            Database::_events()
     LightBird::TableEvents e1;
     LightBird::TableEvents e2;
     QVariantMap informations;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QStringList events;
 
     this->log.trace("Running unit tests of the events...", "Database", "_events");
@@ -460,7 +460,7 @@ void            Database::_files()
     LightBird::TableFiles f2;
     LightBird::TableDirectories d1;
     LightBird::TableAccounts a1;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
 
     this->log.trace("Running unit tests of the files...", "Database", "_files");
     query.prepare("DELETE FROM files WHERE name IN('f1', 'f2', 'f3')");
@@ -560,7 +560,7 @@ void            Database::_groups()
     LightBird::TableGroups g1;
     LightBird::TableGroups g2;
     LightBird::TableAccounts a;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QString     id1;
     QString     id2;
 
@@ -645,7 +645,7 @@ void            Database::_limits()
     LightBird::TableGroups g1;
     LightBird::TableGroups g2;
     LightBird::TableDirectories d1;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
 
     this->log.trace("Running unit tests of the limits...", "Database", "_limits");
     query.prepare("DELETE FROM limits WHERE name IN('l1', 'l2')");
@@ -706,7 +706,7 @@ void            Database::_permissions()
     LightBird::TableDirectories d2;
     LightBird::TableCollections c;
     LightBird::TableFiles f;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QString     id;
     QString     id_object;
     QStringList allowed;
@@ -1050,7 +1050,7 @@ void            Database::_permissions()
 void            Database::_sessions()
 {
     LightBird::TableAccounts a;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
     QString     id1;
     QString     id2;
     QVariantMap i;
@@ -1153,7 +1153,7 @@ void            Database::_tags()
     LightBird::TableTags t;
     LightBird::TableDirectories d1;
     LightBird::TableDirectories d2;
-    QSqlQuery   query;
+    QSqlQuery   query(this->database.getDatabase());
 
     this->log.trace("Running unit tests of the tags...", "Database", "_tags");
     query.prepare("DELETE FROM tags WHERE name IN('t1', 't2')");

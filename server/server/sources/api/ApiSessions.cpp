@@ -12,7 +12,7 @@
 ApiSessions::ApiSessions(QObject *parent)
     : QObject(parent)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Database::instance()->getDatabase());
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(expiration()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(expirationSignal()), this, SLOT(expiration()), Qt::QueuedConnection);
@@ -69,7 +69,7 @@ bool    ApiSessions::destroy(const QString &id, bool disconnect)
 
 QStringList ApiSessions::getSessions(const QString &id_account, const QString &client) const
 {
-    QSqlQuery            query;
+    QSqlQuery            query(Database::instance()->getDatabase());
     QVector<QVariantMap> result;
     int                  i;
     int                  s;
@@ -130,7 +130,7 @@ bool    ApiSessions::exists(const QString &id)
 
 void    ApiSessions::expiration()
 {
-    QSqlQuery            query;
+    QSqlQuery            query(Database::instance()->getDatabase());
     QVector<QVariantMap> result;
     int                  i;
     qint64               s;

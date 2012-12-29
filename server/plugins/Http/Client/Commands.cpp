@@ -79,7 +79,8 @@ void    Commands::_identify(LightBird::IClient &client, const QString &)
     QString                 id;
     QString                 json = "{ \"sessionId\" : \"%1\", \"salt\" : \"%2\" }";
     QString                 identifiant;
-    QSqlQuery               query;
+    LightBird::IDatabase    &database = Plugin::api().database();
+    QSqlQuery               query(database.getDatabase());
     QVector<QVariantMap>    result;
     int                     i = 0;
     int                     s;
@@ -95,7 +96,6 @@ void    Commands::_identify(LightBird::IClient &client, const QString &)
         (salt = urlQuery.queryItemValue("salt")).size() >= 32)
     {
         // Searches the id of the account using the salt and its name
-        LightBird::IDatabase &database = Plugin::api().database();
         query.prepare(database.getQuery("HttpClient", "select_all_accounts"));
         if (database.query(query, result))
             for (i = 0, s = result.size(); i < s && id.isEmpty(); ++i)
@@ -154,7 +154,7 @@ void    Commands::_preview(LightBird::IClient &client, const QString &)
 void    Commands::_select(LightBird::IClient &client, const QString &)
 {
     LightBird::TableFiles file;
-    QSqlQuery             query;
+    QSqlQuery             query(Plugin::api().database().getDatabase());
     QVector<QVariantMap>  result;
     int                   s = 0;
     QVariantMap           row;

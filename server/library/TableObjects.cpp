@@ -25,8 +25,8 @@ TableObjects &TableObjects::operator=(const TableObjects &table)
 
 QString TableObjects::getIdAccount() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableObjects", "getIdAccount").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -37,7 +37,7 @@ QString TableObjects::getIdAccount() const
 
 bool    TableObjects::setIdAccount(const QString &id_account)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableObjects", "setIdAccount").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -47,8 +47,8 @@ bool    TableObjects::setIdAccount(const QString &id_account)
 
 QString TableObjects::getName() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableObjects", "getName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -59,7 +59,7 @@ QString TableObjects::getName() const
 
 bool    TableObjects::setName(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     if (!LightBird::isValidName(name))
         return (false);
@@ -81,11 +81,11 @@ bool    TableObjects::getRights(const QString &id_accessor, QStringList &allowed
 
 QStringList TableObjects::getTags() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             tags;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          tags;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableObjects", "getTags"));
     query.bindValue(":id_object", this->id);
@@ -97,11 +97,11 @@ QStringList TableObjects::getTags() const
 
 QStringList TableObjects::getLimits() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             limits;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          limits;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableObjects", "getLimits"));
     query.bindValue(":id_object", this->id);

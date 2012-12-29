@@ -134,7 +134,7 @@ bool    ClientHandler::onDataConnect(LightBird::IClient &client)
     LightBird::IDatabase &database = this->api.database();
     LightBird::Session   session;
     QVector<QVariantMap> result;
-    QSqlQuery            query;
+    QSqlQuery            query(database.getDatabase());
     QString              command;
 
     // Passive mode

@@ -59,10 +59,10 @@ namespace LightBird
         /// @brief Manages the timers of the current plugin.
         virtual LightBird::ITimers          &timers() = 0;
         /// @brief Stops the server. The server will stop as soon as all its
-        /// current tasks are finished, ie all the plugin has been unloaded.
+        /// current tasks are finished, i.e. all the plugins have been unloaded.
         virtual void                        stop() = 0;
         /// @brief Restarts the server. The server will stop as soon as all
-        /// its current tasks has been done.
+        /// its current tasks have been done.
         virtual void                        restart() = 0;
         /// @brief The id of the plugin. This id refered to the name of the
         /// directory where the plugin is stored. It may or not be the real

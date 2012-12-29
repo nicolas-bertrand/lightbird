@@ -10,6 +10,11 @@ ApiDatabase::~ApiDatabase()
 {
 }
 
+QSqlDatabase    ApiDatabase::getDatabase()
+{
+    return (Database::instance()->getDatabase());
+}
+
 bool    ApiDatabase::query(QSqlQuery &query)
 {
     return (Database::instance()->query(query));

@@ -29,13 +29,13 @@ TableEvents &TableEvents::operator=(const TableEvents &table)
 
 QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, const QDateTime &e) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    response;
-    int                     i;
-    int                     s;
-    QStringList             result;
-    QString                 begin;
-    QString                 end;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> response;
+    int                  i;
+    int                  s;
+    QStringList          result;
+    QString              begin;
+    QString              end;
 
     query.prepare(Library::database().getQuery("TableEvents", "getEvents"));
     begin = b.toUTC().toString(DATE_FORMAT);
@@ -52,10 +52,10 @@ QStringList TableEvents::getEvents(const QString &name, const QDateTime &b, cons
     return (result);
 }
 
-bool            TableEvents::add(const QString &name, const QVariantMap &informations,
-                                 const QString &id_accessor, const QString &id_object)
+bool    TableEvents::add(const QString &name, const QVariantMap &informations,
+                         const QString &id_accessor, const QString &id_object)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     id = createUuid();
@@ -72,15 +72,15 @@ bool            TableEvents::add(const QString &name, const QVariantMap &informa
     return (true);
 }
 
-bool        TableEvents::add(const QString &name, const QString &id_accessor, const QString &id_object)
+bool    TableEvents::add(const QString &name, const QString &id_accessor, const QString &id_object)
 {
     return (this->add(name, QVariantMap(), id_accessor, id_object));
 }
 
-QString     TableEvents::getName() const
+QString TableEvents::getName() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableEvents", "getName"));
     query.bindValue(":id", this->id);
@@ -89,9 +89,9 @@ QString     TableEvents::getName() const
     return ("");
 }
 
-bool            TableEvents::setName(const QString &name)
+bool    TableEvents::setName(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     if (name.isEmpty())
         return (false);
@@ -101,10 +101,10 @@ bool            TableEvents::setName(const QString &name)
     return (Library::database().query(query));
 }
 
-QString     TableEvents::getIdAccessor() const
+QString TableEvents::getIdAccessor() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableEvents", "getIdAccessor"));
     query.bindValue(":id", this->id);
@@ -113,9 +113,9 @@ QString     TableEvents::getIdAccessor() const
     return ("");
 }
 
-bool            TableEvents::setIdAccessor(const QString &id_accessor)
+bool    TableEvents::setIdAccessor(const QString &id_accessor)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableEvents", "setIdAccessor"));
     query.bindValue(":id", this->id);
@@ -123,10 +123,10 @@ bool            TableEvents::setIdAccessor(const QString &id_accessor)
     return (Library::database().query(query));
 }
 
-QString     TableEvents::getIdObject() const
+QString TableEvents::getIdObject() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableEvents", "getIdObject"));
     query.bindValue(":id", this->id);
@@ -135,9 +135,9 @@ QString     TableEvents::getIdObject() const
     return ("");
 }
 
-bool            TableEvents::setIdObject(const QString &id_object)
+bool    TableEvents::setIdObject(const QString &id_object)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableEvents", "setIdObject"));
     query.bindValue(":id", this->id);
@@ -147,8 +147,8 @@ bool            TableEvents::setIdObject(const QString &id_object)
 
 QVariant    TableEvents::getInformation(const QString &name) const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableEvents", "getInformation"));
     query.bindValue(":id_event", this->id);
@@ -160,11 +160,11 @@ QVariant    TableEvents::getInformation(const QString &name) const
 
 QMap<QString, QVariant> TableEvents::getInformations() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QVariantMap             informations;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QVariantMap          informations;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableEvents", "getInformations"));
     query.bindValue(":id_event", this->id);
@@ -174,10 +174,10 @@ QMap<QString, QVariant> TableEvents::getInformations() const
     return (informations);
 }
 
-bool        TableEvents::setInformation(const QString &name, const QVariant &value)
+bool    TableEvents::setInformation(const QString &name, const QVariant &value)
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableEvents", "setInformation_select"));
     query.bindValue(":id_event", this->id);
@@ -201,7 +201,7 @@ bool        TableEvents::setInformation(const QString &name, const QVariant &val
     return (Library::database().query(query));
 }
 
-bool        TableEvents::setInformations(const QVariantMap &informations)
+bool    TableEvents::setInformations(const QVariantMap &informations)
 {
     QMapIterator<QString, QVariant> it(informations);
     bool                            result = true;
@@ -215,9 +215,9 @@ bool        TableEvents::setInformations(const QVariantMap &informations)
     return (result);
 }
 
-bool        TableEvents::removeInformation(const QString &name)
+bool    TableEvents::removeInformation(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableEvents", "removeInformation"));
     query.bindValue(":id_event", this->id);
@@ -225,9 +225,9 @@ bool        TableEvents::removeInformation(const QString &name)
     return (Library::database().query(query) && query.numRowsAffected() > 0);
 }
 
-bool            TableEvents::removeInformations(const QStringList &informations)
+bool    TableEvents::removeInformations(const QStringList &informations)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     bool        result = true;
 
     if (informations.isEmpty())

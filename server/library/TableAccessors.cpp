@@ -23,10 +23,10 @@ TableAccessors &TableAccessors::operator=(const TableAccessors &table)
     return (*this);
 }
 
-QString         TableAccessors::getName() const
+QString TableAccessors::getName() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableAccessors", "getName").replace(":table", this->tableName));
     query.bindValue(":id", this->id);
@@ -35,9 +35,9 @@ QString         TableAccessors::getName() const
     return ("");
 }
 
-bool            TableAccessors::setName(const QString &name)
+bool    TableAccessors::setName(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     if (name.isEmpty())
         return (false);
@@ -47,23 +47,23 @@ bool            TableAccessors::setName(const QString &name)
     return (Library::database().query(query));
 }
 
-bool            TableAccessors::isAllowed(const QString &id_object, const QString &right) const
+bool    TableAccessors::isAllowed(const QString &id_object, const QString &right) const
 {
     return (TablePermissions().isAllowed(this->id, id_object, right));
 }
 
-bool            TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const
+bool    TableAccessors::getRights(const QString &id_object, QStringList &allowed, QStringList &denied) const
 {
     return (TablePermissions().getRights(this->id, id_object, allowed, denied));
 }
 
-QStringList     TableAccessors::getLimits() const
+QStringList TableAccessors::getLimits() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
-    QStringList             tags;
-    int                     i;
-    int                     s;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
+    QStringList          tags;
+    int                  i;
+    int                  s;
 
     query.prepare(Library::database().getQuery("TableAccessors", "getLimits"));
     query.bindValue(":id_accessor", this->id);

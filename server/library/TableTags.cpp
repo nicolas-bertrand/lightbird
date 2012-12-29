@@ -28,7 +28,7 @@ TableTags &TableTags::operator=(const TableTags &table)
 
 bool    TableTags::add(const QString &id_object, const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
     QString     id;
 
     id = createUuid();
@@ -44,8 +44,8 @@ bool    TableTags::add(const QString &id_object, const QString &name)
 
 QString TableTags::getIdObject() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableTags", "getIdObject"));
     query.bindValue(":id", this->id);
@@ -56,7 +56,7 @@ QString TableTags::getIdObject() const
 
 bool    TableTags::setIdObject(const QString &id_object)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableTags", "setIdObject"));
     query.bindValue(":id", this->id);
@@ -66,8 +66,8 @@ bool    TableTags::setIdObject(const QString &id_object)
 
 QString TableTags::getName() const
 {
-    QSqlQuery               query;
-    QVector<QVariantMap>    result;
+    QSqlQuery            query(Library::database().getDatabase());
+    QVector<QVariantMap> result;
 
     query.prepare(Library::database().getQuery("TableTags", "getName"));
     query.bindValue(":id", this->id);
@@ -78,7 +78,7 @@ QString TableTags::getName() const
 
 bool    TableTags::setName(const QString &name)
 {
-    QSqlQuery   query;
+    QSqlQuery   query(Library::database().getDatabase());
 
     query.prepare(Library::database().getQuery("TableTags", "setName"));
     query.bindValue(":id", this->id);
