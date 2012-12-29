@@ -130,7 +130,7 @@ void            Database::_accounts()
         ASSERT(i == a1.getInformations());
         i.insert("key2", "value4");
         i.insert("key3", "value5");
-        ASSERT(a1.setInformations(i));
+        ASSERT(a1.setInformations(i).isEmpty());
         ASSERT(i == a1.getInformations());
         ASSERT(i.remove("key2"));
         ASSERT(a1.removeInformation("key3"));
@@ -433,7 +433,7 @@ void            Database::_events()
         informations["name1"] = "value1new";
         informations["name3"] = "value3new";
         informations["name5"] = "value5";
-        ASSERT(e2.setInformations(informations));
+        ASSERT(e2.setInformations(informations).isEmpty());
         informations["name2"] = "value2new";
         informations["name4"] = "value4";
         ASSERT(e2.getInformations() == informations);
@@ -535,7 +535,7 @@ void            Database::_files()
         i.remove("k1");
         i.insert("k3", "v3");
         i.insert("k4", "v4");
-        ASSERT(f1.setInformations(i));
+        ASSERT(f1.setInformations(i).isEmpty());
         ASSERT(f1.getInformations().size() == 4);
         ASSERT(f1.removeInformation("k1"));
         ASSERT(f1.getInformations().size() == 3);

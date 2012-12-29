@@ -87,13 +87,14 @@ namespace LightBird
         /// @brief Modifies the value of an information of the file, or create
         /// it if it doesn't exists.
         /// @param name : The name of the information to create or modify.
-        /// @brief value : The new value of the information.
+        /// @param value : The new value of the information.
         bool        setInformation(const QString &name, const QVariant &value);
         /// @brief Modifies or creates multiple informations for the file.
         /// @param informations : The informations to modify or create.
         /// The keys of the map are the keys of the informations, and
         /// the values of the map are the values of the informations.
-        bool        setInformations(const QVariantMap &informations);
+        /// @return The list of the informations that could not be set.
+        QStringList setInformations(const QVariantMap &informations);
         /// @brief Removes an information of the file.
         /// @param name : The name of the information to remove.
         bool        removeInformation(const QString &name);

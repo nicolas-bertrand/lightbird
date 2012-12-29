@@ -243,16 +243,16 @@ bool    TableAccounts::setInformation(const QString &name, const QVariant &value
     return (Library::database().query(query));
 }
 
-bool    TableAccounts::setInformations(const QVariantMap &informations)
+QStringList TableAccounts::setInformations(const QVariantMap &informations)
 {
     QMapIterator<QString, QVariant> it(informations);
-    bool                            result = true;
+    QStringList                     result;
 
-    while (it.hasNext() && result)
+    while (it.hasNext())
     {
         it.next();
         if (!this->setInformation(it.key(), it.value()))
-            result = false;
+            result << it.key();
     }
     return (result);
 }

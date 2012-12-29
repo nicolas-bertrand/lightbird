@@ -201,16 +201,16 @@ bool    TableEvents::setInformation(const QString &name, const QVariant &value)
     return (Library::database().query(query));
 }
 
-bool    TableEvents::setInformations(const QVariantMap &informations)
+QStringList TableEvents::setInformations(const QVariantMap &informations)
 {
     QMapIterator<QString, QVariant> it(informations);
-    bool                            result = true;
+    QStringList                     result;
 
-    while (it.hasNext() && result)
+    while (it.hasNext())
     {
         it.next();
         if (!this->setInformation(it.key(), it.value()))
-            result = false;
+            result << it.key();
     }
     return (result);
 }
