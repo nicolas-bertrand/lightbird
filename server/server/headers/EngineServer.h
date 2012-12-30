@@ -27,12 +27,6 @@ public:
     /// been received yet.
     bool    isIdle();
 
-private:
-    EngineServer(const EngineServer &);
-    EngineServer &operator=(const EngineServer &);
-
-    void    _clear();
-
 private slots:
     // This methods calls the interfaces implemented by the plugins,
     // in order to execute the request and generate a response.
@@ -48,6 +42,11 @@ private slots:
     void    _onFinish();
 
 private:
+    EngineServer(const EngineServer &);
+    EngineServer &operator=(const EngineServer &);
+
+    void    _clear();
+
     /// @brief A simple pointer to method.
     /// @return True while the engine has enough data to run.
     typedef bool (EngineServer::*Method)();

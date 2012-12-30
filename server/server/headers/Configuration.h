@@ -52,10 +52,15 @@ public:
 signals:
     void                setParentSignal(QObject *parent);
 
+private slots:
+    /// @brief Set the parent of the configuration in his living thread (because this can't be done in an other thread)
+    void                _setParent(QObject *parent);
+
 protected:
     Configuration();
     Configuration(const Configuration &);
     Configuration &operator=(const Configuration &);
+
     /// @brief Load the xml configuration file.
     /// @param path : The path to the file.
     /// @return If the file has been correctly loaded.
@@ -69,11 +74,6 @@ protected:
     /// @param root : The root element of the nodeName.
     virtual bool        _remove(const QString &nodeName, QDomElement root);
 
-private slots:
-    /// @brief Set the parent of the configuration in his living thread (because this can't be done in an other thread)
-    void                _setParent(QObject *parent);
-
-protected:
     QDomDocument            doc;    ///< The in-memory DOM representation of the XML document.
     QDomElement             dom;    ///< The root of the XML document.
     QFile                   file;   ///< The XML configuration file.

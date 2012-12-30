@@ -59,15 +59,14 @@ public:
     /// @brief Returns the instance of this class created by the Server.
     static Network  *instance();
 
-private:
-    Network(const Network &);
-    Network &operator=(const Network &);
-
 private slots:
     /// @brief Called when a port thread is finished in order to delete it.
     void            _finished();
 
 private:
+    Network(const Network &);
+    Network &operator=(const Network &);
+
     typedef QMap<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > PortList;
     PortList               ports;   ///< The list of the open ports.
     Clients                clients; ///< Manages the clients in CLIENT mode.

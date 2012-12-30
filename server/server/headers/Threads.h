@@ -31,10 +31,6 @@ public:
     /// @brief Returns the instance of this class created by the Server.
     static Threads  *instance();
 
-private:
-    Threads(const Threads &);
-    Threads &operator=(const Threads &);
-
 private slots:
     /// @brief Cleans a thread that has finished.
     void            _threadFinished();
@@ -42,6 +38,9 @@ private slots:
     void            _threadDestroyed(QObject *object);
 
 private:
+    Threads(const Threads &);
+    Threads &operator=(const Threads &);
+
     QMap<QThread *, bool> threads; ///< The list of the managed threads. The value tells if the object has to be deleted when the thread is finished.
     QMutex                mutex;   ///< Lock the member threads.
 };

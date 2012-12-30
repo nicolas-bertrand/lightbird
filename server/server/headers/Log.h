@@ -88,6 +88,10 @@ signals:
     /// @brief This signal is emitted to write a log.
     void        writeLog(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
 
+private slots:
+    /// @brief Write a log to the plugins that implements ILog.
+    void        _write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
+
 private:
     Log(QObject *parent = 0);
     ~Log();
@@ -117,11 +121,6 @@ private:
     /// @see write
     void        _print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method) const;
 
-private slots:
-    /// @brief Write a log to the plugins that implements ILog.
-    void        _write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method);
-
-private:
     LightBird::ILogs::Level                 level;      ///< The minimum level required to write a log.
     static Log                              *_instance; ///< The instance of the Singleton.
     QMap<LightBird::ILogs::Level, QString>  levels;     ///< Combines the levels and their names.

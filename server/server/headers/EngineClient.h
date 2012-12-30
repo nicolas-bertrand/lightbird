@@ -33,12 +33,6 @@ public:
     /// waiting to be processed.
     bool    isIdle();
 
-private:
-    EngineClient(const EngineClient &);
-    EngineClient &operator=(const EngineClient &);
-
-    void    _clear();
-
 private slots:
     // This methods calls the interfaces implemented by the plugins,
     // in order to generate a request and execute the response.
@@ -55,6 +49,11 @@ private slots:
     bool    _onFinish();
 
 private:
+    EngineClient(const EngineClient &);
+    EngineClient &operator=(const EngineClient &);
+
+    void    _clear();
+
     /// @brief A simple pointer to method.
     /// @return True while the engine has enough data to run.
     typedef bool (EngineClient::*Method)();

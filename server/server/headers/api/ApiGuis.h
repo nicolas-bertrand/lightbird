@@ -27,15 +27,14 @@ signals:
     void    showSignal(const QString &id);
     void    hideSignal(const QString &id);
 
-private:
-    ApiGuis(const ApiGuis &);
-    ApiGuis &operator=(const ApiGuis &);
-
 private slots:
     void    _show(const QString &id);
     void    _hide(const QString &id);
 
 private:
+    ApiGuis(const ApiGuis &);
+    ApiGuis &operator=(const ApiGuis &);
+
     bool    isNoGui; ///< True if the server is in noGui mode.
 };
 

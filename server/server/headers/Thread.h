@@ -23,13 +23,13 @@ signals:
     /// for the current thread.
     void    taskAvailableSignal(ThreadPool::ITask *task);
 
-private:
-    Thread(const Thread &);
-    Thread &operator=(const Thread &);
-
 private slots:
     /// @brief Runs a task.
     void    _taskAvailable(ThreadPool::ITask *task);
+
+private:
+    Thread(const Thread &);
+    Thread &operator=(const Thread &);
 };
 
 #endif // THREAD_H

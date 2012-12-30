@@ -42,11 +42,6 @@ signals:
     /// plugin has subscribed occur.
     void        newEvent();
 
-private:
-    ApiEvents();
-    ApiEvents(const ApiEvents &);
-    ApiEvents &operator=(const ApiEvents &);
-
 private slots:
     /// @brief Calls IEvent for the plugins that implements it. This slot is
     /// called in the events thread each time an event occur if the plugin
@@ -54,6 +49,10 @@ private slots:
     void            _newEvent();
 
 private:
+    ApiEvents();
+    ApiEvents(const ApiEvents &);
+    ApiEvents &operator=(const ApiEvents &);
+
     QString         id;         ///< The id of the plugin for which the object has been created.
     QWaitCondition  wait;       ///< Allows to wait that the thread is started before return from the constructor.
     bool            awake;      ///< If the wait condition has been called.
