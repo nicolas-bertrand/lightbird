@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QFileInfo>
 
+#include "IContexts.h"
 #include "IEvent.h"
 #include "ITimer.h"
 
@@ -41,17 +42,21 @@ bool    Plugin::load(bool full)
         this->_clean();
         return (false);
     }
-    if (full && !this->configuration)
+    if (full)
     {
-        LOG_ERROR("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
-        this->_clean();
-        return (false);
-    }
-    if (full && !this->instance->onLoad(this->api))
-    {
-        LOG_ERROR("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
-        this->_clean();
-        return (false);
+        if (!this->configuration)
+        {
+            LOG_ERROR("The plugin must be installed to be loaded", Properties("id", this->id), "Plugin", "load");
+            this->_clean();
+            return (false);
+        }
+        if (!this->instance->onLoad(this->api))
+        {
+            LOG_ERROR("The plugin returned false from IPlugin::onLoad, so it will not be loaded", Properties("id", this->id), "Plugin", "load");
+            this->_clean();
+            return (false);
+        }
+        this->_loadContexts();
     }
     this->state = LightBird::IPlugins::LOADED;
     return (true);
@@ -162,35 +167,6 @@ LightBird::IMetadata Plugin::getMetadata() const
         return (metadata);
     this->instance->getMetadata(metadata);
     return (metadata);
-}
-
-bool    Plugin::checkContext(const QString &mode, const QString &transport, const QStringList &protocols,
-                             unsigned short port, const QString &method, const QString &type, bool all) const
-{
-    QListIterator<Context>  it(this->contexts);
-
-    // Iterate through all the contexts of the plugin
-    while (it.hasNext())
-    {
-        // If at least one context is valid, true is returned
-        if ((!all && it.next().isValid(mode, transport, protocols, port)) ||
-            (all && it.next().isValid(mode, transport, protocols, port, method, type)))
-        {
-            /*LOG_TRACE("Context valid", Properties(it.peekPrevious().toMap()).add("id", this->id)
-                      .add("requiredmode", mode).add("requiredTransport", transport)
-                      .add("requiredProtocols", protocols.join(" "))
-                      .add("requiredPort", port).add("requiredMethod", method, false)
-                      .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
-            return (true);
-        }
-        /*else
-            LOG_TRACE("Context invalid", Properties(it.peekPrevious().toMap()).add("id", this->id)
-                      .add("requiredmode", mode).add("requiredTransport", transport)
-                      .add("requiredProtocols", protocols.join(" "))
-                      .add("requiredPort", port).add("requiredMethod", method, false)
-                      .add("requiredType", type, false).add("all", all), "Plugin", "checkContext");*/
-    }
-    return (false);
 }
 
 LightBird::IPlugins::State Plugin::getState() const
@@ -308,78 +284,11 @@ void    Plugin::_loadApi()
     // The api is loaded only if the configuration is available (i.e if the plugin is installed)
     if (this->configuration)
     {
-        bool event = qobject_cast<LightBird::IEvent *>(this->instanceObject) != NULL;
-        bool timers = qobject_cast<LightBird::ITimer *>(this->instanceObject) != NULL;
+        bool event = (qobject_cast<LightBird::IEvent *>(this->instanceObject) != NULL);
+        bool timers = (qobject_cast<LightBird::ITimer *>(this->instanceObject) != NULL);
         this->api = new Api(this->id, *this->configuration, event, timers);
-        this->_loadContexts();
         this->_loadResources();
     }
-}
-
-void    Plugin::_loadContexts()
-{
-    QDomNode read;
-    QDomNode dom;
-    QDomNode contextNode;
-    QString  nodeName;
-    QString  nodeValue;
-
-    // Load the contexts of the plugin
-    read = this->configuration->readDom().firstChild();
-    dom = read.parentNode().firstChildElement("contexts").firstChild();
-    while (!dom.isNull())
-    {
-        // Iterates through all the contexts
-        if (dom.isElement() && dom.nodeName().toLower().trimmed() == "context")
-        {
-            Context context;
-            contextNode = dom.firstChild();
-            // For each context, we store its informations
-            while (!contextNode.isNull())
-            {
-                if (contextNode.isElement() && contextNode.toElement().text().trimmed().size() > 0)
-                {
-                    nodeName = contextNode.nodeName().toLower().trimmed();
-                    nodeValue = contextNode.toElement().text().toLower().trimmed();
-                    if (nodeName == "mode")
-                    {
-                        if (nodeValue != "client" && nodeValue != "server")
-                            nodeValue.clear();
-                        context.setMode(nodeValue);
-                    }
-                    if (nodeName == "transport")
-                    {
-                        nodeValue = nodeValue.toUpper();
-                        if (nodeValue != "TCP" && nodeValue != "UDP")
-                            nodeValue.clear();
-                        context.setTransport(nodeValue);
-                    }
-                    else if (nodeName == "protocol")
-                        context.setProtocol(contextNode.toElement().text().trimmed());
-                    else if (nodeName == "port")
-                    {
-                        if (nodeValue == "all")
-                            context.setPort(0);
-                        else if (nodeValue.toInt() != 0)
-                            context.setPort(nodeValue.toInt());
-                    }
-                    else if (nodeName == "method")
-                        context.setMethod(nodeValue);
-                    else if (nodeName == "type")
-                        context.setType(nodeValue);
-                }
-                contextNode = contextNode.nextSibling();
-            }
-            // Saves the context if it doesn't already exists
-            if (!this->contexts.contains(context))
-            {
-                LOG_DEBUG("Context added", Properties(context.toMap()).add("id", this->id), "Plugin", "_loadInformations");
-                this->contexts.push_back(context);
-            }
-        }
-        dom = dom.nextSibling();
-    }
-    this->configuration->release();
 }
 
 void    Plugin::_loadResources()
@@ -466,6 +375,87 @@ void    Plugin::_copyAllResources(const QString &resourcesPath, const QString &d
         this->_copyAllResources(resourcesPath, destDir, currentDir + "/" + d.next());
 }
 
+void    Plugin::_loadContexts()
+{
+    QDomNode read;
+    QDomNode dom;
+    QDomNode contextNode;
+    QString  nodeName;
+    QString  nodeValue;
+    QMap<QString, QObject *> contexts;
+    LightBird::IContexts *instance;
+
+    // Calls IContexts to get the context classes of the plugin
+    if ((instance = qobject_cast<LightBird::IContexts *>(this->instanceObject)))
+        contexts = instance->getContexts();
+    // Loads the contexts of the plugin
+    read = this->configuration->readDom().firstChild();
+    dom = read.parentNode().firstChildElement("contexts").firstChild();
+    while (!dom.isNull())
+    {
+        // Iterates through all the contexts nodes
+        if (dom.isElement() && dom.nodeName().toLower().trimmed() == "context")
+        {
+            // Creates the Context using the attributes of the node
+            QDomElement e = dom.toElement();
+            QString contextName;
+            Context context(this->id);
+            context.setName(contextName = e.attribute("name"));
+            context.setMode(e.attribute("mode"));
+            context.setTransport(e.attribute("transport"));
+            context.addProtocols(QStringList(e.attribute("protocol")));
+            context.addProtocols(e.attribute("protocols").split(' '));
+            context.addPorts(QStringList(e.attribute("port")));
+            context.addPorts(e.attribute("ports").split(' '));
+            context.addMethods(QStringList(e.attribute("method")));
+            context.addMethods(e.attribute("methods").split(' '));
+            context.addTypes(QStringList(e.attribute("type")));
+            context.addTypes(e.attribute("types").split(' '));
+            contextNode = dom.firstChild();
+            // Gets the other informations of the context from the child nodes
+            while (!contextNode.isNull())
+            {
+                if (contextNode.isElement() && contextNode.toElement().text().trimmed().size() > 0)
+                {
+                    nodeName = contextNode.nodeName().toLower().trimmed();
+                    nodeValue = contextNode.toElement().text().toLower().trimmed();
+                    if (nodeName == "name")
+                        context.setName(contextName = nodeValue);
+                    else if (nodeName == "mode")
+                        context.setMode(nodeValue);
+                    else if (nodeName == "transport")
+                        context.setTransport(nodeValue);
+                    else if (nodeName == "protocol")
+                        context.addProtocols(QStringList(contextNode.toElement().text().trimmed()));
+                    else if (nodeName == "protocols")
+                        context.addProtocols(contextNode.toElement().text().trimmed().split(' '));
+                    else if (nodeName == "port")
+                        context.addPorts(QStringList(nodeValue));
+                    else if (nodeName == "ports")
+                        context.addPorts(nodeValue.split(' '));
+                    else if (nodeName == "method")
+                        context.addMethods(QStringList(nodeValue));
+                    else if (nodeName == "methods")
+                        context.addMethods(nodeValue.split(' '));
+                    else if (nodeName == "type")
+                        context.addTypes(QStringList(nodeValue));
+                    else if (nodeName == "types")
+                        context.addTypes(nodeValue.split(' '));
+                }
+                contextNode = contextNode.nextSibling();
+            }
+            // Saves the context if it is valid and doesn't already exists
+            if (context.checkName(contexts) && !this->contexts.value(contextName).contains(context))
+            {
+                LOG_DEBUG("Context added", Properties(context.toMap()).add("id", this->id), "Plugin", "_loadInformations");
+                this->contexts[contextName].push_back(context);
+            }
+        }
+        dom = dom.nextSibling();
+    }
+    this->configuration->release();
+}
+
 void    Plugin::_unload()
 {
     this->_clean();
@@ -536,6 +526,15 @@ void    Plugin::_removeConfiguration()
         Configurations::instance()->release();
     // The plugin is unloaded to avoid problems (the api needs a valid configuration)
     this->_clean();
+}
+
+bool    Plugin::_checkContexts(const QList<Context> &contexts, const Context::Validator &validator) const
+{
+    QListIterator<Context> it(contexts);
+    while (it.hasNext())
+        if (it.next().isValid(validator))
+            return (true);
+    return (false);
 }
 
 void    Plugin::_clean()

@@ -5,7 +5,6 @@ SUBDIRS = Example \
     Files \
     Ftp \
     Http \
-    Json/QJson \
     Json \
     Log \
     Test \

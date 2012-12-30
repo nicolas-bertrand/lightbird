@@ -2,6 +2,7 @@
 # define REQUEST_H
 
 # include <QObject>
+# include <QStringList>
 
 # include "Content.h"
 
@@ -38,12 +39,15 @@ public:
     void                    clear();
     /// @brief Sets the protocol of the request.
     void                    setProtocol(const QString &protocol);
+    /// @brief Returns the protocol as a QStringList, for optimization.
+    const QStringList       &getProtocols() const;
 
 private:
     Request(const Request &);
     Request &operator=(const Request &);
 
-    QString                 protocol;
+    QStringList             protocols; ///< This list just contains the protocol (which is a reference to its first string)
+    QString                 &protocol;
     QString                 method;
     QUrl                    uri;
     QString                 version;

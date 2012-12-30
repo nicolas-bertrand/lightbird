@@ -33,6 +33,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     , mode(m)
     , readWriteInterface(r)
     , socket(s)
+    , validator(contexts, mode, transport, protocols, port)
 {
     // Generates the uuid of the client
     this->id = LightBird::createUuid();
@@ -399,7 +400,7 @@ void    Client::_onPause()
 {
     QPair<QString, LightBird::IOnPause *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IOnPause>(this->mode, this->transport, this->protocols, this->port)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IOnPause>(this->getValidator(false))).second)
     {
         LOG_TRACE("Calling IOnPause::onPause()", Properties("id", this->id).add("plugin", instance.first), "Client", "_onPause");
         instance.second->onPause(*this);
@@ -433,7 +434,7 @@ void    Client::_onResume()
     QPair<QString, LightBird::IOnResume *> instance;
     bool    timeout = !this->pauseTimer.isActive() && this->pauseTimer.interval();
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IOnResume>(this->mode, this->transport, this->protocols, this->port)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IOnResume>(this->getValidator(false))).second)
     {
         LOG_TRACE("Calling IOnResume::onResume()", Properties("id", this->id).add("plugin", instance.first), "Client", "_onResume");
         instance.second->onResume(*this, timeout);
@@ -478,7 +479,7 @@ bool    Client::doRead(QByteArray &data)
     QPair<QString, LightBird::IDoRead *> instance;
 
     data.clear();
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->mode, this->transport, this->protocols, this->port)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoRead>(this->getValidator(false))).second)
     {
         LOG_TRACE("Calling IDoRead::doRead()", Properties("id", this->id).add("plugin", instance.first), "Client", "doRead");
         if (!instance.second->doRead(*this, data))
@@ -493,7 +494,7 @@ bool    Client::doWrite(const char *data, qint64 size, qint64 &result)
 {
     QPair<QString, LightBird::IDoWrite *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->mode, this->transport, this->protocols, this->port)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoWrite>(this->getValidator(false))).second)
     {
         LOG_TRACE("Calling IDoWrite::doWrite()", Properties("id", this->id).add("plugin", instance.first).add("size", size), "Client", "doWrite");
         result = instance.second->doWrite(*this, data, size);
@@ -508,7 +509,7 @@ bool    Client::_onConnect()
     bool    accept = true;
 
     // Get the instances of all connected plugins that implements LightBird::IOnConnect and corresponds to the context
-    QMapIterator<QString, LightBird::IOnConnect *> it(Plugins::instance()->getInstances<LightBird::IOnConnect>(this->mode, this->transport, this->protocols, this->port));
+    QMapIterator<QString, LightBird::IOnConnect *> it(Plugins::instance()->getInstances<LightBird::IOnConnect>(this->getValidator(false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnConnect::onConnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onConnect");
@@ -529,7 +530,7 @@ bool    Client::_onDisconnect()
 {
     bool    finish = true;
 
-    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->mode, this->transport, this->protocols, this->port));
+    QMapIterator<QString, LightBird::IOnDisconnect *> it(Plugins::instance()->getInstances<LightBird::IOnDisconnect>(this->getValidator(false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnDisconnect::onDisconnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDisconnect");
@@ -543,7 +544,7 @@ bool    Client::_onDisconnect()
 
 void    Client::_onDestroy()
 {
-    QMapIterator<QString, LightBird::IOnDestroy *> it(Plugins::instance()->getInstances<LightBird::IOnDestroy>(this->mode, this->transport, this->protocols, this->port));
+    QMapIterator<QString, LightBird::IOnDestroy *> it(Plugins::instance()->getInstances<LightBird::IOnDestroy>(this->getValidator(false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnDestroy::onDestroy()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDestroy");
@@ -607,14 +608,19 @@ const QDateTime &Client::getConnectionDate() const
     return (this->connectionDate);
 }
 
+quint64 Client::getBufferSize() const
+{
+    return (this->data.size() + this->socket->size());
+}
+
 LightBird::IClient::Mode Client::getMode() const
 {
     return (this->mode);
 }
 
-quint64 Client::getBufferSize() const
+QStringList &Client::getContexts()
 {
-    return (this->data.size() + this->socket->size());
+    return (this->contexts);
 }
 
 QVariantMap &Client::getInformations()
@@ -690,6 +696,25 @@ QString Client::getProtocol(QString protocol)
         return (QString());
     }
     return (protocol);
+}
+
+Context::Validator  &Client::getValidator(bool requestProtocol, bool methodType)
+{
+    if (!requestProtocol)
+        this->validator.protocols = &this->protocols;
+    else if (this->validator.protocols == &this->protocols)
+        this->validator.protocols = &this->engine->getRequestObject().getProtocols();
+    if (methodType)
+    {
+        this->validator.method = &this->engine->getRequest().getMethod();
+        this->validator.type = &this->engine->getRequest().getType();
+    }
+    else if (this->validator.method)
+    {
+        this->validator.method = NULL;
+        this->validator.type = NULL;
+    }
+    return (this->validator);
 }
 
 void    Client::getInformations(LightBird::INetwork::Client &client, Future<bool> *future)

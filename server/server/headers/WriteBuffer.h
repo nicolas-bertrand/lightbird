@@ -31,11 +31,11 @@ public:
     bool        isWritten() const;
 
 signals:
-    /// @brief Emitted when a chunk of data have been written.
+    /// @brief Emitted when a chunk of data has been written.
     void        bytesWritten();
 
 private slots:
-    /// @brief A chunk of data have been written on the socket.
+    /// @brief A chunk of data has been written on the socket.
     void        _bytesWritten();
 
 private:

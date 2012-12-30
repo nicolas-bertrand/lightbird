@@ -81,21 +81,18 @@ bool        EngineClient::_doSend()
     bool    found = false;
     bool    result = false;
     QString id = this->requests.front().value("id").toString();
+    QPair<QString, LightBird::IDoSend *> instance;
 
     this->request.setProtocol(this->requests.front().value("protocol").toString());
     this->request.getInformations() = this->requests.front().value("informations").toMap();
     this->requests.pop_front();
-    // Gets the plugins that asked to send a request
-    QMapIterator<QString, LightBird::IDoSend *> it(Plugins::instance()->getInstances<LightBird::IDoSend>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
-    while (it.hasNext())
+    // Calls IDoSend for the plugin that asked to send a request
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSend>(this->client.getValidator(), id)).second)
     {
-        if (!found && it.peekNext().key() == id)
-        {
-            LOG_TRACE("Calling IDoSend::doSend()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineClient", "_doSend");
-            result = it.peekNext().value()->doSend(this->client);
-            found = true;
-        }
-        Plugins::instance()->release(it.next().key());
+        LOG_TRACE("Calling IDoSend::doSend()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doSend");
+        result = instance.second->doSend(this->client);
+        Plugins::instance()->release(instance.first);
+        found = true;
     }
     // Calls IOnSend and cancels the send if it returns false
     if (found && !this->_onSend())
@@ -123,7 +120,7 @@ bool        EngineClient::_onSend()
 {
     bool    result = true;
 
-    QMapIterator<QString, LightBird::IOnSend *> it(Plugins::instance()->getInstances<LightBird::IOnSend>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
+    QMapIterator<QString, LightBird::IOnSend *> it(Plugins::instance()->getInstances<LightBird::IOnSend>(this->client.getValidator()));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnSend::onSend()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineClient", "_onSend");
@@ -138,7 +135,7 @@ bool    EngineClient::_doSerializeHeader()
 {
     QPair<QString, LightBird::IDoSerializeHeader *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeHeader>(this->client.getValidator())).second)
     {
         QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeHeader);
@@ -165,7 +162,7 @@ bool    EngineClient::_doSerializeContent()
     QPair<QString, LightBird::IDoSerializeContent *> instance;
     bool    result = true;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeContent>(this->client.getValidator())).second)
     {
         QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeContent);
@@ -201,7 +198,7 @@ bool    EngineClient::_doSerializeTrailer()
 {
     QPair<QString, LightBird::IDoSerializeTrailer *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeTrailer>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeTrailer>(this->client.getValidator())).second)
     {
         QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeTrailer);
@@ -260,7 +257,7 @@ bool    EngineClient::_doDeserializeHeader()
 
     this->done = false;
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeHeader>(this->client.getValidator())).second)
     {
         LOG_TRACE("Calling IDoDeserializeHeader::doDeserializeHeader()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeHeader");
         result = instance.second->doDeserializeHeader(this->client, this->data, used);
@@ -306,7 +303,7 @@ bool    EngineClient::_doDeserializeContent()
     QPair<QString, LightBird::IDoDeserializeContent *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeContent>(this->client.getValidator())).second)
     {
         LOG_TRACE("Calling IDoDeserializeContent::doDeserializeContent()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeContent");
         result = instance.second->doDeserializeContent(this->client, this->data, used);
@@ -352,7 +349,7 @@ bool    EngineClient::_doDeserializeTrailer()
     QPair<QString, LightBird::IDoDeserializeTrailer *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeTrailer>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeTrailer>(this->client.getValidator())).second)
     {
         LOG_TRACE("Calling IDoDeserializeTrailer::doDeserializeTrailer()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doDeserializeTrailer");
         result = instance.second->doDeserializeTrailer(this->client, this->data, used);
@@ -420,7 +417,7 @@ bool        EngineClient::_doExecution()
 {
     QPair<QString, LightBird::IDoExecution *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort(), this->request.getMethod(), this->request.getType(), true)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getValidator(true, true))).second)
     {
         LOG_TRACE("Calling IDoExecution::doExecution()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doExecution");
         instance.second->doExecution(this->client);
@@ -434,7 +431,7 @@ bool        EngineClient::_doExecution()
 
 bool        EngineClient::_onExecution()
 {
-    QMapIterator<QString, LightBird::IOnExecution *> it(Plugins::instance()->getInstances<LightBird::IOnExecution>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
+    QMapIterator<QString, LightBird::IOnExecution *> it(Plugins::instance()->getInstances<LightBird::IOnExecution>(this->client.getValidator()));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnExecution::onExecution()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineClient", "_onExecution");
@@ -446,7 +443,7 @@ bool        EngineClient::_onExecution()
 
 bool    EngineClient::_onFinish()
 {
-    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
+    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getValidator(false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnFinish::onFinish()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "EngineClient", "_onFinish");

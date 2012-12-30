@@ -2,6 +2,8 @@
 
 Request::Request(QObject *parent)
     : QObject(parent)
+    , protocols(QString())
+    , protocol(protocols.first())
 {
     this->clear();
 }
@@ -96,4 +98,9 @@ void                    Request::clear()
 void                    Request::setProtocol(const QString &protocol)
 {
     this->protocol = protocol;
+}
+
+const QStringList       &Request::getProtocols() const
+{
+    return (this->protocols);
 }

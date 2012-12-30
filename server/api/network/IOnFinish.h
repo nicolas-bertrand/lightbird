@@ -13,7 +13,7 @@ namespace LightBird
     public:
         virtual ~IOnFinish() {}
 
-        /// @brief Method called the server has finish to process a request.
+        /// @brief Method called when the server has finish to process a request.
         /// @param client : The client that sent the request.
         virtual void    onFinish(LightBird::IClient &client) = 0;
     };

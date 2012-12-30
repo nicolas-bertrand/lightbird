@@ -107,9 +107,17 @@
                 <td class="key">Version</td>
                 <td>La version actuelle du plugin.</td>
             </tr>
-            <tr class="last">
+            <tr>
                 <td class="key">Licence</td>
                 <td>La licence sous laquelle le plugin est distribué. Les plugins officiels de LightBird sont en <em>Creative Common BY-NC-SA 3.0</em>.</td>
+            </tr>
+            <tr class="odd">
+                <td class="key">Dependencies</td>
+                <td>La liste des dépendances du plugin. Par exemple les bibliothèques externes dont il a besoin pour fonctionner correctement.</td>
+            </tr>
+            <tr class="last">
+                <td class="key">Other</td>
+                <td>D'autres informations utiles.</td>
             </tr>
         </table>
         
@@ -132,6 +140,7 @@
                         <span class="chevron">&lt;</span>type<span class="chevron">&gt;</span><span class="text">text/html</span><span class="chevron"><span class="chevron">&lt;</span>/</span>type<span class="chevron">&gt;</span><br />
                     </div>
                     <span class="chevron"><span class="chevron">&lt;</span>/</span>context<span class="chevron">&gt;</span><br />
+                    <span class="chevron">&lt;</span>context <span class="key">name</span><span class="value">=</span><span class="text">"</span><span class="value">network</span><span class="text">"</span><span class="chevron"> <span class="key">mode</span><span class="value">=</span><span class="text">"</span><span class="value">Client</span><span class="text">"</span><span class="chevron"> <span class="key">protocol</span><span class="value">=</span><span class="text">"</span><span class="value">HTTP</span><span class="text">"</span><span class="chevron"> /&gt;</span><br />
                 </div>
                 <span class="chevron"><span class="chevron">&lt;</span>/</span>contexts<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>timers<span class="chevron">&gt;</span><br />
@@ -155,7 +164,7 @@
         <p>« <strong>:plugins/Example/Basic/languages/en</strong> »</p>
         
         <h3>2. Contexts</h3>
-        <p>Les contextes permettent au serveur de savoir quand appeler les interfaces réseau d’un plugin. Un plugin peut avoir plusieurs contextes simultanément, chacun étant dans un nœud <strong><em>context</em></strong> distinct.</p>
+        <p>Les contextes permettent au serveur de savoir quand appeler les interfaces réseau d’un plugin. Un plugin peut avoir plusieurs contextes simultanément, chacun étant dans un nœud <strong><em>context</em></strong> distinct. Les propriétées d'un context peuvent être données dans le nœud <strong><em>context</em></strong>, ainsi que directement dans ses attributs.</p>
         <table>
             <tr>
                 <th>Configuration</th>
@@ -187,10 +196,15 @@
                 <td>La méthode de la requête pour laquelle le plugin a été implémenté. Il ne sera appelé que pour les requêtes appelant cette méthode.</td>
                 <td class="value">Toutes les méthodes</td>
             </tr>
-            <tr class="last">
+            <tr>
                 <td class="key">Type</td>
                 <td>Le type MIME de la ressource pointée par la requête pour laquelle le plugin a été implémenté. Il ne sera appelé que pour les ressources avec ce type.</td>
                 <td class="value">Tous les types</td>
+            </tr>
+            <tr class="odd last">
+                <td class="key">Name</td>
+                <td>Le nom d'un context permet aux plugins de spécialiser une classe dans un context particulier. Le context par défaut n'a pas de nom et sera toujours appellé.</td>
+                <td class="value">Le context par défaut</td>
             </tr>
         </table>
         
@@ -406,7 +420,7 @@
             </tr>
             <tr class="odd">
                 <td class="key">Réseau</td>
-                <td>Permet d’effectuer divers actions sur le réseau tel que déconnecter un client, ajouter ou supprimer un port TCP/UDP, et obtenir des informations sur les clients connectés.</td>
+                <td>Permet d’effectuer divers actions sur le réseau tel que déconnecter un client, le mettre en pause, ajouter ou supprimer un port TCP/UDP, et obtenir des informations sur les clients connectés.</td>
             </tr>
             <tr>
                 <td class="key">Plugins</td>

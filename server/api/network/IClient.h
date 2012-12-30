@@ -56,12 +56,18 @@ namespace LightBird
         virtual const QString        &getPeerName() const = 0;
         /// @brief The date of the connection of the client, in local time.
         virtual const QDateTime      &getConnectionDate() const = 0;
-        /// @brief The connection mode of the client.
-        virtual LightBird::IClient::Mode getMode() const = 0;
         /// @brief Returns the number of bytes that are waiting to be deserialized.
         /// It is the addition of the data already read from the network but not
         /// yet deserialized, and the data waiting to be read on the socket.
         virtual quint64              getBufferSize() const = 0;
+        /// @brief The connection mode of the client.
+        virtual LightBird::IClient::Mode getMode() const = 0;
+        /// @brief Returns the names of the contexts currently set for this
+        /// client. All the network interfaces of the contexts in this list
+        /// can be potentially called, in addition to the default context
+        /// (the class that inherits LightBird::IPlugin).
+        /// @see LightBird::IContexts
+        virtual QStringList          &getContexts() = 0;
         /// @brief Allows to store informations on the client.
         virtual QVariantMap          &getInformations() = 0;
         /// @brief This account is used to identified the client.

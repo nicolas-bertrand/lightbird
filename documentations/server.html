@@ -102,7 +102,7 @@
                 <span class="chevron">&lt;/</span>preview<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>ports<span class="chevron">&gt;</span><br />
                 <div class="indent">
-                    <span class="chevron">&lt;</span>port <span class="key">protocol</span><span class="value">=</span><span class="text">"</span><span class="value">HTTP UPnP</span><span class="text">"</span><span class="key">transport</span><span class="value">=</span><span class="text">"</span><span class="value">TCP</span><span class="text">"</span> <span class="key">maxClients</span><span class="value">=</span><span class="text">"</span><span class="value">100</span><span class="text">"<span class="value">&gt;</span></span><span class="text">80</span><span class="chevron">&lt;/</span>port<span class="chevron">&gt;</span><br />
+                    <span class="chevron">&lt;</span>port <span class="key">protocol</span><span class="value">=</span><span class="text">"</span><span class="value">HTTP FTP</span><span class="text">"</span><span class="key">transport</span><span class="value">=</span><span class="text">"</span><span class="value">TCP</span><span class="text">"</span> <span class="key">maxClients</span><span class="value">=</span><span class="text">"</span><span class="value">100</span><span class="text">"<span class="value">&gt;</span></span><span class="text">80</span><span class="chevron">&lt;/</span>port<span class="chevron">&gt;</span><br />
                 </div>
                 <span class="chevron">&lt;/</span>ports<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>plugins<span class="chevron">&gt;</span><br />
@@ -393,7 +393,7 @@
             </tr>
             <tr>
                 <td class="key">protocol</td>
-                <td>Noms des protocoles que les clients doivent utiliser pour communiquer avec le serveur via ce port. Les noms des protocoles sont séparés par des espaces. La valeur spéciale <strong>All</strong> indique que tous les protocoles peuvent être utilisés sur le port. Dans la configuration d’exemple ci-dessus, le port <strong>80</strong> est ouvert aux protocoles <strong>HTTP</strong> et <strong>UPnP</strong>. Une même connexion peut utiliser plusieurs protocoles. Le protocole utilisé par un client est défini pour chaque nouvelle requête, et est utilisé pour la réponse associée. Cet attribut est essentiellement utilisé par les plugins, puisque ce sont eux qui communiquent avec les clients. Le serveur ne maîtrise aucun protocole.</td>
+                <td>Noms des protocoles que les clients doivent utiliser pour communiquer avec le serveur via ce port. Les noms des protocoles sont séparés par des espaces. La valeur spéciale <strong>All</strong> indique que tous les protocoles peuvent être utilisés sur le port. Dans la configuration d’exemple ci-dessus, le port <strong>80</strong> est ouvert aux protocoles <strong>HTTP</strong> et <strong>FTP</strong>. Une même connexion peut utiliser plusieurs protocoles. Le protocole utilisé par un client est défini pour chaque nouvelle requête, et est utilisé pour la réponse associée. Cet attribut est essentiellement utilisé par les plugins, puisque ce sont eux qui communiquent avec les clients. Le serveur ne maîtrise aucun protocole.</td>
                 <td class="value">Aucun protocole</td>
             </tr>
             <tr class="odd last">

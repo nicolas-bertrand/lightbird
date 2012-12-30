@@ -23,6 +23,7 @@ HEADERS = IApi.h \
     ISessions.h \
     network/IClient.h \
     network/IContent.h \
+    network/IContexts.h \
     network/IDoDeserializeContent.h \
     network/IDoDeserializeHeader.h \
     network/IDoDeserializeTrailer.h \

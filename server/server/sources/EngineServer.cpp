@@ -61,7 +61,7 @@ bool        EngineServer::_onProtocol()
     bool    result = false;
 
     this->idle = false;
-    QMap<QString, LightBird::IOnProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IOnProtocol>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort());
+    QMap<QString, LightBird::IOnProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IOnProtocol>(this->client.getValidator(false));
     QMapIterator<QString, LightBird::IOnProtocol *> it(plugins);
     if (!it.hasNext())
         LOG_TRACE("No plugin implempents IOnProtocol for this context", Properties("id", this->client.getId()), "EngineServer", "_onProtocol");
@@ -124,7 +124,7 @@ bool    EngineServer::_doDeserializeHeader()
     QPair<QString, LightBird::IDoDeserializeHeader *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeHeader>(this->client.getValidator())).second)
     {
         LOG_TRACE("Calling IDoDeserializeHeader::doDeserializeHeader()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doDeserializeHeader");
         result = instance.second->doDeserializeHeader(this->client, this->data, used);
@@ -170,7 +170,7 @@ bool    EngineServer::_doDeserializeContent()
     QPair<QString, LightBird::IDoDeserializeContent *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeContent>(this->client.getValidator())).second)
     {
         LOG_TRACE("Calling IDoDeserializeContent::doDeserializeContent()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doDeserializeContent");
         result = instance.second->doDeserializeContent(this->client, this->data, used);
@@ -216,7 +216,7 @@ bool    EngineServer::_doDeserializeTrailer()
     QPair<QString, LightBird::IDoDeserializeTrailer *> instance;
 
     // If a plugin matches
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeTrailer>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoDeserializeTrailer>(this->client.getValidator())).second)
     {
         LOG_TRACE("Calling IDoDeserializeTrailer::doDeserializeTrailer()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doDeserializeTrailer");
         result = instance.second->doDeserializeTrailer(this->client, this->data, used);
@@ -284,7 +284,7 @@ bool        EngineServer::_doExecution()
     QPair<QString, LightBird::IDoExecution *> instance;
 
     this->needResponse = true;
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort(), this->request.getMethod(), this->request.getType(), true)).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getValidator(true, true))).second)
     {
         LOG_TRACE("Calling IDoExecution::doExecution()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doExecution");
         if (!(this->needResponse = instance.second->doExecution(this->client)))
@@ -299,7 +299,7 @@ bool        EngineServer::_doExecution()
 
 bool        EngineServer::_onExecution()
 {
-    QMapIterator<QString, LightBird::IOnExecution *> it(Plugins::instance()->getInstances<LightBird::IOnExecution>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort()));
+    QMapIterator<QString, LightBird::IOnExecution *> it(Plugins::instance()->getInstances<LightBird::IOnExecution>(this->client.getValidator()));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnExecution::onExecution()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineServer", "_onExecution");
@@ -330,7 +330,7 @@ bool    EngineServer::_doSerializeHeader()
 
     this->done = false;
     this->_onSerialize(LightBird::IOnSerialize::IDoSerialize);
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeHeader>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeHeader>(this->client.getValidator())).second)
     {
         QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeHeader);
@@ -357,7 +357,7 @@ bool    EngineServer::_doSerializeContent()
     QPair<QString, LightBird::IDoSerializeContent *> instance;
     bool        result = true;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeContent>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeContent>(this->client.getValidator())).second)
     {
         QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeContent);
@@ -393,7 +393,7 @@ bool    EngineServer::_doSerializeTrailer()
 {
     QPair<QString, LightBird::IDoSerializeTrailer *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeTrailer>(this->client.getMode(), this->client.getTransport(), this->request.getProtocol(), this->client.getPort())).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoSerializeTrailer>(this->client.getValidator())).second)
     {
         QByteArray *data = new QByteArray();
         this->_onSerialize(LightBird::IOnSerialize::IDoSerializeTrailer);
@@ -423,7 +423,7 @@ bool    EngineServer::_doSerializeTrailer()
 
 void    EngineServer::_onFinish()
 {
-    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getMode(), this->client.getTransport(), this->client.getProtocols(), this->client.getPort()));
+    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getValidator(false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnFinish::onFinish()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "EngineServer", "_onFinish");

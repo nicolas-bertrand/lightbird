@@ -1,7 +1,12 @@
 #include "Context.h"
+#include "Log.h"
 
-Context::Context(QObject *parent)
-    : QObject(parent)
+Context::Context(const QString &id)
+    : idPlugin(id)
+    , instance(NULL)
+    , allProtocols(false)
+    , allModes(true)
+    , allTransports(true)
 {
 }
 
@@ -10,7 +15,6 @@ Context::~Context()
 }
 
 Context::Context(const Context &context)
-    : QObject()
 {
     *this = context;
 }
@@ -19,12 +23,18 @@ Context &Context::operator=(const Context &context)
 {
     if (this != &context)
     {
-        this->mode = context.mode;
-        this->transport = context.transport;
+        this->idPlugin = context.idPlugin;
+        this->instance = context.instance;
+        this->name = context.name;
+        this->allProtocols = context.allProtocols;
         this->protocols = context.protocols;
         this->ports = context.ports;
         this->methods = context.methods;
         this->types = context.types;
+        this->allModes = context.allModes;
+        this->allTransports = context.allTransports;
+        this->mode = context.mode;
+        this->transport = context.transport;
     }
     return (*this);
 }
@@ -33,91 +43,170 @@ bool    Context::operator==(const Context &context)
 {
     if (this == &context)
         return (true);
-    if (this->mode == context.mode &&
-        this->transport == context.transport &&
+    if (this->idPlugin == context.idPlugin &&
+        this->instance == context.instance &&
+        this->name == context.name &&
+        this->allProtocols == context.allProtocols &&
         this->protocols == context.protocols &&
         this->ports == context.ports &&
         this->methods == context.methods &&
-        this->types == context.types)
+        this->types == context.types &&
+        this->allModes == context.allModes &&
+        this->allTransports == context.allTransports &&
+        this->mode == context.mode &&
+        this->transport == context.transport)
         return (true);
     return (false);
 }
 
-void    Context::setMode(const QString &mode)
+void    Context::setName(const QString &name)
 {
-    this->mode = mode;
+    this->name = name;
 }
 
-void    Context::setTransport(const QString &transport)
+void    Context::setMode(QString mode)
 {
-    this->transport = transport;
+    this->allModes = false;
+    if (mode == "client")
+        this->mode = LightBird::IClient::CLIENT;
+    else if (mode == "server")
+        this->mode = LightBird::IClient::SERVER;
+    else
+        this->allModes = true;
 }
 
-void    Context::setProtocol(const QString &protocol)
+void    Context::setTransport(QString transport)
 {
-    if (!this->protocols.contains(protocol))
-        this->protocols.push_back(protocol);
+    transport = transport.toUpper();
+    this->allTransports = false;
+    if (transport == "TCP")
+        this->transport = LightBird::INetwork::TCP;
+    else if (transport == "UDP")
+        this->transport = LightBird::INetwork::UDP;
+    else
+        this->allTransports = true;
 }
 
-void    Context::setPort(unsigned short port)
+void    Context::addProtocols(const QStringList &protocols)
 {
-    if (!this->ports.contains(port))
-        this->ports.push_back(port);
-}
+    QString protocol;
 
-void    Context::setMethod(const QString &method)
-{
-    if (!this->methods.contains(method))
-        this->methods.push_back(method);
-}
-
-void    Context::setType(const QString &type)
-{
-    if (!this->types.contains(type))
-        this->types.push_back(type);
-}
-
-bool    Context::isValid(const QString &mode, const QString &transport, const QStringList &protocols, unsigned short port) const
-{
-    // If the mode mismatch and is not empty, the context is not valid
-    if (this->mode != mode && !this->mode.isEmpty())
-        return (false);
-    // If the transport protocol mismatch and is not empty, the context is not valid (because empty means that all the transports are supported)
-    if (this->transport != transport && !this->transport.isEmpty())
-        return (false);
-    // If the port are different and it doesn't contains 0, the context is not valid (because 0 means that all the ports are supported)
-    if (!this->ports.contains(port) && !this->ports.contains(0))
+    QStringListIterator it(protocols);
+    while (it.hasNext())
     {
-        // If the protocol is empty, the context is invalid
-        if (protocols.isEmpty() || this->protocols.isEmpty())
-            return (false);
-        // If all the protocols are handled, the context is valid
-        if (this->protocols.contains("all", Qt::CaseInsensitive) || protocols.contains("all", Qt::CaseInsensitive))
-            return (true);
-        // Checks if any of the protocols matches
-        bool contains = false;
-        QStringListIterator it(protocols);
-        while (it.hasNext() && !contains)
-            if (this->protocols.contains(it.next()))
-                contains = true;
-        // If the protocols doesn't contains one of the given protocols
-        if (!contains)
-            return (false);
+        protocol = it.next();
+        if (protocol.toLower() == "all")
+            this->allProtocols = true;
+        if (!protocol.isEmpty() && !this->protocols.contains(protocol))
+            this->protocols.push_back(protocol);
     }
+}
+
+void    Context::addPorts(const QStringList &ports)
+{
+    QString port;
+    ushort  p;
+
+    QStringListIterator it(ports);
+    while (it.hasNext())
+    {
+        port = it.next();
+        p = port.toUShort();
+        if (port != "all" && p == 0)
+            continue ;
+        if (!this->ports.contains(p))
+            this->ports.push_back(p);
+    }
+}
+
+void    Context::addMethods(const QStringList &methods)
+{
+    QString method;
+
+    QStringListIterator it(methods);
+    while (it.hasNext())
+    {
+        method = it.next();
+        if (!method.isEmpty() && !this->methods.contains(method))
+            this->methods.push_back(method);
+    }
+}
+
+void    Context::addTypes(const QStringList &types)
+{
+    QString type;
+
+    QStringListIterator it(types);
+    while (it.hasNext())
+    {
+        type = it.next();
+        if (!type.isEmpty() && !this->types.contains(type))
+            this->types.push_back(type);
+    }
+}
+
+bool    Context::checkName(QMap<QString, QObject *> &contexts)
+{
+    if (this->name.isEmpty())
+    {
+        this->instance = NULL;
+        return (true);
+    }
+    if (!contexts.contains(this->name))
+    {
+        LOG_WARNING("Unknow context name", Properties("idPlugin", this->idPlugin).add("unknow name", this->name).add("possible names", QStringList(contexts.keys()).join(' ')));
+        return (false);
+    }
+    this->instance = contexts.value(this->name);
     return (true);
 }
 
-bool    Context::isValid(const QString &mode, const QString &transport, const QStringList &protocols, unsigned short port, const QString &method, const QString &type) const
+QObject *Context::getInstance() const
 {
-    // Checks if the mode, the transport, the port and the protocol are valid
-    if (!this->isValid(mode, transport, protocols, port))
+    return (this->instance);
+}
+
+bool    Context::isValid(const Context::Validator &v) const
+{
+    // If the name is not in the list and is not empty, the context is not valid (an empty name is the default context, which is allways used)
+    if (!this->name.isEmpty() && !v.names.contains(this->name))
         return (false);
-    // An empty method means that all the methods are supported
-    if (!method.isEmpty() && !this->methods.contains(method.toLower()) && this->methods.size() > 0)
+    // If there is not all the modes and the mode mismatch, the context is not valid
+    if (!this->allModes && this->mode != v.mode)
         return (false);
-    // An empty type means that all the types are supported
-    if (!type.isEmpty() && !this->types.contains(type.toLower()) && this->types.size() > 0)
+    // If there is not all the transports  and the transport protocol mismatch, the context is not valid
+    if (!this->allTransports && this->transport != v.transport)
         return (false);
+    // If the port are different and it doesn't contains 0, the context is not valid (because 0 means that all the ports are supported)
+    if (!this->ports.contains(v.port) && !this->ports.contains(0))
+    {
+        // If the protocol is empty, the context is invalid
+        if (v.protocols->isEmpty() || this->protocols.isEmpty())
+            return (false);
+        // If all the protocols are handled, the context is valid
+        if (!this->allProtocols && !v.protocols->contains("all", Qt::CaseInsensitive))
+        {
+            // Checks if any of the protocols matches
+            bool contains = false;
+            QStringListIterator it(*v.protocols);
+            while (it.hasNext() && !contains)
+                if (this->protocols.contains(it.next()))
+                    contains = true;
+            // If the protocols doesn't contains one of the given protocols
+            if (!contains)
+                return (false);
+        }
+    }
+    // Validates the method and the type
+    if (v.method && v.type)
+    {
+        // An empty method means that all the methods are supported
+        if (!v.method->isEmpty() && !this->methods.contains(v.method->toLower()) && this->methods.size() > 0)
+            return (false);
+        // An empty type means that all the types are supported
+        if (!v.type->isEmpty() && !this->types.contains(v.type->toLower()) && this->types.size() > 0)
+            return (false);
+    }
     return (true);
 }
 
@@ -125,14 +214,20 @@ QMap<QString, QString>  Context::toMap() const
 {
     QMap<QString, QString>  context;
 
-    if (!this->mode.isEmpty())
-        context["mode"] = this->mode;
-    if (!this->transport.isEmpty())
-        context["transport"] = this->transport;
+    if (!this->name.isEmpty())
+        context["name"] = this->name;
+    if (!this->allModes)
+        context["mode"] = (this->mode == LightBird::IClient::SERVER ? "server" : "client");
+    else
+        context["mode"] = "all";
+    if (!this->allTransports)
+        context["transport"] = (this->transport == LightBird::INetwork::TCP ? "TCP" : "UDP");
+    else
+        context["transport"] = "all";
     QStringListIterator itProtocols(this->protocols);
     while (itProtocols.hasNext())
         context.insertMulti("protocol", itProtocols.next());
-    QListIterator<unsigned short> itPorts(this->ports);
+    QListIterator<ushort> itPorts(this->ports);
     while (itPorts.hasNext())
         context.insertMulti("port", QString::number(itPorts.next()));
     QStringListIterator itMethods(this->methods);

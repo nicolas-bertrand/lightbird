@@ -10,6 +10,7 @@
 # include "INetwork.h"
 # include "IReadWrite.h"
 
+# include "Context.h"
 # include "Future.hpp"
 # include "ThreadPool.h"
 
@@ -77,9 +78,17 @@ public:
     /// empty, the first protocol in the protocols list is returned. If nothing
     /// is returned, the protocol is invalid.
     QString                 getProtocol(QString protocol = "");
-    /// @brief This method is used to get the informations of a client in a thread
-    /// safe way. It stores the information request in a map (this->informationsRequests), which
-    /// will be used in the client's ThreadPool to fill the informations and unlock the future.
+    /// @brief Returns the validator used to validate the context in order to
+    /// call the network interfaces.
+    /// @param requestProtocol : True if the protocol of the request have to be used.
+    /// Otherwise the protocols of the client will be validated.
+    /// @param methodType : True if we have to validate the method and the type
+    /// of the request.
+    Context::Validator      &getValidator(bool requestProtocol = true, bool methodType = false);
+    /// @brief This method is used to get the informations of a client in a
+    /// thread safe way. It stores the information request in a map
+    /// (this->informationsRequests), which will be used in the client's ThreadPool
+    /// to fill the informations and unlock the future.
     /// @param client : The informations of the client are stored in this parameter.
     /// @param future : Once the informations are filled, the future is set in order
     /// to unlock the thread that is waiting for the informations.
@@ -96,8 +105,9 @@ public:
     unsigned short          getPeerPort() const;
     const QString           &getPeerName() const;
     const QDateTime         &getConnectionDate() const;
-    LightBird::IClient::Mode getMode() const;
     quint64                 getBufferSize() const;
+    LightBird::IClient::Mode getMode() const;
+    QStringList             &getContexts();
     QVariantMap             &getInformations();
     LightBird::TableAccounts &getAccount();
     LightBird::IRequest     &getRequest();
@@ -223,6 +233,7 @@ private:
     LightBird::IClient::Mode mode;                ///< The connection mode of the client.
     IReadWrite               *readWriteInterface; ///< This interface is used to read and write data on network.
     QDateTime                connectionDate;      ///< The date of the connection, in local time.
+    QStringList              contexts;            ///< The names of the contexts of the client.
     QVariantMap              informations;        ///< Contains information on the client.
     QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
     LightBird::TableAccounts account;             ///< Allows the client to be identified as a know account.
@@ -241,6 +252,7 @@ private:
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.
     QList<QVariantMap>       receiveResponses;    ///< Stores the protocol and the informations of the responses that are going to be received.
+    Context::Validator       validator;           ///< Validates the current context in order to call the network interfaces.
     QMap<Future<bool> *, LightBird::INetwork::Client *> informationsRequests; ///< Used by getInformations to keep track of the informations requests.
 };
 
