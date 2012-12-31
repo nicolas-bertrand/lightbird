@@ -83,14 +83,14 @@ function loadJsCssFile(name)
 	{
 		node = document.createElement("script");
 		node.setAttribute("type", "text/javascript");
-		node.setAttribute("src", "/Client/" + name);
+		node.setAttribute("src", "/c/" + name);
 	}
 	else if (name.match("\.css$") != null)
 	{
 		node = document.createElement("link");
 		node.setAttribute("rel", "stylesheet");
 		node.setAttribute("type", "text/css");
-		node.setAttribute("href", "/Client/" + name);
+		node.setAttribute("href", "/c/" + name);
 	}
 	if (node != undefined)
 		document.getElementsByTagName("head")[0].appendChild(node);

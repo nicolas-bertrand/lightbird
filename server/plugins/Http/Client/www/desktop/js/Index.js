@@ -119,7 +119,7 @@ function request(method, url, callback, data, type)
     url += getSession();
 
 	// Executes the request
-	HttpRequest.open(method, "/Client/" + url, true);
+	HttpRequest.open(method, "/c/" + url, true);
 	if (method.toUpperCase() == "POST")
 	{
 		HttpRequest.setRequestHeader("Content-type", (type ? type : "application/x-www-form-urlencoded"));

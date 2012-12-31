@@ -829,7 +829,7 @@ self.TimeLine = function (player)
             var previewTime = Math.round(Math.floor(e.pageX / (gl_browserSize.width / C.Player.Seek.numberPreviews) + 1) * self.duration / C.Player.Seek.numberPreviews);
             // Gets the new preview if the current one doesn't match
             if (self.currentPreviewTime != previewTime)
-                self.setPreview("/Client/command/preview?fileId=" + gl_files.list[self.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + getSession());
+                self.setPreview("/c/command/preview?fileId=" + gl_files.list[self.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + getSession());
             self.currentPreviewTime = previewTime;
         }
     }
@@ -1697,7 +1697,7 @@ self.Audio = function (player)
         self.fileIndex = fileIndex;
         //  Sets the source of the audio element
         self.audio.mediaId = getUuid();
-        self.audio.src = "/Client/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
+        self.audio.src = "/c/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
         // Replaces the file name by the title of the music and the artist if possible
         if (file.title)
         {
@@ -1749,7 +1749,7 @@ self.Audio = function (player)
             self.clear();
             self.audio.timeOffset = time;
             self.audio.mediaId = getUuid();
-            self.audio.src = "/Client/command/audio." + self.format + "?fileId=" + gl_files.list[self.fileIndex].id + "&mediaId=" + self.audio.mediaId + "&start=" + time + getSession();
+            self.audio.src = "/c/command/audio." + self.format + "?fileId=" + gl_files.list[self.fileIndex].id + "&mediaId=" + self.audio.mediaId + "&start=" + time + getSession();
             if (!paused)
                 self.audio.play();
         }

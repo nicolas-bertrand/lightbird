@@ -42,11 +42,11 @@ a:visited
 
 /*@font-face {
 	font-family: "family";
-	src: url('/Client/fonts/font.eot?'); /* IE9 * /
- 	src: url('/Client/fonts/font.eot?') format('eot'), /* IE6-8 * /
- 	     url('/Client/fonts/font.woff') format('woff'), /* Modern browsers * /
-	     url('/Client/fonts/font.ttf') format('truetype'), /* Older Webkits * /
-	     url('/Client/fonts/font.svg#webfont') format('svg'); /* Opera * /
+	src: url('/c/fonts/font.eot?'); /* IE9 * /
+ 	src: url('/c/fonts/font.eot?') format('eot'), /* IE6-8 * /
+ 	     url('/c/fonts/font.woff') format('woff'), /* Modern browsers * /
+	     url('/c/fonts/font.ttf') format('truetype'), /* Older Webkits * /
+	     url('/c/fonts/font.svg#webfont') format('svg'); /* Opera * /
 	font-weight: normal;
 	font-style: normal;
 }*/

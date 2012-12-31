@@ -14,7 +14,7 @@
 
 #identification
 {
-	background-image: url("/Client/images/identification/panel.png");
+	background-image: url("/c/images/identification/panel.png");
 	width: 342px;
 	height: 248px;
 	position: absolute;
@@ -36,7 +36,7 @@
 	margin-top: 22px;
 	margin-left: 30px;
 	background-color: transparent;
-	background-image: url("/Client/images/identification/form.png");
+	background-image: url("/c/images/identification/form.png");
 	width: 221px;
 	height: 38px;
 	position: static;
@@ -69,10 +69,10 @@
 	float: left;
 	display: none;
 }
-#identification_submit_button_blue { background-image: url("/Client/images/identification/submit_blue.png"); display: block; color: #447799; }
-#identification_submit_button_yellow { background-image: url("/Client/images/identification/submit_yellow.png"); color: #888855; cursor: progress; }
-#identification_submit_button_green { background-image: url("/Client/images/identification/submit_green.png"); color: #559955; cursor: progress; }
-#identification_submit_button_red { background-image: url("/Client/images/identification/submit_red.png"); color: #995555; }
+#identification_submit_button_blue { background-image: url("/c/images/identification/submit_blue.png"); display: block; color: #447799; }
+#identification_submit_button_yellow { background-image: url("/c/images/identification/submit_yellow.png"); color: #888855; cursor: progress; }
+#identification_submit_button_green { background-image: url("/c/images/identification/submit_green.png"); color: #559955; cursor: progress; }
+#identification_submit_button_red { background-image: url("/c/images/identification/submit_red.png"); color: #995555; }
 
 #identification_icon_blue_lock,
 #identification_icon_blue_unlock,
@@ -93,7 +93,7 @@
 	margin-top: 23px;
 	margin-left: 226px;
 	display: block;
-	background-image: url("/Client/images/identification/lock.png");
+	background-image: url("/c/images/identification/lock.png");
 }
 #identification_icon_blue_unlock
 {
@@ -102,14 +102,14 @@
 	margin-top: 16px;
 	margin-left: 226px;
 	display: block;
-	background-image: url("/Client/images/identification/unlock.png");
+	background-image: url("/c/images/identification/unlock.png");
 }
 #identification_icon_yellow
 {
 	width: 40px;
 	height: 40px;
 	cursor: progress;
-	background-image: url("/Client/images/identification/loading.gif");
+	background-image: url("/c/images/identification/loading.gif");
 }
 #identification_icon_green
 {
@@ -117,7 +117,7 @@
 	height: 31px;
 	margin-top: 26px;
 	cursor: progress;
-	background-image: url("/Client/images/identification/valid.png");
+	background-image: url("/c/images/identification/valid.png");
 }
 #identification_icon_red
 {
@@ -126,7 +126,7 @@
 	margin-top: 26px;
 	margin-left: 226px;
 	cursor: auto;
-	background-image: url("/Client/images/identification/error.png");
+	background-image: url("/c/images/identification/error.png");
 }
 
 input.identification_submit_input

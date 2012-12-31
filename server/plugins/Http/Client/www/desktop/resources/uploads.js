@@ -131,7 +131,7 @@ function UploadsSession(uploads)
         $(self.uploads.node.file.input).change(function () { self.check(); });
         // Creates the frame of the session
         var frame = getElementsByClassName("frame", self.session, true);
-        frame.innerHTML = "<iframe class=\"frame\" src=\"/Client/blank\" name=\"" + self.id + "\"></iframe>";
+        frame.innerHTML = "<iframe class=\"frame\" src=\"/c/blank\" name=\"" + self.id + "\"></iframe>";
     }
     
     // Called when the user has selected the files to upload.
@@ -376,7 +376,7 @@ function UploadsSession(uploads)
         // Submit the form
         var id = self.id;
         var path = encodeURIComponent(self.path);
-        self.uploads.node.form.action = "/Client/command/uploads?id=" + id + "&path=" + path + getSession();
+        self.uploads.node.form.action = "/c/command/uploads?id=" + id + "&path=" + path + getSession();
         self.uploads.node.form.submit();
         // Updates the progress bar in one second
         setTimeout(function () { self.requestProgress(); }, C.Uploads.requestProgressInterval);

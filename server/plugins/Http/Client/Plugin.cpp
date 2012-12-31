@@ -93,7 +93,7 @@ void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserial
     QString url = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority | QUrl::RemoveQuery | QUrl::RemoveFragment);
     if (url.startsWith('/'))
         url.remove(0, 1);
-    if (url.isEmpty() || url.startsWith("Client/"))
+    if (url.isEmpty() || url.startsWith("c/"))
     {
         client.getContexts() << "client";
         // Calls onDeserialize since the next context has not been taken into account yet
@@ -115,7 +115,7 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
         client.getResponse().getHeader().insert("cache-control", "no-cache");
         // Gets the uri of the request
         uri = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority | QUrl::RemoveQuery | QUrl::RemoveFragment);
-        uri = LightBird::cleanPath(uri.remove(".."), true).remove(QRegExp("^Client/"));
+        uri = LightBird::cleanPath(uri.remove(".."), true).remove(QRegExp("^c/"));
         client.getRequest().getInformations().insert("uri", uri);
         // Manages the session
         this->_session(client);
