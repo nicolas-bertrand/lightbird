@@ -16,7 +16,7 @@ public:
     virtual ~Parser();
 
     /// @brief Search the protocol of the client (HTTP).
-    virtual bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
+    virtual bool    doProtocol(const QByteArray &data, QString &protocol, bool &unknow);
     /// @brief Deserialize the header.
     virtual bool    doDeserializeHeader(const QByteArray &data, quint64 &used) = 0;
     /// @brief Deserialize the content.

@@ -15,7 +15,7 @@ public:
     ~ParserServer();
 
     // Parser
-    bool    onProtocol(const QByteArray &data, QString &protocol, bool &error);
+    bool    doProtocol(const QByteArray &data, QString &protocol, bool &unknow);
     bool    doDeserializeHeader(const QByteArray &data, quint64 &used);
     bool    doDeserializeContent(const QByteArray &data, quint64 &used);
     void    doSerializeHeader(QByteArray &data);

@@ -1,3 +1,4 @@
+#include "IDoProtocol.h"
 #include "IOnProtocol.h"
 #include "IDoDeserializeHeader.h"
 #include "IDoDeserializeContent.h"
@@ -42,36 +43,36 @@ bool    EngineServer::send(const QString &protocol, const QVariantMap &informati
 
 bool    EngineServer::isIdle()
 {
-    return (this->state == &EngineServer::_onProtocol && this->data.isEmpty() && this->idle);
+    return (this->state == &EngineServer::_doProtocol && this->data.isEmpty() && this->idle);
 }
 
 void    EngineServer::_clear()
 {
-    this->state = &EngineServer::_onProtocol;
+    this->state = &EngineServer::_doProtocol;
     this->needResponse = true;
     this->protocolUnknow.clear();
     this->idle = true;
     Engine::_clear();
 }
 
-bool        EngineServer::_onProtocol()
+bool        EngineServer::_doProtocol()
 {
     QString protocol;
     bool    unknow;
     bool    result = false;
 
     this->idle = false;
-    QMap<QString, LightBird::IOnProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IOnProtocol>(this->client.getValidator(false));
-    QMapIterator<QString, LightBird::IOnProtocol *> it(plugins);
+    QMap<QString, LightBird::IDoProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IDoProtocol>(this->client.getValidator(false));
+    QMapIterator<QString, LightBird::IDoProtocol *> it(plugins);
     if (!it.hasNext())
-        LOG_TRACE("No plugin implempents IOnProtocol for this context", Properties("id", this->client.getId()), "EngineServer", "_onProtocol");
+        LOG_TRACE("No plugin implempents IDoProtocol for this context", Properties("id", this->client.getId()), "EngineServer", "_doProtocol");
     while (it.hasNext() && !result)
         if (!this->protocolUnknow.contains(it.next().key()))
         {
             protocol.clear();
             unknow = false;
-            LOG_TRACE("Calling IOnProtocol::onProtocol()", Properties("id", this->client.getId()).add("plugin", it.key()), "EngineServer", "_onProtocol");
-            result = it.value()->onProtocol(this->client, this->data, protocol, unknow);
+            LOG_TRACE("Calling IDoProtocol::doProtocol()", Properties("id", this->client.getId()).add("plugin", it.key()), "EngineServer", "_doProtocol");
+            result = it.value()->doProtocol(this->client, this->data, protocol, unknow);
             Plugins::instance()->release(it.key());
             // The protocol of the request has been found
             if (result)
@@ -82,11 +83,11 @@ bool        EngineServer::_onProtocol()
                 {
                     this->request.setProtocol(protocol);
                     this->state = &EngineServer::_doDeserializeHeader;
-                    LOG_TRACE("Protocol found", Properties("id", this->client.getId()).add("plugin", it.key()).add("protocol", protocol), "EngineServer", "_onProtocol");
+                    LOG_DEBUG("Protocol found", Properties("id", this->client.getId()).add("plugin", it.key()).add("protocol", protocol), "EngineServer", "_doProtocol");
                 }
                 else
                 {
-                    LOG_WARNING("Invalid protocol", Properties("id", this->client.getId()).add("plugin", it.key()).add("protocol", protocol), "EngineServer", "_onProtocol");
+                    LOG_WARNING("Invalid protocol", Properties("id", this->client.getId()).add("plugin", it.key()).add("protocol", protocol), "EngineServer", "_doProtocol");
                     unknow = true;
                 }
             }
@@ -96,25 +97,40 @@ bool        EngineServer::_onProtocol()
         }
         else
             Plugins::instance()->release(it.key());
-    // If no plugin implements IOnProtocol the first protocol is used
+    // If no plugin implements IDoProtocol the first protocol is used
     if (plugins.isEmpty() && !this->client.getProtocols().isEmpty() && !this->client.getProtocols().contains("all", Qt::CaseInsensitive))
     {
         this->request.setProtocol(this->client.getProtocols().first());
         this->state = &EngineServer::_doDeserializeHeader;
-        LOG_TRACE("Default protocol used", Properties("id", this->client.getId()).add("protocol", this->request.getProtocol()), "EngineServer", "_onProtocol");
+        LOG_DEBUG("Default protocol used", Properties("id", this->client.getId()).add("protocol", this->request.getProtocol()), "EngineServer", "_doProtocol");
     }
     // If there is no more plugin that can find the protocol, the data are cleared
     else if (this->protocolUnknow.size() >= plugins.size())
     {
         this->_clear();
         this->data.clear();
-        LOG_WARNING("Protocol of the request not found", Properties("id", this->client.getId()), "EngineServer", "_onProtocol");
+        LOG_WARNING("Protocol of the request not found", Properties("id", this->client.getId()), "EngineServer", "_doProtocol");
     }
     // The protocol has been found, and the engine can execute the next step
     if (this->state == &EngineServer::_doDeserializeHeader)
+    {
+        // Calls IOnProtocol before IDoDeserializeHeader
+        this->_onProtocol();
         return (true);
+    }
     // Otherwise the engine waits for more data
     return (false);
+}
+
+void    EngineServer::_onProtocol()
+{
+    QMapIterator<QString, LightBird::IOnProtocol *> it(Plugins::instance()->getInstances<LightBird::IOnProtocol>(this->client.getValidator()));
+    while (it.hasNext())
+    {
+        LOG_TRACE("Calling IOnProtocol::onProtocol()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "EngineServer", "_onProtocol");
+        it.peekNext().value()->onProtocol(this->client);
+        Plugins::instance()->release(it.next().key());
+    }
 }
 
 bool    EngineServer::_doDeserializeHeader()

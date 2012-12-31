@@ -15,7 +15,7 @@ ParserServer::~ParserServer()
 {
 }
 
-bool    ParserServer::onProtocol(const QByteArray &data, QString &protocol, bool &error)
+bool    ParserServer::doProtocol(const QByteArray &data, QString &protocol, bool &unknow)
 {
     int j = data.indexOf('\r');
     int i = data.indexOf(" HTTP");
@@ -23,16 +23,12 @@ bool    ParserServer::onProtocol(const QByteArray &data, QString &protocol, bool
     // Search the protocol used
     if (i < j && i >= 0)
     {
-        QByteArray line = data.left(j);
-        if (line.contains(" /f/") || line.contains(" /f "))
-            protocol = "FILES";
-        else
-            protocol = "HTTP";
+        protocol = "HTTP";
         return (true);
     }
     // The protocol of the request is unknown
     if (j >= 0 || data.size() > (int)Plugin::getConfiguration().maxHeaderSize)
-        error = true;
+        unknow = true;
     return (false);
 }
 

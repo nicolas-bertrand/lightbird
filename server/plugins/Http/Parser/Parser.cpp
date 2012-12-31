@@ -16,7 +16,7 @@ Parser::~Parser()
 {
 }
 
-bool    Parser::onProtocol(const QByteArray &, QString &, bool &)
+bool    Parser::doProtocol(const QByteArray &, QString &, bool &)
 {
     return (false);
 }

@@ -28,6 +28,7 @@ HEADERS = IApi.h \
     network/IDoDeserializeHeader.h \
     network/IDoDeserializeTrailer.h \
     network/IDoExecution.h \
+    network/IDoProtocol.h \
     network/IDoRead.h \
     network/IDoSend.h \
     network/IDoSerializeContent.h \

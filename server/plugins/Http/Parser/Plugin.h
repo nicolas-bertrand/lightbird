@@ -9,7 +9,7 @@
 
 # include "IPlugin.h"
 # include "IOnConnect.h"
-# include "IOnProtocol.h"
+# include "IDoProtocol.h"
 # include "IDoDeserializeHeader.h"
 # include "IDoDeserializeContent.h"
 # include "IDoSerializeHeader.h"
@@ -22,7 +22,7 @@
 class Plugin : public QObject,
                public LightBird::IPlugin,
                public LightBird::IOnConnect,
-               public LightBird::IOnProtocol,
+               public LightBird::IDoProtocol,
                public LightBird::IDoDeserializeHeader,
                public LightBird::IDoDeserializeContent,
                public LightBird::IDoSerializeHeader,
@@ -34,7 +34,7 @@ class Plugin : public QObject,
     Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Parser")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
-                 LightBird::IOnProtocol
+                 LightBird::IDoProtocol
                  LightBird::IDoDeserializeHeader
                  LightBird::IDoDeserializeContent
                  LightBird::IDoSerializeHeader
@@ -68,7 +68,7 @@ public:
     void    onDestroy(LightBird::IClient &client);
 
     // Deserialize
-    bool    onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error);
+    bool    doProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &unknow);
     bool    doDeserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
     bool    doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
 

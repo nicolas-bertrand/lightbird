@@ -10,14 +10,4 @@
   <resources>
     <resource>www</resource>
   </resources>
-  <preview>
-    <!-- True if the cache is enabled -->
-    <cacheEnabled>true</cacheEnabled>
-    <!-- The path to the cache directory, where are stored the previews generated (from the plugin directory).
-       By default, they are stored in the "cache" directory of the plugin. -->
-    <cachePath>../../../cache</cachePath>
-    <!-- The maximum size of the cache directory in Mo. After that size, the oldest files are deleted.
-       If it is not defined, there is no cache size limit. -->
-    <cacheMaxSize>1000</cacheMaxSize>
-  </preview>
 </configuration>

@@ -83,9 +83,9 @@ void    Plugin::onDestroy(LightBird::IClient &client)
     this->mutex.unlock();
 }
 
-bool    Plugin::onProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &error)
+bool    Plugin::doProtocol(LightBird::IClient &client, const QByteArray &data, QString &protocol, bool &unknow)
 {
-    return (this->_getParser(client)->onProtocol(data, protocol, error));
+    return (this->_getParser(client)->doProtocol(data, protocol, unknow));
 }
 
 bool    Plugin::doDeserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used)
