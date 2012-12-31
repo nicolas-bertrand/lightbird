@@ -21,10 +21,10 @@ namespace LightBird
     public:
         virtual ~IContexts() {}
 
-        /// @return The contexts of the plugin.
+        /// @brief Returns the contexts of the plugin.
         /// The key represents the context name, and the value is the context
         /// itself, which must be instanciated as long as the plugin is loaded.
-        virtual QMap<QString, QObject *>    getContexts() = 0;
+        virtual void    getContexts(QMap<QString, QObject *> &contexts) = 0;
     };
 }
 

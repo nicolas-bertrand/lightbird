@@ -61,11 +61,12 @@ bool    Context::operator==(const Context &context)
 
 void    Context::setName(const QString &name)
 {
-    this->name = name;
+    this->name = name.toLower();
 }
 
 void    Context::setMode(QString mode)
 {
+    mode = mode.toLower();
     this->allModes = false;
     if (mode == "client")
         this->mode = LightBird::IClient::CLIENT;
@@ -94,8 +95,8 @@ void    Context::addProtocols(const QStringList &protocols)
     QStringListIterator it(protocols);
     while (it.hasNext())
     {
-        protocol = it.next();
-        if (protocol.toLower() == "all")
+        protocol = it.next().toLower();
+        if (protocol == "all")
             this->allProtocols = true;
         if (!protocol.isEmpty() && !this->protocols.contains(protocol))
             this->protocols.push_back(protocol);
@@ -110,7 +111,7 @@ void    Context::addPorts(const QStringList &ports)
     QStringListIterator it(ports);
     while (it.hasNext())
     {
-        port = it.next();
+        port = it.next().toLower();
         p = port.toUShort();
         if (port != "all" && p == 0)
             continue ;
@@ -126,7 +127,7 @@ void    Context::addMethods(const QStringList &methods)
     QStringListIterator it(methods);
     while (it.hasNext())
     {
-        method = it.next();
+        method = it.next().toLower();
         if (!method.isEmpty() && !this->methods.contains(method))
             this->methods.push_back(method);
     }
@@ -139,7 +140,7 @@ void    Context::addTypes(const QStringList &types)
     QStringListIterator it(types);
     while (it.hasNext())
     {
-        type = it.next();
+        type = it.next().toLower();
         if (!type.isEmpty() && !this->types.contains(type))
             this->types.push_back(type);
     }
@@ -152,13 +153,15 @@ bool    Context::checkName(QMap<QString, QObject *> &contexts)
         this->instance = NULL;
         return (true);
     }
-    if (!contexts.contains(this->name))
-    {
-        LOG_WARNING("Unknow context name", Properties("idPlugin", this->idPlugin).add("unknow name", this->name).add("possible names", QStringList(contexts.keys()).join(' ')));
-        return (false);
-    }
-    this->instance = contexts.value(this->name);
-    return (true);
+    QMapIterator<QString, QObject *> it(contexts);
+    while (it.hasNext())
+        if (it.next().key().toLower() == this->name)
+        {
+            this->instance = it.value();
+            return (true);
+        }
+    LOG_WARNING("Unknow context name", Properties("idPlugin", this->idPlugin).add("unknow name", this->name).add("possible names", QStringList(contexts.keys()).join(' ')));
+    return (false);
 }
 
 QObject *Context::getInstance() const
@@ -169,7 +172,7 @@ QObject *Context::getInstance() const
 bool    Context::isValid(const Context::Validator &v) const
 {
     // If the name is not in the list and is not empty, the context is not valid (an empty name is the default context, which is allways used)
-    if (!this->name.isEmpty() && !v.names.contains(this->name))
+    if (!this->name.isEmpty() && !v.names.contains(this->name, Qt::CaseInsensitive))
         return (false);
     // If there is not all the modes and the mode mismatch, the context is not valid
     if (!this->allModes && this->mode != v.mode)
@@ -190,7 +193,7 @@ bool    Context::isValid(const Context::Validator &v) const
             bool contains = false;
             QStringListIterator it(*v.protocols);
             while (it.hasNext() && !contains)
-                if (this->protocols.contains(it.next()))
+                if (this->protocols.contains(it.next().toLower()))
                     contains = true;
             // If the protocols doesn't contains one of the given protocols
             if (!contains)

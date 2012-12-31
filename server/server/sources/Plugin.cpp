@@ -387,7 +387,7 @@ void    Plugin::_loadContexts()
 
     // Calls IContexts to get the context classes of the plugin
     if ((instance = qobject_cast<LightBird::IContexts *>(this->instanceObject)))
-        contexts = instance->getContexts();
+        instance->getContexts(contexts);
     // Loads the contexts of the plugin
     read = this->configuration->readDom().firstChild();
     dom = read.parentNode().firstChildElement("contexts").firstChild();
@@ -418,7 +418,7 @@ void    Plugin::_loadContexts()
                 if (contextNode.isElement() && contextNode.toElement().text().trimmed().size() > 0)
                 {
                     nodeName = contextNode.nodeName().toLower().trimmed();
-                    nodeValue = contextNode.toElement().text().toLower().trimmed();
+                    nodeValue = contextNode.toElement().text().trimmed();
                     if (nodeName == "name")
                         context.setName(contextName = nodeValue);
                     else if (nodeName == "mode")
@@ -426,9 +426,9 @@ void    Plugin::_loadContexts()
                     else if (nodeName == "transport")
                         context.setTransport(nodeValue);
                     else if (nodeName == "protocol")
-                        context.addProtocols(QStringList(contextNode.toElement().text().trimmed()));
+                        context.addProtocols(QStringList(nodeValue));
                     else if (nodeName == "protocols")
-                        context.addProtocols(contextNode.toElement().text().trimmed().split(' '));
+                        context.addProtocols(nodeValue.split(' '));
                     else if (nodeName == "port")
                         context.addPorts(QStringList(nodeValue));
                     else if (nodeName == "ports")
