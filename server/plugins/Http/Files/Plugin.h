@@ -7,7 +7,7 @@
 # include "IContexts.h"
 # include "IOnDeserialize.h"
 
-# include "Network.h"
+# include "Context.h"
 
 # define DEFAULT_CONTENT_TYPE "application/octet-stream" ///< The default MIME type.
 
@@ -26,7 +26,7 @@ public:
     Plugin();
     ~Plugin();
 
-    // LightBird::IPlugin and LightBird::IContexts
+    // IPlugin and IContexts
     bool    onLoad(LightBird::IApi *api);
     void    onUnload();
     bool    onInstall(LightBird::IApi *api);
@@ -48,7 +48,7 @@ private:
     QString _size(quint64 size);
 
     LightBird::IApi *api;      ///< The LightBird API.
-    Network         *network;  ///< The network context from which doExecution is called.
+    Context         *context;  ///< The network context from which doExecution is called.
     QString         content;   ///< The directory HTML file content.
     static const QString link; ///< A generic link.
 };

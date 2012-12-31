@@ -80,7 +80,28 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "CC BY-NC-SA 3.0";
 }
 
-void        Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)
+void    Plugin::getContexts(QMap<QString, QObject *> &contexts)
+{
+    contexts.insert("client", &this->_context);
+}
+
+void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)
+{
+    if (type != LightBird::IOnDeserialize::IDoDeserializeHeader)
+        return ;
+    // Sets the name of the context based on the URL
+    QString url = client.getRequest().getUri().toString(QUrl::RemoveScheme | QUrl::RemoveAuthority | QUrl::RemoveQuery | QUrl::RemoveFragment);
+    if (url.startsWith('/'))
+        url.remove(0, 1);
+    if (url.isEmpty() || url.startsWith("Client/"))
+    {
+        client.getContexts() << "client";
+        // Calls onDeserialize since the next context has not been taken into account yet
+        this->onDeserializeContext(client, type);
+    }
+}
+
+void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)
 {
     QString uri;
     LightBird::IRequest &request = client.getRequest();
@@ -121,7 +142,7 @@ void        Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDese
     }
 }
 
-bool        Plugin::doExecution(LightBird::IClient &client)
+bool    Plugin::doExecution(LightBird::IClient &client)
 {
     QString uri = client.getRequest().getInformations().value("uri").toString();
     QString interface;
@@ -166,17 +187,18 @@ bool        Plugin::doExecution(LightBird::IClient &client)
     return (true);
 }
 
-bool        Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type)
+bool    Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type)
 {
     if (type == LightBird::IOnSerialize::IDoSerializeContent && !client.getRequest().isError())
         this->_medias.update(client);
     return (true);
 }
 
-void        Plugin::onFinish(LightBird::IClient &client)
+void    Plugin::onFinish(LightBird::IClient &client)
 {
     this->_medias.onFinish(client);
     this->_uploads.onFinish(client);
+    client.getContexts().removeAll("client");
 }
 
 bool    Plugin::onDisconnect(LightBird::IClient &client)
@@ -253,7 +275,7 @@ bool    Plugin::_checkIdentifiant(LightBird::IClient &client, LightBird::Session
     return (false);
 }
 
-QString     Plugin::_getInterface(LightBird::IClient &client)
+QString Plugin::_getInterface(LightBird::IClient &client)
 {
     QString interface;
 
@@ -310,7 +332,7 @@ void    Plugin::_getFile(LightBird::IClient &client)
     client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
 }
 
-QString             Plugin::_getMime(const QString &file)
+QString Plugin::_getMime(const QString &file)
 {
     QList<void *>   extensions;
     QString         result;
@@ -332,7 +354,7 @@ void    Plugin::response(LightBird::IClient &client, int code, const QString &me
         client.getResponse().getContent().setData(content, false);
 }
 
-QString     Plugin::getCookie(LightBird::IClient &client, const QString &n)
+QString Plugin::getCookie(LightBird::IClient &client, const QString &n)
 {
     QString name(n + "=");
     QString cookies(client.getRequest().getHeader().value("cookie"));
@@ -349,7 +371,7 @@ QString     Plugin::getCookie(LightBird::IClient &client, const QString &n)
     return ("");
 }
 
-void        Plugin::addCookie(LightBird::IClient &client, const QString &name, const QString &value)
+void    Plugin::addCookie(LightBird::IClient &client, const QString &name, const QString &value)
 {
     QString cookie;
 
@@ -371,7 +393,7 @@ QString Plugin::httpDate(const QDateTime &date, bool separator)
             date.toString("hh:mm:ss")+ " GMT");
 }
 
-bool        Plugin::identificationAllowed(LightBird::IClient &client)
+bool    Plugin::identificationAllowed(LightBird::IClient &client)
 {
     bool    result = true;
 

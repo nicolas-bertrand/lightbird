@@ -66,6 +66,9 @@ namespace LightBird
         /// client. All the network interfaces of the contexts in this list
         /// can be potentially called, in addition to the default context
         /// (the class that inherits LightBird::IPlugin).
+        /// Notice that changing the context does not affect the current
+        /// interface context since it has already been evaluated. The changes
+        /// will apply to the next interface.
         /// @see LightBird::IContexts
         virtual QStringList          &getContexts() = 0;
         /// @brief Allows to store informations on the client.

@@ -14,10 +14,10 @@ DESTDIR = ../../../build/plugins/Http/Files
 LIBS += -L../../../build -lLightBird
 
 HEADERS = \
-    Network.h \
+    Context.h \
     Plugin.h
 SOURCES = \
-    Network.cpp \
+    Context.cpp \
     Plugin.cpp
 OTHER_FILES = Configuration.xml
 

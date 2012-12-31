@@ -7,6 +7,7 @@
 # include <QObject>
 
 # include "IPlugin.h"
+# include "IContexts.h"
 # include "IOnDeserialize.h"
 # include "IDoExecution.h"
 # include "IOnSerialize.h"
@@ -16,6 +17,7 @@
 # include "ITimer.h"
 
 # include "Commands.h"
+# include "Context.h"
 # include "Files.h"
 # include "Medias.h"
 # include "Uploads.h"
@@ -27,43 +29,41 @@
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
+               public LightBird::IContexts,
                public LightBird::IOnDeserialize,
-               public LightBird::IDoExecution,
-               public LightBird::IOnSerialize,
-               public LightBird::IOnFinish,
-               public LightBird::IOnDisconnect,
-               public LightBird::IOnDestroy,
                public LightBird::ITimer
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Client")
     Q_INTERFACES(LightBird::IPlugin
+                 LightBird::IContexts
                  LightBird::IOnDeserialize
-                 LightBird::IDoExecution
-                 LightBird::IOnSerialize
-                 LightBird::IOnFinish
-                 LightBird::IOnDisconnect
-                 LightBird::IOnDestroy
                  LightBird::ITimer)
 
 public:
     Plugin();
     ~Plugin();
 
-    // IPlugin
+    // IPlugin and IContexts
     bool    onLoad(LightBird::IApi *api);
     void    onUnload();
     bool    onInstall(LightBird::IApi *api);
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
+    void    getContexts(QMap<QString, QObject *> &contexts);
 
-    // IOnDeserialize, IDoExecution, IOnSerialize, IOnFinish, ITimer
+    // IOnDeserialize
     void    onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type);
+
+    // These interfaces are called by the Context
+    void    onDeserializeContext(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type);
     bool    doExecution(LightBird::IClient &client);
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
     void    onFinish(LightBird::IClient &client);
     bool    onDisconnect(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
+
+    // ITimer
     bool    timer(const QString &name);
 
     // Static methods
@@ -115,6 +115,7 @@ private:
     QMap<int, QString>  months;     ///< The names of the months in three letters.
     QHash<QHostAddress, QPair<QDateTime, quint32> > attempts; ///< Stores the number of failed connection attempts per ip and date.
     Commands            commands;   ///< Executes the commands of the client.
+    Context             _context;   ///< The context that calls the network interfaces.
     Files               _files;     ///< Manages the files.
     Medias              _medias;    ///< Manages the medias.
     Uploads             _uploads;   ///< Manages the uploads.

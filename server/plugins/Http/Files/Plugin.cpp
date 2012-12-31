@@ -9,12 +9,12 @@ const QString Plugin::link = "<a href=\"/f/%1\">%2</a>";
 
 Plugin::Plugin()
 {
-    this->network = new Network(this);
+    this->context = new Context(this);
 }
 
 Plugin::~Plugin()
 {
-    delete this->network;
+    delete this->context;
 }
 
 bool        Plugin::onLoad(LightBird::IApi *api)
@@ -58,7 +58,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 
 void    Plugin::getContexts(QMap<QString, QObject *> &contexts)
 {
-    contexts.insert("files", this->network);
+    contexts.insert("files", this->context);
 }
 
 void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)
@@ -67,9 +67,9 @@ void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserial
         return ;
     // Sets the name of the context based on the URL
     QString url = client.getRequest().getUri().toString(QUrl::RemoveQuery | QUrl::StripTrailingSlash);
-    client.getContexts().removeAll("Files");
+    client.getContexts().removeAll("files");
     if (url.startsWith("/f/") || url == "/f")
-        client.getContexts() << "Files";
+        client.getContexts() << "files";
 }
 
 bool    Plugin::doExecution(LightBird::IClient &client)

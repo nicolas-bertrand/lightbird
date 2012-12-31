@@ -111,7 +111,7 @@ resource.Image = function ()
         task.setOverflow(false); // No overflow
     
         // Displays the image
-        self.image.src = resource.file.name + "?fileId=" + resource.file.id + getSession();
+        self.image.src = "/Client/" + resource.file.name + "?fileId=" + resource.file.id + getSession();
         self.image.alt = resource.file.name;
         
         // Events
@@ -399,7 +399,7 @@ resource.Video = function ()
         // The browser can't play any common formats
         else
             ;
-        self.video.src = "command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
+        self.video.src = "/Client/command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
         
         // Events
         $(task.content).click(function (e) { self.changeBackground(e); });
@@ -529,7 +529,7 @@ resource.Video = function ()
             // Seeks to the new position
             self.video.timeOffset = time;
             self.video.mediaId = getUuid();
-            self.video.src = "command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + getSession();
+            self.video.src = "/Client/command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + getSession();
             if (!paused)
                 self.video.play();
         }
