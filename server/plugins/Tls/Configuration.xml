@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <contexts>
-    <context>
-      <mode>Server</mode>
-      <transport>TCP</transport>
-      <protocol>TLS</protocol>
-    </context>
+    <context mode="server" transport="TCP" protocol="TLS" />
+    <context name="handshake" mode="server" transport="TCP" protocol="TLS" />
+    <context name="record" mode="server" transport="TCP" protocol="TLS" />
   </contexts>
   <!-- Sets the TLS handshake algorithms allowed by the server.
        See GnuTLS priority strings for details. -->

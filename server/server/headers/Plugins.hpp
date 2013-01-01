@@ -161,7 +161,7 @@ private:
 };
 
 template<class T>
-T       *Plugins::getInstance(const QString &id)
+T   *Plugins::getInstance(const QString &id)
 {
     T       *instance = NULL;
     Mutex   mutex(this->mutex, Mutex::READ, "Plugins", "getInstance");

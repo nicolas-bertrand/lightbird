@@ -1,21 +1,8 @@
-#include "Plugin.h"
-#include <QDir>
-#include <errno.h>
-#include <gnutls/abstract.h>
-#include <gnutls/crypto.h>
-#include <gnutls/x509.h>
-#include "LightBird.h"
+#include <QFileInfo>
 
-#ifdef Q_OS_WIN32
-# include <winsock2.h>
-#else
-# include <sys/socket.h>
-#endif // Q_OS_WIN32
-typedef unsigned int SOCKET;
-// gnutls_session_t needs to be fully defined for Q_DECLARE_METATYPE, but gnutls_session_int is not a public struct,
-// so we declare a fake one (which does not affect the size of gnutls_session_t).
-struct gnutls_session_int { };
-Q_DECLARE_METATYPE(gnutls_session_t)
+#include "Handshake.h"
+#include "Plugin.h"
+#include "Record.h"
 
 Plugin *Plugin::instance = NULL;
 
@@ -58,11 +45,16 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->_deinit();
         return (false);
     }
+    this->contexts.insert("handshake", new Handshake(this->api, this->handshakeTimeout));
+    this->contexts.insert("record", new Record(this->api));
     return (true);
 }
 
 void    Plugin::onUnload()
 {
+    QMapIterator<QString, QObject *> it(this->contexts);
+    while (it.hasNext())
+        delete it.next().value();
     this->_deinit();
 }
 
@@ -79,7 +71,7 @@ void    Plugin::onUninstall(LightBird::IApi *api)
 
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
-    metadata.name = "Transport Layer Secutiry";
+    metadata.name = "Transport Layer Security";
     metadata.brief = "A TLS/SSL implementation.";
     metadata.description = "Secures a TCP communication using the Transport Layer Security.";
     metadata.autor = "LightBird team";
@@ -90,11 +82,14 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.dependencies << QString("GnuTLS %1").arg(GNUTLS_VERSION);
 }
 
+void    Plugin::getContexts(QMap<QString, QObject *> &contexts)
+{
+    contexts = this->contexts;
+}
+
 bool    Plugin::onConnect(LightBird::IClient &client)
 {
     gnutls_session_t session;
-    int              result;
-    QTime            timeout;
 
     if (gnutls_init(&session, GNUTLS_SERVER) != GNUTLS_E_SUCCESS)
         return (false);
@@ -103,42 +98,15 @@ bool    Plugin::onConnect(LightBird::IClient &client)
         return (false);
     if (gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, this->x509_cred))
         return (false);
-    this->mutex.lockForWrite();
-    this->clients.insert(client.getSocket().socketDescriptor(), &client);
-    this->mutex.unlock();
-    gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t)client.getSocket().socketDescriptor());
-    gnutls_transport_set_pull_function(session, Plugin::handshake_pull);
-    gnutls_transport_set_push_function(session, Plugin::handshake_push);
+    gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t)&client);
     // Starts the handshake
-    timeout.start();
-    do
-    {
-        if ((result = gnutls_handshake(session)) == GNUTLS_E_AGAIN)
-            // Slows down the handsake if more data are needed.
-            // We can't call waitForReadyRead because we are not in the socket thread.
-            LightBird::sleep(WAIT_FOR_READ);
-        if (timeout.elapsed() > this->handshakeTimeout)
-        {
-            LOG_DEBUG("Handshake timeout", Properties("timeout", this->handshakeTimeout).toMap(), "Plugin", "onConnect");
-            return (false);
-        }
-    }
-    while (result < 0 && gnutls_error_is_fatal(result) == 0);
-    if (result < 0)
-    {
-        LOG_WARNING("Handshake error", Properties("error", gnutls_strerror(result)).toMap(), "Plugin", "onConnect");
-        return (false);
-    }
-    gnutls_transport_set_pull_function(session, Plugin::record_pull);
-    gnutls_transport_set_push_function(session, Plugin::record_push);
+    qobject_cast<Handshake *>(this->contexts.value("handshake"))->start(client, session);
     return (true);
 }
 
 void    Plugin::onDestroy(LightBird::IClient &client)
 {
     gnutls_session_t session;
-    QTime            timeout;
-    int              result;
 
     if (client.getInformations().contains("gnutls_session"))
     {
@@ -146,109 +114,20 @@ void    Plugin::onDestroy(LightBird::IClient &client)
         // Properly terminates the TLS session
         if (client.getSocket().state() == QAbstractSocket::ConnectedState)
         {
-            gnutls_transport_set_pull_function(session, Plugin::handshake_pull);
-            gnutls_transport_set_push_function(session, Plugin::handshake_push);
-            timeout.start();
-            do
-                if ((result = gnutls_bye(session, GNUTLS_SHUT_RDWR)) == GNUTLS_E_AGAIN)
-                    LightBird::sleep(WAIT_FOR_READ);
-            while (result < 0 && gnutls_error_is_fatal(result) == 0 && timeout.elapsed() < this->handshakeTimeout);
+            gnutls_transport_set_pull_function(session, Record::pull);
+            gnutls_transport_set_push_function(session, Plugin::push);
+            gnutls_bye(session, GNUTLS_SHUT_RDWR);
         }
+        qobject_cast<Handshake *>(this->contexts.value("handshake"))->removeTimeout(client);
         gnutls_deinit(session);
     }
-    this->mutex.lockForWrite();
-    QMutableHashIterator<int, LightBird::IClient *> it(this->clients);
-    while (it.hasNext())
-        if (it.next().value() == &client)
-            it.remove();
-    this->mutex.unlock();
 }
 
-bool    Plugin::doRead(LightBird::IClient &client, QByteArray &data)
+ssize_t Plugin::push(gnutls_transport_ptr_t c, const void *data, size_t size)
 {
-    int result;
+    LightBird::IClient  *client = (LightBird::IClient *)c;
 
-    if (client.getSocket().size() == 0)
-        return (true);
-    data.resize(1024);
-    result = gnutls_record_recv(client.getInformations().value("gnutls_session").value<gnutls_session_t>(), data.data(), 1024);
-    data.resize(result);
-    if (result < 0)
-    {
-        if (gnutls_error_is_fatal(result))
-        {
-            LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Plugin", "doRead");
-            this->api->network().disconnect(client.getId());
-        }
-        return (false);
-    }
-    return (true);
-}
-
-qint64  Plugin::doWrite(LightBird::IClient &client, const char *data, qint64 size)
-{
-    int result;
-
-    if ((result = gnutls_record_send(client.getInformations().value("gnutls_session").value<gnutls_session_t>(), data, size)) < 0)
-    {
-        if (gnutls_error_is_fatal(result))
-        {
-            LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Plugin", "doWrite");
-            this->api->network().disconnect(client.getId());
-        }
-        return (-1);
-    }
-    return (result);
-}
-
-ssize_t Plugin::handshake_pull(gnutls_transport_ptr_t socketDescriptor, void *data, size_t size)
-{
-    LightBird::IClient  *client;
-
-    Plugin::instance->mutex.lockForRead();
-    client = Plugin::instance->clients.value((int)socketDescriptor);
-    Plugin::instance->mutex.unlock();
-    ssize_t result = client->getSocket().read((char *)data, size);
-    // If no data was received, we adopt the non-blocking behavior of recv
-    if (result == 0 && size > 0)
-    {
-        gnutls_transport_set_errno(client->getInformations().value("gnutls_session").value<gnutls_session_t>(), EAGAIN);
-        return (-1);
-    }
-    return (result);
-}
-
-ssize_t Plugin::handshake_push(gnutls_transport_ptr_t socketDescriptor, const void *data, size_t size)
-{
-    return (send((SOCKET)socketDescriptor, (char *)data, size, 0));
-}
-
-ssize_t Plugin::record_pull(gnutls_transport_ptr_t socketDescriptor, void *data, size_t size)
-{
-    LightBird::IClient  *client;
-
-    Plugin::instance->mutex.lockForRead();
-    client = Plugin::instance->clients.value((int)socketDescriptor);
-    Plugin::instance->mutex.unlock();
-    ssize_t result = client->getSocket().read((char *)data, size);
-    // If no data was received, we adopt the non-blocking behavior of recv
-    if (result == 0 && size > 0)
-    {
-        gnutls_transport_set_errno(client->getInformations().value("gnutls_session").value<gnutls_session_t>(), EAGAIN);
-        return (-1);
-    }
-    return (result);
-}
-
-ssize_t Plugin::record_push(gnutls_transport_ptr_t socketDescriptor, const void *data, size_t size)
-{
-    LightBird::IClient  *client;
-
-    Plugin::instance->mutex.lockForRead();
-    client = Plugin::instance->clients.value((int)socketDescriptor);
-    Plugin::instance->mutex.unlock();
-    ssize_t result = client->getSocket().write((char *)data, size);
-    return (result);
+    return (send((SOCKET)client->getSocket().socketDescriptor(), (char *)data, size, 0));
 }
 
 void    Plugin::log(gnutls_session_t, const char *log)

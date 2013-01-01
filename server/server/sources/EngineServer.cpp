@@ -74,11 +74,12 @@ bool        EngineServer::_doProtocol()
             LOG_TRACE("Calling IDoProtocol::doProtocol()", Properties("id", this->client.getId()).add("plugin", it.key()), "EngineServer", "_doProtocol");
             result = it.value()->doProtocol(this->client, this->data, protocol, unknow);
             Plugins::instance()->release(it.key());
+            protocol = protocol.toLower();
             // The protocol of the request has been found
             if (result)
             {
                 // Check the protocol returned
-                if (this->client.getProtocols().contains(protocol) ||
+                if (this->client.getProtocols().contains(protocol, Qt::CaseInsensitive) ||
                     this->client.getProtocols().contains("all", Qt::CaseInsensitive))
                 {
                     this->request.setProtocol(protocol);

@@ -18,8 +18,15 @@ LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll
 # winsock2 is required on Windows
 win32:LIBS += -lWs2_32
 
-HEADERS = Plugin.h
-SOURCES = Plugin.cpp
+HEADERS = \
+    Handshake.h \
+    Plugin.h \
+    Record.h \
+    Tls.h
+SOURCES = \
+    Handshake.cpp \
+    Plugin.cpp \
+    Record.cpp
 OTHER_FILES = Configuration.xml
 
 OBJECTS_DIR = tmp
