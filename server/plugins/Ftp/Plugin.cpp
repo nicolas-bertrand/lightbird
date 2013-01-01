@@ -41,7 +41,7 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         element = element.nextSiblingElement("protocol");
     }
     if ((this->configuration.dataProtocolName = element.text()).isEmpty())
-        this->configuration.dataProtocolName = "FTP-DATA";
+        this->configuration.dataProtocolName = "FTP_DATA";
     this->api->configuration(true).release();
     // Opens the data connection port if necessary
     QStringList protocols;

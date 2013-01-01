@@ -64,9 +64,12 @@ namespace LightBird
         virtual LightBird::IClient::Mode getMode() const = 0;
         /// @brief Returns the names of the contexts currently set for this
         /// client. All the network interfaces of the contexts in this list
-        /// can be potentially called, in addition to the default context
-        /// (the class that inherits LightBird::IPlugin).
-        /// Notice that changing the context does not affect the current
+        /// can be potentially called.
+        /// The default context (the class that inherits LightBird::IPlugin) is
+        /// called if this list is empty, or there is an empty string in it.
+        /// By default the contexts list contains an empty string, so that the
+        /// default context of the plugins is always called.
+        /// Notice that changing the contexts does not affect the current
         /// interface context since it has already been evaluated. The changes
         /// will apply to the next interface.
         /// @see LightBird::IContexts

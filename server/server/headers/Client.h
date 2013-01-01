@@ -80,11 +80,12 @@ public:
     QString                 getProtocol(QString protocol = "");
     /// @brief Returns the validator used to validate the context in order to
     /// call the network interfaces.
+    /// @param useName : True if we have to validate the name of the context.
     /// @param requestProtocol : True if the protocol of the request have to be used.
     /// Otherwise the protocols of the client will be validated.
-    /// @param methodType : True if we have to validate the method and the type
+    /// @param useMethodType : True if we have to validate the method and the type
     /// of the request.
-    Context::Validator      &getValidator(bool requestProtocol = true, bool methodType = false);
+    Context::Validator      &getValidator(bool useName = true, bool requestProtocol = true, bool useMethodType = false);
     /// @brief This method is used to get the informations of a client in a
     /// thread safe way. It stores the information request in a map
     /// (this->informationsRequests), which will be used in the client's ThreadPool

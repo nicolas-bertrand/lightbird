@@ -171,9 +171,16 @@ QObject *Context::getInstance() const
 
 bool    Context::isValid(const Context::Validator &v) const
 {
-    // If the name is not in the list and is not empty, the context is not valid (an empty name is the default context, which is allways used)
-    if (!this->name.isEmpty() && !v.names.contains(this->name, Qt::CaseInsensitive))
-        return (false);
+    // Validates the context name
+    if (v.names)
+    {
+        // If we are in the default context (empty name), and the list of names is not empty and does not contains an empty string, the context is not valid
+        if (this->name.isEmpty() && !v.names->isEmpty() && !v.names->contains(""))
+            return (false);
+        // If the name is not in the list and is not empty, the context is not valid
+        if (!this->name.isEmpty() && !v.names->contains(this->name, Qt::CaseInsensitive))
+            return (false);
+    }
     // If there is not all the modes and the mode mismatch, the context is not valid
     if (!this->allModes && this->mode != v.mode)
         return (false);

@@ -417,7 +417,7 @@ bool        EngineClient::_doExecution()
 {
     QPair<QString, LightBird::IDoExecution *> instance;
 
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getValidator(true, true))).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getValidator(true, true, true))).second)
     {
         LOG_TRACE("Calling IDoExecution::doExecution()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineClient", "_doExecution");
         instance.second->doExecution(this->client);
@@ -443,7 +443,7 @@ bool        EngineClient::_onExecution()
 
 bool    EngineClient::_onFinish()
 {
-    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getValidator(false)));
+    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getValidator(true, false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnFinish::onFinish()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "EngineClient", "_onFinish");

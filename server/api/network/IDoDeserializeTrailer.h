@@ -28,7 +28,7 @@ namespace LightBird
         /// the value of "used" must be equal or highter to the size of the received data.
         /// If the data received represents more than the content, users have to set the
         /// length used from data to this variable. Let zero if no data have to be used,
-        /// ie if there is no content.
+        /// ie if there is no trailer.
         /// @return True if the trailer is complete. This method will be called while
         /// false is returned.
         virtual bool    doDeserializeTrailer(LightBird::IClient &client, const QByteArray &data, quint64 &used) = 0;

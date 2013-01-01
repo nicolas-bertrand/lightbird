@@ -47,8 +47,8 @@ public:
     struct Validator
     {
         Validator(QStringList &n, LightBird::IClient::Mode mo, LightBird::INetwork::Transport tr, QStringList &pr, ushort &po)
-            : names(n), mode(mo), transport(tr), protocols(&pr), port(po), method(NULL), type(NULL) {}
-        const QStringList &names;
+            : names(&n), mode(mo), transport(tr), protocols(&pr), port(po), method(NULL), type(NULL) {}
+        const QStringList *names;
         const LightBird::IClient::Mode mode;
         const LightBird::INetwork::Transport transport;
         const QStringList *protocols;

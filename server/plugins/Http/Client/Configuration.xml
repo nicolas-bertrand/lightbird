@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <contexts>
-    <context>
-      <mode>Server</mode>
-      <transport>TCP</transport>
-      <protocol>HTTP</protocol>
-    </context>
+    <context mode="server" transport="TCP" protocol="HTTP" />
+    <context name="client" mode="server" transport="TCP" protocol="HTTP" />
   </contexts>
   <resources>
     <resource>www</resource>

@@ -39,7 +39,7 @@ void    Engine::_clear()
 
 void    Engine::onRead()
 {
-    QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client.getValidator(false)));
+    QMapIterator<QString, LightBird::IOnRead *> it(Plugins::instance()->getInstances<LightBird::IOnRead>(this->client.getValidator(true, false)));
 
     if (Log::instance()->isTrace())
         Log::trace("Data received", Properties("id", this->client.getId()).add("data", LightBird::simplify(this->data)).add("size", this->data.size()), "Engine", "onRead");
@@ -55,7 +55,7 @@ void    Engine::onRead()
 
 void    Engine::_onWrite(QByteArray &data)
 {
-    QMapIterator<QString, LightBird::IOnWrite *> it(Plugins::instance()->getInstances<LightBird::IOnWrite>(this->client.getValidator(false)));
+    QMapIterator<QString, LightBird::IOnWrite *> it(Plugins::instance()->getInstances<LightBird::IOnWrite>(this->client.getValidator(true, false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnWrite::onWrite()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "Engine", "_onWrite");

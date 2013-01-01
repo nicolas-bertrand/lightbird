@@ -62,7 +62,7 @@ bool        EngineServer::_doProtocol()
     bool    result = false;
 
     this->idle = false;
-    QMap<QString, LightBird::IDoProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IDoProtocol>(this->client.getValidator(false));
+    QMap<QString, LightBird::IDoProtocol *> plugins = Plugins::instance()->getInstances<LightBird::IDoProtocol>(this->client.getValidator(true, false));
     QMapIterator<QString, LightBird::IDoProtocol *> it(plugins);
     if (!it.hasNext())
         LOG_TRACE("No plugin implempents IDoProtocol for this context", Properties("id", this->client.getId()), "EngineServer", "_doProtocol");
@@ -300,7 +300,7 @@ bool        EngineServer::_doExecution()
     QPair<QString, LightBird::IDoExecution *> instance;
 
     this->needResponse = true;
-    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getValidator(true, true))).second)
+    if ((instance = Plugins::instance()->getInstance<LightBird::IDoExecution>(this->client.getValidator(true, true, true))).second)
     {
         LOG_TRACE("Calling IDoExecution::doExecution()", Properties("id", this->client.getId()).add("plugin", instance.first), "EngineServer", "_doExecution");
         if (!(this->needResponse = instance.second->doExecution(this->client)))
@@ -439,7 +439,7 @@ bool    EngineServer::_doSerializeTrailer()
 
 void    EngineServer::_onFinish()
 {
-    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getValidator(false)));
+    QMapIterator<QString, LightBird::IOnFinish *> it(Plugins::instance()->getInstances<LightBird::IOnFinish>(this->client.getValidator(true, false)));
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnFinish::onFinish()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("size", data.size()), "EngineServer", "_onFinish");
