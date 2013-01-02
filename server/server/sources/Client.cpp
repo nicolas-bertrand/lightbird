@@ -20,9 +20,9 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStringList &pr,
+Client::Client(QAbstractSocket *s, const QStringList &pr, LightBird::INetwork::Transport t,
                unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
-               const QString &pn, LightBird::IClient::Mode m, IReadWrite *r)
+               const QString &pn, LightBird::IClient::Mode m, IReadWrite *r, const QStringList &c)
     : transport(t)
     , protocols(pr)
     , port(p)
@@ -32,7 +32,7 @@ Client::Client(QAbstractSocket *s, LightBird::INetwork::Transport t, const QStri
     , peerName(pn)
     , mode(m)
     , readWriteInterface(r)
-    , contexts(QString())
+    , contexts(c)
     , socket(s)
     , validator(contexts, mode, transport, protocols, port)
 {

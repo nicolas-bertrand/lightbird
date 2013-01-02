@@ -147,7 +147,7 @@ Client  *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddre
     Client  *client;
 
     // Creates the client
-    client = new Client(socket, this->transport, this->protocols, this->port,
+    client = new Client(socket, this->protocols, this->transport, this->port,
                         socket->socketDescriptor(), peerAddress, peerPort,
                         socket->peerName(), LightBird::IClient::SERVER, this);
     // Adds the client

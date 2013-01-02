@@ -54,9 +54,10 @@ namespace LightBird
         /// connected to this port. When the number of client reach this limit, new
         /// connections are waiting that a connected client disconnect.
         /// @return True if the port is listening.
-        virtual bool    openPort(unsigned short port, const QStringList &protocols = QStringList(),
-                                 LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
-                                 unsigned int maxClients = ~0) = 0;
+        virtual bool    openPort(unsigned short port
+            , const QStringList &protocols = QStringList()
+            , LightBird::INetwork::Transport transport = LightBird::INetwork::TCP
+            , unsigned int maxClients = ~0) = 0;
 
         /// @brief Closes a port. This may take some time since all the operations
         /// made on the closed port have to be finished.
@@ -73,8 +74,10 @@ namespace LightBird
         /// allowed by the port.
         /// @param transport : The transport protocol of the port to get.
         /// @return True if the port exists.
-        virtual bool    getPort(unsigned short port, QStringList &protocols, unsigned int &maxClients,
-                                LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
+        virtual bool    getPort(unsigned short port
+            , QStringList &protocols
+            , unsigned int &maxClients
+            , LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const = 0;
 
         /// @brief Returns the list of the open ports in TCP or UDP. One can use
         /// getPort() to get more detailed informations about a specific port.
@@ -109,6 +112,8 @@ namespace LightBird
         /// @param protocols : The protocols used to communicate with the client.
         /// If empty the client accepts all the protocols.
         /// @param transport : The transport protocol used to connect to the client.
+        /// @param contexts : The contexts of the new client, as defined by
+        /// LightBird::IClient::getContexts.
         /// @param wait : The maximum time allowed for the server to connect to
         /// the host. After this delay, the connection is interrupted, and this
         /// method returns an empty string. This parameter is in milliseconds
@@ -118,11 +123,13 @@ namespace LightBird
         /// it returns an empty string. In UDP this method doesn't check that the
         /// peer actually exists, since there is no connection in UDP.
         /// @see LightBird::IClient::Mode
-        virtual QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address,
-                                                                     quint16 port,
-                                                                     const QStringList &protocols = QStringList(),
-                                                                     LightBird::INetwork::Transport transport = LightBird::INetwork::TCP,
-                                                                     int wait = 30000) = 0;
+        /// @see LightBird::IClient::getContexts
+        virtual QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address
+            , quint16 port
+            , const QStringList &protocols = QStringList()
+            , LightBird::INetwork::Transport transport = LightBird::INetwork::TCP
+            , const QStringList &contexts = QStringList(QString())
+            , int wait = 30000) = 0;
 
         /// @brief Disconnects the client identified by the id in parameter.
         /// If a request is executing for this client, it is interrupted.

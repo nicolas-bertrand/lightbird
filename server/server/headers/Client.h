@@ -36,10 +36,8 @@ public:
     /// @param peerName : The name of the client's host. May be empty.
     /// @param mode : The connection mode of the client.
     /// @param readWriteInterface : Allows the client to read and write on the network.
-    Client(QAbstractSocket *socket, LightBird::INetwork::Transport transport, const QStringList &protocols,
-           unsigned short port, int socketDescriptor, const QHostAddress &peerAddress,
-           unsigned short peerPort, const QString &peerName, LightBird::IClient::Mode mode,
-           IReadWrite *readWriteInterface);
+    /// @param contexts : The names of the contexts of the client.
+    Client(QAbstractSocket *socket, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned short port, int socketDescriptor, const QHostAddress &peerAddress, unsigned short peerPort, const QString &peerName, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface, const QStringList &contexts = QStringList(QString()));
     ~Client();
 
     /// @brief Performs the actions of the client in a thread of the ThreadPool.

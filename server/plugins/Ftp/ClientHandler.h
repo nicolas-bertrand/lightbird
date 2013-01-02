@@ -10,7 +10,7 @@
 
 # include "Commands.h"
 
-// The informations stored in the session. Only the informations used by both.
+// The informations stored in the session. Only the informations used by both
 // the control and data connections are stored here.
 # define SESSION_CONTROL_ID         "control-id"         // The id of the control connection. Defined while it is opened.
 # define SESSION_DATA_ID            "data-id"            // The id of the data connection. Defined while it is opened.

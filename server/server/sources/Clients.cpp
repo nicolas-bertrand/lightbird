@@ -33,8 +33,12 @@ void    Clients::run()
     this->moveToThread(QCoreApplication::instance()->thread());
 }
 
-Future<QString> Clients::connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                                 LightBird::INetwork::Transport transport, int wait)
+Future<QString> Clients::connect(const QHostAddress &address
+    , quint16 port
+    , const QStringList &protocols
+    , LightBird::INetwork::Transport transport
+    , const QStringList &contexts
+    , int wait)
 {
     Mutex           mutex(this->mutex, "Clients", "connect");
     Future<QString> *future;
@@ -46,8 +50,8 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         // Creates the socket. The connection is made by the client in the ThreadPool, via IReadWrite
         QTcpSocket *socket = new QTcpSocket(NULL);
         // Creates the client
-        Client *client = new Client(socket, transport, protocols, socket->localPort(), socket->socketDescriptor(),
-                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this);
+        Client *client = new Client(socket, protocols, transport, socket->localPort(), socket->socketDescriptor(),
+                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this, contexts);
         this->clients.push_back(client);
         socket->setParent(client);
         client->moveToThread(this);
@@ -78,8 +82,8 @@ Future<QString> Clients::connect(const QHostAddress &address, quint16 port, cons
         QUdpSocket *socket = new QUdpSocket(NULL);
         socket->connectToHost(address, port);
         // Creates the client
-        Client *client = new Client(socket, transport, protocols, socket->localPort(), socket->socketDescriptor(),
-                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this);
+        Client *client = new Client(socket, protocols, transport, socket->localPort(), socket->socketDescriptor(),
+                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this, contexts);
         this->clients.push_back(client);
         socket->setParent(client);
         client->moveToThread(this);

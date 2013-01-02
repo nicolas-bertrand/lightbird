@@ -29,8 +29,7 @@ public:
 
     /// @brief Creates a new Client. The connection to the client is done
     /// via IReadWrite::connect in a ThreadPool thread.
-    Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols,
-                            LightBird::INetwork::Transport transport, int wait);
+    Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QStringList &contexts, int wait);
     /// @brief Asks the engine of a client to generate a new request.
     /// @see LightBird::INetwork::send
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol, const QVariantMap &informations);
