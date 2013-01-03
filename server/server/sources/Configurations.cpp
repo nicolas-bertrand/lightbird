@@ -114,7 +114,7 @@ Configuration   *Configurations::getConfiguration(const QString &configuration, 
     else if (QFileInfo(this->configurations[""]->get("pluginsPath") + "/" + cleaned).isDir())
     {
         path = Plugins::checkId(LightBird::cleanPath(cleaned));
-        // Creates the configuration of the plugin if it doesn't exists
+        // Creates the configuration of the plugin if it does not exist
         if (!this->configurations.contains(path) && !*(instance = new ApiConfiguration(path)))
         {
             LOG_ERROR("Failed to load the configuration of the plugin", Properties("id", path), "Configurations", "instance");
@@ -125,7 +125,7 @@ Configuration   *Configurations::getConfiguration(const QString &configuration, 
     // Cleans the path
     if (path.isEmpty())
         path = LightBird::cleanPath(cleaned);
-    // Creates the configuration if it doesn't exists
+    // Creates the configuration if it does not exist
     if (instance == NULL && !this->configurations.contains(path) &&
         !*(instance = new Configuration(path, alternative)))
     {

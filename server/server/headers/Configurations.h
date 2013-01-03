@@ -32,7 +32,7 @@ public:
     /// configuration will be returned. This path can also be the id of a plugin.
     /// In this case, its configuration will be automatically recovered.
     /// @param alternative : The path of an alternative configuration file.
-    /// It is used in the case where the file defined by path doesn't exists. The
+    /// It is used in the case where the file defined by path does not exist. The
     /// configuration pointed by path will be created using the alternative file.
     /// This is useful to use a default configuration from the resources.
     Configuration        *getConfiguration(const QString &path = "", const QString &alternative = "");

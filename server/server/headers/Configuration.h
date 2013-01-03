@@ -20,10 +20,10 @@ class Configuration : public QObject,
     Q_INTERFACES(LightBird::IConfiguration)
 
 public:
-    /// @param configurationPath : The path to the configuration file. If the file doesn't exists,
+    /// @param configurationPath : The path to the configuration file. If the file does not exist,
     /// it will be created using the file pointed by alternativePath (usualy a resource).
     /// @param alternativePath : The content of this file will be used to create the configuration
-    /// if it doesn't exists. If this parameter is empty and configurationPath doesn't exists,
+    /// if it does not exist. If this parameter is empty and configurationPath does not exist,
     /// Configuration will not try to creates the file.
     Configuration(const QString &configurationPath, const QString &alternativePath = "", QObject *parent = 0);
     ~Configuration();

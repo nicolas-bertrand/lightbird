@@ -143,7 +143,7 @@ void    PortUdp::_readPendingDatagrams()
         }
         if (client != NULL || (unsigned int)this->clients.size() < this->getMaxClients())
         {
-            // If the client doesn't exists yet it is created
+            // If the client does not exist yet it is created
             if (client == NULL)
                 client = this->_addClient(&this->socket, peerAddress, peerPort);
             // Notifies the Client that data are ready to be read

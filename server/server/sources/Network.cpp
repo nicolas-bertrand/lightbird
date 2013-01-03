@@ -57,10 +57,10 @@ bool    Network::closePort(unsigned short port, LightBird::INetwork::Transport t
 
     if (!mutex)
         return (false);
-    // The port doesn't exists
+    // The port does not exist
     if (!this->ports[transport].contains(port))
     {
-        LOG_WARNING("The port doesn't exists", Properties("port", port), "Network", "closePort");
+        LOG_WARNING("The port does not exist", Properties("port", port), "Network", "closePort");
         return (false);
     }
     // If the port is already removing

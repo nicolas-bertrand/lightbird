@@ -61,7 +61,7 @@ namespace LightBird
         /// @brief Returns all the informations of the event.
         QVariantMap getInformations() const;
         /// @brief Modify the value of an information of the event, or create
-        /// it if it doesn't exists.
+        /// it if it does not exist.
         /// @param name : The name of the information to create or modify.
         /// @brief value : The new value of the information.
         bool        setInformation(const QString &name, const QVariant &value);

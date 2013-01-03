@@ -53,17 +53,17 @@ bool    Configuration::_load(const QString &configurationPath, const QString &al
     // Get the directory of the configuration if their is one
     if (configuration.contains('/'))
         dirName = configuration.left(configuration.lastIndexOf('/'));
-    // If configurationPath doesn't exists we try to create it using the alternativePath
+    // If configurationPath does not exist we try to create it using the alternativePath
     this->file.setFileName(configuration);
     if (!QFileInfo(this->file.fileName()).isFile())
     {
-        LOG_DEBUG("The configuration file doesn't exists and will be created using the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
+        LOG_DEBUG("The configuration file does not exist and will be created using the alternative file", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
         if (!QFileInfo(alternative).isFile())
         {
-            LOG_WARNING("The alternative path doesn't exists either. The configuration can't be loaded.", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
+            LOG_WARNING("The alternative path does not exist either. The configuration can't be loaded.", Properties("configuration", this->file.fileName()).add("alternative", alternative), "Configuration", "_load");
             return (false);
         }
-        // Creates the directory of the configuration file if it doesn't exists
+        // Creates the directory of the configuration file if it does not exist
         if (!dirName.isEmpty() && !directory.exists(dirName) && !directory.mkpath(dirName))
         {
             LOG_ERROR("Cannot creates the directory of the configuration", Properties("directory", dirName), "Configuration", "_load");

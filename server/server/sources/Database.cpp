@@ -335,23 +335,23 @@ bool    Database::_getDatabaseName(QString &databaseName)
     databaseFile = Configurations::instance()->get("database/file");
     file = databasePath + "/" + databaseFile;
 
-    // If the database directory doesn't exists, we creates it
+    // If the database directory does not exist, we creates it
     if (dir.exists(databasePath) == false && dir.mkpath(databasePath) == false)
     {
         LOG_ERROR("Cannot creates the database directory", Properties("directory", databasePath), "Database", "_getDatabaseName");
         return (false);
     }
 
-    // If the database file doesn't exists, we creates it using the resource
+    // If the database file does not exist, we creates it using the resource
     if (!QFileInfo(file).isFile())
     {
         // Gets the resource of the database
         databaseResource = Configurations::instance()->get("database/resource");
-        LOG_DEBUG("The database file doesn't exists, so it will be created using the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_getDatabaseName");
-        // If the resource file doesn't exists either
+        LOG_DEBUG("The database file does not exist, so it will be created using the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_getDatabaseName");
+        // If the resource file does not exist either
         if (!QFileInfo(databaseResource).isFile())
         {
-            LOG_ERROR("The alternative database file doesn't exists either", Properties("alternative", databaseResource), "Database", "_getDatabaseName");
+            LOG_ERROR("The alternative database file does not exist either", Properties("alternative", databaseResource), "Database", "_getDatabaseName");
             return (false);
         }
         // Copies the resource file to the database file

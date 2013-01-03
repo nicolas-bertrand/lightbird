@@ -109,7 +109,7 @@ bool    Clients::send(const QString &idClient, const QString &idPlugin, const QS
     while (it.hasNext() && !client)
         if (it.next()->getId() == idClient)
             client = it.peekPrevious();
-    // The client doesn't exists
+    // The client does not exist
     if (!client)
         return (false);
     // Checks the protocol
@@ -135,7 +135,7 @@ bool    Clients::receive(const QString &id, const QString &p, const QVariantMap 
     while (it.hasNext() && !client)
         if (it.next()->getId() == id)
             client = it.peekPrevious();
-    // The client doesn't exists
+    // The client does not exist
     if (!client)
         return (false);
     // Checks the protocol

@@ -10,13 +10,13 @@ ApiConfiguration::ApiConfiguration(const QString &idPlugin)
     : id(Plugins::checkId(idPlugin))
     , configuration(*Configurations::instance())
 {
-    // The plugin doesn't exists
+    // The plugin does not exist
     if (!QFileInfo(Configurations::instance()->get("pluginsPath") + "/" + this->id).isDir())
     {
-        LOG_WARNING("The plugin doesn't exists", Properties("id", this->id), "ApiConfiguration", "ApiConfiguration");
+        LOG_WARNING("The plugin does not exist", Properties("id", this->id), "ApiConfiguration", "ApiConfiguration");
         return ;
     }
-    // Creates the plugin configurations parent node if it doesn't exists
+    // Creates the plugin configurations parent node if it does not exist
     QDomElement element = this->configuration.writeDom();
     if (element.firstChildElement("configurations").isNull())
         element.appendChild(element.toDocument().createElement("configurations"));

@@ -77,7 +77,7 @@ void    Server::_initialize()
     Log::info("Loading the translation", "Server", "_initialize");
     if (!this->_loadTranslation(Configurations::instance()->get("languagesPath") + "/", ":languages/"))
         Log::error("Unable to load the translation of the server", "Server", "_initialize");
-    // Creates the file path if it doesn't exists
+    // Creates the file path if it does not exist
     QString filesPath = Configurations::instance()->get("filesPath");
     if (!QFileInfo(filesPath).isDir() && !QDir().mkpath(filesPath))
         return Log::fatal("Failed to create the files path", Properties("filesPath", filesPath), "Server", "_initialize");
@@ -199,7 +199,7 @@ bool        Server::_temporaryDirectory()
                 else if (Log::instance()->isTrace())
                     Log::trace("Temporary file removed", Properties("file", it.peekPrevious()).add("path", path), "Server", "_temporaryDirectory");
         }
-        // Creates the temporary directory if it doesn't exists
+        // Creates the temporary directory if it does not exist
         if (!QFileInfo(path).isDir())
         {
             if (!directory.mkpath(path))

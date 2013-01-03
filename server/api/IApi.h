@@ -36,7 +36,7 @@ namespace LightBird
         /// @param path : The path of the XML configuration file to load,
         /// or the id of a plugin.
         /// @param alternative : The path of an alternative configuration file.
-        /// It is used in the case where the file defined by path doesn't exists.
+        /// It is used in the case where the file defined by path does not exist.
         /// The configuration pointed by path will be created using the alternative
         /// file. This is useful to create a XML file from the resources.
         /// @return NULL if the configuration file can't be loaded.

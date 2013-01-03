@@ -71,7 +71,7 @@ private:
     /// if the file has not been found using the first parameter.
     /// @return True if the translation has been loaded.
     bool    _loadTranslation(const QString &file, const QString &resource);
-    /// @brief Manages the temporary directory. Creates it if it doesn't exists, or
+    /// @brief Manages the temporary directory. Creates it if it does not exist, or
     /// removes its files.
     /// @return True if no error occured.
     bool    _temporaryDirectory();

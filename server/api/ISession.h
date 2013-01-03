@@ -67,7 +67,7 @@ namespace LightBird
         /// @brief Returns all the informations of the session.
         virtual QVariantMap getInformations() const = 0;
         /// @brief Modifies the value of an information of the session, or create
-        /// it if it doesn't exists.
+        /// it if it does not exist.
         /// @param name : The name of the information to create or modify.
         /// @brief value : The new value of the information.
         virtual bool        setInformation(const QString &name, const QVariant &value) = 0;

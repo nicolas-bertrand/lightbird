@@ -53,7 +53,7 @@ bool    File::onLoad(LightBird::IApi *api)
     this->levels[LightBird::ILogs::DEBUG] = "Debug";
     this->levels[LightBird::ILogs::TRACE] = "Trace";
 
-    // Creates the log timer if it doesn't exists
+    // Creates the log timer if it does not exist
     if (!this->api->timers().getTimer("writeLog"))
         this->api->timers().setTimer("writeLog", 1000);
 

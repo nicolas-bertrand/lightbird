@@ -169,7 +169,7 @@ void    Plugins::_unload(const QString &id, Future<bool> *f)
         return ;
     if (!this->plugins.contains(id))
     {
-        LOG_WARNING("The plugin is already unloaded or doesn't exists", Properties("id", id), "Plugins", "_unload");
+        LOG_WARNING("The plugin is already unloaded or does not exist", Properties("id", id), "Plugins", "_unload");
         return ;
     }
     if (this->plugins.value(id)->getState() != LightBird::IPlugins::LOADED)

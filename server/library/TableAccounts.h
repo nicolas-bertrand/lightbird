@@ -82,7 +82,7 @@ namespace LightBird
         /// @brief Returns all the informations of the account.
         QVariantMap     getInformations() const;
         /// @brief Modifies the value of an information of the account, or create
-        /// it if it doesn't exists.
+        /// it if it does not exist.
         /// @param name : The name of the information to create or modify.
         /// @brief value : The new value of the information.
         bool            setInformation(const QString &name, const QVariant &value);

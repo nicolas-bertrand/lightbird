@@ -233,7 +233,7 @@ void    Plugin::_session(LightBird::IClient &client)
     QString identifiant = QUrlQuery(client.getRequest().getUri()).queryItemValue("identifiant");
     LightBird::Session session;
 
-    // If the session id or the identifiant doesn't exists, the account is cleared
+    // If the session id or the identifiant does not exist, the account is cleared
     if (sessionId.isEmpty() || (session = this->_api->sessions().getSession(sessionId)).isNull() ||
         (!identifiant.isEmpty() && !this->_checkIdentifiant(client, session, identifiant)))
     {
@@ -277,7 +277,7 @@ QString Plugin::_getInterface(LightBird::IClient &client)
 
     // Gets the name of the interface from the cookies
     if (!(interface = this->getCookie(client, "interface")).isEmpty())
-        // The interface doesn't exists
+        // The interface does not exist
         if (!this->interfaces.contains(interface))
             interface.clear();
     // Saves the interface in the client informations

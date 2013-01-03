@@ -49,7 +49,7 @@ namespace LightBird
         /// @brief Returns the session based on its id.
         /// @param id : The id of the session.
         /// @return An object that allows to get the data of a session,
-        /// or NULL if it doesn't exists.
+        /// or NULL if it does not exist.
         virtual LightBird::Session  getSession(const QString &id) = 0;
         /// @brief Returns true if the session exists and is not expired.
         virtual bool                exists(const QString &id) = 0;

@@ -62,7 +62,7 @@ namespace LightBird
         /// @param denied : The list of the denied rights. If it is empty,
         /// no rights are denied. If it has an empty element, all the rights
         /// are denied except the rights in allowed.
-        /// @return False if either the accessor or the object doesn't exists.
+        /// @return False if either the accessor or the object does not exist.
         bool        getRights(const QString &id_accessor, const QString &id_object, QStringList &allowed, QStringList &denied) const;
 
     private:

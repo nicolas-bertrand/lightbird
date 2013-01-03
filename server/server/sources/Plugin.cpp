@@ -381,7 +381,7 @@ void    Plugin::_loadResources()
     QString  alias;
     QString  resourcesPath;
 
-    // Creates the resources of the plugin that doesn't exists
+    // Creates the resources of the plugin that does not exist
     resourcesPath = Plugins::getResourcesPath(this->id);
     read = this->configuration->readDom().firstChild();
     dom = read.parentNode().firstChildElement("resources").firstChild();
@@ -396,7 +396,7 @@ void    Plugin::_loadResources()
             // Copy the file
             if (nodeName == "resource" && !alias.isEmpty() && !QFileInfo(nodeValue).isFile())
             {
-                // Creates the directory of the resource if it doesn't exists
+                // Creates the directory of the resource if it does not exist
                 path = nodeValue.left(nodeValue.lastIndexOf('/'));
                 if (!QFileInfo(path).isDir())
                     QDir().mkpath(path);
@@ -437,7 +437,7 @@ void    Plugin::_copyAllResources(const QString &resourcesPath, const QString &d
         destination = destDir + currentDir + "/" + f.peekNext();
         if (!QFileInfo(destination).isFile())
         {
-            // Create the directory of the resource if it doesn't exists
+            // Create the directory of the resource if it does not exist
             if (!QFileInfo(destDir + "/" + currentDir).isDir())
                 QDir().mkpath(destDir + "/" + currentDir);
             // Copy the resource
@@ -545,7 +545,7 @@ bool    Plugin::_createConfiguration()
     int          errorLine;
     int          errorColumn;
 
-    // Create the plugin configuration from its resource if it doesn't exists
+    // Create the plugin configuration from its resource if it does not exist
     if (!Plugins::isInstalled(this->id))
     {
         element = Configurations::instance()->writeDom().firstChildElement("configurations");
@@ -567,10 +567,10 @@ bool    Plugin::_createConfiguration()
             plugin.setAttribute("id", this->id);
             element.appendChild(plugin);
         }
-        // If the default configuration doesn't exists, just create the node of the plugin
+        // If the default configuration does not exist, just create the node of the plugin
         else
         {
-            LOG_DEBUG("The configuration of the plugin doesn't exists in its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
+            LOG_DEBUG("The configuration of the plugin does not exist in its resources", Properties("id", this->id), "Plugin", "_createConfigurations");
             QDomElement plugin = element.ownerDocument().createElement("plugin");
             plugin.setAttribute("id", this->id);
             element.appendChild(plugin);

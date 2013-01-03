@@ -14,7 +14,7 @@ Media::Media(LightBird::IClient &cl)
     this->response.getContent().setStorage(LightBird::IContent::BYTEARRAY);
     // Extract the file id from the uri
     this->file.setId(QUrlQuery(this->uri).queryItemValue("fileId"));
-    // If the file doesn't exists, an error occured
+    // If the file does not exist, an error occured
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
     {
         this->_error(404, "Not Found", "File not found.");

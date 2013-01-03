@@ -20,14 +20,14 @@ namespace LightBird
         /// @param interval : The time between each calls in milliseconds.
         /// If null the timer is called immediatly.
         virtual void                            setTimer(const QString &name, unsigned int interval = 0) = 0;
-        /// @brief Returns the interval of a timer, or zero if it doesn't exists.
+        /// @brief Returns the interval of a timer, or zero if it does not exist.
         /// @param name : The name of the timer.
         virtual unsigned int                    getTimer(const QString &name) const = 0;
         /// @brief Returns a map of all the timers and their interval.
         virtual QMap<QString, unsigned int>     getTimers() const = 0;
         /// @brief Remove a timer.
         /// @param name : The name of the timer.
-        /// @return False if the timer doesn't exists.
+        /// @return False if the timer does not exist.
         virtual bool                            removeTimer(const QString &name) = 0;
     };
 }

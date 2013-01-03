@@ -31,7 +31,7 @@ QString Preview::generate(const QString &fileId, LightBird::IImage::Format forma
     bool            result = false;
     QTemporaryFile  tmpFile;
 
-    // If the file doesn't exists, we have nothing to do
+    // If the file does not exist, we have nothing to do
     if (!params.file.setId(fileId) || !QFileInfo(params.file.getFullPath()).isFile())
         return ("");
     params.width = width;

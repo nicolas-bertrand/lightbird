@@ -90,7 +90,7 @@ bool    Port::send(const QString &id, const QString &p, const QVariantMap &infor
     while (it.hasNext() && !client)
         if (it.next()->getId() == id)
             client = it.peekPrevious();
-    // The client doesn't exists
+    // The client does not exist
     if (!client)
         return (false);
     // Checks the protocol

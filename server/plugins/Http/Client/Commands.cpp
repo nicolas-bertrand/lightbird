@@ -115,7 +115,7 @@ void    Commands::_identify(LightBird::IClient &client, const QString &)
             json = json.arg(session->getId(), id);
             client.getResponse().getContent().setData(json.toLatin1());
         }
-        // Otherwise we return a fake salt and session id (the user shouldn't know that the name doesn't exists)
+        // Otherwise we return a fake salt and session id (the user shouldn't know that the name does not exist)
         else
         {
             json = json.arg(LightBird::createUuid(), LightBird::createUuid());
