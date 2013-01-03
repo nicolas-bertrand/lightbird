@@ -45,16 +45,15 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->_deinit();
         return (false);
     }
-    this->contexts.insert("handshake", new Handshake(this->api, this->handshakeTimeout));
-    this->contexts.insert("record", new Record(this->api));
+    this->api->contexts().declareInstance("handshake", (this->handshake = new Handshake(this->api, this->handshakeTimeout)));
+    this->api->contexts().declareInstance("record", (this->record = new Record(this->api)));
     return (true);
 }
 
 void    Plugin::onUnload()
 {
-    QMapIterator<QString, QObject *> it(this->contexts);
-    while (it.hasNext())
-        delete it.next().value();
+    delete this->handshake;
+    delete this->record;
     this->_deinit();
 }
 
@@ -82,11 +81,6 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.dependencies << QString("GnuTLS %1").arg(GNUTLS_VERSION);
 }
 
-void    Plugin::getContexts(QMap<QString, QObject *> &contexts)
-{
-    contexts = this->contexts;
-}
-
 bool    Plugin::onConnect(LightBird::IClient &client)
 {
     gnutls_session_t session;
@@ -100,7 +94,7 @@ bool    Plugin::onConnect(LightBird::IClient &client)
         return (false);
     gnutls_transport_set_ptr(session, (gnutls_transport_ptr_t)&client);
     // Starts the handshake
-    qobject_cast<Handshake *>(this->contexts.value("handshake"))->start(client, session);
+    this->handshake->start(client, session);
     return (true);
 }
 
@@ -118,7 +112,7 @@ void    Plugin::onDestroy(LightBird::IClient &client)
             gnutls_transport_set_push_function(session, Plugin::push);
             gnutls_bye(session, GNUTLS_SHUT_RDWR);
         }
-        qobject_cast<Handshake *>(this->contexts.value("handshake"))->removeTimeout(client);
+        this->handshake->removeTimeout(client);
         gnutls_deinit(session);
     }
 }

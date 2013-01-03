@@ -5,6 +5,7 @@
 # include <QString>
 
 # include "IConfiguration.h"
+# include "IContexts.h"
 # include "IDatabase.h"
 # include "IEvents.h"
 # include "IExtensions.h"
@@ -52,6 +53,8 @@ namespace LightBird
         virtual LightBird::ILogs            &log() = 0;
         /// @brief Allows plugins to access to the server network features.
         virtual LightBird::INetwork         &network() = 0;
+        /// @brief Allows to manage the network contexts of the plugin.
+        virtual LightBird::IContexts        &contexts() = 0;
         /// @brief Allows plugins to manage other plugins.
         virtual LightBird::IPlugins         &plugins() = 0;
         /// @brief Returns the session manager.
@@ -72,8 +75,8 @@ namespace LightBird
         /// the pluginsPath plus its id.
         virtual const QString               &getPluginPath() const = 0;
         /// @brief Returns the resources path of the current plugin which consists
-        /// of the define PLUGINS_RESOURCES_PATH followed by the plugin id. The
-        /// resources path stores all the resources used by the plugin.
+        /// of the define PLUGINS_RESOURCES_PATH followed by the plugin id.
+        /// The resources path stores all the resources used by the plugin.
         virtual const QString               &getResourcesPath() const = 0;
         /// @brief Returns the current version of the server.
         virtual QString                     getServerVersion() const = 0;

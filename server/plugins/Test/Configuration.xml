@@ -6,4 +6,5 @@
     <ftp>
         <port>21</port>
     </ftp>
+    <network />
 </configuration>

@@ -10,9 +10,10 @@
 #include "Plugins.hpp"
 #include "Server.h"
 
-Api::Api(const QString &id, LightBird::IConfiguration &configuration, bool event, bool timers, QObject *parent)
+Api::Api(const QString &id, LightBird::IConfiguration &configuration, LightBird::IContexts &contexts, bool event, bool timers, QObject *parent)
     : QObject(parent)
     , configurationApi(configuration)
+    , contextsApi(contexts)
     , databaseApi(id)
     , logsApi(id)
     , networkApi(id)
@@ -51,6 +52,11 @@ LightBird::IConfiguration   &Api::configuration(bool plugin)
 LightBird::IConfiguration   *Api::configuration(const QString &path, const QString &alternative)
 {
     return (Configurations::instance(path, alternative));
+}
+
+LightBird::IContexts        &Api::contexts()
+{
+    return (this->contextsApi);
 }
 
 LightBird::IDatabase        &Api::database()

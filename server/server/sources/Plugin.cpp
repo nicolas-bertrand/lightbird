@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include "IContexts.h"
 #include "IEvent.h"
 #include "ITimer.h"
 
@@ -180,6 +179,87 @@ LightBird::IPlugins::State Plugin::getState() const
     return (state);
 }
 
+bool    Plugin::declareInstance(QString name, QObject *instance)
+{
+    QSharedPointer<Mutex> mutex;
+
+    // If the current thread is the same as the plugins manager,
+    // this method has been called from a IPlugin method, and the mutex is already locked
+    if (QThread::currentThread() != Plugins::instance()->thread())
+        mutex = QSharedPointer<Mutex>(new Mutex(this->mutex, Mutex::WRITE, "Plugin", "declareInstance"));
+    name = name.toLower();
+    if (name.isEmpty() || this->contextsDeclared.contains(name))
+        return (false);
+    this->contextsDeclared.insert(name, instance);
+    return (true);
+}
+
+QMultiMap<QString, LightBird::IContext *> Plugin::get(QStringList names)
+{
+    QMultiMap<QString, LightBird::IContext *> result;
+    QSharedPointer<Mutex> mutex;
+
+    if (QThread::currentThread() != Plugins::instance()->thread())
+        mutex = QSharedPointer<Mutex>(new Mutex(this->mutex, Mutex::WRITE, "Plugin", "get"));
+    if (names.isEmpty())
+        names = this->contexts.keys();
+    QMutableMapIterator<QString, QList<Context> > it1(this->contexts);
+    while (it1.hasNext())
+    {
+        if (names.contains(it1.next().key(), Qt::CaseInsensitive))
+        {
+            QMutableListIterator<Context> it2(it1.value());
+            while (it2.hasNext())
+                result.insert(it1.key(), &it2.next());
+        }
+    }
+    return (result);
+}
+
+LightBird::IContext *Plugin::add(const QString &name)
+{
+    QSharedPointer<Mutex> mutex;
+
+    if (QThread::currentThread() != Plugins::instance()->thread())
+        mutex = QSharedPointer<Mutex>(new Mutex(this->mutex, Mutex::WRITE, "Plugin", "add"));
+    Context context(this->id);
+    context.setName(name);
+    if (!context.checkName(this->contextsDeclared))
+        return (NULL);
+    LOG_DEBUG("Context added", Properties(context.toMap()).add("id", this->id), "Plugin", "add");
+    this->contexts[name].push_back(context);
+    return (&this->contexts[name].last());
+}
+
+LightBird::IContext *Plugin::clone(LightBird::IContext *iContext, const QString &newName)
+{
+    QSharedPointer<Mutex> mutex;
+    Context &oldContext = *((Context *)iContext);
+
+    if (QThread::currentThread() != Plugins::instance()->thread())
+        mutex = QSharedPointer<Mutex>(new Mutex(this->mutex, Mutex::WRITE, "Plugin", "clone"));
+    Context newContext(this->id);
+    newContext = oldContext;
+    newContext.setName(newName);
+    if (!newContext.checkName(this->contextsDeclared))
+        return (NULL);
+    LOG_DEBUG("Context cloned", Properties(newContext.toMap()).add("id", this->id), "Plugin", "add");
+    this->contexts[newName].push_back(newContext);
+    return (&this->contexts[newName].last());
+}
+
+void    Plugin::remove(LightBird::IContext *context)
+{
+    QSharedPointer<Mutex> mutex;
+
+    if (QThread::currentThread() != Plugins::instance()->thread())
+        mutex = QSharedPointer<Mutex>(new Mutex(this->mutex, Mutex::WRITE, "Plugin", "remove"));
+    QMutableListIterator<Context> it(this->contexts[context->getName()]);
+    while (it.hasNext())
+        if (qobject_cast<LightBird::IContext *>(&it.next()) == context)
+            it.remove();
+}
+
 void    Plugin::_initialize()
 {
     this->state = LightBird::IPlugins::UNLOADED;
@@ -286,7 +366,7 @@ void    Plugin::_loadApi()
     {
         bool event = (qobject_cast<LightBird::IEvent *>(this->instanceObject) != NULL);
         bool timers = (qobject_cast<LightBird::ITimer *>(this->instanceObject) != NULL);
-        this->api = new Api(this->id, *this->configuration, event, timers);
+        this->api = new Api(this->id, *this->configuration, *this, event, timers);
         this->_loadResources();
     }
 }
@@ -382,12 +462,7 @@ void    Plugin::_loadContexts()
     QDomNode contextNode;
     QString  nodeName;
     QString  nodeValue;
-    QMap<QString, QObject *> contexts;
-    LightBird::IContexts *instance;
 
-    // Calls IContexts to get the context classes of the plugin
-    if ((instance = qobject_cast<LightBird::IContexts *>(this->instanceObject)))
-        instance->getContexts(contexts);
     // Loads the contexts of the plugin
     read = this->configuration->readDom().firstChild();
     dom = read.parentNode().firstChildElement("contexts").firstChild();
@@ -445,7 +520,7 @@ void    Plugin::_loadContexts()
                 contextNode = contextNode.nextSibling();
             }
             // Saves the context if it is valid and doesn't already exists
-            if (context.checkName(contexts) && !this->contexts.value(contextName).contains(context))
+            if (context.checkName(this->contextsDeclared) && !this->contexts.value(contextName).contains(context))
             {
                 LOG_DEBUG("Context added", Properties(context.toMap()).add("id", this->id), "Plugin", "_loadInformations");
                 this->contexts[contextName].push_back(context);

@@ -26,6 +26,7 @@ bool        Plugin::onLoad(LightBird::IApi *api)
     if (!file.open(QIODevice::ReadOnly))
         return (false);
     this->content = file.readAll();
+    this->api->contexts().declareInstance("files", this->context);
     return (true);
 }
 
@@ -54,11 +55,6 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
     metadata.licence = "CC BY-NC-SA 3.0";
-}
-
-void    Plugin::getContexts(QMap<QString, QObject *> &contexts)
-{
-    contexts.insert("files", this->context);
 }
 
 void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)

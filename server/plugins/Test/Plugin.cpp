@@ -4,6 +4,7 @@
 #include "Database.h"
 #include "Ftp.h"
 #include "LightBird.h"
+#include "Network.h"
 #include "Plugin.h"
 
 Plugin::Plugin()
@@ -27,6 +28,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->tests << QPair<QString, ITest *>("Database", new Database(*this->api));
     if (configuration.count("ftp"))
         this->tests << QPair<QString, ITest *>("Ftp", new Ftp(*this->api));
+    if (configuration.count("network"))
+        this->tests << QPair<QString, ITest *>("Network", new Network(*this->api));
     return (true);
 }
 

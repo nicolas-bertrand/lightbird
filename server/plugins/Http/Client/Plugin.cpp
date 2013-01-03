@@ -50,6 +50,7 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->wwwDir = "www";
     // This timer will remove the outdated data in this->attempts
     this->_api->timers().setTimer("attempts", IDENTIFICATION_TIME * 1000);
+    this->_api->contexts().declareInstance("client", &this->_context);
     return (true);
 }
 
@@ -78,11 +79,6 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
     metadata.licence = "CC BY-NC-SA 3.0";
-}
-
-void    Plugin::getContexts(QMap<QString, QObject *> &contexts)
-{
-    contexts.insert("client", &this->_context);
 }
 
 void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type)

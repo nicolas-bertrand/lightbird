@@ -4,41 +4,54 @@
 # include <QList>
 # include <QMap>
 # include <QObject>
+# include <QReadWriteLock>
 # include <QString>
 # include <QStringList>
 
 # include "IClient.h"
+# include "IContext.h"
 
 /// @brief Stores a context of a plugin. A context is a set of conditions that
 /// defines if the interfaces of a plugin has to be called in a particular situation.
-class Context : public QObject
+class Context : public QObject,
+                public LightBird::IContext
 {
     Q_OBJECT
+    Q_INTERFACES(LightBird::IContext)
 
 public:
     Context(const QString &idPlugin);
     ~Context();
     Context(const Context &context);
     Context &operator=(const Context &context);
-    bool    operator==(const Context &context);
+    bool    operator==(const Context &context) const;
+    bool    operator!=(const Context &context) const;
+    bool    operator==(const LightBird::IContext &context) const;
+    bool    operator!=(const LightBird::IContext &context) const;
 
-    /// @brief Sets the name of the context.
+    // LightBird::IContext
+    QString getName() const;
     void    setName(const QString &name);
-    /// @brief Sets the mode of the context.
+    QString getMode() const;
     void    setMode(QString mode);
-    /// @brief Sets the transport protocol of the context.
+    QString getTransport() const;
     void    setTransport(QString transport);
-    /// @brief Adds several protocols to the context.
+    QStringList getProtocols() const;
     void    addProtocols(const QStringList &protocols);
-    /// @brief Adds several ports to the context.
+    void    removeProtocols(const QStringList &protocols);
+    QStringList getPorts() const;
     void    addPorts(const QStringList &ports);
-    /// @brief Adds several methods to the context.
+    void    removePorts(const QStringList &ports);
+    QStringList getMethods() const;
     void    addMethods(const QStringList &methods);
-    /// @brief Adds several types to the context.
+    void    removeMethods(const QStringList &methods);
+    QStringList getTypes() const;
     void    addTypes(const QStringList &types);
+    void    removeTypes(const QStringList &types);
+
     /// @brief Ensures that the context name corresponds to a valid context
     /// instance in the plugin.
-    /// @param contexts : The contexts of the plugin as returned by LightBird::IContexts.
+    /// @param contexts : The instances of the contexts of the plugin.
     bool    checkName(QMap<QString, QObject *> &contexts);
     /// @brief Returns the plugin instance associated with the context.
     QObject *getInstance() const;
@@ -69,12 +82,14 @@ private:
     bool          allProtocols;    ///< The context matches all the protocols (HTTP, FTP...).
     QStringList   protocols;       ///< The list of communication protocols knowns by the plugin (not used when allProtocols is true).
     QList<ushort> ports;           ///< The list of ports listenned by the plugin.
+    bool          allPorts;        ///< The context matches all the ports.
     QStringList   methods;         ///< The list of methods available for the plugin.
     QStringList   types;           ///< The list of file types handled by the plugin (MIME types).
     bool          allModes;        ///< The context matches all the modes (CLIENT and SERVER).
     bool          allTransports;   ///< The context matches all the transport protocols (TCP and UDP).
     LightBird::IClient::Mode mode; ///< The connection mode of the client (not used when allModes is true).
     LightBird::INetwork::Transport transport; ///< The transport protocol to use (not used when allTransports is true).
+    mutable QReadWriteLock mutex;  ///< Makes the class thread safe.
 };
 
 #endif // CONTEXT_H

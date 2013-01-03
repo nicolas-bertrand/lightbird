@@ -13,14 +13,18 @@ TARGET = Test
 DESTDIR = ../../build/plugins/Test
 LIBS += -L../../build -lLightBird
 
-HEADERS = Configuration.h \
+HEADERS = \
+    Configuration.h \
     Database.h \
     Ftp.h \
     ITest.h \
+    Network.h \
     Plugin.h
-SOURCES = Configuration.cpp \
+SOURCES = \
+    Configuration.cpp \
     Database.cpp \
     Ftp.cpp \
+    Network.cpp \
     Plugin.cpp
 OTHER_FILES = Configuration.xml
 

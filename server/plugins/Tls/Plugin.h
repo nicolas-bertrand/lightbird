@@ -4,13 +4,15 @@
 # include <QObject>
 
 # include "IPlugin.h"
-# include "IContexts.h"
 # include "IOnConnect.h"
 # include "IOnDestroy.h"
 # include "IDoRead.h"
 # include "IDoWrite.h"
 
 # include "Tls.h"
+
+class Handshake;
+class Record;
 
 # define GNUTLS_CHECK_VERSION "3.1.2"            // The GnuTLS version used by the current implementation of the plugin.
 # define CRT_EXPIRATION       360 * 24 * 60 * 60 // The number of seconds of validity of the certificate.
@@ -19,14 +21,12 @@
 class Plugin
     : public QObject
     , public LightBird::IPlugin
-    , public LightBird::IContexts
     , public LightBird::IOnConnect
     , public LightBird::IOnDestroy
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cc.lightbird.Tls")
     Q_INTERFACES(LightBird::IPlugin
-                 LightBird::IContexts
                  LightBird::IOnConnect
                  LightBird::IOnDestroy)
 
@@ -40,8 +40,6 @@ public:
     bool    onInstall(LightBird::IApi *api);
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
-    // LightBird::IContexts
-    void    getContexts(QMap<QString, QObject *> &contexts);
 
     // Network
     /// @brief Starts the handshake.
@@ -75,6 +73,8 @@ private:
 
     static Plugin         *instance;            ///< Allows the static methods to access the plugin.
     LightBird::IApi       *api;                 ///< The LightBird Api.
+    Handshake             *handshake;           ///< The handshake context instance.
+    Record                *record;              ///< The record context instance.
     gnutls_priority_t     priority;             ///< The priority strings for the handshake algorithms.
     gnutls_sec_param_t    secParam;             ///< Security parameters for passive attacks.
     gnutls_x509_crt_t     crt;                  ///< The X.509 certificate.
@@ -89,7 +89,6 @@ private:
     int                   handshakeTimeout;     ///< The maximum duration of the handshake.
     QByteArray            keyPassword;          ///< The password with which the private key is encrypted and stored.
     QStringList           init;                 ///< The list of the GnuTLS structures initialized.
-    QMap<QString, QObject *> contexts;          ///< The contexts of the plugin (handshake and record).
 };
 
 // Throws an exception if the gnutls call failed

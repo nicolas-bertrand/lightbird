@@ -7,7 +7,6 @@
 # include <QObject>
 
 # include "IPlugin.h"
-# include "IContexts.h"
 # include "IOnDeserialize.h"
 # include "IDoExecution.h"
 # include "IOnSerialize.h"
@@ -29,14 +28,12 @@
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
-               public LightBird::IContexts,
                public LightBird::IOnDeserialize,
                public LightBird::ITimer
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cc.lightbird.Http.Client")
     Q_INTERFACES(LightBird::IPlugin
-                 LightBird::IContexts
                  LightBird::IOnDeserialize
                  LightBird::ITimer)
 
@@ -44,13 +41,12 @@ public:
     Plugin();
     ~Plugin();
 
-    // IPlugin and IContexts
+    // IPlugin
     bool    onLoad(LightBird::IApi *api);
     void    onUnload();
     bool    onInstall(LightBird::IApi *api);
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
-    void    getContexts(QMap<QString, QObject *> &contexts);
 
     // IOnDeserialize
     void    onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type);

@@ -9,6 +9,7 @@
 # include <QReadWriteLock>
 
 # include "IApi.h"
+# include "IContexts.h"
 # include "IPlugin.h"
 # include "IPlugins.h"
 
@@ -20,9 +21,11 @@
 # include "Mutex.h"
 
 /// @brief Manages a plugin.
-class Plugin : public QObject
+class Plugin : public QObject,
+               public LightBird::IContexts
 {
     Q_OBJECT
+    Q_INTERFACES(LightBird::IContexts)
 
 public:
     /// @brief Initializes the object. The plugin is not loaded until
@@ -76,6 +79,18 @@ public:
     /// @brief Returns the current state of the plugin.
     LightBird::IPlugins::State  getState() const;
 
+    // LightBird::IContexts
+    /// @see LightBird::IContexts::declareInstance
+    bool    declareInstance(QString name, QObject *instance);
+    /// @see LightBird::IContexts::get
+    QMultiMap<QString, LightBird::IContext *> get(QStringList names = QStringList());
+    /// @see LightBird::IContexts::add
+    LightBird::IContext *add(const QString &name);
+    /// @see LightBird::IContexts::clone
+    LightBird::IContext *clone(LightBird::IContext *context, const QString &newName);
+    /// @see LightBird::IContexts::remove
+    void    remove(LightBird::IContext *context);
+
 private:
     Plugin();
     Plugin(const Plugin &);
@@ -128,6 +143,7 @@ private:
     int                used;            ///< A counter of used plugin instances, for a basic garbage collection.
     mutable QReadWriteLock mutex;       ///< Ensures that the class is thread safe.
     LightBird::IPlugins::State state;   ///< The current state of the plugin.
+    QMap<QString, QObject *> contextsDeclared; ///< The instances of the contexts declared, sorted by name.
     QMap<QString, QList<Context> > contexts; ///< The the contexts of the plugin, sorted by name.
 
     // Allows Extensions to increment this->used
@@ -138,7 +154,7 @@ template<class T>
 T   *Plugin::getInstance()
 {
     T       *instance = NULL;
-    Mutex   mutex(this->mutex, Mutex::WRITE, "Plugin", "getInstance");
+    Mutex   mutex(this->mutex, "Plugin", "getInstance");
 
     if (!mutex || this->state != LightBird::IPlugins::LOADED)
         return (NULL);
@@ -151,7 +167,7 @@ template<class T>
 T   *Plugin::getInstance(const Context::Validator &validator)
 {
     T       *instance = NULL;
-    Mutex   mutex(this->mutex, Mutex::WRITE, "Plugin", "getInstance");
+    Mutex   mutex(this->mutex, "Plugin", "getInstance");
 
     if (!mutex || this->state != LightBird::IPlugins::LOADED)
         return (NULL);
@@ -174,7 +190,7 @@ QMultiMap<QString, T *> Plugin::getInstances(const Context::Validator &validator
 {
     QMultiMap<QString, T *> instances;
     T                       *instance = NULL;
-    Mutex                   mutex(this->mutex, Mutex::WRITE, "Plugin", "getInstance");
+    Mutex                   mutex(this->mutex, "Plugin", "getInstances");
 
     if (!mutex || this->state != LightBird::IPlugins::LOADED)
         return (instances);

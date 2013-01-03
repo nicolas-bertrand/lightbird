@@ -11,9 +11,9 @@
 namespace LightBird
 {
     /// @brief Allows plugins to manage other plugins.
-    /// The id of the plugin used bellow refered to the name
-    /// of the directory where the plugin is stored. It may or not be
-    /// the real name of the plugin. Its just a way to identified it.
+    /// The id of the plugin used bellow refers to the name of the directory
+    /// where the plugin is stored. It may or not be the real name of the
+    /// plugin. Its just a way to identified it.
     class IPlugins
     {
     public:
@@ -29,51 +29,62 @@ namespace LightBird
             UNKNOW       ///< The plugin has not been found in the plugins directory.
         };
 
-        /// @brief Allows to load an installed plugin. This operation is executed in a dedicated thread.
+        /// @brief Allows to load an installed plugin. This operation is
+        /// executed in a dedicated thread.
         /// Use getState() to get the current state of the plugin.
         /// @param id : The id of the plugin to load.
-        /// @return The future result of the operation. True is returned if the plugin has been correctly
-        /// loaded. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
+        /// @return The future result of the operation. True is returned if the
+        /// plugin has been correctly loaded. Thanks to the shared pointer,
+        /// plugins don't have to delete themself the IFuture.
         virtual QSharedPointer<LightBird::IFuture<bool> > load(const QString &id) = 0;
-        /// @brief Unload a plugin. It may not be unloaded immediatly if the plugin is being used.
-        /// A plugin can unload itself. This operation is executed in a dedicated thread.
+        /// @brief Unload a plugin. It may not be unloaded immediatly if the
+        /// plugin is being used. A plugin can unload itself. This operation
+        /// is executed in a dedicated thread.
         /// Use getState() to get the current state of the plugin.
         /// @param id : The id of the plugin.
-        /// @return The future result of the operation. True is returned if the plugin has been
-        /// unloaded, or is unloading (because it is still in use). Thanks to the shared pointer,
-        /// plugins don't have to delete themself the IFuture.
+        /// @return The future result of the operation. True is returned if the
+        /// plugin has been unloaded, or is unloading (because it is still in use).
+        /// Thanks to the shared pointer, plugins don't have to delete themself
+        /// the IFuture.
         virtual QSharedPointer<LightBird::IFuture<bool> > unload(const QString &id) = 0;
-        /// @brief Use this method to install a plugin. This operation is executed in a
-        /// dedicated thread. Use getState() to get the current state of the plugin.
+        /// @brief Use this method to install a plugin. This operation is
+        /// executed in a dedicated thread.
+        /// Use getState() to get the current state of the plugin.
         /// @param id : The Plugin id.
-        /// @return The future result of the operation. True is returned if the plugin has been correctly
-        /// installed. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
+        /// @return The future result of the operation. True is returned if the
+        /// plugin has been correctly installed. Thanks to the shared pointer,
+        /// plugins don't have to
+        /// delete themself the IFuture.
         virtual QSharedPointer<LightBird::IFuture<bool> > install(const QString &id) = 0;
-        /// @brief Try to uninstall a plugin. The plugin must be unloaded, or the uninstallation will
-        /// fail. This operation is executed in a dedicated thread. Use getState() to get the current
-        /// state of the plugin.
+        /// @brief Try to uninstall a plugin. The plugin must be unloaded, or
+        /// the uninstallation will fail. This operation is executed in a
+        /// dedicated thread.
+        /// Use getState() to get the current state of the plugin.
         /// @param id : The Plugin id.
-        /// @return The future result of the operation. True is returned if the plugin has been correctly
-        /// uninstalled. Thanks to the shared pointer, plugins don't have to delete themself the IFuture.
+        /// @return The future result of the operation. True is returned if the
+        /// plugin has been correctly uninstalled. Thanks to the shared pointer,
+        /// plugins don't have to delete themself the IFuture.
         virtual QSharedPointer<LightBird::IFuture<bool> > uninstall(const QString &id) = 0;
-        /// @brief Returns the metadata of a plugin. This method can be called for any plugin accessible
-        /// by the server, even if it is unloaded or uninstalled. However it can't be used from the
-        /// methods defined in IPlugin.
+        /// @brief Returns the metadata of a plugin. This method can be called
+        /// for any plugin accessible by the server, even if it is unloaded or
+        /// uninstalled.
+        /// @warning It can't be called from the methods defined in IPlugin.
         /// @param id : The Plugin id.
         /// @return The metadata of the plugin.
         virtual LightBird::IMetadata getMetadata(const QString &id) const = 0;
-        /// @brief This method is used to get the current state of a plugin. It can't be called from
-        /// the methods defined in IPlugin.
+        /// @brief This method is used to get the current state of a plugin.
+        /// @warning It can't be called from the methods defined in IPlugin.
         /// @param id : The id of the plugin.
         /// @return The current state of the plugin.
         virtual LightBird::IPlugins::State getState(const QString &id) const = 0;
         /// @brief Returns a list of the id of all the plugins available on the server.
         virtual QStringList     getPlugins() const = 0;
-        /// @brief Returns a list of the id of the loaded plugins. It can't be called from
-        /// the methods defined in IPlugin.
+        /// @brief Returns a list of the id of the loaded plugins.
+        /// @warning It can't be called from the methods defined in IPlugin.
         virtual QStringList     getLoadedPlugins() const = 0;
-        /// @brief Returns a list of the id of the plugins that are installed but not loaded.
-        /// It can't be called from the methods defined in IPlugin.
+        /// @brief Returns a list of the id of the plugins that are installed
+        /// but not loaded.
+        /// @warning It can't be called from the methods defined in IPlugin.
         virtual QStringList     getUnloadedPlugins() const = 0;
         /// @brief Returns a list of the id of the installed plugins.
         virtual QStringList     getInstalledPlugins() const = 0;

@@ -4,6 +4,8 @@ INCLUDEPATH += .
 
 HEADERS = IApi.h \
     IConfiguration.h \
+    IContext.h \
+    IContexts.h \
     IDatabase.h \
     IEvent.h \
     IEvents.h \
@@ -23,7 +25,6 @@ HEADERS = IApi.h \
     ISessions.h \
     network/IClient.h \
     network/IContent.h \
-    network/IContexts.h \
     network/IDoDeserializeContent.h \
     network/IDoDeserializeHeader.h \
     network/IDoDeserializeTrailer.h \
