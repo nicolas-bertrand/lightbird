@@ -65,6 +65,7 @@ void    Server::_initialize()
     Log::info("Loading the server configuration", "Server", "_initialize");
     if (!*(this->configurations = new Configurations(this->arguments.getConfiguration(), this)))
         return Log::fatal("Failed to load the server configuration", "Server", "_initialize");
+    Log::instance()->setState(Log::CONFIGURATION);
     // Tells Qt where are its plugins
     QCoreApplication::addLibraryPath(Configurations::instance()->get("QtPluginsPath"));
     // The threads manager must be initialized just after the configuration
@@ -104,9 +105,9 @@ void    Server::_initialize()
     // Loads the plugins
     Log::info("Loading the plugins", "Server", "_initialize");
     this->_loadPlugins();
-    // The log is then initialized which mean that previous logs are really write
+    // The logs are now fully initialized
     Log::info("Loading the logs", "Server", "_initialize");
-    Log::instance()->setMode(Log::WRITE);
+    Log::instance()->setState(Log::PLUGIN);
     Log::info("Server initialized", "Server", "_initialize");
     Events::instance()->send("server_started");
     this->isInitialized();
@@ -116,7 +117,7 @@ Server::~Server()
 {
     Log::info("Server shutdown", "Server", "~Server");
     // From now on, the logs are printed directly on the standard output, and ILog will not be called anymore
-    Log::instance()->setMode(Log::PRINT);
+    Log::instance()->setState(Log::END);
     // Shutdown the features of the server
     Log::info("Unloads all the plugins", "Server", "~Server");
     if (this->plugins)

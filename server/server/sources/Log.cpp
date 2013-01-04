@@ -12,25 +12,24 @@
 
 Log     *Log::_instance = NULL;
 
-Log *Log::instance(QObject *parent)
+Log *Log::instance()
 {
     if (Log::_instance == NULL)
-        Log::_instance = new Log(parent);
+        Log::_instance = new Log();
     return (Log::_instance);
 }
 
-Log::Log(QObject *parent)
+Log::Log()
     : mutex(QMutex::Recursive)
 {
-    this->parent = parent;
     this->display = false;
-    this->mode = Log::BUFFER;
+    this->state = Log::BEGIN;
     qRegisterMetaType<Properties>("Properties");
     qRegisterMetaType<LightBird::ILogs::Level>("LightBird::ILogs::Level");
     QObject::connect(this, SIGNAL(writeLog(LightBird::ILogs::Level,QDateTime,QString,Properties,QString,QString,QString,QString)),
                      this, SLOT(_write(LightBird::ILogs::Level,QDateTime,QString,Properties,QString,QString,QString,QString)),
                      Qt::QueuedConnection);
-    // Map the names of the log levels
+    // Maps the names of the log levels
     this->levels[LightBird::ILogs::FATAL] = "Fatal";
     this->levels[LightBird::ILogs::ERROR] = "Error";
     this->levels[LightBird::ILogs::WARNING] = "Warning";
@@ -52,28 +51,38 @@ Log::~Log()
     Log::trace("Log destroyed!", "Log", "Log");
 }
 
-void    Log::write(LightBird::ILogs::Level level, const QString &message, const QString &plugin,
-        const Properties &properties, const QString &object, const QString &method)
+void    Log::write(LightBird::ILogs::Level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method)
 {
-    switch (this->mode)
+    switch (this->state)
     {
-        case Log::WRITE:
-            if (this->levels.contains(level) && this->level <= level)
+        case Log::PLUGIN:
+            if (this->level <= level)
             {
                 emit writeLog(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
                 this->_print(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
             }
             break;
-        case Log::BUFFER:
+        case Log::CONFIGURATION:
             this->mutex.lock();
-            if (this->mode == Log::BUFFER)
+            if (this->state == Log::CONFIGURATION && this->level <= level)
+            {
+                this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method));
+                this->_print(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
+            }
+            else if (this->state != Log::CONFIGURATION)
+                this->write(level, message, plugin, properties, object, method);
+            this->mutex.unlock();
+            break;
+        case Log::BEGIN:
+            this->mutex.lock();
+            if (this->state == Log::BEGIN)
                 this->buffer.push_back(LogInformations(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method));
             else
                 this->write(level, message, plugin, properties, object, method);
             this->mutex.unlock();
             break;
-        default:
-            if (this->levels.contains(level) && this->level <= level)
+        case Log::END:
+            if (this->level <= level)
                 this->_print(level, QDateTime::currentDateTime(), message, properties, LightBird::addressToString(this->currentThread()), plugin, object, method);
     }
 }
@@ -145,8 +154,7 @@ LightBird::ILogs::Level Log::getLevel() const
 
 void    Log::setLevel(LightBird::ILogs::Level level)
 {
-    if (this->levels.contains(level))
-        this->level = level;
+    this->level = level;
 }
 
 bool    Log::isDisplay() const
@@ -184,18 +192,18 @@ bool    Log::isTrace() const
     return (this->level <= LightBird::ILogs::TRACE);
 }
 
-void    Log::setMode(Log::Mode mode)
+void    Log::setState(Log::State mode)
 {
-    if (this->mode == mode)
-        return ;
-    if (mode == Log::WRITE)
-        this->_initializeWrite();
-    this->mutex.lock();
-    this->mode = mode;
-    this->mutex.unlock();
+    Mutex   mutex(this->mutex, "Log", "setState");
+
+    if (this->state == Log::BEGIN && mode == Log::CONFIGURATION)
+        this->_initializeConfiguration();
+    else if (this->state == Log::CONFIGURATION && mode == Log::PLUGIN)
+        this->_initializePlugin();
+    this->state = mode;
 }
 
-void        Log::run()
+void    Log::run()
 {
     // Tells to the thread that started the current thread that it is running
     this->waitMutex.lock();
@@ -210,13 +218,10 @@ void        Log::run()
         this->moveToThread(this->parent->thread());
 }
 
-void    Log::_initializeWrite()
+void    Log::_initializeConfiguration()
 {
     QString level;
 
-    // Ensures that the write has not already been initialized
-    if (this->isRunning() || this->isFinished())
-        return ;
     // Loads the current log level
     level = Configurations::instance()->get("log/level").toLower();
     // Puts the first letter in upper case, to match the values of the map
@@ -225,15 +230,20 @@ void    Log::_initializeWrite()
     this->display = false;
     if (Configurations::instance()->get("log/display") == "true")
         this->display = true;
-    // Writes the buffered logs
-    this->mutex.lock();
+    // Prints the buffered logs
     QListIterator<Log::LogInformations> log(this->buffer);
     while (log.hasNext())
         if (this->level <= log.next().level)
-        {
-            emit writeLog(log.peekPrevious().level, log.peekPrevious().date, log.peekPrevious().message, log.peekPrevious().properties, log.peekPrevious().thread, log.peekPrevious().plugin, log.peekPrevious().object, log.peekPrevious().method);
             this->_print(log.peekPrevious().level, log.peekPrevious().date, log.peekPrevious().message, log.peekPrevious().properties, log.peekPrevious().thread, log.peekPrevious().plugin, log.peekPrevious().object, log.peekPrevious().method);
-        }
+}
+
+void    Log::_initializePlugin()
+{
+    // Writes the buffered logs
+    QListIterator<Log::LogInformations> log(this->buffer);
+    while (log.hasNext())
+        if (this->level <= log.next().level)
+            emit writeLog(log.peekPrevious().level, log.peekPrevious().date, log.peekPrevious().message, log.peekPrevious().properties, log.peekPrevious().thread, log.peekPrevious().plugin, log.peekPrevious().object, log.peekPrevious().method);
     this->buffer.clear();
     this->moveToThread(this);
     this->awake = false;
@@ -244,8 +254,7 @@ void    Log::_initializeWrite()
     if (!this->awake)
         this->waitRun.wait(&waitMutex);
     this->waitMutex.unlock();
-    this->mode = Log::WRITE;
-    this->mutex.unlock();
+    this->state = Log::PLUGIN;
 }
 
 QString     Log::_mapToString(const QMap<QString, QString> &properties) const
@@ -263,8 +272,7 @@ QString     Log::_mapToString(const QMap<QString, QString> &properties) const
     return (result);
 }
 
-Log::LogInformations::LogInformations(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
-                                      const QString &thread, const QString &plugin, const QString &object, const QString &method)
+Log::LogInformations::LogInformations(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method)
 {
     this->level = level;
     this->message = message;
@@ -276,14 +284,13 @@ Log::LogInformations::LogInformations(LightBird::ILogs::Level level, const QDate
     this->date = date;
 }
 
-void    Log::_write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
-                    const QString &thread, const QString &plugin, const QString &object, const QString &method)
+void    Log::_write(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method)
 {
     QMap<QString, LightBird::ILog *> plugins;
 
     // Ensures that the mode is correct before getting the plugins
     this->mutex.lock();
-    if (this->mode == Log::WRITE)
+    if (this->state == Log::PLUGIN)
         plugins = Plugins::instance()->getInstances<LightBird::ILog>();
     this->mutex.unlock();
     QMapIterator<QString, LightBird::ILog *> it(plugins);
@@ -294,16 +301,14 @@ void    Log::_write(LightBird::ILogs::Level level, const QDateTime &date, const 
     }
 }
 
-void        Log::_print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties,
-                        const QString &thread, const QString &plugin, const QString &object, const QString &method) const
+void    Log::_print(LightBird::ILogs::Level level, const QDateTime &date, const QString &message, const Properties &properties, const QString &thread, const QString &plugin, const QString &object, const QString &method) const
 {
     QString buffer;
 
     if (!this->display)
         return ;
     buffer += date.toString("[hh:mm:ss:zzz]");
-    if (this->levels.contains(level))
-        buffer += " [" + this->levels[level] + "]";
+    buffer += " [" + this->levels[level] + "]";
     buffer += " [" + thread;
     if (!plugin.isEmpty())
         buffer += "::" + plugin;
@@ -315,14 +320,14 @@ void        Log::_print(LightBird::ILogs::Level level, const QDateTime &date, co
     if (properties.toMap().size())
         buffer += " [" + this->_mapToString(properties.toMap()) + "]";
     buffer += " : " + message;
-    this->mutex.lock();
+    this->printMutex.lock();
     std::cout << buffer.toStdString() << std::endl;
-    this->mutex.unlock();
+    this->printMutex.unlock();
 }
 
 void    Log::print()
 {
-    bool                                display = this->display;
+    bool    display = this->display;
 
     this->mutex.lock();
     this->display = true;
