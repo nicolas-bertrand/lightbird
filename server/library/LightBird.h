@@ -67,6 +67,12 @@ namespace LightBird
     /// @param dot : If the extension have to start with a dot.
     LIB QString     getImageExtension(LightBird::IImage::Format format, bool dot = false);
 
+    /// @brief Returns the list of the ports in the string.
+    /// The ports can be separated by any character excluding '-',
+    /// which is used to represent a range of ports between two numbers.
+    /// @param max : The maximum number of ports returned.
+    LIB QList<ushort> parsePorts(QString ports, int max = 100);
+
     /// @brief Generates a preview image of the file if possible.
     /// Calls all the plugins that implements IPreview in order to generate
     /// the preview of a file. A cache system is also implemented in order to

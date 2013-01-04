@@ -80,6 +80,29 @@ QString LightBird::getImageExtension(LightBird::IImage::Format format, bool dot)
     return ((dot ? "." : "") + LightBird::Library::getImageExtensions().value(format));
 }
 
+QList<ushort> LightBird::parsePorts(QString ports, int max)
+{
+    QList<ushort> result;
+    int           from, to;
+
+    // Replaces the other characters by a space
+    for (int i = ports.size() - 1; i >= 0; --i)
+        if (!ports[i].isDigit() && ports[i] != '-' && ports[i] != ' ')
+            ports[i] = ' ';
+    // Parses the ports
+    QStringListIterator it(ports.split(' '));
+    while (it.hasNext() && result.size() < max)
+    {
+        from = it.next().split('-').first().toUInt();
+        to = it.peekPrevious().split('-').last().toUInt();
+        if (from)
+            for (int port = from; port <= to && result.size() < max; ++port)
+                if (port && !result.contains(port))
+                    result << port;
+    }
+    return (result);
+}
+
 QString LightBird::preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int position, float quality)
 {
     return (LightBird::Library::getPreview()->generate(fileId, format, width, height, position, quality));
