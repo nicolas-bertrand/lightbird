@@ -5,7 +5,7 @@
 #include <QString>
 #include <QStringList>
 
-/// @brief Parse and store the arguments given to the server.
+/// @brief Parses and stores the arguments given to the server.
 class Arguments
 {
 public:

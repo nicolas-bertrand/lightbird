@@ -41,14 +41,14 @@ public:
     Plugin();
     ~Plugin();
 
-    // IPlugin
+    // LightBird::IPlugin
     bool    onLoad(LightBird::IApi *api);
     void    onUnload();
     bool    onInstall(LightBird::IApi *api);
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
 
-    // IOnDeserialize
+    // LightBird::IOnDeserialize
     void    onDeserialize(LightBird::IClient &client, LightBird::IOnDeserialize::Deserialize type);
 
     // These interfaces are called by the Context
@@ -59,7 +59,7 @@ public:
     bool    onDisconnect(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
 
-    // ITimer
+    // LightBird::ITimer
     bool    timer(const QString &name);
 
     // Static methods

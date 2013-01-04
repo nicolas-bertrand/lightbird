@@ -23,7 +23,7 @@ public:
     Plugin();
     ~Plugin();
 
-    // IPlugin
+    // LightBird::IPlugin
     bool    onLoad(LightBird::IApi *api);
     void    onUnload();
     bool    onInstall(LightBird::IApi *api);

@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 
 INCLUDEPATH += .
 
-HEADERS = IAudio.h \
+HEADERS = \
+    IAudio.h \
     IIdentify.h \
     IImage.h \
     IMime.h \

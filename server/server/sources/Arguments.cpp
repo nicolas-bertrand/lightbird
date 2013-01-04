@@ -16,10 +16,10 @@ Arguments::Arguments(int ac, char **av)
     while (it.hasNext())
     {
         it.next();
-        // Search the configuration path
+        // Searches the configuration path
         if (it.peekPrevious() == "-c" && it.hasNext())
             this->arguments["configuration"] = it.peekNext();
-        // Search the noGui
+        // Searches the noGui
         else if (it.peekPrevious().toLower() == "-nogui")
             this->arguments["nogui"] = "true";
     }

@@ -27,7 +27,7 @@ class Log : public QThread
     Q_OBJECT
 
 public:
-    /// @brief The states of the logs lifecycle.
+    /// @brief The states of the logs, which depend on the state of the server.
     enum State
     {
         BEGIN,         ///< The logs are the first thing loaded, so they are just buffered for now.
@@ -87,7 +87,7 @@ public:
     bool    isDebug() const;
     bool    isTrace() const;
 
-    /// @brief Set the mode of the log.
+    /// @brief Set the state of the log, which depends on the state of the server.
     void    setState(State state);
     /// @brief Displays all the logs of the buffer in the standard output.
     void    print();

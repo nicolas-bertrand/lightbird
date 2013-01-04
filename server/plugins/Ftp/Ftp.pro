@@ -3,7 +3,7 @@ CONFIG += plugin
 QT += network sql xml
 RESOURCES = resources.qrc
 
-INCLUDEPATH += . \
+INCLUDEPATH += \
     ../../api \
     ../../api/network \
     ../../extensions \
@@ -13,14 +13,16 @@ TARGET = Ftp
 DESTDIR = ../../build/plugins/Ftp
 LIBS += -L../../build -lLightBird
 
-HEADERS =  ClientHandler.h \
+HEADERS = \
+    ClientHandler.h \
     Commands.h \
     Parser.h \
     ParserControl.h \
     ParserData.h \
     Plugin.h \
     Timer.h
-SOURCES = ClientHandler.cpp \
+SOURCES = \
+    ClientHandler.cpp \
     Commands.cpp \
     Parser.cpp \
     ParserControl.cpp \

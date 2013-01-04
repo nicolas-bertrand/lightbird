@@ -3,7 +3,7 @@ CONFIG += plugin
 QT += network sql xml
 RESOURCES = resources.qrc
 
-INCLUDEPATH += . \
+INCLUDEPATH += \
     ../../../api \
     ../../../api/network \
     ../../../extensions \

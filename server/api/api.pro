@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 
 INCLUDEPATH += .
 
-HEADERS = IApi.h \
+HEADERS = \
+    IApi.h \
     IConfiguration.h \
     IContext.h \
     IContexts.h \

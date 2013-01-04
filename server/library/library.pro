@@ -2,7 +2,7 @@ TEMPLATE = lib
 QT += sql xml
 
 DEPENDPATH += .
-INCLUDEPATH += . \
+INCLUDEPATH += \
     ../api \
     ../extensions
 
@@ -10,7 +10,8 @@ TARGET = LightBird
 DESTDIR = ../build
 DEFINES += LIGHTBIRD_LIBRARY
 
-HEADERS = Defines.h \
+HEADERS = \
+    Defines.h \
     Export.h \
     Identify.h \
     Initialize.h \
@@ -34,7 +35,8 @@ HEADERS = Defines.h \
     Dir.h \
     File.h \
     Node.h
-SOURCES = Identify.cpp \
+SOURCES = \
+    Identify.cpp \
     Initialize.cpp \
     Library.cpp \
     LightBird.cpp \

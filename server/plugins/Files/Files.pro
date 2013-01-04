@@ -3,7 +3,7 @@ CONFIG += plugin
 QT +=  network sql xml
 RESOURCES = resources.qrc
 
-INCLUDEPATH += . \
+INCLUDEPATH += \
     ../../api \
     ../../api/network \
     ../../extensions \
@@ -13,9 +13,11 @@ TARGET = Plugin
 DESTDIR = ../../build/plugins/Files
 LIBS += -L../../build -lLightBird
 
-HEADERS = Files.h \
+HEADERS = \
+    Files.h \
     Plugin.h
-SOURCES = Files.cpp \
+SOURCES = \
+    Files.cpp \
     Plugin.cpp
 OTHER_FILES = Configuration.xml
 
