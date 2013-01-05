@@ -246,7 +246,8 @@ private:
     QByteArray               *writing;            ///< Stores the data to write. The client's task is paused while the data are being written on the network (i.e. while writing is not NULL).
     State                    written;             ///< The state to resume after the data have been written on the socket.
     Pause::State             pauseState;          ///< The pause state of the network workflow.
-    QTimer                   pauseTimer;          ///< Resumes the network workflow when the pause duration elapsed.
+    bool                     resumeAfterPausing;  ///< True when resume have been called while PAUSING. Allows to resume the network workflow just after the PAUSING.
+    QTimer                   *pauseTimer;         ///< Resumes the network workflow when the pause duration elapsed.
     Disconnect::State        disconnectState;     ///< The disconnect state of the client.
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.

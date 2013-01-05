@@ -43,10 +43,9 @@ Client::Client(QAbstractSocket *s, const QStringList &pr, LightBird::INetwork::T
     this->writing = NULL;
     this->state = Client::NONE;
     this->pauseState = Pause::NONE;
+    this->resumeAfterPausing = false;
+    this->pauseTimer = NULL;
     this->disconnectState = Disconnect::NONE;
-    // Connects the resume slot
-    this->pauseTimer.setSingleShot(true);
-    QObject::connect(&this->pauseTimer, SIGNAL(timeout()), this, SLOT(resume()), Qt::QueuedConnection);
     // Sets the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
     // Creates the engine
@@ -371,11 +370,15 @@ bool    Client::pause(int msec)
         return (false);
     this->pauseState = Pause::PAUSING;
     this->runStatePause = RunState();
+    // Creates the pause timer in the Client thread
     if (msec > 0)
-        this->pauseTimer.start(msec);
-    // When interval is 0 there is no timer
-    else
-        this->pauseTimer.setInterval(0);
+    {
+        this->pauseTimer = new QTimer();
+        this->pauseTimer->setSingleShot(true);
+        QObject::connect(this->pauseTimer, SIGNAL(timeout()), this, SLOT(resume()), Qt::QueuedConnection);
+        this->pauseTimer->start(msec);
+        this->pauseTimer->moveToThread(QObject::thread());
+    }
     if (!this->running)
         this->_newTask(Client::PAUSE);
     return (true);
@@ -387,9 +390,13 @@ bool    Client::_pause()
 
     if (!mutex)
         return (false);
-    // The workflow has already been resumed
+    // The network workflow has already been resumed
+    if (this->resumeAfterPausing)
+        this->pauseState = Pause::RESUMING;
+    this->resumeAfterPausing = false;
     if (this->pauseState == Pause::RESUMING)
         return (false);
+    // The workflow is paused now
     this->pauseState = Pause::PAUSED;
     // The client has been disconnected while we were pausing
     if (this->disconnectState == Disconnect::DISCONNECT)
@@ -417,12 +424,16 @@ bool    Client::resume()
 
     if (!mutex || this->pauseState == Pause::NONE || this->pauseState == Pause::RESUMING)
         return (false);
-    this->pauseState = Pause::RESUMING;
-    // Stops the timer. By setting the interval to 0, we tell that the timer has not elapsed.
-    if (this->pauseTimer.isActive())
+    if (this->pauseState != Pause::PAUSING)
+        this->pauseState = Pause::RESUMING;
+    // The workflow will be resumed just after PAUSING is finished
+    else
+        this->resumeAfterPausing = true;
+    // Stops the timer if it has not timeout
+    if (this->pauseTimer && this->pauseTimer->isActive())
     {
-        this->pauseTimer.stop();
-        this->pauseTimer.setInterval(0);
+        this->pauseTimer->deleteLater();
+        this->pauseTimer = NULL;
     }
     // Runs the RESUME task is we are not PAUSING and the client is not being disconnected
     if (oldPauseState == Pause::PAUSED && this->disconnectState == Disconnect::NONE)
@@ -433,7 +444,7 @@ bool    Client::resume()
 void    Client::_onResume()
 {
     QPair<QString, LightBird::IOnResume *> instance;
-    bool    timeout = !this->pauseTimer.isActive() && this->pauseTimer.interval();
+    bool    timeout = (this->pauseTimer != NULL && !this->pauseTimer->isActive());
 
     if ((instance = Plugins::instance()->getInstance<LightBird::IOnResume>(this->getValidator(true, false))).second)
     {
