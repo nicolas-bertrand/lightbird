@@ -1,14 +1,10 @@
-#ifndef CLIENTHANDLER_H
-# define CLIENTHANDLER_H
+#ifndef FTP_H
+# define FTP_H
 
-# include <QHash>
-# include <QHostAddress>
-# include <QMutex>
-# include <QWaitCondition>
-
-# include "ISessions.h"
-
-# include "Commands.h"
+# define FTP_PROTOCOL_NAME  "FTP"     // The name of the FTP protocol.
+# define CONTROL_CONNECTION "control" // The name of the control connection context.
+# define DATA_CONNECTION    "data"    // The name of the data connection context.
+# define PARSER             "parser"  // The name of the client information that contains the parser.
 
 // The informations stored in the session. Only the informations used by both
 // the control and data connections are stored here.
@@ -20,7 +16,7 @@
 # define SESSION_BINARY_FLAG        "binary-flag"        // Whether we are in Ascii or Image mode.
 # define SESSION_RESTART            "restart"            // The RESTart position of the next RETR or STOR command.
 # define SESSION_TRANSFER_IP        "transfer-ip"        // In active mode these two variables contains the information given by the PORT command,
-# define SESSION_TRANSFER_PORT      "transfer-port"      // however in passive mode they contains the control client informations.
+# define SESSION_TRANSFER_PORT      "transfer-port"      // however in passive mode the port is the server passive port.
 # define SESSION_TRANSFER_COMMAND   "transfer-command"   // The command that initiated the transfer. Defined only during the transfer.
 # define SESSION_TRANSFER_PARAMETER "transfer-parameter" // The paramater of the command. Defined only during the transfer.
 # define SESSION_TRANSFER_MODE      "transfer-mode"      // The selected transfer mode of the data.
@@ -38,29 +34,4 @@
 # define DATA_UPLOAD_ID             "upload-id"          // The id of the uploaded file. Used to identify it.
 # define DATA_DOWNLOAD_COMPLETED    "download-completed" // Defined when the download has been completed. An error message is sent otherwise.
 
-/// @brief Manages the clients on the control and data connections.
-class ClientHandler
-{
-public:
-    ClientHandler(LightBird::IApi &api);
-    ~ClientHandler();
-
-    bool    onConnect(LightBird::IClient &client);
-    bool    onDataConnect(LightBird::IClient &client);
-    bool    doControlExecute(LightBird::IClient &client);
-    bool    doDataExecute(LightBird::IClient &client);
-    void    onDataDestroy(LightBird::IClient &client);
-
-private:
-    Commands::Result _prepareTransferMethod(const QString &command, const QString &parameter, LightBird::Session &session, LightBird::IClient &client);
-
-    LightBird::IApi  &api;
-    Commands         *commands;
-    QMutex           mutex; ///< Makes the class thread safe.
-    /// The list of the clients that are waiting to be associated with a control connection in passive mode.
-    QList<QPair<QHostAddress, QString> > passiveClients;
-    /// The list of the clients that are waiting the control connection to be ready before the start of the deserialization.
-    QHash<QString, QWaitCondition *> wait;
-};
-
-#endif // CLIENTHANDLER_H
+#endif // FTP_H

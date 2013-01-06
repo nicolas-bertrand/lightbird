@@ -1,4 +1,4 @@
-#include "ClientHandler.h"
+#include "Ftp.h"
 #include "ParserControl.h"
 
 ParserControl::ParserControl(LightBird::IApi &api, LightBird::IClient &client)
@@ -10,10 +10,10 @@ ParserControl::~ParserControl()
 {
 }
 
-bool        ParserControl::doDeserializeContent(const QByteArray &data, quint64 &used)
+bool    ParserControl::doDeserializeContent(const QByteArray &data, quint64 &used)
 {
-    int     i;
-    int     j;
+    int i;
+    int j;
 
     // End of line found
     if (this->buffer.endsWith('\r') && data.startsWith('\n'))
@@ -42,8 +42,8 @@ bool        ParserControl::doDeserializeContent(const QByteArray &data, quint64 
             parameter = command.right(command.size() - j - 1);
             command.truncate(j);
         }
-        command = command.toUpper();
-        this->client.getRequest().setMethod(command);
+        // Makes sure we capitalize the command, as we do case insensitive matching
+        this->client.getRequest().setMethod(command.toUpper());
         this->client.getRequest().getInformations()["parameter"] = parameter;
         this->buffer.clear();
     }
@@ -83,24 +83,4 @@ bool    ParserControl::doSerializeContent(QByteArray &data)
     else
         data = message.toUtf8();
     return (true);
-}
-
-bool    ParserControl::onExecution()
-{
-    // Ensures that a response is needed
-    return (!this->client.getResponse().getMessage().isEmpty());
-}
-
-void    ParserControl::onDestroy()
-{
-    LightBird::Session  session = this->client.getSession();
-
-    // Destroy the session if there is no data connection
-    if (session)
-    {
-        session->removeInformation(SESSION_CONTROL_ID);
-        session->removeClient(this->client.getId());
-        if (session->getInformation(SESSION_DATA_ID).toString().isEmpty())
-            session->destroy();
-    }
 }

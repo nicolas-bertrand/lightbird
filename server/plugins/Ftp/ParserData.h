@@ -12,10 +12,6 @@ public:
 
     bool    doDeserializeContent(const QByteArray &data, quint64 &used);
     bool    doSerializeContent(QByteArray &data);
-    void    onFinish();
-    bool    onSerialize(LightBird::IOnSerialize::Serialize type);
-    bool    onDisconnect();
-    void    onDestroy();
 };
 
 #endif // PARSERDATA_H

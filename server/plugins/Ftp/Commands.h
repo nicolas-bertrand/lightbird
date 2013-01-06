@@ -13,7 +13,7 @@
 class Commands
 {
 public:
-    Commands(LightBird::IApi &api);
+    Commands(LightBird::IApi *api);
     ~Commands();
 
     enum TransferMode
@@ -106,7 +106,7 @@ private:
     /// @brief Converts the date in the "ls -l" format.
     QString _listDate(const QDateTime &datetime);
 
-    LightBird::IApi   &api;
+    LightBird::IApi   *api;
     QMap<QString, Commands::ControlMethod> controlCommands; ///< The list of the control commands.
     QMap<QString, QPair<bool, Commands::TransferMethod> > transferCommands; ///< The bool of the pair is true if the command sends data on transfer connection, false if it receives some.
     QStringList       anonymousCommands; ///< The list of the commands that can be used without being identified.

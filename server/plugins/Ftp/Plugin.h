@@ -4,115 +4,105 @@
 # include <QMap>
 # include <QObject>
 # include <QReadWriteLock>
+# include <QSharedPointer>
 # include <QString>
 # include <QStringList>
 
 # include "IPlugin.h"
 # include "IOnConnect.h"
-# include "IOnDisconnect.h"
 # include "IOnDestroy.h"
-# include "IDoDeserializeContent.h"
-# include "IDoDeserializeHeader.h"
-# include "IDoExecution.h"
-# include "IOnExecution.h"
-# include "IOnSerialize.h"
-# include "IDoSerializeContent.h"
-# include "IDoSend.h"
-# include "IOnFinish.h"
 # include "ITimer.h"
 
-# include "ClientHandler.h"
+# include "Commands.h"
+# include "Control.h"
+# include "Data.h"
+# include "Mutex.h"
 # include "Parser.h"
 # include "Timer.h"
 
 class Plugin : public QObject,
                public LightBird::IPlugin,
                public LightBird::IOnConnect,
-               public LightBird::IOnDisconnect,
                public LightBird::IOnDestroy,
-               public LightBird::IDoDeserializeHeader,
-               public LightBird::IDoDeserializeContent,
-               public LightBird::IDoExecution,
-               public LightBird::IOnExecution,
-               public LightBird::IOnSerialize,
-               public LightBird::IDoSerializeContent,
-               public LightBird::IDoSend,
-               public LightBird::IOnFinish,
                public LightBird::ITimer
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "cc.lightbird.Ftp")
     Q_INTERFACES(LightBird::IPlugin
                  LightBird::IOnConnect
-                 LightBird::IOnDisconnect
                  LightBird::IOnDestroy
-                 LightBird::IDoDeserializeHeader
-                 LightBird::IDoDeserializeContent
-                 LightBird::IDoExecution
-                 LightBird::IOnExecution
-                 LightBird::IOnSerialize
-                 LightBird::IDoSerializeContent
-                 LightBird::IDoSend
-                 LightBird::IOnFinish
                  LightBird::ITimer)
 
 public:
-    /// Stores the configuration of the plugin.
-    struct      Configuration
-    {
-        quint32 maxPacketSize;      ///< The maximum size send at a time to the client.
-        quint32 timeWaitControl;    ///< The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready.
-        quint32 timeout;            ///< The number of seconds an inactive client can stay connected to the server.
-        QString dataProtocolName;   ///< The name of the data connection protocol.
-        unsigned short passivePort; ///< The port on which the clients can etablish a passive connection.
-    };
 
     Plugin();
     ~Plugin();
 
-    // IPlugin
+    // LightBird::IPlugin
     bool    onLoad(LightBird::IApi *api);
     void    onUnload();
     bool    onInstall(LightBird::IApi *api);
     void    onUninstall(LightBird::IApi *api);
     void    getMetadata(LightBird::IMetadata &metadata) const;
 
-    // Connect / Disconnect
+    // Other
     bool    onConnect(LightBird::IClient &client);
-    bool    onDisconnect(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
-
-    // Execution
-    bool    doDeserializeHeader(LightBird::IClient &client, const QByteArray &data, quint64 &used);
-    bool    doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used);
-    bool    doExecution(LightBird::IClient &client);
-    bool    onExecution(LightBird::IClient &client);
-    bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
-    bool    doSerializeContent(LightBird::IClient &client, QByteArray &data);
-    bool    doSend(LightBird::IClient &client);
-    /// @brief Disconnect the client if there is an error in its request
-    void    onFinish(LightBird::IClient &client);
-
-    // ITimer
     bool    timer(const QString &name);
 
-    /// @brief Returns the parser that is in charge of the client, in a thread safe way.
-    Parser  *_getParser(const LightBird::IClient &client);
+    /// Stores the configuration of the plugin.
+    struct      Configuration
+    {
+        quint32 maxPacketSize;      ///< The maximum size sent at a time to the client.
+        quint32 waitConnectionTime; ///< The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready, and vice versa.
+        quint32 timeout;            ///< The number of seconds an inactive client can stay connected to the server.
+        QList<ushort> passivePorts; ///< The ports on which the clients can etablish a passive data connection.
+    };
+
     /// @brief Sends a message on the control connection.
-    /// @param idClient : The id of the control connection.
+    /// @param controlId : The id of the control connection.
     /// @param message : The message to send.
-    static void sendControlMessage(const QString &controlId, const Commands::Result &message);
+    static void     sendControlMessage(const QString &controlId, const Commands::Result &message);
+    /// @brief Returns the parser that is in charge of the client.
+    static Parser   &getParser(LightBird::IClient &client);
+    /// @brief Returns the commands.
+    static Commands &getCommands();
+    /// @brief Returns the timer manager.
+    static Timer    &getTimer();
     /// @brief Returns the configuration of the plugin
-    static Configuration     &getConfiguration();
+    static Configuration &getConfiguration();
+    /// @brief Returns the locked plugin mutex.
+    static QSharedPointer<Mutex> getMutex(const QString &object, const QString &function);
+
+    // Manages the passive connections
+    /// @brief Returns an available passive port for this client.
+    static ushort   getPassivePort(LightBird::IClient &client);
+    /// @brief Returns the data connection waiting for this control connection, if available.
+    /// @return A locked mutex that allows to guarantee the atomicity of the dataId, after the return.
+    static QSharedPointer<Mutex> getDataConnection(LightBird::Session &session, LightBird::IClient &client, QString &dataId);
+    /// @brief Returns the control connection waiting for this data connection, if available.
+    /// @param isValid : Returns false if the client was not expected.
+    /// @return A locked mutex that allows to guarantee the atomicity of the controlId, after the return.
+    static QSharedPointer<Mutex> getControlConnection(LightBird::IClient &client, QString &controlId, bool &isValid);
 
 private:
-    LightBird::IApi          *api;          ///< The LightBird's Api.
-    QReadWriteLock           mutex;         ///< Makes parsers thread safe.
-    QHash<QString, Parser *> parsers;       ///< Parses the FTP control and data connections.
-    ClientHandler            *handler;      ///< This single object handles all the connections.
-    Timer                    *timerManager; ///< Manages the connections timeout.
-    static Configuration     configuration; ///< The configuration of the plugin.
-    static Plugin            *instance;     ///< Allows to access the Plugin instance from a static method.
+    /// @brief Opens the passive data ports, from the contiguration.
+    void    _openPassiveDataPorts();
+    /// @brief Removes all the occurences of controlId and dataId from the passive connection maps and list.
+    /// @param passivePort : True if the passive ports map have to be cleaned.
+    void    _cleanPassiveConnections(const QString &controlId, const QString &dataId = "", bool passivePort = true);
+
+    LightBird::IApi *api;           ///< The LightBird's Api.
+    static Plugin   *instance;      ///< Allows to access the Plugin instance from a static method.
+    Control         *control;       ///< Manages the control connections.
+    Data            *data;          ///< Manages the data connections.
+    Commands        *commands;      ///< Executes the FTP commands.
+    Timer           *timerManager;  ///< Manages the connections timeout.
+    Configuration   configuration;  ///< The configuration of the plugin.
+    QMutex          mutex;          ///< Makes the class thread safe.
+    QStringList     controlWaiting; ///< The list of the control clients waiting for a data connection.
+    QMultiMap<ushort, QPair<QString, QHostAddress> > dataWaiting; ///< The list of the data clients waiting for a control connection.
+    QMultiMap<ushort, QPair<QString, QHostAddress> > passivePorts; ///< The list of the passive ports waiting to be used.
 };
 
 #endif // PLUGIN_H

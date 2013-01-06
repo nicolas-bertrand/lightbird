@@ -14,23 +14,25 @@ DESTDIR = ../../build/plugins/Ftp
 LIBS += -L../../build -lLightBird
 
 HEADERS = \
-    ClientHandler.h \
     Commands.h \
+    Control.h \
+    Data.h \
+    Ftp.h \
     Parser.h \
     ParserControl.h \
     ParserData.h \
     Plugin.h \
     Timer.h
 SOURCES = \
-    ClientHandler.cpp \
     Commands.cpp \
+    Control.cpp \
+    Data.cpp \
     Parser.cpp \
     ParserControl.cpp \
     ParserData.cpp \
     Plugin.cpp \
     Timer.cpp
-OTHER_FILES = Configuration.xml \
-    Queries.xml
+OTHER_FILES = Configuration.xml
 
 OBJECTS_DIR = tmp
 RCC_DIR = tmp

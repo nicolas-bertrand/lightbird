@@ -12,7 +12,7 @@
 class Timer : public LightBird::ITimer
 {
 public:
-    Timer(LightBird::IApi &api);
+    Timer(LightBird::IApi *api);
     virtual ~Timer();
 
     /// @see LightBird::ITimer
@@ -30,7 +30,7 @@ private:
     /// @brief Disconnects the inactive clients.
     bool    _timeout();
 
-    LightBird::IApi &api;
+    LightBird::IApi *api;
     QMutex          mutex;             ///< Makes the class thread safe.
     QDateTime       nextTimeout;       ///< The next timeout of the timer.
     QHash<QString, QDateTime> timeout; ///< The list of the dates

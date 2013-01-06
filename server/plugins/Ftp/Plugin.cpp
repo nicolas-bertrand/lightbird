@@ -1,13 +1,16 @@
 #include <stddef.h>
 #include <cstddef>
-#include <QDomNode>
+#include <QSharedPointer>
 
-#include "Plugin.h"
-#include "ParserData.h"
+#include "Ftp.h"
+#include "LightBird.h"
 #include "ParserControl.h"
+#include "ParserData.h"
+#include "Plugin.h"
 
-Plugin::Configuration   Plugin::configuration;
-Plugin                  *Plugin::instance = NULL;
+Q_DECLARE_METATYPE(QSharedPointer<Parser>)
+
+Plugin  *Plugin::instance = NULL;
 
 Plugin::Plugin()
 {
@@ -22,42 +25,32 @@ Plugin::~Plugin()
 bool    Plugin::onLoad(LightBird::IApi *api)
 {
     this->api = api;
-    this->handler = new ClientHandler(*api);
-    this->timerManager = new Timer(*api);
+    this->commands = new Commands(api);
+    this->api->contexts().declareInstance(CONTROL_CONNECTION, (this->control = new Control(api)));
+    this->api->contexts().declareInstance(DATA_CONNECTION, (this->data = new Data(api)));
+    this->timerManager = new Timer(api);
     // Fills the configuration
     if (!(this->configuration.maxPacketSize = api->configuration(true).get("maxPacketSize").toUInt()))
         this->configuration.maxPacketSize = 10000000;
-    if (!(this->configuration.timeWaitControl = api->configuration(true).get("timeWaitControl").toUInt()) || this->configuration.timeWaitControl > 30000)
-        this->configuration.timeWaitControl = 5000;
+    if (!(this->configuration.waitConnectionTime = api->configuration(true).get("waitConnectionTime").toUInt()) || this->configuration.waitConnectionTime > 30000)
+        this->configuration.waitConnectionTime = 5000;
     if (!(this->configuration.timeout = api->configuration(true).get("timeout").toUInt()))
         this->configuration.timeout = 120;
-    // Gets the data connection protocol name
-    QDomElement element = this->api->configuration(true).readDom();
-    element = element.firstChildElement("contexts").firstChildElement("context").firstChildElement("protocol");
-    while (!element.isNull())
-    {
-        if (element.text() != "FTP")
-            break;
-        element = element.nextSiblingElement("protocol");
-    }
-    if ((this->configuration.dataProtocolName = element.text()).isEmpty())
-        this->configuration.dataProtocolName = "FTP_DATA";
-    this->api->configuration(true).release();
-    // Opens the data connection port if necessary
-    QStringList protocols;
-    unsigned int maxClients;
-    this->configuration.passivePort = this->api->configuration(true).get("passive").toUShort();
-    if (this->configuration.passivePort && !this->api->network().getPort(this->configuration.passivePort, protocols, maxClients))
-        this->api->network().openPort(this->configuration.passivePort, QStringList(this->configuration.dataProtocolName));
+    // Opens the passive data ports
+    this->_openPassiveDataPorts();
     return (true);
 }
 
 void    Plugin::onUnload()
 {
-    delete this->handler;
-    this->handler = NULL;
+    delete this->commands;
+    this->commands = NULL;
+    delete this->control;
+    this->control = NULL;
+    delete this->data;
+    this->data = NULL;
     delete this->timerManager;
-    this->handler = NULL;
+    this->timerManager = NULL;
 }
 
 bool    Plugin::onInstall(LightBird::IApi *api)
@@ -83,102 +76,37 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.licence = "CC BY-NC-SA 3.0";
 }
 
-bool        Plugin::onConnect(LightBird::IClient &client)
+bool    Plugin::onConnect(LightBird::IClient &client)
 {
     bool    result = true;
     Parser  *parser = NULL;
 
-    if (client.getProtocols().first() == "FTP")
+    // Control connection
+    if (client.getMode() == LightBird::IClient::SERVER && !this->configuration.passivePorts.contains(client.getPort()))
     {
+        client.getContexts() << CONTROL_CONNECTION;
         parser = new ParserControl(*this->api, client);
-        result = this->handler->onConnect(client);
+        result = this->control->onConnect(client);
     }
-    else if (client.getProtocols().first() == this->configuration.dataProtocolName)
-    {
-        parser = new ParserData(*this->api, client);
-        result = this->handler->onDataConnect(client);
-    }
+    // Data connection
     else
-        result = false;
-    this->mutex.lockForWrite();
-    if (parser)
-        this->parsers.insert(client.getId(), parser);
-    this->mutex.unlock();
+    {
+        client.getContexts() << DATA_CONNECTION;
+        parser = new ParserData(*this->api, client);
+        result = this->data->onConnect(client);
+    }
+    // Creates the parser of the client
+    client.getInformations()[PARSER] = QVariant().fromValue(QSharedPointer<Parser>(parser));
     if (result)
         this->timerManager->startTimeout(client.getId());
     return (result);
 }
 
-bool    Plugin::doDeserializeHeader(LightBird::IClient &client, const QByteArray &, quint64 &)
-{
-    // ClientHandler::doDataExecute is only called here from the data connection
-    // when the client is sending data to us. It is used to initiate the upload.
-    if (client.getRequest().getProtocol() == this->configuration.dataProtocolName)
-        this->handler->doDataExecute(client);
-    return (true);
-}
-
-bool     Plugin::doDeserializeContent(LightBird::IClient &client, const QByteArray &data, quint64 &used)
-{
-    this->timerManager->stopTimeout(client.getId());
-    return (this->_getParser(client)->doDeserializeContent(data, used));
-}
-
-bool     Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data)
-{
-    return (this->_getParser(client)->doSerializeContent(data));
-}
-
-bool     Plugin::doExecution(LightBird::IClient &client)
-{
-    bool result = false;
-
-    if (client.getRequest().getProtocol() == "FTP")
-        result = this->handler->doControlExecute(client);
-    else if (client.getRequest().getProtocol() == this->configuration.dataProtocolName && client.getMode() == LightBird::IClient::SERVER)
-        result = this->handler->doDataExecute(client);
-    return (result);
-}
-
-bool     Plugin::onExecution(LightBird::IClient &client)
-{
-    return (this->_getParser(client)->onExecution());
-}
-
-bool     Plugin::doSend(LightBird::IClient &client)
-{
-    bool result = false;
-
-    if (client.getRequest().getProtocol() == this->configuration.dataProtocolName)
-        result = this->handler->doDataExecute(client);
-    return (result);
-}
-
-bool     Plugin::onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type)
-{
-    return (this->_getParser(client)->onSerialize(type));
-}
-
-void    Plugin::onFinish(LightBird::IClient &client)
-{
-    this->_getParser(client)->onFinish();
-    this->timerManager->startTimeout(client.getId());
-}
-
-bool     Plugin::onDisconnect(LightBird::IClient &client)
-{
-    return (this->_getParser(client)->onDisconnect());
-}
-
 void    Plugin::onDestroy(LightBird::IClient &client)
 {
-    if (client.getProtocols().first() == this->configuration.dataProtocolName)
-        this->handler->onDataDestroy(client);
-    this->_getParser(client)->onDestroy();
-    this->mutex.lockForWrite();
-    delete this->parsers.value(client.getId());
-    this->parsers.remove(client.getId());
-    this->mutex.unlock();
+    Mutex   mutex(Plugin::instance->mutex, "Plugin", "onDestroy");
+
+    this->_cleanPassiveConnections(client.getId(), client.getId());
     this->timerManager->stopTimeout(client.getId());
 }
 
@@ -199,20 +127,167 @@ void    Plugin::sendControlMessage(const QString &controlId, const Commands::Res
     informations.insert(CONTROL_CODE, message.first);
     // And it's description
     informations.insert(CONTROL_MESSAGE, message.second);
-    Plugin::instance->api->network().send(controlId, "FTP", informations);
+    Plugin::instance->api->network().send(controlId, FTP_PROTOCOL_NAME, informations);
 }
 
-Parser      *Plugin::_getParser(const LightBird::IClient &client)
+Parser  &Plugin::getParser(LightBird::IClient &client)
 {
-    Parser  *parser;
+    return (*client.getInformations()[PARSER].value<QSharedPointer<Parser> >().data());
+}
 
-    this->mutex.lockForRead();
-    parser = this->parsers[client.getId()];
-    this->mutex.unlock();
-    return (parser);
+Commands    &Plugin::getCommands()
+{
+    return (*Plugin::instance->commands);
+}
+
+Timer   &Plugin::getTimer()
+{
+    return (*Plugin::instance->timerManager);
 }
 
 Plugin::Configuration   &Plugin::getConfiguration()
 {
-    return (Plugin::configuration);
+    return (Plugin::instance->configuration);
+}
+
+QSharedPointer<Mutex>   Plugin::getMutex(const QString &object, const QString &function)
+{
+    return (QSharedPointer<Mutex>(new Mutex(Plugin::instance->mutex, object, function)));
+}
+
+ushort  Plugin::getPassivePort(LightBird::IClient &client)
+{
+    Mutex         mutex(Plugin::instance->mutex, "Plugin", "getPassivePort");
+    QList<ushort> portsUsed;
+
+    // Removes the port previously retained by this client
+    Plugin::instance->_cleanPassiveConnections(client.getId());
+    // Gets the list of the ports already used by this address
+    QMapIterator<ushort, QPair<QString, QHostAddress> > used(Plugin::instance->passivePorts);
+    while (used.hasNext())
+        if (used.next().value().second == client.getPeerAddress())
+            portsUsed << used.key();
+    // Searches an available port
+    QListIterator<ushort> it(Plugin::instance->configuration.passivePorts);
+    while (it.hasNext())
+        if (!portsUsed.contains(it.next()))
+        {
+            // Retains it
+            Plugin::instance->passivePorts.insert(it.peekPrevious(), QPair<QString, QHostAddress>(client.getId(), client.getPeerAddress()));
+            return (it.peekPrevious());
+        }
+    return (0);
+}
+
+QSharedPointer<Mutex> Plugin::getDataConnection(LightBird::Session &session, LightBird::IClient &client, QString &dataId)
+{
+    QSharedPointer<Mutex> mutex(new Mutex(Plugin::instance->mutex, "Plugin", "getDataConnection"));
+    QHostAddress ip(session->getInformation(SESSION_TRANSFER_IP).toString());
+    ushort       port = session->getInformation(SESSION_TRANSFER_PORT).toUInt();
+
+    QMapIterator<ushort, QPair<QString, QHostAddress> > it(Plugin::instance->dataWaiting);
+    while (it.hasNext())
+    {
+        it.next();
+        // The data connection have been found
+        if (it.key() == port && it.value().second == ip)
+        {
+            dataId = it.value().first;
+            Plugin::instance->_cleanPassiveConnections(client.getId(), dataId, false);
+            return (mutex);
+        }
+    }
+    // The control client is waiting the data connection
+    Plugin::instance->controlWaiting << client.getId();
+    return (mutex);
+}
+
+QSharedPointer<Mutex> Plugin::getControlConnection(LightBird::IClient &client, QString &controlId, bool &isValid)
+{
+    QSharedPointer<Mutex> mutex(new Mutex(Plugin::instance->mutex, "Plugin", "getControlConnection"));
+    QHostAddress ip(client.getPeerAddress());
+    ushort       port = client.getPort();
+
+    isValid = false;
+    // Ensures that no over data client is waiting for the same control connection
+    QMapIterator<ushort, QPair<QString, QHostAddress> > it1(Plugin::instance->dataWaiting);
+    while (it1.hasNext())
+    {
+        it1.next();
+        if (it1.key() == port && it1.value().second == ip)
+            return (mutex);
+    }
+    // Searches the control connection
+    QMapIterator<ushort, QPair<QString, QHostAddress> > it2(Plugin::instance->passivePorts);
+    while (it2.hasNext() && !isValid)
+    {
+        it2.next();
+        // The control connection has been found
+        if (it2.key() == port && it2.value().second == ip)
+        {
+            isValid = true;
+            // And is waiting the client
+            if (Plugin::instance->controlWaiting.contains(it2.value().first))
+            {
+                controlId = it2.value().first;
+                Plugin::instance->_cleanPassiveConnections(controlId, client.getId(), false);
+                return (mutex);
+            }
+        }
+    }
+    // The data client is waiting the control connection
+    if (isValid)
+        Plugin::instance->dataWaiting.insert(port, QPair<QString, QHostAddress>(client.getId(), ip));
+    return (mutex);
+}
+
+void    Plugin::_openPassiveDataPorts()
+{
+    LightBird::IConfiguration &configuration = this->api->configuration(true);
+    int count = configuration.count("passivePorts");
+    QStringList  protocols;
+    unsigned int maxClients;
+    QStringList  ports, fail;
+
+    // Gets the ports list
+    for (int i = 0; i < count; ++i)
+    {
+        ports << configuration.get(QString("passivePorts[%1]").arg(QString::number(i)));
+        this->configuration.passivePorts << LightBird::parsePorts(ports.last());
+    }
+    if (!this->configuration.passivePorts.isEmpty())
+        this->api->log().info("Opening the ports of the passive data connection", Properties("ports", ports.join(" ")).toMap(), "Plugin", "_openPassiveDataPorts");
+    else
+        LOG_DEBUG("Passive transfert mode disable", "Plugin", "_openPassiveDataPorts");
+    // Tries to open the FTP passive ports
+    QMutableListIterator<ushort> it(this->configuration.passivePorts);
+    while (it.hasNext())
+    {
+        if (!this->api->network().getPort(it.next(), protocols, maxClients))
+            this->api->network().openPort(it.peekPrevious(), QStringList(FTP_PROTOCOL_NAME));
+        // The port is already opened for another protocol
+        else if (!protocols.contains(FTP_PROTOCOL_NAME, Qt::CaseInsensitive))
+        {
+            fail << QString::number(it.peekPrevious());
+            it.remove();
+        }
+    }
+    if (!fail.isEmpty())
+        LOG_WARNING("Unable to open some ports for the passive data connection", Properties("ports", fail.join(" ")).toMap(), "Plugin", "_openPassiveDataPorts");
+}
+
+void    Plugin::_cleanPassiveConnections(const QString &controlId, const QString &dataId, bool passivePort)
+{
+    this->controlWaiting.removeAll(controlId);
+    QMutableMapIterator<ushort, QPair<QString, QHostAddress> > it1(this->dataWaiting);
+    while (it1.hasNext())
+        if (it1.next().value().first == dataId)
+            it1.remove();
+    if (passivePort)
+    {
+        QMutableMapIterator<ushort, QPair<QString, QHostAddress> > it2(this->passivePorts);
+        while (it2.hasNext())
+            if (it2.next().value().first == controlId)
+                it2.remove();
+    }
 }

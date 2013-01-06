@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/plugins/Ftp">
-        <file alias="queries">Queries.xml</file>
         <file alias="configuration">Configuration.xml</file>
     </qresource>
 </RCC>

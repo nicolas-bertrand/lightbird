@@ -3,6 +3,7 @@
 #include "Dir.h"
 #include "Commands.h"
 #include "File.h"
+#include "Ftp.h"
 #include "LightBird.h"
 #include "Plugin.h"
 #include "Properties.h"
@@ -11,7 +12,7 @@
 
 const char *Commands::months[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-Commands::Commands(LightBird::IApi &api)
+Commands::Commands(LightBird::IApi *api)
     : api(api)
 {
     this->controlCommands["USER"] = &Commands::_user;
@@ -305,7 +306,7 @@ Commands::Result Commands::_stat(const QString &path, LightBird::Session &sessio
         result = "211-FTP server status:\r\n";
         result += " Logged in as " + LightBird::TableAccounts(session->getAccount()).getName() + "\r\n";
         result += " TYPE: " + QString(binary ? "BINARY" : "ASCII") + "\r\n";
-        result += " LightBird " + this->api.getServerVersion() + "\r\n";
+        result += " LightBird " + this->api->getServerVersion() + "\r\n";
         result += "211 End of status\r\n";
     }
     else
@@ -400,17 +401,16 @@ Commands::Result Commands::_allo(const QString &, LightBird::Session &, LightBir
 
 Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, LightBird::IClient &client)
 {
-    QString         protocol = Plugin::getConfiguration().dataProtocolName;
-    QStringList     protocols;
-    unsigned int    maxClients;
-    unsigned short  port = Plugin::getConfiguration().passivePort;
+    ushort  port;
 
-    // Ensures that the passive port is opened
-    if (this->api.network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
+    // Ensures that a passive port is opened
+    if (!Plugin::getConfiguration().passivePorts.isEmpty())
     {
+        if (!(port = Plugin::getPassivePort(client)))
+            return (Result(425, "No passive data port available, try later."));
         session->setInformation(SESSION_TRANSFER_MODE, Commands::PASSIVE);
         session->setInformation(SESSION_TRANSFER_IP, client.getPeerAddress().toString());
-        session->setInformation(SESSION_TRANSFER_PORT, client.getPeerPort());
+        session->setInformation(SESSION_TRANSFER_PORT, port);
         return (Result(227, QString("Entered Passive Mode (127,0,0,1,%1,%2)").arg(QString::number(port >> 8), QString::number(port & 0xFF))));
     }
     return (Result(502, "Data port not opened.\r\nUse active connection instead."));
@@ -418,19 +418,18 @@ Commands::Result Commands::_pasv(const QString &, LightBird::Session &session, L
 
 Commands::Result Commands::_epsv(const QString &network, LightBird::Session &session, LightBird::IClient &client)
 {
-    QString         protocol = Plugin::getConfiguration().dataProtocolName;
-    QStringList     protocols;
-    unsigned int    maxClients;
-    unsigned short  port = Plugin::getConfiguration().passivePort;
+    ushort  port;
 
-    // Ensures that the passive port is opened
-    if (this->api.network().getPort(port, protocols, maxClients) && protocols.contains(protocol))
+    // Ensures that a passive port is opened
+    if (!Plugin::getConfiguration().passivePorts.isEmpty())
     {
         if (!network.isEmpty() && network != "1" && network != "2")
             return (Result(522, "Network protocol not supported, use (1,2)"));
+        if (!(port = Plugin::getPassivePort(client)))
+            return (Result(425, "No passive data port available, try later."));
         session->setInformation(SESSION_TRANSFER_MODE, Commands::PASSIVE);
         session->setInformation(SESSION_TRANSFER_IP, client.getPeerAddress().toString());
-        session->setInformation(SESSION_TRANSFER_PORT, client.getPeerPort());
+        session->setInformation(SESSION_TRANSFER_PORT, port);
         return (Result(229, QString("Extended Passive Mode Entered (|||%1|)").arg(QString::number(port))));
     }
     return (Result(502, "Data port not opened.\r\nUse active connection instead."));
@@ -479,7 +478,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session, L
 
     if (dataId.isEmpty())
         return (Result(225, "No transfer in progress."));
-    this->api.network().disconnect(dataId);
+    this->api->network().disconnect(dataId);
     session->getClients();
     session->setInformation(SESSION_DISCONNECT_DATA, true);
     return (Result(0, "426 Data connection closed.\r\n226 Transfer aborted.\r\n"));
@@ -488,7 +487,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session, L
 Commands::Result Commands::_quit(const QString &, LightBird::Session &session, LightBird::IClient &)
 {
     session->destroy();
-    this->api.network().disconnect(session->getInformation(SESSION_CONTROL_ID).toString());
+    this->api->network().disconnect(session->getInformation(SESSION_CONTROL_ID).toString());
     return (Result(221, "Goodbye."));
 }
 

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <contexts>
-    <context>
-      <transport>TCP</transport>
-      <protocol>FTP</protocol>
-      <protocol>FTP-DATA</protocol>
-    </context>
+    <context protocols="FTP" transport="TCP"/>
+    <context name="control" protocols="FTP" transport="TCP"/>
+    <context name="data" protocols="FTP" transport="TCP"/>
   </contexts>
-  <!-- Enables the passive mode on this port. The plugin will open this port for the passive data connections. -->
-  <passive>20</passive>
-  <!-- The maximum size send at a time to the client. -->
+  <!-- Enables the passive mode on these ports.
+  The plugin will open these ports for the passive data connection.
+  The ports can be separated by any character excluding '-',
+  which is used to represent a range of ports between two numbers. -->
+  <passivePorts>4242</passivePorts>
+  <!-- The maximum size sent at a time to the client. -->
   <maxPacketSize>10000000</maxPacketSize>
-  <!-- The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready. -->
-  <timeWaitControl>5000</timeWaitControl>
+  <!-- The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready, and vice versa. -->
+  <waitConnectionTime>5000</waitConnectionTime>
   <!-- The number of seconds an inactive client can stay connected to the server. -->
   <timeout>120</timeout>
 </configuration>

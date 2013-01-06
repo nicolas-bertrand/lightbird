@@ -2,7 +2,7 @@
 #include "Timer.h"
 #include "TableFiles.h"
 
-Timer::Timer(LightBird::IApi &api)
+Timer::Timer(LightBird::IApi *api)
     : api(api)
 {
 }
@@ -28,7 +28,7 @@ void          Timer::startTimeout(const QString &idClient)
     if (this->nextTimeout.isNull())
     {
         this->nextTimeout = newTimeout;
-        this->api.timers().setTimer(TIMER_TIMEOUT, this->nextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch());
+        this->api->timers().setTimer(TIMER_TIMEOUT, this->nextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch());
     }
     this->mutex.unlock();
 }
@@ -51,10 +51,10 @@ void          Timer::stopTimeout(const QString &idClient)
                 while (l.hasNext())
                     if (l.next() < this->nextTimeout || this->nextTimeout.isNull())
                         this->nextTimeout = l.peekPrevious();
-                this->api.timers().setTimer(TIMER_TIMEOUT, this->nextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch());
+                this->api->timers().setTimer(TIMER_TIMEOUT, this->nextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch());
             }
             else
-                this->api.timers().removeTimer(TIMER_TIMEOUT);
+                this->api->timers().removeTimer(TIMER_TIMEOUT);
         }
     }
     this->mutex.unlock();
@@ -73,7 +73,7 @@ bool          Timer::_timeout()
         // Disconnects the timeout clients
         if (it.next().value() <= currentTime)
         {
-            this->api.network().disconnect(it.key());
+            this->api->network().disconnect(it.key());
             it.remove();
         }
         // Searches the next timeout
@@ -81,7 +81,7 @@ bool          Timer::_timeout()
             this->nextTimeout = it.value();
     // Sets the next timeout
     if (this->nextTimeout.isValid())
-        this->api.timers().setTimer(TIMER_TIMEOUT, this->nextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch());
+        this->api->timers().setTimer(TIMER_TIMEOUT, this->nextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch());
     result = this->nextTimeout.isValid();
     this->mutex.unlock();
     return (result);
