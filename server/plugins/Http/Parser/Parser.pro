@@ -9,7 +9,7 @@ INCLUDEPATH += \
     ../../../extensions \
     ../../../library
 
-TARGET = Parser
+TARGET = HttpParser
 DESTDIR = ../../../build/plugins/Http/Parser
 LIBS += -L../../../build -lLightBird
 

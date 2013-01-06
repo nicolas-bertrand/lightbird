@@ -10,7 +10,7 @@ INCLUDEPATH += \
     ../../library \
     ./GnuTLS/include
 
-TARGET = Plugin
+TARGET = Tls
 DESTDIR = ../../build/plugins/Tls
 LIBS += -L../../build -lLightBird
 # GnuTLS should be located in the GnuTLS folder of the plugin

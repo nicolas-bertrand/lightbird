@@ -9,7 +9,7 @@ INCLUDEPATH += \
     ../../../extensions \
     ../../../library
 
-TARGET = Plugin
+TARGET = ExampleBasic
 DESTDIR = ../../../build/plugins/Example/Basic
 LIBS += -L../../../build -lLightBird
 

@@ -31,7 +31,7 @@ QT += \
     sql
 
 # Build
-TARGET = LightBird
+TARGET = Server
 DESTDIR = ../build
 LIBS += -L../build -lLightBird
 
