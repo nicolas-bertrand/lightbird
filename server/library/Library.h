@@ -33,6 +33,8 @@ namespace LightBird
         static QHash<LightBird::IImage::Format, QString> &getImageExtensions();
 
         // These methods must only be used by the server
+        /// @brief Initializes the library.
+        LIB static void initialize();
         LIB static void setConfiguration(IConfiguration *configuration);
         LIB static void setDatabase(IDatabase *database);
         LIB static void setExtension(IExtensions *extension);

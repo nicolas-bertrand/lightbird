@@ -98,6 +98,9 @@ void    Server::_initialize()
     this->apiPlugins = new ApiPlugins(this);
     this->apiSessions = new ApiSessions(this);
     this->extensions = new Extensions(this);
+    // Loads the library
+    Log::info("Loading the LightBird library", "Server", "_initialize");
+    LightBird::Library::initialize();
     // Loads the network
     Log::info("Loading the network", "Server", "_initialize");
     this->network = new Network(this);

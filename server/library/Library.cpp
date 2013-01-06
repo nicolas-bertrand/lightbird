@@ -13,6 +13,12 @@ Library *Library::getInstance()
     return (Library::instance);
 }
 
+void Library::initialize()
+{
+    Library::getInstance()->identify = new Identify();
+    Library::getInstance()->preview = new Preview();
+}
+
 void Library::shutdown()
 {
     delete Library::instance;
@@ -89,15 +95,11 @@ ILogs   &Library::log()
 
 Identify *Library::getIdentify()
 {
-    if (!Library::instance->identify)
-        Library::instance->identify = new Identify();
     return (Library::instance->identify);
 }
 
 Preview *Library::getPreview()
 {
-    if (!Library::instance->preview)
-        Library::instance->preview = new Preview();
     return (Library::instance->preview);
 }
 
