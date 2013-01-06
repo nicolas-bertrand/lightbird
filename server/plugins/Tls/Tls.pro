@@ -12,7 +12,7 @@ INCLUDEPATH += \
 
 TARGET = Tls
 DESTDIR = ../../build/plugins/Tls
-LIBS += -L../../build -lLightBird
+LIBS += -L../../build -lLightBirdLibrary
 # GnuTLS should be located in the GnuTLS folder of the plugin
 LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll
 # winsock2 is required on Windows

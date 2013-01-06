@@ -31,9 +31,9 @@ QT += \
     sql
 
 # Build
-TARGET = Server
+TARGET = LightBird
 DESTDIR = ../build
-LIBS += -L../build -lLightBird
+LIBS += -L../build -lLightBirdLibrary
 
 # Resources
 RESOURCES = resources/resources.qrc

@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = Ftp
 DESTDIR = ../../build/plugins/Ftp
-LIBS += -L../../build -lLightBird
+LIBS += -L../../build -lLightBirdLibrary
 
 HEADERS = \
     Commands.h \

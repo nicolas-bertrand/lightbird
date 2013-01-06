@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = HttpParser
 DESTDIR = ../../../build/plugins/Http/Parser
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = \
     Parser.h \

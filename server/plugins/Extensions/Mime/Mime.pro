@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = Mime
 DESTDIR = ../../../build/plugins/Extensions/Mime
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = Plugin.h
 SOURCES = Plugin.cpp

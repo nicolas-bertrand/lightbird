@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = Json
 DESTDIR = ../../build/plugins/Json
-LIBS += -L../../build -lLightBird
+LIBS += -L../../build -lLightBirdLibrary
 
 HEADERS = Plugin.h
 SOURCES = Plugin.cpp

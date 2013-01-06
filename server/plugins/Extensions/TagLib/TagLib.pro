@@ -14,7 +14,7 @@ DEFINES += TAGLIB_STATIC
 
 TARGET = TagLib
 DESTDIR = ../../../build/plugins/Extensions/TagLib
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib
 
 HEADERS = Identify.h \

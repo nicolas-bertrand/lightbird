@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = HttpFiles
 DESTDIR = ../../../build/plugins/Http/Files
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = \
     Context.h \

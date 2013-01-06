@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = LogFile
 DESTDIR = ../../../build/plugins/Log/File
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = File.h
 SOURCES = File.cpp

@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = Test
 DESTDIR = ../../build/plugins/Test
-LIBS += -L../../build -lLightBird
+LIBS += -L../../build -lLightBirdLibrary
 
 HEADERS = \
     Configuration.h \

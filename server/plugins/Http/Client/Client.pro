@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = HttpClient
 DESTDIR = ../../../build/plugins/Http/Client
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = \
     Audio.h \

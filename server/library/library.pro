@@ -6,7 +6,7 @@ INCLUDEPATH += \
     ../api \
     ../extensions
 
-TARGET = LightBird
+TARGET = LightBirdLibrary
 DESTDIR = ../build
 DEFINES += LIGHTBIRD_LIBRARY
 

@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = ExampleBasic
 DESTDIR = ../../../build/plugins/Example/Basic
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = Plugin.h
 SOURCES = Plugin.cpp

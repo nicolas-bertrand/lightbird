@@ -12,7 +12,7 @@ INCLUDEPATH += \
 
 TARGET = FFmpeg
 DESTDIR = ../../../build/plugins/Extensions/FFmpeg
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec -lavfilter -lavformat -lavutil -lswscale
 
 HEADERS = Audio.h \

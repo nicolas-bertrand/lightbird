@@ -11,7 +11,7 @@ INCLUDEPATH += \
 
 TARGET = Files
 DESTDIR = ../../build/plugins/Files
-LIBS += -L../../build -lLightBird
+LIBS += -L../../build -lLightBirdLibrary
 
 HEADERS = \
     Files.h \

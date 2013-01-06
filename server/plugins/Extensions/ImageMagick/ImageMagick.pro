@@ -12,7 +12,7 @@ INCLUDEPATH += \
 
 TARGET = ImageMagick
 DESTDIR = ../../../build/plugins/Extensions/ImageMagick
-LIBS += -L../../../build -lLightBird
+LIBS += -L../../../build -lLightBirdLibrary
 
 HEADERS = Identify.h \
     Image.h \
