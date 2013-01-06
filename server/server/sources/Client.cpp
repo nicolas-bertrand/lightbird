@@ -436,7 +436,7 @@ bool    Client::resume()
         this->pauseTimer = NULL;
     }
     // Runs the RESUME task is we are not PAUSING and the client is not being disconnected
-    if (oldPauseState == Pause::PAUSED && this->disconnectState == Disconnect::NONE)
+    if (oldPauseState == Pause::PAUSED && this->disconnectState != Disconnect::DISCONNECT && this->disconnectState != Disconnect::DISCONNECTED)
         this->_newTask(Client::RESUME);
     return (true);
 }
