@@ -2,6 +2,7 @@
 # define IDENTIFY_H
 
 # include <QMutex>
+# include <QObject>
 # include <QStringList>
 # include <QThread>
 
@@ -12,14 +13,20 @@
 # define READ_FILE_SIZE 1000000
 
 /// @see LightBird::identify
-class Identify
+class Identify : public QObject
 {
+    Q_OBJECT
+
 public:
     Identify();
     ~Identify();
 
     /// @see LightBird::identify
     void    identify(const QString &file, LightBird::IIdentify::Information *information = NULL);
+
+private slots:
+    /// @brief Deletes the thread when it is finished.
+    void    finished();
 
 private:
     typedef LightBird::IIdentify::Information Info;

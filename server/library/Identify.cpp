@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QFileInfo>
 
@@ -68,6 +69,8 @@ void    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
         this->identifyThread->files << file;
         this->identifyThread->thread = &this->identifyThread;
         this->identifyThread->method = &Identify::_identifyThread;
+        this->identifyThread->moveToThread(this->identifyThread);
+        QObject::connect(this->identifyThread, SIGNAL(finished()), this, SLOT(finished()));
         this->identifyThread->start();
     }
     else
@@ -79,11 +82,21 @@ void    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
         this->hashThread->files << file;
         this->hashThread->thread = &this->hashThread;
         this->hashThread->method = &Identify::_hashThread;
+        this->hashThread->moveToThread(this->hashThread);
+        QObject::connect(this->hashThread, SIGNAL(finished()), this, SLOT(finished()));
         this->hashThread->start();
     }
     else
         this->hashThread->files << file;
     this->mutex.unlock();
+}
+
+void    Identify::finished()
+{
+    Identify::Thread    *thread;
+
+    if ((thread = dynamic_cast<Identify::Thread *>(this->sender())))
+        delete thread;
 }
 
 void    Identify::Thread::run()
@@ -118,10 +131,7 @@ void    Identify::Thread::run()
             this->files.clear();
         // No more file to process
         else
-        {
             *(this->thread) = NULL;
-            this->deleteLater();
-        }
         instance->mutex.unlock();
     }
 }
