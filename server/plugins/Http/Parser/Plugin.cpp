@@ -111,7 +111,7 @@ bool    Plugin::doSerializeContent(LightBird::IClient &client, QByteArray &data)
 void    Plugin::onFinish(LightBird::IClient &client)
 {
     if (client.getRequest().isError() || client.getResponse().isError())
-        this->api->network().disconnect(client.getId());
+        this->api->network().disconnect(client.getId(), true);
 }
 
 Plugin::Configuration   &Plugin::getConfiguration()

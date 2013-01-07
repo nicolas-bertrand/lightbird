@@ -47,14 +47,14 @@ void        Uploads::onDeserializeHeader(LightBird::IClient &client)
     else
     {
         Plugin::api().log().error("This upload id is already used", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
-        Plugin::api().network().disconnect(client.getId());
+        Plugin::api().network().disconnect(client.getId(), true);
     }
     this->mutex.unlock();
     // Some browsers send a negative content length when there is too many files (firefox 10, safari 5)
     if (client.getRequest().getHeader().value("content-length").toLongLong() < 0)
     {
         Plugin::api().log().error("Negative content-length", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
-        Plugin::api().network().disconnect(client.getId());
+        Plugin::api().network().disconnect(client.getId(), true);
     }
     // Tells the parser to store the data in the memory and not in a temporary file
     client.getInformations().insert("keepInMemory", true);
@@ -235,7 +235,7 @@ void        Uploads::stop(LightBird::IClient &client)
     {
         Plugin::api().log().info("Upload stopped", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).toMap(), "Uploads", "stop");
         if (!this->uploads[id].complete)
-            Plugin::api().network().disconnect(this->uploads[id].idClient);
+            Plugin::api().network().disconnect(this->uploads[id].idClient, true);
         this->uploads[id].complete = true;
         Plugin::api().timers().setTimer("uploads");
     }
@@ -262,7 +262,7 @@ void                Uploads::cancel(LightBird::IClient &client)
             }
         Plugin::api().log().info("Upload canceled", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).toMap(), "Uploads", "cancel");
         if (!this->uploads[id].complete)
-            Plugin::api().network().disconnect(this->uploads[id].idClient);
+            Plugin::api().network().disconnect(this->uploads[id].idClient, true);
         this->uploads[id].complete = true;
     }
     // If the upload is not found, we remove the files asked by the client, provided that he is the owner
@@ -393,6 +393,6 @@ void    Uploads::_error(LightBird::IClient &client, Upload &upload, const QStrin
         upload.file->remove();
     // Disconnects the client
     client.getRequest().getContent().clear();
-    Plugin::api().network().disconnect(client.getId());
+    Plugin::api().network().disconnect(client.getId(), true);
     Plugin::api().log().error("An error occured in the upload: " + error, Properties("idClient", client.getId()).add("idUpload", upload.id).toMap(), "Uploads", "_error");
 }

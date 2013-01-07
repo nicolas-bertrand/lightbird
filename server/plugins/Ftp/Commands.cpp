@@ -478,9 +478,7 @@ Commands::Result Commands::_abor(const QString &, LightBird::Session &session, L
 
     if (dataId.isEmpty())
         return (Result(225, "No transfer in progress."));
-    this->api->network().disconnect(dataId);
-    session->getClients();
-    session->setInformation(SESSION_DISCONNECT_DATA, true);
+    this->api->network().disconnect(dataId, true);
     return (Result(0, "426 Data connection closed.\r\n226 Transfer aborted.\r\n"));
 }
 

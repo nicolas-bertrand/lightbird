@@ -23,7 +23,7 @@ bool    Record::doRead(LightBird::IClient &client, QByteArray &data)
         if (gnutls_error_is_fatal(result))
         {
             LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Record", "doRead");
-            this->api->network().disconnect(client.getId());
+            this->api->network().disconnect(client.getId(), true);
         }
         return (false);
     }
@@ -39,7 +39,7 @@ qint64  Record::doWrite(LightBird::IClient &client, const char *data, qint64 siz
         if (gnutls_error_is_fatal(result))
         {
             LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Record", "doWrite");
-            this->api->network().disconnect(client.getId());
+            this->api->network().disconnect(client.getId(), true);
         }
         return (-1);
     }

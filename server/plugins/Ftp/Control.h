@@ -48,7 +48,7 @@ public:
     bool    onExecution(LightBird::IClient &client);
     bool    doSerializeContent(LightBird::IClient &client, QByteArray &data);
     void    onFinish(LightBird::IClient &client);
-    bool    onDisconnect(LightBird::IClient &client);
+    bool    onDisconnect(LightBird::IClient &client, bool fatal);
     void    onDestroy(LightBird::IClient &client);
 
 private:

@@ -73,7 +73,7 @@ bool          Timer::_timeout()
         // Disconnects the timeout clients
         if (it.next().value() <= currentTime)
         {
-            this->api->network().disconnect(it.key());
+            this->api->network().disconnect(it.key(), true);
             it.remove();
         }
         // Searches the next timeout

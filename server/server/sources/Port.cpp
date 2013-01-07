@@ -60,7 +60,7 @@ QStringList Port::getClients() const
     return (result);
 }
 
-bool    Port::disconnect(const QString &id)
+bool    Port::disconnect(const QString &id, bool fatal)
 {
     Mutex   mutex(this->mutex, Mutex::READ, "Port", "disconnect");
 
@@ -71,7 +71,7 @@ bool    Port::disconnect(const QString &id)
     while (it.hasNext())
         if (it.next()->getId() == id)
         {
-            it.peekPrevious()->disconnect();
+            it.peekPrevious()->disconnect(fatal);
             return (true);
         }
     return (false);

@@ -64,7 +64,7 @@ bool    Data::onConnect(LightBird::IClient &client)
 void    Data::onResume(LightBird::IClient &client, bool timeout)
 {
     if (timeout)
-        this->api->network().disconnect(client.getId());
+        this->api->network().disconnect(client.getId(), true);
 }
 
 bool    Data::doDeserializeHeader(LightBird::IClient &client, const QByteArray &, quint64 &)
@@ -103,16 +103,11 @@ bool    Data::doSerializeContent(LightBird::IClient &client, QByteArray &data)
 
 void    Data::onFinish(LightBird::IClient &client)
 {
-    this->api->network().disconnect(client.getId());
+    this->api->network().disconnect(client.getId(), true);
 }
 
-bool    Data::onDisconnect(LightBird::IClient &client)
+bool    Data::onDisconnect(LightBird::IClient &client, bool)
 {
-    LightBird::Session  session = client.getSession();
-
-    // The data connection has been aborted
-    if (session && session->getInformation(SESSION_DISCONNECT_DATA).toBool())
-        return (true);
     // If the client is downloading data we can close the connection directly.
     // Otherwise we have to wait that the upload is finished.
     return (client.getInformations().contains(DATA_DOWNLOAD));
@@ -137,7 +132,6 @@ void    Data::onDestroy(LightBird::IClient &client)
         // A message have to be sent after the transfer
         else if (informations.contains(DATA_MESSAGE))
             Plugin::sendControlMessage(session->getInformation(SESSION_CONTROL_ID).toString(), Commands::Result(informations.value(DATA_CODE).toUInt(), informations.value(DATA_MESSAGE).toString()));
-        session->setInformation(SESSION_DISCONNECT_DATA, false);
         session->removeInformation(SESSION_DATA_ID);
         session->removeClient(client.getId());
         // Destroys the session if there is no control connection

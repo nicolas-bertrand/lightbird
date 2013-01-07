@@ -39,7 +39,7 @@ public:
     /// @see LightBird::INetwork::connect
     Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QStringList &contexts = QStringList(QString()), int wait = -1);
     /// @see LightBird::INetwork::disconnect
-    bool            disconnect(const QString &id);
+    bool            disconnect(const QString &id, bool fatal = false);
     /// @see LightBird::INetwork::send
     bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     /// @see LightBird::INetwork::receive

@@ -94,7 +94,7 @@ void    Handshake::onFinish(LightBird::IClient &client)
 
     // An error occured in the handshake, so the client is disconnected
     if (client.getResponse().isError())
-        this->api->network().disconnect(client.getId());
+        this->api->network().disconnect(client.getId(), true);
     // The handshake succeeded, so we go to the record context
     else if (client.getResponse().getInformations().contains("handshake succeeded"))
     {
@@ -150,6 +150,6 @@ void    Handshake::timeout()
     if ((timer = qobject_cast<QTimer *>(QObject::sender())))
     {
         LOG_DEBUG("Handshake timeout", Properties("timeout", this->handshakeTimeout).toMap(), "Handshake", "timeout");
-        this->api->network().disconnect(timer->property("idClient").toString());
+        this->api->network().disconnect(timer->property("idClient").toString(), true);
     }
 }

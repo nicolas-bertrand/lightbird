@@ -58,7 +58,7 @@ public:
     /// @see LightBird::INetwork::pause
     bool                    pause(int msec = -1);
     /// @brief Disconnects the client.
-    void                    disconnect();
+    void                    disconnect(bool fatal = false);
     /// @brief Calls the IDoRead interface of the plugins.
     bool                    doRead(QByteArray &data);
     /// @brief Calls the IDoWrite interface of the plugins.
@@ -249,6 +249,7 @@ private:
     bool                     resumeAfterPausing;  ///< True when resume have been called while PAUSING. Allows to resume the network workflow just after the PAUSING.
     QTimer                   *pauseTimer;         ///< Resumes the network workflow when the pause duration elapsed.
     Disconnect::State        disconnectState;     ///< The disconnect state of the client.
+    bool                     disconnectFatal;     ///< True if the disconnection is fatal.
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.
     QList<QVariantMap>       receiveResponses;    ///< Stores the protocol and the informations of the responses that are going to be received.

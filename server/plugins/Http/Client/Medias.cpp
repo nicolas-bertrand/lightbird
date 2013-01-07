@@ -46,7 +46,7 @@ void    Medias::onFinish(LightBird::IClient &client)
     this->mutex.lock();
     if (this->medias.contains(client.getId()))
     {
-        Plugin::api().network().disconnect(client.getId());
+        Plugin::api().network().disconnect(client.getId(), true);
         delete this->medias[client.getId()];
         this->medias.remove(client.getId());
     }
@@ -61,10 +61,10 @@ void        Medias::update(LightBird::IClient &client)
     if (this->medias.contains(client.getId()))
     {
         media = this->medias[client.getId()];
-        // If the streaming has to be stopped
+        // The streaming has to be stopped
         if (this->stopList.contains(media->getId()))
         {
-            Plugin::api().network().disconnect(client.getId());
+            Plugin::api().network().disconnect(client.getId(), true);
             delete media;
             this->medias.remove(client.getId());
         }

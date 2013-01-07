@@ -207,7 +207,7 @@ QStringList Clients::getClients() const
     return (result);
 }
 
-bool    Clients::disconnect(const QString &id)
+bool    Clients::disconnect(const QString &id, bool fatal)
 {
     Mutex   mutex(this->mutex, "Clients", "disconnect");
 
@@ -217,7 +217,7 @@ bool    Clients::disconnect(const QString &id)
     while (it.hasNext())
         if (it.next()->getId() == id)
         {
-            it.peekPrevious()->disconnect();
+            it.peekPrevious()->disconnect(fatal);
             return (true);
         }
     return (false);

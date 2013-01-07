@@ -12,7 +12,6 @@
 # define SESSION_DATA_ID            "data-id"            // The id of the data connection. Defined while it is opened.
 # define SESSION_WORKING_DIR        "working-dir"        // The id of the working directory. Empty for the root.
 # define SESSION_LAST_COMMAND       "last-command"       // The last command executed by the control connection.
-# define SESSION_DISCONNECT_DATA    "disconnect-data"    // Allows to abort the data connection if true.
 # define SESSION_BINARY_FLAG        "binary-flag"        // Whether we are in Ascii or Image mode.
 # define SESSION_RESTART            "restart"            // The RESTart position of the next RETR or STOR command.
 # define SESSION_TRANSFER_IP        "transfer-ip"        // In active mode these two variables contains the information given by the PORT command,

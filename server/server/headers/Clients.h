@@ -46,8 +46,8 @@ public:
     /// @see LightBird::INetwork::getClients
     QStringList     getClients() const;
     /// @brief Disconnects the client.
-    /// @param id : The id of the client to disconnect.
-    bool            disconnect(const QString &id);
+    /// @see LightBird::INetwork::disconnect
+    bool            disconnect(const QString &id, bool fatal = false);
     /// @brief Cleans the client after the thread is finished.
     void            shutdown();
 

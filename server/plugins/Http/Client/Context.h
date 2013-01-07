@@ -35,7 +35,7 @@ public:
     bool    doExecution(LightBird::IClient &client);
     bool    onSerialize(LightBird::IClient &client, LightBird::IOnSerialize::Serialize type);
     void    onFinish(LightBird::IClient &client);
-    bool    onDisconnect(LightBird::IClient &client);
+    bool    onDisconnect(LightBird::IClient &client, bool fatal);
     void    onDestroy(LightBird::IClient &client);
 };
 

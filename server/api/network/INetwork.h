@@ -132,13 +132,18 @@ namespace LightBird
             , int wait = 30000) = 0;
 
         /// @brief Disconnects the client identified by the id in parameter.
-        /// If a request is executing for this client, it is interrupted.
-        /// The interface IOnDisconnect is called when the client has been
+        /// If data are being processed for this client, it may be interrupted.
+        /// The interface IOnDisconnect is called when the client is being
         /// disconnected.
         /// @param id : The id of the client to disconnect. Nothing appends
-        /// if it is already disconnected.
+        /// if it is already disconnected or disconnecting.
+        /// @param fatal : If false, the disconnection behavior is based on
+        /// the value returned by IOnDisconnect. However if fatal is true,
+        /// the client is immediatly disconnected regardless the return value
+        /// of IOnDisconnect, and IOnDestroy is called just after it.
         /// @return True if the client exists.
-        virtual bool    disconnect(const QString &id) = 0;
+        /// @see LightBird::IOnDisconnect
+        virtual bool    disconnect(const QString &id, bool fatal = false) = 0;
 
         /// @brief The behaviour of this method depends on the mode of the client.
         /// * In SERVER mode it allows to bypass the deserialization of the requests

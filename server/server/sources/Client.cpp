@@ -46,6 +46,7 @@ Client::Client(QAbstractSocket *s, const QStringList &pr, LightBird::INetwork::T
     this->resumeAfterPausing = false;
     this->pauseTimer = NULL;
     this->disconnectState = Disconnect::NONE;
+    this->disconnectFatal = false;
     // Sets the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
     // Creates the engine
@@ -455,13 +456,14 @@ void    Client::_onResume()
     this->pauseState = Pause::NONE;
 }
 
-void    Client::disconnect()
+void    Client::disconnect(bool fatal)
 {
     Mutex  mutex(this->mutex, "Client", "disconnect");
 
     if (!mutex || this->disconnectState != Disconnect::NONE)
         return ;
     this->runStateDisconnect = RunState();
+    this->disconnectFatal = fatal;
     // If the client is not running, a new task can be created to disconnect it.
     // Otherwise it will be disconnected after the current task is completed.
     this->disconnectState = Disconnect::DISCONNECT;
@@ -471,8 +473,8 @@ void    Client::disconnect()
 
 bool    Client::_disconnect()
 {
-    // If IOnDisconnect returns true the client is destroyed now
-    if (this->_onDisconnect())
+    // If IOnDisconnect returned true or the disconnection is fatal, the client is destroyed now
+    if (this->_onDisconnect() || this->disconnectFatal)
     {
         this->_finish();
         return (true);
@@ -546,11 +548,11 @@ bool    Client::_onDisconnect()
     while (it.hasNext())
     {
         LOG_TRACE("Calling IOnDisconnect::onDisconnect()", Properties("id", this->id).add("plugin", it.peekNext().key()), "Client", "_onDisconnect");
-        if (!it.peekNext().value()->onDisconnect(*this))
+        if (!it.peekNext().value()->onDisconnect(*this, this->disconnectFatal))
             finish = false;
         Plugins::instance()->release(it.next().key());
     }
-    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish).add("still connected", (this->socket->state() == QAbstractSocket::ConnectedState)), "Client", "run");
+    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish).add("still connected", (this->socket->state() == QAbstractSocket::ConnectedState)).add("fatal", this->disconnectFatal), "Client", "run");
     return (finish);
 }
 

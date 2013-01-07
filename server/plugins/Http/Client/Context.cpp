@@ -21,7 +21,7 @@ void    Context::onFinish(LightBird::IClient &client)
     Plugin::instance().onFinish(client);
 }
 
-bool    Context::onDisconnect(LightBird::IClient &client)
+bool    Context::onDisconnect(LightBird::IClient &client, bool)
 {
     return (Plugin::instance().onDisconnect(client));
 }

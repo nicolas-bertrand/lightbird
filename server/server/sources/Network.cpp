@@ -151,20 +151,20 @@ Future<QString> Network::connect(const QHostAddress &address, quint16 port, cons
     return (this->clients.connect(address, port, protocols, transport, contexts, wait));
 }
 
-bool    Network::disconnect(const QString &id)
+bool    Network::disconnect(const QString &id, bool fatal)
 {
     Mutex   mutex(this->mutex, Mutex::READ, "Network", "disconnect");
     bool    found = false;
 
     if (!mutex)
         return (false);
-    found = this->clients.disconnect(id);
+    found = this->clients.disconnect(id, fatal);
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext() && !found)
     {
         QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext() && !found)
-            if (it.next().value()->disconnect(id))
+            if (it.next().value()->disconnect(id, fatal))
                 found = true;
     }
     return (found);

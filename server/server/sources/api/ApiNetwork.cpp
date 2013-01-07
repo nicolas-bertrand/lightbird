@@ -56,9 +56,9 @@ QSharedPointer<LightBird::IFuture<QString> > ApiNetwork::connect(const QHostAddr
     return (QSharedPointer<LightBird::IFuture<QString> >(new Future<QString>(Network::instance()->connect(address, port, protocols, transport, contexts, wait))));
 }
 
-bool    ApiNetwork::disconnect(const QString &id)
+bool    ApiNetwork::disconnect(const QString &id, bool fatal)
 {
-    return (Network::instance()->disconnect(id));
+    return (Network::instance()->disconnect(id, fatal));
 }
 
 bool    ApiNetwork::send(const QString &idClient, const QString &protocol, const QVariantMap &informations)

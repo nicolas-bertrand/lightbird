@@ -59,7 +59,7 @@ public:
     bool    doSerializeContent(LightBird::IClient &client, QByteArray &data);
     /// @brief Disconnects the data connection when it is finished.
     void    onFinish(LightBird::IClient &client);
-    bool    onDisconnect(LightBird::IClient &client);
+    bool    onDisconnect(LightBird::IClient &client, bool fatal);
     void    onDestroy(LightBird::IClient &client);
 
 private:

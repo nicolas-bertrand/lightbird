@@ -30,9 +30,8 @@ public:
     /// @see LightBird::INetwork::getClients
     QStringList     getClients() const;
     /// @brief Disconnects a client from this port.
-    /// @param id : The id of the client to disconnect.
-    /// @return True is the client exists.
-    bool            disconnect(const QString &id);
+    /// @see LightBird::INetwork::disconnect
+    bool            disconnect(const QString &id, bool fatal = false);
     /// @brief Tries to send a response without waiting for a request.
     /// @see LightBird::INetwork::send
     bool            send(const QString &id, const QString &protocol, const QVariantMap &informations);

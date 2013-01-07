@@ -21,7 +21,6 @@ bool    Control::onConnect(LightBird::IClient &client)
     informations[SESSION_CONTROL_ID] = client.getId();
     informations[SESSION_WORKING_DIR] = QString();
     informations[SESSION_LAST_COMMAND] = QString();
-    informations[SESSION_DISCONNECT_DATA] = false;
     informations[SESSION_BINARY_FLAG] = false;
     informations[SESSION_TRANSFER_IP] = QString();
     informations[SESSION_TRANSFER_PORT] = 0;
@@ -102,7 +101,7 @@ void    Control::onFinish(LightBird::IClient &client)
     Plugin::getTimer().startTimeout(client.getId());
 }
 
-bool    Control::onDisconnect(LightBird::IClient &)
+bool    Control::onDisconnect(LightBird::IClient &, bool)
 {
     // We want to finish the current request before disconnecting the client
     return (false);

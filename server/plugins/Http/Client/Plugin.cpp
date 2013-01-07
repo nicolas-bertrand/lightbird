@@ -124,7 +124,7 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
     {
         // One must be identified to upload data
         if (!client.getAccount().exists())
-            this->_api->network().disconnect(client.getId());
+            this->_api->network().disconnect(client.getId(), true);
         // Manages the upload of files
         else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().endsWith("/command/uploads"))
         {
@@ -134,7 +134,7 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
                 this->_uploads.onDeserializeContent(client);
         }
         else if (!request.getUri().path().contains("/commands/uploads"))
-            this->_api->network().disconnect(client.getId());
+            this->_api->network().disconnect(client.getId(), true);
     }
 }
 
