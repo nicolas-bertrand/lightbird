@@ -17,10 +17,12 @@ DESTDIR = ../../../build/plugins/Extensions/TagLib
 LIBS += -L../../../build -lLightBirdLibrary
 LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib
 
-HEADERS = Identify.h \
+HEADERS = \
+    Identify.h \
     Plugin.h \
     Preview.h
-SOURCES = Identify.cpp \
+SOURCES = \
+    Identify.cpp \
     Plugin.cpp \
     Preview.cpp
 OTHER_FILES = Configuration.xml

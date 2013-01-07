@@ -25,6 +25,9 @@ public:
     /// is cleaned by the slot _threadFinished with catch the signal finished of the thread.
     /// @param thread : The thread to handle.
     void            deleteThread(QThread *thread);
+    /// @brief Removes a thread from the managed list.
+    /// The thread will no longer be managed.
+    bool            removeThread(QThread *thread);
     /// @brief Stops and cleans all the thread managed by the instance.
     /// This method will returns only when all the threads are stopped.
     void            shutdown();

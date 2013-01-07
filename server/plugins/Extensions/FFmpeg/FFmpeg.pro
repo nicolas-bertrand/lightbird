@@ -15,13 +15,15 @@ DESTDIR = ../../../build/plugins/Extensions/FFmpeg
 LIBS += -L../../../build -lLightBirdLibrary
 LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec -lavfilter -lavformat -lavutil -lswscale
 
-HEADERS = Audio.h \
+HEADERS = \
+    Audio.h \
     FFmpeg.h \
     Identify.h \
     Plugin.h \
     Preview.h \
     Video.h
-SOURCES = Audio.cpp \
+SOURCES = \
+    Audio.cpp \
     Identify.cpp \
     Plugin.cpp \
     Preview.cpp \

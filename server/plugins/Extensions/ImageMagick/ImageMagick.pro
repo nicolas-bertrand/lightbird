@@ -14,10 +14,12 @@ TARGET = ImageMagick
 DESTDIR = ../../../build/plugins/Extensions/ImageMagick
 LIBS += -L../../../build -lLightBirdLibrary
 
-HEADERS = Identify.h \
+HEADERS = \
+    Identify.h \
     Image.h \
     Plugin.h
-SOURCES = Identify.cpp \
+SOURCES = \
+    Identify.cpp \
     Image.cpp \
     Plugin.cpp
 OTHER_FILES = Configuration.xml \

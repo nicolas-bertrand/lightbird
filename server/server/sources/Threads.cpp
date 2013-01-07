@@ -54,6 +54,17 @@ void    Threads::deleteThread(QThread *thread)
     }
 }
 
+bool    Threads::removeThread(QThread *thread)
+{
+    Mutex   mutex(this->mutex, "Threads", "removeThread");
+
+    if (!mutex || !this->threads.contains(thread))
+        return (false);
+    LOG_TRACE("Thread removed from the managed list", Properties("thread", QString::number((quint64)thread, 16)), "Threads", "removeThread");
+    this->threads.remove(thread);
+    return (true);
+}
+
 void    Threads::shutdown()
 {
     Mutex   mutex(this->mutex, "Threads", "shutdown");
@@ -129,7 +140,7 @@ void    Threads::_threadDestroyed(QObject *object)
         it.next();
         if (it.key() == object)
         {
-            // Remove the destroyed thread of the list
+            // Removes the destroyed thread of the list
             it.remove();
             LOG_TRACE("Thread destroyed", Properties("thread", QString::number((quint64)object, 16)), "Threads", "_threadDestroyed");
             break;

@@ -41,6 +41,7 @@ bool    Network::openPort(unsigned short port, const QStringList &protocols, Lig
     // If the port is not listening an error occured
     if (!p->isListening())
     {
+        Threads::instance()->removeThread(p);
         delete p;
         return (false);
     }
