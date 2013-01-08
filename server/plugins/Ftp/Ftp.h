@@ -26,6 +26,7 @@
 # define CONTROL_CODE               "code"               // The code of the message to send when SEND_MESSAGE is defined.
 # define CONTROL_MESSAGE            "message"            // The text of the message to send when SEND_MESSAGE is defined.
 // The informations stored in the data client
+# define DATA_SESSION_ID            "data-session-id"    // The id of the session for which the data connection has been created (in active mode).
 # define DATA_DOWNLOAD              "download"           // Defined when a download is in progress.
 # define DATA_UPLOAD                "upload"             // Defined when an upload is in progress.
 # define DATA_CODE                  "code"               // Sent along with the message when a transfer is completed.

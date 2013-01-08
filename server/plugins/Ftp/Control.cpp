@@ -160,13 +160,9 @@ Commands::Result    Control::_prepareTransferCommand(const QString &command, con
         // Direct connection to the client
         else if (mode == Commands::ACTIVE)
         {
-            // The mutex guarantees the atomicity of assignment of the session
-            QSharedPointer<Mutex> mutex(Plugin::getMutex("Control", "_prepareTransferCommand"));
-            dataId = this->api->network().connect(QHostAddress(address), port, QStringList(FTP_PROTOCOL_NAME))->getResult();
-            session->setClient(dataId);
-            if (!dataId.isEmpty())
-                session->setInformation(SESSION_DATA_ID, dataId);
-            else
+            QVariantMap informations;
+            informations.insert(DATA_SESSION_ID, session->getId());
+            if (this->api->network().connect(QHostAddress(address), port, QStringList(FTP_PROTOCOL_NAME), LightBird::INetwork::TCP, informations)->getResult().isEmpty())
                 result = Commands::Result(425, "Could not open data connection.");
         }
     }

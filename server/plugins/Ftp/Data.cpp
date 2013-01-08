@@ -44,11 +44,13 @@ bool    Data::onConnect(LightBird::IClient &client)
             return (true);
         }
     }
-    // Active mode. The mutex ensures that we have the time to assign the session to the client, in _prepareTransferMethod.
+    // Active mode
     else if (client.getMode() == LightBird::IClient::CLIENT)
     {
-        QSharedPointer<Mutex> mutex(Plugin::getMutex("Data", "onConnect"));
-        session = client.getSession();
+        if (!(session = this->api->sessions().getSession(client.getInformations().value(DATA_SESSION_ID).toString())))
+            return (false);
+        session->setClient(client.getId());
+        session->setInformation(SESSION_DATA_ID, client.getId());
     }
     if (session == NULL)
         return (false);

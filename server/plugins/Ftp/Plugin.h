@@ -71,8 +71,6 @@ public:
     static Timer    &getTimer();
     /// @brief Returns the configuration of the plugin
     static Configuration &getConfiguration();
-    /// @brief Returns the locked plugin mutex.
-    static QSharedPointer<Mutex> getMutex(const QString &object, const QString &function);
 
     // Manages the passive connections
     /// @brief Returns an available passive port for this client.

@@ -151,11 +151,6 @@ Plugin::Configuration   &Plugin::getConfiguration()
     return (Plugin::instance->configuration);
 }
 
-QSharedPointer<Mutex>   Plugin::getMutex(const QString &object, const QString &function)
-{
-    return (QSharedPointer<Mutex>(new Mutex(Plugin::instance->mutex, object, function)));
-}
-
 ushort  Plugin::getPassivePort(LightBird::IClient &client)
 {
     Mutex         mutex(Plugin::instance->mutex, "Plugin", "getPassivePort");
