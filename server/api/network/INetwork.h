@@ -112,6 +112,8 @@ namespace LightBird
         /// @param protocols : The protocols used to communicate with the client.
         /// If empty the client accepts all the protocols.
         /// @param transport : The transport protocol used to connect to the client.
+        /// @param informations : This parameter will be stored in the client.
+        /// Use LightBird::IClient::getInformations to access it.
         /// @param contexts : The contexts of the new client, as defined by
         /// LightBird::IClient::getContexts.
         /// @param wait : The maximum time allowed for the server to connect to
@@ -128,6 +130,7 @@ namespace LightBird
             , quint16 port
             , const QStringList &protocols = QStringList()
             , LightBird::INetwork::Transport transport = LightBird::INetwork::TCP
+            , const QVariantMap &informations = QVariantMap()
             , const QStringList &contexts = QStringList(QString())
             , int wait = 30000) = 0;
 

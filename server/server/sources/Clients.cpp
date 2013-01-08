@@ -37,6 +37,7 @@ Future<QString> Clients::connect(const QHostAddress &address
     , quint16 port
     , const QStringList &protocols
     , LightBird::INetwork::Transport transport
+    , const QVariantMap &informations
     , const QStringList &contexts
     , int wait)
 {
@@ -52,6 +53,7 @@ Future<QString> Clients::connect(const QHostAddress &address
         // Creates the client
         Client *client = new Client(socket, protocols, transport, socket->localPort(), socket->socketDescriptor(),
                                     address, port, socket->peerName(), LightBird::IClient::CLIENT, this, contexts);
+        client->getInformations() = informations;
         this->clients.push_back(client);
         socket->setParent(client);
         client->moveToThread(this);

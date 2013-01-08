@@ -37,7 +37,7 @@ public:
     /// @see LightBird::INetwork::getClients
     QStringList     getClients(int port = -1, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const;
     /// @see LightBird::INetwork::connect
-    Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QStringList &contexts = QStringList(QString()), int wait = -1);
+    Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QVariantMap &informations = QVariantMap(), const QStringList &contexts = QStringList(QString()), int wait = -1);
     /// @see LightBird::INetwork::disconnect
     bool            disconnect(const QString &id, bool fatal = false);
     /// @see LightBird::INetwork::send

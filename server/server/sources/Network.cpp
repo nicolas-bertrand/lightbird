@@ -146,9 +146,9 @@ QStringList Network::getClients(int port, LightBird::INetwork::Transport transpo
     return (result);
 }
 
-Future<QString> Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QStringList &contexts, int wait)
+Future<QString> Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QVariantMap &informations, const QStringList &contexts, int wait)
 {
-    return (this->clients.connect(address, port, protocols, transport, contexts, wait));
+    return (this->clients.connect(address, port, protocols, transport, informations, contexts, wait));
 }
 
 bool    Network::disconnect(const QString &id, bool fatal)

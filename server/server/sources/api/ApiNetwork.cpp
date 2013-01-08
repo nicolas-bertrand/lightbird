@@ -46,14 +46,14 @@ QStringList ApiNetwork::getClients(unsigned short port, LightBird::INetwork::Tra
     return (Network::instance()->getClients(port, transport));
 }
 
-QSharedPointer<LightBird::IFuture<QString> > ApiNetwork::connect(const QHostAddress &address, quint16 port, const QStringList &p, LightBird::INetwork::Transport transport, const QStringList &contexts, int wait)
+QSharedPointer<LightBird::IFuture<QString> > ApiNetwork::connect(const QHostAddress &address, quint16 port, const QStringList &p, LightBird::INetwork::Transport transport, const QVariantMap &informations, const QStringList &contexts, int wait)
 {
     QStringList protocols = p;
 
     // If protocols is empty all the protocols are accepted
     if (protocols.isEmpty())
         protocols << "all";
-    return (QSharedPointer<LightBird::IFuture<QString> >(new Future<QString>(Network::instance()->connect(address, port, protocols, transport, contexts, wait))));
+    return (QSharedPointer<LightBird::IFuture<QString> >(new Future<QString>(Network::instance()->connect(address, port, protocols, transport, informations, contexts, wait))));
 }
 
 bool    ApiNetwork::disconnect(const QString &id, bool fatal)

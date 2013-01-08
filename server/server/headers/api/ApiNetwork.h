@@ -23,7 +23,7 @@ public:
     bool        getClient(const QString &id, LightBird::INetwork::Client &client) const;
     QStringList getClients() const;
     QStringList getClients(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const;
-    QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address, quint16 port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QStringList &contexts = QStringList(QString()), int wait = -1);
+    QSharedPointer<LightBird::IFuture<QString> > connect(const QHostAddress &address, quint16 port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QVariantMap &informations = QVariantMap(), const QStringList &contexts = QStringList(QString()), int wait = -1);
     bool        disconnect(const QString &id, bool fatal = false);
     bool        send(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     bool        receive(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
