@@ -82,8 +82,12 @@ public:
     // LightBird::IContexts
     /// @see LightBird::IContexts::declareInstance
     bool    declareInstance(QString name, QObject *instance);
+    /// @see LightBird::IContexts::loadContextsFromConfiguration
+    void    loadContextsFromConfiguration();
     /// @see LightBird::IContexts::get
     QMultiMap<QString, LightBird::IContext *> get(QStringList names = QStringList());
+    /// @see LightBird::IContexts::get
+    QMultiMap<QString, LightBird::IContext *> get(QString name);
     /// @see LightBird::IContexts::add
     LightBird::IContext *add(const QString &name);
     /// @see LightBird::IContexts::clone

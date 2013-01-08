@@ -1,4 +1,5 @@
 #include "Context.h"
+#include "LightBird.h"
 #include "Log.h"
 #include "Mutex.h"
 
@@ -220,6 +221,22 @@ void    Context::addPorts(const QStringList &ports)
         if (port == "all")
             this->allPorts = true;
         else if (p != 0 && !this->ports.contains(p))
+            this->ports.push_back(p);
+    }
+}
+
+void    Context::addPorts(const QString &ports)
+{
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Context", "addPorts");
+    ushort  p;
+
+    if (ports.split(' ').contains("all"))
+        this->allPorts = true;
+    QListIterator<ushort> it(LightBird::parsePorts(ports));
+    while (it.hasNext())
+    {
+        p = it.next();
+        if (p != 0 && !this->ports.contains(p))
             this->ports.push_back(p);
     }
 }

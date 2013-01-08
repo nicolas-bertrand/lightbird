@@ -49,6 +49,10 @@ namespace LightBird
         /// @brief Adds several ports to the context.
         /// @param ports : The value "all" means all the ports.
         virtual void    addPorts(const QStringList &ports) = 0;
+        /// @brief Adds the ports in the string. The ports can be separated by
+        /// any character excluding '-', which is used to represent a range of
+        /// ports between two numbers. The value "all" is also understood.
+        virtual void    addPorts(const QString &ports) = 0;
         /// @brief Removes the ports in the list from the context.
         virtual void    removePorts(const QStringList &ports) = 0;
 

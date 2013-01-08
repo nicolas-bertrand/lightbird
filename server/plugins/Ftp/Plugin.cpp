@@ -28,6 +28,7 @@ bool    Plugin::onLoad(LightBird::IApi *api)
     this->commands = new Commands(api);
     this->api->contexts().declareInstance(CONTROL_CONNECTION, (this->control = new Control(api)));
     this->api->contexts().declareInstance(DATA_CONNECTION, (this->data = new Data(api)));
+    this->api->contexts().loadContextsFromConfiguration();
     this->timerManager = new Timer(api);
     // Fills the configuration
     if (!(this->configuration.maxPacketSize = api->configuration(true).get("maxPacketSize").toUInt()))
@@ -243,33 +244,37 @@ QSharedPointer<Mutex> Plugin::getControlConnection(LightBird::IClient &client, Q
 
 void    Plugin::_openPassiveDataPorts()
 {
-    LightBird::IConfiguration &configuration = this->api->configuration(true);
-    int count = configuration.count("passivePorts");
     QStringList  protocols;
     unsigned int maxClients;
-    QStringList  ports, fail;
+    QStringList  fail;
 
-    // Gets the ports list
-    for (int i = 0; i < count; ++i)
+    // Gets the ports list from the data contexts
+    QMapIterator<QString, LightBird::IContext *> it1(this->api->contexts().get("data"));
+    while (it1.hasNext())
     {
-        ports << configuration.get(QString("passivePorts[%1]").arg(QString::number(i)));
-        this->configuration.passivePorts << LightBird::parsePorts(ports.last());
+        QStringListIterator it2(it1.next().value()->getPorts());
+        while (it2.hasNext())
+            if (!this->configuration.passivePorts.contains(it2.next().toUInt()))
+                this->configuration.passivePorts << it2.peekPrevious().toUInt();
     }
     if (!this->configuration.passivePorts.isEmpty())
-        this->api->log().info("Opening the ports of the passive data connection", Properties("ports", ports.join(" ")).toMap(), "Plugin", "_openPassiveDataPorts");
+        this->api->log().info("Opening the ports of the passive data connection", "Plugin", "_openPassiveDataPorts");
     else
         LOG_DEBUG("Passive transfert mode disable", "Plugin", "_openPassiveDataPorts");
     // Tries to open the FTP passive ports
-    QMutableListIterator<ushort> it(this->configuration.passivePorts);
-    while (it.hasNext())
+    QMutableListIterator<ushort> it3(this->configuration.passivePorts);
+    while (it3.hasNext())
     {
-        if (!this->api->network().getPort(it.next(), protocols, maxClients))
-            this->api->network().openPort(it.peekPrevious(), QStringList(FTP_PROTOCOL_NAME));
+        if (!this->api->network().getPort(it3.next(), protocols, maxClients))
+        {
+            if (!this->api->network().openPort(it3.peekPrevious(), QStringList(FTP_PROTOCOL_NAME)))
+                fail << QString::number(it3.peekPrevious());
+        }
         // The port is already opened for another protocol
         else if (!protocols.contains(FTP_PROTOCOL_NAME, Qt::CaseInsensitive))
         {
-            fail << QString::number(it.peekPrevious());
-            it.remove();
+            fail << QString::number(it3.peekPrevious());
+            it3.remove();
         }
     }
     if (!fail.isEmpty())

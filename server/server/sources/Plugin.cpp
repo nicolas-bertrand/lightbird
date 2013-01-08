@@ -194,6 +194,15 @@ bool    Plugin::declareInstance(QString name, QObject *instance)
     return (true);
 }
 
+void    Plugin::loadContextsFromConfiguration()
+{
+    QSharedPointer<Mutex> mutex;
+
+    if (QThread::currentThread() != Plugins::instance()->thread())
+        mutex = QSharedPointer<Mutex>(new Mutex(this->mutex, Mutex::WRITE, "Plugin", "declareInstance"));
+    this->_loadContexts();
+}
+
 QMultiMap<QString, LightBird::IContext *> Plugin::get(QStringList names)
 {
     QMultiMap<QString, LightBird::IContext *> result;
@@ -214,6 +223,11 @@ QMultiMap<QString, LightBird::IContext *> Plugin::get(QStringList names)
         }
     }
     return (result);
+}
+
+QMultiMap<QString, LightBird::IContext *> Plugin::get(QString name)
+{
+    return (this->get(QStringList(name)));
 }
 
 LightBird::IContext *Plugin::add(const QString &name)
@@ -481,7 +495,7 @@ void    Plugin::_loadContexts()
             context.addProtocols(QStringList(e.attribute("protocol")));
             context.addProtocols(e.attribute("protocols").split(' '));
             context.addPorts(QStringList(e.attribute("port")));
-            context.addPorts(e.attribute("ports").split(' '));
+            context.addPorts(e.attribute("ports"));
             context.addMethods(QStringList(e.attribute("method")));
             context.addMethods(e.attribute("methods").split(' '));
             context.addTypes(QStringList(e.attribute("type")));
@@ -507,7 +521,7 @@ void    Plugin::_loadContexts()
                     else if (nodeName == "port")
                         context.addPorts(QStringList(nodeValue));
                     else if (nodeName == "ports")
-                        context.addPorts(nodeValue.split(' '));
+                        context.addPorts(nodeValue);
                     else if (nodeName == "method")
                         context.addMethods(QStringList(nodeValue));
                     else if (nodeName == "methods")

@@ -10,6 +10,8 @@
 namespace LightBird
 {
     /// @brief Manages the contexts of the current plugin.
+    /// The contexts of a plugin are loaded from the "contexts" node of its
+    /// configuration, just after IPlugin::onLoad.
     /// @see LightBird::IContext
     /// @see LightBird::IClient::getContexts
     class IContexts
@@ -33,14 +35,22 @@ namespace LightBird
         /// @return False if the name is already used by an instance.
         virtual bool    declareInstance(QString name, QObject *instance) = 0;
 
+        /// @brief Loads the contexts from the "contexts" node of the plugin
+        /// configuration. This is normally done automatically just after
+        /// IPlugin::onLoad, but if a plugin needs its contexts in onLoad,
+        /// loadContextsFromConfiguration can be called, after declareInstance.
+        virtual void    loadContextsFromConfiguration() = 0;
+
         /// @brief Returns the contexts of the plugin.
-        /// @param name : The list of the contexts to return.
+        /// @param names : The list of the contexts to return.
         /// Several contexts can share the same name (the same instance).
         /// An empty list will returns all the contexts.
         /// An empty string in the list will return the default contexts.
         /// @warning The pointers returned by this method are only valid in the
         /// method that called it.
         virtual QMultiMap<QString, LightBird::IContext *> get(QStringList names = QStringList()) = 0;
+        /// @see IContexts::get
+        virtual QMultiMap<QString, LightBird::IContext *> get(QString name) = 0;
 
         /// @brief Adds a context and returns a pointer to it.
         /// @param name : The name of the new context, which must match an

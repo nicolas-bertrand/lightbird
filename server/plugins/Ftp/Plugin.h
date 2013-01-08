@@ -86,7 +86,7 @@ public:
     static QSharedPointer<Mutex> getControlConnection(LightBird::IClient &client, QString &controlId, bool &isValid);
 
 private:
-    /// @brief Opens the passive data ports, from the contiguration.
+    /// @brief Opens the passive data ports from the contiguration.
     void    _openPassiveDataPorts();
     /// @brief Removes all the occurences of controlId and dataId from the passive connection maps and list.
     /// @param passivePort : True if the passive ports map have to be cleaned.

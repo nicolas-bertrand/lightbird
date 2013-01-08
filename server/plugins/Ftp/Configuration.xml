@@ -3,13 +3,9 @@
   <contexts>
     <context protocols="FTP" transport="TCP"/>
     <context name="control" protocols="FTP" transport="TCP"/>
-    <context name="data" protocols="FTP" transport="TCP"/>
+    <!-- The plugin will open the ports in the "ports" attribute, for the passive data connection. -->
+    <context name="data" protocols="FTP" transport="TCP" ports="4242-4250"/>
   </contexts>
-  <!-- Enables the passive mode on these ports.
-  The plugin will open these ports for the passive data connection.
-  The ports can be separated by any character excluding '-',
-  which is used to represent a range of ports between two numbers. -->
-  <passivePorts>4242</passivePorts>
   <!-- The maximum size sent at a time to the client. -->
   <maxPacketSize>10000000</maxPacketSize>
   <!-- The maximum amount of time in millisecond during which the data connection will wait the control connection to be ready, and vice versa. -->

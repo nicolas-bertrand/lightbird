@@ -41,6 +41,7 @@ public:
     void    removeProtocols(const QStringList &protocols);
     QStringList getPorts() const;
     void    addPorts(const QStringList &ports);
+    void    addPorts(const QString &ports);
     void    removePorts(const QStringList &ports);
     QStringList getMethods() const;
     void    addMethods(const QStringList &methods);
