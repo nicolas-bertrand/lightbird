@@ -20,6 +20,8 @@ Identify::Identify(LightBird::IApi *a)
         this->isInitialized();
     else
         LOG_ERROR("Could not found the identify binary of ImageMagick", Properties("path", path).toMap(), "Identify", "Identify");
+    if (!(this->timeout = this->api->configuration(true).get("identify_timeout").toUInt()))
+        this->timeout = 5000;
 }
 
 Identify::~Identify()
@@ -45,10 +47,9 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
     process.start(this->imageMagickPath + "/" + this->binaryName, arguments);
     process.waitForStarted();
     // Wait until the identification has finished
-    if (!process.waitForFinished(10000))
+    if (!process.waitForFinished(this->timeout))
     {
-        // If it is too long, the process is killed.
-        // This happends when the file is not an image (a video or a music).
+        // If it is too long, the process is killed. This happends when the file is not an image (a video or a music).
         process.kill();
         process.waitForFinished(1000);
     }

@@ -28,6 +28,7 @@ private:
     QString         imageMagickPath; ///< The path to the ImageMagick binaries.
     QString         binaryName;      ///< The name of the convert tool of ImageMagick.
     QString         fileTemplate;    ///< The template of the temporary files.
+    unsigned int    timeout;         ///< The maximum duration of the convert program.
 };
 
 #endif // IMAGE_H

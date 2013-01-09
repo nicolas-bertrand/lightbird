@@ -3,4 +3,8 @@
   <!-- The path to the ImageMagick binaries, from the working directory of the server. It can be absolute or relative.
        By default this path is the directory "ImageMagick" of the plugin ImageMagick. -->
   <image_magick_path></image_magick_path>
+  <!-- The maximum duration of the identify program, in milliseconds. -->
+  <identify_timeout>5000</identify_timeout>
+  <!-- The maximum duration of the convert program, in milliseconds.. -->
+  <convert_timeout>5000</convert_timeout>
 </configuration>

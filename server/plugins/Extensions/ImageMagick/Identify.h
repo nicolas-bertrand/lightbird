@@ -19,6 +19,7 @@ private:
     LightBird::IApi *api;            ///< The LightBird API.
     QString         imageMagickPath; ///< The path to the ImageMagick binaries.
     QString         binaryName;      ///< The name of the identify tool of ImageMagick.
+    unsigned int    timeout;         ///< The maximum duration of the identify program.
 
     /// @brief Adds information from the image.
     void    _addData(LightBird::IIdentify::Information &information, const QString &key, const QString &value);

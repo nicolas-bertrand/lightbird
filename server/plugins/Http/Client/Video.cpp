@@ -81,5 +81,7 @@ Video::~Video()
 
 void    Video::read()
 {
+    if (!this->video)
+        return ;
     this->response.getContent().setData(this->video->transcode(), false);
 }

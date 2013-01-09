@@ -22,6 +22,8 @@ Image::Image(LightBird::IApi *a)
         this->isInitialized();
     else
         LOG_ERROR("Could not found the convert binary of ImageMagick", Properties("path", path).toMap(), "Image", "Image");
+    if (!(this->timeout = this->api->configuration(true).get("convert_timeout").toUInt()))
+        this->timeout = 5000;
 }
 
 Image::~Image()
@@ -61,7 +63,12 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     process.start(commandLine);
     process.waitForStarted();
     // Wait until the conversion has finished
-    process.waitForFinished();
+    if (!process.waitForFinished(this->timeout))
+    {
+        // If it is too long, the process is killed. This happends when the file is not an image (a video or a music).
+        process.kill();
+        process.waitForFinished(1000);
+    }
     // If the exit code is not 0, an error occured
     if (process.exitCode())
     {
