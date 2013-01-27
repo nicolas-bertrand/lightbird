@@ -17,7 +17,7 @@ Context::~Context()
 {
 }
 
-Context::Context(const Context &context)
+Context::Context(const Context &context) : QObject()
 {
     *this = context;
 }
