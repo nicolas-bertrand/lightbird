@@ -327,7 +327,7 @@ function Player(task)
         // Resumes the playback of a player interface which have been paused earlier.
         self.resumeFile = function (playerInterface)
         {
-            if (self.playerInterface != playerInterface)
+            if (self.playerInterface != playerInterface || playerInterface == self.audio)
             {
                 // There is no playlist
                 if (!self.playlistInterface)
@@ -1694,8 +1694,9 @@ self.Audio = function (player)
     {
         var file = gl_files.list[fileIndex];
         
+        self.clear();
         self.fileIndex = fileIndex;
-        //  Sets the source of the audio element
+        // Sets the source of the audio element
         self.audio.mediaId = getUuid();
         self.audio.src = "/c/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
         // Replaces the file name by the title of the music and the artist if possible
@@ -1713,11 +1714,14 @@ self.Audio = function (player)
     // Clears the audio.
     self.clear = function ()
     {
-        self.audio.pause();
-        self.audio.src = "";
-        request("GET", "command/audio/stop?mediaId=" + self.audio.mediaId);
-        self.audio.mediaId = undefined;
-        self.audio.timeOffset = 0;
+        if (self.audio.src)
+        {
+            self.audio.pause();
+            self.audio.src = "";
+            request("GET", "command/audio/stop?mediaId=" + self.audio.mediaId);
+            self.audio.mediaId = undefined;
+            self.audio.timeOffset = 0;
+        }
     }
     
 // Player and file interfaces
