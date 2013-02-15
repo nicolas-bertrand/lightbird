@@ -33,6 +33,7 @@ function ResourceFiles(task)
     resource.close = function ()
     {
         gl_player.closePlaylist(resource);
+        resource.container.close();
         for (var key in resource)
             resource[key] = undefined;
     }
@@ -177,32 +178,30 @@ function List()
     {
         // Nodes
         self.list = resource.node.list;
+        self.top = $(self.list).children(".top");
         self.table = $(self.list).children("table")[0];
-        self.top = $(self.list).children(".top")[0];
-        self.bottom = $(self.list).children(".bottom")[0];
+        self.bottom = $(self.list).children(".bottom");
         
         // Members
         self.listHeight; // The height of the file list
         self.selectedFiles = new Object(); // The list of the files selected by the user
         self.lastFileSelected; // The last file selected or deselected
-        self.index = 0; // Used to add an element at the end of the selectedFiles list
+        self.selectedFilesIndex = 0; // Used to add an element at the end of the selectedFiles list
+        self.oldTableLength; // The length of the table before its last modification
         
         // Events
         $(self.table).mousedown(function (e) { self.mouseDown(e); });
         $(self.table).dblclick(function (e) { self.dblClick(e); });
+        $(self.list).scroll(function (e) { self.scroll(e); });
         
         self.updateColumns();
-        
-        // Hides the scroll if all the files can be seen at the same time
-        if (self.listHeight / C.Files.listRowHeight >= gl_files.list.length)
-            $(self.list).removeClass("scroll");
-        else
-            $(self.list).addClass("scroll");
-        self.list.scrollTop = 0;
-		// Displays the files
-        for (var i = 0; i < gl_files.list.length; i++)
-            self.addRow(i, i);
-        self.addEmptyRows();
+    }
+    
+    // Closes the list.
+    self.close = function ()
+    {
+        for (var key in self)
+            resource[key] = undefined;
     }
     
     // Updates the width of the columns.
@@ -254,6 +253,9 @@ function List()
     {
         self.listHeight = height - C.Files.controlsHeight - C.Files.headerHeight - 2; // -2 is the border of the header
         self.list.style.height = self.listHeight + "px";
+        // Updates the files list
+        self.updateRows();
+        self.scroll();
         // Hides the scroll when all the files can be seen at the same time
         if (self.listHeight / C.Files.listRowHeight >= gl_files.list.length)
         {
@@ -262,61 +264,8 @@ function List()
         }
         else
             $(self.list).addClass("scroll");
-        // Ensures that the list is always filled with rows
-        self.addEmptyRows();
     }
     
-    // Adds a row at the given position.
-    // @param relative : The position of the new row in the table (-1 for the end of the list).
-    // @param absolute : The absolute position of the row in the list, which includes the rows that are not visible.
-    self.addRow = function (relative, absolute)
-    {
-        var isFile = absolute < gl_files.list.length;
-        
-        // Creates the row
-        var row = self.table.insertRow(relative);
-        $(row).addClass(absolute % 2 ? "even" : "odd");
-        // The first cell is the type of the file
-        if (isFile)
-        {
-            var type = gl_files.list[absolute].type;
-            var firstCell = 0;
-            if (!row.previousSibling || !$(row.previousSibling).hasClass(type))
-            {
-                var cell = $(row.insertCell(-1)).addClass("type")[0];
-                for (var i = absolute; i < gl_files.list.length && gl_files.list[i].type == type; ++i)
-                    ;
-                cell.rowSpan = i - absolute;
-                firstCell = 1;
-            }
-        }
-        else
-        {
-            $(row).addClass("empty");
-            $(row.insertCell(-1));
-        }
-        // Builds the other cells
-        var columns = resource.header.getColumns();
-        for (var i = 0; i <= columns.length; ++i)
-            row.insertCell(-1);
-        // If the row represents a file we fill its cells
-        if (isFile)
-        {
-            row.fileIndex = absolute;
-            $(row).addClass(gl_files.list[absolute].type);
-            $(row.cells[firstCell]).addClass("first");
-            for (var i = 0; i < columns.length; ++i)
-            {
-                var cell = row.cells[i + firstCell];
-                cell.name = columns[i].originalName;
-                cell.originalText = resource.layout.convert(columns[i].originalName, gl_files.list[absolute][columns[i].originalName]);
-                cell.innerHTML = cell.originalText;
-                if (columns[i].align != "left")
-                    cell.align = columns[i].align;
-            }
-        }
-    }
-
     // Adds / removes a file from the selection, depending if the keys shift or ctrl are pressed.
     self.mouseDown = function (e)
     {
@@ -351,7 +300,7 @@ function List()
             // Selects the file
             if (!$(file).hasClass("selected"))
             {
-                self.selectedFiles[self.index++] = file;
+                self.selectedFiles[self.selectedFilesIndex++] = file;
                 $(file).addClass("selected");
             }
             // Deselects the file
@@ -383,7 +332,7 @@ function List()
                 for (var row = start; row != end.nextSibling; row = row.nextSibling)
                     if (!$(row).hasClass("selected"))
                         {
-                            self.selectedFiles[self.index++] = row;
+                            self.selectedFiles[self.selectedFilesIndex++] = row;
                             $(row).addClass("selected");
                         }
                 return ;
@@ -391,7 +340,7 @@ function List()
             // Selects the file
             else
             {
-                self.selectedFiles[self.index++] = file;
+                self.selectedFiles[self.selectedFilesIndex++] = file;
                 $(file).addClass("selected");
             }
         }
@@ -414,7 +363,7 @@ function List()
                 for (var row = start; row != end.nextSibling; row = row.nextSibling)
                     if (!$(row).hasClass("selected"))
                         {
-                            self.selectedFiles[self.index++] = row;
+                            self.selectedFiles[self.selectedFilesIndex++] = row;
                             $(row).addClass("selected");
                         }
                 return ;
@@ -422,7 +371,7 @@ function List()
             // Selects the file
             else
             {
-                self.selectedFiles[self.index++] = file;
+                self.selectedFiles[self.selectedFilesIndex++] = file;
                 $(file).addClass("selected");
             }
         }
@@ -433,8 +382,8 @@ function List()
             $(self.table.rows).removeClass("selected");
             self.selectedFiles = new Object();
             // Selects the file
-            self.index = 0;
-            self.selectedFiles[self.index++] = file;
+            self.selectedFilesIndex = 0;
+            self.selectedFiles[self.selectedFilesIndex++] = file;
             $(file).addClass("selected");
         }
         self.lastFileSelected = file;
@@ -467,21 +416,123 @@ function List()
             gl_desktop.openPage("view", { playlistInterface : resource, fileIndex : file.fileIndex });
     }
     
-    // Ensures that the list is allways filled with rows.
-    self.addEmptyRows = function ()
+    // Scrolls the file list.
+    self.scroll = function ()
     {
-        var totalRows = self.listHeight / C.Files.listRowHeight;
+        // Computes the top padding that simutates the scroll
+        var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
+        top = Math.max(0, Math.min(top, (gl_files.list.length - self.table.rows.length) * C.Files.listRowHeight));
         
-        // Adds empty rows
-        if (totalRows > gl_files.list.length)
+        // Update the file list if needed
+        if (top != self.top.height() || self.table.rows.length != self.oldTableLength)
         {
-            for (var i = self.table.rows.length; self.table.rows.length < totalRows; i++)
-                self.addRow(-1, i);
+            var bottom = Math.max(Math.floor((gl_files.list.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
+            self.top.height(top);
+            self.bottom.height(bottom);
+            
+            var headerColumns = resource.header.getColumns();
+            var firstFileIndex = Math.floor(self.top.height() / C.Files.listRowHeight);
+            var diff = firstFileIndex - self.table.rows[0].fileIndex;
+            var row;
+            
+            // Scrolls up
+            if (diff < 0)
+            {
+                var lastRow;
+                for (var i = 0; i < self.table.rows.length && self.table.rows[i].fileIndex != firstFileIndex + i; ++i)
+                {
+                    row = self.table.rows[self.table.rows.length - 1];
+                    lastRow ? $(row).insertAfter(lastRow) : $(row).prependTo(row.parentNode);
+                    self.setFileInRow(firstFileIndex + i, row, headerColumns);
+                    lastRow = row;
+                }
+            }
+            // Scrolls down
+            if (diff > 0 || !diff)
+            {
+                for (var i = 0; (row = self.table.rows[0]).fileIndex != firstFileIndex && i < self.table.rows.length; ++i)
+                    $(row).appendTo(row.parentNode);
+                for (var i = self.table.rows.length - 1; i >= 0 && (row = self.table.rows[i]).fileIndex != firstFileIndex + i; --i)
+                    self.setFileInRow(firstFileIndex + i, self.table.rows[i], headerColumns);
+            }
+            self.oldTableLength = self.table.rows.length;
         }
-        // Remove all the empty rows
+    }
+    
+    // Creates / removes enouth rows to fill the visible part of the list.
+    self.updateRows = function ()
+    {
+        var numberRows = Math.max(Math.ceil(self.listHeight / C.Files.listRowHeight) + 1, 1);
+        var headerColumns = resource.header.getColumns();
+        var j = 0;
+        
+        // There is enouth rows to display all the files
+        if (gl_files.list.length <= numberRows - 1)
+            numberRows--;
+        // Adds the necessary rows
+        if (self.table.rows.length < numberRows)
+            while (self.table.rows.length < numberRows)
+            {
+                var row = self.table.insertRow(-1);
+                // Creates the content of the row
+                $(row.insertCell(-1)).addClass("type");
+                for (var i = 0; i < headerColumns.length; ++i)
+                    $(row.insertCell(-1)).addClass(headerColumns[i].originalName);
+                $(row.insertCell(-1));
+            }
+        // Removes the superfluous rows
         else
-            while (self.table.rows.length > gl_files.list.length)
-                self.table.deleteRow(-1);
+        {
+            var lastRowDisplayed = (numberRows <= gl_files.list.length && $(self.list).hasClass("scroll") && !self.bottom.height());
+            while (self.table.rows.length > numberRows)
+                // If the last row is displayed we remove the top row
+                if (lastRowDisplayed)
+                {
+                    self.top.height(self.top.height() + C.Files.listRowHeight);
+                    self.table.deleteRow(0);
+                }
+                else
+                    self.table.deleteRow(-1);
+        }
+    }
+    
+    // Fills the row with the given file informations.
+    // fileIndex : The file to put in the row (can be out of range).
+    // row : The row to fill.
+    // headerColumns : The list of the columns in the row.
+    self.setFileInRow = function (fileIndex, row, headerColumns)
+    {
+        var columns = $(row).children();
+        
+        row.className = (fileIndex % 2 ? "even" : "odd");
+        // Sets the file to the column
+        if (fileIndex < gl_files.list.length)
+        {
+            row.fileIndex = fileIndex;
+            $(row).addClass("file").addClass(gl_files.list[fileIndex].type);
+            for (var i = 0; i < headerColumns.length; ++i)
+            {
+                var column = columns[i + 1];
+                column.name = headerColumns[i].originalName;
+                column.originalText = resource.layout.convert(headerColumns[i].originalName, gl_files.list[fileIndex][headerColumns[i].originalName]);
+                column.innerHTML = column.originalText;
+                if (headerColumns[i].align != "left")
+                    column.style.textAlign = headerColumns[i].align;
+            }
+        }
+        // Cleans the column
+        else if (row.fileIndex != undefined)
+        {
+            delete row.fileIndex;
+            for (var i = 0; i < headerColumns.length; ++i)
+            {
+                var column = columns[i + 1];
+                delete column.name;
+                delete column.originalText;
+                column.innerHTML = "";
+                column.style.textAlign = "";
+            }
+        }
     }
     
     self.init();
