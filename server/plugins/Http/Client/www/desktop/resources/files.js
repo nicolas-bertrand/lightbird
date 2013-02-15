@@ -186,7 +186,6 @@ function List()
         self.listHeight; // The height of the file list
         self.selectedFiles = new Object(); // The list of the files selected by the user
         self.lastFileSelected; // The last file selected or deselected
-        self.selectedFilesIndex = 0; // Used to add an element at the end of the selectedFiles list
         self.oldTableLength; // The length of the table before its last modification
         
         // Events
@@ -300,18 +299,15 @@ function List()
             // Selects the file
             if (!$(file).hasClass("selected"))
             {
-                self.selectedFiles[self.selectedFilesIndex++] = file;
+                self.selectedFiles[file.fileIndex] = true;
                 $(file).addClass("selected");
             }
             // Deselects the file
-            else
-                for (i in self.selectedFiles)
-                    if (self.selectedFiles[i] == file)
-                    {
-                        delete self.selectedFiles[i];
-                        $(file).removeClass("selected");
-                        break ;
-                    }
+            else if (self.selectedFiles[file.fileIndex])
+            {
+                delete self.selectedFiles[file.fileIndex];
+                $(file).removeClass("selected");
+            }
         }
         // Selects / deselects multiple files
         else if (e.shiftKey == true && e.ctrlKey == false)
@@ -319,59 +315,50 @@ function List()
             // Deselects all the files
             self.selectedFiles = new Object();
             $(self.table.rows).removeClass("selected");
-            // Selects all the files between the selected file and the last file
-            if (self.lastFileSelected)
+            // Selects all the files between the selected file and the last file selected
+            if (self.lastFileSelected != undefined)
             {
-                var start = self.lastFileSelected;
-                var end = file;
-                if (self.lastFileSelected.rowIndex > file.rowIndex)
+                var start = file.fileIndex;
+                var end = self.lastFileSelected;
+                var increment = (start > end ? -1 : 1);
+                for (var i = 0; i <= Math.abs(start - end); i++)
                 {
-                    start = file;
-                    end = self.lastFileSelected;
+                    var rowIndex = file.rowIndex + i * increment;
+                    if (rowIndex >= 0 && rowIndex < self.table.rows.length)
+                        $(self.table.rows[rowIndex]).addClass("selected");
+                    self.selectedFiles[file.fileIndex + i * increment] = true;
                 }
-                for (var row = start; row != end.nextSibling; row = row.nextSibling)
-                    if (!$(row).hasClass("selected"))
-                        {
-                            self.selectedFiles[self.selectedFilesIndex++] = row;
-                            $(row).addClass("selected");
-                        }
                 return ;
             }
             // Selects the file
             else
             {
-                self.selectedFiles[self.selectedFilesIndex++] = file;
+                self.selectedFiles[file.fileIndex] = true;
                 $(file).addClass("selected");
             }
         }
         // Selects multiple files
         else if (e.shiftKey == true && e.ctrlKey == true)
         {
-            // No file selected
-            for (var f in self.selectedFiles)
-                break ;
             // Selects all the files between the selected file and the last file
-            if (f || self.lastFileSelected)
+            if (self.lastFileSelected != undefined)
             {
-                var start = self.lastFileSelected;
-                var end = file;
-                if (self.lastFileSelected.rowIndex > file.rowIndex)
+                var start = file.fileIndex;
+                var end = self.lastFileSelected;
+                var increment = (start > end ? -1 : 1);
+                for (var i = 0; i <= Math.abs(start - end); i++)
                 {
-                    start = file;
-                    end = self.lastFileSelected;
+                    var rowIndex = file.rowIndex + i * increment;
+                    if (rowIndex >= 0 && rowIndex < self.table.rows.length)
+                        $(self.table.rows[rowIndex]).addClass("selected");
+                    self.selectedFiles[file.fileIndex + i * increment] = true;
                 }
-                for (var row = start; row != end.nextSibling; row = row.nextSibling)
-                    if (!$(row).hasClass("selected"))
-                        {
-                            self.selectedFiles[self.selectedFilesIndex++] = row;
-                            $(row).addClass("selected");
-                        }
                 return ;
             }
             // Selects the file
             else
             {
-                self.selectedFiles[self.selectedFilesIndex++] = file;
+                self.selectedFiles[file.fileIndex] = true;
                 $(file).addClass("selected");
             }
         }
@@ -382,11 +369,10 @@ function List()
             $(self.table.rows).removeClass("selected");
             self.selectedFiles = new Object();
             // Selects the file
-            self.selectedFilesIndex = 0;
-            self.selectedFiles[self.selectedFilesIndex++] = file;
+            self.selectedFiles[file.fileIndex] = true;
             $(file).addClass("selected");
         }
-        self.lastFileSelected = file;
+        self.lastFileSelected = file.fileIndex;
     }
     
     // Opens the file.
@@ -450,7 +436,7 @@ function List()
             // Scrolls down
             if (diff > 0 || !diff)
             {
-                for (var i = 0; (row = self.table.rows[0]).fileIndex != firstFileIndex && i < self.table.rows.length; ++i)
+                for (var i = 0; i < self.table.rows.length && (row = self.table.rows[0]).fileIndex != firstFileIndex; ++i)
                     $(row).appendTo(row.parentNode);
                 for (var i = self.table.rows.length - 1; i >= 0 && (row = self.table.rows[i]).fileIndex != firstFileIndex + i; --i)
                     self.setFileInRow(firstFileIndex + i, self.table.rows[i], headerColumns);
@@ -505,10 +491,12 @@ function List()
         var columns = $(row).children();
         
         row.className = (fileIndex % 2 ? "even" : "odd");
-        // Sets the file to the column
+        // Sets the file to the row
         if (fileIndex < gl_files.list.length)
         {
             row.fileIndex = fileIndex;
+            if (self.selectedFiles[fileIndex])
+                $(row).addClass("selected");
             $(row).addClass("file").addClass(gl_files.list[fileIndex].type);
             for (var i = 0; i < headerColumns.length; ++i)
             {
@@ -520,8 +508,8 @@ function List()
                     column.style.textAlign = headerColumns[i].align;
             }
         }
-        // Cleans the column
-        else if (row.fileIndex != undefined)
+        // Cleans the row
+        else if (!$(row).hasClass("empty"))
         {
             delete row.fileIndex;
             for (var i = 0; i < headerColumns.length; ++i)
@@ -532,6 +520,7 @@ function List()
                 column.innerHTML = "";
                 column.style.textAlign = "";
             }
+            $(row).addClass("empty");
         }
     }
     
