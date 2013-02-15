@@ -18,7 +18,12 @@ function ResourceFiles(task)
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
         resource.fileNumber = 0; // The number of the current file of the playlist
         resource.fileIndex = 0; // The index of the current file of the playlist
+        resource.files = new Object(); // The list of the files to display. Points to gl_files.
         
+        // Fills the files list
+        for (var i = 0; i < gl_files.list.length; ++i)
+            resource.files[i] = i;
+        resource.files.length = i;
         // Sets the resource instance to the task, so that it can call close and onResize
         task.setResource(resource);
     }
@@ -43,7 +48,7 @@ function ResourceFiles(task)
         resource.getNumberFiles = function ()
         {
             return ({ fileNumber : resource.fileNumber,
-                      numberOfFiles : gl_files.list.length,
+                      numberOfFiles : resource.files.length,
                       fileIndex : resource.fileIndex });
         }
         
@@ -256,7 +261,7 @@ function List()
         self.updateRows();
         self.scroll();
         // Hides the scroll when all the files can be seen at the same time
-        if (self.listHeight / C.Files.listRowHeight >= gl_files.list.length)
+        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
         {
             $(self.list).removeClass("scroll");
             self.list.scrollTop = 0;
@@ -392,14 +397,16 @@ function List()
                 return ;
             file = self.table.rows[n];
         }
+        if ($(file).hasClass("empty"))
+            return ;
         resource.fileNumber = file.rowIndex + 1;
-        resource.fileIndex = file.fileIndex;
+        resource.fileIndex = resource.files[file.fileIndex];
         // If it is an audio file we play it in the global player
-        if (gl_files.list[file.fileIndex].type == "audio")
-            gl_player.openAudio(resource, file.fileIndex);
+        if (gl_files.list[resource.fileIndex].type == "audio")
+            gl_player.openAudio(resource, resource.fileIndex);
         // Otherwise we open a new page to view the file
         else
-            gl_desktop.openPage("view", { playlistInterface : resource, fileIndex : file.fileIndex });
+            gl_desktop.openPage("view", { playlistInterface : resource, fileIndex : resource.fileIndex });
     }
     
     // Scrolls the file list.
@@ -407,12 +414,12 @@ function List()
     {
         // Computes the top padding that simutates the scroll
         var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
-        top = Math.max(0, Math.min(top, (gl_files.list.length - self.table.rows.length) * C.Files.listRowHeight));
+        top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight));
         
         // Update the file list if needed
         if (top != self.top.height() || self.table.rows.length != self.oldTableLength)
         {
-            var bottom = Math.max(Math.floor((gl_files.list.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
+            var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
             self.top.height(top);
             self.bottom.height(bottom);
             
@@ -453,7 +460,7 @@ function List()
         var j = 0;
         
         // There is enouth rows to display all the files
-        if (gl_files.list.length <= numberRows - 1)
+        if (resource.files.length <= numberRows - 1)
             numberRows--;
         // Adds the necessary rows
         if (self.table.rows.length < numberRows)
@@ -469,7 +476,7 @@ function List()
         // Removes the superfluous rows
         else
         {
-            var lastRowDisplayed = (numberRows <= gl_files.list.length && $(self.list).hasClass("scroll") && !self.bottom.height());
+            var lastRowDisplayed = (numberRows <= resource.files.length && $(self.list).hasClass("scroll") && !self.bottom.height());
             while (self.table.rows.length > numberRows)
                 // If the last row is displayed we remove the top row
                 if (lastRowDisplayed)
@@ -492,17 +499,18 @@ function List()
         
         row.className = (fileIndex % 2 ? "even" : "odd");
         // Sets the file to the row
-        if (fileIndex < gl_files.list.length)
+        if (fileIndex < resource.files.length)
         {
+            var file = gl_files.list[resource.files[fileIndex]];
             row.fileIndex = fileIndex;
             if (self.selectedFiles[fileIndex])
                 $(row).addClass("selected");
-            $(row).addClass("file").addClass(gl_files.list[fileIndex].type);
+            $(row).addClass("file").addClass(file.type);
             for (var i = 0; i < headerColumns.length; ++i)
             {
                 var column = columns[i + 1];
                 column.name = headerColumns[i].originalName;
-                column.originalText = resource.layout.convert(headerColumns[i].originalName, gl_files.list[fileIndex][headerColumns[i].originalName]);
+                column.originalText = resource.layout.convert(headerColumns[i].originalName, file[headerColumns[i].originalName]);
                 column.innerHTML = column.originalText;
                 if (headerColumns[i].align != "left")
                     column.style.textAlign = headerColumns[i].align;
