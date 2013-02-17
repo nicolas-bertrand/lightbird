@@ -18,12 +18,11 @@ function ResourceFiles(task)
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
         resource.fileNumber = 0; // The number of the current file of the playlist
         resource.fileIndex = 0; // The index of the current file of the playlist
-        resource.files = new Object(); // The list of the files to display. Points to gl_files.
+        resource.files = new Array(); // The list of the files to display. Points to gl_files.
         
         // Fills the files list
         for (var i = 0; i < gl_files.list.length; ++i)
             resource.files[i] = i;
-        resource.files.length = i;
         // Sets the resource instance to the task, so that it can call close and onResize
         task.setResource(resource);
     }
@@ -116,7 +115,14 @@ function Header()
     
     self.mouseDownHeader = function (e)
     {
-        if (e.which == 2)
+        // Sorts the column
+        if (e.which == 1)
+        {
+            resource.sortFiles(e.currentTarget.originalName);
+            resource.container.onSort();
+        }
+        // Removes the column
+        else if (e.which == 2)
             self.removeColumn(e.currentTarget);
     }
     
@@ -250,6 +256,16 @@ function List()
             for (var j = 0, cells = rows[i].cells; j < cells.length; ++j)
                 if (cells[j].name == column.originalName)
                     $(cells[j]).remove();
+    }
+    
+    // The files have been sorted, so we have to update the displayed rows.
+    self.onSort = function (column)
+    {
+        var headerColumns = resource.header.getColumns();
+        var firstFileIndex = Math.floor(self.top.height() / C.Files.listRowHeight);
+        
+        for (var i = 0; i < self.table.rows.length; ++i)
+            self.setFileInRow(firstFileIndex + i, self.table.rows[i], headerColumns);
     }
     
     // Resizes the list to fit into the task content height.
@@ -582,6 +598,12 @@ function Layout()
         return (C.Files.headerDefaultWidth);
     }
 
+    // Returns true if the column contains numerical values.
+    self.isNumerical = function (column)
+    {
+        return (self.columns[column] && self.columns[column].numerical)
+    }
+
     // Makes the date more readable.
     self.convertDate = function (date)
     {
@@ -606,7 +628,7 @@ function Layout()
             alignment : "right",
             minWidth : 50,
             defaultWidth : 70,
-            
+            numerical : true,
         },
         created :
         {
@@ -818,7 +840,58 @@ function Icons()
     self.init();
     return (self);
 }
- 
+
+// Sorts the files based on the given column, using the merge sort algorithm.
+var MergeSort =
+{
+    main: function (column)
+    {
+        MergeSort.column = column;
+        if (resource.layout.isNumerical(column))
+            MergeSort.comparison = MergeSort.compareNumber;
+        else
+            MergeSort.comparison = MergeSort.compareString;
+        resource.files = MergeSort.sort(resource.files);
+    },
+
+    sort: function (list)
+    {
+        if (list.length < 2)
+            return (list);
+        var middle = Math.ceil(list.length / 2);
+        return (MergeSort.merge(MergeSort.sort(list.slice(0, middle)), MergeSort.sort(list.slice(middle))));
+    },
+    
+    merge: function (left, right)
+    {
+        var result = new Array();
+        
+        while ((left.length > 0) && (right.length > 0))
+        {
+            if(MergeSort.comparison(left[0], right[0]))
+                result.push(left.shift());
+            else
+                result.push(right.shift());
+        }
+        while (left.length > 0)
+            result.push(left.shift());
+        while (right.length > 0)
+            result.push(right.shift());
+        return (result);
+    },
+    
+    compareNumber: function (a, b)
+    {
+        return (parseInt(gl_files.list[a][MergeSort.column]) <= parseInt(gl_files.list[b][MergeSort.column]));
+    },
+    
+    compareString: function (a, b)
+    {
+        return (gl_files.list[a][MergeSort.column].toLowerCase() <= gl_files.list[b][MergeSort.column].toLowerCase());
+    }
+};
+resource.sortFiles = MergeSort.main;
+
     resource.init();
     return (resource);
 }
