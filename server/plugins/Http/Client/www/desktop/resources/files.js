@@ -195,7 +195,7 @@ function List()
         
         // Members
         self.listHeight; // The height of the file list
-        self.selectedFiles = new Object(); // The list of the files selected by the user
+        self.selectedFiles = new Object(); // The list of the files selected by the user. The key is the global file index.
         self.lastFileSelected; // The last file selected or deselected
         self.oldTableLength; // The length of the table before its last modification
         
@@ -266,6 +266,8 @@ function List()
         
         for (var i = 0; i < self.table.rows.length; ++i)
             self.setFileInRow(firstFileIndex + i, self.table.rows[i], headerColumns);
+        // The local file index is no longer valid
+        self.lastFileSelected.local = undefined;
     }
     
     // Resizes the list to fit into the task content height.
@@ -314,72 +316,53 @@ function List()
             }
             return ;
         }
+        var globalFileIndex = resource.files[file.fileIndex];
         // Selects or deselects one file
-        else if (e.ctrlKey == true && e.shiftKey == false)
+        if (e.ctrlKey == true && e.shiftKey == false)
         {
             // Selects the file
             if (!$(file).hasClass("selected"))
             {
-                self.selectedFiles[file.fileIndex] = true;
+                self.selectedFiles[globalFileIndex] = true;
                 $(file).addClass("selected");
             }
             // Deselects the file
-            else if (self.selectedFiles[file.fileIndex])
+            else if (self.selectedFiles[globalFileIndex])
             {
-                delete self.selectedFiles[file.fileIndex];
+                delete self.selectedFiles[globalFileIndex];
                 $(file).removeClass("selected");
             }
         }
         // Selects / deselects multiple files
-        else if (e.shiftKey == true && e.ctrlKey == false)
+        else if (e.shiftKey == true)
         {
-            // Deselects all the files
-            self.selectedFiles = new Object();
-            $(self.table.rows).removeClass("selected");
+            // Deselects all the files when ctrl is not pressed
+            if (e.ctrlKey == false)
+            {
+                self.selectedFiles = new Object();
+                $(self.table.rows).removeClass("selected");
+            }
             // Selects all the files between the selected file and the last file selected
             if (self.lastFileSelected != undefined)
             {
+                if (!self.lastFileSelected.local)
+                    self.lastFileSelected.local = self.searchLocalFromGlobalFileIntex(self.lastFileSelected.global);
                 var start = file.fileIndex;
-                var end = self.lastFileSelected;
+                var end = self.lastFileSelected.local;
                 var increment = (start > end ? -1 : 1);
                 for (var i = 0; i <= Math.abs(start - end); i++)
                 {
                     var rowIndex = file.rowIndex + i * increment;
                     if (rowIndex >= 0 && rowIndex < self.table.rows.length)
                         $(self.table.rows[rowIndex]).addClass("selected");
-                    self.selectedFiles[file.fileIndex + i * increment] = true;
+                    self.selectedFiles[resource.files[file.fileIndex + i * increment]] = true;
                 }
                 return ;
             }
             // Selects the file
             else
             {
-                self.selectedFiles[file.fileIndex] = true;
-                $(file).addClass("selected");
-            }
-        }
-        // Selects multiple files
-        else if (e.shiftKey == true && e.ctrlKey == true)
-        {
-            // Selects all the files between the selected file and the last file
-            if (self.lastFileSelected != undefined)
-            {
-                var start = file.fileIndex;
-                var end = self.lastFileSelected;
-                var increment = (start > end ? -1 : 1);
-                for (var i = 0; i <= Math.abs(start - end); i++)
-                {
-                    var rowIndex = file.rowIndex + i * increment;
-                    if (rowIndex >= 0 && rowIndex < self.table.rows.length)
-                        $(self.table.rows[rowIndex]).addClass("selected");
-                    self.selectedFiles[file.fileIndex + i * increment] = true;
-                }
-                return ;
-            }
-            // Selects the file
-            else
-            {
-                self.selectedFiles[file.fileIndex] = true;
+                self.selectedFiles[globalFileIndex] = true;
                 $(file).addClass("selected");
             }
         }
@@ -390,10 +373,10 @@ function List()
             $(self.table.rows).removeClass("selected");
             self.selectedFiles = new Object();
             // Selects the file
-            self.selectedFiles[file.fileIndex] = true;
+            self.selectedFiles[globalFileIndex] = true;
             $(file).addClass("selected");
         }
-        self.lastFileSelected = file.fileIndex;
+        self.lastFileSelected = { local: file.fileIndex, global: globalFileIndex };
     }
     
     // Opens the file.
@@ -517,9 +500,10 @@ function List()
         // Sets the file to the row
         if (fileIndex < resource.files.length)
         {
-            var file = gl_files.list[resource.files[fileIndex]];
+            var globalFileIndex = resource.files[fileIndex];
+            var file = gl_files.list[globalFileIndex];
             row.fileIndex = fileIndex;
-            if (self.selectedFiles[fileIndex])
+            if (self.selectedFiles[globalFileIndex])
                 $(row).addClass("selected");
             $(row).addClass("file").addClass(file.type);
             for (var i = 0; i < headerColumns.length; ++i)
@@ -546,6 +530,15 @@ function List()
             }
             $(row).addClass("empty");
         }
+    }
+    
+    // Searches and returns the local file index that corresponds to the given global index.
+    self.searchLocalFromGlobalFileIntex = function (global)
+    {
+        for (var local = 0; local < resource.files.length; ++local)
+            if (resource.files[local] == global)
+                return (local);
+        return (undefined);
     }
     
     self.init();
