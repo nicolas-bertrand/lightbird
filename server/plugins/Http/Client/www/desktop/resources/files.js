@@ -65,7 +65,7 @@ function Header()
     self.init = function ()
     {
         self.columns; // The list of the columns in the header
-        self.sortedBy; // The name of the column by which the files are sorted
+        self.sortColumn; // The name of the column by which the files are sorted
     
         self.add = $(resource.node.header).children(".add")[0];
         self.addColumn("name");
@@ -125,8 +125,14 @@ function Header()
         // Sorts the column
         if (e.which == 1)
         {
-            resource.sortFiles(e.currentTarget.originalName);
+            // If the column is already sorted, we just reverse the files list
+            if (self.sortColumn == e.currentTarget.originalName)
+                resource.files.reverse();
+            // Performs the actual sorting
+            else
+                resource.sortFiles(e.currentTarget.originalName);
             resource.container.onSort();
+            self.sortColumn = e.currentTarget.originalName;
         }
         // Removes the column
         else if (e.which == 2)
@@ -182,7 +188,7 @@ function Header()
         p.i = i;
         resource.container.updateColumns();
     }
-
+    
     self.init();
     return (self);
 }
@@ -203,7 +209,7 @@ function List()
         // Members
         self.listHeight; // The height of the file list
         self.selectedFiles = new Object(); // The list of the files selected by the user. The key is the global file index.
-        self.lastFileSelected; // The last file selected or deselected
+        self.lastFileSelected = { local: undefined, global: undefined }; // The last file selected or deselected
         self.oldTableLength; // The length of the table before its last modification
         
         // Events
