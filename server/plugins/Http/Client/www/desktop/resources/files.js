@@ -64,6 +64,9 @@ function Header()
     
     self.init = function ()
     {
+        self.columns; // The list of the columns in the header
+        self.sortedBy; // The name of the column by which the files are sorted
+    
         self.add = $(resource.node.header).children(".add")[0];
         self.addColumn("name");
         self.addColumn("size");
@@ -94,6 +97,8 @@ function Header()
         column[0].originalName = name;
         column[0].align = resource.layout.getAlignment(name);
         column.addClass(column[0].align);
+        // Updates the list of the columns
+        self.columns = $(resource.node.header).children(".column");
     }
     
     // Removes a column from the header and the container.
@@ -105,12 +110,14 @@ function Header()
         $(column).next().remove();
         // And the column
         $(column).remove();
+        // Updates the list of the columns
+        self.columns = $(resource.node.header).children(".column");
     }
     
     // Returns the list of the columns in the header.
     self.getColumns = function ()
     {
-        return ($(resource.node.header).children(".column"));
+        return (self.columns);
     }
     
     self.mouseDownHeader = function (e)
@@ -261,11 +268,10 @@ function List()
     // The files have been sorted, so we have to update the displayed rows.
     self.onSort = function (column)
     {
-        var headerColumns = resource.header.getColumns();
         var firstFileIndex = Math.floor(self.top.height() / C.Files.listRowHeight);
         
         for (var i = 0; i < self.table.rows.length; ++i)
-            self.setFileInRow(firstFileIndex + i, self.table.rows[i], headerColumns);
+            self.setFileInRow(firstFileIndex + i, self.table.rows[i]);
         // The local file index is no longer valid
         self.lastFileSelected.local = undefined;
     }
@@ -345,7 +351,7 @@ function List()
             // Selects all the files between the selected file and the last file selected
             if (self.lastFileSelected != undefined)
             {
-                if (!self.lastFileSelected.local)
+                if (self.lastFileSelected.local == undefined)
                     self.lastFileSelected.local = self.searchLocalFromGlobalFileIntex(self.lastFileSelected.global);
                 var start = file.fileIndex;
                 var end = self.lastFileSelected.local;
@@ -422,7 +428,6 @@ function List()
             self.top.height(top);
             self.bottom.height(bottom);
             
-            var headerColumns = resource.header.getColumns();
             var firstFileIndex = Math.floor(self.top.height() / C.Files.listRowHeight);
             var diff = firstFileIndex - self.table.rows[0].fileIndex;
             var row;
@@ -435,7 +440,7 @@ function List()
                 {
                     row = self.table.rows[self.table.rows.length - 1];
                     lastRow ? $(row).insertAfter(lastRow) : $(row).prependTo(row.parentNode);
-                    self.setFileInRow(firstFileIndex + i, row, headerColumns);
+                    self.setFileInRow(firstFileIndex + i, row);
                     lastRow = row;
                 }
             }
@@ -445,7 +450,7 @@ function List()
                 for (var i = 0; i < self.table.rows.length && (row = self.table.rows[0]).fileIndex != firstFileIndex; ++i)
                     $(row).appendTo(row.parentNode);
                 for (var i = self.table.rows.length - 1; i >= 0 && (row = self.table.rows[i]).fileIndex != firstFileIndex + i; --i)
-                    self.setFileInRow(firstFileIndex + i, self.table.rows[i], headerColumns);
+                    self.setFileInRow(firstFileIndex + i, self.table.rows[i]);
             }
             self.oldTableLength = self.table.rows.length;
         }
@@ -491,10 +496,10 @@ function List()
     // Fills the row with the given file informations.
     // fileIndex : The file to put in the row (can be out of range).
     // row : The row to fill.
-    // headerColumns : The list of the columns in the row.
-    self.setFileInRow = function (fileIndex, row, headerColumns)
+    self.setFileInRow = function (fileIndex, row)
     {
         var columns = $(row).children();
+        var headerColumns = resource.header.getColumns();
         
         row.className = (fileIndex % 2 ? "even" : "odd");
         // Sets the file to the row
