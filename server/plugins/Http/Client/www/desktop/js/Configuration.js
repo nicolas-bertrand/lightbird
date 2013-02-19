@@ -88,10 +88,12 @@ var Configuration =
         controlsHeight : 40,
         headerHeight : 28,
         headerSeparatorWidth : 1, // The width of the header separators.
+        headerSeparatorMinColumnWidth : 15, // When the width of a column is lower than this, the active area of the separators next to it is shorten.
         headerMinWidth : 40, // The default minimum width of the columns of the header.
         headerTextPadding : 5, // The padding between the separator and the header columns.
         headerDefaultWidth : 200, // The default width of the coulmns of the header.
         listRowHeight : 30, // The height of the rows of the files list.
+        columnTypeTextMinWidth : 30, // The minimum width required by the type column to display the type in text instead of the colors.
 	},
 	View :
 	{

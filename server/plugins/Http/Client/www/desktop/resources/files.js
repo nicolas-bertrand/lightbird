@@ -101,6 +101,7 @@ function Header()
         column.addClass(column[0].align);
         // Updates the list of the columns
         self.columns = $(resource.node.header).children(".column");
+        self.updateSeparators();
     }
     
     // Removes a column from the header and the container.
@@ -152,7 +153,7 @@ function Header()
         param.width = new Array();
         for (var p = $(e.currentTarget).prev(); p.length > 0; p = p.prev().prev())
             param.width.push(p.width());
-        gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, undefined, param);
+        gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "updateSeparators", param);
     }
     
     // Resizes the column.
@@ -190,6 +191,25 @@ function Header()
                     column.width(p.width[j]);
         p.i = i;
         resource.container.updateColumns();
+    }
+    
+    // Shortens the width of the separators next to a small column.
+    self.updateSeparators = function ()
+    {
+        self.getColumns().each(function ()
+        {
+            var column = $(this);
+            if (column.width() <= C.Files.headerSeparatorMinColumnWidth)
+            {
+                column.next().addClass("right");
+                column.prev().addClass("left");
+            }
+            else
+            {
+                column.next().removeClass("right");
+                column.prev().removeClass("left");
+            }
+        });
     }
     
     self.init();
@@ -639,7 +659,7 @@ function Layout()
         {
             var table = $(resource.container.table);
             var isTypeText = table.hasClass("type_text");
-            if (width > 30)
+            if (width > C.Files.columnTypeTextMinWidth)
             {
                 if (!isTypeText)
                 {

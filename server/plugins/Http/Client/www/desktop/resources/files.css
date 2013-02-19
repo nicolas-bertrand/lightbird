@@ -91,6 +91,21 @@
     left: -5px;
     cursor: e-resize;
 }
+#tasks>.task>.files>.header>.separator.right>div
+{
+    width: 6px;
+    left: 0px;
+}
+#tasks>.task>.files>.header>.separator.left>div
+{
+    width: 6px;
+    left: -5px;
+}
+#tasks>.task>.files>.header>.separator.left.right>div
+{
+    width: 5px;
+    left: -2px;
+}
 
 #tasks>.task>.files>.header>.column
 {
