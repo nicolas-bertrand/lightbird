@@ -33,10 +33,16 @@ var Translation =
     },
     Files :
     {
+        type : "Type",
         name : "Name",
         size : "Size",
         created : "Date",
         dateFormat : "d/M/y h:m",
+        audio : "Audio",
+        document : "Document",
+        image : "Image",
+        other : "Other",
+        video : "Video",
     },
     Uploads :
     {

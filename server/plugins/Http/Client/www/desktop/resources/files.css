@@ -75,14 +75,6 @@
     height: 100%;
 }
 
-#tasks>.task>.files>.header>.type
-{
-    width: 10px;
-    border-right: 1px solid #c4d1e0;
-    box-shadow: inset -1px 0px rgba(255, 255, 255, 0.33), 1px 0px rgba(255, 255, 255, 0.33);
-    cursor: pointer;
-}
-
 #tasks>.task>.files>.header>.separator
 {
     width: 1px;
@@ -114,6 +106,11 @@
     text-shadow: 0px 0px 2px #fff, 1px 1px 1px #fff;
     font-size: 14px;
     width: 10000%;
+}
+
+#tasks>.task>.files>.header>.column>div.hide
+{
+    display: none;
 }
 
 #tasks>.task>.files>.header>.column.right>div
@@ -222,12 +219,34 @@
 
 #tasks>.task>.files>.list>table td.type
 {
-    width: 5px;
-    height: 30px;
-    padding: 0px;
+    padding-left: 0px;
 }
 
-#tasks>.task>.files>.list>table tr.image td.type
+#tasks>.task>.files>.list>table td.type span
+{
+    display: none;
+}
+
+#tasks>.task>.files>.list>table.type_text td.type
+{
+    padding-left: 5px;
+}
+#tasks>.task>.files>.list>table.type_text td.type div
+{
+    display: none;
+}
+#tasks>.task>.files>.list>table.type_text td.type span
+{
+    display: block;
+}
+
+#tasks>.task>.files>.list>table td.type div
+{
+    width: 100%;
+    height: 30px;
+}
+
+#tasks>.task>.files>.list>table tr.image td.type div
 {
     background-image: linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
     background-image: -moz-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
@@ -236,7 +255,7 @@
     background-image: -ms-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
 }
 
-#tasks>.task>.files>.list>table tr.audio td.type
+#tasks>.task>.files>.list>table tr.audio td.type div
 {
     background-image: linear-gradient(top, #6be179 0%, #47da58 100%);
     background-image: -moz-linear-gradient(top, #6be179 0%, #47da58 100%);
@@ -245,7 +264,7 @@
     background-image: -ms-linear-gradient(top, #6be179 0%, #47da58 100%);
 }
 
-#tasks>.task>.files>.list>table tr.video td.type
+#tasks>.task>.files>.list>table tr.video td.type div
 {
     background-image: linear-gradient(top, #ff925c 0%, #ff7834 100%);
     background-image: -moz-linear-gradient(top, #ff925c 0%, #ff7834 100%);
@@ -254,7 +273,7 @@
     background-image: -ms-linear-gradient(top, #ff925c 0%, #ff7834 100%);
 }
 
-#tasks>.task>.files>.list>table tr.document td.type
+#tasks>.task>.files>.list>table tr.document td.type div
 {
     background-image: linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
     background-image: -moz-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
@@ -263,7 +282,7 @@
     background-image: -ms-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
 }
 
-#tasks>.task>.files>.list>table tr.other td.type
+#tasks>.task>.files>.list>table tr.other td.type div
 {
     background-image: linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -moz-linear-gradient(top, #999999 0%, #808080 100%);

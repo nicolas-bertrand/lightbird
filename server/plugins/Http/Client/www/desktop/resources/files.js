@@ -68,6 +68,7 @@ function Header()
         self.sortColumn; // The name of the column by which the files are sorted
     
         self.add = $(resource.node.header).children(".add")[0];
+        self.addColumn("type");
         self.addColumn("name");
         self.addColumn("size");
         self.addColumn("created");
@@ -84,6 +85,7 @@ function Header()
             translated = T.Files[name];
         text[0].innerHTML = translated;
         text.appendTo(column);
+        column.addClass(name);
         column.width(resource.layout.getDefaultWidth(name));
         column.mousedown(function (e) { self.mouseDownHeader(e); });
         column.insertBefore(self.add);
@@ -131,8 +133,8 @@ function Header()
             // Performs the actual sorting
             else
                 resource.sortFiles(e.currentTarget.originalName);
-            resource.container.onSort();
             self.sortColumn = e.currentTarget.originalName;
+            resource.container.onSort();
         }
         // Removes the column
         else if (e.which == 2)
@@ -178,6 +180,7 @@ function Header()
                     diff += (p.width[i] - minWidth);
             }
             column.width(width);
+            resource.layout.onResize(column[0].originalName, width);
         }
         column = $(p.separator).prev();
         // Ensures that the previous column have their original width
@@ -218,6 +221,8 @@ function List()
         $(self.list).scroll(function (e) { self.scroll(e); });
         
         self.updateColumns();
+        // Initializes the type column
+        resource.header.getColumns().filter(".type").children().addClass("hide");
     }
     
     // Closes the list.
@@ -237,19 +242,16 @@ function List()
         {
             var col;
             // The columns doesn't exists yet
-            if (cols.length <= i + 1)
+            if (cols.length <= i)
             {
                 col = $("<col></col>");
                 col[0].name = columns[i].originalName;
                 col.appendTo(colgroup);
             }
             else
-                col = $(cols[i + 1]);
+                col = $(cols[i]);
             // Updates the width
-            if (i != 0)
-                col.width($(columns[i]).width() + C.Files.headerSeparatorWidth);
-            else
-                col.width($(columns[i]).width() + C.Files.headerSeparatorWidth * 2);
+            col.width($(columns[i]).width() + C.Files.headerSeparatorWidth);
         }
     }
     
@@ -449,6 +451,8 @@ function List()
                     self.setFileInRow(firstFileIndex + i, row);
                     lastRow = row;
                 }
+                for (var i = self.table.rows.length - 1; i >= 0 && !(row = self.table.rows[i]).className; --i)
+                    self.setFileInRow(firstFileIndex + i, row);
             }
             // Scrolls down
             if (diff > 0 || !diff)
@@ -478,7 +482,6 @@ function List()
             {
                 var row = self.table.insertRow(-1);
                 // Creates the content of the row
-                $(row.insertCell(-1)).addClass("type");
                 for (var i = 0; i < headerColumns.length; ++i)
                     $(row.insertCell(-1)).addClass(headerColumns[i].originalName);
                 $(row.insertCell(-1));
@@ -519,7 +522,7 @@ function List()
             $(row).addClass("file").addClass(file.type);
             for (var i = 0; i < headerColumns.length; ++i)
             {
-                var column = columns[i + 1];
+                var column = columns[i];
                 column.name = headerColumns[i].originalName;
                 column.originalText = resource.layout.convert(headerColumns[i].originalName, file[headerColumns[i].originalName]);
                 column.innerHTML = column.originalText;
@@ -533,7 +536,7 @@ function List()
             delete row.fileIndex;
             for (var i = 0; i < headerColumns.length; ++i)
             {
-                var column = columns[i + 1];
+                var column = columns[i];
                 delete column.name;
                 delete column.originalText;
                 column.innerHTML = "";
@@ -568,12 +571,12 @@ function Layout()
     // Converts the value depending on the key.
     self.convert = function (key, value)
     {
-        if (self.columns[key] && self.columns[key].method)
+        if (self.columns[key] && self.columns[key].convert)
         {
-            if (self[self.columns[key].method])
-                return (self[self.columns[key].method](value));
-            else if (window[self.columns[key].method])
-                return (window[self.columns[key].method](value));
+            if (self[self.columns[key].convert])
+                return (self[self.columns[key].convert](value));
+            else if (window[self.columns[key].convert])
+                return (window[self.columns[key].convert](value));
         }
         return (value);
     }
@@ -608,6 +611,12 @@ function Layout()
         return (self.columns[column] && self.columns[column].numerical)
     }
 
+    // Converts the generic type name (audio document image other video).
+    self.convertType = function (type)
+    {
+        return ("<div></div><span>" + T.Files[type] + "</span>");
+    }
+    
     // Makes the date more readable.
     self.convertDate = function (date)
     {
@@ -623,28 +632,58 @@ function Layout()
         return (d);
     }
     
+    // The column have been resized
+    self.onResize = function (column, width)
+    {
+        if (resource.container.table && column == "type")
+        {
+            var table = $(resource.container.table);
+            var isTypeText = table.hasClass("type_text");
+            if (width > 30)
+            {
+                if (!isTypeText)
+                {
+                    resource.header.getColumns().filter(".type").children().removeClass("hide");
+                    table.addClass("type_text");
+                }
+            }
+            else if (isTypeText)
+            {
+                resource.header.getColumns().filter(".type").children().addClass("hide");
+                table.removeClass("type_text");
+            }
+            self.columns[column]
+        }
+    }
+    
     // Stores the layout of the columns.
     self.columns = 
     {
-        size :
+        type:
         {
-            method : "sizeToString",
-            alignment : "right",
-            minWidth : 50,
-            defaultWidth : 70,
-            numerical : true,
+            minWidth: 10,
+            defaultWidth: 10,
+            convert: "convertType"
         },
-        created :
+        name:
         {
-            method : "convertDate",
-            minWidth : 67,
-            defaultWidth : 110,
+            defaultWidth: 300
         },
-        name :
+        size:
         {
-            defaultWidth : 300,
+            convert: "sizeToString",
+            alignment: "right",
+            minWidth: 50,
+            defaultWidth: 70,
+            numerical: true
         },
-    }
+        created:
+        {
+            convert: "convertDate",
+            minWidth: 67,
+            defaultWidth: 110
+        }
+    };
     
     self.init();
     return (self);
