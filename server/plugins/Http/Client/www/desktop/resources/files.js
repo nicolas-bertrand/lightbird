@@ -8,6 +8,8 @@ function ResourceFiles(task)
         resource.node = new Object();
         resource.node.element = $(task.content).children(".files")[0];
         resource.node.controls = $(resource.node.element).children(".controls")[0];
+        resource.node.types = $(resource.node.controls).children(".types")[0];
+        resource.node.other = $(resource.node.controls).children(".other")[0];
         resource.node.header = $(resource.node.element).children(".header")[0];
         resource.node.list = $(resource.node.element).children(".list")[0];
         
@@ -18,11 +20,8 @@ function ResourceFiles(task)
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
         resource.fileNumber = 0; // The number of the current file of the playlist
         resource.fileIndex = 0; // The index of the current file of the playlist
-        resource.files = new Array(); // The list of the files to display. Points to gl_files.
+        resource.files = new Files(); // The list of the files to display.
         
-        // Fills the files list
-        for (var i = 0; i < gl_files.list.length; ++i)
-            resource.files[i] = i;
         // Sets the resource instance to the task, so that it can call close and onResize
         task.setResource(resource);
     }
@@ -56,7 +55,89 @@ function ResourceFiles(task)
             gl_player.playFile(resource, fileInterface);
         }
     }
+
+// Manages the files. This class inherit from Array.
+function Files()
+{
+    var self = new Array();
     
+    // The id of the files in the lists point to gl_files.
+    self.init = function ()
+    {
+        self.raw = new Array(); // The unfiltered list of the files
+        self.types = new Object(); // The types that don't have to be displayed
+        self.sortColumn; // The name of the column used to sort the files
+        resource.files = self;
+    
+        // Fills the list
+        for (var i = 0; i < gl_files.list.length; ++i)
+            self.raw.push(i);
+        self.applyFilters();
+    }
+    
+    // Recreates the filtered list.
+    self.applyFilters = function ()
+    {
+        self.length = 0;
+        for (var i = 0; i < self.raw.length; ++i)
+        {
+            var file = gl_files.list[self.raw[i]];
+            if (!self.types[file.type])
+                self.push(self.raw[i]);
+        }
+        resource.container.onFilesChange();
+    }
+    
+    // The files of this type will not be displayed.
+    self.addFilterType = function (type)
+    {
+        self.types[type] = true;
+    }
+    
+    // Displays the files of this type.
+    self.removeFilterType = function (type)
+    {
+        self.types[type] = undefined;
+    }
+    
+    // Sorts the files.
+    self.sort = function (column)
+    {
+        self.sortColumn = column;
+        if (resource.layout.isNumerical(column))
+            self.raw.sort(self._compareNumber);
+        else
+            self.raw.sort(self._compareString);
+        self.applyFilters();
+    }
+    
+    // Reverses the list.
+    self.reverse = function()
+    {
+        self.raw.reverse();
+        self.applyFilters();
+    }
+    
+    // Numerical column comparison.
+    self._compareNumber = function (a, b)
+    {
+        return (parseInt(gl_files.list[a][self.sortColumn]) - parseInt(gl_files.list[b][self.sortColumn]));
+    }
+    
+    // Alphabetical column comparison.
+    self._compareString = function (i, j)
+    {
+        var a = gl_files.list[i][self.sortColumn].toLowerCase();
+        var b = gl_files.list[j][self.sortColumn].toLowerCase();
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+    }
+    
+    self.init();
+    return (self);
+}
+
 // Manages the files list header.
 function Header()
 {
@@ -133,9 +214,8 @@ function Header()
                 resource.files.reverse();
             // Performs the actual sorting
             else
-                resource.sortFiles(e.currentTarget.originalName);
+                resource.files.sort(e.currentTarget.originalName);
             self.sortColumn = e.currentTarget.originalName;
-            resource.container.onSort();
         }
         // Removes the column
         else if (e.which == 2)
@@ -293,8 +373,19 @@ function List()
                     $(cells[j]).remove();
     }
     
-    // The files have been sorted, so we have to update the displayed rows.
-    self.onSort = function (column)
+    // Hides the files that have the given type.
+    // If type is empty, all the files are displayed back.
+    self.filterTypesPreview = function (type)
+    {
+        if (type)
+            $(resource.node.list).addClass("filter_" + type);
+        else
+            for (var type in resource.icons.icons.types)
+                $(resource.node.list).removeClass("filter_" + type);
+    }
+    
+    // The files have been sorted or filtered, so we have to update the displayed rows.
+    self.onFilesChange = function (column)
     {
         var firstFileIndex = Math.floor(self.top.height() / C.Files.listRowHeight);
         
@@ -302,6 +393,12 @@ function List()
             self.setFileInRow(firstFileIndex + i, self.table.rows[i]);
         // The local file index is no longer valid
         self.lastFileSelected.local = undefined;
+        // Updates the scroll padding
+        var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
+        top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight));
+        var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
+        self.top.height(top);
+        self.bottom.height(bottom);
     }
     
     // Resizes the list to fit into the task content height.
@@ -380,7 +477,8 @@ function List()
             if (self.lastFileSelected != undefined)
             {
                 if (self.lastFileSelected.local == undefined)
-                    self.lastFileSelected.local = self.searchLocalFromGlobalFileIntex(self.lastFileSelected.global);
+                    if (!(self.lastFileSelected.local = self.searchLocalFromGlobalFileIntex(self.lastFileSelected.global)))
+                        self.lastFileSelected = { local: file.fileIndex, global: globalFileIndex };
                 var start = file.fileIndex;
                 var end = self.lastFileSelected.local;
                 var increment = (start > end ? -1 : 1);
@@ -631,7 +729,7 @@ function Layout()
         return (self.columns[column] && self.columns[column].numerical)
     }
 
-    // Converts the generic type name (audio document image other video).
+    // Converts the generic type name (image audio video document other).
     self.convertType = function (type)
     {
         return ("<div></div><span>" + T.Files[type] + "</span>");
@@ -717,55 +815,97 @@ function Icons()
     self.init = function ()
     {
         for (var type in self.icons.types)
-            self.typeIcons($(resource.node.controls).children("." + type)[0], self.icons.types[type]);
+            self.typeIcons($(resource.node.types).children("." + type)[0], type);
         for (var control in self.icons.controls)
-            self.controlIcons($(resource.node.controls).children("." + control)[0], self.icons.controls[control]);
+            self.controlIcons($(resource.node.other).children("." + control)[0], self.icons.controls[control]);
         self.headerIcon($(resource.node.header).children(".add")[0], self.icons.add);
     }
     
     // Generates the type icons.
-    self.typeIcons = function (destination, icon)
+    self.typeIcons = function (destination, type)
     {
+        var icon = self.icons.types[type];
         var height = C.Files.controlsHeight;
         var paper = Raphael(destination, icon.width, height);
-        var background = paper.rect(0, 0, icon.width, height - 5);
-        background.attr("fill", icon.background);
-        background.attr("stroke", "none");
-        background.hide();
         var path = paper.path(icon.path);
-        path.attr("fill", "90-#6e7d8f-#929daa");
+        path.attr("fill", self.icons.type.selected_color);
         path.attr("stroke", "none");
         path.translate(icon.width / 2, height / 2);
         var line = paper.rect(0, height - 5, icon.width, 5);
         line.attr("fill", icon.line);
         line.attr("stroke", "none");
         line.hide();
-        if (icon == self.icons.types.image)
+        
+        // Associates the node with the SVG
+        var object = new Object();
+        destination.object = object;
+        object.isSelected = true; // True is the type is selected
+        object.type = type; // The name of the type
+        // Selects / deselects the type
+        object.selectType = function (select)
         {
-            icon.border = paper.rect(0, 0, 1, height - 5);
-            icon.border.attr("fill", "#bee8fd");
-            icon.border.attr("stroke", "none");
-            icon.border.hide();
-        }
+            object.isSelected = select;
+            path.translate(-icon.width / 2, - height / 2);
+            if (select)
+            {
+                path.attr("fill", self.icons.type.selected_color);
+                resource.files.removeFilterType(type);
+            }
+            else
+            {
+                path.attr("fill", self.icons.type.deselected_color);
+                resource.files.addFilterType(type);
+            }
+            path.translate(icon.width / 2, height / 2);
+        };
+        
+        // Events
+        var types = $(resource.node.types).children();
         $(destination).mouseenter(function ()
         {
-            path.translate(-icon.width / 2, - height / 2);
-            path.attr("fill", icon.gradient);
-            path.translate(icon.width / 2, height / 2);
-            background.show();
+            var selected = 0;
+            types.each(function () { if (this.object.isSelected) selected++; });
+            if (selected == types.length)
+                types.not(destination).each(function () { resource.container.filterTypesPreview(this.object.type); });
+            else if (selected > 1 || !object.isSelected)
+                resource.container.filterTypesPreview(type);
             line.show();
-            if (icon.border)
-                icon.border.show();
         });
         $(destination).mouseleave(function ()
         {
-            path.translate(-icon.width / 2, - height / 2);
-            path.attr("fill", "90-#6e7d8f-#929daa");
-            path.translate(icon.width / 2, height / 2);
-            background.hide();
             line.hide();
-            if (icon.border)
-                icon.border.hide();
+            resource.container.filterTypesPreview();
+        });
+        $(destination).mousedown(function ()
+        {
+            var selected = 0;
+            types.each(function () { if (this.object.isSelected) selected++; });
+            // If all the types are selected, we deselect all the other types
+            if (selected == types.length)
+                types.not(destination).each(function () { this.object.selectType(false); });
+            else
+            {
+                selected = 0;
+                object.isSelected = !object.isSelected;
+                types.each(function () { if (this.object.isSelected) selected++; });
+                // If no type is selected, we select all the other types
+                if (selected == 0)
+                {
+                    types.not(destination).each(function () { this.object.selectType(true); });
+                    object.isSelected = true;
+                }
+                else
+                {
+                    object.selectType(object.isSelected);
+                    // If all types are now selected, we display the filter preview of all the other types
+                    if (selected == types.length)
+                    {
+                        resource.container.filterTypesPreview();
+                        types.not(destination).each(function () { resource.container.filterTypesPreview(this.object.type); });
+                    }
+                }
+            }
+            resource.files.applyFilters();
         });
     }
     
@@ -816,87 +956,82 @@ function Icons()
     // Stores the icons data.
     self.icons = 
     {
-        types :
+        types:
         {
-            image :
+            image:
             {
-                path : gl_svg.ResourceFiles.image,
-                width : 47,
-                gradient : "90-#33bbff-#66ccff",
-                line : "#33bbff",
-                background : "90-#d6f1ff-#edf9ff",
+                path: gl_svg.ResourceFiles.image,
+                width: 47,
+                line: "#33bbff",
             },
-            music : 
+            audio: 
             {
-                path : gl_svg.ResourceFiles.music,
-                width : 40,
-                gradient : "90-#46da57-#73e380",
-                line : "#46da57",
-                background : "90-#daf8dd-#effcf0",
+                path: gl_svg.ResourceFiles.audio,
+                width: 40,
+                line: "#46da57",
             },
-            video : 
+            video: 
             {
-                path : gl_svg.ResourceFiles.video,
-                width : 41,
-                gradient : "90-#ff7733-#ff9865",
-                line : "#ff7733",
-                background : "90-#ffe4d6 -#fff3ed",
+                path: gl_svg.ResourceFiles.video,
+                width: 41,
+                line: "#ff7733",
             },
-            document : 
+            document: 
             {
-                path : gl_svg.ResourceFiles.document,
-                width : 36,
-                gradient : "90-#ffc000-#ffd040",
-                line : "#ffc000",
-                background : "90-#fff2cc-#fff9e8",
+                path: gl_svg.ResourceFiles.document,
+                width: 36,
+                line: "#ffc000",
             },
-            other : 
+            other: 
             {
-                path : gl_svg.ResourceFiles.other,
-                width : 40,
-                gradient : "90-#808080-#9e9e9e",
-                line : "#808080",
-                background : "90-#e2e5e9-#f2f4f5",
+                path: gl_svg.ResourceFiles.other,
+                width: 40,
+                line: "#808080",
             },
         },
-        controls :
+        type:
         {
-            folder : 
+            selected_color: "90-#6e7d8f-#929daa",
+            deselected_color: "90-#b1bac5-#c7cdd4",
+        },
+        controls:
+        {
+            folder: 
             {
-                path : gl_svg.ResourceFiles.folder,
-                width : 18,
+                path: gl_svg.ResourceFiles.folder,
+                width: 18,
             },
-            resize : 
+            resize: 
             {
-                path : gl_svg.ResourceFiles.resize,
-                width : 14,
+                path: gl_svg.ResourceFiles.resize,
+                width: 14,
             },
-            list : 
+            list: 
             {
-                path : gl_svg.ResourceFiles.list,
-                width : 18,
-                selected : true,
+                path: gl_svg.ResourceFiles.list,
+                width: 18,
+                selected: true,
             },
-            hierarchy : 
+            hierarchy: 
             {
-                path : gl_svg.ResourceFiles.hierarchy,
-                width : 18,
+                path: gl_svg.ResourceFiles.hierarchy,
+                width: 18,
             },
-            split : 
+            split: 
             {
-                path : gl_svg.ResourceFiles.split,
-                width : 18,
+                path: gl_svg.ResourceFiles.split,
+                width: 18,
             },
-            block : 
+            block: 
             {
-                path : gl_svg.ResourceFiles.block,
-                width : 18,
+                path: gl_svg.ResourceFiles.block,
+                width: 18,
             },
         },
-        add : 
+        add: 
         {
-            path : gl_svg.ResourceFiles.add,
-            width : 20,
+            path: gl_svg.ResourceFiles.add,
+            width: 20,
         },
     };
 
@@ -914,7 +1049,7 @@ var MergeSort =
             MergeSort.comparison = MergeSort.compareNumber;
         else
             MergeSort.comparison = MergeSort.compareString;
-        resource.files = MergeSort.sort(resource.files);
+        return (MergeSort.sort(resource.files));
     },
 
     sort: function (list)
@@ -953,7 +1088,6 @@ var MergeSort =
         return (gl_files.list[a][MergeSort.column].toLowerCase() <= gl_files.list[b][MergeSort.column].toLowerCase());
     }
 };
-resource.sortFiles = MergeSort.main;
 
     resource.init();
     return (resource);

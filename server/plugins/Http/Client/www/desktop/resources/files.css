@@ -22,27 +22,22 @@
     overflow: hidden;
 }
 
-#tasks>.task>.files>.controls>.image,
-#tasks>.task>.files>.controls>.music,
-#tasks>.task>.files>.controls>.video,
-#tasks>.task>.files>.controls>.document,
-#tasks>.task>.files>.controls>.other
+#tasks>.task>.files>.controls>.types>.image,
+#tasks>.task>.files>.controls>.types>.audio,
+#tasks>.task>.files>.controls>.types>.video,
+#tasks>.task>.files>.controls>.types>.document,
+#tasks>.task>.files>.controls>.types>.other
 {
     float: left;
     cursor: pointer;
 }
-#tasks>.task>.files>.controls>.image:hover { box-shadow: 0px 0px 5px #33bbff; }
-#tasks>.task>.files>.controls>.music:hover { box-shadow: 0px 0px 5px #46da57; }
-#tasks>.task>.files>.controls>.video:hover { box-shadow: 0px 0px 5px #ff7733; }
-#tasks>.task>.files>.controls>.document:hover { box-shadow: 0px 0px 5px #ffc000; }
-#tasks>.task>.files>.controls>.other:hover { box-shadow: 0px 0px 5px #808080; }
 
-#tasks>.task>.files>.controls>.folder,
-#tasks>.task>.files>.controls>.resize,
-#tasks>.task>.files>.controls>.list,
-#tasks>.task>.files>.controls>.hierarchy,
-#tasks>.task>.files>.controls>.split,
-#tasks>.task>.files>.controls>.block
+#tasks>.task>.files>.controls>.other>.folder,
+#tasks>.task>.files>.controls>.other>.resize,
+#tasks>.task>.files>.controls>.other>.list,
+#tasks>.task>.files>.controls>.other>.hierarchy,
+#tasks>.task>.files>.controls>.other>.split,
+#tasks>.task>.files>.controls>.other>.block
 {
     float: right;
     padding: 0px 10px 0px 10px;
@@ -304,4 +299,15 @@
     background-image: -webkit-linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -o-linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -ms-linear-gradient(top, #999999 0%, #808080 100%);
+}
+
+/* Filter types preview */
+
+#tasks>.task>.files>.list.filter_image>table tr.image td,
+#tasks>.task>.files>.list.filter_audio>table tr.audio td,
+#tasks>.task>.files>.list.filter_video>table tr.video td,
+#tasks>.task>.files>.list.filter_document>table tr.document td,
+#tasks>.task>.files>.list.filter_other>table tr.other td
+{
+    opacity: 0.5;
 }
