@@ -891,7 +891,8 @@ function Icons()
                 // If no type is selected, we select all the other types
                 if (selected == 0)
                 {
-                    types.not(destination).each(function () { this.object.selectType(true); });
+                    resource.container.filterTypesPreview();
+                    types.not(destination).each(function () { this.object.selectType(true); resource.container.filterTypesPreview(this.object.type); });
                     object.isSelected = true;
                 }
                 else

@@ -19,8 +19,9 @@ function Player(task)
         self.node.player = self.node.bottom.children(".player");
         self.node.playback = self.node.player.children(".playback");
         self.node.settings = self.node.player.children(".settings");
-        self.node.numerator = self.node.playback.find(".numerator"); // The number of the current file played
-        self.node.denominator = self.node.playback.find(".denominator"); // The total number of files
+        self.node.number = self.node.playback.children(".number");
+        self.node.numerator = self.node.number.children(".numerator"); // The number of the current file played
+        self.node.denominator = self.node.number.find(".denominator"); // The total number of files
         self.node.time = self.node.playback.children(".time");
         self.node.current_time = self.node.playback.find(".current_time"); // The current time of the file played
         self.node.duration = self.node.playback.find(".duration"); // The duration of the file
@@ -28,10 +29,6 @@ function Player(task)
         self.node.audio = self.node.bottom.children(".audio");
         // Icons
         self.node.icon = new Object();
-        self.node.icon.play = $(self.node.playback).children(".play").children(".play");
-        self.node.icon.pause = $(self.node.playback).children(".play").children(".pause");
-        self.node.icon.previous = $(self.node.playback).children(".previous");
-        self.node.icon.next = $(self.node.playback).children(".next");
         self.node.icon.volume = $(self.node.settings).children(".volume");
         self.node.icon.mute = $(self.node.settings).children(".mute");
         self.node.icon.settings = $(self.node.settings).children(".settings");
@@ -51,6 +48,7 @@ function Player(task)
         self.node.list = self.node.playlist.children(".list");
 
         // Members
+        self.playback; // Manages the playback buttons
         self.timeLine; // Manages the time line
         self.playlist; // Manages the playlist
         self.header; // Manages the header of the playlist
@@ -64,11 +62,8 @@ function Player(task)
         // Default values
         C.Desktop.bottomHeight = C.Player.defaultHeight;
         self.node.bottom.height(C.Desktop.bottomHeight);
-        self.node.numerator.html("0");
-        self.node.denominator.html("0");
-        self.node.current_time.html("0:00");
-        self.node.duration.html("0:00");
         self.node.filename.html("");
+        self.playback = new self.Playback(self);
         self.timeLine = new self.TimeLine(self);
         self.playlist = new self.Playlist(self);
         self.header = new self.Header(self);
@@ -78,8 +73,7 @@ function Player(task)
         // Events
         self.node.bottom.mouseenter(function (e) { self.mouseEnter(e); });
         self.node.bottom.mouseleave(function (e) { self.mouseLeave(e); });
-        self.node.playback.children(".number").mousedown(function (e) { self.mouseDown(e); });
-        self.node.player.children(".name").mousedown(function (e) { self.mouseDown(e); });
+        self.node.player.children(".name").mousedown(function (e) { self.mouseDownName(e); });
     }
     
     // Resizes the player when the browser size changes.
@@ -136,11 +130,6 @@ function Player(task)
     // Generates the SVG icons of the player.
     self.generateIcons = function ()
     {
-        self.drawIcon(self.node.icon.play[0], 16, gl_svg.Player.play, 0, 0.3);
-        self.node.icon.play.parent().unbind("click"); // The play and pause icons share the same parent
-        self.drawIcon(self.node.icon.pause[0], 16, gl_svg.Player.pause);
-        self.drawIcon(self.node.icon.previous.children("div")[0], 14, gl_svg.Player.previous, 0.5);
-        self.drawIcon(self.node.icon.next.children("div")[0], 14, gl_svg.Player.next, -0.1);
         self.drawIcon(self.node.icon.volume.children("div")[0], 25, gl_svg.Player.volume);
         self.drawIcon(self.node.icon.mute.children("div")[0], 25, gl_svg.Player.mute);
         self.drawIcon(self.node.icon.settings.children("div")[0], 21, gl_svg.Player.settings);
@@ -170,50 +159,35 @@ function Player(task)
         {
             icon.attr("fill", "#eeeeee");
         });
-        $(destination.parentNode).click(function (e) { self.mouseDown(e); });
+        $(destination.parentNode).click(function (e) { self.mouseDownName(e); });
     }
     
-    // Mouse down on a button of the player.
-    self.mouseDown = function (e)
+    // Mouse down on the name area.
+    self.mouseDownName = function (e)
     {
-        var target = $(e.delegateTarget);
-        var media;
-        
         if (e.which != 1)
             return ;
-        if (self.playerInterface)
-            media = self.playerInterface.getMedia();
-        if (target.hasClass("play") && media)
-        {
-            if (media.paused)
-                self.playerInterface.play();
-            else
-                self.playerInterface.pause();
-        }
         // Opens / closes the playlist
-        else if (target.hasClass("number") || target.hasClass("name"))
+        if (!self.playlist.isPinned())
         {
-            if (!self.playlist.isPinned())
+            if (!self.playlist.isDisplayed())
+                self.playlist.display();
+            else
+                self.playlist.hide();
+        }
+        // If the playlist is pinned we resize it to the minimal height instead of hiding it
+        else
+        {
+            if (self.playlist.height <= C.Player.headerHeight + 1)
             {
-                if (!self.playlist.isDisplayed())
-                    self.playlist.display();
-                else
-                    self.playlist.hide();
+                if (!self.oldPlaylistHeight)
+                    self.oldPlaylistHeight = C.Player.playlistHeight;
+                self.playlist.setHeight(self.oldPlaylistHeight);
             }
-            // If the playlist is pinned we resize it to the minimal height instead of hidding it
             else
             {
-                if (self.playlist.height <= C.Player.headerHeight + 1)
-                {
-                    if (!self.oldPlaylistHeight)
-                        self.oldPlaylistHeight = C.Player.playlistHeight;
-                    self.playlist.setHeight(self.oldPlaylistHeight);
-                }
-                else
-                {
-                    self.oldPlaylistHeight = self.playlist.height;
-                    self.playlist.setHeight(0);
-                }
+                self.oldPlaylistHeight = self.playlist.height;
+                self.playlist.setHeight(0);
             }
         }
     }
@@ -234,15 +208,13 @@ function Player(task)
     // Called by the media play event.
     self.play = function ()
     {
-        self.node.icon.play.addClass("hide");
-        self.node.icon.pause.removeClass("hide");
+        self.playback.setPlay();
     }
     
     // Called by the media pause event.
     self.pause = function ()
     {
-        self.node.icon.play.removeClass("hide");
-        self.node.icon.pause.addClass("hide");
+        self.playback.setPause();
     }
 
     // Puts the player in its initial state
@@ -258,9 +230,8 @@ function Player(task)
         self.playlistInterface = undefined;
         self.fileInterface = undefined;
         self.playerInterface = undefined;
-        self.node.time.removeClass("display");
-        self.node.numerator.html(0);
-        self.node.denominator.html(0);
+        self.playback.hideTime();
+        self.playback.setNumber(0, 0);
         self.node.filename.html("");
     }
     
@@ -306,9 +277,8 @@ function Player(task)
             self.playlistInterface = playlistInterface;
             self.fileInterface = fileInterface;
             self.setFileName(fileInterface.getFileIndex());
-            self.node.time.removeClass("display");
-            self.node.numerator.html(playlistInterface.getNumberFiles().fileNumber);
-            self.node.denominator.html(playlistInterface.getNumberFiles().numberOfFiles);
+            self.playback.hideTime();
+            self.playback.setNumber(playlistInterface.getNumberFiles().fileNumber, playlistInterface.getNumberFiles().numberOfFiles);
             // The file implements the player interface
             if (fileInterface.getMedia)
             {
@@ -319,7 +289,7 @@ function Player(task)
             }
             // Displays the time if there is a player interface
             if (self.playerInterface)
-                self.node.time.addClass("display");
+                self.playback.displayTime();
             // Adds the file to the recent files playlist
             self.playlist.addRecentFile(fileInterface.getFileIndex());
         }
@@ -331,10 +301,7 @@ function Player(task)
             {
                 // There is no playlist
                 if (!self.playlistInterface)
-                {
-                    self.node.numerator.html(1);
-                    self.node.denominator.html(1);
-                }
+                    self.playback.setNumber(1, 1);
                 // Pauses the current player interface
                 if (self.playerInterface)
                 {
@@ -348,7 +315,7 @@ function Player(task)
                 self.playerInterface = playerInterface;
                 var media = self.playerInterface.getMedia();
                 self.timeLine.newMedia(playerInterface.getFileIndex(), media);
-                self.node.time.addClass("display");
+                self.playback.displayTime();
                 $(media).bind("play", function (e) { self.play(e); });
                 $(media).bind("pause", function (e) { self.pause(e); });
             }
@@ -398,9 +365,9 @@ function Player(task)
             }
             // Displays / hides the time
             if (self.playerInterface)
-                self.node.time.addClass("display");
+                self.playback.displayTime();
             else if (self.fileInterface)
-                self.node.time.removeClass("display");
+                self.playback.hideTime();
             // Nothing to display anymore
             else if (!self.playlistInterface)
                 self.clear();
@@ -416,8 +383,7 @@ function Player(task)
                 {
                     self.playlistInterface = undefined;
                     self.fileInterface.setPlaylist(undefined);
-                    self.node.numerator.html(1);
-                    self.node.denominator.html(1);
+                    self.playback.setNumber(1, 1);
                     // The player replaces the current file
                     if (self.playerInterface)
                         self.fileInterface = self.playerInterface;
@@ -451,7 +417,405 @@ function Player(task)
                 self.node.filename.html("");
         }
     }
+
+// Manages the playback buttons.
+self.Playback = function (player)
+{
+    var self = this;
+    var node = player.node;
+    var Config
     
+    self.init = function ()
+    {
+        // Members
+        self.C = C.Player.Playback; // The configuration of the playback
+        self.height; // The height of the buttons
+        self.paper; // The SVG paper on which the buttons are drawn
+        self.textWidth = {interval: undefined, elapsed: 0, currentWidth: 0}; // Used to calculate the width of the texts
+        self.slope; // The slope of the buttons
+        self.defaultLink; // This link is used when the mouse is outside the buttons areas, but still on the paper
+        // The buttons properties
+        self.defaultBackground = {path: 0, left: 0};
+        self.play = {icon: 0, background: 0, link: 0, isPlaying: false, mouseOver: false};
+        self.pause = {icon: 0, background: 0, link: 0};
+        self.previous = {icon: 0, background: 0, link: 0};
+        self.number = {left: 0, background: 0, link: 0};
+        self.next = {icon: 0, background: 0, link: 0};
+        self.time = {background: 0, link: 0, left: 0, display: false};
+        
+        // Default values
+        self.height = C.Player.defaultHeight - C.Player.timelineHeight;
+        self.slope = self.C.slopeRatio * self.height;
+        node.playback.css("width", self.C.initialPaperWidth);
+        self.paper = Raphael(node.playback[0], "100%", self.height);
+        node.numerator.html("0");
+        node.denominator.html("0");
+        node.current_time.html("0:00");
+        node.duration.html("0:00");
+        self.createButtons();
+        self.addEvents();
+        self.updateTextsWidth();
+        
+        // Events
+    }
+    
+    // Creates the buttons.
+    self.createButtons = function ()
+    {
+        var slope = self.slope / 2;
+        var left = self.C.margin / 2;
+        var top = self.C.top;
+        
+        // Default link
+        self.defaultLink = self.paper.rect(0, 0, 1000, self.height);
+        self.defaultLink.attr(self.C.linkAttr);
+        
+        // Default background
+        self.defaultBackground.left = self.C.margin / 2 + self.C.playWidth + self.C.margin - slope - self.C.margin / 2;
+        self.defaultBackground.path = self.createBackground(self.defaultBackground.left, self.C.initialDefaultBackgroundWidth, self.C.defaultBackgroundAttr, false);
+        
+        // Play
+        var backgroundLeft = 0;
+        var backgroundWidth = left + self.C.playWidth + slope + self.C.margin / 2;
+        self.play.background = self.createBackground(backgroundLeft - 100, backgroundWidth + 100, self.C.playBackgroundAttr).hide();
+        
+        var play = self.paper.path(gl_svg.Player.play);
+        play.transform("T" + left + "," + top);
+        play.attr(self.C.iconAttr);
+        play.glow = play.glow(self.C.iconGlow);
+        self.play.icon = play;
+        self.play.link = self.play.background.clone().attr(self.C.linkAttr);
+        
+        // Pause
+        var backgroundLeft = 0;
+        var backgroundWidth = left + self.C.playWidth + slope + self.C.margin / 2;
+        self.pause.background = self.createBackground(backgroundLeft - 100, backgroundWidth + 100, self.C.pauseBackgroundAttr).hide();
+        
+        var pause = self.paper.path(gl_svg.Player.pause);
+        pause.transform("T" + left + "," + top);
+        pause.attr(self.C.iconAttr);
+        pause.glow = pause.glow(self.C.iconGlow);
+        self.pause.icon = pause;
+        left += self.C.playWidth;
+        pause.hide();
+        pause.glow.hide();
+        self.pause.link = self.play.link.toFront();
+        
+        // Previous
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin / 2 + self.C.previousWidth + self.C.numberMargin / 2 + slope * 2;
+        self.previous.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.previousBackgroundAttr).hide();
+        
+        var previous = self.paper.path(gl_svg.Player.previous);
+        previous.transform("T" + left + "," + top);
+        previous.attr(self.C.iconAttr);
+        previous.glow(self.C.iconGlow);
+        self.previous.icon = previous;
+        left += self.C.previousWidth;
+        self.previous.link = self.previous.background.clone().attr(self.C.linkAttr);
+        
+        // Number
+        left += self.C.numberMargin;
+        var backgroundLeft = left - self.C.numberMargin / 2 - slope;
+        var backgroundWidth = self.C.numberMargin / 2 + self.C.initialNumberTextWidth + self.C.numberMargin / 2 + slope * 2;
+        self.number.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.numberBackgroundAttr).hide();
+        
+        node.number.css("left", left);
+        self.number.left = left;
+        left += self.C.initialNumberTextWidth;
+        self.number.link = self.number.background.clone().attr(self.C.linkAttr);
+        
+        // Next
+        left += self.C.numberMargin;
+        var backgroundLeft = left - self.C.numberMargin / 2 - slope;
+        var backgroundWidth = self.C.numberMargin / 2 + self.C.nextWidth + self.C.margin / 2 + slope * 2;
+        self.next.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.nextBackgroundAttr).hide();
+        
+        var next = self.paper.path(gl_svg.Player.next);
+        next.attr(self.C.iconAttr);
+        next.glow = next.glow(self.C.iconGlow);
+        next.transform("T" + left + "," + top);
+        self.next.icon = next;
+        left += self.C.nextWidth;
+        self.next.link = self.next.background.clone().attr(self.C.linkAttr);
+        
+        // Time
+        var backgroundLeft = left - self.C.margin / 2 - slope;
+        var backgroundWidth = self.C.numberMargin / 2 + node.time.width() + self.C.adjustTextWidth + self.C.margin / 2 + slope * 2;
+        self.time.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.timeBackgroundAttr).hide();
+        
+        left += self.C.margin;
+        node.time.css("left", left);
+        self.time.link = self.time.background.clone().attr(self.C.linkAttr).hide();
+    }
+    
+    // Adds the events to the buttons.
+    self.addEvents = function ()
+    {
+        // Default link
+        $(self.defaultLink.node).mousedown(function (e) { player.mouseDownName(e); });
+    
+        // Play / Pause
+        $(self.play.link.node).mouseenter(function (e)
+        {
+            self.mouseEnter(self.play.isPlaying ? self.pause : self.play);
+            self.play.mouseOver = true;
+        });
+        $(self.play.link.node).mouseleave(function (e)
+        {
+            self.mouseLeave(self.play.isPlaying ? self.pause : self.play);
+            self.play.mouseOver = false;
+        });
+        $(self.play.link.node).mousedown(function (e) { self.mouseDownPlayPause(); });
+        
+        // Previous
+        $(self.previous.link.node).mouseenter(function (e) { self.mouseEnter(self.previous); });
+        $(self.previous.link.node).mouseleave(function (e) { self.mouseLeave(self.previous); });
+        
+        // Number
+        $(self.number.link.node).mouseenter(function (e)
+        {
+            // Ensures that we are not just entering the number node
+            if (e.relatedTarget != node.number[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".number").length)
+                self.mouseEnter(self.number);
+        });
+        $(self.number.link.node).mouseleave(function (e)
+        {
+            if (e.relatedTarget != node.number[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".number").length)
+                self.mouseLeave(self.number);
+        });
+        $(node.number).mouseenter(function (e)
+        {
+            if (e.relatedTarget != self.number.link.node)
+                self.mouseEnter(self.number);
+        });
+        $(node.number).mouseleave(function (e)
+        {
+            if (e.relatedTarget != self.number.link.node)
+                self.mouseLeave(self.number);
+        });
+        
+        // Next
+        $(self.next.link.node).mouseenter(function (e) { self.mouseEnter(self.next); });
+        $(self.next.link.node).mouseleave(function (e) { self.mouseLeave(self.next); });
+        
+        // Time
+        $(self.time.link.node).mouseenter(function (e)
+        {
+            if (e.relatedTarget != node.time[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".time").length)
+                self.mouseEnter(self.time);
+        });
+        $(self.time.link.node).mouseleave(function (e)
+        {
+            if (e.relatedTarget != node.time[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".time").length)
+                self.mouseLeave(self.time);
+        });
+        $(node.time).mouseenter(function (e)
+        {
+            if (e.relatedTarget != self.time.link.node)
+                self.mouseEnter(self.time);
+        });
+        $(node.time).mouseleave(function (e)
+        {
+            if (e.relatedTarget != self.time.link.node)
+                self.mouseLeave(self.time);
+        });
+    }
+    
+    // Waits the html engine to update the texts width, using an inverval loop.
+    self.updateTextsWidth = function ()
+    {
+        // Starts the inverval loop
+        if (self.textWidth.interval == undefined)
+        {
+            self.textWidth.interval = setInterval(self.updateTextsWidth, self.C.updateTextsWidthDuration / self.C.updateTextsWidthSteps);
+            self.textWidth.elapsed = 1;
+            self.textWidth.current = node.number.width();
+            if (self.textWidth.current)
+                self.updatePositions();
+        }
+        // Ends the interval loop
+        if (self.textWidth.elapsed++ >= self.C.updateTextsWidthSteps || self.textWidth.current != node.number.width())
+        {
+            clearInterval(self.textWidth.interval);
+            self.textWidth.interval = undefined;
+            self.updatePositions();
+        }
+    }
+    
+    // Updates the position of the buttons based on the texts width.
+    self.updatePositions = function ()
+    {
+        var slope = self.slope / 2;
+        var top = self.C.top;
+        var left = self.number.left;
+        var numberTextWidth = node.number.width() + self.C.adjustTextWidth;
+        var timeTextWidth = node.time.width() + self.C.adjustTextWidth;
+        
+        // Default background
+        var width = self.C.previousWidth + numberTextWidth + self.C.nextWidth + self.C.numberMargin * 2 + slope * 2 + self.C.margin;
+        self.updateBackground(self.defaultBackground.path, self.defaultBackground.left, width, false);
+        
+        // Number
+        var backgroundLeft = left - self.C.numberMargin / 2 - slope;
+        var backgroundWidth = self.C.numberMargin / 2 + numberTextWidth + self.C.numberMargin / 2 + slope * 2;
+        self.updateBackground(self.number.background, backgroundLeft, backgroundWidth);
+        self.updateBackground(self.number.link, backgroundLeft, backgroundWidth);
+        
+        // Next
+        left += numberTextWidth + self.C.numberMargin;
+        self.next.icon.transform("T" + left + "," + top);
+        self.next.icon.glow.transform("T" + left + "," + top);
+        var backgroundLeft = left - self.C.numberMargin / 2 - slope;
+        var backgroundWidth = self.C.numberMargin / 2 + self.C.nextWidth + self.C.margin / 2 + slope * 2;
+        self.updateBackground(self.next.background, backgroundLeft, backgroundWidth);
+        self.updateBackground(self.next.link, backgroundLeft, backgroundWidth);
+        
+        // Time
+        left += self.C.nextWidth + self.C.margin;
+        var backgroundLeft = left - self.C.margin / 2 - slope;
+        var backgroundWidth = self.C.numberMargin / 2 + timeTextWidth + self.C.margin / 2 + slope * 2;
+        self.updateBackground(self.time.background, backgroundLeft, backgroundWidth);
+        self.updateBackground(self.time.link, backgroundLeft, backgroundWidth);
+        node.time.css("left", left);
+        self.time.left = left;
+        
+        // Updates the width of the paper
+        if (self.time.display)
+            node.playback.css("width", left + timeTextWidth + self.C.margin / 2 + slope);
+        else
+            node.playback.css("width", left - self.C.margin / 2 + slope);
+    }
+    
+    // Creates and returns a button background.
+    // @correctGap: If not false, the width is incremented by 1, in order to close gap between two adjacent backgrounds.
+    self.createBackground = function (left, width, attr, correctGap)
+    {
+        if (self.C.correctGap && correctGap !== false)
+            width++;
+        var path = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + self.height + "z");
+        path.transform("T" + left + ",0");
+        path.attr(attr);
+        return (path);
+    }
+    // Updates the background position and width.
+    // @correctGap: If not false, the width is incremented by 1, in order to close gap between two adjacent backgrounds.
+    self.updateBackground = function (background, left, width, correctGap)
+    {
+        if (self.C.correctGap && correctGap !== false)
+            width++;
+        background.attr({path: "M0," + self.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + self.height + "z"});
+        background.transform("T" + left + ",0");
+    }
+    
+    // The mouse entered a button.
+    self.mouseEnter = function (button)
+    {
+        button.background.show();
+        if (button == self.number)
+            node.number.addClass("hover");
+        else if (button == self.time)
+            node.time.addClass("hover");
+    }
+    
+    // The mouse leaved a button.
+    self.mouseLeave = function (button)
+    {
+        button.background.hide();
+        if (button == self.number)
+            node.number.removeClass("hover");
+        else if (button == self.time)
+            node.time.removeClass("hover");
+    }
+    
+    // The user clicked on the play / pause button.
+    self.mouseDownPlayPause = function ()
+    {
+        var media;
+        if (player.playerInterface && (media = player.playerInterface.getMedia()))
+        {
+            if (media.paused)
+                player.playerInterface.play();
+            else
+                player.playerInterface.pause();
+        }
+    }
+    
+    // Displays the pause icon.
+    self.setPlay = function ()
+    {
+        self.play.icon.hide();
+        self.play.icon.glow.hide();
+        self.pause.icon.show();
+        self.pause.icon.glow.show();
+        self.play.background.hide();
+        self.pause.background.hide();
+        if (self.play.mouseOver)
+            self.pause.background.show();
+        self.play.isPlaying = true;
+    }
+    
+    // Displays the play icon.
+    self.setPause = function ()
+    {
+        self.pause.icon.hide();
+        self.pause.icon.glow.hide();
+        self.play.icon.show();
+        self.play.icon.glow.show();
+        self.play.background.hide();
+        self.pause.background.hide();
+        if (self.play.mouseOver)
+            self.play.background.show();
+        self.play.isPlaying = false;
+    }
+    
+    // Sets the number numerator and denominator.
+    self.setNumber = function (numerator, denominator)
+    {
+        node.numerator.html(numerator);
+        node.denominator.html(denominator);
+        self.updateTextsWidth();
+    }
+    
+    // Sets the current time and the duration.
+    self.setTime = function (current_time, duration)
+    {
+        var oldCurrentTime = node.current_time.html();
+        var oldDuration = node.duration.html();
+        
+        current_time = player.timeToString(current_time);
+        node.current_time.html(current_time);
+        if (duration != undefined)
+        {
+            duration = player.timeToString(duration);
+            node.duration.html(duration);
+        }
+        if (current_time.length != oldCurrentTime.length || (duration != undefined && duration.length != oldDuration.length))
+            self.updateTextsWidth();
+    }
+    // Displays the time button.
+    self.displayTime = function ()
+    {
+        self.time.display = true;
+        node.time.addClass("display");
+        self.time.link.show();
+        node.playback.css("width", self.time.left + node.time.width() + self.C.margin / 2 + self.slope / 2);
+    }
+    // Hides the time button.
+    self.hideTime = function ()
+    {
+        self.time.display = false;
+        node.time.removeClass("display");
+        self.time.background.hide();
+        self.time.link.hide();
+        node.playback.css("width", self.time.left - self.C.margin / 2 + self.slope / 2);
+    }
+    
+    self.init();
+    return (self);
+}
+
 // Manages the time line.
 self.TimeLine = function (player)
 {
@@ -494,6 +858,7 @@ self.TimeLine = function (player)
         var before = paper.rect(0, 0, 1, height);
         before.attr("stroke", "none");
         before.attr("fill", "#4a4a4a");
+        before.attr("opacity", 0.5);
         var played = paper.rect(0, 0, 1, height);
         played.attr("stroke", "none");
         played.attr("fill", "#b91f1f");
@@ -503,6 +868,7 @@ self.TimeLine = function (player)
         var after = paper.rect(0, 0, 1, height);
         after.attr("stroke", "none");
         after.attr("fill", "#4a4a4a");
+        after.attr("opacity", 0.5);
         
 
         // Updates the time line SVG.
@@ -534,6 +900,8 @@ self.TimeLine = function (player)
         {
             paper.setSize(undefined, height);
             svg.css("top", "-" + C.Player.timelineExpandHeight + "px");
+            before.attr("opacity", 1);
+            after.attr("opacity", 1);
         }
         
         // Retracts the time line.
@@ -541,15 +909,17 @@ self.TimeLine = function (player)
         {
             paper.setSize(undefined, C.Player.timelineHeight);
             svg.css("top", "0px");
+            before.attr("opacity", 0.5);
+            after.attr("opacity", 0.5);
         }
         
         // Changes the color of the played part based on the file type.
         self.setTimeLineType = function (type)
         {
             if (type == "audio")
-                played.attr("fill", "#20ba2f");
+                played.attr("fill", "#45d41e");
             else if (type == "video")
-                played.attr("fill", "#b91f1f");
+                played.attr("fill", "#d43c1e");
         }
         
         self.updateTimeLine();
@@ -718,8 +1088,7 @@ self.TimeLine = function (player)
         self.media = media;
         self.fileIndex = fileIndex;
         self.duration = file.duration;
-        node.current_time.html("0:00");
-        node.duration.html(player.timeToString(self.duration));
+        player.playback.setTime(0, self.duration);
         self.timeOffset = media.timeOffset;
         self.setTimeLineType(file.type);
         if (file.type == "video")
@@ -748,9 +1117,7 @@ self.TimeLine = function (player)
         self.buffered = 0;
         self.currentPreviewTime = undefined;
         self.updateTimeLine();
-        node.current_time.html("0:00");
-        if (!keepDuration)
-            node.duration.html("0:00");
+        player.playback.setTime(0, keepDuration ? undefined : 0);
     }
     
     // The time of the media played has changed.
@@ -765,7 +1132,7 @@ self.TimeLine = function (player)
         self.played = currentTime / self.duration;
         self.buffered = buffered / self.duration;
         self.updateTimeLine();
-        node.current_time.html(player.timeToString(currentTime + self.timeOffset));
+        player.playback.setTime(currentTime + self.timeOffset);
     }
     
     // Mouse enter the time line.
@@ -1023,7 +1390,7 @@ self.Playlist = function (player)
     self.init();
     return (self);
 }
-    
+
 // Manages the headers of the playlist, which includes the tabs, the pin and the resize.
 self.Header = function (player)
 {

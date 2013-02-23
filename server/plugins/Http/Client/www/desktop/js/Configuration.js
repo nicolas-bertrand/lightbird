@@ -77,6 +77,34 @@ var Configuration =
             radius : 5, // The radius of the box corners.
             previewWidth : 200, // The width of the preview displayed above the box.
             numberPreviews : 100, // The number of previews generated for each videos.
+        },
+        Playback:
+        {
+            slopeRatio: 75 / 130, // The ratio of the slope of the backgrounds. // Math.sin(30 * (Math.PI / 180)) / Math.cos(30 * (Math.PI / 180))
+            margin: 30, // The margin between the buttons.
+            numberMargin: 20, // The margin between the number and the next / previous buttons.
+            playWidth: 16, // Width of the play icon.
+            previousWidth: 14,  // Width of the previous icon.
+            nextWidth: 14,  // Width of the next icon.
+            top: 10, // The top position of the icons.
+            iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
+            iconGlow: {color: "black", width: 5, opacity: 0.1}, // The attributes of the glow of the icons.
+            updateTextsWidthDuration: 500, // The maximum duration during which we try to get the width of the number and time texts.
+            updateTextsWidthSteps: 10, // The number of attempts to get the width of the texts during the duration.
+            // The attributes of the buttons backgrounds
+            defaultBackgroundAttr: {fill: "90-#292929-#3d3d3d", stroke: "none"}, // This background is always displayed bellow previous / number / next.
+            playBackgroundAttr: {fill: "90-#37ab18-#45d41e", stroke: "none"},
+            pauseBackgroundAttr: {fill: "90-#ab3018-#d43c1e", stroke: "none"},
+            previousBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
+            numberBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
+            nextBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
+            timeBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
+            linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
+            initialNumberTextWidth: 34, // The initial width of the number, before the text widths computation is performed.
+            initialDefaultBackgroundWidth: 137, // The initial width of the default background, before the texts width computation is performed.
+            initialPaperWidth: 300,  // The initial width of the SVG paper, before the texts width computation is performed.
+            adjustTextWidth: -1, // Browsers seems to add on extra pixel when calculating the width of a text.
+            correctGap: false, // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         }
     },
     Uploads :
