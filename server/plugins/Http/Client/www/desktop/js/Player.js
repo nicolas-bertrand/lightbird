@@ -4,6 +4,7 @@ var gl_player;
 function Player(task)
 {
     var self = this;
+    var player = self;
     gl_player = self;
     
     self.init = function ()
@@ -18,7 +19,7 @@ function Player(task)
         self.node.activeArea = self.node.timeline.children(".active_area");
         self.node.player = self.node.bottom.children(".player");
         self.node.playback = self.node.player.children(".playback");
-        self.node.settings = self.node.player.children(".settings");
+        self.node.controls = self.node.player.children(".controls");
         self.node.number = self.node.playback.children(".number");
         self.node.numerator = self.node.number.children(".numerator"); // The number of the current file played
         self.node.denominator = self.node.number.find(".denominator"); // The total number of files
@@ -27,18 +28,6 @@ function Player(task)
         self.node.duration = self.node.playback.find(".duration"); // The duration of the file
         self.node.filename = self.node.player.children(".name");
         self.node.audio = self.node.bottom.children(".audio");
-        // Icons
-        self.node.icon = new Object();
-        self.node.icon.volume = $(self.node.settings).children(".volume");
-        self.node.icon.mute = $(self.node.settings).children(".mute");
-        self.node.icon.settings = $(self.node.settings).children(".settings");
-        self.node.icon.repeat = $(self.node.settings).children(".repeat");
-        self.node.icon.repeatOne = $(self.node.settings).children(".repeat_one");
-        self.node.icon.noRepeat = $(self.node.settings).children(".no_repeat");
-        self.node.icon.random = $(self.node.settings).children(".random");
-        self.node.icon.linear = $(self.node.settings).children(".linear");
-        self.node.icon.fullscreen = $(self.node.settings).children(".fullscreen");
-        self.node.icon.normalScreen = $(self.node.settings).children(".normal_screen");
         // Playlist
         self.node.playlist = self.node.bottom.children(".playlist");
         self.node.header = self.node.playlist.children(".header");
@@ -49,6 +38,7 @@ function Player(task)
 
         // Members
         self.playback; // Manages the playback buttons
+        self.controls; // Manages the control buttons
         self.timeLine; // Manages the time line
         self.playlist; // Manages the playlist
         self.header; // Manages the header of the playlist
@@ -63,12 +53,12 @@ function Player(task)
         C.Desktop.bottomHeight = C.Player.defaultHeight;
         self.node.bottom.height(C.Desktop.bottomHeight);
         self.node.filename.html("");
-        self.playback = new self.Playback(self);
-        self.timeLine = new self.TimeLine(self);
-        self.playlist = new self.Playlist(self);
-        self.header = new self.Header(self);
-        self.audio = new self.Audio(self);
-        self.generateIcons();
+        self.playback = new self.Playback();
+        self.controls = new self.Controls();
+        self.timeLine = new self.TimeLine();
+        self.playlist = new self.Playlist();
+        self.header = new self.Header();
+        self.audio = new self.Audio();
         
         // Events
         self.node.bottom.mouseenter(function (e) { self.mouseEnter(e); });
@@ -125,41 +115,6 @@ function Player(task)
                 }
             });
         }
-    }
-    
-    // Generates the SVG icons of the player.
-    self.generateIcons = function ()
-    {
-        self.drawIcon(self.node.icon.volume.children("div")[0], 25, gl_svg.Player.volume);
-        self.drawIcon(self.node.icon.mute.children("div")[0], 25, gl_svg.Player.mute);
-        self.drawIcon(self.node.icon.settings.children("div")[0], 21, gl_svg.Player.settings);
-        self.drawIcon(self.node.icon.repeat.children("div")[0], 27, gl_svg.Player.repeat, 0.2);
-        self.drawIcon(self.node.icon.repeatOne.children("div")[0], 27, gl_svg.Player.repeatOne, 0.2, 3.2);
-        self.drawIcon(self.node.icon.noRepeat.children("div")[0], 27, gl_svg.Player.noRepeat, 0.2);
-        self.drawIcon(self.node.icon.random.children("div")[0], 27, gl_svg.Player.random);
-        self.drawIcon(self.node.icon.linear.children("div")[0], 27, gl_svg.Player.linear);
-        self.drawIcon(self.node.icon.fullscreen.children("div")[0], 25, gl_svg.Player.fullscreen);
-        self.drawIcon(self.node.icon.normalScreen.children("div")[0], 25, gl_svg.Player.normalScreen);
-    }
-
-    // Draws an SVG icon.
-    self.drawIcon = function (destination, width, path, left, top)
-    {
-        var paper = Raphael(destination, width, 20);
-        var icon = paper.path(path);
-        icon.translate(left, top);
-        icon.attr("fill", "#eeeeee");
-        icon.attr("stroke", "none");
-        // Events
-        $(destination.parentNode).mouseenter(function (e)
-        {
-            icon.attr("fill", "#444444");
-        });
-        $(destination.parentNode).mouseleave(function (e)
-        {
-            icon.attr("fill", "#eeeeee");
-        });
-        $(destination.parentNode).click(function (e) { self.mouseDownName(e); });
     }
     
     // Mouse down on the name area.
@@ -419,11 +374,10 @@ function Player(task)
     }
 
 // Manages the playback buttons.
-self.Playback = function (player)
+self.Playback = function ()
 {
     var self = this;
     var node = player.node;
-    var Config
     
     self.init = function ()
     {
@@ -683,9 +637,9 @@ self.Playback = function (player)
         
         // Updates the width of the paper
         if (self.time.display)
-            node.playback.css("width", left + timeTextWidth + self.C.margin / 2 + slope);
+            node.playback.css("width", left + timeTextWidth + self.C.margin / 2 + Math.abs(slope));
         else
-            node.playback.css("width", left - self.C.margin / 2 + slope);
+            node.playback.css("width", left - self.C.margin / 2 + Math.abs(slope));
     }
     
     // Creates and returns a button background.
@@ -800,7 +754,7 @@ self.Playback = function (player)
         self.time.display = true;
         node.time.addClass("display");
         self.time.link.show();
-        node.playback.css("width", self.time.left + node.time.width() + self.C.margin / 2 + self.slope / 2);
+        node.playback.css("width", self.time.left + node.time.width() + self.C.margin / 2 + Math.abs(self.slope / 2));
     }
     // Hides the time button.
     self.hideTime = function ()
@@ -809,7 +763,271 @@ self.Playback = function (player)
         node.time.removeClass("display");
         self.time.background.hide();
         self.time.link.hide();
-        node.playback.css("width", self.time.left - self.C.margin / 2 + self.slope / 2);
+        node.playback.css("width", self.time.left - self.C.margin / 2 + Math.abs(self.slope / 2));
+    }
+    
+    self.init();
+    return (self);
+}
+
+// Manages the controls buttons.
+self.Controls = function ()
+{
+    var self = this;
+    var node = player.node;
+    
+    self.init = function ()
+    {
+        // Members
+        self.C = C.Player.Controls; // The configuration of the controls
+        self.height; // The height of the buttons
+        self.paper; // The SVG paper on which the buttons are drawn
+        self.slope; // The slope of the buttons
+        self.defaultLink; // This link is used when the mouse is outside the buttons areas, but still on the paper
+        // The buttons properties
+        self.defaultBackground;
+        self.volume = {icon: 0, background: 0, link: 0};
+        self.mute = {icon: 0, background: 0};
+        self.settings = {icon: 0, background: 0, link: 0};
+        self.repeat = {icon: 0, background: 0, link: 0, previousIcon: 0, currentIcon: 0, nextIcon: 0};
+        self.repeatOne;
+        self.noRepeat;
+        self.random = {icon: 0, background: 0, link: 0, currentIcon: 0, nextIcon: 0};
+        self.linear;
+        self.fullScreen = {icon: 0, background: 0, link: 0};
+        self.normalScreen = {icon: 0, background: 0};
+        
+        // Default values
+        self.height = C.Player.defaultHeight - C.Player.timelineHeight;
+        self.slope = self.C.slopeRatio * self.height;
+        node.controls.css("width", self.C.initialPaperWidth);
+        self.paper = Raphael(node.controls[0], "100%", self.height);
+        self.createButtons();
+        self.addEvents();
+        
+        // Events
+    }
+    
+    // Creates the buttons.
+    self.createButtons = function ()
+    {
+        var slope = self.slope / 2;
+        var left = 0;
+        var top = self.C.top;
+        
+        // Default link
+        self.defaultLink = self.paper.rect(0, 0, 1000, self.height);
+        self.defaultLink.attr(self.C.linkAttr);
+        
+        // Volume
+        left += self.C.margin / 2 + Math.abs(slope);
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin + self.C.volumeWidth + slope * 2;
+        self.volume.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.volumeBackgroundAttr).hide();
+        
+        var volume = self.paper.path(gl_svg.Player.volume);
+        volume.transform("T" + left + "," + top);
+        volume.attr(self.C.iconAttr);
+        volume.glow = volume.glow(self.C.iconGlow);
+        self.volume.icon = volume;
+        
+        self.mute = self.volume;
+        self.mute.icon = volume.clone().attr({path: gl_svg.Player.mute});
+        self.mute.icon.glow = self.mute.icon.glow = self.mute.icon.glow(self.C.iconGlow);
+        self.mute.icon.hide();
+        self.mute.icon.glow.hide();
+        left += self.C.volumeWidth;
+        self.volume.link = self.volume.background.clone().attr(self.C.linkAttr);
+        
+        // Settings
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin + self.C.settingWidth + slope * 2;
+        self.settings.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.settingsBackgroundAttr).hide();
+        
+        var settings = self.paper.path(gl_svg.Player.settings);
+        settings.transform("T" + left + "," + top);
+        settings.attr(self.C.iconAttr);
+        settings.glow = settings.glow(self.C.iconGlow);
+        self.settings.icon = settings;
+        left += self.C.settingWidth;
+        self.settings.link = self.settings.background.clone().attr(self.C.linkAttr);
+        
+        // Repeat
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin + self.C.repeatWidth + slope * 2;
+        var defaultBackgroundLeft = backgroundLeft;
+        self.repeat.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.repeatBackgroundAttr).hide();
+
+        var repeat = self.paper.path(gl_svg.Player.repeat);
+        repeat.transform("T" + left + "," + top);
+        repeat.attr(self.C.iconAttr);
+        repeat.glow = repeat.glow(self.C.iconGlow).attr(self.C.iconGlowAttr);
+        self.repeat.icon = repeat;
+        self.repeat.icon.hide();
+        self.repeat.icon.glow.hide();
+        
+        self.repeatOne = repeat.clone().attr({path: gl_svg.Player.repeatOne});
+        self.repeatOne.glow = self.repeatOne.glow(self.C.iconGlow).attr(self.C.iconGlowAttr);
+        self.repeatOne.hide();
+        self.repeatOne.glow.hide();
+        
+        self.noRepeat = repeat.clone().attr({path: gl_svg.Player.noRepeat});
+        self.noRepeat.glow = self.noRepeat.glow(self.C.iconGlow).attr(self.C.iconGlowAttr);
+        
+        self.repeat.previousIcon = self.repeatOne;
+        self.repeat.currentIcon = self.noRepeat;
+        self.repeat.nextIcon = self.repeat.icon;
+        self.repeat.nextIcon.attr(self.C.iconAttrInverse);
+        self.repeat.nextIcon.glow.attr(self.C.iconGlowInverse);
+        left += self.C.repeatWidth;
+        self.repeat.link = self.repeat.background.clone().attr(self.C.linkAttr);
+        
+        // Random
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin + self.C.randomWidth + slope * 2;
+        self.random.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.randomBackgroundAttr).hide();
+
+        var random = self.paper.path(gl_svg.Player.random);
+        random.transform("T" + left + "," + top);
+        random.attr(self.C.iconAttr);
+        random.glow = random.glow(self.C.iconGlow);
+        self.random.icon = random;
+        self.random.icon.hide();
+        self.random.icon.glow.hide();
+        
+        self.linear = random.clone().attr({path: gl_svg.Player.linear});
+        self.linear.glow = self.linear.glow(self.C.iconGlow);
+        self.random.currentIcon = self.linear;
+        
+        self.random.nextIcon = self.random.icon;
+        self.random.nextIcon.attr(self.C.iconAttrInverse);
+        self.random.nextIcon.glow.attr(self.C.iconGlowInverse);
+        left += self.C.randomWidth;
+        self.random.link = self.random.background.clone().attr(self.C.linkAttr);
+        
+        // Full screen
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = 1000;
+        self.fullScreen.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.fullScreenBackgroundAttr).hide();
+
+        var fullScreen = self.paper.path(gl_svg.Player.fullScreen);
+        fullScreen.transform("T" + left + "," + top);
+        fullScreen.attr(self.C.iconAttr);
+        fullScreen.glow(self.C.iconGlow);
+        self.fullScreen.icon = fullScreen;
+        
+        self.normalScreen = self.fullScreen;
+        self.normalScreen.icon = fullScreen.clone().attr({path: gl_svg.Player.normalScreen});
+        self.fullScreen.icon.hide();
+        left += self.C.fullScreenWidth;
+        self.fullScreen.link = self.fullScreen.background.clone().attr(self.C.linkAttr);
+        
+        // Default background
+        var backgroundLeft = defaultBackgroundLeft;
+        var backgroundWidth = self.C.margin * 2 + self.C.repeatWidth + self.C.randomWidth + slope * 2;
+        self.defaultBackground = self.createBackground(backgroundLeft, backgroundWidth, self.C.defaultBackgroundAttr, false);
+        self.defaultBackground.toBack();
+        
+        // The width of the paper
+        node.controls.css("width", left + self.C.margin / 2);
+    }
+    
+    // Adds the events to the buttons.
+    self.addEvents = function ()
+    {
+        // Default link
+        $(self.defaultLink.node).mousedown(function (e) { player.mouseDownName(e); });
+        
+        // Volume
+        $(self.volume.link.node).mouseenter(function (e) { self.mouseEnter(self.volume); });
+        $(self.volume.link.node).mouseleave(function (e) { self.mouseLeave(self.volume); });
+        
+        // Settings
+        $(self.settings.link.node).mouseenter(function (e) { self.mouseEnter(self.settings); });
+        $(self.settings.link.node).mouseleave(function (e) { self.mouseLeave(self.settings); });
+        
+        // Repeat
+        $(self.repeat.link.node).mouseenter(function (e)
+        {
+            self.mouseEnter(self.repeat);
+            self.repeat.currentIcon.attr(self.C.iconAttrInverse);
+            self.repeat.currentIcon.glow.attr(self.C.iconGlowInverse);
+        });
+        $(self.repeat.link.node).mouseleave(function (e)
+        {
+            self.mouseLeave(self.repeat);
+            self.repeat.currentIcon.attr(self.C.iconAttr);
+            self.repeat.currentIcon.glow.attr(self.C.iconGlowAttr);
+        });
+        $(self.repeat.link.node).mousedown(function (e)
+        {
+            var previous = self.repeat.previousIcon;
+            self.repeat.previousIcon = self.repeat.currentIcon;
+            self.repeat.currentIcon = self.repeat.nextIcon;
+            self.repeat.nextIcon = previous;
+            
+            self.repeat.previousIcon.hide();
+            self.repeat.previousIcon.glow.hide();
+            self.repeat.currentIcon.show().attr(self.C.iconAttrInverse);
+            self.repeat.currentIcon.glow.show().attr(self.C.iconGlowInverse);
+        });
+        
+        // Random
+        $(self.random.link.node).mouseenter(function (e)
+        {
+            self.mouseEnter(self.random);
+            self.random.currentIcon.attr(self.C.iconAttrInverse);
+            self.random.currentIcon.glow.attr(self.C.iconGlowInverse);
+        });
+        $(self.random.link.node).mouseleave(function (e)
+        {
+            self.mouseLeave(self.random);
+            self.random.currentIcon.attr(self.C.iconAttr);
+            self.random.currentIcon.glow.attr(self.C.iconGlowAttr);
+        });
+        $(self.random.link.node).mousedown(function (e)
+        {
+            var next = self.random.currentIcon;
+            self.random.currentIcon = self.random.nextIcon;
+            self.random.nextIcon = next;
+            
+            self.random.currentIcon.show().attr(self.C.iconAttrInverse);
+            self.random.currentIcon.glow.show().attr(self.C.iconGlowInverse);
+            self.random.nextIcon.hide();
+            self.random.nextIcon.glow.hide();
+        });
+        
+        // Full screen
+        $(self.fullScreen.link.node).mouseenter(function (e) { self.mouseEnter(self.fullScreen); });
+        $(self.fullScreen.link.node).mouseleave(function (e) { self.mouseLeave(self.fullScreen); });
+    }
+    
+    // Creates and returns a button background.
+    // @correctGap: If not false, the width is incremented by 1, in order to close gap between two adjacent backgrounds.
+    self.createBackground = function (left, width, attr, correctGap)
+    {
+        if (self.C.correctGap && correctGap !== false)
+            width++;
+        var path = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + self.height + "z");
+        path.transform("T" + left + ",0");
+        path.attr(attr);
+        return (path);
+    }
+    
+    // The mouse entered a button.
+    self.mouseEnter = function (button)
+    {
+        button.background.show();
+    }
+    
+    // The mouse leaved a button.
+    self.mouseLeave = function (button)
+    {
+        button.background.hide();
     }
     
     self.init();
@@ -817,7 +1035,7 @@ self.Playback = function (player)
 }
 
 // Manages the time line.
-self.TimeLine = function (player)
+self.TimeLine = function ()
 {
     var self = this;
     var node = player.node; 
@@ -861,7 +1079,7 @@ self.TimeLine = function (player)
         before.attr("opacity", 0.5);
         var played = paper.rect(0, 0, 1, height);
         played.attr("stroke", "none");
-        played.attr("fill", "#b91f1f");
+        played.attr("fill", "#f13d1a");
         var buffered = paper.rect(0, 0, 1, height);
         buffered.attr("stroke", "none");
         buffered.attr("fill", "#cccccc");
@@ -917,9 +1135,9 @@ self.TimeLine = function (player)
         self.setTimeLineType = function (type)
         {
             if (type == "audio")
-                played.attr("fill", "#45d41e");
+                played.attr("fill", "#24b335");
             else if (type == "video")
-                played.attr("fill", "#d43c1e");
+                played.attr("fill", "#f13d1a");
         }
         
         self.updateTimeLine();
@@ -1244,7 +1462,7 @@ self.TimeLine = function (player)
 }
 
 // Manages the playlist.
-self.Playlist = function (player)
+self.Playlist = function ()
 {
     var self = this;
     var node = player.node; 
@@ -1382,7 +1600,7 @@ self.Playlist = function (player)
     {
         // Creates the recent files playlist if it doesn't exists
         if (!player.header.tabFocused.length)
-            self.recentFilesPlaylist = new player.Tab(player, T.Player.recentFiles);
+            self.recentFilesPlaylist = new player.Tab(T.Player.recentFiles);
         // Adds the file to the current playlist
         player.header.tabFocused[0].object.addFile(fileIndex);
     }
@@ -1392,7 +1610,7 @@ self.Playlist = function (player)
 }
 
 // Manages the headers of the playlist, which includes the tabs, the pin and the resize.
-self.Header = function (player)
+self.Header = function ()
 {
     var self = this;
     var node = player.node; 
@@ -1604,7 +1822,7 @@ self.Header = function (player)
                 tab[0].object.mouseDown(e);
             }
             else if (tab.hasClass("add"))
-                new player.Tab(player, "New playlist " + (node.tabs.children().length + 1));
+                new player.Tab("New playlist " + (node.tabs.children().length + 1));
         }
     }
     
@@ -1740,7 +1958,7 @@ self.Header = function (player)
 // Creates and manages a tab and the playlist it represents.
 // Implements the playlist interface.
 // @param name : The name of the tab.
-self.Tab = function (player, name)
+self.Tab = function (name)
 {
     var self = this;
     var node = player.node; 
@@ -2031,7 +2249,7 @@ self.Tab = function (player, name)
 }
 
 // Manages the audio player.
-self.Audio = function (player)
+self.Audio = function ()
 {
     var self = this;
     var node = player.node; 

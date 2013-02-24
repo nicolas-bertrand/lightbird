@@ -88,13 +88,13 @@ var Configuration =
             nextWidth: 14,  // Width of the next icon.
             top: 10, // The top position of the icons.
             iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
-            iconGlow: {color: "black", width: 5, opacity: 0.1}, // The attributes of the glow of the icons.
+            iconGlow: {color: "black", width: 5, opacity: 0.15}, // The attributes of the glow of the icons.
             updateTextsWidthDuration: 500, // The maximum duration during which we try to get the width of the number and time texts.
             updateTextsWidthSteps: 10, // The number of attempts to get the width of the texts during the duration.
             // The attributes of the buttons backgrounds
             defaultBackgroundAttr: {fill: "90-#292929-#3d3d3d", stroke: "none"}, // This background is always displayed bellow previous / number / next.
-            playBackgroundAttr: {fill: "90-#37ab18-#45d41e", stroke: "none"},
-            pauseBackgroundAttr: {fill: "90-#ab3018-#d43c1e", stroke: "none"},
+            playBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
+            pauseBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
             previousBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
             numberBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
             nextBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
@@ -104,6 +104,33 @@ var Configuration =
             initialDefaultBackgroundWidth: 137, // The initial width of the default background, before the texts width computation is performed.
             initialPaperWidth: 300,  // The initial width of the SVG paper, before the texts width computation is performed.
             adjustTextWidth: -1, // Browsers seems to add on extra pixel when calculating the width of a text.
+            correctGap: false, // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+        },
+        Controls:
+        {
+            slopeRatio: -75 / 130, // The ratio of the slope of the backgrounds. // -Math.sin(30 * (Math.PI / 180)) / Math.cos(30 * (Math.PI / 180))
+            margin: 30, // The margin between the buttons.
+            top: 10, // The top position of the icons.
+            iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
+            iconGlow: {width: 5, opacity: 0.15}, // The attributes of the icons glows.
+            iconGlowAttr: {stroke: "black"}, // The attributes of the icons glows.
+            iconAttrInverse: {fill: "#333333", stroke: "none"}, // The inverse attributes of the icons.
+            iconGlowInverse: {stroke: "white"}, // The inverse attributes of the icons glows.
+            // The width of the icons
+            volumeWidth: 25,
+            settingWidth: 21,
+            repeatWidth: 27,
+            randomWidth: 27,
+            fullScreenWidth: 25,
+            // The attributes of the buttons backgrounds
+            defaultBackgroundAttr: {fill: "90-#292929-#3d3d3d", stroke: "none"},
+            volumeBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
+            settingsBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
+            repeatBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
+            randomBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
+            fullScreenBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
+            linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
+            initialPaperWidth: 300,  // The initial width of the SVG paper
             correctGap: false, // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         }
     },
