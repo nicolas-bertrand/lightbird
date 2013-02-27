@@ -691,7 +691,6 @@ a:visited
     color: #FFFFFF;
     font-size: 16px;
     font-weight: bold;
-    text-align: center;
     letter-spacing: 1px;
     cursor: pointer;
 }
@@ -703,19 +702,20 @@ a:visited
 
 #desktop>.bottom>.player>.playback
 {
-    float: left;
-    height: 100%;
-    position: relative;
+    height: 40px;
+    position: absolute;
+    left: 0px;
     z-index: 1;
 }
 
 #desktop>.bottom>.player>.playback>.number,
 #desktop>.bottom>.player>.playback>.time
 {
+    line-height: 40px;
     position: absolute;
     bottom: 0px;
     left: 75px;
-    line-height: 40px;
+    text-align: center;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
@@ -723,7 +723,6 @@ a:visited
 {
     display: none;
 }
-
 #desktop>.bottom>.player>.playback>.time.display
 {
     display: block;
@@ -742,21 +741,46 @@ a:visited
     color: #666666;
 }
 
-#desktop>.bottom>.player>.name
+#desktop>.bottom>.player>.file_name
 {
-    width: 100%;
     height: 40px;
     line-height: 40px;
     position: absolute;
-    bottom: 0px;
     z-index: 0;
+    overflow: hidden;
+}
+
+#desktop>.bottom>.player>.file_name.hide
+{
+    visibility: hidden;
+}
+
+#desktop>.bottom>.player>.file_name>.text
+{
+    height: 40px;
+    overflow: hidden;
+    margin: auto;
+}
+
+#desktop>.bottom>.player>.file_name>.text>.container
+{
+    width: 10000px;
+}
+
+#desktop>.bottom>.player>.file_name>.background
+{
+    position: relative;
+    top: -40px;
+    height: 100%;
+    width: 200px;
+    z-index: -1;
 }
 
 #desktop>.bottom>.player>.controls
 {
-    float: right;
-    height: 100%;
-    position: relative;
+    height: 40px;
+    position: absolute;
+    right: 0px;
     z-index: 1;
 }
 

@@ -26,7 +26,7 @@ function Player(task)
         self.node.time = self.node.playback.children(".time");
         self.node.current_time = self.node.playback.find(".current_time"); // The current time of the file played
         self.node.duration = self.node.playback.find(".duration"); // The duration of the file
-        self.node.filename = self.node.player.children(".name");
+        self.node.file_name = self.node.player.children(".file_name");
         self.node.audio = self.node.bottom.children(".audio");
         // Playlist
         self.node.playlist = self.node.bottom.children(".playlist");
@@ -39,10 +39,12 @@ function Player(task)
         // Members
         self.playback; // Manages the playback buttons
         self.controls; // Manages the control buttons
+        self.fileName; // Manages the display of the file name
         self.timeLine; // Manages the time line
         self.playlist; // Manages the playlist
         self.header; // Manages the header of the playlist
         self.audio; // Manages the audio player
+        self.buttonsHeight; // The height of the buttons of the player
         self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leave
         self.mouseOverPlayer; // True while the mouse is over the player
         self.playlistInterface; // The current playlist, from which the current file is played
@@ -52,9 +54,10 @@ function Player(task)
         // Default values
         C.Desktop.bottomHeight = C.Player.defaultHeight;
         self.node.bottom.height(C.Desktop.bottomHeight);
-        self.node.filename.html("");
+        self.buttonsHeight = C.Player.defaultHeight - C.Player.timelineHeight;
         self.playback = new self.Playback();
         self.controls = new self.Controls();
+        self.fileName = new self.FileName();
         self.timeLine = new self.TimeLine();
         self.playlist = new self.Playlist();
         self.header = new self.Header();
@@ -63,12 +66,12 @@ function Player(task)
         // Events
         self.node.bottom.mouseenter(function (e) { self.mouseEnter(e); });
         self.node.bottom.mouseleave(function (e) { self.mouseLeave(e); });
-        self.node.player.children(".name").mousedown(function (e) { self.mouseDownName(e); });
     }
     
     // Resizes the player when the browser size changes.
     self.onResize = function (width, height)
     {
+        self.fileName.onResize(width);
         self.timeLine.onResize(width);
         self.playlist.onResize(width, height);
     }
@@ -187,7 +190,7 @@ function Player(task)
         self.playerInterface = undefined;
         self.playback.hideTime();
         self.playback.setNumber(0, 0);
-        self.node.filename.html("");
+        self.fileName.setText();
     }
     
 // File interface
@@ -232,7 +235,6 @@ function Player(task)
             self.playlistInterface = playlistInterface;
             self.fileInterface = fileInterface;
             self.setFileName(fileInterface.getFileIndex());
-            self.playback.hideTime();
             self.playback.setNumber(playlistInterface.getNumberFiles().fileNumber, playlistInterface.getNumberFiles().numberOfFiles);
             // The file implements the player interface
             if (fileInterface.getMedia)
@@ -245,6 +247,8 @@ function Player(task)
             // Displays the time if there is a player interface
             if (self.playerInterface)
                 self.playback.displayTime();
+            else
+                self.playback.hideTime();
             // Adds the file to the recent files playlist
             self.playlist.addRecentFile(fileInterface.getFileIndex());
         }
@@ -361,15 +365,15 @@ function Player(task)
             if (gl_desktop.drag.isDragging())
                 return ;
             if (fileIndex || fileIndex === 0)
-                self.node.filename.html(gl_files.list[fileIndex].name);
+                self.fileName.setText(gl_files.list[fileIndex].name);
             else if (self.playerInterface)
-                self.node.filename.html(gl_files.list[self.playerInterface.getFileIndex()].name);
+                self.fileName.setText(gl_files.list[self.playerInterface.getFileIndex()].name);
             else if (self.fileInterface)
-                self.node.filename.html(gl_files.list[self.fileInterface.getFileIndex()].name);
+                self.fileName.setText(gl_files.list[self.fileInterface.getFileIndex()].name);
             else if (self.playlistInterface)
-                self.node.filename.html(gl_files.list[self.playlistInterface.getNumberFiles().fileIndex].name);
+                self.fileName.setText(gl_files.list[self.playlistInterface.getNumberFiles().fileIndex].name);
             else
-                self.node.filename.html("");
+                self.fileName.setText("");
         }
     }
 
@@ -383,11 +387,11 @@ self.Playback = function ()
     {
         // Members
         self.C = C.Player.Playback; // The configuration of the playback
-        self.height; // The height of the buttons
         self.paper; // The SVG paper on which the buttons are drawn
-        self.textWidth = {interval: undefined, elapsed: 0, currentWidth: 0}; // Used to calculate the width of the texts
+        self.textWidth = {interval: undefined, elapsed: 0, checkTime: 0, checkNumber: 0, currentNumber: 0, currentTime: 0}; // Used to calculate the width of the texts
         self.slope; // The slope of the buttons
         self.defaultLink; // This link is used when the mouse is outside the buttons areas, but still on the paper
+        self.width = self.C.initialPaperWidth; // The total width of the buttons
         // The buttons properties
         self.defaultBackground = {path: 0, left: 0};
         self.play = {icon: 0, background: 0, link: 0, isPlaying: false, mouseOver: false};
@@ -398,17 +402,16 @@ self.Playback = function ()
         self.time = {background: 0, link: 0, left: 0, display: false};
         
         // Default values
-        self.height = C.Player.defaultHeight - C.Player.timelineHeight;
-        self.slope = self.C.slopeRatio * self.height;
-        node.playback.css("width", self.C.initialPaperWidth);
-        self.paper = Raphael(node.playback[0], "100%", self.height);
+        self.slope = self.C.slopeRatio * player.buttonsHeight;
+        node.playback.css("width", self.width);
+        self.paper = Raphael(node.playback[0], "100%", player.buttonsHeight);
         node.numerator.html("0");
         node.denominator.html("0");
         node.current_time.html("0:00");
         node.duration.html("0:00");
         self.createButtons();
         self.addEvents();
-        self.updateTextsWidth();
+        self.updateTextsWidth(true, true);
         
         // Events
     }
@@ -421,7 +424,7 @@ self.Playback = function ()
         var top = self.C.top;
         
         // Default link
-        self.defaultLink = self.paper.rect(0, 0, 1000, self.height);
+        self.defaultLink = self.paper.rect(0, 0, 1000, player.buttonsHeight);
         self.defaultLink.attr(self.C.linkAttr);
         
         // Default background
@@ -578,23 +581,45 @@ self.Playback = function ()
     }
     
     // Waits the html engine to update the texts width, using an inverval loop.
-    self.updateTextsWidth = function ()
+    self.updateTextsWidth = function (checkNumber, checkTime)
     {
+        var tw = self.textWidth;
+    
         // Starts the inverval loop
-        if (self.textWidth.interval == undefined)
+        if (tw.interval == undefined)
         {
-            self.textWidth.interval = setInterval(self.updateTextsWidth, self.C.updateTextsWidthDuration / self.C.updateTextsWidthSteps);
-            self.textWidth.elapsed = 1;
-            self.textWidth.current = node.number.width();
-            if (self.textWidth.current)
+            tw.interval = setInterval(self.updateTextsWidth, self.C.updateTextsWidthDuration / self.C.updateTextsWidthSteps);
+            tw.elapsed = 1;
+            tw.checkNumber = checkNumber ? true : false;
+            tw.checkTime = checkTime ? true : false;
+            tw.currentNumber = node.number.width();
+            tw.currentTime = node.time.width();
+            if (tw.currentNumber)
                 self.updatePositions();
         }
-        // Ends the interval loop
-        if (self.textWidth.elapsed++ >= self.C.updateTextsWidthSteps || self.textWidth.current != node.number.width())
+        // Restarts the loop if another update has been called
+        else if (checkNumber || checkTime)
         {
-            clearInterval(self.textWidth.interval);
-            self.textWidth.interval = undefined;
+            clearInterval(tw.interval);
+            tw.interval = undefined;
+            self.updateTextsWidth(checkNumber || tw.checkNumber, checkTime || tw.checkTime);
+        }
+        // Ends the interval loop
+        else if (tw.elapsed++ >= self.C.updateTextsWidthSteps ||
+                (tw.checkNumber && tw.currentNumber != node.number.width()) ||
+                (tw.checkTime && tw.currentTime != node.time.width()))
+        {
+            if (tw.checkNumber && tw.currentNumber != node.number.width())
+                tw.checkNumber = false;
+            if (tw.checkTime && tw.currentTime != node.time.width())
+                tw.checkTime = false;
             self.updatePositions();
+            // Ensures that all the texts have been checked, and ends the loop
+            if ((!tw.checkNumber && !tw.checkTime) || tw.elapsed >= self.C.updateTextsWidthSteps)
+            {
+                clearInterval(tw.interval);
+                tw.interval = undefined;
+            }
         }
     }
     
@@ -629,7 +654,7 @@ self.Playback = function ()
         // Time
         left += self.C.nextWidth + self.C.margin;
         var backgroundLeft = left - self.C.margin / 2 - slope;
-        var backgroundWidth = self.C.numberMargin / 2 + timeTextWidth + self.C.margin / 2 + slope * 2;
+        var backgroundWidth = self.C.margin / 2 + timeTextWidth + self.C.margin / 2 + slope * 2;
         self.updateBackground(self.time.background, backgroundLeft, backgroundWidth);
         self.updateBackground(self.time.link, backgroundLeft, backgroundWidth);
         node.time.css("left", left);
@@ -637,9 +662,9 @@ self.Playback = function ()
         
         // Updates the width of the paper
         if (self.time.display)
-            node.playback.css("width", left + timeTextWidth + self.C.margin / 2 + Math.abs(slope));
+            self.setWidth(left + timeTextWidth + self.C.margin / 2 + Math.abs(slope));
         else
-            node.playback.css("width", left - self.C.margin / 2 + Math.abs(slope));
+            self.setWidth(left - self.C.margin / 2 + Math.abs(slope));
     }
     
     // Creates and returns a button background.
@@ -648,7 +673,7 @@ self.Playback = function ()
     {
         if (self.C.correctGap && correctGap !== false)
             width++;
-        var path = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + self.height + "z");
+        var path = self.paper.path("M0," + player.buttonsHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + player.buttonsHeight + "z");
         path.transform("T" + left + ",0");
         path.attr(attr);
         return (path);
@@ -659,7 +684,7 @@ self.Playback = function ()
     {
         if (self.C.correctGap && correctGap !== false)
             width++;
-        background.attr({path: "M0," + self.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + self.height + "z"});
+        background.attr({path: "M0," + player.buttonsHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + player.buttonsHeight + "z"});
         background.transform("T" + left + ",0");
     }
     
@@ -729,7 +754,7 @@ self.Playback = function ()
     {
         node.numerator.html(numerator);
         node.denominator.html(denominator);
-        self.updateTextsWidth();
+        self.updateTextsWidth(true, false);
     }
     
     // Sets the current time and the duration.
@@ -746,24 +771,45 @@ self.Playback = function ()
             node.duration.html(duration);
         }
         if (current_time.length != oldCurrentTime.length || (duration != undefined && duration.length != oldDuration.length))
-            self.updateTextsWidth();
+            self.updateTextsWidth(false, true);
     }
     // Displays the time button.
     self.displayTime = function ()
     {
+        if (self.time.display)
+            return ;
         self.time.display = true;
         node.time.addClass("display");
         self.time.link.show();
-        node.playback.css("width", self.time.left + node.time.width() + self.C.margin / 2 + Math.abs(self.slope / 2));
+        self.setWidth(self.time.left + node.time.width() + self.C.margin / 2 + Math.abs(self.slope / 2));
+        self.updateTextsWidth(false, true);
     }
     // Hides the time button.
     self.hideTime = function ()
     {
+        if (!self.time.display)
+            return ;
         self.time.display = false;
         node.time.removeClass("display");
         self.time.background.hide();
         self.time.link.hide();
-        node.playback.css("width", self.time.left - self.C.margin / 2 + Math.abs(self.slope / 2));
+        self.setWidth(self.time.left - self.C.margin / 2 + Math.abs(self.slope / 2));
+    }
+    
+    // Sets the width of the playback.
+    self.setWidth = function (width)
+    {
+        if (self.width == width)
+            return ;
+        self.width = width;
+        node.playback.css("width", width);
+        player.fileName.onResize();
+    }
+    
+    // Returns the total width of the playback.
+    self.getWidth = function ()
+    {
+        return (self.width);
     }
     
     self.init();
@@ -780,10 +826,10 @@ self.Controls = function ()
     {
         // Members
         self.C = C.Player.Controls; // The configuration of the controls
-        self.height; // The height of the buttons
         self.paper; // The SVG paper on which the buttons are drawn
         self.slope; // The slope of the buttons
         self.defaultLink; // This link is used when the mouse is outside the buttons areas, but still on the paper
+        self.width = self.C.initialPaperWidth;
         // The buttons properties
         self.defaultBackground;
         self.volume = {icon: 0, background: 0, link: 0};
@@ -798,10 +844,9 @@ self.Controls = function ()
         self.normalScreen = {icon: 0, background: 0};
         
         // Default values
-        self.height = C.Player.defaultHeight - C.Player.timelineHeight;
-        self.slope = self.C.slopeRatio * self.height;
-        node.controls.css("width", self.C.initialPaperWidth);
-        self.paper = Raphael(node.controls[0], "100%", self.height);
+        self.slope = self.C.slopeRatio * player.buttonsHeight;
+        node.controls.css("width", self.width);
+        self.paper = Raphael(node.controls[0], "100%", player.buttonsHeight);
         self.createButtons();
         self.addEvents();
         
@@ -816,7 +861,7 @@ self.Controls = function ()
         var top = self.C.top;
         
         // Default link
-        self.defaultLink = self.paper.rect(0, 0, 1000, self.height);
+        self.defaultLink = self.paper.rect(0, 0, 1000, player.buttonsHeight);
         self.defaultLink.attr(self.C.linkAttr);
         
         // Volume
@@ -933,7 +978,7 @@ self.Controls = function ()
         self.defaultBackground.toBack();
         
         // The width of the paper
-        node.controls.css("width", left + self.C.margin / 2);
+        self.setWidth(left + self.C.margin / 2);
     }
     
     // Adds the events to the buttons.
@@ -1012,7 +1057,7 @@ self.Controls = function ()
     {
         if (self.C.correctGap && correctGap !== false)
             width++;
-        var path = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + self.height + "z");
+        var path = self.paper.path("M0," + player.buttonsHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + player.buttonsHeight + "z");
         path.transform("T" + left + ",0");
         path.attr(attr);
         return (path);
@@ -1028,6 +1073,189 @@ self.Controls = function ()
     self.mouseLeave = function (button)
     {
         button.background.hide();
+    }
+    
+    // Sets the width of the controls.
+    self.setWidth = function (width)
+    {
+        self.width = width;
+        node.controls.css("width", width);
+    }
+    
+    // Returns the total width of the controls.
+    self.getWidth = function ()
+    {
+        return (self.width);
+    }
+    
+    self.init();
+    return (self);
+}
+
+// Manages the display of the file name.
+self.FileName = function ()
+{
+    var self = this;
+    var node = player.node;
+    
+    self.init = function ()
+    {
+        // Members
+        self.C = C.Player.FileName; // The configuration of the file name
+        self.paper; // The SVG paper on which the background is drawn
+        self.slope; // The slope of the buttons
+        self.text = node.file_name.children(".text");
+        self.primary = self.text.find(".primary");
+        self.secondary = self.text.find(".secondary");
+        self.text_width = self.text.find(".text_width");
+        self.background = node.file_name.children(".background");
+        self.fullTextWidth; // The width of the unshortened text
+        self.path; // The SVG path of the background
+        self.displayed; // True while the file name is displayed
+        self.textShortened; // True if the text have been shortened to fit between the buttons
+        
+        // Default values
+        self.slope = self.C.slopeRatio * player.buttonsHeight;
+        self.paper = Raphael(self.background[0], "100%", player.buttonsHeight);
+        self.path = self.createBackground(self.C.initialWidth);
+        self.setText();
+        
+        // Events
+        node.file_name.mousedown(function (e) { player.mouseDownName(e); });
+        node.player.mousedown(function (e) { if (e.target == node.player[0]) player.mouseDownName(e); });
+    }
+    
+    // Creates the background.
+    self.createBackground = function (width)
+    {
+        var path = self.paper.path("M0," + player.buttonsHeight + "L" + self.slope + " 0,H" + width + ",l" + self.slope + " " + player.buttonsHeight + "z");
+        path.transform("T" + (-self.slope / 2 + Math.abs(self.slope / 2)) + ",0");
+        path.attr(self.C.attr);
+        return (path);
+    }
+    
+    // Sets the width of the background and the text.
+    self.setWidth = function (width)
+    {
+        self.path.attr({path: "M0," + player.buttonsHeight + "L" + self.slope + " 0,H" + width + ",l" + self.slope + " " + player.buttonsHeight + "z"});
+        self.path.transform("T" + (-self.slope / 2 + Math.abs(self.slope / 2)) + ",0");
+        self.background.css("width", width + Math.abs(self.slope));
+        node.file_name.css("width", width + Math.abs(self.slope));
+        self.text.css("width", width - self.C.padding * 2);
+    }
+    
+    // The player or the playback buttons width have changed,
+    // so we update the position and width of the text accordingly.
+    self.onResize = function ()
+    {
+        if (!self.displayed)
+            return ;
+        var playerWidth = gl_browserSize.width;
+        var playbackWidth = player.playback.getWidth();
+        var controlsWidth = player.controls.getWidth();
+        var fullWidth = self.fullTextWidth + self.C.padding * 2 + Math.abs(self.slope);
+        var width = fullWidth - Math.abs(self.slope) * 2;
+        var left = playerWidth / 2 - width / 2 - playbackWidth;
+        var right = playerWidth / 2 - width / 2 - controlsWidth;
+        var diff = playerWidth - width - playbackWidth - controlsWidth;
+        var centerLeft = playerWidth / 2 - width / 2 - Math.abs(self.slope);
+        
+        // We don't have enougth space to display all the text, so we shorten it
+        if (diff < 0)
+        {
+            node.file_name.css("left", playbackWidth - Math.abs(self.slope));
+            var width = fullWidth + diff - Math.abs(self.slope);
+            self.setWidth(width);
+            self.shortenText(width - self.C.padding * 2);
+            if (width < self.C.minWidth + Math.abs(self.slope))
+                node.file_name.addClass("hide");
+            else
+                node.file_name.removeClass("hide");
+            self.textShortened = true;
+        }
+        // No more space on the left
+        else if (left < 0)
+            node.file_name.css("left", centerLeft - left);
+        // No more space on the right
+        else if (right < 0)
+            node.file_name.css("left", centerLeft + right);
+        // The text can be enterly displayed
+        else
+            node.file_name.css("left", centerLeft);
+        // Puts the width of the text back to its full length
+        if (diff >= 0 && self.textShortened)
+        {
+            node.file_name.removeClass("hide");
+            self.setWidth(fullWidth - Math.abs(self.slope));
+            self.primary.html(self.primary.originalText);
+            self.secondary.html(self.secondary.originalText);
+            self.textShortened = false;
+        }
+    }
+    
+    // Shortens the text in order to fit within the given width.
+    self.shortenText = function (width)
+    {
+        self.primary.html(self.primary.originalText);
+        var primary = self.primary.width();
+        
+        // Shortens the secondary name
+        if (width > primary)
+        {
+            self.secondary.html(self.secondary.originalText);
+            var secondary = self.primary.width();
+            var text = self.secondary.originalText;
+            self.secondary.html(text.substr(0, text.length * width / (primary + secondary)) + self.C.shortenEndString);
+            while (width - primary < self.secondary.width() && text.length > self.C.shortenEndString.length)
+            {
+                text = self.secondary.html();
+                self.secondary.html(text.substr(0, text.length - self.C.shortenEndString.length - 1) + self.C.shortenEndString);
+            }
+            if (width - primary >= self.secondary.width())
+                return ;
+        }
+        // Shortens the primary name
+        self.secondary.html("");
+        var text = self.primary.originalText;
+        self.primary.html(text.substr(0, text.length * width / primary) + self.C.shortenEndString);
+        while (width < self.primary.width() && text.length > self.C.shortenEndString.length)
+        {
+            text = self.primary.html();
+            self.primary.html(text.substr(0, text.length - self.C.shortenEndString.length - 1) + self.C.shortenEndString);
+        }
+    }
+    
+    // Sets the file name.
+    self.setText = function (primary, secondary)
+    {
+        var oldPrimary = self.primary.html();
+        var oldSecondary = self.secondary.html();
+
+        if (secondary == undefined)
+            secondary = "";
+        if (primary == undefined)
+            primary = "";
+        if (oldPrimary == primary && oldSecondary == secondary)
+            return ;
+        if (primary && secondary)
+            secondary = " - " + secondary;
+        self.primary.html(primary);
+        self.secondary.html(secondary);
+        self.primary.originalText = primary;
+        self.secondary.originalText = secondary;
+        if (primary == "" && secondary == "")
+        {
+            self.displayed = false;
+            self.path.hide();
+        }
+        else
+        {
+            self.displayed = true;
+            self.path.show();
+            self.fullTextWidth = self.text_width.width();
+            self.setWidth(self.fullTextWidth + self.C.padding * 2);
+            self.onResize();
+        }
     }
     
     self.init();
@@ -1085,8 +1313,8 @@ self.TimeLine = function ()
         buffered.attr("fill", "#cccccc");
         var after = paper.rect(0, 0, 1, height);
         after.attr("stroke", "none");
-        after.attr("fill", "#4a4a4a");
-        after.attr("opacity", 0.5);
+        after.attr("fill", "black");
+        after.attr("opacity", 0.33);
         
 
         // Updates the time line SVG.
@@ -1118,8 +1346,8 @@ self.TimeLine = function ()
         {
             paper.setSize(undefined, height);
             svg.css("top", "-" + C.Player.timelineExpandHeight + "px");
-            before.attr("opacity", 1);
-            after.attr("opacity", 1);
+            before.attr("opacity", 0.33);
+            after.attr("opacity", 0.33);
         }
         
         // Retracts the time line.
@@ -1127,8 +1355,8 @@ self.TimeLine = function ()
         {
             paper.setSize(undefined, C.Player.timelineHeight);
             svg.css("top", "0px");
-            before.attr("opacity", 0.5);
-            after.attr("opacity", 0.5);
+            before.attr("opacity", 0.33);
+            after.attr("opacity", 0.33);
         }
         
         // Changes the color of the played part based on the file type.
@@ -2284,16 +2512,11 @@ self.Audio = function ()
         // Sets the source of the audio element
         self.audio.mediaId = getUuid();
         self.audio.src = "/c/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
-        // Replaces the file name by the title of the music and the artist if possible
-        if (file.title)
-        {
-            var filename = file.title;
-            if (file.artist)
-                filename += "<span class=\"secondary\"> - " + file.artist + "</span>";
-            node.filename.html(filename);
-        }
         self.playlistInterface = playlistInterface;
         playlistInterface.readyToPlay(self);
+        // Replaces the file name by the title of the music and the artist if possible
+        if (file.title)
+            player.fileName.setText(file.title, file.artist);
     }
     
     // Clears the audio.

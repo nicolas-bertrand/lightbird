@@ -80,7 +80,7 @@ var Configuration =
         },
         Playback:
         {
-            slopeRatio: 75 / 130, // The ratio of the slope of the backgrounds. // Math.sin(30 * (Math.PI / 180)) / Math.cos(30 * (Math.PI / 180))
+            slopeRatio: 75 / 130, // The ratio of the slope of the backgrounds.
             margin: 30, // The margin between the buttons.
             numberMargin: 20, // The margin between the number and the next / previous buttons.
             playWidth: 16, // Width of the play icon.
@@ -92,7 +92,7 @@ var Configuration =
             updateTextsWidthDuration: 500, // The maximum duration during which we try to get the width of the number and time texts.
             updateTextsWidthSteps: 10, // The number of attempts to get the width of the texts during the duration.
             // The attributes of the buttons backgrounds
-            defaultBackgroundAttr: {fill: "90-#292929-#3d3d3d", stroke: "none"}, // This background is always displayed bellow previous / number / next.
+            defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"}, // This background is always displayed bellow previous / number / next.
             playBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
             pauseBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
             previousBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
@@ -123,7 +123,7 @@ var Configuration =
             randomWidth: 27,
             fullScreenWidth: 25,
             // The attributes of the buttons backgrounds
-            defaultBackgroundAttr: {fill: "90-#292929-#3d3d3d", stroke: "none"},
+            defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"},
             volumeBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
             settingsBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
             repeatBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
@@ -132,6 +132,15 @@ var Configuration =
             linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
             initialPaperWidth: 300,  // The initial width of the SVG paper
             correctGap: false, // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+        },
+        FileName:
+        {
+            slopeRatio: 75 / 130, // The ratio of the slope of the background.
+            attr: {fill: "90-#2b2b2b-#404040", stroke: "none"}, // The attributes of the background.
+            initialWidth: 300, // The initial width of the background.
+            padding: 20, // The padding between the text and the background edges.
+            minWidth: 50, // The file name is hidden bellow this width.
+            shortenEndString: "...", // The string to put at the end of the shortened file name.
         }
     },
     Uploads :
