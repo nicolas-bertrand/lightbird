@@ -365,15 +365,15 @@ function Player(task)
             if (gl_desktop.drag.isDragging())
                 return ;
             if (fileIndex || fileIndex === 0)
-                self.fileName.setText(gl_files.list[fileIndex].name);
+                self.fileName.setText(fileIndex);
             else if (self.playerInterface)
-                self.fileName.setText(gl_files.list[self.playerInterface.getFileIndex()].name);
+                self.fileName.setText(self.playerInterface.getFileIndex());
             else if (self.fileInterface)
-                self.fileName.setText(gl_files.list[self.fileInterface.getFileIndex()].name);
+                self.fileName.setText(self.fileInterface.getFileIndex());
             else if (self.playlistInterface)
-                self.fileName.setText(gl_files.list[self.playlistInterface.getNumberFiles().fileIndex].name);
+                self.fileName.setText(self.playlistInterface.getNumberFiles().fileIndex);
             else
-                self.fileName.setText("");
+                self.fileName.setText();
         }
     }
 
@@ -1105,8 +1105,8 @@ self.FileName = function ()
         self.paper; // The SVG paper on which the background is drawn
         self.slope; // The slope of the buttons
         self.text = node.file_name.children(".text");
-        self.primary = self.text.find(".primary");
-        self.secondary = self.text.find(".secondary");
+        self.primary = self.text.find(".primary"); // {originalText} contains the full primary name
+        self.secondary = self.text.find(".secondary"); // {originalText} contains the full secondary name
         self.text_width = self.text.find(".text_width");
         self.background = node.file_name.children(".background");
         self.fullTextWidth; // The width of the unshortened text
@@ -1167,10 +1167,6 @@ self.FileName = function ()
             var width = fullWidth + diff - Math.abs(self.slope);
             self.setWidth(width);
             self.shortenText(width - self.C.padding * 2);
-            if (width < self.C.minWidth + Math.abs(self.slope))
-                node.file_name.addClass("hide");
-            else
-                node.file_name.removeClass("hide");
             self.textShortened = true;
         }
         // No more space on the left
@@ -1199,6 +1195,7 @@ self.FileName = function ()
         self.primary.html(self.primary.originalText);
         var primary = self.primary.width();
         
+        node.file_name.removeClass("hide");
         // Shortens the secondary name
         if (width > primary)
         {
@@ -1223,39 +1220,47 @@ self.FileName = function ()
             text = self.primary.html();
             self.primary.html(text.substr(0, text.length - self.C.shortenEndString.length - 1) + self.C.shortenEndString);
         }
+        // There is not enougth space to display the text so we hide it
+        if (self.primary.html().length <= self.C.shortenEndString.length)
+            node.file_name.addClass("hide");
     }
     
     // Sets the file name.
-    self.setText = function (primary, secondary)
+    self.setText = function (fileIndex)
     {
-        var oldPrimary = self.primary.html();
-        var oldSecondary = self.secondary.html();
-
-        if (secondary == undefined)
-            secondary = "";
-        if (primary == undefined)
-            primary = "";
-        if (oldPrimary == primary && oldSecondary == secondary)
+        // Hides the file name
+        if (fileIndex == undefined)
+        {
+            self.displayed = false;
+            self.path.hide();
+            self.primary.html("");
+            self.secondary.html("");
             return ;
-        if (primary && secondary)
-            secondary = " - " + secondary;
+        }
+        // Gets the texts
+        var file = gl_files.list[fileIndex]
+        var primary = "";
+        var secondary = "";
+    
+        if (file.title)
+            primary = file.title;
+        else
+            primary = file.name;
+        if (file.artist)
+            secondary = self.C.separatorString + file.artist;
+        // This file is already displayed
+        if (primary == self.primary.originalText && secondary == self.secondary.originalText)
+            return ;
         self.primary.html(primary);
         self.secondary.html(secondary);
         self.primary.originalText = primary;
         self.secondary.originalText = secondary;
-        if (primary == "" && secondary == "")
-        {
-            self.displayed = false;
-            self.path.hide();
-        }
-        else
-        {
-            self.displayed = true;
-            self.path.show();
-            self.fullTextWidth = self.text_width.width();
-            self.setWidth(self.fullTextWidth + self.C.padding * 2);
-            self.onResize();
-        }
+        // Displays the file name
+        self.displayed = true;
+        self.path.show();
+        self.fullTextWidth = self.text_width.width();
+        self.setWidth(self.fullTextWidth + self.C.padding * 2);
+        self.onResize();
     }
     
     self.init();
@@ -2514,9 +2519,6 @@ self.Audio = function ()
         self.audio.src = "/c/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
         self.playlistInterface = playlistInterface;
         playlistInterface.readyToPlay(self);
-        // Replaces the file name by the title of the music and the artist if possible
-        if (file.title)
-            player.fileName.setText(file.title, file.artist);
     }
     
     // Clears the audio.

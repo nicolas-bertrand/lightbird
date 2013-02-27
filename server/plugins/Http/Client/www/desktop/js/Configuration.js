@@ -141,6 +141,7 @@ var Configuration =
             padding: 20, // The padding between the text and the background edges.
             minWidth: 50, // The file name is hidden bellow this width.
             shortenEndString: "...", // The string to put at the end of the shortened file name.
+            separatorString: " - ", // The string that separates the primary and the secondary file name, if displayed.
         }
     },
     Uploads :
