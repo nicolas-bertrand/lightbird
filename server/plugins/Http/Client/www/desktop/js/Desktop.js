@@ -55,11 +55,11 @@ function Desktop(task)
         $(self.node.middle).height(self.middleHeight);
         self.left = C.Desktop.tasksListWidth;
         self.top = C.Desktop.topHeight;
-        self.width = width - C.Desktop.tasksListWidth - C.Desktop.taskBorder * 2;
-        self.height = self.middleHeight - C.Desktop.taskBorder * 2;
+        self.width = width - C.Desktop.tasksListWidth;
+        self.height = self.middleHeight;
         self.node.resize_layer.style.left = self.left + "px";
         self.node.resize_layer.style.top = self.top + "px";
-        self.node.resize_layer.style.width = self.width + C.Desktop.taskBorder * 2 + "px";
+        self.node.resize_layer.style.width = self.width + "px";
         self.node.resize_layer.style.height = self.middleHeight + "px";
         if (self.currentPage)
             self.currentPage.onResize();
@@ -544,8 +544,7 @@ function Page()
         // Otherwise we split the area based on the ratios, and we dive deeper into the tree
         else if (node.first && node.second)
         {
-            var taskBorder = C.Desktop.taskBorder * 2;
-            var taskMargin = C.Desktop.taskMargin + taskBorder;
+            var taskMargin = C.Desktop.taskMargin;
             var margin = taskMargin / 2;
             // Creates the resize bar that allows to resize the tasks
             if (!node.resize)
@@ -573,10 +572,10 @@ function Page()
                 self.renderTree(node.second, l, top, Math.max(second, 0), height);
                 // Positions the vertical resize bar
                 $(node.resize).addClass("vertical");
-                node.resize.style.left = Math.max(l - taskMargin, left) + taskBorder + "px";
+                node.resize.style.left = Math.max(l - taskMargin, left) + "px";
                 node.resize.style.top = top + "px";
-                node.resize.style.width = Math.max(Math.min(taskMargin, width) - taskBorder, 0) + "px";
-                node.resize.style.height = (height > 0 ? height + taskBorder : 0) + "px";
+                node.resize.style.width = Math.max(Math.min(taskMargin, width), 0) + "px";
+                node.resize.style.height = (height > 0 ? height : 0) + "px";
             }
             // Splits horizontally
             else
@@ -602,9 +601,9 @@ function Page()
                 // Positions the horizontal resize bar
                 $(node.resize).addClass("horizontal");
                 node.resize.style.left = left + "px";
-                node.resize.style.top = Math.max(t - taskMargin, top) + taskBorder + "px";
-                node.resize.style.width = (width > 0 ? width + taskBorder : 0) + "px";
-                node.resize.style.height = Math.max(Math.min(taskMargin, height) - taskBorder, 0) + "px";
+                node.resize.style.top = Math.max(t - taskMargin, top) + "px";
+                node.resize.style.width = (width > 0 ? width : 0) + "px";
+                node.resize.style.height = Math.max(Math.min(taskMargin, height), 0) + "px";
             }
         }
         // Saves the coordinates of the node
@@ -1185,11 +1184,11 @@ function Task(resource, html)
     // Sets the coordinates of the content of the task.
     self.setCoordinates = function(left, top, width, height)
     {
-        // Compensates the lack of task border
-        if ($(self.content).hasClass("no_border") && height > 0 && width > 0)
+        // Compensates the presence of the task border
+        if (!$(self.content).hasClass("no_border"))
         {
-            width += C.Desktop.taskBorder * 2;
-            height += C.Desktop.taskBorder * 2;
+            width = Math.max(width - C.Desktop.taskBorder * 2, 0);
+            height = Math.max(height - C.Desktop.taskBorder * 2, 0);
         }
         // Sets the new coordinates
         self.left = left;
@@ -1392,7 +1391,7 @@ function TaskTreeNode(node)
     // Resizes the node according to the mouse position.
     self.mouseMove = function (e)
     {
-        var taskMargin = C.Desktop.taskMargin + C.Desktop.taskBorder * 2;
+        var taskMargin = C.Desktop.taskMargin;
         var x = e.pageX;
         var y = e.pageY;
 

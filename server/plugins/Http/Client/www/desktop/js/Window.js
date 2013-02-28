@@ -133,9 +133,9 @@ function Window(page)
     {
         self.element.style.left = self.left - C.Window.border + "px";
         self.element.style.top = self.top - self.topHeight + "px";
-        self.element.style.width = self.width + (C.Window.border + C.Desktop.taskBorder) * 2 + "px";
-        self.element.style.height = Math.max(self.height + C.Desktop.taskBorder * 2 + self.topHeight + C.Window.border, 0) + "px";
-        self.node.middle.style.height = Math.max(self.height + C.Desktop.taskBorder * 2 + C.Window.border - self.bottomHeight, 0) + "px";
+        self.element.style.width = self.width + C.Window.border * 2 + "px";
+        self.element.style.height = Math.max(self.height + self.topHeight + C.Window.border, 0) + "px";
+        self.node.middle.style.height = Math.max(self.height + C.Window.border - self.bottomHeight, 0) + "px";
         self.page.onResize();
     }
     
@@ -224,13 +224,13 @@ function Window(page)
         {
             if (width < C.Window.minWidth)
                 width = C.Window.minWidth;
-            self.width = Math.max(width - (C.Window.border + C.Desktop.taskBorder) * 2, 0);
+            self.width = Math.max(width - C.Window.border * 2, 0);
         }
         if (height != undefined)
         {
             if (height < C.Window.minHeight)
                 height = C.Window.minHeight;
-            self.height = height - (C.Desktop.taskBorder * 2 + self.topHeight + C.Window.border);
+            self.height = height - (self.topHeight + C.Window.border);
         }
         self.onResize();
     }
