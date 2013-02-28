@@ -514,12 +514,12 @@ self.Playback = function ()
         $(self.defaultLink.node).mousedown(function (e) { player.mouseDownName(e); });
     
         // Play / Pause
-        $(self.play.link.node).mouseenter(function (e)
+        $(self.play.link.node).mouseover(function (e)
         {
             self.mouseEnter(self.play.isPlaying ? self.pause : self.play);
             self.play.mouseOver = true;
         });
-        $(self.play.link.node).mouseleave(function (e)
+        $(self.play.link.node).mouseout(function (e)
         {
             self.mouseLeave(self.play.isPlaying ? self.pause : self.play);
             self.play.mouseOver = false;
@@ -527,55 +527,54 @@ self.Playback = function ()
         $(self.play.link.node).mousedown(function (e) { self.mouseDownPlayPause(); });
         
         // Previous
-        $(self.previous.link.node).mouseenter(function (e) { self.mouseEnter(self.previous); });
-        $(self.previous.link.node).mouseleave(function (e) { self.mouseLeave(self.previous); });
+        $(self.previous.link.node).mouseover(function (e) { self.mouseEnter(self.previous); });
+        $(self.previous.link.node).mouseout(function (e) { self.mouseLeave(self.previous); });
         
         // Number
-        $(self.number.link.node).mouseenter(function (e)
+        $(self.number.link.node).mouseover(function (e)
         {
-            // Ensures that we are not just entering the number node
-            if (e.relatedTarget != node.number[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".number").length)
+            if (!node.number.hasClass("hover"))
                 self.mouseEnter(self.number);
         });
-        $(self.number.link.node).mouseleave(function (e)
+        $(self.number.link.node).mouseout(function (e)
         {
             if (e.relatedTarget != node.number[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".number").length)
                 self.mouseLeave(self.number);
         });
-        $(node.number).mouseenter(function (e)
+        $(node.number).mouseover(function (e)
         {
-            if (e.relatedTarget != self.number.link.node)
+            if (!node.number.hasClass("hover"))
                 self.mouseEnter(self.number);
         });
-        $(node.number).mouseleave(function (e)
+        $(node.number).mouseout(function (e)
         {
-            if (e.relatedTarget != self.number.link.node)
+            if (e.relatedTarget != self.number.link.node && e.relatedTarget != node.number[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".number").length)
                 self.mouseLeave(self.number);
         });
         
         // Next
-        $(self.next.link.node).mouseenter(function (e) { self.mouseEnter(self.next); });
-        $(self.next.link.node).mouseleave(function (e) { self.mouseLeave(self.next); });
+        $(self.next.link.node).mouseover(function (e) { self.mouseEnter(self.next); });
+        $(self.next.link.node).mouseout(function (e) { self.mouseLeave(self.next); });
         
         // Time
-        $(self.time.link.node).mouseenter(function (e)
+        $(self.time.link.node).mouseover(function (e)
         {
-            if (e.relatedTarget != node.time[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".time").length)
+            if (!node.time.hasClass("hover"))
                 self.mouseEnter(self.time);
         });
-        $(self.time.link.node).mouseleave(function (e)
+        $(self.time.link.node).mouseout(function (e)
         {
             if (e.relatedTarget != node.time[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".time").length)
                 self.mouseLeave(self.time);
         });
-        $(node.time).mouseenter(function (e)
+        $(node.time).mouseover(function (e)
         {
-            if (e.relatedTarget != self.time.link.node)
+            if (!node.time.hasClass("hover"))
                 self.mouseEnter(self.time);
         });
-        $(node.time).mouseleave(function (e)
+        $(node.time).mouseout(function (e)
         {
-            if (e.relatedTarget != self.time.link.node)
+            if (e.relatedTarget != self.time.link.node && e.relatedTarget != node.time[0] && !$(e.relatedTarget).parentsUntil(node.playback, ".time").length)
                 self.mouseLeave(self.time);
         });
     }
@@ -988,21 +987,21 @@ self.Controls = function ()
         $(self.defaultLink.node).mousedown(function (e) { player.mouseDownName(e); });
         
         // Volume
-        $(self.volume.link.node).mouseenter(function (e) { self.mouseEnter(self.volume); });
-        $(self.volume.link.node).mouseleave(function (e) { self.mouseLeave(self.volume); });
+        $(self.volume.link.node).mouseover(function (e) { self.mouseEnter(self.volume); });
+        $(self.volume.link.node).mouseout(function (e) { self.mouseLeave(self.volume); });
         
         // Settings
-        $(self.settings.link.node).mouseenter(function (e) { self.mouseEnter(self.settings); });
-        $(self.settings.link.node).mouseleave(function (e) { self.mouseLeave(self.settings); });
+        $(self.settings.link.node).mouseover(function (e) { self.mouseEnter(self.settings); });
+        $(self.settings.link.node).mouseout(function (e) { self.mouseLeave(self.settings); });
         
         // Repeat
-        $(self.repeat.link.node).mouseenter(function (e)
+        $(self.repeat.link.node).mouseover(function (e)
         {
             self.mouseEnter(self.repeat);
             self.repeat.currentIcon.attr(self.C.iconAttrInverse);
             self.repeat.currentIcon.glow.attr(self.C.iconGlowInverse);
         });
-        $(self.repeat.link.node).mouseleave(function (e)
+        $(self.repeat.link.node).mouseout(function (e)
         {
             self.mouseLeave(self.repeat);
             self.repeat.currentIcon.attr(self.C.iconAttr);
@@ -1022,13 +1021,13 @@ self.Controls = function ()
         });
         
         // Random
-        $(self.random.link.node).mouseenter(function (e)
+        $(self.random.link.node).mouseover(function (e)
         {
             self.mouseEnter(self.random);
             self.random.currentIcon.attr(self.C.iconAttrInverse);
             self.random.currentIcon.glow.attr(self.C.iconGlowInverse);
         });
-        $(self.random.link.node).mouseleave(function (e)
+        $(self.random.link.node).mouseout(function (e)
         {
             self.mouseLeave(self.random);
             self.random.currentIcon.attr(self.C.iconAttr);
@@ -1047,8 +1046,8 @@ self.Controls = function ()
         });
         
         // Full screen
-        $(self.fullScreen.link.node).mouseenter(function (e) { self.mouseEnter(self.fullScreen); });
-        $(self.fullScreen.link.node).mouseleave(function (e) { self.mouseLeave(self.fullScreen); });
+        $(self.fullScreen.link.node).mouseover(function (e) { self.mouseEnter(self.fullScreen); });
+        $(self.fullScreen.link.node).mouseout(function (e) { self.mouseLeave(self.fullScreen); });
     }
     
     // Creates and returns a button background.
