@@ -1292,6 +1292,7 @@ self.TimeLine = function ()
         self.currentPreviewTime; // The time of the preview currently displayed.
         self.timeOffset = 0; // The offset that have to be applied to the time line due to the server side seeking
         self.fileIndex; // The index of the file displayed by the time line
+        self.fileType; // The type of the file currently played
         self.opaqueCounter = 0; // Counts the number of time the time line is made opaque / transparent. The time line is made transparent when the counter reaches 0.
         
         // Default values
@@ -1377,15 +1378,22 @@ self.TimeLine = function ()
                 buffered.attr(self.C.buffered.normal);
                 after.attr(self.C.after.normal);
             }
+            self.setTimeLineType();
         }
         
         // Changes the color of the played part based on the file type.
-        self.setTimeLineType = function (type)
+        self.setTimeLineType = function ()
         {
-            if (type == "audio")
+            if (self.fileType == "audio")
+            {
+                before.attr(self.C.before.audio);
                 played.attr(self.C.played.audio);
-            else if (type == "video")
+            }
+            else if (self.fileType == "video")
+            {
+                before.attr(self.C.before.video);
                 played.attr(self.C.played.video);
+            }
         }
         
         self.updateTimeLine();
@@ -1556,7 +1564,8 @@ self.TimeLine = function ()
         self.duration = file.duration;
         player.playback.setTime(0, self.duration);
         self.timeOffset = media.timeOffset;
-        self.setTimeLineType(file.type);
+        self.fileType = file.type;
+        self.setTimeLineType();
         if (file.type == "video")
             self.previewHeight = Math.round(C.Player.Seek.previewWidth * file.height / file.width);
         else

@@ -149,18 +149,20 @@ var Configuration =
             before:
             {
                 normal: {fill: "#4a4a4a", opacity: 0.5, stroke: "none"},
-                opaque: {opacity: 1}
+                opaque: {opacity: 1},
+                audio: {fill: "#377f3f"},
+                video: {fill: "#9e4332"}
             },
             played:
             {
                 normal: {opacity: 1, stroke: "none"},
                 opaque: {opacity: 1},
                 audio: {fill: "#24b335"},
-                video: {fill: "#f13d1a"},
+                video: {fill: "#f13d1a"}
             },
             buffered:
             {
-                normal: {fill: "#cccccc", opacity: 1, stroke: "none"},
+                normal: {fill: "#cccccc", opacity: 0.8, stroke: "none"},
                 opaque: {opacity: 1}
             },
             after:
