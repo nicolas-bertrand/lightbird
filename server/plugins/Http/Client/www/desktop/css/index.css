@@ -601,20 +601,20 @@ a:visited
     z-index: 1000000;
 }
 
-#desktop>.bottom>.timeline
+#desktop>.bottom>.time_line
 {
-    height: 5px; /* C.Player.timelineDefaultHeight */
+    height: 5px; /* C.Player.TimeLine.height */
     cursor: pointer;
     position: relative;
 }
 
-#desktop>.bottom>.timeline div
+#desktop>.bottom>.time_line div
 {
     height: 100%;
     float: left;
 }
 
-#desktop>.bottom>.timeline>.active_area
+#desktop>.bottom>.time_line>.active_area
 {
     width: 100%;
     height: 5px;
@@ -623,18 +623,18 @@ a:visited
     z-index: 1;
     background-color: rgba(255, 0, 0, 0);
 }
-#desktop>.bottom>.timeline.expand>.active_area
+#desktop>.bottom>.time_line.expand>.active_area
 {
     height: 10px;
     top: -5px;
 }
-#desktop>.bottom>.timeline.expand>.active_area.expand
+#desktop>.bottom>.time_line.expand>.active_area.expand
 {
     height: 30px;
     top: -15px;
 }
 
-#desktop>.bottom>.timeline>.seek
+#desktop>.bottom>.time_line>.seek
 {
     position: absolute;
     top: -47px;
@@ -642,24 +642,24 @@ a:visited
     display: none;
 }
 
-#desktop>.bottom>.timeline>.seek>.preview>img
+#desktop>.bottom>.time_line>.seek>.preview>img
 {
     position: absolute;
 }
 
-#desktop>.bottom>.timeline>.seek>svg,
-#desktop>.bottom>.timeline>.seek>.middle
+#desktop>.bottom>.time_line>.seek>svg,
+#desktop>.bottom>.time_line>.seek>.middle
 {
     float: left;
     position: relative;
 }
 
-#desktop>.bottom>.timeline.over>.seek
+#desktop>.bottom>.time_line.over>.seek
 {
     display: block;
 }
 
-#desktop>.bottom>.timeline>.seek>.time
+#desktop>.bottom>.time_line>.seek>.time
 {
     padding: 7px 10px 0px 10px;
     color: white;
@@ -669,13 +669,13 @@ a:visited
     position: absolute;
 }
 
-#desktop>.bottom>.timeline>.seek>.preview
+#desktop>.bottom>.time_line>.seek>.preview
 {
     position: absolute;
     display: none;
 }
 
-#desktop>.bottom>.timeline>.seek>.preview.display
+#desktop>.bottom>.time_line>.seek>.preview.display
 {
     display: block;
 }

@@ -1,82 +1,80 @@
 // The configuration of the Client.
 var Configuration =
 {
-	animationFPS : 20, // Default animation FPS.
-    focusBeforeAction : true, // If the page have to be focused before doing any action when the mouse clicks on a task.
+	animationFPS: 20, // Default animation FPS.
+    focusBeforeAction: true, // If the page have to be focused before doing any action when the mouse clicks on a task.
     // The configuration of the desktop.
-    Desktop :
+    Desktop:
     {
-        minWidth : 600, // The minimum width of the desktop.
-        minHeight : 300, // The minimum height of the desktop.
-        topHeight : 40, // The height of the top menu.
-        bottomHeight : 45, // The height of the bottom area.
-        collectionsWidth : 10, // The width of the collections list.
-        pageMargin : 10, // The height of the bottom margin between the pages.
-        tasksListWidth : 120, // The width of the tasks list.
-        tasksListMargin : 10, // The width of the left margin of the tasks list.
-        taskIconHeight : 75, // The height of a task icon.
-        taskResistance : 3, // Number of pixels a task icon have to be dragged before actually moving.
-        taskDragShift : { x : 10, y : 10 }, // The shift of the dragged task when when it is out of the tasks list.
-        tasksListScrollHeight : 50, // Height of the scrolling areas of the tasks list.
-        tasksListScrollSpeed : 20, // The speed of the scroll areas of the tasks list.
-        mouseWheelMultiplier : 50, // Used to normalize the mouse wheel delta. Increases the delta of each click.
-        defaultPosition : "e", // The default position of a task moved (n s e w).
-        insertTaskAreaSize : 50, // The size of the page border areas that allows to insert a task.
-        taskMargin : 5, // The margin between the tasks content in a page. It is also the size of the resize task bars.
-        taskBorder : 1, // The size of the border of the tasks content.
-        resizeTaskLimitMin : 0, // The minimum ratio by which a task can be resized. Between 0 and 1.
-        resizeTaskLimitMax : 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
-        resizeResistance : 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
-        resizeDeltaDivisor : 20, // Reduce the delta of the mouse wheel that resize the task margin.
+        minWidth: 600, // The minimum width of the desktop.
+        minHeight: 300, // The minimum height of the desktop.
+        topHeight: 40, // The height of the top menu.
+        bottomHeight: 45, // The height of the bottom area.
+        collectionsWidth: 10, // The width of the collections list.
+        pageMargin: 10, // The height of the bottom margin between the pages.
+        tasksListWidth: 120, // The width of the tasks list.
+        tasksListMargin: 10, // The width of the left margin of the tasks list.
+        taskIconHeight: 75, // The height of a task icon.
+        taskResistance: 3, // Number of pixels a task icon have to be dragged before actually moving.
+        taskDragShift: { x: 10, y: 10 }, // The shift of the dragged task when when it is out of the tasks list.
+        tasksListScrollHeight: 50, // Height of the scrolling areas of the tasks list.
+        tasksListScrollSpeed: 20, // The speed of the scroll areas of the tasks list.
+        mouseWheelMultiplier: 50, // Used to normalize the mouse wheel delta. Increases the delta of each click.
+        defaultPosition: "e", // The default position of a task moved (n s e w).
+        insertTaskAreaSize: 50, // The size of the page border areas that allows to insert a task.
+        taskMargin: 5, // The margin between the tasks content in a page. It is also the size of the resize task bars.
+        taskBorder: 1, // The size of the border of the tasks content.
+        resizeTaskLimitMin: 0, // The minimum ratio by which a task can be resized. Between 0 and 1.
+        resizeTaskLimitMax: 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
+        resizeResistance: 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
+        resizeDeltaDivisor: 20 // Reduce the delta of the mouse wheel that resize the task margin.
     },
-	Window :
+	Window:
 	{
-        default : // The default position of the window
+        default: // The default position of the window
         {
-            left : 200,
-            top : 100,
-            width : 600,
-            height : 400
+            left: 200,
+            top: 100,
+            width: 600,
+            height: 400
         },
-        limit : // The limits of the window when it is moved or resized
+        limit: // The limits of the window when it is moved or resized
         {
-            top : 8,
-            bottom : 28,
+            top: 8,
+            bottom: 28
         },
-        minWidth : 162,
-        minHeight : 35,
-        border : 5, // The size of the border of the window.
-        topHeight : 35, // The height of the top of the window.
-        bottomHeight : 30, // The height of the bottom of the window.
+        minWidth: 162,
+        minHeight: 35,
+        border: 5, // The size of the border of the window.
+        topHeight: 35, // The height of the top of the window.
+        bottomHeight: 30 // The height of the bottom of the window.
 	},
-    Player :
+    Player:
     {
-        defaultHeight : 45, // == C.Desktop.bottomHeight
-        playlistHeight : 200, // The default height of the playlist.
-        timelineHeight : 5, // The default height of the timeline.
-        timelineExpandHeight : 5, // The additionnal height of the timeline when it is expanded.
-        headerHeight : 24, // The height of the playlist header.
-        listFileHeight : 25, // The height of each file of the playlist.
-        tabOrigin : -30, // The original position of the tabs.
-        tabMargin : 16, // The margin between the tabs.
-        addIconMargin : 40, // The margin between the last tab and the add icon.
-        addIconOrigin : -16, // The origin position of the add icon.
-        tabOffsetInterval : 10, // The duration of the intervals used to get the offset* of the tabs.
-        tabExternLeft : 16, // The estimation of the width of the external left part of the tab, based on its shape.
-        tabExternRight : 21, // The estimation of the width of the external right part of the tab, based on its shape.
-        tabDragResistance : 3, // The number of pixels the mouse needs to move in order to start the dragging.
-        playlistResizeResistance : 20, // The number of pixels the mouse needs to move in order to start the resizing.
-        playlistResizeEdges : -2, // The distance from the edge of the header where the resize takes effect.
-        mouseLeaveTimeout : 1000, // The delay before the effect of the mouse leave.
-        Seek :
+        defaultHeight: 45, // == C.Desktop.bottomHeight
+        playlistHeight: 200, // The default height of the playlist.
+        headerHeight: 24, // The height of the playlist header.
+        listFileHeight: 25, // The height of each file of the playlist.
+        tabOrigin: -30, // The original position of the tabs.
+        tabMargin: 16, // The margin between the tabs.
+        addIconMargin: 40, // The margin between the last tab and the add icon.
+        addIconOrigin: -16, // The origin position of the add icon.
+        tabOffsetInterval: 10, // The duration of the intervals used to get the offset* of the tabs.
+        tabExternLeft: 16, // The estimation of the width of the external left part of the tab, based on its shape.
+        tabExternRight: 21, // The estimation of the width of the external right part of the tab, based on its shape.
+        tabDragResistance: 3, // The number of pixels the mouse needs to move in order to start the dragging.
+        playlistResizeResistance: 20, // The number of pixels the mouse needs to move in order to start the resizing.
+        playlistResizeEdges: -2, // The distance from the edge of the header where the resize takes effect.
+        mouseLeaveTimeout: 1000, // The delay before the effect of the mouse leave.
+        Seek:
         {
-            border : 20, // The width of the borders (not visible).
-            topPosition : 15, // The position of the seek box above the time line.
-            positionLimit : 1, // The number of pixels the seek box can exceed left and right relative to the browser width.
-            height : 31, // The default height of the box.
-            radius : 5, // The radius of the box corners.
-            previewWidth : 200, // The width of the preview displayed above the box.
-            numberPreviews : 100, // The number of previews generated for each videos.
+            border: 20, // The width of the borders (not visible).
+            topPosition: 15, // The position of the seek box above the time line.
+            positionLimit: 1, // The number of pixels the seek box can exceed left and right relative to the browser width.
+            height: 31, // The default height of the box.
+            radius: 5, // The radius of the box corners.
+            previewWidth: 200, // The width of the preview displayed above the box.
+            numberPreviews: 100 // The number of previews generated for each videos.
         },
         Playback:
         {
@@ -104,7 +102,7 @@ var Configuration =
             initialDefaultBackgroundWidth: 137, // The initial width of the default background, before the texts width computation is performed.
             initialPaperWidth: 300,  // The initial width of the SVG paper, before the texts width computation is performed.
             adjustTextWidth: -1, // Browsers seems to add on extra pixel when calculating the width of a text.
-            correctGap: false, // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+            correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         },
         Controls:
         {
@@ -131,7 +129,7 @@ var Configuration =
             fullScreenBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
             linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
             initialPaperWidth: 300,  // The initial width of the SVG paper
-            correctGap: false, // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+            correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         },
         FileName:
         {
@@ -141,28 +139,56 @@ var Configuration =
             padding: 20, // The padding between the text and the background edges.
             minWidth: 50, // The file name is hidden bellow this width.
             shortenEndString: "...", // The string to put at the end of the shortened file name.
-            separatorString: " - ", // The string that separates the primary and the secondary file name, if displayed.
+            separatorString: " - " // The string that separates the primary and the secondary file name, if displayed.
+        },
+        TimeLine:
+        {
+            height: 5, // The default height of the time line.
+            expandHeight: 5, // The additionnal height of the time line when it is expanded.
+            // The attributes of the time line elements
+            before:
+            {
+                normal: {fill: "#4a4a4a", opacity: 0.5, stroke: "none"},
+                opaque: {opacity: 1}
+            },
+            played:
+            {
+                normal: {opacity: 1, stroke: "none"},
+                opaque: {opacity: 1},
+                audio: {fill: "#24b335"},
+                video: {fill: "#f13d1a"},
+            },
+            buffered:
+            {
+                normal: {fill: "#cccccc", opacity: 1, stroke: "none"},
+                opaque: {opacity: 1}
+            },
+            after:
+            {
+                normal: {fill: "black", opacity: 0.33, stroke: "none"},
+                opaque: {fill: "#4a4a4a", opacity: 1}
+            }
         }
     },
-    Uploads :
+    Uploads:
     {
-        requestProgressInterval : 1000, // The number of milliseconds between each progress request.
+        requestProgressInterval: 1000 // The number of milliseconds between each progress request.
     },
-	Files :
+	Files:
 	{
-        controlsHeight : 40,
-        headerHeight : 28,
-        headerSeparatorWidth : 1, // The width of the header separators.
-        headerSeparatorMinColumnWidth : 15, // When the width of a column is lower than this, the active area of the separators next to it is shorten.
-        headerMinWidth : 40, // The default minimum width of the columns of the header.
-        headerTextPadding : 5, // The padding between the separator and the header columns.
-        headerDefaultWidth : 200, // The default width of the coulmns of the header.
-        listRowHeight : 30, // The height of the rows of the files list.
-        columnTypeTextMinWidth : 30, // The minimum width required by the type column to display the type in text instead of the colors.
+        controlsHeight: 40,
+        headerHeight: 28,
+        headerSeparatorWidth: 1, // The width of the header separators.
+        headerSeparatorMinColumnWidth: 15, // When the width of a column is lower than this, the active area of the separators next to it is shorten.
+        headerMinWidth: 40, // The default minimum width of the columns of the header.
+        headerTextPadding: 5, // The padding between the separator and the header columns.
+        headerDefaultWidth: 200, // The default width of the coulmns of the header.
+        listRowHeight: 30, // The height of the rows of the files list.
+        columnTypeTextMinWidth: 30 // The minimum width required by the type column to display the type in text instead of the colors.
 	},
-	View :
+	View:
 	{
-        minHeight : 15, // The minimal height of the images and videos.
-	},
+        minHeight: 15 // The minimal height of the images and videos.
+	}
 };
 var C = Configuration;

@@ -287,43 +287,45 @@ function Window(page)
         });
     }
     
-// Container interface
+// Container API
+// These methods allow the pages to interact with their container.
+    {
+        // Displays the window.
+        self.display = function ()
+        {
+            self.onResize();
+            self.focus();
+            $(self.element).addClass("display");
+            $(self.page.icon).addClass("window");
+        }
 
-    // Displays the window.
-    self.display = function ()
-    {
-        self.onResize();
-        self.focus();
-        $(self.element).addClass("display");
-        $(self.page.icon).addClass("window");
-    }
-
-    // Hides the window.
-    self.hide = function ()
-    {
-        $(self.element).removeClass("display");
-        gl_windows.clearZIndex();
-    }
-    
-    // Closes the window.
-    self.close = function ()
-    {
-        // Saves the coordinates of the window for the next time it is opened, if necessary
-        self.page.oldWindowCoordinates = { left : self.left, top : self.top, width : self.width, height : self.height };
-        // Clears the window
-        self.page = undefined;
-        self.element.object = undefined;
-        $(self.element).remove();
-        for (var key in self)
-            self[key] = undefined;
-        gl_windows.clearZIndex();
-    }
-    
-    // Notifies that the window is no longer the container of the page.
-    // @parem page : The page concerned.
-    self.containerChanged = function(page)
-    {
-        self.close();
+        // Hides the window.
+        self.hide = function ()
+        {
+            $(self.element).removeClass("display");
+            gl_windows.clearZIndex();
+        }
+        
+        // Closes the window.
+        self.close = function ()
+        {
+            // Saves the coordinates of the window for the next time it is opened, if necessary
+            self.page.oldWindowCoordinates = { left : self.left, top : self.top, width : self.width, height : self.height };
+            // Clears the window
+            self.page = undefined;
+            self.element.object = undefined;
+            $(self.element).remove();
+            for (var key in self)
+                self[key] = undefined;
+            gl_windows.clearZIndex();
+        }
+        
+        // Notifies that the window is no longer the container of the page.
+        // @parem page : The page concerned.
+        self.containerChanged = function(page)
+        {
+            self.close();
+        }
     }
     
     self.init();

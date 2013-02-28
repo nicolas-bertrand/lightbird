@@ -12,11 +12,11 @@ function Player(task)
         // Nodes
         self.node = new Object();
         self.node.bottom = $("#desktop>.bottom");
-        self.node.timeline = self.node.bottom.children(".timeline");
-        self.node.seek = self.node.timeline.children(".seek");
+        self.node.time_line = self.node.bottom.children(".time_line");
+        self.node.seek = self.node.time_line.children(".seek");
         self.node.preview = self.node.seek.children(".preview");
         self.node.seek_time = self.node.seek.children(".time");
-        self.node.activeArea = self.node.timeline.children(".active_area");
+        self.node.activeArea = self.node.time_line.children(".active_area");
         self.node.player = self.node.bottom.children(".player");
         self.node.playback = self.node.player.children(".playback");
         self.node.controls = self.node.player.children(".controls");
@@ -54,7 +54,7 @@ function Player(task)
         // Default values
         C.Desktop.bottomHeight = C.Player.defaultHeight;
         self.node.bottom.height(C.Desktop.bottomHeight);
-        self.buttonsHeight = C.Player.defaultHeight - C.Player.timelineHeight;
+        self.buttonsHeight = C.Player.defaultHeight - C.Player.TimeLine.height;
         self.playback = new self.Playback();
         self.controls = new self.Controls();
         self.fileName = new self.FileName();
@@ -86,7 +86,7 @@ function Player(task)
             clearTimeout(self.mouseLeaveTimeout);
             self.mouseLeaveTimeout = 0;
         }
-        // Expands the timeline
+        // Expands the time line
         else if (!self.playlist.isDisplayed() && !gl_desktop.drag.isDragging())
             self.timeLine.expand();
     }
@@ -163,6 +163,12 @@ function Player(task)
         return (result);
     }
     
+    // This event is received when a page is displayed or hidden by the desktop.
+    self.onDesktopPage = function (display)
+    {
+        self.timeLine.opaqueTimeLine(display);
+    }
+    
     // Called by the media play event.
     self.play = function ()
     {
@@ -225,7 +231,7 @@ function Player(task)
         function readyToPlay(fileInterface) {}
     }
     
-// Player api
+// Player API
     {
         // Plays a file within a playlist. The current playlist is replaced by the one given.
         // @param playlistInterface : The playlist from which the file is played. Muts implement the playlist interface.
@@ -1275,16 +1281,18 @@ self.TimeLine = function ()
     self.init = function ()
     {
         // Members
+        self.C = C.Player.TimeLine; // The configuration of the time line.
         self.media; // The media currently played
         self.duration; // The duration of the media currently played
         self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leaving the active area
-        self.before = 0; // The percentage of the before part of the timeline
+        self.before = 0; // The percentage of the before part of the time line
         self.played = 0; // The percentage of the media played
         self.buffered = 0; // The percentage of the media buffered
         self.previewHeight; // The height of the preview if it is displayed.
         self.currentPreviewTime; // The time of the preview currently displayed.
         self.timeOffset = 0; // The offset that have to be applied to the time line due to the server side seeking
         self.fileIndex; // The index of the file displayed by the time line
+        self.opaqueCounter = 0; // Counts the number of time the time line is made opaque / transparent. The time line is made transparent when the counter reaches 0.
         
         // Default values
         self.drawTimeLine();
@@ -1300,26 +1308,19 @@ self.TimeLine = function ()
     // Draws the time line in SVG.
     self.drawTimeLine = function ()
     {
-        var height = C.Player.timelineHeight + C.Player.timelineExpandHeight;
-        var paper = Raphael(node.timeline[0], gl_browserSize.width, C.Player.timelineHeight);
-        var svg = $(node.timeline).children("svg");
+        var height = self.C.height + self.C.expandHeight;
+        var paper = Raphael(node.time_line[0], gl_browserSize.width, self.C.height);
+        var svg = $(node.time_line).children("svg");
         
         svg.css("position", "absolute");
         var before = paper.rect(0, 0, 1, height);
-        before.attr("stroke", "none");
-        before.attr("fill", "#4a4a4a");
-        before.attr("opacity", 0.5);
+        before.attr(self.C.before.normal);
         var played = paper.rect(0, 0, 1, height);
-        played.attr("stroke", "none");
-        played.attr("fill", "#f13d1a");
+        played.attr(self.C.played.normal);
         var buffered = paper.rect(0, 0, 1, height);
-        buffered.attr("stroke", "none");
-        buffered.attr("fill", "#cccccc");
+        buffered.attr(self.C.buffered.normal);
         var after = paper.rect(0, 0, 1, height);
-        after.attr("stroke", "none");
-        after.attr("fill", "black");
-        after.attr("opacity", 0.33);
-        
+        after.attr(self.C.after.normal);
 
         // Updates the time line SVG.
         var drawElement;
@@ -1327,10 +1328,10 @@ self.TimeLine = function ()
         {
             var transform = { translate : 0, scale : 0 };
 
-            transform = drawElement(before, self.before, transform);
-            transform = drawElement(played, self.played, transform);
-            transform = drawElement(buffered, self.buffered, transform);
-            transform = drawElement(after, gl_browserSize.width - transform.translate, transform);
+            drawElement(before, self.before, transform);
+            drawElement(played, self.played, transform);
+            drawElement(buffered, self.buffered, transform);
+            drawElement(after, gl_browserSize.width - transform.translate, transform);
             paper.setSize(gl_browserSize.width);
         }
         // Draws an element of the time line.
@@ -1342,34 +1343,49 @@ self.TimeLine = function ()
                 element.transform("S" + transform.scale + ",1,0,0T" + transform.translate + ",0");
             else
                 element.transform("T0,1000");
-            return (transform);
         }
         
         // Expands the time line.
         self.expandTimeLine = function ()
         {
             paper.setSize(undefined, height);
-            svg.css("top", "-" + C.Player.timelineExpandHeight + "px");
-            before.attr("opacity", 0.33);
-            after.attr("opacity", 0.33);
+            svg.css("top", "-" + self.C.expandHeight + "px");
         }
         
         // Retracts the time line.
         self.retractTimeLine = function ()
         {
-            paper.setSize(undefined, C.Player.timelineHeight);
+            paper.setSize(undefined, self.C.height);
             svg.css("top", "0px");
-            before.attr("opacity", 0.33);
-            after.attr("opacity", 0.33);
+        }
+        
+        // Makes the time line opaque / transparent, based on a counter.
+        self.opaqueTimeLine = function (opaque)
+        {
+            self.opaqueCounter = Math.max(self.opaqueCounter + (opaque ? 1 : -1), 0);
+            if (self.opaqueCounter > 0)
+            {
+                before.attr(self.C.before.opaque);
+                played.attr(self.C.played.opaque);
+                buffered.attr(self.C.buffered.opaque);
+                after.attr(self.C.after.opaque);
+            }
+            else
+            {
+                before.attr(self.C.before.normal);
+                played.attr(self.C.played.normal);
+                buffered.attr(self.C.buffered.normal);
+                after.attr(self.C.after.normal);
+            }
         }
         
         // Changes the color of the played part based on the file type.
         self.setTimeLineType = function (type)
         {
             if (type == "audio")
-                played.attr("fill", "#24b335");
+                played.attr(self.C.played.audio);
             else if (type == "video")
-                played.attr("fill", "#f13d1a");
+                played.attr(self.C.played.video);
         }
         
         self.updateTimeLine();
@@ -1590,7 +1606,7 @@ self.TimeLine = function ()
     {
         if (!self.media || gl_desktop.drag.isDragging())
             return ;
-        node.timeline.addClass("over");
+        node.time_line.addClass("over");
         node.activeArea.addClass("expand");
         if (self.mouseLeaveTimeout)
         {
@@ -1604,7 +1620,7 @@ self.TimeLine = function ()
     {
         if (!self.media)
             return ;
-        node.timeline.removeClass("over");
+        node.time_line.removeClass("over");
         self.mouseLeaveTimeout = setTimeout(function ()
         {
             node.activeArea.removeClass("expand");
@@ -1673,20 +1689,20 @@ self.TimeLine = function ()
     self.expand = function ()
     {
         self.expandTimeLine();
-        node.timeline.addClass("expand");
+        node.time_line.addClass("expand");
     }
     
     // Retracts the time line.
     self.retract = function ()
     {
         self.retractTimeLine();
-        node.timeline.removeClass("expand");
+        node.time_line.removeClass("expand");
     }
     
     // Returns trus if the time line is expanded.
     self.isExpanded = function ()
     {
-        return (node.timeline.hasClass("expand"));
+        return (node.time_line.hasClass("expand"));
     }
     
     self.init();
@@ -1737,14 +1753,14 @@ self.Playlist = function ()
         // Clamp the height
         if (height <= C.Player.headerHeight)
             height = C.Player.headerHeight + 1;
-        else if (height > gl_desktop.middleHeight - C.Player.timelineExpandHeight)
-            height = gl_desktop.middleHeight - C.Player.timelineExpandHeight;
+        else if (height > gl_desktop.middleHeight - C.Player.TimeLine.expandHeight)
+            height = gl_desktop.middleHeight - C.Player.TimeLine.expandHeight;
         // Resizes the playlist
         var listHeight = height - C.Player.headerHeight;
         self.height = height;
         node.playlist.height(height);
         node.list.height(listHeight);
-        node.playlist[0].style.top = -(height + C.Player.timelineExpandHeight) + "px";
+        node.playlist[0].style.top = -(height + C.Player.TimeLine.expandHeight) + "px";
         return (listHeight);
     }
     // Sets the height in the pinned mode.
@@ -1753,16 +1769,16 @@ self.Playlist = function ()
         // Clamp the height
         if (height <= C.Player.headerHeight)
             height = C.Player.headerHeight + 1;
-        else if (gl_browserSize.height - (height + C.Player.defaultHeight + C.Player.timelineExpandHeight) < C.Desktop.topHeight)
-            height = gl_browserSize.height - (C.Player.defaultHeight + C.Player.timelineExpandHeight + C.Desktop.topHeight);
+        else if (gl_browserSize.height - (height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight) < C.Desktop.topHeight)
+            height = gl_browserSize.height - (C.Player.defaultHeight + C.Player.TimeLine.expandHeight + C.Desktop.topHeight);
         // Resizes the playlist
         var listHeight = height - C.Player.headerHeight;
         self.height = height;
         node.playlist.height(height);
         node.list.height(listHeight);
         // Updates the desktop
-        C.Desktop.bottomHeight = self.height + C.Player.defaultHeight + C.Player.timelineExpandHeight;
-        node.bottom.css("padding-top", self.height + C.Player.timelineExpandHeight + "px");
+        C.Desktop.bottomHeight = self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight;
+        node.bottom.css("padding-top", self.height + C.Player.TimeLine.expandHeight + "px");
         gl_desktop.onResize();
         return (listHeight);
     }
@@ -1777,7 +1793,7 @@ self.Playlist = function ()
             if (self.height > height - C.Desktop.bottomHeight - C.Desktop.topHeight)
                 self.setHeight(self.height);
         }
-        else if (height - (self.height + C.Player.defaultHeight + C.Player.timelineExpandHeight) < C.Desktop.topHeight)
+        else if (height - (self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight) < C.Desktop.topHeight)
             self.setHeight(self.height);
     }
 
@@ -1786,6 +1802,7 @@ self.Playlist = function ()
     {
         node.playlist.addClass("display");
         node.playlist.height(self.height);
+        player.timeLine.opaqueTimeLine(true);
     }
 
     // Hides the playlist.
@@ -1793,6 +1810,7 @@ self.Playlist = function ()
     {
         node.playlist.removeClass("display");
         node.playlist.height(0);
+        player.timeLine.opaqueTimeLine(false);
     }
     
     // Returns true if the playlist is displayed.
@@ -1814,7 +1832,7 @@ self.Playlist = function ()
     {
         self.pinned = false;
         node.bottom.css("padding-top", "0px");
-        node.playlist.css("top", -(self.height + C.Player.timelineExpandHeight) + "px");
+        node.playlist.css("top", -(self.height + C.Player.TimeLine.expandHeight) + "px");
         self.hide();
         player.timeLine.retract();
         C.Desktop.bottomHeight = C.Player.defaultHeight;

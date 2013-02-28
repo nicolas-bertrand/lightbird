@@ -89,6 +89,24 @@ function Desktop(task)
         });
     }
     
+    // Sets the page displayed by the desktop.
+    // page: The new current page. If undefined, no page is displayed by the desktop.
+    self.setCurrentPage = function (page)
+    {
+        if (page)
+        {
+            self.currentPage = page;
+            $(self.node.resize_layer).addClass("display");
+            gl_player.onDesktopPage(true);
+        }
+        else
+        {
+            self.currentPage = undefined;
+            $(self.node.resize_layer).removeClass("display");
+            gl_player.onDesktopPage(false);
+        }
+    }
+    
     // Closes all the pages and their tasks.
     self.disconnect = function ()
     {
@@ -118,53 +136,51 @@ function Desktop(task)
         self.drag.mouseUp(e);
     }
     
-// Container interface
-    
-    // Changes the page displayed by the desktop.
-    // @param page : The page to display.
-    self.display = function(page)
+// Container API
+// These methods allow the pages to interact with their container.
     {
-        // Hides the old page and the windows
-        self.hide();
-        gl_windows.hide();
-        // Sets the new page
-        self.currentPage = page;
-        $(self.currentPage.icon).removeClass("window");
-        self.currentPage.setZIndex(0);
-        $(self.node.resize_layer).addClass("display");
-    }
+        // Changes the page displayed by the desktop.
+        // @param page : The page to display.
+        self.display = function(page)
+        {
+            // Hides the windows
+            gl_windows.hide();
+            if (page != self.currentPage)
+            {
+                // Hides the old page
+                self.hide();
+                // Sets the new page
+                self.setCurrentPage(page);
+                $(self.currentPage.icon).removeClass("window");
+                self.currentPage.setZIndex(0);
+            }
+        }
 
-    // Hides the page currently displayed by the desktop.
-    self.hide = function ()
-    {
-        if (self.currentPage)
+        // Hides the page currently displayed by the desktop.
+        self.hide = function ()
         {
-            if (self.currentPage.isDisplayed())
-                self.currentPage.hide();
-            self.currentPage = undefined;
-            $(self.node.resize_layer).removeClass("display");
+            if (self.currentPage)
+            {
+                var currentPage = self.currentPage;
+                self.setCurrentPage();
+                currentPage.hide();
+            }
         }
-    }
-    
-    // Notifies the desktop that a page has been closed.
-    // @parem page : The page closed.
-    self.close = function (page)
-    {
-        if (self.currentPage && self.currentPage == page)
+        
+        // Notifies the desktop that a page has been closed.
+        // @parem page : The page closed.
+        self.close = function (page)
         {
-            self.currentPage = undefined;
-            $(self.node.resize_layer).removeClass("display");
+            if (self.currentPage == page)
+                self.setCurrentPage();
         }
-    }
-    
-    // Notifies that the desktop is no longer the container of the page.
-    // @parem page : The page concerned.
-    self.containerChanged = function(page)
-    {
-        if (self.currentPage && self.currentPage == page)
+        
+        // Notifies that the desktop is no longer the container of the page.
+        // @parem page : The page concerned.
+        self.containerChanged = function(page)
         {
-            self.currentPage = undefined;
-            $(self.node.resize_layer).removeClass("display");
+            if (self.currentPage == page)
+                self.setCurrentPage();
         }
     }
     
@@ -234,7 +250,7 @@ function Page()
     {
         // Displays the page
         self.container.display(self);
-        if (!$(self.content).hasClass("display"))
+        if (!self.isDisplayed())
         {
             // Display the page
             $(self.content).addClass("display");
@@ -253,10 +269,13 @@ function Page()
     // Hides the page and its tasks.
     self.hide = function ()
     {
-        $(self.content).removeClass("display");
         $(self.icon).removeClass("focus");
-        // Hides the tasks of the page.
-        $(self.icon).children(".task").each(function () { this.object.hide(); });
+        if (self.isDisplayed())
+        {
+            $(self.content).removeClass("display");
+            // Hides the tasks of the page.
+            $(self.icon).children(".task").each(function () { this.object.hide(); });
+        }
         self.container.hide(self);
     }
     
@@ -1243,7 +1262,7 @@ function Task(resource, html)
         function onResize(left, top, width, height) {}
     }
 
-// Resource api
+// Resource API
 // These methods are called by the resources in order to interact with the task.
     {
         // Sets the instance of the resource that manages the content.
