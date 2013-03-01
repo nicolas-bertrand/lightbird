@@ -6,7 +6,7 @@ var Configuration =
     // The configuration of the desktop.
     Desktop:
     {
-        minWidth: 600, // The minimum width of the desktop.
+        minWidth: 650, // The minimum width of the desktop.
         minHeight: 300, // The minimum height of the desktop.
         topHeight: 40, // The height of the top menu.
         bottomHeight: 45, // The height of the bottom area.
@@ -128,7 +128,7 @@ var Configuration =
             randomBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
             fullScreenBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
             linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
-            initialPaperWidth: 300,  // The initial width of the SVG paper
+            initialPaperWidth: 300, // The initial width of the SVG paper
             correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         },
         FileName:
@@ -171,6 +171,32 @@ var Configuration =
                 opaque: {fill: "#4a4a4a", opacity: 1}
             }
         }
+
+    },
+    Header:
+    {
+        slopeRatio: 75 / 130, // The ratio of the slope of the backgrounds.
+        paperWidth: 300, // The default width of the SVG paper.
+        margin: 30, // The margin between the buttons.
+        top: 10, // The top position of the icons.
+        iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
+        iconGlow: {width: 5, opacity: 0.15}, // The attributes of the icons glows.
+        iconGlowAttr: {stroke: "black"}, // The attributes of the icons glows.
+        iconAttrInverse: {fill: "#333333", stroke: "none"}, // The inverse attributes of the icons.
+        iconGlowInverse: {stroke: "white"}, // The inverse attributes of the icons glows.
+        // The width of the icons
+        searchWidth: 20,
+        settingsWidth: 19,
+        helpWidth: 11,
+        disconnectWidth: 19,
+        // The attributes of the buttons backgrounds
+        defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"},
+        searchBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
+        settingsBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
+        helpBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
+        disconnectBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
+        linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
+        correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
     },
     Uploads:
     {
