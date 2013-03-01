@@ -72,7 +72,7 @@ function Player(task)
     self.onResize = function (width, height)
     {
         self.fileName.onResize(width);
-        self.timeLine.onResize(width);
+        self.timeLine.onResize();
         self.playlist.onResize(width, height);
     }
     
@@ -1549,9 +1549,14 @@ self.TimeLine = function ()
     }
     
     // Updates the time line based on the width of the browser.
-    self.onResize = function (width)
+    self.onResize = function ()
     {
         self.updateTimeLine();
+        // Ensures that there is nothing bellow the time line
+        if (self.isExpanded() && !player.playlist.isDisplayed())
+            gl_desktop.node.middle_area.css({height: gl_desktop.height - self.C.expandHeight});
+        else
+            gl_desktop.node.middle_area.css({height: "100%"});
     }
     
     // Changes the media displayed in the time line.
@@ -1699,6 +1704,7 @@ self.TimeLine = function ()
     {
         self.expandTimeLine();
         node.time_line.addClass("expand");
+        self.onResize();
     }
     
     // Retracts the time line.
@@ -1706,6 +1712,7 @@ self.TimeLine = function ()
     {
         self.retractTimeLine();
         node.time_line.removeClass("expand");
+        self.onResize();
     }
     
     // Returns trus if the time line is expanded.
@@ -1762,8 +1769,8 @@ self.Playlist = function ()
         // Clamp the height
         if (height <= C.Player.headerHeight)
             height = C.Player.headerHeight + 1;
-        else if (height > gl_desktop.middleHeight - C.Player.TimeLine.expandHeight)
-            height = gl_desktop.middleHeight - C.Player.TimeLine.expandHeight;
+        else if (height > gl_desktop.height - C.Player.TimeLine.expandHeight)
+            height = gl_desktop.height - C.Player.TimeLine.expandHeight;
         // Resizes the playlist
         var listHeight = height - C.Player.headerHeight;
         self.height = height;

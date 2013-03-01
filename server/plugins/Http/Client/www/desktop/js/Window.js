@@ -210,9 +210,9 @@ function Window(page)
                 if (p.direction == "n" || p.direction == "nw" || p.direction == "ne")
                     height = p.height - (top - (element.y));
             }
-            else if (top > C.Desktop.topHeight + gl_desktop.middleHeight - C.Window.limit.bottom)
+            else if (top > C.Desktop.topHeight + gl_desktop.height - C.Window.limit.bottom)
             {
-                top = C.Desktop.topHeight + gl_desktop.middleHeight - C.Window.limit.bottom;
+                top = C.Desktop.topHeight + gl_desktop.height - C.Window.limit.bottom;
                 if (p.direction == "n" || p.direction == "nw" || p.direction == "ne")
                     height = p.height - (top - (element.y));
             }

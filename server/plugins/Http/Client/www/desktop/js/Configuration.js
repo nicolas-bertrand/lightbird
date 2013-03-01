@@ -10,7 +10,6 @@ var Configuration =
         minHeight: 300, // The minimum height of the desktop.
         topHeight: 40, // The height of the top menu.
         bottomHeight: 45, // The height of the bottom area.
-        collectionsWidth: 10, // The width of the collections list.
         pageMargin: 10, // The height of the bottom margin between the pages.
         tasksListWidth: 120, // The width of the tasks list.
         tasksListMargin: 10, // The width of the left margin of the tasks list.
@@ -19,6 +18,7 @@ var Configuration =
         taskDragShift: { x: 10, y: 10 }, // The shift of the dragged task when when it is out of the tasks list.
         tasksListScrollHeight: 50, // Height of the scrolling areas of the tasks list.
         tasksListScrollSpeed: 20, // The speed of the scroll areas of the tasks list.
+        tasksListScrollFps: 1000 / 30, // The number of time per second the scroll is performed.
         mouseWheelMultiplier: 50, // Used to normalize the mouse wheel delta. Increases the delta of each click.
         defaultPosition: "e", // The default position of a task moved (n s e w).
         insertTaskAreaSize: 50, // The size of the page border areas that allows to insert a task.

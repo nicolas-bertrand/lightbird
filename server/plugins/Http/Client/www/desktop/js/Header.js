@@ -16,6 +16,7 @@ function Header(task)
         // Members
         
         // Default values
+        self.node.top.height(C.Desktop.topHeight);
         self.addIcon(self.node.icons.children(".search").children("div")[0], gl_svg.Header.search, 10);
         self.addIcon(self.node.icons.children(".settings").children("div")[0], gl_svg.Header.settings, 10.5);
         self.addIcon(self.node.icons.children(".help").children("div")[0], gl_svg.Header.help, 16.4);
