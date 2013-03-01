@@ -11,9 +11,13 @@ function Header(task)
         // Nodes
         self.node = new Object();
         self.node.top = $("#desktop>.top");
+        self.node.menu = self.node.top.children(".menu");
         self.node.controls = self.node.top.children(".controls");
+        self.node.files = self.node.menu.children(".files");
+        self.node.uploads = self.node.menu.children(".uploads");
 
         // Members
+        self.menu = new self.Menu();
         self.controls = new self.Controls();
         
         // Default values
@@ -22,6 +26,183 @@ function Header(task)
         // Events
     }
     
+// Manages the menu.
+self.Menu = function ()
+{
+    var self = this;
+    var node = gl_header.node;
+    
+    self.init = function ()
+    {
+        // Members
+        self.C = C.Header.Menu; // The configuration of the menu
+        self.paper; // The SVG paper on which the buttons are drawn
+        self.slope; // The slope of the buttons
+        self.textWidth = {interval: undefined, elapsed: 0}; // Used to calculate the width of the texts
+        // The buttons properties
+        self.defaultBackground;
+        self.files = {background: 0, link: 0, over: 0};
+        self.uploads = {background: 0, link: 0, over: 0};
+        
+        // Default values
+        self.slope = self.C.slopeRatio * C.Desktop.topHeight;
+        node.menu.css("width", self.C.paperWidth);
+        self.paper = Raphael(node.menu[0], "100%", "100%");
+        self.createButtons();
+        self.updateTextsWidth();
+    }
+    
+    // Creates the buttons.
+    self.createButtons = function ()
+    {
+        var slope = self.slope / 2;
+        var left = 0;
+        
+        // Default background
+        var backgroundWidth = left + self.C.defaultButtonWidth + slope + self.C.margin / 2;
+        self.defaultBackground = self.createBackground(-100, backgroundWidth + 100, self.C.defaultBackgroundAttr, false);
+        self.defaultBackground.toBack();
+
+        // Files
+        var backgroundWidth = left + self.C.defaultButtonWidth + slope + self.C.margin / 2;
+        self.files.background = self.createBackground(-100, backgroundWidth + 100, self.C.filesBackgroundAttr).hide();
+        self.files.link = self.files.background.clone().attr(self.C.linkAttr);
+        node.files.css("left", self.C.margin / 2);
+        self.addEvents(self.files, node.files, "files");
+        left += self.C.defaultButtonWidth;
+
+        // Uploads
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin + self.C.defaultButtonWidth + slope * 2;
+        self.uploads.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.uploadsBackgroundAttr).hide();
+        self.uploads.link = self.uploads.background.clone().attr(self.C.linkAttr);
+        node.uploads.css("left", left);
+        self.addEvents(self.uploads, node.uploads, "uploads");
+        left += self.C.defaultButtonWidth;
+        
+        // The width of the paper
+        node.menu.css("width", left + self.C.margin / 2 + Math.abs(slope));
+    }
+    
+    // Adds the events to a button.
+    self.addEvents = function (button, text, task)
+    {
+        $(button.link.node).mouseover(function (e)
+        {
+            if (!button.over)
+                self.mouseEnter(button);
+        });
+        $(button.link.node).mouseout(function (e)
+        {
+            if (e.relatedTarget != text[0])
+                self.mouseLeave(button);
+        });
+        text.mouseover(function (e)
+        {
+            if (!button.over)
+                self.mouseEnter(button);
+        });
+        text.mouseout(function (e)
+        {
+            if (e.relatedTarget != button.link.node)
+                self.mouseLeave(button);
+        });
+        var mousedown = function (e) { gl_desktop.openPage(task, '', e); };
+        $(button.link.node).mousedown(mousedown);
+        text.mousedown(mousedown);
+    }
+    
+    // Waits the html engine to update the texts width, using an inverval loop.
+    self.updateTextsWidth = function ()
+    {
+        var tw = self.textWidth;
+    
+        // Starts the inverval loop
+        if (tw.interval == undefined)
+        {
+            tw.interval = setInterval(self.updateTextsWidth, self.C.updateTextsWidthDuration / self.C.updateTextsWidthSteps);
+            tw.elapsed = 1;
+        }
+        // Ends the interval loop
+        if (tw.elapsed++ >= self.C.updateTextsWidthSteps || node.files.width())
+        {
+            self.updatePositions();
+            clearInterval(tw.interval);
+            tw.interval = undefined;
+        }
+    }
+    
+    // Update the position and the width of the buttons based on their texts width.
+    self.updatePositions = function ()
+    {
+        var slope = self.slope / 2;
+        var left = self.C.margin / 2;
+        var filesWidth = node.files.width();
+        var uploadsWidth = node.uploads.width();
+        
+        // Default background
+        var backgroundWidth = left + filesWidth + slope + self.C.margin / 2;
+        self.updateBackground(self.defaultBackground, -100, backgroundWidth + 100, self.C.defaultBackgroundAttr, false);
+
+        // Files
+        var backgroundWidth = left + filesWidth + slope + self.C.margin / 2;
+        self.updateBackground(self.files.background, -100, backgroundWidth + 100);
+        self.updateBackground(self.files.link, -100, backgroundWidth + 100);
+        left += filesWidth;
+
+        // Uploads
+        left += self.C.margin;
+        var backgroundLeft = left - slope - self.C.margin / 2;
+        var backgroundWidth = self.C.margin + uploadsWidth + slope * 2;
+        self.updateBackground(self.uploads.background, backgroundLeft, backgroundWidth);
+        self.updateBackground(self.uploads.link, backgroundLeft, backgroundWidth);
+        node.uploads.css("left", left);
+        left += uploadsWidth;
+        
+        // The width of the paper
+        node.menu.css("width", left + self.C.margin / 2 + Math.abs(slope));
+    }
+    
+    // Creates and returns a button background.
+    // @correctGap: If not false, the width is incremented by 1, in order to close gap between two adjacent backgrounds.
+    self.createBackground = function (left, width, attr, correctGap)
+    {
+        if (self.C.correctGap && correctGap !== false)
+            width++;
+        var path = self.paper.path("M0," + C.Desktop.topHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + C.Desktop.topHeight + "z");
+        path.transform("T" + left + ",0");
+        path.attr(attr);
+        return (path);
+    }
+    // Updates the background position and width.
+    // @correctGap: If not false, the width is incremented by 1, in order to close gap between two adjacent backgrounds.
+    self.updateBackground = function (background, left, width, correctGap)
+    {
+        if (self.C.correctGap && correctGap !== false)
+            width++;
+        background.attr({path: "M0," + C.Desktop.topHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + C.Desktop.topHeight + "z"});
+        background.transform("T" + left + ",0");
+    }
+    
+    // The mouse entered a button.
+    self.mouseEnter = function (button)
+    {
+        button.over = true;
+        button.background.show();
+    }
+    
+    // The mouse leaved a button.
+    self.mouseLeave = function (button)
+    {
+        button.over = false;
+        button.background.hide();
+    }
+    
+    self.init();
+    return (self);
+}
+
 // Manages the controls buttons.
 self.Controls = function ()
 {
@@ -31,7 +212,7 @@ self.Controls = function ()
     self.init = function ()
     {
         // Members
-        self.C = C.Header; // The configuration of the controls
+        self.C = C.Header.Controls; // The configuration of the controls
         self.paper; // The SVG paper on which the buttons are drawn
         self.slope; // The slope of the buttons
         // The buttons properties
@@ -44,7 +225,7 @@ self.Controls = function ()
         // Default values
         self.slope = self.C.slopeRatio * C.Desktop.topHeight;
         node.controls.css("width", self.C.paperWidth);
-        self.paper = Raphael(node.controls[0], "100%", C.Desktop.topHeight);
+        self.paper = Raphael(node.controls[0], "100%", "100%");
         self.createButtons();
         self.addEvents();
     }

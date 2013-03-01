@@ -175,28 +175,45 @@ var Configuration =
     },
     Header:
     {
-        slopeRatio: 75 / 130, // The ratio of the slope of the backgrounds.
-        paperWidth: 300, // The default width of the SVG paper.
-        margin: 30, // The margin between the buttons.
-        top: 10, // The top position of the icons.
-        iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
-        iconGlow: {width: 5, opacity: 0.15}, // The attributes of the icons glows.
-        iconGlowAttr: {stroke: "black"}, // The attributes of the icons glows.
-        iconAttrInverse: {fill: "#333333", stroke: "none"}, // The inverse attributes of the icons.
-        iconGlowInverse: {stroke: "white"}, // The inverse attributes of the icons glows.
-        // The width of the icons
-        searchWidth: 20,
-        settingsWidth: 19,
-        helpWidth: 11,
-        disconnectWidth: 19,
-        // The attributes of the buttons backgrounds
-        defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"},
-        searchBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
-        settingsBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
-        helpBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
-        disconnectBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
-        linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
-        correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+        Menu:
+        {
+            slopeRatio: -75 / 130, // The ratio of the slope of the backgrounds.
+            paperWidth: 300, // The default width of the SVG paper.
+            defaultButtonWidth: 70, // The default width of the buttons.
+            margin: 30, // The margin between the buttons.
+            defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"},
+            filesBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
+            uploadsBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
+            linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
+            updateTextsWidthDuration: 500, // The maximum duration during which we try to get the width of the number and time texts.
+            updateTextsWidthSteps: 10, // The number of attempts to get the width of the texts during the duration.
+            correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+        },
+        Controls:
+        {
+            slopeRatio: 75 / 130, // The ratio of the slope of the backgrounds.
+            paperWidth: 300, // The default width of the SVG paper.
+            margin: 30, // The margin between the buttons.
+            top: 10, // The top position of the icons.
+            iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
+            iconGlow: {width: 5, opacity: 0.15}, // The attributes of the icons glows.
+            iconGlowAttr: {stroke: "black"}, // The attributes of the icons glows.
+            iconAttrInverse: {fill: "#333333", stroke: "none"}, // The inverse attributes of the icons.
+            iconGlowInverse: {stroke: "white"}, // The inverse attributes of the icons glows.
+            // The width of the icons
+            searchWidth: 20,
+            settingsWidth: 19,
+            helpWidth: 11,
+            disconnectWidth: 19,
+            // The attributes of the buttons backgrounds
+            defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"},
+            searchBackgroundAttr: {fill: "90-#d9d9d9-#ffffff", stroke: "none"},
+            settingsBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
+            helpBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
+            disconnectBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
+            linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
+            correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
+        }
     },
     Uploads:
     {
