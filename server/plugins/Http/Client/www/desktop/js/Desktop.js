@@ -62,8 +62,8 @@ function Desktop(task)
         gl_windows.onResize(gl_browserSize.width, gl_browserSize.height);
     }
     
-    // The screen mode has changed (full/normal).
-    // @param fullScreen: True if we are switching to the full screen mode, and false to the normal mode.
+    // We entered/leaved the full screen mode.
+    // @param fullScreen: True if we are entering the full screen mode, and false for the normal mode.
     self.onFullScreen = function (fullScreen)
     {
         gl_header.onFullScreen(fullScreen);

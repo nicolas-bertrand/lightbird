@@ -20,20 +20,62 @@ function Header(task)
         self.height = C.Header.defaultHeight; // The height of the header
         self.menu = new self.Menu(); // Manages the menu
         self.controls = new self.Controls(); // Manages the control buttons
+        self.fullScreenHideTimeout; // Used to hide the header in full screen mode
         
         // Default values
         self.node.top.height(self.height);
         
         // Events
+        self.node.top.mouseenter(function () { self.mouseEnter(); });
+        self.node.top.mouseleave(function () { self.mouseLeave(); });
     }
     
-    // The screen mode has changed (full/normal).
+    // We entered/leaved the full screen mode.
     self.onFullScreen = function (fullScreen)
     {
         if (fullScreen)
-            self.node.top.addClass("hide");
+            self.hide();
         else
-            self.node.top.removeClass("hide");
+            self.display();
+    }
+    
+    // Displays the header when the mouse enters it, in full screen mode.
+    self.mouseEnter = function ()
+    {
+        if (gl_desktop.isFullScreen())
+        {
+            self.display();
+            if (self.fullScreenHideTimeout)
+            {
+                clearTimeout(self.fullScreenHideTimeout);
+                self.fullScreenHideTimeout = undefined;
+            }
+        }
+    }
+    
+    // Hides the header after the timeout when the mouse leaves it, in full screen mode.
+    self.mouseLeave = function ()
+    {
+        if (gl_desktop.isFullScreen())
+            self.fullScreenHideTimeout = setTimeout(function ()
+            {
+                self.hide();
+                self.fullScreenHideTimeout = undefined;
+            }, C.Header.FullScreen.displayDuration);
+    }
+    
+    // Hides the header, in full screen mode.
+    self.display = function ()
+    {
+        self.node.top.removeClass("hide");
+        self.node.top.css("height", C.Header.defaultHeight);
+    }
+    
+    // Displays the header, in full screen mode.
+    self.hide = function ()
+    {
+        self.node.top.addClass("hide");
+        self.node.top.css("height", C.Header.FullScreen.hideHeight);
     }
     
 // Manages the menu.

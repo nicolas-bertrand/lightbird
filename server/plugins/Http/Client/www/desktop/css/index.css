@@ -92,11 +92,6 @@ a:visited
     overflow: hidden;
 }
 
-#desktop>.top .line.blue, #desktop>.bottom .line.blue { background-color: #00a2ff; }
-#desktop>.top .line.green, #desktop>.bottom .line.green { background-color: #46da57; }
-#desktop>.top .line.yellow, #desktop>.bottom .line.yellow { background-color: #ffd600; }
-#desktop>.top .line.red, #desktop>.bottom .line.red { background-color: #ff5500; }
-
 /*////////////////////////////////////////////////////////////////////////////
 //                                   TOP                                    //
 ////////////////////////////////////////////////////////////////////////////*/
@@ -114,8 +109,11 @@ a:visited
     top: 0px;
     z-index: 1000000;
 }
-
 #desktop>.top.hide
+{
+    background-image: none;
+}
+#desktop>.top.hide>div
 {
     display: none;
 }
@@ -594,6 +592,10 @@ a:visited
     bottom: 0px;
     z-index: 1000000;
 }
+#desktop>.bottom.hide>div
+{
+    display: none;
+}
 
 #desktop>.bottom>.time_line
 {
@@ -791,6 +793,10 @@ a:visited
 #desktop>.bottom>.playlist.display
 {
     display: block;
+}
+#desktop>.bottom.hide>.playlist.display
+{
+    display: none;
 }
 
 #desktop>.bottom>.playlist>.header

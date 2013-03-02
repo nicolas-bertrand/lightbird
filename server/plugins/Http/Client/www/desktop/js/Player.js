@@ -51,6 +51,7 @@ function Player(task)
         self.playlistInterface; // The current playlist, from which the current file is played
         self.fileInterface; // The current file in the playlist.
         self.playerInterface; // The file currently played. May be different than the fileInterface.
+        self.fullScreenHideTimeout; // Used to hide the player in full screen mode
         
         // Default values
         self.height = C.Player.defaultHeight;
@@ -77,7 +78,7 @@ function Player(task)
         self.playlist.onResize(width, height);
     }
     
-    // The screen mode has changed (full/normal).
+    // We entered/leaved the full screen mode.
     self.onFullScreen = function (fullScreen)
     {
         self.timeLine.opaqueTimeLine();
@@ -96,6 +97,17 @@ function Player(task)
         // Expands the time line
         else if (!self.playlist.isDisplayed())
             self.timeLine.expand();
+        // Displays the player if we are in full screen mode
+        if (gl_desktop.isFullScreen())
+        {
+            self.node.bottom.removeClass("hide");
+            self.node.bottom.css("bottom", 0);
+            if (self.fullScreenHideTimeout)
+            {
+                clearTimeout(self.fullScreenHideTimeout);
+                self.fullScreenHideTimeout = undefined;
+            }
+        }
     }
     
     // The mouse leaved the player area.
@@ -124,6 +136,18 @@ function Player(task)
                     self.timeLine.retract();
                 }
             });
+        }
+        // Hides the player after the timeout, in full screen mode
+        if (gl_desktop.isFullScreen())
+        {
+            self.fullScreenHideTimeout = setTimeout(function ()
+            {
+                self.node.bottom.addClass("hide");
+                self.node.bottom.css("bottom", -self.height + C.Player.FullScreen.hideHeight);
+                if (!self.playlist.isPinned() && self.playlist.isDisplayed())
+                    self.playlist.hide();
+                self.fullScreenHideTimeout = undefined;
+            }, C.Player.FullScreen.displayDuration);
         }
     }
     
@@ -1791,7 +1815,7 @@ self.Playlist = function ()
         node.list.height(listHeight);
         // Updates the desktop
         player.height = self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight;
-        node.bottom.css("padding-top", self.height + C.Player.TimeLine.expandHeight + "px");
+        node.bottom.css("padding-top", self.height + C.Player.TimeLine.expandHeight);
         gl_desktop.setBottom(player.height);
         return (listHeight);
     }
@@ -1844,8 +1868,8 @@ self.Playlist = function ()
     self.unpin = function ()
     {
         self.pinned = false;
-        node.bottom.css("padding-top", "0px");
-        node.playlist.css("top", -(self.height + C.Player.TimeLine.expandHeight) + "px");
+        node.bottom.css("padding-top", 0);
+        node.playlist.css("top", -(self.height + C.Player.TimeLine.expandHeight));
         self.hide();
         player.timeLine.retract();
         player.height = C.Player.defaultHeight;

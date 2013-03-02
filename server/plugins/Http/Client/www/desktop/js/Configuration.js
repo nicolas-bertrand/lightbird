@@ -66,6 +66,11 @@ var Configuration =
         playlistResizeResistance: 20, // The number of pixels the mouse needs to move in order to start the resizing.
         playlistResizeEdges: -2, // The distance from the edge of the header where the resize takes effect.
         mouseLeaveTimeout: 1000, // The delay before the effect of the mouse leave.
+        FullScreen:
+        {
+            hideHeight: 5, // The height of the player while it is hidden, which allows to display it back when the mouse enters it again.
+            displayDuration: 2000 // The duration during which the player is kept displayed when the mouse leaves it.
+        },
         Seek:
         {
             border: 20, // The width of the borders (not visible).
@@ -176,6 +181,11 @@ var Configuration =
     Header:
     {
         defaultHeight: 40, // The default height of the header.
+        FullScreen:
+        {
+            hideHeight: 5, // The height of the header while it is hidden, which allows to display it back when the mouse enters it again.
+            displayDuration: 2000 // The duration during which the header is kept displayed when the mouse leaves it.
+        },
         Menu:
         {
             slopeRatio: -75 / 130, // The ratio of the slope of the backgrounds.
