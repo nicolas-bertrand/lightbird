@@ -8,8 +8,8 @@ var Configuration =
     {
         minWidth: 650, // The minimum width of the desktop.
         minHeight: 300, // The minimum height of the desktop.
-        topHeight: 40, // The height of the top menu.
-        bottomHeight: 45, // The height of the bottom area.
+        browserFullScreen: true, // If we have to use the browser full screen API.
+        stopDragLeaveDesktop: false, // If the current drag have to be stopped when the mouse leaves the browser.
         pageMargin: 10, // The height of the bottom margin between the pages.
         tasksListWidth: 120, // The width of the tasks list.
         tasksListMargin: 10, // The width of the left margin of the tasks list.
@@ -51,7 +51,7 @@ var Configuration =
 	},
     Player:
     {
-        defaultHeight: 45, // == C.Desktop.bottomHeight
+        defaultHeight: 45, // The default height of the player.
         playlistHeight: 200, // The default height of the playlist.
         headerHeight: 24, // The height of the playlist header.
         listFileHeight: 25, // The height of each file of the playlist.
@@ -175,6 +175,7 @@ var Configuration =
     },
     Header:
     {
+        defaultHeight: 40, // The default height of the header.
         Menu:
         {
             slopeRatio: -75 / 130, // The ratio of the slope of the backgrounds.

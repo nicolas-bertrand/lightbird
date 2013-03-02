@@ -44,6 +44,7 @@ function Player(task)
         self.playlist; // Manages the playlist
         self.header; // Manages the header of the playlist
         self.audio; // Manages the audio player
+        self.height; // The height of the player.
         self.buttonsHeight; // The height of the buttons of the player
         self.mouseLeaveTimeout = 0; // Delays the effect of the mouse leave
         self.mouseOverPlayer; // True while the mouse is over the player
@@ -52,8 +53,8 @@ function Player(task)
         self.playerInterface; // The file currently played. May be different than the fileInterface.
         
         // Default values
-        C.Desktop.bottomHeight = C.Player.defaultHeight;
-        self.node.bottom.height(C.Desktop.bottomHeight);
+        self.height = C.Player.defaultHeight;
+        self.node.bottom.height(self.height);
         self.buttonsHeight = C.Player.defaultHeight - C.Player.TimeLine.height;
         self.playback = new self.Playback();
         self.controls = new self.Controls();
@@ -74,6 +75,12 @@ function Player(task)
         self.fileName.onResize(width);
         self.timeLine.onResize();
         self.playlist.onResize(width, height);
+    }
+    
+    // The screen mode has changed (full/normal).
+    self.onFullScreen = function (fullScreen)
+    {
+        self.timeLine.opaqueTimeLine();
     }
     
     // The mouse entered the player area.
@@ -120,36 +127,6 @@ function Player(task)
         }
     }
     
-    // Mouse down on the name area.
-    self.mouseDownName = function (e)
-    {
-        if (e.which != 1)
-            return ;
-        // Opens / closes the playlist
-        if (!self.playlist.isPinned())
-        {
-            if (!self.playlist.isDisplayed())
-                self.playlist.display();
-            else
-                self.playlist.hide();
-        }
-        // If the playlist is pinned we resize it to the minimal height instead of hiding it
-        else
-        {
-            if (self.playlist.height <= C.Player.headerHeight + 1)
-            {
-                if (!self.oldPlaylistHeight)
-                    self.oldPlaylistHeight = C.Player.playlistHeight;
-                self.playlist.setHeight(self.oldPlaylistHeight);
-            }
-            else
-            {
-                self.oldPlaylistHeight = self.playlist.height;
-                self.playlist.setHeight(0);
-            }
-        }
-    }
-
     // Converts the time in seconds to a string (0:00).
     self.timeToString = function (seconds)
     {
@@ -166,7 +143,7 @@ function Player(task)
     // This event is received when a page is displayed or hidden by the desktop.
     self.onDesktopPage = function (display)
     {
-        self.timeLine.opaqueTimeLine(display);
+        self.timeLine.opaqueTimeLine(display, true);
     }
     
     // Called by the media play event.
@@ -517,7 +494,7 @@ self.Playback = function ()
     self.addEvents = function ()
     {
         // Default link
-        $(self.defaultLink.node).mousedown(function (e) { player.mouseDownName(e); });
+        $(self.defaultLink.node).mousedown(function (e) { player.playlist.mouseDownName(e); });
     
         // Play / Pause
         $(self.play.link.node).mouseover(function (e)
@@ -845,8 +822,8 @@ self.Controls = function ()
         self.noRepeat;
         self.random = {icon: 0, background: 0, link: 0, currentIcon: 0, nextIcon: 0};
         self.linear;
-        self.fullScreen = {icon: 0, background: 0, link: 0};
-        self.normalScreen = {icon: 0, background: 0};
+        self.fullScreen = {icon: 0, background: 0, link: 0, currentIcon: 0, nextIcon: 0};
+        self.normalScreen;
         
         // Default values
         self.slope = self.C.slopeRatio * player.buttonsHeight;
@@ -967,12 +944,17 @@ self.Controls = function ()
         var fullScreen = self.paper.path(gl_svg.Player.fullScreen);
         fullScreen.transform("T" + left + "," + top);
         fullScreen.attr(self.C.iconAttr);
-        fullScreen.glow(self.C.iconGlow);
+        fullScreen.glow = fullScreen.glow(self.C.iconGlow);
         self.fullScreen.icon = fullScreen;
+        self.fullScreen.currentIcon = fullScreen;
         
-        self.normalScreen = self.fullScreen;
-        self.normalScreen.icon = fullScreen.clone().attr({path: gl_svg.Player.normalScreen});
-        self.fullScreen.icon.hide();
+        var normalScreen = fullScreen.clone().attr({path: gl_svg.Player.normalScreen});
+        normalScreen.glow = normalScreen.glow(self.C.iconGlow);
+        normalScreen.hide();
+        normalScreen.glow.hide();
+        self.normalScreen = normalScreen;
+        
+        self.fullScreen.nextIcon = self.normalScreen;
         left += self.C.fullScreenWidth;
         self.fullScreen.link = self.fullScreen.background.clone().attr(self.C.linkAttr);
         
@@ -990,7 +972,7 @@ self.Controls = function ()
     self.addEvents = function ()
     {
         // Default link
-        $(self.defaultLink.node).mousedown(function (e) { player.mouseDownName(e); });
+        $(self.defaultLink.node).mousedown(function (e) { player.playlist.mouseDownName(e); });
         
         // Volume
         $(self.volume.link.node).mouseover(function (e) { self.mouseEnter(self.volume); });
@@ -1054,6 +1036,19 @@ self.Controls = function ()
         // Full screen
         $(self.fullScreen.link.node).mouseover(function (e) { self.mouseEnter(self.fullScreen); });
         $(self.fullScreen.link.node).mouseout(function (e) { self.mouseLeave(self.fullScreen); });
+        $(self.fullScreen.link.node).mousedown(function (e)
+        {
+            var next = self.fullScreen.currentIcon;
+            self.fullScreen.currentIcon = self.fullScreen.nextIcon;
+            self.fullScreen.nextIcon = next;
+            
+            self.fullScreen.currentIcon.show();
+            self.fullScreen.currentIcon.glow.show();
+            self.fullScreen.nextIcon.hide();
+            self.fullScreen.nextIcon.glow.hide();
+            
+            gl_desktop.setFullScreen();
+        });
     }
     
     // Creates and returns a button background.
@@ -1126,8 +1121,8 @@ self.FileName = function ()
         self.setText();
         
         // Events
-        node.file_name.mousedown(function (e) { player.mouseDownName(e); });
-        node.player.mousedown(function (e) { if (e.target == node.player[0]) player.mouseDownName(e); });
+        node.file_name.mousedown(function (e) { player.playlist.mouseDownName(e); });
+        node.player.mousedown(function (e) { if (e.target == node.player[0]) player.playlist.mouseDownName(e); });
     }
     
     // Creates the background.
@@ -1293,7 +1288,7 @@ self.TimeLine = function ()
         self.timeOffset = 0; // The offset that have to be applied to the time line due to the server side seeking
         self.fileIndex; // The index of the file displayed by the time line
         self.fileType; // The type of the file currently played
-        self.opaqueCounter = 0; // Counts the number of time the time line is made opaque / transparent. The time line is made transparent when the counter reaches 0.
+        self.desktopPage; // True while a page is displayed on the desktop.
         
         // Default values
         self.drawTimeLine();
@@ -1360,11 +1355,12 @@ self.TimeLine = function ()
             svg.css("top", "0px");
         }
         
-        // Makes the time line opaque / transparent, based on a counter.
-        self.opaqueTimeLine = function (opaque)
+        // Makes the time line opaque if the playlist is displayed or a page is on the desktop and we are not in full screen mode.
+        self.opaqueTimeLine = function (opaque, desktop)
         {
-            self.opaqueCounter = Math.max(self.opaqueCounter + (opaque ? 1 : -1), 0);
-            if (self.opaqueCounter > 0)
+            if (desktop)
+                self.desktopPage = opaque;
+            if ((self.desktopPage && !gl_desktop.isFullScreen()) || (player.playlist && player.playlist.isDisplayed()))
             {
                 before.attr(self.C.before.opaque);
                 played.attr(self.C.played.opaque);
@@ -1738,6 +1734,7 @@ self.Playlist = function ()
         self.pinned; // True if the playlist is pinned
         self.rowTemplate = node.playlist.children(".row_template").html(); // The template used to create the rows.
         self.recentFilesPlaylist; // This playlist stores all the files recently played. It is created automatically and filled by addRecentFile.
+        self.oldPlaylistHeight; // Saves the height of the playlist when it is pinned.
         
         // Default values
         self.setHeight(C.Player.playlistHeight);
@@ -1785,17 +1782,17 @@ self.Playlist = function ()
         // Clamp the height
         if (height <= C.Player.headerHeight)
             height = C.Player.headerHeight + 1;
-        else if (gl_browserSize.height - (height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight) < C.Desktop.topHeight)
-            height = gl_browserSize.height - (C.Player.defaultHeight + C.Player.TimeLine.expandHeight + C.Desktop.topHeight);
+        else if (gl_browserSize.height - (height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight) < gl_header.height)
+            height = gl_browserSize.height - (C.Player.defaultHeight + C.Player.TimeLine.expandHeight + gl_header.height);
         // Resizes the playlist
         var listHeight = height - C.Player.headerHeight;
         self.height = height;
         node.playlist.height(height);
         node.list.height(listHeight);
         // Updates the desktop
-        C.Desktop.bottomHeight = self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight;
+        player.height = self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight;
         node.bottom.css("padding-top", self.height + C.Player.TimeLine.expandHeight + "px");
-        gl_desktop.onResize();
+        gl_desktop.setBottom(player.height);
         return (listHeight);
     }
     
@@ -1806,10 +1803,10 @@ self.Playlist = function ()
         // Checks if the playlist is highter than the top part of the desktop
         if (!self.pinned)
         {
-            if (self.height > height - C.Desktop.bottomHeight - C.Desktop.topHeight)
+            if (self.height > gl_desktop.height - C.Player.TimeLine.expandHeight)
                 self.setHeight(self.height);
         }
-        else if (height - (self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight) < C.Desktop.topHeight)
+        else if (height - (self.height + C.Player.defaultHeight + C.Player.TimeLine.expandHeight) < gl_header.height)
             self.setHeight(self.height);
     }
 
@@ -1851,8 +1848,8 @@ self.Playlist = function ()
         node.playlist.css("top", -(self.height + C.Player.TimeLine.expandHeight) + "px");
         self.hide();
         player.timeLine.retract();
-        C.Desktop.bottomHeight = C.Player.defaultHeight;
-        gl_desktop.onResize();
+        player.height = C.Player.defaultHeight;
+        gl_desktop.setBottom(player.height);
     }
     
     // Returns true if the playlist is pinned to the player.
@@ -1869,6 +1866,36 @@ self.Playlist = function ()
             self.recentFilesPlaylist = new player.Tab(T.Player.recentFiles);
         // Adds the file to the current playlist
         player.header.tabFocused[0].object.addFile(fileIndex);
+    }
+    
+    // Mouse down on the name area. Opens / closes the playlist.
+    self.mouseDownName = function (e)
+    {
+        if (e.which != 1)
+            return ;
+        // Opens / closes the playlist
+        if (!self.isPinned())
+        {
+            if (!self.isDisplayed())
+                self.display();
+            else
+                self.hide();
+        }
+        // If the playlist is pinned we resize it to the minimal height instead of hiding it
+        else
+        {
+            if (self.height <= C.Player.headerHeight + 1)
+            {
+                if (!self.oldPlaylistHeight)
+                    self.oldPlaylistHeight = C.Player.playlistHeight;
+                self.setHeight(self.oldPlaylistHeight);
+            }
+            else
+            {
+                self.oldPlaylistHeight = self.height;
+                self.setHeight(0);
+            }
+        }
     }
     
     self.init();

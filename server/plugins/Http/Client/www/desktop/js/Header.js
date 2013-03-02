@@ -17,13 +17,23 @@ function Header(task)
         self.node.uploads = self.node.menu.children(".uploads");
 
         // Members
-        self.menu = new self.Menu();
-        self.controls = new self.Controls();
+        self.height = C.Header.defaultHeight; // The height of the header
+        self.menu = new self.Menu(); // Manages the menu
+        self.controls = new self.Controls(); // Manages the control buttons
         
         // Default values
-        self.node.top.height(C.Desktop.topHeight);
+        self.node.top.height(self.height);
         
         // Events
+    }
+    
+    // The screen mode has changed (full/normal).
+    self.onFullScreen = function (fullScreen)
+    {
+        if (fullScreen)
+            self.node.top.addClass("hide");
+        else
+            self.node.top.removeClass("hide");
     }
     
 // Manages the menu.
@@ -45,7 +55,7 @@ self.Menu = function ()
         self.uploads = {background: 0, link: 0, over: 0};
         
         // Default values
-        self.slope = self.C.slopeRatio * C.Desktop.topHeight;
+        self.slope = self.C.slopeRatio * gl_header.height;
         node.menu.css("width", self.C.paperWidth);
         self.paper = Raphael(node.menu[0], "100%", "100%");
         self.createButtons();
@@ -125,7 +135,7 @@ self.Menu = function ()
             tw.elapsed = 1;
         }
         // Ends the interval loop
-        if (tw.elapsed++ >= self.C.updateTextsWidthSteps || node.files.width())
+        if (tw.elapsed++ >= self.C.updateTextsWidthSteps || (node.files.width() && node.uploads.width()))
         {
             self.updatePositions();
             clearInterval(tw.interval);
@@ -170,7 +180,7 @@ self.Menu = function ()
     {
         if (self.C.correctGap && correctGap !== false)
             width++;
-        var path = self.paper.path("M0," + C.Desktop.topHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + C.Desktop.topHeight + "z");
+        var path = self.paper.path("M0," + gl_header.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + gl_header.height + "z");
         path.transform("T" + left + ",0");
         path.attr(attr);
         return (path);
@@ -181,7 +191,7 @@ self.Menu = function ()
     {
         if (self.C.correctGap && correctGap !== false)
             width++;
-        background.attr({path: "M0," + C.Desktop.topHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + C.Desktop.topHeight + "z"});
+        background.attr({path: "M0," + gl_header.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + gl_header.height + "z"});
         background.transform("T" + left + ",0");
     }
     
@@ -203,7 +213,7 @@ self.Menu = function ()
     return (self);
 }
 
-// Manages the controls buttons.
+// Manages the control buttons.
 self.Controls = function ()
 {
     var self = this;
@@ -223,7 +233,7 @@ self.Controls = function ()
         self.disconnect = {icon: 0, background: 0, link: 0};
         
         // Default values
-        self.slope = self.C.slopeRatio * C.Desktop.topHeight;
+        self.slope = self.C.slopeRatio * gl_header.height;
         node.controls.css("width", self.C.paperWidth);
         self.paper = Raphael(node.controls[0], "100%", "100%");
         self.createButtons();
@@ -336,7 +346,7 @@ self.Controls = function ()
     {
         if (self.C.correctGap && correctGap !== false)
             width++;
-        var path = self.paper.path("M0," + C.Desktop.topHeight + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + C.Desktop.topHeight + "z");
+        var path = self.paper.path("M0," + gl_header.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + gl_header.height + "z");
         path.transform("T" + left + ",0");
         path.attr(attr);
         return (path);

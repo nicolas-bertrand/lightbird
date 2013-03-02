@@ -32,9 +32,12 @@ function Desktop(task)
         self.sessions = new Sessions(); // Manages the sessions
         self.mouse = { x : 0, y : 0 }; // The position of the mouse on the desktop
         self.currentPage = undefined; // The page currently displayed by the desktop
+        self.fullScreen = false; // True while we are in full screen mode.
         // The coordinates of the main area of the desktop
-        self.left;
-        self.top;
+        self.left = C.Desktop.tasksListWidth;
+        self.right = 0;
+        self.top = C.Header.defaultHeight;
+        self.bottom = C.Player.defaultHeight;
         self.width;
         self.height;
         
@@ -42,21 +45,29 @@ function Desktop(task)
         $(document.body).mousewheel(function (e, delta) { self.mouseWheel(e, delta); });
         $(document.body).mousemove(function (e) { self.mouseMove(e); });
         $(document.body).mouseup(function (e) { self.mouseUp(e); });
+        $(document.body).mouseleave(function (e) { self.mouseLeave(e); });
     }
     
     // Called when the browser is resized. Updates the size of the desktop.
     self.onResize = function ()
     {
-        self.left = C.Desktop.tasksListWidth;
-        self.top = C.Desktop.topHeight;
-        self.width = gl_browserSize.width - C.Desktop.tasksListWidth;
-        self.height = gl_browserSize.height - C.Desktop.topHeight - C.Desktop.bottomHeight;
+        self.width = gl_browserSize.width - self.left - self.right;
+        self.height = gl_browserSize.height - self.top - self.bottom;
         self.node.middle.css({marginTop: self.top, height: self.height});
         self.node.middle_background.css({left: self.left, width: self.width});
         self.node.tasks_list.background.css({top: -self.tasksList.top, height: gl_browserSize.height});
         if (self.currentPage)
             self.currentPage.onResize();
         gl_player.onResize(gl_browserSize.width, gl_browserSize.height);
+    }
+    
+    // The screen mode has changed (full/normal).
+    // @param fullScreen: True if we are switching to the full screen mode, and false to the normal mode.
+    self.onFullScreen = function (fullScreen)
+    {
+        gl_header.onFullScreen(fullScreen);
+        gl_player.onFullScreen(fullScreen);
+        gl_desktop.tasksList.onFullScreen(fullScreen);
     }
     
     // Opens a task in a new page.
@@ -82,6 +93,67 @@ function Desktop(task)
         });
     }
     
+    // Switches between the normal and the full screen modes.
+    self.setFullScreen = function ()
+    {
+        self.fullScreen = !self.fullScreen;
+        if (self.fullScreen)
+        {
+            // The desktop takes all the browser space in full screen
+            self.left = 0;
+            self.right = 0;
+            self.top = 0;
+            self.bottom = 0;
+            self.onFullScreen(true);
+            self.onResize();
+            // Asks the browser to go in full screen mode
+            if (C.Desktop.browserFullScreen)
+            {
+                var e = document.body;
+                ((e.mozRequestFullScreen && e.mozRequestFullScreen()) ||
+                 (e.webkitRequestFullScreen && e.webkitRequestFullScreen()) ||
+                 (e.requestFullScreen && e.requestFullScreen()))
+            }
+        }
+        else
+        {
+            self.left = C.Desktop.tasksListWidth;
+            self.right = 0;
+            self.top = gl_header.height;
+            self.bottom = gl_player.height;
+            self.onFullScreen(false);
+            self.onResize();
+            // Asks the browser to quit the full screen mode
+            var e = document;
+            ((e.mozCancelFullScreen && e.mozCancelFullScreen()) ||
+             (e.webkitCancelFullScreen && e.webkitCancelFullScreen()) ||
+             (e.cancelFullScreen && e.cancelFullScreen()))
+        }
+    }
+    
+    // Returns true if we are in full screen mode.
+    self.isFullScreen = function ()
+    {
+        return (self.fullScreen);
+    }
+    
+    // Sets the bottom margin of the desktop. Has no effect in full screen mode.
+    self.setBottom = function (bottom)
+    {
+        if (!self.fullScreen)
+        {
+            self.bottom = bottom;
+            gl_desktop.onResize();
+        }
+    }
+    
+    // Closes all the pages and their tasks.
+    self.disconnect = function ()
+    {
+        var pages = $(gl_desktop.node.tasks_list).children(".page");
+        pages.each(function () { this.object.close(); });
+    }
+    
     // Sets the page displayed by the desktop.
     // page: The new current page. If undefined, no page is displayed by the desktop.
     self.setCurrentPage = function (page)
@@ -98,13 +170,6 @@ function Desktop(task)
             self.node.middle_background.removeClass("display");
             gl_player.onDesktopPage(false);
         }
-    }
-    
-    // Closes all the pages and their tasks.
-    self.disconnect = function ()
-    {
-        var pages = $(gl_desktop.node.tasks_list).children(".page");
-        pages.each(function () { this.object.close(); });
     }
     
     // Called each time the mouse wheel is used.
@@ -127,6 +192,12 @@ function Desktop(task)
     self.mouseUp = function (e)
     {
         self.drag.mouseUp(e);
+    }
+    
+    // Called when the mouse leaves the desktop.
+    self.mouseLeave = function (e)
+    {
+        self.drag.mouseLeave(e);
     }
     
 // Container API
@@ -1000,10 +1071,10 @@ function Task(resource, html)
                 gl_desktop.taskPreview.display(undefined, undefined, page.object);
             }
             // Scrolls to the ghost if necessary
-            if ($(self.ghost).offset().top < C.Desktop.topHeight)
-                gl_desktop.node.tasks_list.scrollTop += $(self.ghost).offset().top - C.Desktop.topHeight;
-            else if ($(self.ghost).offset().top + C.Desktop.taskIconHeight > C.Desktop.topHeight + gl_desktop.height)
-                gl_desktop.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollTop + $(self.ghost).offset().top - C.Desktop.topHeight - gl_desktop.height + C.Desktop.taskIconHeight;
+            if ($(self.ghost).offset().top < gl_desktop.tasksList.top)
+                gl_desktop.node.tasks_list.scrollTop += $(self.ghost).offset().top - gl_desktop.tasksList.top;
+            else if ($(self.ghost).offset().top + C.Desktop.taskIconHeight > gl_desktop.tasksList.top + gl_desktop.height)
+                gl_desktop.node.tasks_list.scrollTop = gl_desktop.node.tasks_list.scrollTop + $(self.ghost).offset().top - gl_desktop.tasksList.top - gl_desktop.height + C.Desktop.taskIconHeight;
         }
     }
 
@@ -1755,10 +1826,10 @@ function TaskButtons()
         
         $(self.buttons).removeClass("scroll");
         // If we are on the scrolling top limit, gets the first task
-        if (gl_desktop.node.tasks_list.scrollTop <= 0 && mouse.y < C.Desktop.topHeight + C.Desktop.tasksListScrollHeight)
+        if (gl_desktop.node.tasks_list.scrollTop <= 0 && mouse.y < gl_desktop.tasksList.top + C.Desktop.tasksListScrollHeight)
             task = $(gl_desktop.node.tasks_list).children(".page:first").children(".task:first")[0];
         // If we are on the scrolling bottom limit, gets the last task
-        else if (gl_desktop.node.tasks_list.scrollTop >= gl_desktop.node.tasks_list.scrollHeight - gl_desktop.height && mouse.y > C.Desktop.topHeight + gl_desktop.height - C.Desktop.tasksListScrollHeight)
+        else if (gl_desktop.node.tasks_list.scrollTop >= gl_desktop.node.tasks_list.scrollHeight - gl_desktop.height && mouse.y > gl_desktop.tasksList.top + gl_desktop.height - C.Desktop.tasksListScrollHeight)
             task = $(gl_desktop.node.tasks_list).children(".page:last").children(".task:last")[0];
         // Then displays its buttons
         if (task && !gl_desktop.drag.isDragging())
@@ -1814,13 +1885,22 @@ function TasksList()
         self.over = false; // True while the mouse is over the tasks list
         self.delta; // The position of the mouse in the scrolling area
         self.interval; // The interval that actually scroll the tasks list
-        self.top = C.Desktop.topHeight; // The top position of the tasks list
+        self.top = C.Header.defaultHeight; // The top position of the tasks list
         
         // Events
         $(self.tasks_list).mouseenter(function (e) { self.mouseEnter(e); });
         $(self.tasks_list).mouseleave(function (e) { self.mouseLeave(e); });
         $(self.tasks_list).mousemove(function (e) { self.mouseMove(e); });
         $(self.tasks_list).click(function (e) { self.click(e); });
+    }
+    
+    // The screen mode has changed (full/normal).
+    self.onFullScreen = function (fullScreen)
+    {
+        if (fullScreen)
+            self.hide();
+        else
+            self.display();
     }
     
     // The mouse entered the tasks list.
@@ -1840,11 +1920,11 @@ function TasksList()
     self.mouseMove = function (e)
     {
         // The top scrolling area of the tasks list
-        if (e.pageY > C.Desktop.topHeight && e.pageY <= C.Desktop.topHeight + C.Desktop.tasksListScrollHeight)
-            self.scroll(1 - (e.pageY - C.Desktop.topHeight) / C.Desktop.tasksListScrollHeight);
+        if (e.pageY > self.top && e.pageY <= self.top + C.Desktop.tasksListScrollHeight)
+            self.scroll(1 - (e.pageY - self.top) / C.Desktop.tasksListScrollHeight);
         // The bottom scrolling area of the tasks list
-        else if (e.pageY >= C.Desktop.topHeight + gl_desktop.height - C.Desktop.tasksListScrollHeight && e.pageY < C.Desktop.topHeight + gl_desktop.height)
-            self.scroll((C.Desktop.topHeight + gl_desktop.height - C.Desktop.tasksListScrollHeight - e.pageY) / C.Desktop.tasksListScrollHeight);
+        else if (e.pageY >= self.top + gl_desktop.height - C.Desktop.tasksListScrollHeight && e.pageY < self.top + gl_desktop.height)
+            self.scroll((self.top + gl_desktop.height - C.Desktop.tasksListScrollHeight - e.pageY) / C.Desktop.tasksListScrollHeight);
         // Ensures that the scrolling is stopped outside of the scrolling areas
         else if (self.interval)
             self.stopScroll();
@@ -2359,7 +2439,19 @@ function Drag()
     // Called when the mouse is up (the drag is finished).
     self.mouseUp = function (e)
     {
-        if (e.which != 1)
+        if (!self.isDragging() || e.which != 1)
+            return ;
+        if (self.object && self.mouseUpCallback)
+            stop = self.object[self.mouseUpCallback](e, self.parameter);
+         self._stop();
+    }
+
+    // Called when the mouse leaves the desktop, in order to finish the drag.
+    // This is needed because we can't know when the mouse is up outside the browser,
+    // which may lead to some bugs.
+    self.mouseLeave = function (e)
+    {
+        if (!self.isDragging() || !C.Desktop.stopDragLeaveDesktop)
             return ;
         if (self.object && self.mouseUpCallback)
             stop = self.object[self.mouseUpCallback](e, self.parameter);

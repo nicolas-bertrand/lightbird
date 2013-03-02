@@ -204,15 +204,15 @@ function Window(page)
         }
         if (top != undefined)
         {
-            if (top < C.Desktop.topHeight - C.Window.limit.top)
+            if (top < gl_header.height - C.Window.limit.top)
             {
-                top = C.Desktop.topHeight - C.Window.limit.top;
+                top = gl_header.height - C.Window.limit.top;
                 if (p.direction == "n" || p.direction == "nw" || p.direction == "ne")
                     height = p.height - (top - (element.y));
             }
-            else if (top > C.Desktop.topHeight + gl_desktop.height - C.Window.limit.bottom)
+            else if (top > gl_header.height + gl_desktop.height - C.Window.limit.bottom)
             {
-                top = C.Desktop.topHeight + gl_desktop.height - C.Window.limit.bottom;
+                top = gl_header.height + gl_desktop.height - C.Window.limit.bottom;
                 if (p.direction == "n" || p.direction == "nw" || p.direction == "ne")
                     height = p.height - (top - (element.y));
             }
