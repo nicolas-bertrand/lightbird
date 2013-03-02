@@ -15,6 +15,7 @@ function Windows()
         
         // Members
         self.zIndex = 1; // Used to put the window that have the focus on top
+        self.bottomLimit = C.Player.defaultHeight; // The limit position of the windows from the bottom. Depends if the full screen mode is active or not.
     }
     
     // Opens a new window.
@@ -27,9 +28,25 @@ function Windows()
     // Hide all the displayed windows.
     self.hide = function ()
     {
-        var windows = $(self.node.windows).children(".window");
-        for (var i = 0; i < windows.length; ++i)
-            windows[i].object.page.hide();
+        $(self.node.windows).children(".window").each(function () { this.object.page.hide(); });
+    }
+    
+    // Ensures that the windows are within the boundaries of the desktop when it is resized.
+    self.onResize = function ()
+    {
+        $(self.node.windows).children(".window").each(function () { this.object.checkPosition(); });
+    }
+    
+    // Ensures that the windows are within the boundaries of the desktop when we quit the full screen mode.
+    self.onFullScreen = function (fullScreen)
+    {
+        if (!fullScreen)
+        {
+            self.bottomLimit = C.Player.defaultHeight;
+            $(self.node.windows).children(".window").each(function () { this.object.checkPosition(); });
+        }
+        else
+            self.bottomLimit = 0;
     }
     
     // Returns a top z-index.
@@ -204,15 +221,15 @@ function Window(page)
         }
         if (top != undefined)
         {
-            if (top < gl_header.height - C.Window.limit.top)
+            if (top < gl_desktop.top - C.Window.limit.top)
             {
-                top = gl_header.height - C.Window.limit.top;
+                top = gl_desktop.top - C.Window.limit.top;
                 if (p.direction == "n" || p.direction == "nw" || p.direction == "ne")
                     height = p.height - (top - (element.y));
             }
-            else if (top > gl_header.height + gl_desktop.height - C.Window.limit.bottom)
+            else if (top > gl_browserSize.height - gl_windows.bottomLimit - C.Window.limit.bottom)
             {
-                top = gl_header.height + gl_desktop.height - C.Window.limit.bottom;
+                top = gl_browserSize.height - gl_windows.bottomLimit - C.Window.limit.bottom;
                 if (p.direction == "n" || p.direction == "nw" || p.direction == "ne")
                     height = p.height - (top - (element.y));
             }
@@ -254,6 +271,22 @@ function Window(page)
             if (this != self.page.content)
                 this.object.hide();
         });
+    }
+    
+    // Ensures that the window is within the boundaries of the desktop.
+    // @param checkTop: True if the top boundary have to be checked.
+    self.checkPosition = function ()
+    {
+        var top = self.top - self.topHeight;
+        var result;
+        
+        if (top < (result = gl_desktop.top - C.Window.limit.top) ||
+            top > (result = gl_browserSize.height - gl_windows.bottomLimit - C.Window.limit.bottom))
+        {
+            self.element.style.top = result + "px";
+            self.top = result + self.topHeight;
+            self.page.onResize();
+        }
     }
     
     // Creates an icon and adds it to the destination.

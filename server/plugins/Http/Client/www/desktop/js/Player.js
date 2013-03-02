@@ -94,7 +94,7 @@ function Player(task)
             self.mouseLeaveTimeout = 0;
         }
         // Expands the time line
-        else if (!self.playlist.isDisplayed() && !gl_desktop.drag.isDragging())
+        else if (!self.playlist.isDisplayed())
             self.timeLine.expand();
     }
     

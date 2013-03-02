@@ -44,7 +44,7 @@ function Desktop(task)
         // Events
         $(document.body).mousewheel(function (e, delta) { self.mouseWheel(e, delta); });
         $(document.body).mousemove(function (e) { self.mouseMove(e); });
-        $(document.body).mouseup(function (e) { self.mouseUp(e); });
+        $(window).mouseup(function (e) { self.mouseUp(e); });
         $(document.body).mouseleave(function (e) { self.mouseLeave(e); });
     }
     
@@ -59,6 +59,7 @@ function Desktop(task)
         if (self.currentPage)
             self.currentPage.onResize();
         gl_player.onResize(gl_browserSize.width, gl_browserSize.height);
+        gl_windows.onResize(gl_browserSize.width, gl_browserSize.height);
     }
     
     // The screen mode has changed (full/normal).
@@ -68,6 +69,7 @@ function Desktop(task)
         gl_header.onFullScreen(fullScreen);
         gl_player.onFullScreen(fullScreen);
         gl_desktop.tasksList.onFullScreen(fullScreen);
+        gl_windows.onFullScreen(fullScreen);
     }
     
     // Opens a task in a new page.
@@ -2447,8 +2449,6 @@ function Drag()
     }
 
     // Called when the mouse leaves the desktop, in order to finish the drag.
-    // This is needed because we can't know when the mouse is up outside the browser,
-    // which may lead to some bugs.
     self.mouseLeave = function (e)
     {
         if (!self.isDragging() || !C.Desktop.stopDragLeaveDesktop)
