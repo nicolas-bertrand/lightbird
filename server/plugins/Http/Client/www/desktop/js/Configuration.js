@@ -1,14 +1,14 @@
 // The configuration of the Client.
 var Configuration =
 {
-	animationFPS: 20, // Default animation FPS.
+    animationFPS: 20, // Default animation FPS.
     focusBeforeAction: true, // If the page have to be focused before doing any action when the mouse clicks on a task.
     // The configuration of the desktop.
     Desktop:
     {
         minWidth: 650, // The minimum width of the desktop.
         minHeight: 300, // The minimum height of the desktop.
-        browserFullScreen: true, // If we have to use the browser full screen API.
+        browserFullScreen: false, // If we have to use the browser full screen API.
         stopDragLeaveDesktop: false, // If the current drag have to be stopped when the mouse leaves the browser.
         pageMargin: 10, // The height of the bottom margin between the pages.
         tasksListWidth: 120, // The width of the tasks list.
@@ -29,8 +29,8 @@ var Configuration =
         resizeResistance: 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
         resizeDeltaDivisor: 20 // Reduce the delta of the mouse wheel that resize the task margin.
     },
-	Window:
-	{
+    Window:
+    {
         default: // The default position of the window
         {
             left: 200,
@@ -48,7 +48,7 @@ var Configuration =
         border: 5, // The size of the border of the window.
         topHeight: 35, // The height of the top of the window.
         bottomHeight: 30 // The height of the bottom of the window.
-	},
+    },
     Player:
     {
         defaultHeight: 45, // The default height of the player.
@@ -220,8 +220,8 @@ var Configuration =
     {
         requestProgressInterval: 1000 // The number of milliseconds between each progress request.
     },
-	Files:
-	{
+    Files:
+    {
         controlsHeight: 40,
         headerHeight: 28,
         headerSeparatorWidth: 1, // The width of the header separators.
@@ -231,10 +231,10 @@ var Configuration =
         headerDefaultWidth: 200, // The default width of the coulmns of the header.
         listRowHeight: 30, // The height of the rows of the files list.
         columnTypeTextMinWidth: 30 // The minimum width required by the type column to display the type in text instead of the colors.
-	},
-	View:
-	{
+    },
+    View:
+    {
         minHeight: 15 // The minimal height of the images and videos.
-	}
+    }
 };
 var C = Configuration;

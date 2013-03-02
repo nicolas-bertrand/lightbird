@@ -8,80 +8,80 @@ var gl_browserSize;
 // Initializes the page (called by onload)
 function load()
 {
-	gl_browserSize = getBrowserSize();
+    gl_browserSize = getBrowserSize();
     // Initialize the main systems
-	new Resources();
-	new Desktop();
-	new Windows();
+    new Resources();
+    new Desktop();
+    new Windows();
     new Header();
     new Player();
     new Files();
-	new Account();
-	// Initializes the browser size
-	onResize();
-	// onResize is called every time the browser is resized
-	window.onresize = onResize;
-	// The right click is disabled in order to replace the normal contextual menu of the browser.
-	//document.oncontextmenu = function() { return (false); };
-	document.getElementById("loading_client").style.display = "none";
+    new Account();
+    // Initializes the browser size
+    onResize();
+    // onResize is called every time the browser is resized
+    window.onresize = onResize;
+    // The right click is disabled in order to replace the normal contextual menu of the browser.
+    //document.oncontextmenu = function() { return (false); };
+    document.getElementById("loading_client").style.display = "none";
     // Disables the text selection
     $(document.body).mousedown(function (e) { disableSelection(false); });
     $(document.body).mouseup(function () { disableSelection(true); });
     // Asks a confirmation when the user is about to leave the page.
     //window.onbeforeunload = function() { return ("Leaving now will save the current session."); }
-	// Ensures that the load function will not be called twice
-	gl_loaded = true;
+    // Ensures that the load function will not be called twice
+    gl_loaded = true;
 }
 
 // This function is called when the size of the browser change
 function onResize()
 {
-	// Gets the new browser size
-	gl_browserSize = getBrowserSize();
-	// Updates the background
-	adjustBackgroundSize();
+    // Gets the new browser size
+    gl_browserSize = getBrowserSize();
+    // Updates the background
+    adjustBackgroundSize();
     // Resizes the desktop
     gl_desktop.onResize();
-	// Calls the resize function of all the windows that implements it
-	for (var id in gl_windows)
-		if (gl_windows[id].onResize != undefined)
-			gl_windows[id].onResize();
+    // Calls the resize function of all the windows that implements it
+    for (var id in gl_windows)
+        if (gl_windows[id].onResize != undefined)
+            gl_windows[id].onResize();
 }
 
 // Ajusts the background size according to the size of the browser
 function adjustBackgroundSize()
 {
-	// Sets the background size to the screen size
-	var background = document.getElementById("background");
-	$("#background").width(gl_browserSize.width);
-	$("#background").height(gl_browserSize.height);
+    // Sets the background size to the screen size
+    var background = document.getElementById("background");
+    $("#background").width(gl_browserSize.width);
+    $("#background").height(gl_browserSize.height);
 }
 
 // Finds the size of the browser window
 function getBrowserSize()
 {
-	var width = 1280;
-	var height = 1024;
+    var width = 1280;
+    var height = 1024;
  
-	if (typeof(window.innerWidth) == 'number')
-	{
-		//Non-IE
-		width = window.innerWidth;
-		height = window.innerHeight;
-	}
-	else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight))
-	{
-		//IE 6+ in 'standards compliant mode'
-		width = document.documentElement.clientWidth;
-		height = document.documentElement.clientHeight;
-	}
-	else if (document.body && ( document.body.clientWidth || document.body.clientHeight))
-	{
-		//IE 4 compatible
-		width = document.body.clientWidth;
-		height = document.body.clientHeight;
-	}
-	return { width : (width > C.Desktop.minWidth ? width : C.Desktop.minWidth),
+    if (typeof(window.innerWidth) == 'number')
+    {
+        //Non-IE
+        width = window.innerWidth;
+        height = window.innerHeight;
+    }
+    else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight))
+    {
+        //IE 6+ in 'standards compliant mode'
+        width = document.documentElement.clientWidth;
+        height = document.documentElement.clientHeight;
+    }
+    else if (document.body && ( document.body.clientWidth || document.body.clientHeight))
+    {
+        //IE 4 compatible
+        width = document.body.clientWidth;
+        height = document.body.clientHeight;
+    }
+    return { width : (width > C.Desktop.minWidth ? width : C.Desktop.minWidth),
              height : (height > C.Desktop.minHeight ? height : C.Desktop.minHeight) };
 }
 
@@ -94,40 +94,40 @@ function getBrowserSize()
 // The response may be invalid.
 function request(method, url, callback, data, type)
 {
-	var HttpRequest;
+    var HttpRequest;
 
-	// Creates the XMLHttpRequest object
-	if (window.XMLHttpRequest)
-		// code for IE7+, Firefox, Chrome, Opera, Safari
-		HttpRequest = new XMLHttpRequest();
-	else
-		// code for IE6, IE5
-		HttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+    // Creates the XMLHttpRequest object
+    if (window.XMLHttpRequest)
+        // code for IE7+, Firefox, Chrome, Opera, Safari
+        HttpRequest = new XMLHttpRequest();
+    else
+        // code for IE6, IE5
+        HttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
 
-	// Sets the ready state anonym function
-	HttpRequest.onreadystatechange = function()
-	{
-		if (HttpRequest.readyState == 4)
-			if (callback != null)
-				callback(HttpRequest);
-	}
+    // Sets the ready state anonym function
+    HttpRequest.onreadystatechange = function()
+    {
+        if (HttpRequest.readyState == 4)
+            if (callback != null)
+                callback(HttpRequest);
+    }
 
-	// Adds a random string in the uri to prevent the result from being cached
-	url += (url.indexOf("?") == -1 ? "?" : "&");
-	url += "r=" + Math.random();
-	// Adds the session information that identify the user
+    // Adds a random string in the uri to prevent the result from being cached
+    url += (url.indexOf("?") == -1 ? "?" : "&");
+    url += "r=" + Math.random();
+    // Adds the session information that identify the user
     url += getSession();
 
-	// Executes the request
-	HttpRequest.open(method, "/c/" + url, true);
-	if (method.toUpperCase() == "POST")
-	{
-		HttpRequest.setRequestHeader("Content-type", (type ? type : "application/x-www-form-urlencoded"));
-		HttpRequest.send(data);
-	}
-	else
-		HttpRequest.send();
-	return (HttpRequest);
+    // Executes the request
+    HttpRequest.open(method, "/c/" + url, true);
+    if (method.toUpperCase() == "POST")
+    {
+        HttpRequest.setRequestHeader("Content-type", (type ? type : "application/x-www-form-urlencoded"));
+        HttpRequest.send(data);
+    }
+    else
+        HttpRequest.send();
+    return (HttpRequest);
 }
 
 // Replaces the end of line characters of the text (\r\n \n or \r) by the HTML equivalent (<br />).
@@ -135,43 +135,43 @@ function newLineToBr(text)
 {
     var regexp;
     
-	text = escape(text);
-	if (text.indexOf("%0D%0A") > -1)
-		regexp = /%0D%0A/g;
-	else if (text.indexOf("%0A") > -1)
-		regexp = /%0A/g;
-	else if (text.indexOf("%0D") > -1)
-		regexp = /%0D/g;
-	if (regexp)
-		return unescape(text.replace(regexp, "<br />"));
+    text = escape(text);
+    if (text.indexOf("%0D%0A") > -1)
+        regexp = /%0D%0A/g;
+    else if (text.indexOf("%0A") > -1)
+        regexp = /%0A/g;
+    else if (text.indexOf("%0D") > -1)
+        regexp = /%0D/g;
+    if (regexp)
+        return unescape(text.replace(regexp, "<br />"));
     return unescape(text);
 }
 
 // Changes the opacity of the node, if the browser support it.
 function changeOpacity(node, value)
 {
-	if (node.style.opacity != undefined)
-		node.style.opacity = value;
+    if (node.style.opacity != undefined)
+        node.style.opacity = value;
 }
 
 function getElementsByClassName(className, node, first)
 {
-	if(!node)
-		node = document.getElementsByTagName("body")[0];
-	if (first != false)
-		first = true;
-	var result = [];
-	var regexp = new RegExp('\\b' + className + '\\b');
-	var elements = node.getElementsByTagName("*");
-	for(var i = 0, j = elements.length; i < j; i++)
-		if (regexp.test(elements[i].className))
-		{
-			if (first)
-				return (elements[i]);
-			else
-				result.push(elements[i]);
-		}
-	return (result);
+    if(!node)
+        node = document.getElementsByTagName("body")[0];
+    if (first != false)
+        first = true;
+    var result = [];
+    var regexp = new RegExp('\\b' + className + '\\b');
+    var elements = node.getElementsByTagName("*");
+    for(var i = 0, j = elements.length; i < j; i++)
+        if (regexp.test(elements[i].className))
+        {
+            if (first)
+                return (elements[i]);
+            else
+                result.push(elements[i]);
+        }
+    return (result);
 }
 
 // Returns the name of the object.
@@ -211,17 +211,17 @@ function getUuid()
 // Same as parseInt, except that NaN is replaced by 0.
 function toNumber(number)
 {
-	if (number == "")
-		return (0);
-	return (parseInt(number));
+    if (number == "")
+        return (0);
+    return (parseInt(number));
 }
 
 // If n is lesser than zero, zero is returned.
 function positive(n)
 {
-	if (n < 0)
-		return (0);
-	return (n);
+    if (n < 0)
+        return (0);
+    return (n);
 }
 
 // Converts a date in a ISO8601 string, without T&Z

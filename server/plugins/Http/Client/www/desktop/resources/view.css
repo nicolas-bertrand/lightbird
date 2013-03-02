@@ -4,9 +4,9 @@
 #tasks>.view_other>div,
 #tasks>.view_video>div
 {
-	border: 0px;
-	margin: 0px;
-	padding: 0px;
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
     width: 100%;
     height: 100%;
     display: none;
