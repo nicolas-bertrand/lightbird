@@ -33,6 +33,11 @@ function Header(task)
     // We entered/leaved the full screen mode.
     self.onFullScreen = function (fullScreen)
     {
+        if (self.fullScreenHideTimeout)
+        {
+            clearTimeout(self.fullScreenHideTimeout);
+            self.fullScreenHideTimeout = undefined;
+        }
         if (fullScreen)
             self.hide();
         else

@@ -81,6 +81,11 @@ function Player(task)
     // We entered/leaved the full screen mode.
     self.onFullScreen = function (fullScreen)
     {
+        if (self.fullScreenHideTimeout)
+        {
+            clearTimeout(self.fullScreenHideTimeout);
+            self.fullScreenHideTimeout = undefined;
+        }
         self.timeLine.opaqueTimeLine();
     }
     
