@@ -604,6 +604,7 @@ a:visited
     top: 0px;
     z-index: 10;
     display: none;
+    background-color: rgba(0, 0, 0, 0); /* IE */
 }
 #desktop>.bottom.hide>.full_screen_area
 {
@@ -631,7 +632,7 @@ a:visited
     position: absolute;
     top: 0px;
     z-index: 2;
-    background-color: rgba(255, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0); /* IE */
 }
 #desktop>.bottom>.time_line.expand>.active_area
 {
