@@ -99,8 +99,8 @@ function Player(task)
             clearTimeout(self.mouseLeaveTimeout);
             self.mouseLeaveTimeout = 0;
         }
-        // Expands the time line
-        else if (!self.playlist.isDisplayed())
+        // Expands the time line if the playlist is not displayed and there is a media playing
+        else if (!self.playlist.isDisplayed() && self.playerInterface)
             self.timeLine.expand();
         // Displays the player if we are in full screen mode
         if (gl_desktop.isFullScreen())
@@ -1596,6 +1596,8 @@ self.TimeLine = function ()
         self.timeOffset = media.timeOffset;
         self.fileType = file.type;
         self.setTimeLineType();
+        if (player.mouseOverPlayer)
+            self.expand();
         if (file.type == "video")
             self.previewHeight = Math.round(C.Player.Seek.previewWidth * file.height / file.width);
         else
@@ -1727,6 +1729,8 @@ self.TimeLine = function ()
     // Expands the time line.
     self.expand = function ()
     {
+        if (self.isExpanded())
+            return ;
         self.expandTimeLine();
         node.time_line.addClass("expand");
         self.onResize();
@@ -1844,6 +1848,7 @@ self.Playlist = function ()
     {
         node.playlist.addClass("display");
         node.playlist.height(self.height);
+        player.timeLine.expand();
         player.timeLine.opaqueTimeLine(true);
     }
 
@@ -1852,6 +1857,8 @@ self.Playlist = function ()
     {
         node.playlist.removeClass("display");
         node.playlist.height(0);
+        if (!player.playerInterface)
+            player.timeLine.retract();
         player.timeLine.opaqueTimeLine(false);
     }
     
