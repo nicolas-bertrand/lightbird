@@ -594,7 +594,21 @@ a:visited
 }
 #desktop>.bottom.hide>div
 {
+    visibility: hidden;
+}
+#desktop>.bottom>.full_screen_area
+{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    z-index: 10;
     display: none;
+}
+#desktop>.bottom.hide>.full_screen_area
+{
+    display: block;
+    visibility: visible;
 }
 
 #desktop>.bottom>.time_line
