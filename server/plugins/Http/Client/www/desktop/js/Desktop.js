@@ -72,6 +72,21 @@ function Desktop(task)
         gl_windows.onFullScreen(fullScreen);
     }
     
+    // Called when the user has been authentified.
+    self.onConnect = function ()
+    {
+        gl_files.onConnect();
+    }
+    
+    // Called when the user is disconnecting.
+    self.onDisconnect = function ()
+    {
+        gl_files.onDisconnect();
+        // Closes all the pages and their tasks.
+        var pages = $(gl_desktop.node.tasks_list).children(".page");
+        pages.each(function () { this.object.close(); });
+    }
+    
     // Opens a task in a new page.
     // @param resource : The name of the resource that will be loaded in the task.
     // @param parameter : An optional parameter for the resource.
@@ -147,13 +162,6 @@ function Desktop(task)
             self.bottom = bottom;
             gl_desktop.onResize();
         }
-    }
-    
-    // Closes all the pages and their tasks.
-    self.disconnect = function ()
-    {
-        var pages = $(gl_desktop.node.tasks_list).children(".page");
-        pages.each(function () { this.object.close(); });
     }
     
     // Sets the page displayed by the desktop.

@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex, nofollow" />
-    <link href="/c/css/identification.css" rel="stylesheet" />
+    <link href="/c/css/authentication.css" rel="stylesheet" />
     <link href="/c/css/index.css" rel="stylesheet" />
     <link href="/c/css/window.css" rel="stylesheet" />
     <link href="/c/libs/SHJS/sh_style.css" rel="stylesheet" />
     <link href="/c/images/favicon.png" rel="icon" />
-    <script src="/c/js/Account.js"></script>
-    <script src="/c/js/Animations.js"></script>
     <script src="/c/js/Configuration.js"></script>
     <script src="/c/js/Desktop.js"></script>
     <script src="/c/js/Files.js"></script>
@@ -19,6 +17,7 @@
     <script src="/c/js/Resources.js"></script>
     <script src="/c/js/Selection.js"></script>
     <script src="/c/js/Svg.js"></script>
+    <script src="/c/js/User.js"></script>
     <script src="/c/js/Window.js"></script>
     <script src="/c/libs/jQuery/jquery.js"></script>
     <script src="/c/libs/jQuery/plugins.js"></script>
@@ -31,9 +30,8 @@
 </head>
 
 <body onload="load()">
-    <div id="background">
-        <img class="identification" src="/c/images/backgrounds/identification.jpg" alt="background" />
-        <img class="desktop" src="/c/images/backgrounds/birds.jpg" alt="background" />
+    <div id="background" class="foreground">
+        <img class="hide" src="/c/images/backgrounds/birds.jpg" alt="background" />
     </div>
 
     <div id="desktop">
@@ -142,28 +140,28 @@
         </div>
     </div>
 
-    <div id="identification_container" onmousemove="gl_account.cleanError()">
-        <form id="identification" action="javascript:gl_account.identify()">
-            <input class="blur" type="text" value="User" maxlength="100" onfocus="gl_account.onFocus(true, T.Identification.user, this)" onblur="gl_account.onFocus(false, T.Identification.user, this)" />
-            <input class="blur" type="password" value="Password" maxlength="100" onfocus="gl_account.onFocus(true, T.Identification.password, this)" onblur="gl_account.onFocus(false, T.Identification.password, this)" />
-            <div>
-                <div id="identification_icon_blue_lock" onclick="gl_account.changeLock(false)" onmouseover="hint('lock')" onmouseout="hint(false)"></div>
-                <div id="identification_icon_blue_unlock" onclick="gl_account.changeLock(true)" onmouseover="hint('lock')" onmouseout="hint(false)"></div>
-                <div id="identification_icon_yellow"></div>
-                <div id="identification_icon_green"></div>
-                <div id="identification_icon_red"></div>
-                <div id="identification_submit_button_blue" onclick="gl_account.identify()"><script>tr(T.Identification.connection)</script></div>
-                <div id="identification_submit_button_yellow"><script>tr(T.Identification.checking)</script></div>
-                <div id="identification_submit_button_green"><script>tr(T.Identification.connected)</script></div>
-                <div id="identification_submit_button_red" onclick="gl_account.identify()"><script>tr(T.Identification.error)</script></div>
+    <div id="authentication">
+        <div>
+            <div class="form">
+                <form action="" method="post">
+                    <input class="user" name="username" type="text" maxlength="100" tabindex="1" />
+                    <input class="password" name="password" type="password" maxlength="100" tabindex="2" />
+                    <input class="submit" type="submit" />
+                </form>
+                <div class="background">
+                    <div class="user"></div>
+                    <div class="password"></div>
+                </div>
+                <div class="focus">
+                    <div class="user"></div>
+                    <div class="password"></div>
+                </div>
+                <div class="test_text">
+                    <span class="user"></span>
+                    <span class="password"></span>
+                </div>
             </div>
-            <input type="submit" value="" class="identification_submit_input" />
-        </form>
-    </div>
-
-    <div id="loading_client" onclick="load()">
-        <h1><script>tr(T.loading)</script></h1>
-        <script>tr(T.do_not_wait)</script>
+        </div>
     </div>
 </body>
 </html>

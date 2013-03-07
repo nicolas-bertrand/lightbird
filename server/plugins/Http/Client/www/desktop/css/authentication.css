@@ -1,0 +1,161 @@
+﻿#authentication
+{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    display: table;
+    z-index: -2;
+    font-size: 20px;
+}
+
+#authentication.display
+{
+    z-index: 2;
+}
+#authentication.display input
+{
+    display: block;
+}
+
+#authentication>div
+{
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#authentication .form
+{
+    width: 280px;
+    height: 170px;
+    margin: auto;
+    border-radius: 10px 10px 10px 10px;
+    background-image: linear-gradient(top, rgba(89, 89, 89, 0.9) 0%, rgba(62, 62, 62, 0.9) 100%);
+    background-image: -moz-linear-gradient(top, rgba(89, 89, 89, 0.9) 0%, rgba(62, 62, 62, 0.9) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(89, 89, 89, 0.9) 0%, rgba(62, 62, 62, 0.9) 100%);
+    background-image: -o-linear-gradient(top, rgba(89, 89, 89, 0.9) 0%, rgba(62, 62, 62, 0.9) 100%);
+    background-image: -ms-linear-gradient(top, rgba(89, 89, 89, 0.9) 0%, rgba(62, 62, 62, 0.9) 100%);
+    box-shadow: 0px 0px 0px 10px rgba(255, 255, 255, 0.6),
+                0px 0px 80px rgba(0, 0, 0, 0.5),
+                inset 0px 0px 150px rgba(0, 0, 0, 0.05);
+}
+
+#authentication .form>.background,
+#authentication .form>.focus
+{
+    position: absolute;
+    padding: 40px;
+}
+
+#authentication .form>.background>div,
+#authentication .form>.focus>div
+{
+    width: 180px;
+    height: 30px;
+    margin: 0px 0px 30px 0px;
+    padding: 0px 10px 0px 10px;
+    border-radius: 3px 3px 3px 3px;
+}
+
+#authentication .form>.background>div
+{
+    text-shadow: 0 0 5px rgba(0, 0, 0, 1);
+    color: #cccccc;
+    line-height: 30px;
+    
+    background-image: linear-gradient(top, #575757 0%, #424242 100%);
+    background-image: -moz-linear-gradient(top, #575757 0%, #424242 100%);
+    background-image: -webkit-linear-gradient(top, #575757 0%, #424242 100%);
+    background-image: -o-linear-gradient(top, #575757 0%, #424242 100%);
+    background-image: -ms-linear-gradient(top, #575757 0%, #424242 100%);
+    box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.6),
+                0px 0px 0px 3px rgba(255, 255, 255, 0.1);
+}
+
+#authentication .form>.focus>div
+{
+    max-width: 180px;
+    background-image: linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
+    background-image: -moz-linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
+    background-image: -webkit-linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
+    background-image: -o-linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
+    background-image: -ms-linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
+    box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.6),
+                0px 0px 0px 3px rgba(255, 255, 255, 0.1);
+    visibility: hidden;
+}
+
+#authentication .form>.focus>div.display
+{
+    visibility: visible;
+}
+
+#authentication form
+{
+    position: absolute;
+    margin: 40px;
+    z-index: 1;
+}
+
+#authentication input
+{
+    width: 180px;
+    height: 30px;
+    margin: 0px 0px 30px 0px;
+    padding: 0px 10px 0px 10px;
+    border: solid 0 #ffffff;
+    background-color: transparent;
+    display: none;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    color: #111111;
+    font-size: 20px;
+}
+
+#authentication input.submit
+{
+    position: absolute;
+    z-index: -1;
+    top: 0px;
+    opacity: 0;
+}
+
+#authentication .form>.test_text
+{
+    visibility: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+/* Fonts */
+
+#authentication input.user,
+#authentication .background>.user,
+#authentication .background>.password,
+#authentication .test_text>.user
+{
+    font-family: calibri;
+}
+
+#authentication input.password,
+#authentication .test_text>.password
+{
+    font-family: monospace;
+}
+
+/* Error */
+
+#authentication.error input
+{
+    color: #eeeeee;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+#authentication.error .focus>div
+{
+    background-image: linear-gradient(top, #c53a3a 0%, #942c2c 100%);
+    background-image: -moz-linear-gradient(top, #c53a3a 0%, #942c2c 100%);
+    background-image: -webkit-linear-gradient(top, #c53a3a 0%, #942c2c 100%);
+    background-image: -o-linear-gradient(top, #c53a3a 0%, #942c2c 100%);
+    background-image: -ms-linear-gradient(top, #c53a3a 0%, #942c2c 100%);
+}

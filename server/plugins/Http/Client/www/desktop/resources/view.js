@@ -23,7 +23,7 @@ function ResourceView(task, playlistInterface, fileIndex)
         $(task.content).addClass("view_" + resource.file.type);
         
         // Events
-        if (C.focusBeforeAction)
+        if (C.View.focusBeforeAction)
             $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
         $(task.content).mouseenter(function (e) { gl_player.setFileName(resource.fileIndex); });
         $(task.content).mouseleave(function (e) { gl_player.setFileName(); });

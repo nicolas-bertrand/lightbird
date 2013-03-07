@@ -16,17 +16,17 @@ function load()
     new Header();
     new Player();
     new Files();
-    new Account();
-    // Initializes the browser size
+    new User();
+    // Updates the size of the window
     onResize();
-    // onResize is called every time the browser is resized
+    // Events
     window.onresize = onResize;
+    $(document.body).keydown(function (e) { onKeyDown(e); });
     // The right click is disabled in order to replace the normal contextual menu of the browser.
     //document.oncontextmenu = function() { return (false); };
-    document.getElementById("loading_client").style.display = "none";
     // Disables the text selection
-    $(document.body).mousedown(function (e) { disableSelection(false); });
-    $(document.body).mouseup(function () { disableSelection(true); });
+    //$(document.body).mousedown(function (e) { disableSelection(false); });
+    //$(document.body).mouseup(function () { disableSelection(true); });
     // Asks a confirmation when the user is about to leave the page.
     //window.onbeforeunload = function() { return ("Leaving now will save the current session."); }
     // Ensures that the load function will not be called twice
@@ -38,8 +38,6 @@ function onResize()
 {
     // Gets the new browser size
     gl_browserSize = getBrowserSize();
-    // Updates the background
-    adjustBackgroundSize();
     // Resizes the desktop
     gl_desktop.onResize();
     // Calls the resize function of all the windows that implements it
@@ -48,13 +46,10 @@ function onResize()
             gl_windows[id].onResize();
 }
 
-// Ajusts the background size according to the size of the browser
-function adjustBackgroundSize()
+// A key has been pressed in the window.
+function onKeyDown(e)
 {
-    // Sets the background size to the screen size
-    var background = document.getElementById("background");
-    $("#background").width(gl_browserSize.width);
-    $("#background").height(gl_browserSize.height);
+    gl_user.onKeyDown(e);
 }
 
 // Finds the size of the browser window

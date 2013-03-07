@@ -384,7 +384,7 @@ self.Controls = function ()
         // Disconnect
         $(self.disconnect.link.node).mouseover(function (e) { self.mouseEnter(self.disconnect); });
         $(self.disconnect.link.node).mouseout(function (e) { self.mouseLeave(self.disconnect); });
-        $(self.disconnect.link.node).click(function (e) { gl_account.disconnect(); });
+        $(self.disconnect.link.node).click(function (e) { gl_user.disconnect(); });
     }
     
     // Creates and returns a button background.

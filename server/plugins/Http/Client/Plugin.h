@@ -90,7 +90,7 @@ public:
 
 private:
     /// @brief Manages the session.
-    void    _session(LightBird::IClient &client);
+    void    _session(LightBird::IClient &client, const QString &uri);
     /// @brief Checks if the client identifiant is valid.
     bool    _checkIdentifiant(LightBird::IClient &client, LightBird::Session &session, const QString &identifiant);
     /// @brief Returns the name of the interface used by the user.

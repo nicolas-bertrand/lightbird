@@ -1,9 +1,6 @@
 // The configuration of the Client.
 var Configuration =
 {
-    animationFPS: 20, // Default animation FPS.
-    focusBeforeAction: true, // If the page have to be focused before doing any action when the mouse clicks on a task.
-    // The configuration of the desktop.
     Desktop:
     {
         minWidth: 650, // The minimum width of the desktop.
@@ -244,7 +241,13 @@ var Configuration =
     },
     View:
     {
-        minHeight: 15 // The minimal height of the images and videos.
+        minHeight: 15, // The minimal height of the images and videos.
+        focusBeforeAction: true // If the page have to be focused before doing any action when the mouse clicks on a task.
+    },
+    User:
+    {
+        passwordCharacter: "\u25CF", // The charecter used to replace the password.
+        activeElementLoop: true, // If true the tab key will loop the focus between the inputs of the authentication form.
     }
 };
 var C = Configuration;

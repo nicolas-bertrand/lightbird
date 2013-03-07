@@ -114,7 +114,7 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
         uri = LightBird::cleanPath(uri.remove(".."), true).remove(QRegExp("^c/"));
         client.getRequest().getInformations().insert("uri", uri);
         // Manages the session
-        this->_session(client);
+        this->_session(client, uri);
     }
     // If an error occured we don't execute the request
     else if (type == LightBird::IOnDeserialize::IDoDeserialize && client.getResponse().getCode() >= 400)
@@ -226,7 +226,7 @@ bool    Plugin::timer(const QString &name)
     return (true);
 }
 
-void    Plugin::_session(LightBird::IClient &client)
+void    Plugin::_session(LightBird::IClient &client, const QString &uri)
 {
     QString id;
     QString sessionId = QUrlQuery(client.getRequest().getUri()).queryItemValue("sessionId");
@@ -245,6 +245,9 @@ void    Plugin::_session(LightBird::IClient &client)
                 this->_api->sessions().getSession(it.next())->removeClient(client.getId());
         }
         client.getAccount().clear();
+        // Tells the client that it is not identified
+        if (!identifiant.isEmpty() && uri == "blank")
+            this->response(client, 403, "Forbidden");
     }
     // Otherwise the client is identified
     else if (!identifiant.isEmpty())
@@ -265,9 +268,6 @@ bool    Plugin::_checkIdentifiant(LightBird::IClient &client, LightBird::Session
         return (true);
     this->identificationFailed(client);
     client.getResponse().setError(true);
-    // Tells the client that it is not identified
-    if (client.getRequest().getInformations().value("uri").toString() == "blank")
-        this->response(client, 403, "Forbidden");
     return (false);
 }
 

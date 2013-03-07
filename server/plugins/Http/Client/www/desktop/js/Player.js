@@ -57,9 +57,9 @@ function Player(task)
         self.height = C.Player.defaultHeight;
         self.node.bottom.height(self.height);
         self.buttonsHeight = C.Player.defaultHeight - C.Player.TimeLine.height;
+        self.fileName = new self.FileName();
         self.playback = new self.Playback();
         self.controls = new self.Controls();
-        self.fileName = new self.FileName();
         self.timeLine = new self.TimeLine();
         self.playlist = new self.Playlist();
         self.header = new self.Header();
@@ -605,8 +605,7 @@ self.Playback = function ()
             tw.checkTime = checkTime ? true : false;
             tw.currentNumber = node.number.width();
             tw.currentTime = node.time.width();
-            if (tw.currentNumber)
-                self.updatePositions();
+            self.updatePositions();
         }
         // Restarts the loop if another update has been called
         else if (checkNumber || checkTime)
