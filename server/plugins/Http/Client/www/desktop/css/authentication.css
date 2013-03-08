@@ -7,7 +7,6 @@
     height: 100%;
     display: table;
     z-index: -2;
-    font-size: 20px;
 }
 
 #authentication.display
@@ -109,7 +108,6 @@
     display: none;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     color: #111111;
-    font-size: 20px;
 }
 
 #authentication input.submit
@@ -134,13 +132,20 @@
 #authentication .background>.password,
 #authentication .test_text>.user
 {
-    font-family: calibri;
+    font-family: 'Open Sans', sans-serif;
 }
 
 #authentication input.password,
 #authentication .test_text>.password
 {
+    letter-spacing: 1px;
     font-family: monospace;
+}
+
+#authentication,
+#authentication input
+{
+    font-size: 18px;
 }
 
 /* Error */
