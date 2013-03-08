@@ -6,7 +6,9 @@ function Player(task)
     var self = this;
     var player = self;
     gl_player = self;
-    
+
+// Player methods
+{
     self.init = function ()
     {
         // Nodes
@@ -204,6 +206,7 @@ function Player(task)
         self.playback.setNumber(0, 0);
         self.fileName.setText();
     }
+}
     
 // File interface
 // Implemented by all the files.
@@ -400,7 +403,6 @@ self.Playback = function ()
         // Members
         self.C = C.Player.Playback; // The configuration of the playback
         self.paper; // The SVG paper on which the buttons are drawn
-        self.textWidth = {interval: undefined, elapsed: 0, checkTime: 0, checkNumber: 0, currentNumber: 0, currentTime: 0}; // Used to calculate the width of the texts
         self.slope; // The slope of the buttons
         self.defaultLink; // This link is used when the mouse is outside the buttons areas, but still on the paper
         self.width = self.C.initialPaperWidth; // The total width of the buttons
@@ -423,7 +425,7 @@ self.Playback = function ()
         node.duration.html("0:00");
         self.createButtons();
         self.addEvents();
-        self.updateTextsWidth(true, true);
+        self.updatePositions();
         
         // Events
     }
@@ -591,48 +593,6 @@ self.Playback = function ()
         });
     }
     
-    // Waits the html engine to update the texts width, using an inverval loop.
-    self.updateTextsWidth = function (checkNumber, checkTime)
-    {
-        var tw = self.textWidth;
-    
-        // Starts the inverval loop
-        if (tw.interval == undefined)
-        {
-            tw.interval = setInterval(self.updateTextsWidth, self.C.updateTextsWidthDuration / self.C.updateTextsWidthSteps);
-            tw.elapsed = 1;
-            tw.checkNumber = checkNumber ? true : false;
-            tw.checkTime = checkTime ? true : false;
-            tw.currentNumber = node.number.width();
-            tw.currentTime = node.time.width();
-            self.updatePositions();
-        }
-        // Restarts the loop if another update has been called
-        else if (checkNumber || checkTime)
-        {
-            clearInterval(tw.interval);
-            tw.interval = undefined;
-            self.updateTextsWidth(checkNumber || tw.checkNumber, checkTime || tw.checkTime);
-        }
-        // Ends the interval loop
-        else if (tw.elapsed++ >= self.C.updateTextsWidthSteps ||
-                (tw.checkNumber && tw.currentNumber != node.number.width()) ||
-                (tw.checkTime && tw.currentTime != node.time.width()))
-        {
-            if (tw.checkNumber && tw.currentNumber != node.number.width())
-                tw.checkNumber = false;
-            if (tw.checkTime && tw.currentTime != node.time.width())
-                tw.checkTime = false;
-            self.updatePositions();
-            // Ensures that all the texts have been checked, and ends the loop
-            if ((!tw.checkNumber && !tw.checkTime) || tw.elapsed >= self.C.updateTextsWidthSteps)
-            {
-                clearInterval(tw.interval);
-                tw.interval = undefined;
-            }
-        }
-    }
-    
     // Updates the position of the buttons based on the texts width.
     self.updatePositions = function ()
     {
@@ -764,7 +724,7 @@ self.Playback = function ()
     {
         node.numerator.html(numerator);
         node.denominator.html(denominator);
-        self.updateTextsWidth(true, false);
+        self.updatePositions();
     }
     
     // Sets the current time and the duration.
@@ -781,7 +741,7 @@ self.Playback = function ()
             node.duration.html(duration);
         }
         if (current_time.length != oldCurrentTime.length || (duration != undefined && duration.length != oldDuration.length))
-            self.updateTextsWidth(false, true);
+            self.updatePositions();
     }
     // Displays the time button.
     self.displayTime = function ()
@@ -792,7 +752,7 @@ self.Playback = function ()
         node.time.addClass("display");
         self.time.link.show();
         self.setWidth(self.time.left + node.time.width() + self.C.margin / 2 + Math.abs(self.slope / 2));
-        self.updateTextsWidth(false, true);
+        self.updatePositions();
     }
     // Hides the time button.
     self.hideTime = function ()

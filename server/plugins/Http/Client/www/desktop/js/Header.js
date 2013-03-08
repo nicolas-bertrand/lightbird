@@ -6,6 +6,8 @@ function Header(task)
     var self = this;
     gl_header = self;
     
+// Header methods
+{
     self.init = function ()
     {
         // Nodes
@@ -82,6 +84,7 @@ function Header(task)
         self.node.top.addClass("hide");
         self.node.top.css("height", C.Header.FullScreen.hideHeight);
     }
+}
     
 // Manages the menu.
 self.Menu = function ()
@@ -95,7 +98,6 @@ self.Menu = function ()
         self.C = C.Header.Menu; // The configuration of the menu
         self.paper; // The SVG paper on which the buttons are drawn
         self.slope; // The slope of the buttons
-        self.textWidth = {interval: undefined, elapsed: 0}; // Used to calculate the width of the texts
         // The buttons properties
         self.defaultBackground;
         self.files = {background: 0, link: 0, over: 0};
@@ -106,7 +108,7 @@ self.Menu = function ()
         node.menu.css("width", self.C.paperWidth);
         self.paper = Raphael(node.menu[0], "100%", "100%");
         self.createButtons();
-        self.updateTextsWidth();
+        self.updatePositions();
     }
     
     // Creates the buttons.
@@ -168,26 +170,6 @@ self.Menu = function ()
         var mousedown = function (e) { gl_desktop.openPage(task, '', e); };
         $(button.link.node).mousedown(mousedown);
         text.mousedown(mousedown);
-    }
-    
-    // Waits the html engine to update the texts width, using an inverval loop.
-    self.updateTextsWidth = function ()
-    {
-        var tw = self.textWidth;
-    
-        // Starts the inverval loop
-        if (tw.interval == undefined)
-        {
-            tw.interval = setInterval(self.updateTextsWidth, self.C.updateTextsWidthDuration / self.C.updateTextsWidthSteps);
-            tw.elapsed = 1;
-        }
-        // Ends the interval loop
-        if (tw.elapsed++ >= self.C.updateTextsWidthSteps || (node.files.width() && node.uploads.width()))
-        {
-            self.updatePositions();
-            clearInterval(tw.interval);
-            tw.interval = undefined;
-        }
     }
     
     // Update the position and the width of the buttons based on their texts width.

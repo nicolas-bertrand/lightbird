@@ -89,8 +89,6 @@ var Configuration =
             top: 10, // The top position of the icons.
             iconAttr: {fill: "#eeeeee", stroke: "none"}, // The attributes of the icons.
             iconGlow: {color: "black", width: 5, opacity: 0.15}, // The attributes of the glow of the icons.
-            updateTextsWidthDuration: 500, // The maximum duration during which we try to get the width of the number and time texts.
-            updateTextsWidthSteps: 10, // The number of attempts to get the width of the texts during the duration.
             // The attributes of the buttons backgrounds
             defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"}, // This background is always displayed bellow previous / number / next.
             playBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
@@ -193,8 +191,6 @@ var Configuration =
             filesBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
             uploadsBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
             linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
-            updateTextsWidthDuration: 500, // The maximum duration during which we try to get the width of the number and time texts.
-            updateTextsWidthSteps: 10, // The number of attempts to get the width of the texts during the duration.
             correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         },
         Controls:
