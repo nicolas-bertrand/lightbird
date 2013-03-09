@@ -1,5 +1,4 @@
-﻿.uploads
-{
+﻿.uploads {
     border: 0px;
     margin: 0px;
     padding: 0px;
@@ -10,14 +9,12 @@
 
 .uploads .frame,
 .uploads .session_template,
-.uploads .hidden
-{
+.uploads .hidden {
     display: none;
 }
 
 /********** form **********/
-.uploads form
-{
+.uploads form {
     height: 30px;
     background-color: #CCEEFF;
     text-align: center;
@@ -25,8 +22,7 @@
     overflow: hidden;
 }
 
-.uploads form .file
-{
+.uploads form .file {
     height: 100%;
     width: 34%;
     float: left;
@@ -38,8 +34,7 @@
     padding-top: 5px;
 }
 
-.uploads form .file input
-{
+.uploads form .file input {
     position: absolute;
     height: 100%;
     width: auto;
@@ -48,22 +43,19 @@
     min-width: 200px;
 }
 
-.uploads form .path
-{
+.uploads form .path {
     height: 100%;
     width: 33%;
     float: left;
 }
 
-.uploads form .path div
-{
+.uploads form .path div {
     height: 100%;
     width: auto;
     padding: 0px 10px 0px 10px;
 }
 
-.uploads form .path input
-{
+.uploads form .path input {
     height: 100%;
     width: 100%;
     text-align: center;
@@ -71,13 +63,11 @@
     color: grey;
 }
 
-.uploads form .path input.focus
-{
+.uploads form .path input.focus {
     color: inherit;
 }
 
-.uploads form .submit
-{
+.uploads form .submit {
     height: 100%;
     width: 33%;
     display: block;
@@ -87,24 +77,20 @@
 }
 
 /********** session **********/
-.uploads .session
-{
+.uploads .session {
     padding: 0px;
 }
 
-.uploads .session.odd
-{
+.uploads .session.odd {
     background-color: #E7F2FF;
 }
 
-.uploads .session.even
-{
+.uploads .session.even {
     background-color: #CCEEFF;
 }
 
 .uploads .session .cancel,
-.uploads .session .stop
-{
+.uploads .session .stop {
     height: 40px;
     width: 20px;
     background-color: #FF8888;
@@ -112,71 +98,58 @@
     cursor: pointer;
 }
 
-.uploads .session .cancel:hover
-{
+.uploads .session .cancel:hover {
     background-color: #FF5555;
 }
 
-.uploads .session .stop
-{
+.uploads .session .stop {
     background-color: #FFCC55;
 }
 
-.uploads .session .stop:hover
-{
+.uploads .session .stop:hover {
     background-color: #FFDF00;
 }
 
 /********** progress **********/
-.uploads .session .progress
-{
+.uploads .session .progress {
     height: 40px;
     margin-right: 40px;
 }
 
-.uploads .session .progress table
-{
+.uploads .session .progress table {
     height: 100%;
     width: 100%;
     border-collapse: collapse;
     border: none;
 }
 
-.uploads .session .progress .odd
-{
+.uploads .session .progress .odd {
     background-color: #99CCFF;
 }
-.uploads .session .progress .even
-{
+.uploads .session .progress .even {
     background-color: #77BBFF;
 }
 
-.uploads .session .progress .odd.uploaded
-{
+.uploads .session .progress .odd.uploaded {
     background-color: #9AEF9A;
 }
-.uploads .session .progress .even.uploaded
-{
+.uploads .session .progress .even.uploaded {
     background-color: #77E077;
 }
 
-.uploads .session .progress .odd.conflict
-{
+.uploads .session .progress .odd.conflict {
     background-color: #FFBBAA;
 }
-.uploads .session .progress .even.conflict
-{
+.uploads .session .progress .even.conflict {
     background-color: #FFAA99;
 }
 
 .uploads .session .progress .current_file,
-.uploads .session .progress .current_file.uploaded
-{
+.uploads .session .progress .current_file.uploaded {
     background-color: #FFCC55;
 }
 
-.uploads .session .progress .uploading
-{
+.uploads .session .progress .uploading {
     height: 40px;
     width: 100%;
     float: right;
@@ -184,86 +157,70 @@
     background-color: #F1F8FF;
 }
 
-.uploads .session .progress>.uploading
-{
+.uploads .session .progress>.uploading {
     display: none;
 }
 
 /********** files_list **********/
-.uploads .session .files_list
-{
+.uploads .session .files_list {
     width: 100%;
     border-collapse: collapse;
     border: none;
 }
 
-.uploads .session .files_list td
-{
+.uploads .session .files_list td {
     padding: 5px;
     font-size: 15px;
 }
 
-.uploads .session .files_list td.size
-{
+.uploads .session .files_list td.size {
     text-align: center;
     min-width: 55px;
     padding: 5px 10px 5px 10px;
 }
 
-.uploads .session .files_list td.action
-{
+.uploads .session .files_list td.action {
     text-align: center;
     cursor: pointer;
     padding: 5px 10px 5px 10px;
 }
-.uploads .session .files_list td.action.selected
-{
+.uploads .session .files_list td.action.selected {
     font-weight: bold;
 }
 
-.uploads .session .files_list .odd
-{
+.uploads .session .files_list .odd {
     background-color: #BBE1FF;
 }
-.uploads .session .files_list .even
-{
+.uploads .session .files_list .even {
     background-color: #CCEEFF;
 }
 
-.uploads .session .files_list .odd.conflict
-{
+.uploads .session .files_list .odd.conflict {
     background-color: #FFCCBB;
 }
-.uploads .session .files_list .even.conflict
-{
+.uploads .session .files_list .even.conflict {
     background-color: #FFDDCC;
 }
 
-.uploads .session .files_list .odd.change
-{
+.uploads .session .files_list .odd.change {
     background-color: #ffe39d;
 }
-.uploads .session .files_list .even.change
-{
+.uploads .session .files_list .even.change {
     background-color: #feecbd;
 }
 
-.uploads .session .files_list .odd.renameConflict.change
-{
+.uploads .session .files_list .odd.renameConflict.change {
     background-color: #FFCCBB;
 }
-.uploads .session .files_list .even.renameConflict.change
-{
+.uploads .session .files_list .even.renameConflict.change {
     background-color: #FFDDCC;
 }
 
-.uploads .session .files_list td.rename
-{
+.uploads .session .files_list td.rename {
     padding: 0px;
 }
 
-.uploads .session .files_list td.rename input
-{
+.uploads .session .files_list td.rename input {
     width: 100%;
     border: 0px none;
     padding: 5px 4px 5px 4px;
@@ -271,13 +228,11 @@
     font: inherit;
     opacity: 0.8;
 }
-.uploads .session .files_list td.rename input.rename
-{
+.uploads .session .files_list td.rename input.rename {
     font-weight: bold;
 }
 
 .uploads .session .files_list td.rename input:focus,
-.uploads .session .files_list td.rename input:hover
-{
+.uploads .session .files_list td.rename input:hover {
     background-color: #FFFFFF;
 }

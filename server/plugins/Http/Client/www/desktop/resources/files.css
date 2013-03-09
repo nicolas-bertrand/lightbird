@@ -1,5 +1,4 @@
-﻿#tasks>.task>.files
-{
+﻿#tasks>.task>.files {
     font-family: Helvetica, Arial, Verdana, sans-serif;
     border: 0px;
     margin: 0px;
@@ -12,8 +11,7 @@
 //                                 CONTROLS                                 //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#tasks>.task>.files>.controls
-{
+#tasks>.task>.files>.controls {
     height: 40px;
     background-image: linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
     background-image: -moz-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
@@ -27,8 +25,7 @@
 #tasks>.task>.files>.controls>.types>.audio,
 #tasks>.task>.files>.controls>.types>.video,
 #tasks>.task>.files>.controls>.types>.document,
-#tasks>.task>.files>.controls>.types>.other
-{
+#tasks>.task>.files>.controls>.types>.other {
     float: left;
     cursor: pointer;
 }
@@ -38,8 +35,7 @@
 #tasks>.task>.files>.controls>.other>.list,
 #tasks>.task>.files>.controls>.other>.hierarchy,
 #tasks>.task>.files>.controls>.other>.split,
-#tasks>.task>.files>.controls>.other>.block
-{
+#tasks>.task>.files>.controls>.other>.block {
     float: right;
     padding: 0px 10px 0px 10px;
     cursor: pointer;
@@ -49,8 +45,7 @@
 //                                  HEADER                                  //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#tasks>.task>.files>.header
-{
+#tasks>.task>.files>.header {
     width: 10000%;
     height: 28px;
     border-top: 1px solid #c4d1e0;
@@ -65,53 +60,45 @@
     overflow: hidden;
 }
 
-#tasks>.task>.files>.header>div
-{
+#tasks>.task>.files>.header>div {
     float: left;
     height: 100%;
 }
 
-#tasks>.task>.files>.header>.separator
-{
+#tasks>.task>.files>.header>.separator {
     width: 1px;
     background-color: #c4d1e0;
     box-shadow: -1px 0px rgba(255, 255, 255, 0.33), 1px 0px  rgba(255, 255, 255, 0.33);
     position: relative;
 }
 
-#tasks>.task>.files>.header>.separator>div
-{
+#tasks>.task>.files>.header>.separator>div {
     width: 11px;
     height: 28px;
     position: absolute;
     left: -5px;
     cursor: e-resize;
 }
-#tasks>.task>.files>.header>.separator.right>div
-{
+#tasks>.task>.files>.header>.separator.right>div {
     width: 6px;
     left: 0px;
 }
-#tasks>.task>.files>.header>.separator.left>div
-{
+#tasks>.task>.files>.header>.separator.left>div {
     width: 6px;
     left: -5px;
 }
-#tasks>.task>.files>.header>.separator.left.right>div
-{
+#tasks>.task>.files>.header>.separator.left.right>div {
     width: 5px;
     left: -2px;
 }
 
-#tasks>.task>.files>.header>.column
-{
+#tasks>.task>.files>.header>.column {
     width: 200px;
     cursor: pointer;
     overflow: hidden;
 }
 
-#tasks>.task>.files>.header>.column>div
-{
+#tasks>.task>.files>.header>.column>div {
     margin: 6px 5px 0px 5px;
     color: #252c35;
     text-shadow: 0px 0px 2px #fff, 1px 1px 1px #fff;
@@ -119,19 +106,16 @@
     width: 10000%;
 }
 
-#tasks>.task>.files>.header>.column>div.hide
-{
+#tasks>.task>.files>.header>.column>div.hide {
     display: none;
 }
 
-#tasks>.task>.files>.header>.column.right>div
-{
+#tasks>.task>.files>.header>.column.right>div {
     float: right;
     text-align: right;
 }
 
-#tasks>.task>.files>.header>.add
-{
+#tasks>.task>.files>.header>.add {
     width: 20px;
     height: 28px;
     float: right;
@@ -151,18 +135,15 @@
 //                                    LIST                                  //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#tasks>.task>.files>.list
-{
+#tasks>.task>.files>.list {
     overflow-x: auto;
     overflow-y: hidden;
 }
-#tasks>.task>.files>.list.scroll
-{
+#tasks>.task>.files>.list.scroll {
     overflow-y: auto;
 }
 
-#tasks>.task>.files>.list>table
-{
+#tasks>.task>.files>.list>table {
     width: 100%;
     border: none;
     border-collapse: collapse;
@@ -171,94 +152,77 @@
     color: #252c35;
 }
 
-#tasks>.task>.files>.list>table tr
-{
+#tasks>.task>.files>.list>table tr {
     height: 30px;
 }
 
-#tasks>.task>.files>.list>table tr.odd
-{
+#tasks>.task>.files>.list>table tr.odd {
     background-color: #ffffff;
 }
 
-#tasks>.task>.files>.list>table tr.even
-{
+#tasks>.task>.files>.list>table tr.even {
     background-color: #f2f6fa;
 }
 
-#tasks>.task>.files>.list>table td
-{
+#tasks>.task>.files>.list>table td {
     padding-left: 5px;
     padding-right: 5px;
     overflow: hidden;
     white-space: nowrap;
 }
 
-#tasks>.task>.files>.list>table td.first
-{
+#tasks>.task>.files>.list>table td.first {
     padding-left: 10px;
 }
 
 /* Selected */
 
-#tasks>.task>.files>.list>table tr.selected.image
-{
+#tasks>.task>.files>.list>table tr.selected.image {
     background-color: #bae9ff;
 }
 
-#tasks>.task>.files>.list>table tr.selected.audio
-{
+#tasks>.task>.files>.list>table tr.selected.audio {
     background-color: #b5ffbd;
 }
 
-#tasks>.task>.files>.list>table tr.selected.video
-{
+#tasks>.task>.files>.list>table tr.selected.video {
     background-color: #ffcdb5;
 }
 
-#tasks>.task>.files>.list>table tr.selected.document
-{
+#tasks>.task>.files>.list>table tr.selected.document {
     background-color: #ffef9b;
 }
 
-#tasks>.task>.files>.list>table tr.selected.other
-{
+#tasks>.task>.files>.list>table tr.selected.other {
     background-color: #d6d6d6;
 }
 
 /* Types */
 
-#tasks>.task>.files>.list>table td.type
-{
+#tasks>.task>.files>.list>table td.type {
     padding-left: 0px;
 }
 
-#tasks>.task>.files>.list>table td.type span
-{
+#tasks>.task>.files>.list>table td.type span {
     display: none;
 }
 
-#tasks>.task>.files>.list>table.type_text td.type
-{
+#tasks>.task>.files>.list>table.type_text td.type {
     padding-left: 5px;
 }
-#tasks>.task>.files>.list>table.type_text td.type div
-{
+#tasks>.task>.files>.list>table.type_text td.type div {
     display: none;
 }
-#tasks>.task>.files>.list>table.type_text td.type span
-{
+#tasks>.task>.files>.list>table.type_text td.type span {
     display: block;
 }
 
-#tasks>.task>.files>.list>table td.type div
-{
+#tasks>.task>.files>.list>table td.type div {
     width: 100%;
     height: 30px;
 }
 
-#tasks>.task>.files>.list>table tr.image td.type div
-{
+#tasks>.task>.files>.list>table tr.image td.type div {
     background-image: linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
     background-image: -moz-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
     background-image: -webkit-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
@@ -266,8 +230,7 @@
     background-image: -ms-linear-gradient(top, #5cc9ff 0%, #34bbff 100%);
 }
 
-#tasks>.task>.files>.list>table tr.audio td.type div
-{
+#tasks>.task>.files>.list>table tr.audio td.type div {
     background-image: linear-gradient(top, #6be179 0%, #47da58 100%);
     background-image: -moz-linear-gradient(top, #6be179 0%, #47da58 100%);
     background-image: -webkit-linear-gradient(top, #6be179 0%, #47da58 100%);
@@ -275,8 +238,7 @@
     background-image: -ms-linear-gradient(top, #6be179 0%, #47da58 100%);
 }
 
-#tasks>.task>.files>.list>table tr.video td.type div
-{
+#tasks>.task>.files>.list>table tr.video td.type div {
     background-image: linear-gradient(top, #ff925c 0%, #ff7834 100%);
     background-image: -moz-linear-gradient(top, #ff925c 0%, #ff7834 100%);
     background-image: -webkit-linear-gradient(top, #ff925c 0%, #ff7834 100%);
@@ -284,8 +246,7 @@
     background-image: -ms-linear-gradient(top, #ff925c 0%, #ff7834 100%);
 }
 
-#tasks>.task>.files>.list>table tr.document td.type div
-{
+#tasks>.task>.files>.list>table tr.document td.type div {
     background-image: linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
     background-image: -moz-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
     background-image: -webkit-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
@@ -293,8 +254,7 @@
     background-image: -ms-linear-gradient(top, #ffe45c 0%, #ffdd34 100%);
 }
 
-#tasks>.task>.files>.list>table tr.other td.type div
-{
+#tasks>.task>.files>.list>table tr.other td.type div {
     background-image: linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -moz-linear-gradient(top, #999999 0%, #808080 100%);
     background-image: -webkit-linear-gradient(top, #999999 0%, #808080 100%);
@@ -308,7 +268,6 @@
 #tasks>.task>.files>.list.filter_audio>table tr.audio td,
 #tasks>.task>.files>.list.filter_video>table tr.video td,
 #tasks>.task>.files>.list.filter_document>table tr.document td,
-#tasks>.task>.files>.list.filter_other>table tr.other td
-{
+#tasks>.task>.files>.list.filter_other>table tr.other td {
     opacity: 0.5;
 }

@@ -1,5 +1,4 @@
-﻿#authentication
-{
+﻿#authentication {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -9,23 +8,19 @@
     z-index: -2;
 }
 
-#authentication.display
-{
+#authentication.display {
     z-index: 2;
 }
-#authentication.display input
-{
+#authentication.display input {
     display: block;
 }
 
-#authentication>div
-{
+#authentication>div {
     display: table-cell;
     vertical-align: middle;
 }
 
-#authentication .form
-{
+#authentication .form {
     width: 280px;
     height: 170px;
     margin: auto;
@@ -41,15 +36,13 @@
 }
 
 #authentication .form>.background,
-#authentication .form>.focus
-{
+#authentication .form>.focus {
     position: absolute;
     padding: 40px;
 }
 
 #authentication .form>.background>div,
-#authentication .form>.focus>div
-{
+#authentication .form>.focus>div {
     width: 180px;
     height: 30px;
     margin: 0px 0px 30px 0px;
@@ -57,8 +50,7 @@
     border-radius: 3px 3px 3px 3px;
 }
 
-#authentication .form>.background>div
-{
+#authentication .form>.background>div {
     text-shadow: 0 0 5px rgba(0, 0, 0, 1);
     color: #cccccc;
     line-height: 30px;
@@ -72,8 +64,7 @@
                 0px 0px 0px 3px rgba(255, 255, 255, 0.1);
 }
 
-#authentication .form>.focus>div
-{
+#authentication .form>.focus>div {
     max-width: 180px;
     background-image: linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
     background-image: -moz-linear-gradient(top, #d9d9d9 0%, #a3a3a3 100%);
@@ -85,20 +76,17 @@
     visibility: hidden;
 }
 
-#authentication .form>.focus>div.display
-{
+#authentication .form>.focus>div.display {
     visibility: visible;
 }
 
-#authentication form
-{
+#authentication form {
     position: absolute;
     margin: 40px;
     z-index: 1;
 }
 
-#authentication input
-{
+#authentication input {
     width: 180px;
     height: 30px;
     margin: 0px 0px 30px 0px;
@@ -110,16 +98,14 @@
     color: #111111;
 }
 
-#authentication input.submit
-{
+#authentication input.submit {
     position: absolute;
     z-index: -1;
     top: 0px;
     opacity: 0;
 }
 
-#authentication .form>.test_text
-{
+#authentication .form>.test_text {
     visibility: hidden;
     position: absolute;
     z-index: -1;
@@ -130,34 +116,29 @@
 #authentication input.user,
 #authentication .background>.user,
 #authentication .background>.password,
-#authentication .test_text>.user
-{
+#authentication .test_text>.user {
     font-family: 'Open Sans', sans-serif;
 }
 
 #authentication input.password,
-#authentication .test_text>.password
-{
+#authentication .test_text>.password {
     letter-spacing: 1px;
     font-family: monospace;
 }
 
 #authentication,
-#authentication input
-{
+#authentication input {
     font-size: 18px;
 }
 
 /* Error */
 
-#authentication.error input
-{
+#authentication.error input {
     color: #eeeeee;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
-#authentication.error .focus>div
-{
+#authentication.error .focus>div {
     background-image: linear-gradient(top, #c53a3a 0%, #942c2c 100%);
     background-image: -moz-linear-gradient(top, #c53a3a 0%, #942c2c 100%);
     background-image: -webkit-linear-gradient(top, #c53a3a 0%, #942c2c 100%);
