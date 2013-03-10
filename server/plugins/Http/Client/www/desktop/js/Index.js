@@ -15,6 +15,7 @@ function load()
     new Windows();
     new Header();
     new Player();
+    new TasksList();
     new Files();
     new User();
     // Updates the size of the window
@@ -292,11 +293,11 @@ function tr(text)
 // @brief resource : The html node of the resource to translate.
 function translate(resource)
 {
-    var scripts = resource.getElementsByTagName("script");
+    var scripts = resource.children("script");
     
     for (var i = 0; i < scripts.length; ++i)
     {
-        var tr = scripts[i].innerHTML;
+        var tr = scripts.html();
         if (tr.indexOf("tr(") == 0)
         {
             tr = tr.substring(5, tr.length - 1).split('.');

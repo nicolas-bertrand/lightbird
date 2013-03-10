@@ -25,7 +25,7 @@ function Player(task)
         self.node.number = self.node.playback.children(".number");
         self.node.numerator = self.node.number.children(".numerator"); // The number of the current file played
         self.node.denominator = self.node.number.find(".denominator"); // The total number of files
-        self.node.time = self.node.playback.children(".time");
+        self.node.time = self.node.playback.find(".time>span");
         self.node.current_time = self.node.playback.find(".current_time"); // The current time of the file played
         self.node.duration = self.node.playback.find(".duration"); // The duration of the file
         self.node.file_name = self.node.player.children(".file_name");
@@ -1315,7 +1315,7 @@ self.TimeLine = function ()
             drawElement(before, self.before, transform);
             drawElement(played, self.played, transform);
             drawElement(buffered, self.buffered, transform);
-            drawElement(after, gl_browserSize.width - transform.translate, transform);
+            drawElement(after, 1, transform);
             paper.setSize(gl_browserSize.width);
         }
         // Draws an element of the time line.

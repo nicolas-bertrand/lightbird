@@ -268,7 +268,7 @@ function Window(page)
             return ;
         $(gl_desktop.node.pages).children(".display").each(function ()
         {
-            if (this != self.page.content)
+            if (this != self.page.content[0])
                 this.object.hide();
         });
     }
@@ -329,7 +329,7 @@ function Window(page)
             self.onResize();
             self.focus();
             $(self.element).addClass("display");
-            $(self.page.icon).addClass("window");
+            self.page.icon.addClass("window");
         }
 
         // Hides the window.

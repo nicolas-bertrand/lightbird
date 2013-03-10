@@ -110,14 +110,16 @@ a:visited {
 }
 #desktop>.top.hide {
     background-image: none;
+    background-color: rgba(0, 0, 0, 0);
 }
 #desktop>.top.hide>div {
-    display: none;
+    visibility: hidden;
 }
 
 #desktop>.top>.menu {
     float: left;
     height: 100%;
+    overflow: hidden;
 }
 
 #desktop>.top>.menu>span {
@@ -173,11 +175,16 @@ a:visited {
     height: 100%;
     position: absolute;
     top: 0px;
-    z-index: 1;
     display: none;
 }
 #desktop>.middle>.area>.tasks_list.display {
     display: block;
+}
+#desktop>.middle>.area>.tasks_list.hide_full_screen {
+    background-color: rgba(0, 0, 0, 0);
+}
+#desktop>.middle>.area>.tasks_list.hide_full_screen>div {
+    visibility: hidden;
 }
 
 #desktop>.middle>.area>.tasks_list>.background {
@@ -186,22 +193,34 @@ a:visited {
     position: absolute;
     left: 0px;
     z-index: -1;
-    background-image: linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
-    background-image: -moz-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
-    background-image: -o-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
-    background-image: -ms-linear-gradient(top, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0.1) 100%);
+    background-image: linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 100%);
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 100%);
+    background-image: -o-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 100%);
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 100%);
 }
-
 #desktop>.middle>.area>.tasks_list>.background>.left {
     width: 10px;
     height: 100%;
     position: absolute;
     left: 0px;
-    z-index: -1;
-    background-color: #FFFFFF;
-    opacity: 0.30;
+    z-index: 1;
+    background-color: #ffffff;
+    opacity: 0.25;
 }
+
+#desktop.page_displayed>.middle>.area>.tasks_list>.background {
+    background-image: linear-gradient(left, rgba(56,56,56,0.95) 0%, rgba(89,89,89,0.9) 100%);
+    background-image: -moz-linear-gradient(left, rgba(56,56,56,0.95) 0%, rgba(89,89,89,0.9) 100%);
+    background-image: -webkit-linear-gradient(left, rgba(56,56,56,0.95) 0%, rgba(89,89,89,0.9) 100%);
+    background-image: -o-linear-gradient(left, rgba(56,56,56,0.95) 0%, rgba(89,89,89,0.9) 100%);
+    background-image: -ms-linear-gradient(left, rgba(56,56,56,0.95) 0%, rgba(89,89,89,0.9) 100%);
+}
+#desktop.page_displayed>.middle>.area>.tasks_list>.background>.left {
+    background-color: #000000;
+}
+
+/* Pages icons */
 
 #desktop>.middle>.area>.tasks_list>.icons {
     height: 100%;
@@ -211,37 +230,31 @@ a:visited {
 }
 
 #desktop>.middle>.area>.tasks_list>.icons>.top {
-    height: 10px;
+    height: 15px;
 }
 
 #desktop>.middle>.area>.tasks_list>.icons>.page {
-    width: 10px;
-    margin-bottom: 10px;
-    background-image: linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -moz-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -o-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    background-image: -ms-linear-gradient(top, rgba(128, 209, 255, 0.9) 0%, rgba(0, 162, 255, 0.9) 100%);
-    cursor: move;
+    width: 100%;
+    margin-bottom: 15px;
 }
 #desktop>.middle>.area>.tasks_list>.icons>.page.window {
-    background-image: linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -moz-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -o-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
-    background-image: -ms-linear-gradient(top, rgba(156, 236, 165, 0.9) 0%, rgba(58, 217, 76, 0.9) 100%);
 }
 #desktop>.middle>.area>.tasks_list>.icons>.page.focus {
-    background-image: linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
-    background-image: -moz-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
-    background-image: -webkit-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
-    background-image: -o-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
-    background-image: -ms-linear-gradient(top, rgba(255, 230, 128, 0.9) 0%, rgba(255, 204, 1, 0.9) 100%);
 }
 #desktop>.middle>.area>.tasks_list>.icons>.page.empty {
-    height: 10px;
+    padding-top: 15px;
     margin-bottom: 0px;
     background-image: none;
+}
+
+#desktop>.middle>.area>.tasks_list>.icons>.page>.active_area {
+    width: 10px;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    position: relative;
+    z-index: 1;
+    float: left;
+    cursor: move;
 }
 
 #desktop>.middle>.area>.tasks_list>.icons>.page.drag {
@@ -249,151 +262,142 @@ a:visited {
     z-index: 999999;
 }
 
-#desktop>.middle>.area>.tasks_list>.icons>.ghost {
-    width: 100px;
-    margin-bottom: 10px;
-}
+/* Tasks icons */
 
 #desktop>.middle>.area>.tasks_list>.icons>.page>.task {
-    width: 110px;
-    height: 75px;
-    margin-left: 10px;
-    opacity: 0.85;
+    width: 100%;
     cursor: pointer;
 }
+
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.title {
+    height: 30px;
+    line-height: 30px;
+    position: relative;
+    background-color: rgba(61, 61, 61, 0.9);
+    color: #ffffff;
+    font-size: 16px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+#desktop.page_displayed>.middle>.area>.tasks_list>.icons>.page>.task>.title {
+    background-color: #3d3d3d;
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page.focus>.task>.title {
+    background-color: #eeeeee;
+    color: #111111;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 1);
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.title>span {
+    position: absolute;
+    left: 10px;
+}
+
+#desktop>.middle>.area>.tasks_list>.icons>.page.over>.task>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.over>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.over_content>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.title {
+    color: #ffffff;
+    text-shadow: none;
+    background-image: none;
+    background-color: #4895d0;
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page.window.over>.task>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page.window>.task.over>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page.window>.task.over_content>.title {
+    background-color: #53b85c;
+}
+
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content {
+    position: relative;
+    margin-left: 10px;
+    color: white;
+    font-size: 10px;
+    box-shadow: inset 0px 0px 100px rgba(0, 0, 0, 0.07);
+    background-image: linear-gradient(top, rgba(87, 87, 87, 0.9) 0%, rgba(70, 70, 70, 0.9) 100%);
+    background-image: -moz-linear-gradient(top, rgba(87, 87, 87, 0.9) 0%, rgba(70, 70, 70, 0.9) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(87, 87, 87, 0.9) 0%, rgba(70, 70, 70, 0.9) 100%);
+    background-image: -o-linear-gradient(top, rgba(87, 87, 87, 0.9) 0%, rgba(70, 70, 70, 0.9) 100%);
+    background-image: -ms-linear-gradient(top, rgba(87, 87, 87, 0.9) 0%, rgba(70, 70, 70, 0.9) 100%);
+}
+#desktop.page_displayed>.middle>.area>.tasks_list>.icons>.page>.task>.content {
+    background-image: linear-gradient(top, #575757 0%, #464646 100%);
+    background-image: -moz-linear-gradient(top, #575757 0%, #464646 100%);
+    background-image: -webkit-linear-gradient(top, #575757 0%, #464646 100%);
+    background-image: -o-linear-gradient(top, #575757 0%, #464646 100%);
+    background-image: -ms-linear-gradient(top, #575757 0%, #464646 100%);
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.container {
+    padding:5px;
+}
+
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.left {
+    height: 100%;
+    width: 10px;
+    position: absolute;
+    left: -10px;
+    top: 0px;
+    background-color: #4895d0;
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page.window>.task>.content>.left {
+    background-color: #53b85c;
+}
+
+/* Target */
+
+#desktop>.middle>.area>.tasks_list>.icons>.target {
+    height: 100px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+#desktop>.middle>.area>.tasks_list>.icons>.page>.target {
+    height: 100px;
+    width: 100%;
+    background-color: #4895d0;
+    opacity: 0.7;
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page.window>.target {
+    background-color: #53b85c;
+}
+
+/* Drag task */
 
 #desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag {
     position: absolute;
     z-index: 999999;
-    margin-left: 0px;
-}
-
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content {
-    height: 46px;
-    width: 100px;
-    padding-top: 29px;
-    text-align: center;
-    color: #555555;
-    font-weight: bold;
-    font-size: 15px;
-    background-color: #FFFFFF;
-    cursor: pointer;
-}
-
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.over,
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag {
-    opacity: 1;
-}
-
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.over>.content,
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.content {
-    color: #222222;
 }
 
 #desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.title,
 #desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.content {
     cursor: move;
 }
 
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.content {
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.33);
-    opacity: 0.75;
+#desktop>.middle>.area>.tasks_list>.icons>.page.window>.task.drag>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag>.content>.left {
+    background-color: #4895d0;
 }
-
-#desktop>.middle>.area>.tasks_list>.icons>.page>.ghost {
-    height: 75px;
-    width: 100px;
-    margin-left: 10px;
-    opacity: 0.9;
-    background-image: linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
-    background-image: -moz-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
-    background-image: -webkit-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
-    background-image: -o-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
-    background-image: -ms-linear-gradient(top, rgb(128, 209, 255) 0%, rgb(0, 162, 255) 100%);
-}
-#desktop>.middle>.area>.tasks_list>.icons>.page.window>.ghost {
-    background-image: linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
-    background-image: -moz-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
-    background-image: -webkit-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
-    background-image: -o-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
-    background-image: -ms-linear-gradient(top, rgb(156, 236, 165) 0%, rgb(58, 217, 76) 100%);
-}
-#desktop>.middle>.area>.tasks_list>.icons>.page.focus>.ghost {
-    background-image: linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
-    background-image: -moz-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
-    background-image: -webkit-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
-    background-image: -o-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
-    background-image: -ms-linear-gradient(top, rgb(255, 230, 128) 0%, rgb(255, 204, 1) 100%);
-}
-
-/* Mouse over task content */
-
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.over_content {
-    opacity: 0.95;
-}
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task.over_content>.content {
-    color: #222222;
-}
-#desktop.drag>.middle>.area>.tasks_list>.icons>.page>.task.over_content {
-    opacity: 0.85;
-}
-#desktop.drag>.middle>.area>.tasks_list>.icons>.page>.task.over_content>.content {
-    color: #555555;
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag.drag_window>.title,
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task.drag.drag_window>.content>.left {
+    background-color: #53b85c;
 }
 
 /* Task buttons */
 
-#desktop>.middle>.area>.tasks_list .buttons {
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.title>.close
+{
     position: absolute;
-    left: 105px;
-    cursor: pointer;
-    display: none;
-    z-index: 1;
-}
-
-#desktop>.middle>.area>.tasks_list .buttons.display {
-    display: block;
-}
-
-#desktop>.middle>.area>.tasks_list .buttons.display.scroll {
-    display: none;
-}
-
-#desktop>.middle>.area>.tasks_list .buttons>div>.line {
+    top: 0px;
+    right: 0px;
     height: 100%;
-    width: 5px;
-    float: left;
 }
 
-#desktop>.middle>.area>.tasks_list .buttons>div>.icon {
-    width: 20px;
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.window
+{
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
     height: 100%;
-    float: right;
-}
-
-#desktop>.middle>.area>.tasks_list .buttons>.close>.line { background-color: #ff5500; }
-#desktop>.middle>.area>.tasks_list .buttons>.hide>.line { background-color: #ffd600; }
-#desktop>.middle>.area>.tasks_list .buttons>.window>.line { background-color: #46da57; }
-#desktop>.middle>.area>.tasks_list .buttons>.fullscreen>.line { background-color: #00a2ff; }
-
-#desktop>.middle>.area>.tasks_list .buttons>div {
-    height: 19px;
-    background-image: linear-gradient(top, #373737 0%, #282828 100%);
-    background-image: -moz-linear-gradient(top, #373737 0%, #282828 100%);
-    background-image: -webkit-linear-gradient(top, #373737 0%, #282828 100%);
-    background-image: -o-linear-gradient(top, #373737 0%, #282828 100%);
-    background-image: -ms-linear-gradient(top, #373737 0%, #282828 100%);
-}
-#desktop>.middle>.area>.tasks_list .buttons>.fullscreen {
-    height: 18px;
-}
-
-#desktop>.middle>.area>.tasks_list .buttons>div:hover {
-    background-image: linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
-    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
-    background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
-    background-image: -o-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
-    background-image: -ms-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%);
 }
 
 /* Pages */
@@ -470,10 +474,6 @@ a:visited {
     box-shadow: none;
 }
 
-#tasks>.task.no_background.create_page {
-    background-color: rgba(255, 255, 255, 0.33); /* #windows>.window */
-}
-
 #tasks>.task.no_border,
 #tasks>.task.no_border.highlight {
     border: none;
@@ -488,6 +488,26 @@ a:visited {
 #tasks>.task.hide_border.highlight {
     border: none;
     box-shadow: none;
+}
+
+/* Drag previews */
+
+#desktop #preview {
+    position: absolute;
+    z-index: 999998;
+    background-color: rgba(89, 202, 255, 0.33);
+    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5),
+                inset 0 0 0 1px rgba(89, 202, 255, 1);
+    display: none;
+}
+#desktop #preview.window {
+    background-color: rgba(77, 255, 97, 0.33);
+    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5),
+                inset 0 0 0 1px rgba(77, 255, 97, 1);
+}
+
+#desktop #preview.display {
+    display: block;
 }
 
 /* Middle area background */
@@ -636,30 +656,38 @@ a:visited {
 }
 
 #desktop>.bottom>.player>.playback>.number,
-#desktop>.bottom>.player>.playback>.time {
+#desktop>.bottom>.player>.playback>.time>span {
     line-height: 40px;
     position: absolute;
     bottom: 0px;
     left: 75px;
-    text-align: center;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 #desktop>.bottom>.player>.playback>.time {
-    display: none;
+    width: 500px;
+    height: 0px;
+    position: absolute;
+    bottom: 0px;
 }
-#desktop>.bottom>.player>.playback>.time.display {
-    display: block;
+
+#desktop>.bottom>.player>.playback>.time>span {
+    visibility: hidden;
+    position: relative;
+}
+#desktop>.bottom>.player>.playback>.time>span.display {
+    visibility: visible;
+    position: absolute;
 }
 
 #desktop>.bottom>.player>.playback>.number.hover,
-#desktop>.bottom>.player>.playback>.time.hover {
+#desktop>.bottom>.player>.playback>.time .hover {
     color: #222222;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 #desktop>.bottom>.player>.playback>.number.hover span.secondary,
-#desktop>.bottom>.player>.playback>.time.hover span.secondary {
+#desktop>.bottom>.player>.playback>.time .hover span.secondary {
     color: #666666;
 }
 
@@ -857,25 +885,3 @@ a:visited {
 //                                  OTHER                                   //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#desktop #preview {
-    position: absolute;
-    z-index: 999998;
-    background-color: rgba(89, 202, 255, 0.33);
-    border: 1px solid rgba(89, 202, 255, 1);
-    box-shadow: 0 0 10px rgba(89, 202, 255, 0.5);
-    display: none;
-}
-#desktop #preview.window {
-    background-color: rgba(77, 255, 97, 0.33);
-    border: 1px solid rgba(77, 255, 97, 1);
-    box-shadow: 0 0 10px rgba(77, 255, 97, 0.5);
-}
-#desktop #preview.focus {
-    background-color: rgba(255, 193, 0, 0.33);
-    border: 1px solid rgba(255, 193, 0, 1);
-    box-shadow: 0 0 10px rgba(255, 193, 0, 0.5);
-}
-
-#desktop #preview.display {
-    display: block;
-}

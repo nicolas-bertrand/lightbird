@@ -6,7 +6,7 @@ function ResourceFiles(task)
     {
         // Nodes
         resource.node = new Object();
-        resource.node.element = $(task.content).children(".files")[0];
+        resource.node.element = task.content.children(".files")[0];
         resource.node.controls = $(resource.node.element).children(".controls")[0];
         resource.node.types = $(resource.node.controls).children(".types")[0];
         resource.node.other = $(resource.node.controls).children(".other")[0];

@@ -71,14 +71,14 @@ function Header(task)
             }, C.Header.FullScreen.displayDuration);
     }
     
-    // Hides the header, in full screen mode.
+    // Displays the header, in full screen mode.
     self.display = function ()
     {
         self.node.top.removeClass("hide");
         self.node.top.css("height", C.Header.defaultHeight);
     }
     
-    // Displays the header, in full screen mode.
+    // Hides the header, in full screen mode.
     self.hide = function ()
     {
         self.node.top.addClass("hide");

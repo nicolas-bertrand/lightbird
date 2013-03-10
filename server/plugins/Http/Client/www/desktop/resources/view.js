@@ -7,7 +7,7 @@ function ResourceView(task, playlistInterface, fileIndex)
         // Members
         resource.file = gl_files.list[fileIndex]; // The file displayed by the resource
         resource.fileIndex = fileIndex; // The index of the file displayed
-        resource.root = $(task.content).children("." + resource.file.type)[0]; // The root element of the resource
+        resource.root = task.content.children("." + resource.file.type)[0]; // The root element of the resource
         resource.isFocus = true; // If the task had the focus in the last mouse down event
         resource.object; // The object that displays the file, based on its type. Implements the file and the player interfaces.
         resource.playlistInterface = playlistInterface; // The playlist that manages this file (may be undefined)
@@ -20,13 +20,13 @@ function ResourceView(task, playlistInterface, fileIndex)
         // Default values
         task.setResource(resource);
         resource.playlistInterface.readyToPlay(resource.object);
-        $(task.content).addClass("view_" + resource.file.type);
+        task.content.addClass("view_" + resource.file.type);
         
         // Events
         if (C.View.focusBeforeAction)
-            $(task.content).mousedown(function (e) { resource.isFocus = task.isFocus(); });
-        $(task.content).mouseenter(function (e) { gl_player.setFileName(resource.fileIndex); });
-        $(task.content).mouseleave(function (e) { gl_player.setFileName(); });
+            task.content.mousedown(function (e) { resource.isFocus = task.isFocus(); });
+        task.content.mouseenter(function (e) { gl_player.setFileName(resource.fileIndex); });
+        task.content.mouseleave(function (e) { gl_player.setFileName(); });
     }
     
     // The task have been resized.
@@ -115,7 +115,7 @@ resource.Image = function ()
         self.image.alt = resource.file.name;
         
         // Events
-        $(task.content).click(function (e) { self.changeBackground(e); });
+        task.content.click(function (e) { self.changeBackground(e); });
         $(self.image).click(function (e) { self.changeResize(e); });
     }
     
@@ -402,7 +402,7 @@ resource.Video = function ()
         self.video.src = "/c/command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
         
         // Events
-        $(task.content).click(function (e) { self.changeBackground(e); });
+        task.content.click(function (e) { self.changeBackground(e); });
         $(self.video).click(function (e) { self.playPause(e); });
     }
     

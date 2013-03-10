@@ -7,17 +7,7 @@ var Configuration =
         minHeight: 300, // The minimum height of the desktop.
         browserFullScreen: false, // If we have to use the browser full screen API.
         stopDragLeaveDesktop: false, // If the current drag have to be stopped when the mouse leaves the browser.
-        pageMargin: 10, // The height of the bottom margin between the pages.
-        tasksListWidth: 120, // The width of the tasks list.
-        tasksListMargin: 10, // The width of the left margin of the tasks list.
-        taskIconHeight: 75, // The height of a task icon.
-        taskResistance: 3, // Number of pixels a task icon have to be dragged before actually moving.
-        taskDragShift: { x: 10, y: 10 }, // The shift of the dragged task when when it is out of the tasks list.
-        tasksListScrollHeight: 50, // Height of the scrolling areas of the tasks list.
-        tasksListScrollSpeed: 20, // The speed of the scroll areas of the tasks list.
-        tasksListScrollFps: 1000 / 30, // The number of time per second the scroll is performed.
         mouseWheelMultiplier: 50, // Used to normalize the mouse wheel delta. Increases the delta of each click.
-        defaultPosition: "e", // The default position of a task moved (n s e w).
         insertTaskAreaSize: 50, // The size of the page border areas that allows to insert a task.
         taskMargin: 5, // The margin between the tasks content in a page. It is also the size of the resize task bars.
         taskBorder: 1, // The size of the border of the tasks content.
@@ -25,6 +15,52 @@ var Configuration =
         resizeTaskLimitMax: 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
         resizeResistance: 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
         resizeDeltaDivisor: 20 // Reduce the delta of the mouse wheel that resize the task margin.
+    },
+    TasksList:
+    {
+        defaultWidth: 120, // The default width of the tasks list.
+        top: 15, // The height of the top margin of the tasks list.
+        pageMargin: 15, // The height of the bottom margin between the pages icons.
+        taskTitleHeight: 30, // The height of the tasks icon title.
+        taskResistance: 3, // Number of pixels a task icon have to be dragged before actually moving.
+        taskDragShift: { x: 10, y: 10 }, // The shift of the dragged task when when it is out of the tasks list.
+        defaultPosition: "e", // The default position of a task moved (n s e w).
+        Scroll:
+        {
+            height: 50, // Height of the scrolling areas.
+            speed: 20, // The speed of the scroll areas.
+            fps: 1000 / 30, // The number of time per second the scroll is performed.
+        },
+        FullScreen:
+        {
+            hideWidth: 5, // The width of the tasksList while it is hidden, which allows to display it back when the mouse enters it again.
+            displayDuration: 2000, // The duration during which the player is kept displayed when the mouse leaves it.
+            zIndex: 999999 // In full screen, the tasks list is above the windows.
+        },
+        Buttons:
+        {
+            slopeRatio: 75 / 130, // The ratio of the slope of the background.
+            margin: 5, // The margin of the icons.
+            linkAttr: {fill: "white", opacity: 0}, // The background of the buttons active areas.
+            close:
+            {
+                width: 10, // The width of the close path.
+                height: 9, // The height of the close path.
+                attr: {fill: "white", opacity: 0.5, stroke: "none"}, // The attributes of the close path.
+                attrOver: {opacity: 1}, // The attributes of the close path when the mouse is over it.
+                background: {fill: "#e34738", stroke: "none"}, // The attributes of the background.
+            },
+            window:
+            {
+                width: 10, // The width of the window path.
+                height: 9, // The height of the window path.
+                attr: {fill: "white", opacity: 0.5, stroke: "none"}, // The attributes of the window path.
+                attrOver: {opacity: 1}, // The attributes of the window path when the mouse is over it.
+                background: {fill: "#4895d0", stroke: "none"}, // The attributes of the background.
+                backgroundDesktop: {fill: "#53b85c"}, // The color of the background when the page is on the desktop.
+                backgroundWindow: {fill: "#4895d0"}, // The color of the background when the page is in a window.
+            },
+        }
     },
     Window:
     {
