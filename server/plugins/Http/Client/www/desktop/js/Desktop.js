@@ -1820,15 +1820,16 @@ function TaskPreview()
             preview.style.height = task.height + adjustBorder + "px";
             preview.style.zIndex = task.content.css("z-index");
             $(preview).addClass("display");
+                console.log((task.width + adjustBorder) % 2, (task.height + adjustBorder) % 2);
             if (position == "n")
-                preview.style.height = Math.ceil(task.height / 2) + adjustBorder / 2 + "px";
+                preview.style.height = Math.ceil(task.height / 2) + adjustBorder / 2 + (-task.height % 2 * adjustBorder / 2 + (1 - adjustBorder / 2) * (task.height + 1) % 2) + "px"; // The last part adjusts the parity
             if (position == "s")
             {
                 preview.style.top = task.top + Math.floor(task.height / 2) + "px";
                 preview.style.height = Math.ceil(task.height / 2) + adjustBorder + "px";
             }
             if (position == "w")
-                preview.style.width = Math.ceil(task.width / 2) + adjustBorder / 2 + "px";
+                preview.style.width = Math.ceil(task.width / 2) + adjustBorder / 2 + (-task.width % 2 * adjustBorder / 2 + (1 - adjustBorder / 2) * (task.width + 1) % 2) + "px"; // The last part adjusts the parity
             if (position == "e")
             {
                 preview.style.left = task.left + Math.floor(task.width / 2) + "px";
