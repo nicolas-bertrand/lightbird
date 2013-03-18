@@ -383,9 +383,7 @@ TasksList.Buttons = function (task)
     // Displays the buttons back, if the mouse is over the task.
     self.stopDrag = function (e)
     {
-        var offset = $(self.task.icon).offset();
-        if (e.pageY > offset.top && e.pageY < offset.top + $(self.task.icon).height()
-            && e.pageX > offset.left && e.pageX < offset.left + $(self.task.icon).width())
+        if (F.isMouseOverNode(e, self.task.icon))
             self._display();
         else
             $(self.task.icon).removeClass("over");
@@ -409,8 +407,9 @@ TasksList.Buttons = function (task)
     {
         self.close.path.hide();
         self.window.path.hide();
-        self.task.icon.removeClass("over");
         self.task.content.removeClass("highlight");
+        if (!gl_desktop.drag.isDragging())
+            self.task.icon.removeClass("over");
     }
     
     // Returns true if the target is part of the task's button.

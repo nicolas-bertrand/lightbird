@@ -233,7 +233,8 @@ function Header()
         param.width = new Array();
         for (var p = $(e.currentTarget).prev(); p.length > 0; p = p.prev().prev())
             param.width.push(p.width());
-        gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "updateSeparators", param);
+        gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "mouseUpSeparator", param);
+        gl_desktop.drag.setCursor("e-resize");
     }
     
     // Resizes the column.
@@ -271,6 +272,13 @@ function Header()
                     column.width(p.width[j]);
         p.i = i;
         resource.container.updateColumns();
+    }
+    
+    // Resizes the column.
+    self.mouseUpSeparator = function (e)
+    {
+        self.updateSeparators();
+        task.updateMouseOverContent(e);
     }
     
     // Shortens the width of the separators next to a small column.
@@ -693,8 +701,8 @@ function Layout()
         {
             if (self[self.columns[key].convert])
                 return (self[self.columns[key].convert](value));
-            else if (window[self.columns[key].convert])
-                return (window[self.columns[key].convert](value));
+            else if (F[self.columns[key].convert])
+                return (F[self.columns[key].convert](value));
         }
         return (value);
     }

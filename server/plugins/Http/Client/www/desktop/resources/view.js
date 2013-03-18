@@ -61,7 +61,7 @@ resource.Document = function ()
         // Members
         self.pre = $(resource.root).children("pre"); // The element that stores the text of the document
         
-        request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
+        F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
         });
@@ -111,7 +111,7 @@ resource.Image = function ()
         task.setOverflow(false); // No overflow
     
         // Displays the image
-        self.image.src = "/c/" + resource.file.name + "?fileId=" + resource.file.id + getSession();
+        self.image.src = "/c/" + resource.file.name + "?fileId=" + resource.file.id + F.getSession();
         self.image.alt = resource.file.name;
         
         // Events
@@ -335,7 +335,7 @@ resource.Other = function ()
         // Members
         self.pre = $(resource.root).children("pre"); // The element that stores the text of the file
         
-        request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
+        F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
         });
@@ -388,7 +388,7 @@ resource.Video = function ()
         
         // Creates the video
         var file = resource.file;
-        self.video.mediaId = getUuid();
+        self.video.mediaId = F.getUuid();
         // Checks the supported video formats
         if (self.video.canPlayType("video/webm; codecs=\"vp8.0, vorbis\""))
             self.format = "webm";
@@ -399,7 +399,7 @@ resource.Video = function ()
         // The browser can't play any common formats
         else
             ;
-        self.video.src = "/c/command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + getSession();
+        self.video.src = "/c/command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + F.getSession();
         
         // Events
         task.content.click(function (e) { self.changeBackground(e); });
@@ -525,11 +525,11 @@ resource.Video = function ()
             // Clears the current play back
             self.video.pause();
             self.video.src = "";
-            request("GET", "command/video/stop?mediaId=" + self.video.mediaId);
+            F.request("GET", "command/video/stop?mediaId=" + self.video.mediaId);
             // Seeks to the new position
             self.video.timeOffset = time;
-            self.video.mediaId = getUuid();
-            self.video.src = "/c/command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + getSession();
+            self.video.mediaId = F.getUuid();
+            self.video.src = "/c/command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + F.getSession();
             if (!paused)
                 self.video.play();
         }

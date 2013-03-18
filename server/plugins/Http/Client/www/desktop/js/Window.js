@@ -177,9 +177,10 @@ function Window(page)
     // Starts to move or resize the window.
     self.mouseDown = function (e, direction)
     {
-        if (e.which != 1 || gl_desktop.drag.isDragging() || e.target != e.currentTarget)
+        if (e.which != 1 || e.target != e.currentTarget)
             return ;
         gl_desktop.drag.start(e, e.target, self, "mouseMove", undefined, undefined, { direction : direction, width : $(self.element).width(), height : $(self.element).height(), top : $(self.element).offset().top, left : $(self.element).offset().left });
+        gl_desktop.drag.setCursor(direction != "move" ? direction + "-resize" : direction);
         self.direction = direction;
     }
     
@@ -266,7 +267,7 @@ function Window(page)
     {
         if (e.target != self.node.top)
             return ;
-        $(gl_desktop.node.pages).children(".display").each(function ()
+        gl_desktop.node.pages.children(".display").each(function ()
         {
             if (this != self.page.content[0])
                 this.object.hide();

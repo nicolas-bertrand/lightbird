@@ -377,8 +377,6 @@ function Player(task)
         // @param fileIndex : If undefined, the name of the current file is used.
         self.setFileName = function (fileIndex)
         {
-            if (gl_desktop.drag.isDragging())
-                return ;
             if (fileIndex || fileIndex === 0)
                 self.fileName.setText(fileIndex);
             else if (self.playerInterface)
@@ -1604,7 +1602,7 @@ self.TimeLine = function ()
     // Mouse enter the time line.
     self.mouseEnter = function (e)
     {
-        if (!self.media || gl_desktop.drag.isDragging())
+        if (!self.media)
             return ;
         node.time_line.addClass("over");
         node.activeArea.addClass("expand");
@@ -1662,7 +1660,7 @@ self.TimeLine = function ()
             var previewTime = Math.round(Math.floor(e.pageX / (gl_browserSize.width / C.Player.Seek.numberPreviews) + 1) * self.duration / C.Player.Seek.numberPreviews);
             // Gets the new preview if the current one doesn't match
             if (self.currentPreviewTime != previewTime)
-                self.setPreview("/c/command/preview?fileId=" + gl_files.list[self.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + getSession());
+                self.setPreview("/c/command/preview?fileId=" + gl_files.list[self.fileIndex].id + "&width=" + width + "&height=" + self.previewHeight + "&position=" + previewTime + F.getSession());
             self.currentPreviewTime = previewTime;
         }
     }
@@ -2174,10 +2172,10 @@ self.Header = function ()
     // Starts to resize the playlist.
     self.mouseDownOnHeader = function (e)
     {
-        // Something is already being dragged
-        if (e.which != 1 || gl_desktop.drag.isDragging() || !$(e.target).hasClass("header"))
+        if (e.which != 1 || !$(e.target).hasClass("header"))
             return ;
         gl_desktop.drag.start(e, node.header[0], self, "mouseMoveResize");
+        gl_desktop.drag.setCursor("n-resize");
         self.element = gl_desktop.drag.getElement().y;
         self.mouse = gl_desktop.drag.getMouse().y;
         self.initialHeight = player.playlist.height;
@@ -2406,9 +2404,8 @@ self.Tab = function (name)
     // Starts the dragging of the tab.
     self.mouseDown = function (e)
     {
-        if (gl_desktop.drag.isDragging())
-            return ;
         gl_desktop.drag.start(e, self.tab[0], self, "mouseMove", "", "mouseUpMove");
+        gl_desktop.drag.setCursor("pointer");
         self.element = gl_desktop.drag.getElement();
         self.mouse = gl_desktop.drag.getMouse();
         self.resistance = true;
@@ -2570,8 +2567,8 @@ self.Audio = function ()
         self.clear();
         self.fileIndex = fileIndex;
         // Sets the source of the audio element
-        self.audio.mediaId = getUuid();
-        self.audio.src = "/c/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + getSession();
+        self.audio.mediaId = F.getUuid();
+        self.audio.src = "/c/command/audio." + self.format + "?fileId=" + file.id + "&mediaId=" + self.audio.mediaId + F.getSession();
         self.playlistInterface = playlistInterface;
         playlistInterface.readyToPlay(self);
     }
@@ -2583,7 +2580,7 @@ self.Audio = function ()
         {
             self.audio.pause();
             self.audio.src = "";
-            request("GET", "command/audio/stop?mediaId=" + self.audio.mediaId);
+            F.request("GET", "command/audio/stop?mediaId=" + self.audio.mediaId);
             self.audio.mediaId = undefined;
             self.audio.timeOffset = 0;
         }
@@ -2617,8 +2614,8 @@ self.Audio = function ()
             
             self.clear();
             self.audio.timeOffset = time;
-            self.audio.mediaId = getUuid();
-            self.audio.src = "/c/command/audio." + self.format + "?fileId=" + gl_files.list[self.fileIndex].id + "&mediaId=" + self.audio.mediaId + "&start=" + time + getSession();
+            self.audio.mediaId = F.getUuid();
+            self.audio.src = "/c/command/audio." + self.format + "?fileId=" + gl_files.list[self.fileIndex].id + "&mediaId=" + self.audio.mediaId + "&start=" + time + F.getSession();
             if (!paused)
                 self.audio.play();
         }

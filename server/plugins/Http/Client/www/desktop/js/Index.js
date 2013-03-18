@@ -4,11 +4,13 @@
 var gl_loaded = false;
 // Holds the size of the browser
 var gl_browserSize;
+// The global functions library
+var F = new Object();
 
 // Initializes the page (called by onload)
 function load()
 {
-    gl_browserSize = getBrowserSize();
+    gl_browserSize = F.getBrowserSize();
     // Initialize the main systems
     new Resources();
     new Desktop();
@@ -38,7 +40,7 @@ function load()
 function onResize()
 {
     // Gets the new browser size
-    gl_browserSize = getBrowserSize();
+    gl_browserSize = F.getBrowserSize();
     // Resizes the desktop
     gl_desktop.onResize();
     // Calls the resize function of all the windows that implements it
@@ -54,7 +56,7 @@ function onKeyDown(e)
 }
 
 // Finds the size of the browser window
-function getBrowserSize()
+F.getBrowserSize = function ()
 {
     var width = 1280;
     var height = 1024;
@@ -88,7 +90,7 @@ function getBrowserSize()
 // @data : The data that has to be sent with the POST method.
 // @type : The content-type of the data. The default is "application/x-www-form-urlencoded".
 // The response may be invalid.
-function request(method, url, callback, data, type)
+F.request = function (method, url, callback, data, type)
 {
     var HttpRequest;
 
@@ -112,7 +114,7 @@ function request(method, url, callback, data, type)
     url += (url.indexOf("?") == -1 ? "?" : "&");
     url += "r=" + Math.random();
     // Adds the session information that identify the user
-    url += getSession();
+    url += F.getSession();
 
     // Executes the request
     HttpRequest.open(method, "/c/" + url, true);
@@ -127,7 +129,7 @@ function request(method, url, callback, data, type)
 }
 
 // Replaces the end of line characters of the text (\r\n \n or \r) by the HTML equivalent (<br />).
-function newLineToBr(text)
+F.newLineToBr = function (text)
 {
     var regexp;
     
@@ -141,13 +143,6 @@ function newLineToBr(text)
     if (regexp)
         return unescape(text.replace(regexp, "<br />"));
     return unescape(text);
-}
-
-// Changes the opacity of the node, if the browser support it.
-function changeOpacity(node, value)
-{
-    if (node.style.opacity != undefined)
-        node.style.opacity = value;
 }
 
 function getElementsByClassName(className, node, first)
@@ -171,31 +166,15 @@ function getElementsByClassName(className, node, first)
 }
 
 // Returns the name of the object.
-function getObjectName(object)
+F.getObjectName = function (object)
 { 
     var funcNameRegex = /function (.{1,})\(/;
     var results = (funcNameRegex).exec(object.constructor.toString());
     return (results && results.length > 1) ? results[1] : "";
 }
 
-// Removes the texts nodes of a node (nodes without a tagName).
-function removeTextNodes(node)
-{
-    var child = node.firstChild;
-    
-    while (child)
-    {
-        var previous = child;
-        child = child.nextSibling;
-        // If the child doesn't have a tag name we remove it
-        if (!previous.tagName)
-            previous.parentNode.removeChild(previous);
-    }
-    return (node);
-}
-
 // Generates a universally unique identifier.
-function getUuid()
+F.getUuid = function ()
 {
     var S4 = function()
     {
@@ -204,24 +183,8 @@ function getUuid()
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4()+"-" + S4() + S4() + S4());
 }
 
-// Same as parseInt, except that NaN is replaced by 0.
-function toNumber(number)
-{
-    if (number == "")
-        return (0);
-    return (parseInt(number));
-}
-
-// If n is lesser than zero, zero is returned.
-function positive(n)
-{
-    if (n < 0)
-        return (0);
-    return (n);
-}
-
 // Converts a date in a ISO8601 string, without T&Z
-function ISODateString(d)
+F.ISODateString = function (d)
 {
   function pad(n){return n<10 ? '0'+n : n}
   return d.getUTCFullYear()+'-'
@@ -233,7 +196,7 @@ function ISODateString(d)
 
 // Returns the session information that have to be added at the end of the URLs in order to communicate with the server.
 // @param useQuestionMark : Prepends the session url a "?". Otherwise a "&" is prepended.
-function getSession(useQuestionMark)
+F.getSession = function (useQuestionMark)
 {
     var result;
 
@@ -248,7 +211,7 @@ function getSession(useQuestionMark)
 
 // Generate a random string.
 // @param size : The size of the string returned.
-function randomString(size)
+F.randomString = function (size)
 {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -259,7 +222,7 @@ function randomString(size)
 }
 
 // Converts the size to a string like 5,42 Mb.
-function sizeToString(size)
+F.sizeToString = function (size)
 {
     size = new String(size);
     if (!size)
@@ -279,7 +242,7 @@ function sizeToString(size)
 }
 
 // Translates the text in the correct language.
-function tr(text)
+tr = function (text)
 {
     if (text)
         document.write(text);
@@ -291,7 +254,7 @@ function tr(text)
 // The elements to translate are in the node <script>tr(T.text)</script>.
 // This method replaces these nodes by their translation.
 // @brief resource : The html node of the resource to translate.
-function translate(resource)
+F.translate = function (resource)
 {
     var scripts = resource.children("script");
     
@@ -309,4 +272,14 @@ function translate(resource)
             scripts[i].parentNode.insertBefore(text, scripts[i]);
         }
     }
+}
+
+// Returns true if the mouse is over the node.
+F.isMouseOverNode = function (e, node)
+{
+    var offset = node.offset();
+    var width = node.width();
+    var height = node.height();
+    
+    return (e.pageX >= offset.left && e.pageY >= offset.top && e.pageX <= offset.left + width && e.pageY <= offset.top + height);
 }

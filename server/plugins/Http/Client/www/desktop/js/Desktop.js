@@ -15,8 +15,8 @@ function Desktop(task)
         self.node.middle = $("#desktop>.middle");
         self.node.middle_area = self.node.middle.children(".area");
         self.node.middle_background = self.node.middle_area.children(".background");
-        self.node.pages = self.node.middle.children(".pages")[0];
-        self.node.tasks = self.node.middle.children("#tasks")[0];
+        self.node.pages = self.node.middle.children(".pages");
+        self.node.tasks = self.node.middle.children("#tasks");
         self.node.preview = $("#desktop>#preview")[0];
 
         // Members
@@ -289,7 +289,7 @@ function Page()
         self.activeArea = $("<div></div>").addClass("active_area");
         self.activeArea.appendTo(self.icon);
         self.activeArea.mouseenter(function (e) { self.icon.addClass("over"); });
-        self.activeArea.mouseleave(function (e) { self.icon.removeClass("over"); });
+        self.activeArea.mouseleave(function (e) { if (!gl_desktop.drag.isDragging()) self.icon.removeClass("over"); });
         self.activeArea.mouseup(function (e) { self.mouseUpClose(e); });
         self.icon.mousedown(function (e) { self.mouseDown(e); });
         self.icon.insertBefore(gl_tasksList.node.bottom);
@@ -404,9 +404,10 @@ function Page()
         else
             self.justFocused = false;
         // Starts to drag the icon if we clicked on its active area
-        if (e.target == self.activeArea[0] && !gl_desktop.drag.isDragging())
+        if (e.target == self.activeArea[0])
         {
             gl_desktop.drag.start(e, self.icon[0], self, "mouseMove", "mouseWheel", "mouseUp");
+            gl_desktop.drag.setCursor("move");
             self.element = gl_desktop.drag.getElement();
             self.mouse = gl_desktop.drag.getMouse();
             // Takes the scroll into account
@@ -471,12 +472,14 @@ function Page()
         self.icon.insertBefore(self.target);
         self.target.remove();
         self.pagesPositions = undefined;
+        if (!F.isMouseOverNode(e, self.activeArea))
+            self.icon.removeClass("over");
     }
     
     // Closes the page with the middle mouse.
     self.mouseUpClose = function (e)
     {
-        if (e.which == 2 && !gl_desktop.drag.isDragging())
+        if (e.which == 2)
             self.close();
     }
 
@@ -808,13 +811,12 @@ function Task(resource, html)
         self.content = $("<div></div>").addClass("task");
         self.content[0].object = self;
         self.content.html(html);
-        translate(self.content);
+        F.translate(self.content);
         // Events
         self.content.mousedown(function (e) { self.mouseDownContent(e); });
         self.content.mouseenter(function (e) { self.mouseEnterContent(e); });
         self.content.mouseleave(function (e) { self.mouseLeaveContent(e); });
         self.content.appendTo(gl_desktop.node.tasks);
-        gl_desktop.taskPreview.addTask(self);
     }
     
     // Closes the task.
@@ -837,6 +839,7 @@ function Task(resource, html)
         if (e.which != 1 || TasksList.Buttons.isButton(e))
             return ;
         gl_desktop.drag.start(e, self.icon, self, "mouseMove", "mouseWheel", "mouseUp");
+        gl_desktop.drag.setCursor("pointer");
         self.mouse = gl_desktop.drag.getMouse();
         self.element = gl_desktop.drag.getElement();
         self.element.y -= gl_tasksList.top;
@@ -876,10 +879,12 @@ function Task(resource, html)
         {
             self.icon.css("left", e.pageX + C.TasksList.taskDragShift.x);
             self.icon.css("top", Math.min(Math.max(e.pageY + C.TasksList.taskDragShift.y, 0), gl_desktop.height - self.taskHeight));
+            gl_desktop.drag.setCursor("auto");
         }
         // Otherwise updates the tasks list
         else
         {
+            gl_desktop.drag.setCursor("move");
             self.icon.css("left", 0);
             if (!self.resistance)
                 self.updateTasksList(e.pageY);
@@ -1016,6 +1021,7 @@ function Task(resource, html)
             if (self.createPage == "bottom")
                 gl_tasksList.scrollTop(gl_tasksList.node.icons[0].style.scrollHeight);
             delete self.createPage;
+            gl_desktop.drag.overlay.html("");
         }
         // Otherwise the page is hidden if it was already focused before the mouse down event
         else if (!self.getPage().justFocused)
@@ -1025,7 +1031,7 @@ function Task(resource, html)
     // Closes the task with the middle mouse.
     self.mouseUpClose = function (e)
     {
-        if (e.which == 2 && !gl_desktop.drag.isDragging())
+        if (e.which == 2)
             self.getPage().removeTask(self);
     }
     
@@ -1044,7 +1050,8 @@ function Task(resource, html)
     // The mouse leaved the task content.
     self.mouseLeaveContent = function (e)
     {
-        self.icon.removeClass("over_content");
+        if (!gl_desktop.drag.isDragging())
+            self.icon.removeClass("over_content");
     }
         
     // Displays the content of the task.
@@ -1139,6 +1146,8 @@ function Task(resource, html)
         // Moves the task
         self.icon.css("top", mouseY);
         self.icon.addClass("drag");
+        gl_desktop.drag.setCursor("move");
+        gl_desktop.taskPreview.updateActiveAreas();
         // Creates the target
         self.target = $("<div></div>").addClass("target");
         self.target.insertAfter(self.icon);
@@ -1201,6 +1210,7 @@ function Task(resource, html)
                 self.display();
                 self.icon.removeClass("drag_window");
                 gl_desktop.taskPreview.hide();
+                gl_desktop.drag.overlay.html("");
                 return ;
             }
             else
@@ -1241,7 +1251,7 @@ function Task(resource, html)
         if (!page.isDisplayed() || (page != self.getPage() && self.getPage().isDisplayed()))
         {
             // Hides all the pages
-            $(gl_desktop.node.pages).children(".display").each(function() { this.object.hide(); });
+            gl_desktop.node.pages.children(".display").each(function() { this.object.hide(); });
             // Displays the current page but keeps the focus on the original page of the task
             if (page != self.getPage())
             {
@@ -1257,6 +1267,7 @@ function Task(resource, html)
             }
             // Displays the preview
             gl_desktop.taskPreview.display(undefined, undefined, page);
+            gl_desktop.taskPreview.updateActiveAreas();
         }
         if (resetBottomHeight)
             gl_tasksList.node.bottom.height(0);
@@ -1402,8 +1413,18 @@ function Task(resource, html)
         {
             return (self.content.hasClass("window"));
         }
-    }
         
+        // Ensures that the task icon style is up to date, based on the position of the mouse.
+        // Should be called after a drag within the content.
+        self.updateMouseOverContent = function (e)
+        {
+            if (F.isMouseOverNode(e, self.content))
+                self.icon.addClass("over_content");
+            else
+                self.icon.removeClass("over_content");
+        }
+    }
+
     self.init();
     return (self);
 }
@@ -1454,9 +1475,10 @@ function TaskTreeNode(node)
     // Starts to resize the node.
     self.mouseDown = function (e)
     {
-        if (e.which != 1 || gl_desktop.drag.isDragging())
+        if (e.which != 1)
             return ;
         gl_desktop.drag.start(e, self.resize[0], self, "mouseMove", "mouseWheel", "mouseUp");
+        gl_desktop.drag.setCursor(self.h > -1 ? "e-resize" : "s-resize");
         self.mouse = gl_desktop.drag.getMouse();
         self.element = gl_desktop.drag.getElement();
         // Searches nodes that are in the edge of the current node and save their properties
@@ -1618,7 +1640,7 @@ function TaskTreeNode(node)
     }
 
     // Stops the resize.
-    self.mouseUp = function ()
+    self.mouseUp = function (e)
     {
         delete self.leftNode;
         delete self.rightNode;
@@ -1626,18 +1648,23 @@ function TaskTreeNode(node)
         delete self.bottomNode;
         delete self.startResize;
         self.resize.parent().removeClass("resize_node");
+        if (!F.isMouseOverNode(e, self.resize))
+            self.resize.parent()[0].object.icon.removeClass("over");
     }
 
     // The mouse entered the resize bar.
     self.mouseEnter = function (e)
     {
         self.resize.parent().addClass("over_resize");
+        self.resize.parent()[0].object.icon.addClass("over");
     }
     
     // The mouse leaved the resize bar.
     self.mouseLeave = function (e)
     {
         self.resize.parent().removeClass("over_resize");
+        if (!gl_desktop.drag.isDragging())
+            self.resize.parent()[0].object.icon.removeClass("over");
     }
     
     self.init();
@@ -1657,25 +1684,30 @@ function TaskPreview()
         self.currentTask; // The last task on which the mouse moved
     }
     
-    // Registers the events that allow to display the preview.
-    self.addTask = function (task)
+    // Creates the tasks active areas in the drag overlay.
+    self.updateActiveAreas = function ()
     {
-        task.content.mousemove(function (e) { self.mouseMoveContent(e); });
-        task.content.mouseleave(function (e) { self.mouseLeaveContent(e); });
-        $(gl_desktop.node.preview).mousemove(function (e) { self.mouseMoveContent(e); });
-        $(gl_desktop.node.preview).mouseleave(function (e) { self.mouseLeavePreview(e); });
-        task.icon.mouseleave(function (e) { self.mouseLeaveIcon(e); });
+        gl_desktop.drag.overlay.html("");
+        gl_desktop.node.tasks.children(".display").each(function ()
+        {
+            $("<div></div>").appendTo(gl_desktop.drag.overlay).css({
+                left: this.object.left,
+                top: this.object.top,
+                width: this.object.width,
+                height: this.object.height,
+                zIndex: this.object.zIndex,
+                position: "absolute"})
+            .mousemove(function (e) { self.mouseMoveContent(e); })
+            .mouseleave(function (e) { self.mouseLeaveContent(e); })
+            [0].object = this.object;
+        });
     }
-    
+
     // The mouse moved over the content of a task, while a task icon is being dragged.
     // Displays a preview of the future position of the dragged task in the content.
     self.mouseMoveContent = function (e)
     {
-        if (!gl_desktop.drag.isDragging("Task"))
-            return ;
-        if (e.currentTarget != gl_desktop.node.preview)
-            self.currentTask = e.currentTarget.object;
-        if (!self.currentTask && !self._searchCurrentTask(e))
+        if (!(self.currentTask = e.delegateTarget.object))
             return self.hide();
         var width = self.currentTask.width;
         var height = self.currentTask.height;
@@ -1723,7 +1755,7 @@ function TaskPreview()
                 else
                     self.position = "s";
             }
-            // Facilitates the transition east/west
+            // Facilitates the east/west transition
             else if (self.position == "e" || self.position == "w")
             {
                 if (y >= height / 3 && y <= height * 2 / 3 && x <= width / 2)
@@ -1735,7 +1767,7 @@ function TaskPreview()
                 else
                     self.position = "s";
             }
-            // Facilitates the transition north/south
+            // Facilitates the north/south transition
             else
             {
                 if (x >= width / 3 && x <= width * 2 / 3 && y <= height / 2)
@@ -1751,6 +1783,16 @@ function TaskPreview()
         // If the position has changed, the preview is displayed
         if (oldPosition != self.position || oldTask != self.task || oldPage != self.page)
             self.display(self.position, self.task, self.page);
+    }
+    
+    // The mouse leaved the task content.
+    self.mouseLeaveContent = function (e)
+    {
+        self.hide();
+        var page;
+        // Displays the default drop position
+        if ((page = gl_desktop.drag.getObject()) && (page = gl_desktop.drag.getObject().target) && (page = page[0].parentNode))
+            self.display(undefined, undefined, page.object);
     }
     
     // When a task is dragged over a page or an other task, this method displays a preview of its future position.
@@ -1855,58 +1897,6 @@ function TaskPreview()
             self.page = undefined;
     }
     
-    // The mouse leaved the task content.
-    self.mouseLeaveContent = function (e)
-    {
-        if (!gl_desktop.drag.isDragging("Task"))
-            return ;
-        // If the mouse is really out of the content
-        if (e.relatedTarget != gl_desktop.node.preview
-            && !gl_desktop.drag.getObject().icon.has(e.relatedTarget).length
-            && (!$(e.relatedTarget).hasClass("resize") || !$(e.relatedTarget.parentNode).hasClass("page")))
-        {
-            self.hide();
-            var page;
-            // Displays the default drop position
-            if (gl_desktop.drag.isDragging("Task") && (page = gl_desktop.drag.getObject().target) && (page = page[0].parentNode))
-                self.display(undefined, undefined, page.object);
-        }
-    }
-    
-    // The mouse leaved the preview.
-    self.mouseLeavePreview = function (e)
-    {
-        if (!gl_desktop.drag.isDragging("Task"))
-            return ;
-        // If the mouse is really out of the task content
-        if (!gl_desktop.drag.getObject().icon.has(e.relatedTarget).length
-            && (!self.task || !self.task.content.has(e.relatedTarget).length)
-            && (!$(e.relatedTarget).hasClass("resize") || !$(e.relatedTarget.parentNode).hasClass("page")))
-        {
-            self.hide();
-            var page;
-            if (gl_desktop.drag.isDragging("Task") && (page = gl_desktop.drag.getObject().target) && (page = page[0].parentNode))
-                self.display(undefined, undefined, page.object);
-        }
-    }
-    
-    // The mouse leaved the icon.
-    self.mouseLeaveIcon = function (e)
-    {
-        if (!gl_desktop.drag.isDragging("Task"))
-            return ;
-        // If the mouse is really out of the task content
-        if (e.relatedTarget != gl_desktop.node.preview
-            && (!self.task || !self.task.content.has(e.relatedTarget).length)
-            && (!$(e.relatedTarget).hasClass("resize") || !$(e.relatedTarget.parentNode).hasClass("page")))
-        {
-            self.hide();
-            var page;
-            if (gl_desktop.drag.isDragging("Task") && (page = gl_desktop.drag.getObject().target) && (page = page[0].parentNode))
-                self.display(undefined, undefined, page.object);
-        }
-    }
-    
     // Hides the preview.
     self.hide = function ()
     {
@@ -1923,26 +1913,6 @@ function TaskPreview()
             if (drag.getPage().icon.hasClass("window"))
                 drag.icon.addClass("drag_window");
         }
-    }
-    
-    // Searches the task over which the mouse is.
-    self._searchCurrentTask = function (e)
-    {
-        if (!self.page)
-            return (false);
-        var tasks = self.page.icon.children(".task");
-        for (var i = 0; i < tasks.length; ++i)
-        {
-            var task = tasks[i].object;
-            if (task.left <= e.pageX && task.top <= e.pageY
-                && task.left + task.width + 2 >= e.pageX && task.top + task.height + 2 >= e.pageY)
-            {
-                self.currentTask = task;
-                self.page = undefined;
-                return (true);
-            }
-        }
-        return (false);
     }
     
     self.init();
@@ -1964,7 +1934,7 @@ function Sessions()
     // @return The pages saved.
     self.save = function (name)
     {
-        var pages = $(gl_desktop.node.pages).children(".display");
+        var pages = gl_desktop.node.pages.children(".display");
         // Sorts the pages by z-index
         pages.sort(function (a, b)
         {
@@ -2002,14 +1972,17 @@ function Drag()
     
     self.init = function ()
     {
+        // Members
         self.object; // The dragged object
         self.objectName; // The name of its class
         self.mouse = { x : 0, y : 0 }; // The position of the mouse in the element
         self.element = { x : 0, y : 0 }; // The initial position of the element
-        // Callbacks
-        self.mouseMoveCallback;
-        self.mouseUpCallback;
-        self.mouseWheelCallback;
+        self.overlay = $("body>.drag"); // This node is displayed over everything while something is being dragged
+        
+        // Events
+        self.mouseMoveEvent;
+        self.mouseUpEvent;
+        self.mouseWheelEvent;
         self.parameter;
     }
 
@@ -2036,29 +2009,29 @@ function Drag()
         self.element = {x : element.left,
                         y : element.top};
         self.object = object;
-        self.objectName = getObjectName(object);
-        self.mouseMoveCallback = mouseMove;
-        self.mouseUpCallback = mouseUp;
-        self.mouseWheelCallback = mouseWheel;
+        self.objectName = F.getObjectName(object);
+        self.mouseMoveEvent = mouseMove;
+        self.mouseUpEvent = mouseUp;
+        self.mouseWheelEvent = mouseWheel;
         self.parameter = parameter;
-        // This class is set to the desktop while something is being dragged
-        $(gl_desktop.node.desktop).addClass("drag");
         // The selection is disabled during the drag
         disableSelection(false);
+        // Ensures that no event will reach the desktop while something is being dragged
+        self.overlay.addClass("display");
     }
 
     // Called when the mouse moves.
     self.mouseMove = function (e)
     {
-        if (self.object && self.mouseMoveCallback)
-            self.object[self.mouseMoveCallback](e, self.parameter);
+        if (self.object && self.mouseMoveEvent)
+            self.object[self.mouseMoveEvent](e, self.parameter);
     }
 
     // Called when the mouse wheel clicks.
     self.mouseWheel = function (e, delta)
     {
-        if (self.object && self.mouseWheelCallback)
-            self.object[self.mouseWheelCallback](e, delta, self.parameter);
+        if (self.object && self.mouseWheelEvent)
+            self.object[self.mouseWheelEvent](e, delta, self.parameter);
     }
 
     // Called when the mouse is up (the drag is finished).
@@ -2066,8 +2039,8 @@ function Drag()
     {
         if (!self.isDragging() || e.which != 1)
             return ;
-        if (self.object && self.mouseUpCallback)
-            stop = self.object[self.mouseUpCallback](e, self.parameter);
+        if (self.object && self.mouseUpEvent)
+            stop = self.object[self.mouseUpEvent](e, self.parameter);
          self._stop();
     }
 
@@ -2076,8 +2049,8 @@ function Drag()
     {
         if (!self.isDragging() || !C.Desktop.stopDragLeaveDesktop)
             return ;
-        if (self.object && self.mouseUpCallback)
-            stop = self.object[self.mouseUpCallback](e, self.parameter);
+        if (self.object && self.mouseUpEvent)
+            stop = self.object[self.mouseUpEvent](e, self.parameter);
          self._stop();
     }
 
@@ -2086,13 +2059,14 @@ function Drag()
     {
         self.object = undefined;
         self.objectName = undefined;
-        self.mouseMoveCallback = undefined;
-        self.mouseUpCallback = undefined;
-        self.mouseWheelCallback = undefined;
+        self.mouseMoveEvent = undefined;
+        self.mouseUpEvent = undefined;
+        self.mouseWheelEvent = undefined;
         self.parameter = undefined;
         self.mouse = { x : 0, y : 0 };
         self.element = { x : 0, y : 0 };
-        $(gl_desktop.node.desktop).removeClass("drag");
+        self.overlay.removeClass("display");
+        self.setCursor();
         disableSelection(true);
     }
 
@@ -2121,6 +2095,15 @@ function Drag()
     // Returns the instance of the object being dragged.
     self.getObject = function () { return (self.object); }
 
+    // Sets the CSS cursor displayed during the drag.
+    self.setCursor = function (cursor)
+    {
+        if (cursor)
+            self.overlay.css("cursor", cursor);
+        else
+            self.overlay.css("cursor", "auto");
+    }
+    
     self.init();
     return (self);
 }

@@ -28,7 +28,7 @@ self.load = function (resource, callback)
     {
         self[resource].loading = true;
         // Load the HTML
-        request("GET", self[resource].html, function(HttpRequest)
+        F.request("GET", self[resource].html, function(HttpRequest)
         {
             if (HttpRequest.status == 200)
                 gl_resources[resource].content = HttpRequest.responseText;

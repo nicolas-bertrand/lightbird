@@ -55,7 +55,7 @@ function User()
             self.remember = false;
             // Tells the server that the session can be destroyed, if there is one
             if (!gl_loaded)
-                request("GET", "command/disconnect");
+                F.request("GET", "command/disconnect");
             // Removes the session id and the identifiant
             localStorage.removeItem("sessionId");
             localStorage.removeItem("identifiant");
@@ -65,7 +65,7 @@ function User()
         if (localStorage.getItem("sessionId") && localStorage.getItem("identifiant"))
         {
             // Tries to authenticate the user
-            request("GET", "blank", function (HttpRequest)
+            F.request("GET", "blank", function (HttpRequest)
             {
                 // The user is authenticated
                 if (HttpRequest.status == 200)
@@ -120,7 +120,7 @@ function User()
                 var response = jsonParse(HttpRequest.responseText);
                 localStorage.setItem("sessionId", response.sessionId);
                 localStorage.setItem("identifiant", SHA256(name + SHA256(password + response.salt) + response.sessionId));
-                request("GET", "command/identify", authenticate);
+                F.request("GET", "command/identify", authenticate);
             }
             // At this point we are not allowed to connect to the server
             else
@@ -131,8 +131,8 @@ function User()
         }
 
         // Step 1: Gets the salt from the user name, which will allow us to generate the identifiant
-        var salt = getUuid();
-        request("GET", "command/identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);
+        var salt = F.getUuid();
+        F.request("GET", "command/identify?name=" + SHA256(name + salt) + "&salt=" + salt, generateIdentifiant);
     }
     
     // Locks / unlocks the inputs during the authentication.
@@ -180,7 +180,7 @@ function User()
         // Tells the desktop that we are disconnecting
         gl_desktop.onDisconnect();
         // Tells the server to destroy the session
-        request("GET", "command/disconnect");
+        F.request("GET", "command/disconnect");
         // Displays the authentication form
         self.display();
         self.disconnecting = false;

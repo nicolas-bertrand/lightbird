@@ -14,7 +14,7 @@ function Files()
     // Downloads the files list.
     self.onConnect = function ()
     {
-        request("GET", "command/files/get", function (HttpRequest)
+        F.request("GET", "command/files/get", function (HttpRequest)
         {
             if (HttpRequest.status == 200)
                 self.list = jsonParse(HttpRequest.responseText);

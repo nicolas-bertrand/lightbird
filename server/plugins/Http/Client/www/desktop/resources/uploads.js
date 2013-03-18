@@ -96,7 +96,7 @@ function UploadsSession(uploads)
         self.node.stop = undefined; // Allows to stop an upload session
         self.path = uploads.path; // The virtual directory where the file will be uploaded
         self.filesInDirectory = undefined; // The list of the files in the path
-        self.id = getUuid(); // The id is used to send commands to the server
+        self.id = F.getUuid(); // The id is used to send commands to the server
         self.row = undefined; // The row of the table in the progress bar
         self.files = undefined; // The list of the files uploaded by the session
         self.numberFilesUploaded = 0; // The number of files uploaded so far
@@ -145,7 +145,7 @@ function UploadsSession(uploads)
         if ((self.path = self.uploads.node.path.value) == self.uploads.node.path.defaultValue)
             self.path = "";
         var path = encodeURIComponent(self.path);
-        request("POST", "command/uploads/check?path=" + path, function (HttpRequest)
+        F.request("POST", "command/uploads/check?path=" + path, function (HttpRequest)
         {
             if (HttpRequest.status == 200)
                 self.checkResult(jsonParse(HttpRequest.responseText));
@@ -182,7 +182,7 @@ function UploadsSession(uploads)
                 row.size = row.insertCell(-1);
                 $(row.size).addClass("size");
                 if (self.files[i].size)
-                    row.size.innerHTML = sizeToString(self.files[i].size);
+                    row.size.innerHTML = F.sizeToString(self.files[i].size);
                 // Ignore
                 row.ignore = row.insertCell(-1)
                 row.ignore.innerHTML = T.Uploads.ignore;
@@ -209,7 +209,7 @@ function UploadsSession(uploads)
                 row.size = row.insertCell(-1);
                 $(row.size).addClass("size");
                 if (self.files[i].size)
-                    row.size.innerHTML = sizeToString(self.files[i].size);
+                    row.size.innerHTML = F.sizeToString(self.files[i].size);
                 // Ignore
                 row.ignore = row.insertCell(-1)
                 row.ignore.innerHTML = T.Uploads.ignore;
@@ -376,7 +376,7 @@ function UploadsSession(uploads)
         // Submit the form
         var id = self.id;
         var path = encodeURIComponent(self.path);
-        self.uploads.node.form.action = "/c/command/uploads?id=" + id + "&path=" + path + getSession();
+        self.uploads.node.form.action = "/c/command/uploads?id=" + id + "&path=" + path + F.getSession();
         self.uploads.node.form.submit();
         // Updates the progress bar in one second
         setTimeout(function () { self.requestProgress(); }, C.Uploads.requestProgressInterval);
@@ -451,7 +451,7 @@ function UploadsSession(uploads)
             }
         }
         // Sends the request
-        request("GET", "command/uploads/progress?id=" + self.id, callback);
+        F.request("GET", "command/uploads/progress?id=" + self.id, callback);
     }
 
     // Updates the progression bar.
@@ -487,7 +487,7 @@ function UploadsSession(uploads)
     self.stop = function ()
     {
         if (!self.complete)
-            request("GET", "command/uploads/stop?id=" + self.id);
+            F.request("GET", "command/uploads/stop?id=" + self.id);
         $(self.session).remove();
         self.uploads.updateParity();
     }
@@ -500,7 +500,7 @@ function UploadsSession(uploads)
 
         if (self.complete)
             files = self.filesToJson();
-        request("POST", "command/uploads/cancel?id=" + self.id + "&path=" + path, undefined, files, "application/json");
+        F.request("POST", "command/uploads/cancel?id=" + self.id + "&path=" + path, undefined, files, "application/json");
         $(self.session).remove();
         self.uploads.updateParity();
     }
