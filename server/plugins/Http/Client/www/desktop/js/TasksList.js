@@ -377,7 +377,9 @@ TasksList.Buttons = function (task)
     // Hides the buttons while the task is being dragged.
     self.startDrag = function ()
     {
-        self._hide(task);
+        self.close.path.hide();
+        self.window.path.hide();
+        self.task.content.removeClass("highlight");
     }
     
     // Displays the buttons back, if the mouse is over the task.
@@ -405,17 +407,19 @@ TasksList.Buttons = function (task)
     // Hides the buttons and the highlight
     self._hide = function ()
     {
-        self.close.path.hide();
-        self.window.path.hide();
-        self.task.content.removeClass("highlight");
         if (!gl_desktop.drag.isDragging())
+        {
+            self.close.path.hide();
+            self.window.path.hide();
+            self.task.content.removeClass("highlight");
             self.task.icon.removeClass("over");
+        }
     }
     
     // Returns true if the target is part of the task's button.
     TasksList.Buttons.isButton = function (e)
     {
-        return (e.target.tagName.toLowerCase() == "svg" || e.target.parentNode.tagName.toLowerCase() == "svg");
+        return (e.target.tagName.toLowerCase() == "path");
     }
 
     self.init();
