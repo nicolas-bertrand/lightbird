@@ -20,6 +20,7 @@ function Desktop(task)
         self.node.preview = $("#desktop>#preview")[0];
 
         // Members
+        self.events = new Events(); // Manages the events
         self.drag = new Drag(); // Allows to drag elements
         self.taskPreview = new TaskPreview(); // Displays a preview while a task icon is being dragged
         self.sessions = new Sessions(); // Manages the sessions
@@ -35,10 +36,7 @@ function Desktop(task)
         self.height;
         
         // Events
-        $(document.body).mousewheel(function (e, delta) { self.mouseWheel(e, delta); });
-        $(document.body).mousemove(function (e) { self.mouseMove(e); });
-        $(window).mouseup(function (e) { self.mouseUp(e); });
-        $(document.body).mouseleave(function (e) { self.mouseLeave(e); });
+        self.events.bind("mousemove", self, function (e) { self.mouse = {pageX: e.pageX, pageY: e.pageY}; });
     }
     
     // Called when the browser is resized. Updates the size of the desktop.
@@ -174,34 +172,6 @@ function Desktop(task)
             self.node.middle_background.removeClass("display");
             gl_player.onDesktopPage(false);
         }
-    }
-    
-    // Called each time the mouse wheel is used.
-    // @param delta : The direction and velocity of the movement.
-    self.mouseWheel = function(e, delta)
-    {
-        delta = Math.round(delta * C.Desktop.mouseWheelMultiplier);
-        gl_tasksList.mouseWheel(delta);
-        self.drag.mouseWheel(e, delta);
-    }
-    
-    // Called each time the mouse moves over the desktop.
-    self.mouseMove = function (e)
-    {
-        self.mouse = { pageX : e.pageX, pageY : e.pageY }
-        self.drag.mouseMove(e);
-    }
-
-    // Called when the mouse is up.
-    self.mouseUp = function (e)
-    {
-        self.drag.mouseUp(e);
-    }
-    
-    // Called when the mouse leaves the desktop.
-    self.mouseLeave = function (e)
-    {
-        self.drag.mouseLeave(e);
     }
     
 // Container API
@@ -1988,12 +1958,16 @@ function Drag()
         self.mouse = { x : 0, y : 0 }; // The position of the mouse in the element
         self.element = { x : 0, y : 0 }; // The initial position of the element
         self.overlay = $("body>.drag"); // This node is displayed over everything while something is being dragged
-        
-        // Events
+        self.parameter; // An user defined parameter passed to the events
         self.mouseMoveEvent;
         self.mouseUpEvent;
         self.mouseWheelEvent;
-        self.parameter;
+        
+        // Events
+        gl_desktop.events.bind("mousemove", self, function (e) { self.mouseMove(e); });
+        gl_desktop.events.bind("mousewheel", self, function (e, delta) { self.mouseWheel(e, delta); });
+        gl_desktop.events.bind("mouseup", self, function (e) { self.mouseUp(e); });
+        gl_desktop.events.bind("mouseleave", self, function (e) { self.mouseLeave(e); });
     }
 
     // Starts to drag an object.
@@ -2112,6 +2086,57 @@ function Drag()
             self.overlay.css("cursor", cursor);
         else
             self.overlay.css("cursor", "auto");
+    }
+    
+    self.init();
+    return (self);
+}
+
+// Manages the events on the desktop.
+function Events()
+{
+    var self = this;
+    
+    self.init = function ()
+    {
+        // Members
+        self.events = new Object(); // Stores the events and the objects binded to them
+        
+        // Events
+        $(document.body).mousedown(function (e) { self.call("mousedown", e); });
+        $(document.body).mousewheel(function (e, delta) { self.call("mousewheel", e, Math.round(delta * C.Desktop.mouseWheelMultiplier)); });
+        $(document.body).mousemove(function (e) { self.call("mousemove", e); });
+        $(window).mouseup(function (e) { self.call("mouseup", e); });
+        $(document.body).mouseleave(function (e) { self.call("mouseleave", e); });
+    }
+
+    // Binds an event to an object. The handler will be called when the event is called.
+    self.bind = function (type, object, handler)
+    {
+        if (!self.events[type])
+            self.events[type] = new Array();
+        self.events[type].push({object: object, handler: handler});
+    }
+
+    // Unbins an event from an object.
+    self.unbind = function (type, object)
+    {
+        if (!self.events[type])
+            return ;
+        var list = self.events[type];
+        for (var i = 0; i < list.length; ++i)
+            if (list[i].object == object)
+                list.splice(i, 1);
+    }
+
+    // Calls all the handlers of an event.
+    self.call = function (type, e, delta)
+    {
+        if (!self.events[type])
+            return ;
+        var list = self.events[type];
+        for (var i = 0; i < list.length; ++i)
+            list[i].handler(e, delta);
     }
     
     self.init();

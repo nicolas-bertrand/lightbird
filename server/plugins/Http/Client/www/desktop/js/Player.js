@@ -133,10 +133,9 @@ function Player(task)
         // Otherwise we wait a mouse down event outside the player to retract it and hide the playlist
         else
         {
-            $("body").unbind("mousedown");
-            $("body").mousedown(function (e)
+            gl_desktop.events.bind("mousedown", self, function (e)
             {
-                $("body").unbind(e);
+                gl_desktop.events.unbind("mousedown", self);
                 if (!self.mouseOverPlayer && !self.playlist.isPinned())
                 {
                     self.playlist.hide();

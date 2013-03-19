@@ -36,6 +36,7 @@ function TasksList(task)
         self.node.tasks_list.mouseleave(function (e) { self.mouseLeave(e); });
         self.node.tasks_list.mousemove(function (e) { self.mouseMove(e); });
         self.node.tasks_list.click(function (e) { self.click(e); });
+        gl_desktop.events.bind("mousewheel", self, function(e, delta) { self.mouseWheel(e, delta); });
     }
     
     // The browser has been resized.
@@ -83,13 +84,13 @@ function TasksList(task)
     }
 
     // Scrolls the tasks list using the mouse wheel.
-    self.mouseWheel = function (delta)
+    self.mouseWheel = function (e, delta)
     {
         if (self.over)
         {
             self.node.icons[0].scrollTop -= delta;
             if (gl_desktop.drag.isDragging("Task"))
-                gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.pageY - self.top);
+                gl_desktop.drag.getObject().updateTasksList(e.pageY - self.top);
         }
     }
     
