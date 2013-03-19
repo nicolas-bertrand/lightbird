@@ -220,14 +220,14 @@ a:visited {
     background-color: #000000;
 }
 
-/* Pages icons */
-
 #desktop>.middle>.area>.tasks_list>.icons {
     height: 100%;
     width: 100%;
     overflow: hidden;
     float: left;
 }
+
+/* Pages icons */
 
 #desktop>.middle>.area>.tasks_list>.icons>.top {
     height: 15px;

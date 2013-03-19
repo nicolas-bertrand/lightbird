@@ -76,6 +76,7 @@ function Header(task)
     {
         self.node.top.removeClass("hide");
         self.node.top.css("height", C.Header.defaultHeight);
+        gl_tasksList.headerHeightChanged(C.Header.defaultHeight);
     }
     
     // Hides the header, in full screen mode.
@@ -83,6 +84,7 @@ function Header(task)
     {
         self.node.top.addClass("hide");
         self.node.top.css("height", C.Header.FullScreen.hideHeight);
+        gl_tasksList.headerHeightChanged(0);
     }
 }
     

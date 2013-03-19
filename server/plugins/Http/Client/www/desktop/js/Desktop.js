@@ -474,6 +474,7 @@ function Page()
         self.pagesPositions = undefined;
         if (!F.isMouseOverNode(e, self.activeArea))
             self.icon.removeClass("over");
+        gl_tasksList.stopDrag(e);
     }
     
     // Closes the page with the middle mouse.
@@ -1004,24 +1005,7 @@ function Task(resource, html)
                     preview.task.getPage().onResize();
                 }
             }
-            // Clears the context
-            delete self.tasksPositions;
-            if (self.createPageTarget)
-                self.createPageTarget.close();
-            delete self.createPageTarget;
-            self.icon.removeClass("drag");
-            self.icon.parent().removeClass("empty");
-            self.icon.removeClass("drag_window");
-            self.target.remove();
-            gl_tasksList.node.top.height(C.TasksList.pageMargin);
-            gl_tasksList.node.bottom.height(0);
-            gl_desktop.taskPreview.hide(e);
-            self.buttons.stopDrag(e);
-            gl_tasksList.node.icons.children(".page").each(function () { this.object.updateIconHeight(); });
-            if (self.createPage == "bottom")
-                gl_tasksList.scrollTop(gl_tasksList.node.icons[0].style.scrollHeight);
-            delete self.createPage;
-            gl_desktop.drag.overlay.html("");
+            self.stopDrag(e);
         }
         // Otherwise the page is hidden if it was already focused before the mouse down event
         else if (!self.getPage().justFocused)
@@ -1148,12 +1132,38 @@ function Task(resource, html)
         self.icon.addClass("drag");
         gl_desktop.drag.setCursor("move");
         gl_desktop.taskPreview.updateActiveAreas();
+        // Sets the style of the icon
+        if (self.getPage().icon.hasClass("window"))
+            self.icon.addClass("drag_window");
         // Creates the target
         self.target = $("<div></div>").addClass("target");
         self.target.insertAfter(self.icon);
         self.target.height(self.taskHeight);
         self.buttons.startDrag(self);
         return (mouseY);
+    }
+    
+    // Clears the context after the drag of the icon.
+    self.stopDrag = function (e)
+    {
+        gl_tasksList.node.top.height(C.TasksList.pageMargin);
+        gl_tasksList.node.bottom.height(0);
+        gl_desktop.taskPreview.hide(e);
+        gl_desktop.drag.overlay.html("");
+        self.target.remove();
+        self.icon.parent().removeClass("empty");
+        self.icon.removeClass("drag");
+        self.icon.removeClass("drag_window");
+        self.buttons.stopDrag(e);
+        gl_tasksList.stopDrag(e);
+        gl_tasksList.node.icons.children(".page").each(function () { this.object.updateIconHeight(); });
+        if (self.createPage == "bottom")
+            gl_tasksList.scrollTop(gl_tasksList.node.icons[0].style.scrollHeight);
+        delete self.createPage;
+        delete self.tasksPositions;
+        if (self.createPageTarget)
+            self.createPageTarget.close();
+        delete self.createPageTarget;
     }
     
     // Puts a target task under the cursor to show the place where the dragged task will be moved.
@@ -1695,7 +1705,7 @@ function TaskPreview()
                 top: this.object.top,
                 width: this.object.width,
                 height: this.object.height,
-                zIndex: this.object.zIndex,
+                zIndex: $(this).css("z-index"),
                 position: "absolute"})
             .mousemove(function (e) { self.mouseMoveContent(e); })
             .mouseleave(function (e) { self.mouseLeaveContent(e); })
@@ -1820,7 +1830,6 @@ function TaskPreview()
             preview.style.height = task.height + adjustBorder + "px";
             preview.style.zIndex = task.content.css("z-index");
             $(preview).addClass("display");
-                console.log((task.width + adjustBorder) % 2, (task.height + adjustBorder) % 2);
             if (position == "n")
                 preview.style.height = Math.ceil(task.height / 2) + adjustBorder / 2 + (-task.height % 2 * adjustBorder / 2 + (1 - adjustBorder / 2) * (task.height + 1) % 2) + "px"; // The last part adjusts the parity
             if (position == "s")

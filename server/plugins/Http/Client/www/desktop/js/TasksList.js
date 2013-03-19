@@ -45,24 +45,6 @@ function TasksList(task)
         self.node.background.height(height);
     }
     
-    // We entered/leaved the full screen mode.
-    self.onFullScreen = function (fullScreen)
-    {
-        if (fullScreen)
-        {
-            self.top = 0;
-            self.node.background.css("top", self.top);
-            self.hideFullScreen();
-        }
-        else
-        {
-            self.displayFullScreen();
-            self.top = gl_header.height;
-            self.node.background.css("top", -self.top);
-            self.node.tasks_list.css("z-index", "auto");
-        }
-    }
-    
     // The mouse entered the tasks list.
     self.mouseEnter = function ()
     {
@@ -80,7 +62,9 @@ function TasksList(task)
         // Hides the tasks list after the timeout when the mouse leaves it, in full screen mode.
         if (gl_desktop.isFullScreen())
             self.fullScreenHideTimeout = setTimeout(function () {
-                self.hideFullScreen();
+                if (!gl_desktop.drag.isDragging("Task") && !gl_desktop.drag.isDragging("Page"))
+                    self.hideFullScreen();
+                delete self.fullScreenHideTimeout;
             }, C.TasksList.FullScreen.displayDuration);
     }
     
@@ -192,32 +176,6 @@ function TasksList(task)
             self.hideFullScreen();
     }
     
-    // Displays the tasks list in full screen mode.
-    self.displayFullScreen = function ()
-    {
-        self.node.tasks_list.removeClass("hide_full_screen");
-        self.node.tasks_list.css("width", C.TasksList.defaultWidth);
-        self.node.tasks_list.css("z-index", gl_windows.getZIndex());
-        if (self.fullScreenHideTimeout)
-        {
-            clearTimeout(self.fullScreenHideTimeout);
-            self.fullScreenHideTimeout = undefined;
-        }
-    }
-    
-    // Hides (partially) the tasks list in full screen mode.
-    self.hideFullScreen = function ()
-    {
-        self.node.tasks_list.addClass("hide_full_screen");
-        self.node.tasks_list.css({"width": C.TasksList.FullScreen.hideWidth,
-                                  "z-index": C.TasksList.FullScreen.zIndex});
-        if (self.fullScreenHideTimeout)
-        {
-            clearTimeout(self.fullScreenHideTimeout);
-            self.fullScreenHideTimeout = undefined;
-        }
-    }
-    
     // Returns the pages of the tasks list.
     self.getPages = function ()
     {
@@ -236,6 +194,81 @@ function TasksList(task)
     self.scrollToBottom = function ()
     {
         self.node.icons[0].scrollTop = self.node.icons[0].scrollHeight - gl_desktop.height - C.TasksList.pageMargin;
+    }
+
+}
+// Full screen methods
+{
+    // We entered/leaved the full screen mode.
+    self.onFullScreen = function (fullScreen)
+    {
+        if (fullScreen)
+        {
+            self.top = 0;
+            self.node.background.css("top", self.top);
+            self.node.icons.css("margin-top", self.top);
+            self.hideFullScreen();
+        }
+        else
+        {
+            self.displayFullScreen();
+            self.top = gl_header.height;
+            self.node.background.css("top", -self.top);
+            self.node.tasks_list.css("z-index", "auto");
+        }
+        self.clearFullScreenTimeout();
+    }
+    
+    // Displays the tasks list in full screen mode.
+    self.displayFullScreen = function ()
+    {
+        self.node.tasks_list.removeClass("hide_full_screen");
+        self.node.tasks_list.css("left", 0);
+        self.node.tasks_list.css("z-index", gl_windows.getZIndex());
+        self.clearFullScreenTimeout();
+    }
+    
+    // Hides (partially) the tasks list in full screen mode.
+    self.hideFullScreen = function ()
+    {
+        self.node.tasks_list.addClass("hide_full_screen");
+        self.node.tasks_list.css({"left": -self.width + C.TasksList.FullScreen.hideWidth,
+                                  "z-index": C.TasksList.FullScreen.zIndex});
+        self.clearFullScreenTimeout();
+    }
+    
+    // The dragging of a task or a page has stopped.
+    self.stopDrag = function (e)
+    {
+        if (!gl_desktop.isFullScreen())
+            return ;
+        self.clearFullScreenTimeout();
+        // Hides the tasks list if we are out of it, in full screen mode.
+        if (!F.isMouseOverNode(e, self.node.tasks_list))
+            self.fullScreenHideTimeout = setTimeout(function () {
+                self.hideFullScreen();
+                delete self.fullScreenHideTimeout;
+            }, C.TasksList.FullScreen.displayDuration);
+    }
+
+    // Called when the header height changed in full screen mode.
+    self.headerHeightChanged = function (newHeight)
+    {
+        if (gl_desktop.isFullScreen())
+        {
+            self.top = newHeight;
+            self.node.icons.css("margin-top", self.top);
+        }
+    }
+    
+    // Clears the full screen timeout.
+    self.clearFullScreenTimeout = function ()
+    {
+        if (self.fullScreenHideTimeout)
+        {
+            clearTimeout(self.fullScreenHideTimeout);
+            delete self.fullScreenHideTimeout;
+        }
     }
 }
 
