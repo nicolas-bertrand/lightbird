@@ -216,6 +216,7 @@ function TasksList(task)
             self.top = gl_header.height;
             self.node.background.css("top", -self.top);
             self.node.tasks_list.css("z-index", "auto");
+            gl_desktop.events.unbind("mousedown", self);
         }
         self.clearFullScreenTimeout();
     }
@@ -227,6 +228,11 @@ function TasksList(task)
         self.node.tasks_list.css("left", 0);
         self.node.tasks_list.css("z-index", gl_windows.getZIndex());
         self.clearFullScreenTimeout();
+        // Hides the tasks list when the user clicks outside it
+        gl_desktop.events.bind("mousedown", self, function(e) {
+            if (!F.isMouseOverNode(e, self.node.tasks_list))
+                self.hideFullScreen();
+        });
     }
     
     // Hides (partially) the tasks list in full screen mode.
@@ -236,6 +242,7 @@ function TasksList(task)
         self.node.tasks_list.css({"left": -self.width + C.TasksList.FullScreen.hideWidth,
                                   "z-index": C.TasksList.FullScreen.zIndex});
         self.clearFullScreenTimeout();
+        gl_desktop.events.unbind("mousedown", self);
     }
     
     // The dragging of a task or a page has stopped.

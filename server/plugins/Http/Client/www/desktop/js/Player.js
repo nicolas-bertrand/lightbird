@@ -89,6 +89,10 @@ function Player(task)
             self.fullScreenHideTimeout = undefined;
         }
         self.timeLine.opaqueTimeLine();
+        if (fullScreen)
+            self.display();
+        else
+            gl_desktop.events.unbind("mousedown", self);
     }
     
     // The mouse entered the player area.
@@ -106,15 +110,7 @@ function Player(task)
             self.timeLine.expand();
         // Displays the player if we are in full screen mode
         if (gl_desktop.isFullScreen())
-        {
-            self.node.bottom.removeClass("hide");
-            self.node.bottom.css("bottom", 0);
-            if (self.fullScreenHideTimeout)
-            {
-                clearTimeout(self.fullScreenHideTimeout);
-                self.fullScreenHideTimeout = undefined;
-            }
-        }
+            self.display();
     }
     
     // The mouse leaved the player area.
@@ -133,9 +129,9 @@ function Player(task)
         // Otherwise we wait a mouse down event outside the player to retract it and hide the playlist
         else
         {
-            gl_desktop.events.bind("mousedown", self, function (e)
+            gl_desktop.events.bind("mousedown", self.playlist, function (e)
             {
-                gl_desktop.events.unbind("mousedown", self);
+                gl_desktop.events.unbind("mousedown", self.playlist);
                 if (!self.mouseOverPlayer && !self.playlist.isPinned())
                 {
                     self.playlist.hide();
@@ -145,16 +141,38 @@ function Player(task)
         }
         // Hides the player after the timeout, in full screen mode
         if (gl_desktop.isFullScreen())
-        {
             self.fullScreenHideTimeout = setTimeout(function ()
             {
-                self.node.bottom.addClass("hide");
-                self.node.bottom.css("bottom", -self.height + C.Player.FullScreen.hideHeight);
-                if (!self.playlist.isPinned() && self.playlist.isDisplayed())
-                    self.playlist.hide();
+                self.hide();
                 self.fullScreenHideTimeout = undefined;
             }, C.Player.FullScreen.displayDuration);
+    }
+    
+    // Displays the player, in full screen mode.
+    self.display = function ()
+    {
+        self.node.bottom.removeClass("hide");
+        self.node.bottom.css("bottom", 0);
+        if (self.fullScreenHideTimeout)
+        {
+            clearTimeout(self.fullScreenHideTimeout);
+            self.fullScreenHideTimeout = undefined;
         }
+        // Hides the player when the user clicks outside it
+        gl_desktop.events.bind("mousedown", self, function(e) {
+            if (!F.isMouseOverNode(e, self.node.bottom))
+                self.hide();
+        });
+    }
+    
+    // Hides the player, in full screen mode.
+    self.hide = function ()
+    {
+        self.node.bottom.addClass("hide");
+        self.node.bottom.css("bottom", -self.height + C.Player.FullScreen.hideHeight);
+        if (!self.playlist.isPinned() && self.playlist.isDisplayed())
+            self.playlist.hide();
+        gl_desktop.events.unbind("mousedown", self);
     }
     
     // Converts the time in seconds to a string (0:00).

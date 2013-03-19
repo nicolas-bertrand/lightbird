@@ -43,7 +43,10 @@ function Header(task)
         if (fullScreen)
             self.hide();
         else
+        {
             self.display();
+            gl_desktop.events.unbind("mousedown", self);
+        }
     }
     
     // Displays the header when the mouse enters it, in full screen mode.
@@ -77,6 +80,11 @@ function Header(task)
         self.node.top.removeClass("hide");
         self.node.top.css("height", C.Header.defaultHeight);
         gl_tasksList.headerHeightChanged(C.Header.defaultHeight);
+        // Hides the header when the user clicks outside it
+        gl_desktop.events.bind("mousedown", self, function(e) {
+            if (!F.isMouseOverNode(e, self.node.top))
+                self.hide();
+        });
     }
     
     // Hides the header, in full screen mode.
@@ -85,6 +93,7 @@ function Header(task)
         self.node.top.addClass("hide");
         self.node.top.css("height", C.Header.FullScreen.hideHeight);
         gl_tasksList.headerHeightChanged(0);
+        gl_desktop.events.unbind("mousedown", self);
     }
 }
     

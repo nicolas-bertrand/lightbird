@@ -2111,10 +2111,15 @@ function Events()
     }
 
     // Binds an event to an object. The handler will be called when the event is called.
+    // An object can only have one handler per event type.
     self.bind = function (type, object, handler)
     {
         if (!self.events[type])
             self.events[type] = new Array();
+        var list = self.events[type];
+        for (var i = 0; i < list.length; ++i)
+            if (list[i].object == object)
+                list.splice(i--, 1);
         self.events[type].push({object: object, handler: handler});
     }
 
@@ -2126,7 +2131,7 @@ function Events()
         var list = self.events[type];
         for (var i = 0; i < list.length; ++i)
             if (list[i].object == object)
-                list.splice(i, 1);
+                list.splice(i--, 1);
     }
 
     // Calls all the handlers of an event.
@@ -2135,8 +2140,12 @@ function Events()
         if (!self.events[type])
             return ;
         var list = self.events[type];
+        // Makes a copy of the events so that they can be safely unbinded and iterated at the same time
+        var copy = new Array();
         for (var i = 0; i < list.length; ++i)
-            list[i].handler(e, delta);
+            copy.push(list[i]);
+        for (var i = 0; i < copy.length; ++i)
+            copy[i].handler(e, delta);
     }
     
     self.init();
