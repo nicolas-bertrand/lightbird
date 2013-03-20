@@ -389,7 +389,7 @@ function Page()
             self.target.insertBefore(self.icon);
             // Moves the icon to the mouse position
             self.icon.addClass("drag");
-            self.icon.css("top", e.pageY - gl_tasksList.top - self.mouse.y);
+            self.icon.css("top", e.pageY - self.mouse.y - gl_tasksList.top + gl_tasksList.offset);
             // Computes the positions of the pages
             var pages = gl_tasksList.getPages();
             var y = C.TasksList.top;
@@ -410,7 +410,7 @@ function Page()
         // Moves the icon
         if (e)
             mouseY = e.pageY;
-        self.icon.css("top", mouseY - gl_tasksList.top - self.mouse.y);
+        self.icon.css("top", mouseY - self.mouse.y - gl_tasksList.top + gl_tasksList.offset);
         // The reference y changes if we are above or below the original position of the page
         var y = mouseY - self.mouse.y - gl_tasksList.top + gl_tasksList.scrollTop();
         if (self.element.y < y)
@@ -841,10 +841,7 @@ function Task(resource, html)
             self.icon.css("top", gl_desktop.height - self.taskHeight);
         // If the resistance is broken, we start to drag the task
         else if (self.resistance && Math.sqrt(Math.pow(elementY - y, 2) + Math.pow(self.element.x - x, 2)) > C.TasksList.taskResistance)
-            self.startDrag(y);
-        // Moves the task vertically
-        else if (!self.resistance)
-            self.icon.css("top", y);
+            y = self.startDrag(y);
         // Moves the dragged task horizontally if the mouse is outside of the tasks list
         if (e.pageX >= gl_tasksList.width)
         {
@@ -852,9 +849,10 @@ function Task(resource, html)
             self.icon.css("top", Math.min(Math.max(e.pageY + C.TasksList.taskDragShift.y, 0), gl_desktop.height - self.taskHeight));
             gl_desktop.drag.setCursor("auto");
         }
-        // Otherwise updates the tasks list
-        else
+        // Moves the task vertically
+        else if (!self.resistance)
         {
+            self.icon.css("top", y + gl_tasksList.offset);
             gl_desktop.drag.setCursor("move");
             self.icon.css("left", 0);
             if (!self.resistance)
@@ -1097,8 +1095,7 @@ function Task(resource, html)
             mouseY += self.mouse.y - self.taskHeight + 2;
             self.mouse.y = self.taskHeight - 2;
         }
-        // Moves the task
-        self.icon.css("top", mouseY);
+        // Starts the drag
         self.icon.addClass("drag");
         gl_desktop.drag.setCursor("move");
         gl_desktop.taskPreview.updateActiveAreas();

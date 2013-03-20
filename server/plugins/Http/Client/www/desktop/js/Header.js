@@ -35,11 +35,7 @@ function Header(task)
     // We entered/leaved the full screen mode.
     self.onFullScreen = function (fullScreen)
     {
-        if (self.fullScreenHideTimeout)
-        {
-            clearTimeout(self.fullScreenHideTimeout);
-            self.fullScreenHideTimeout = undefined;
-        }
+        self.clearFullScreenTimeout();
         if (fullScreen)
             self.hide();
         else
@@ -55,11 +51,7 @@ function Header(task)
         if (gl_desktop.isFullScreen())
         {
             self.display();
-            if (self.fullScreenHideTimeout)
-            {
-                clearTimeout(self.fullScreenHideTimeout);
-                self.fullScreenHideTimeout = undefined;
-            }
+            self.clearFullScreenTimeout();
         }
     }
     
@@ -94,6 +86,17 @@ function Header(task)
         self.node.top.css("height", C.Header.FullScreen.hideHeight);
         gl_tasksList.headerHeightChanged(0);
         gl_desktop.events.unbind("mousedown", self);
+        self.clearFullScreenTimeout();
+    }
+    
+    // Clears the full screen timeout.
+    self.clearFullScreenTimeout = function ()
+    {
+        if (self.fullScreenHideTimeout)
+        {
+            clearTimeout(self.fullScreenHideTimeout);
+            delete self.fullScreenHideTimeout;
+        }
     }
 }
     

@@ -160,7 +160,7 @@ function Player(task)
         }
         // Hides the player when the user clicks outside it
         gl_desktop.events.bind("mousedown", self, function(e) {
-            if (!F.isMouseOverNode(e, self.node.bottom))
+            if (!$(e.target).parents("#desktop>.bottom").length)
                 self.hide();
         });
     }

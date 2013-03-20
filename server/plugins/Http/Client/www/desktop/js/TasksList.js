@@ -25,6 +25,8 @@ function TasksList(task)
         self.scrollDelta; // The position of the mouse in the scrolling area
         self.scrollInterval; // The interval that actually scroll the tasks list
         self.top = gl_header.height; // The top position of the tasks list
+        self.offset = 0; // Applies an offset to the vertical position of the icons, relative to the tasks_list top.
+        self.updateIconsHeight; // If true, the offset of the icons node have to be updated the next time the mouse leaves the tasks list, in full screen mode
         
         // Default values
         self.node.tasks_list.height(self.height);
@@ -56,17 +58,21 @@ function TasksList(task)
     }
     
     // The mouse leaved the tasks list.
-    self.mouseLeave = function ()
+    self.mouseLeave = function (e)
     {
         self.over = false;
         self.stopScroll();
         // Hides the tasks list after the timeout when the mouse leaves it, in full screen mode.
         if (gl_desktop.isFullScreen())
+        {
             self.fullScreenHideTimeout = setTimeout(function () {
                 if (!gl_desktop.drag.isDragging("Task") && !gl_desktop.drag.isDragging("Page"))
                     self.hideFullScreen();
                 delete self.fullScreenHideTimeout;
             }, C.TasksList.FullScreen.displayDuration);
+            if (self.updateIconsHeight && !gl_desktop.drag.isDragging())
+                self.setIconsOffset(0);
+        }
     }
     
     // Manages the scrolling areas at the top and the bottom of the tasks list.
@@ -208,13 +214,16 @@ function TasksList(task)
             self.top = 0;
             self.node.background.css("top", self.top);
             self.node.icons.css("margin-top", self.top);
+            self.node.tasks_list.css("z-index", C.TasksList.FullScreen.zIndex);
             self.hideFullScreen();
         }
         else
         {
             self.displayFullScreen();
             self.top = gl_header.height;
+            self.offset = 0;
             self.node.background.css("top", -self.top);
+            self.node.icons.css("margin-top", 0);
             self.node.tasks_list.css("z-index", "auto");
             gl_desktop.events.unbind("mousedown", self);
         }
@@ -226,7 +235,6 @@ function TasksList(task)
     {
         self.node.tasks_list.removeClass("hide_full_screen");
         self.node.tasks_list.css("left", 0);
-        self.node.tasks_list.css("z-index", gl_windows.getZIndex());
         self.clearFullScreenTimeout();
         // Hides the tasks list when the user clicks outside it
         gl_desktop.events.bind("mousedown", self, function(e) {
@@ -239,8 +247,7 @@ function TasksList(task)
     self.hideFullScreen = function ()
     {
         self.node.tasks_list.addClass("hide_full_screen");
-        self.node.tasks_list.css({"left": -self.width + C.TasksList.FullScreen.hideWidth,
-                                  "z-index": C.TasksList.FullScreen.zIndex});
+        self.node.tasks_list.css("left", -self.width + C.TasksList.FullScreen.hideWidth);
         self.clearFullScreenTimeout();
         gl_desktop.events.unbind("mousedown", self);
     }
@@ -253,19 +260,27 @@ function TasksList(task)
         self.clearFullScreenTimeout();
         // Hides the tasks list if we are out of it, in full screen mode.
         if (!F.isMouseOverNode(e, self.node.tasks_list))
+        {
             self.fullScreenHideTimeout = setTimeout(function () {
                 self.hideFullScreen();
                 delete self.fullScreenHideTimeout;
             }, C.TasksList.FullScreen.displayDuration);
+            if (self.updateIconsHeight)
+                self.setIconsOffset(0);
+        }
     }
 
     // Called when the header height changed in full screen mode.
     self.headerHeightChanged = function (newHeight)
     {
+        self.updateIconsHeight = false;
         if (gl_desktop.isFullScreen())
         {
-            self.top = newHeight;
-            self.node.icons.css("margin-top", self.top);
+            if (newHeight || !self.over)
+                self.setIconsOffset(newHeight);
+            // If the mouse is over the tasks list, we will update the icons the next time the mouse leaves it
+            else
+                self.updateIconsHeight = true;
         }
     }
     
@@ -277,6 +292,15 @@ function TasksList(task)
             clearTimeout(self.fullScreenHideTimeout);
             delete self.fullScreenHideTimeout;
         }
+    }
+    
+    // Applies an offset to the vertical position of the icons, relative to the tasks_list top.
+    self.setIconsOffset = function (offset)
+    {
+        self.top = offset;
+        self.offset = offset;
+        self.node.icons.css("margin-top", offset);
+        self.updateIconsHeight = false;
     }
 }
 
