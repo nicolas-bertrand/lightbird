@@ -37,7 +37,6 @@ function TasksList(task)
         self.node.tasks_list.mouseenter(function (e) { self.mouseEnter(e); });
         self.node.tasks_list.mouseleave(function (e) { self.mouseLeave(e); });
         self.node.tasks_list.mousemove(function (e) { self.mouseMove(e); });
-        self.node.tasks_list.click(function (e) { self.click(e); });
         gl_desktop.events.bind("mousewheel", self, function(e, delta) { self.mouseWheel(e, delta); });
     }
     
@@ -99,19 +98,7 @@ function TasksList(task)
                 gl_desktop.drag.getObject().updateTasksList(e.pageY - self.top);
         }
     }
-    
-    // Hides all the pages, or displays them back.
-    self.click = function (e)
-    {
-        if (e.which != 1 || e.target != self.node.icons[0])
-            return ;
-        // Saves the pages displayed and hide the them
-        var pages = gl_desktop.sessions.save("tasksList").each(function () { this.object.hide(); });
-        // If no page has been hidden we display them back
-        if (pages.length == 0)
-            gl_desktop.sessions.load("tasksList").each(function () { this.object.display(); });
-    }
-    
+
     // Scrolls the tasks list up or down, depending on the delta.
     // @param delta : The speed of the scroll. Scroll top if positive, down if negative.
     // Should be between 1 and -1.
@@ -421,7 +408,7 @@ TasksList.Buttons = function (task)
             c.background.hide();
             c.path.attr(C.TasksList.Buttons.window.attr);
         });
-        $(c.link.node).click(function ()
+        $(c.link.node).mousedown(function ()
         {
             var page = self.task.getPage();
             if (self.task.isWindow())

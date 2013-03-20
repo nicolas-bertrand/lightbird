@@ -241,6 +241,7 @@ function Page()
         self.container = gl_desktop; // The container that displays the page
         self.zIndex = 0; // The z-index of the content of the page
         self.justFocused = false; // True if the page was not focused before the mouse down event
+        self.oldWindowCoordinates; // The coordinates of the last time the page was in a window
         // Drag properties
         self.element; // The initial position of the icon {x, y}
         self.mouse; // The position of the mouse in the icon {x, y}

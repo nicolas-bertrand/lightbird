@@ -44,20 +44,20 @@
     cursor: pointer;
 }
 
-#windows>.window>.top>.window {
+#windows>.window>.top>.plus {
     float: left;
     cursor: pointer;
 }
 
-#windows>.window>.top>.fullscreen {
+#windows>.window>.top>.window {
     float: left;
     cursor: pointer;
 }
 
 #windows>.window>.top>.close:hover,
 #windows>.window>.top>.hide:hover,
-#windows>.window>.top>.window:hover,
-#windows>.window>.top>.fullscreen:hover {
+#windows>.window>.top>.plus:hover,
+#windows>.window>.top>.window:hover {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.20);
 }
 

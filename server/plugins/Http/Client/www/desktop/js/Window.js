@@ -88,8 +88,8 @@ function Window(page)
         self.node.top_top = $(self.node.top).children(".top")[0];
         self.node.close = $(self.node.top).children(".close")[0];
         self.node.hide = $(self.node.top).children(".hide")[0];
+        self.node.plus = $(self.node.top).children(".plus")[0];
         self.node.window = $(self.node.top).children(".window")[0];
-        self.node.fullscreen = $(self.node.top).children(".fullscreen")[0];
         self.node.middle = $(self.element).children(".middle")[0];
         self.node.middle_left = $(self.node.middle).children(".left")[0];
         self.node.middle_right = $(self.node.middle).children(".right")[0];
@@ -103,8 +103,8 @@ function Window(page)
         // Buttons
         $(self.node.close).click(function (e) { self.buttons(e); });
         $(self.node.hide).click(function (e) { self.buttons(e); });
-        $(self.node.window).click(function (e) { self.buttons(e); });
-        $(self.node.fullscreen).click(function (e) { self.buttons(e); });
+        $(self.node.plus).mousedown(function (e) { self.buttons(e); });
+        $(self.node.window).mousedown(function (e) { self.buttons(e); });
         // Resize
         $(self.node.top).mousedown(function (e) { self.mouseDown(e, "move"); });
         $(self.node.top_left).mousedown(function (e) { self.mouseDown(e, "nw"); });
@@ -138,8 +138,8 @@ function Window(page)
         // Adds the SVG icons
         self.addIcon($(self.node.close)[0], "#ff7733", 1, gl_svg.Window.close);
         self.addIcon($(self.node.hide)[0], "#ffdd33", 4, gl_svg.Window.hide);
-        self.addIcon($(self.node.window)[0], "#46da57", 0, gl_svg.Window.window);
-        self.addIcon($(self.node.fullscreen)[0], "#33bbff", 0, gl_svg.Window.fullscreen);
+        self.addIcon($(self.node.plus)[0], "#46da57", 0, gl_svg.Window.plus);
+        self.addIcon($(self.node.window)[0], "#33bbff", 0, gl_svg.Window.window);
         
         // Adds the window to the list
         $(self.element).appendTo(gl_windows.node.windows);
@@ -165,6 +165,19 @@ function Window(page)
             self.page.close();
         else if (e.currentTarget == self.node.hide)
             self.page.hide();
+        else if (e.currentTarget == self.node.plus)
+        {
+            // Saves the pages displayed and hide them
+            if (gl_desktop.node.pages.children(".page.display").length > 1)
+                gl_desktop.sessions.save("window").each(function ()
+                {
+                    if (this.object != self.page)
+                        this.object.hide();
+                });
+            // If no page has been hidden we display them back
+            else
+                gl_desktop.sessions.load("window").each(function () { this.object.display(); });
+        }
         else if (e.currentTarget == self.node.window)
         {
             var page = self.page;
