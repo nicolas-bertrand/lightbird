@@ -697,11 +697,11 @@ function Page()
     {
         self.container.containerChanged(self);
         self.container = container;
-        self.icon.children(".task").each(function () { this.object.setContainer(container); });
         if (container != gl_desktop)
             self.content.addClass("window");
         else
             self.content.removeClass("window");
+        self.icon.children(".task").each(function () { this.object.setContainer(container); });
     }
     
     // Puts the focus on the page elements.
@@ -739,6 +739,7 @@ function Task(resource, html)
         self.resource = new Object(); // The instance of the resource that manages the content
         self.buttons; // Manages the buttons of the task
         self.lastFocusDate = 0; // The date of the last time the task was focused. Used by isFocus to tell if the task has the focus regardless of the events timing.
+        self.lastIconMouseDown = 0; // The time of the last mouse down event on the icon. Used to simulate the double click.
         self.lastBackgroundSet; // The last task background set using setBackground()
         self.overflow = true; // If the overflow of the content is enabled
         // The following members are used when the task icon is being dragged
@@ -808,6 +809,11 @@ function Task(resource, html)
     {
         if (e.which != 1 || TasksList.Buttons.isButton(e))
             return ;
+        // Simulates the double click
+        if (new Date().getTime() - self.lastIconMouseDown < C.Desktop.doubleClickInterval)
+            return self.dblClick();
+        self.lastIconMouseDown = new Date().getTime();
+        // Initializes the drag of the icon
         gl_desktop.drag.start(e, self.icon, self, "mouseMove", "mouseWheel", "mouseUp");
         gl_desktop.drag.setCursor("pointer");
         self.mouse = gl_desktop.drag.getMouse();
@@ -821,6 +827,17 @@ function Task(resource, html)
         self.resistance = true;
         // Saves all the pages displayed
         gl_desktop.sessions.save("task");
+    }
+    
+    // Switch bewteen the window and desktop containers.
+    self.dblClick = function ()
+    {
+        self.getPage().hide();
+        if (self.isWindow())
+            self.getPage().setContainer(gl_desktop);
+        else
+            gl_windows.open(self.getPage());
+        self.lastIconMouseDown = 0;
     }
     
     // Moves the task icon according to the mouse position.
@@ -1285,6 +1302,7 @@ function Task(resource, html)
         else
             self.content.removeClass("window");
         self.focus(false);
+        self.buttons.setContainer(container);
     }
     
     // Sets the z-indes of the content of the task.

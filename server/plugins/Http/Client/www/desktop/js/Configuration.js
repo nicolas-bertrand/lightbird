@@ -14,7 +14,8 @@ var Configuration =
         resizeTaskLimitMin: 0, // The minimum ratio by which a task can be resized. Between 0 and 1.
         resizeTaskLimitMax: 1, // The maximum ratio by which a task can be resized. Between 0 and 1.
         resizeResistance: 50, // The number of pixels the mouse need to move before the resize of the tasks starts.
-        resizeDeltaDivisor: 20 // Reduce the delta of the mouse wheel that resize the task margin.
+        resizeDeltaDivisor: 20, // Reduce the delta of the mouse wheel that resize the task margin.
+        doubleClickInterval: 250 // The time interval between two clicks required to create a double click.
     },
     TasksList:
     {

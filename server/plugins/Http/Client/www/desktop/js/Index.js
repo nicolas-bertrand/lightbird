@@ -275,11 +275,12 @@ F.translate = function (resource)
 }
 
 // Returns true if the mouse is over the node.
-F.isMouseOverNode = function (e, node)
+// @param mouse: The coordinates of the mouse {pageX, pageY}
+F.isMouseOverNode = function (mouse, node)
 {
     var offset = node.offset();
     var width = node.width();
     var height = node.height();
     
-    return (e.pageX >= offset.left && e.pageY >= offset.top && e.pageX <= offset.left + width && e.pageY <= offset.top + height);
+    return (mouse.pageX >= offset.left && mouse.pageY >= offset.top && mouse.pageX <= offset.left + width && mouse.pageY <= offset.top + height);
 }

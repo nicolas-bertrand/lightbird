@@ -433,7 +433,6 @@ TasksList.Buttons = function (task)
                 c.background.attr(C.TasksList.Buttons.window.backgroundWindow);
                 gl_windows.open(page);
             }
-            self.close.showBackground();
             page.onResize();
             page.display();
         });
@@ -482,6 +481,17 @@ TasksList.Buttons = function (task)
             self.task.content.removeClass("highlight");
             self.task.icon.removeClass("over");
         }
+    }
+    
+    // The container that displays the task has changed.
+    self.setContainer = function (container)
+    {
+        if (self.close.over)
+            return;
+        if (self.task.isWindow())
+            self.close.background.attr(C.TasksList.Buttons.window.backgroundDesktop);
+        else
+            self.close.background.attr(C.TasksList.Buttons.window.backgroundWindow);
     }
     
     // Returns true if the target is part of the task's button.
