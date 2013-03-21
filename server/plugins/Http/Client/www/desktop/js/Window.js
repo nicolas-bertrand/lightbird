@@ -88,7 +88,7 @@ function Window(page)
         self.node.top_top = $(self.node.top).children(".top")[0];
         self.node.close = $(self.node.top).children(".close")[0];
         self.node.hide = $(self.node.top).children(".hide")[0];
-        self.node.plus = $(self.node.top).children(".plus")[0];
+        self.node.maximize = $(self.node.top).children(".maximize")[0];
         self.node.window = $(self.node.top).children(".window")[0];
         self.node.middle = $(self.element).children(".middle")[0];
         self.node.middle_left = $(self.node.middle).children(".left")[0];
@@ -103,7 +103,7 @@ function Window(page)
         // Buttons
         $(self.node.close).click(function (e) { self.buttons(e); });
         $(self.node.hide).click(function (e) { self.buttons(e); });
-        $(self.node.plus).mousedown(function (e) { self.buttons(e); });
+        $(self.node.maximize).mousedown(function (e) { self.buttons(e); });
         $(self.node.window).mousedown(function (e) { self.buttons(e); });
         // Resize
         $(self.node.top).mousedown(function (e) { self.mouseDown(e, "move"); });
@@ -138,7 +138,7 @@ function Window(page)
         // Adds the SVG icons
         self.addIcon($(self.node.close)[0], "#ff7733", 1, gl_svg.Window.close);
         self.addIcon($(self.node.hide)[0], "#ffdd33", 4, gl_svg.Window.hide);
-        self.addIcon($(self.node.plus)[0], "#46da57", 0, gl_svg.Window.plus);
+        self.addIcon($(self.node.maximize)[0], "#46da57", 0, gl_svg.Window.maximize);
         self.addIcon($(self.node.window)[0], "#33bbff", 0, gl_svg.Window.window);
         
         // Adds the window to the list
@@ -165,18 +165,39 @@ function Window(page)
             self.page.close();
         else if (e.currentTarget == self.node.hide)
             self.page.hide();
-        else if (e.currentTarget == self.node.plus)
+        else if (e.currentTarget == self.node.maximize)
         {
-            // Saves the pages displayed and hide them
-            if (gl_desktop.node.pages.children(".page.display").length > 1)
-                gl_desktop.sessions.save("window").each(function ()
+            // Hides all the other pages
+            var displayedPages = gl_desktop.node.pages.children(".page.display");
+            if (displayedPages.length > 1)
+            {
+                displayedPages.each(function ()
                 {
                     if (this.object != self.page)
                         this.object.hide();
                 });
-            // If no page has been hidden we display them back
+                self.page.oldWindowMaximizeCoordinates = {left: self.left, top: self.top, width: self.width, height: self.height};
+            }
+            // If no page have been hidden we maximize the size of the window
             else
-                gl_desktop.sessions.load("window").each(function () { this.object.display(); });
+            {
+                var oldCoordinates = {left: self.left, top: self.top, width: self.width, height: self.height};
+                self.left = gl_desktop.left + C.Window.border + C.Window.maximizeMargin;
+                self.top = gl_desktop.top + self.topHeight + C.Window.maximizeMargin;
+                self.width = gl_desktop.width - C.Window.border * 2 - C.Window.maximizeMargin * 2;
+                self.height = gl_desktop.height - self.topHeight - C.Window.border - C.Window.maximizeMargin * 2;
+                if (self.page.oldWindowMaximizeCoordinates && oldCoordinates.left == self.left && oldCoordinates.top == self.top && oldCoordinates.width == self.width && oldCoordinates.height == self.height)
+                {
+                    self.left = self.page.oldWindowMaximizeCoordinates.left;
+                    self.top = self.page.oldWindowMaximizeCoordinates.top;
+                    self.width = self.page.oldWindowMaximizeCoordinates.width;
+                    self.height = self.page.oldWindowMaximizeCoordinates.height;
+                    delete self.page.oldWindowMaximizeCoordinates;
+                }
+                else
+                    self.page.oldWindowMaximizeCoordinates = oldCoordinates;
+                self.onResize();
+            }
         }
         else if (e.currentTarget == self.node.window)
         {
@@ -357,7 +378,7 @@ function Window(page)
         self.close = function ()
         {
             // Saves the coordinates of the window for the next time it is opened, if necessary
-            self.page.oldWindowCoordinates = { left : self.left, top : self.top, width : self.width, height : self.height };
+            self.page.oldWindowCoordinates = {left: self.left, top: self.top, width: self.width, height: self.height};
             // Clears the window
             self.page = undefined;
             self.element.object = undefined;

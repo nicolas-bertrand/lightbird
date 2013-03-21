@@ -44,7 +44,7 @@
     cursor: pointer;
 }
 
-#windows>.window>.top>.plus {
+#windows>.window>.top>.maximize {
     float: left;
     cursor: pointer;
 }
@@ -56,7 +56,7 @@
 
 #windows>.window>.top>.close:hover,
 #windows>.window>.top>.hide:hover,
-#windows>.window>.top>.plus:hover,
+#windows>.window>.top>.maximize:hover,
 #windows>.window>.top>.window:hover {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.20);
 }

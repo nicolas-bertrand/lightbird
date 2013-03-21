@@ -84,7 +84,8 @@ var Configuration =
         minHeight: 35,
         border: 5, // The size of the border of the window.
         topHeight: 35, // The height of the top of the window.
-        bottomHeight: 30 // The height of the bottom of the window.
+        bottomHeight: 30, // The height of the bottom of the window.
+        maximizeMargin: 40 // The margin between the desktop sides and the maximized window.
     },
     Player:
     {
