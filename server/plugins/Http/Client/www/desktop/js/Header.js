@@ -73,8 +73,8 @@ function Header(task)
         self.node.top.css("height", C.Header.defaultHeight);
         gl_tasksList.headerHeightChanged(C.Header.defaultHeight);
         // Hides the header when the user clicks outside it
-        gl_desktop.events.bind("mousedown", self, function(e) {
-            if (!F.isMouseOverNode(e, self.node.top))
+        gl_desktop.events.bind("mousedown", self, function() {
+            if (!F.isMouseOverNode(self.node.top))
                 self.hide();
         });
     }
@@ -181,7 +181,14 @@ self.Menu = function ()
             if (e.relatedTarget != button.link.node)
                 self.mouseLeave(button);
         });
-        var mousedown = function (e) { gl_desktop.openPage(task, '', e); };
+        var mousedown = function (e)
+        {
+            // Opens the task
+            gl_desktop.openPage(task, '', e);
+            // Displays the tasks list if we are in full screen mode
+            if (gl_desktop.isFullScreen())
+                gl_tasksList.displayFullScreen(true);
+        };
         $(button.link.node).mousedown(mousedown);
         text.mousedown(mousedown);
     }

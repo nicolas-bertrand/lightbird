@@ -275,12 +275,12 @@ F.translate = function (resource)
 }
 
 // Returns true if the mouse is over the node.
-// @param mouse: The coordinates of the mouse {pageX, pageY}
-F.isMouseOverNode = function (mouse, node)
+F.isMouseOverNode = function (node)
 {
     var offset = node.offset();
     var width = node.width();
     var height = node.height();
+    var mouse = gl_desktop.mouse;
     
     return (mouse.pageX >= offset.left && mouse.pageY >= offset.top && mouse.pageX <= offset.left + width && mouse.pageY <= offset.top + height);
 }

@@ -57,7 +57,7 @@ function TasksList(task)
     }
     
     // The mouse leaved the tasks list.
-    self.mouseLeave = function (e)
+    self.mouseLeave = function ()
     {
         self.over = false;
         self.stopScroll();
@@ -218,16 +218,23 @@ function TasksList(task)
     }
     
     // Displays the tasks list in full screen mode.
-    self.displayFullScreen = function ()
+    // @param timeout: If the full screen timeout have to be enabled if the mouse is out of the tasks list.
+    self.displayFullScreen = function (timeout)
     {
         self.node.tasks_list.removeClass("hide_full_screen");
         self.node.tasks_list.css("left", 0);
         self.clearFullScreenTimeout();
         // Hides the tasks list when the user clicks outside it
-        gl_desktop.events.bind("mousedown", self, function(e) {
-            if (!F.isMouseOverNode(e, self.node.tasks_list))
+        gl_desktop.events.bind("mousedown", self, function() {
+            if (!F.isMouseOverNode(self.node.tasks_list))
                 self.hideFullScreen();
         });
+        // Sets the full screen timeout if the mouse is out of the tasks list
+        if (timeout && !self.over)
+            self.fullScreenHideTimeout = setTimeout(function () {
+                self.hideFullScreen();
+                delete self.fullScreenHideTimeout;
+            }, C.TasksList.FullScreen.displayDuration);
     }
     
     // Hides (partially) the tasks list in full screen mode.
@@ -240,13 +247,13 @@ function TasksList(task)
     }
     
     // The dragging of a task or a page has stopped.
-    self.stopDrag = function (e)
+    self.stopDrag = function ()
     {
         if (!gl_desktop.isFullScreen())
             return ;
         self.clearFullScreenTimeout();
         // Hides the tasks list if we are out of it, in full screen mode.
-        if (!F.isMouseOverNode(e, self.node.tasks_list))
+        if (!F.isMouseOverNode(self.node.tasks_list))
         {
             self.fullScreenHideTimeout = setTimeout(function () {
                 self.hideFullScreen();
@@ -448,9 +455,9 @@ TasksList.Buttons = function (task)
     }
     
     // Displays the buttons back, if the mouse is over the task.
-    self.stopDrag = function (e)
+    self.stopDrag = function ()
     {
-        if (F.isMouseOverNode(e, self.task.icon))
+        if (F.isMouseOverNode(self.task.icon))
             self._display();
         else
             $(self.task.icon).removeClass("over");

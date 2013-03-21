@@ -443,9 +443,9 @@ function Page()
         self.icon.insertBefore(self.target);
         self.target.remove();
         self.pagesPositions = undefined;
-        if (!F.isMouseOverNode(e, self.activeArea))
+        if (!F.isMouseOverNode(self.activeArea))
             self.icon.removeClass("over");
-        gl_tasksList.stopDrag(e);
+        gl_tasksList.stopDrag();
     }
     
     // Closes the page with the middle mouse.
@@ -989,7 +989,7 @@ function Task(resource, html)
                     preview.task.getPage().onResize();
                 }
             }
-            self.stopDrag(e);
+            self.stopDrag();
         }
         // Otherwise the page is hidden if it was already focused before the mouse down event
         else if (!self.getPage().justFocused)
@@ -1127,18 +1127,18 @@ function Task(resource, html)
     }
     
     // Clears the context after the drag of the icon.
-    self.stopDrag = function (e)
+    self.stopDrag = function ()
     {
         gl_tasksList.node.top.height(C.TasksList.pageMargin);
         gl_tasksList.node.bottom.height(0);
-        gl_desktop.taskPreview.hide(e);
+        gl_desktop.taskPreview.hide();
         gl_desktop.drag.overlay.html("");
         self.target.remove();
         self.icon.parent().removeClass("empty");
         self.icon.removeClass("drag");
         self.icon.removeClass("drag_window");
-        self.buttons.stopDrag(e);
-        gl_tasksList.stopDrag(e);
+        self.buttons.stopDrag();
+        gl_tasksList.stopDrag();
         gl_tasksList.node.icons.children(".page").each(function () { this.object.updateIconHeight(); });
         if (self.createPage == "bottom")
             gl_tasksList.scrollTop(gl_tasksList.node.icons[0].style.scrollHeight);
@@ -1427,9 +1427,9 @@ function Task(resource, html)
         
         // Ensures that the task icon style is up to date, based on the position of the mouse.
         // Should be called after a drag within the content.
-        self.updateMouseOverContent = function (e)
+        self.updateMouseOverContent = function ()
         {
-            if (F.isMouseOverNode(e, self.content))
+            if (F.isMouseOverNode(self.content))
                 self.icon.addClass("over_content");
             else
                 self.icon.removeClass("over_content");
@@ -1659,7 +1659,7 @@ function TaskTreeNode(node)
         delete self.bottomNode;
         delete self.startResize;
         self.resize.parent().removeClass("resize_node");
-        if (!F.isMouseOverNode(e, self.resize))
+        if (!F.isMouseOverNode(self.resize))
             self.resize.parent()[0].object.icon.removeClass("over");
     }
 

@@ -296,10 +296,10 @@ function Header()
     }
     
     // Resizes the column.
-    self.mouseUpSeparator = function (e)
+    self.mouseUpSeparator = function ()
     {
         self.updateSeparators();
-        task.updateMouseOverContent(e);
+        task.updateMouseOverContent();
     }
     
     // Shortens the width of the separators next to a small column.
