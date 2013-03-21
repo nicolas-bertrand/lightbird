@@ -60,9 +60,9 @@ var Configuration =
                 height: 9, // The height of the window path.
                 attr: {fill: "white", opacity: 0.5, stroke: "none"}, // The attributes of the window path.
                 attrOver: {opacity: 1}, // The attributes of the window path when the mouse is over it.
-                background: {fill: "#4895d0", stroke: "none"}, // The attributes of the background.
-                backgroundDesktop: {fill: "#53b85c"}, // The color of the background when the page is on the desktop.
-                backgroundWindow: {fill: "#4895d0"}, // The color of the background when the page is in a window.
+                background: {fill: "#575757", opacity: 0.5, stroke: "none"}, // The attributes of the background.
+                backgroundDesktop: {fill: "#53b85c", opacity: 1}, // The color of the background when the page is on the desktop.
+                backgroundWindow: {fill: "#4895d0", opacity: 1}, // The color of the background when the page is in a window.
             },
         }
     },

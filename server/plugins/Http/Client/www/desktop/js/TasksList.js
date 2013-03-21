@@ -424,8 +424,8 @@ TasksList.Buttons = function (task)
         });
         $(c.link.node).mouseout(function ()
         {
-            c.background.hide();
             c.path.attr(C.TasksList.Buttons.window.attr);
+            c.background.attr(C.TasksList.Buttons.window.background);
         });
         $(c.link.node).mousedown(function ()
         {
@@ -451,6 +451,7 @@ TasksList.Buttons = function (task)
         self.close.path.hide();
         self.close.background.hide();
         self.window.path.hide();
+        self.window.background.hide();
         self.task.content.removeClass("highlight");
     }
     
@@ -469,6 +470,7 @@ TasksList.Buttons = function (task)
         // Displays the buttons
         self.close.showBackground();
         self.close.path.show();
+        self.window.background.show();
         self.window.path.show();
         $(self.task.icon).addClass("over");
         // The highlight on the content is only added if there is more than one task in the page
@@ -485,6 +487,7 @@ TasksList.Buttons = function (task)
             self.close.path.hide();
             self.close.background.hide();
             self.window.path.hide();
+            self.window.background.hide();
             self.task.content.removeClass("highlight");
             self.task.icon.removeClass("over");
         }

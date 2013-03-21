@@ -688,8 +688,7 @@ function Page()
     // Must be called when the height of the page icon changed.
     self.updateIconHeight = function ()
     {
-        self.icon.height("auto");
-        self.icon.height(self.icon.height());
+        self.activeArea.height(self.icon.height());
     }
     
     // Changes the container that displays the page.
@@ -844,8 +843,8 @@ function Task(resource, html)
     self.mouseMove = function (e)
     {
         // The new position of the task icon
-        e.pageY -= gl_tasksList.top;
-        var y = e.pageY - self.mouse.y;
+        var pageY = e.pageY - gl_tasksList.top;
+        var y = pageY - self.mouse.y;
         var x = e.pageX - self.mouse.x;
         var elementY = self.element.y - gl_tasksList.scrollTop();
         
@@ -862,7 +861,7 @@ function Task(resource, html)
         if (e.pageX >= gl_tasksList.width)
         {
             self.icon.css("left", e.pageX + C.TasksList.taskDragShift.x);
-            self.icon.css("top", Math.min(Math.max(e.pageY + C.TasksList.taskDragShift.y, 0), gl_desktop.height - self.taskHeight));
+            self.icon.css("top", Math.min(Math.max(pageY + C.TasksList.taskDragShift.y, 0), gl_desktop.height - self.taskHeight));
             gl_desktop.drag.setCursor("auto");
         }
         // Moves the task vertically
@@ -872,7 +871,7 @@ function Task(resource, html)
             gl_desktop.drag.setCursor("move");
             self.icon.css("left", 0);
             if (!self.resistance)
-                self.updateTasksList(e.pageY);
+                self.updateTasksList(pageY);
         }
     }
     
@@ -1354,6 +1353,16 @@ function Task(resource, html)
         self.updateIconHeight = function ()
         {
             self.getPage().updateIconHeight();
+        }
+        
+        // Allows to make the content of the icon larger.
+        self.setLargeIconContent = function (isLarge)
+        {
+            var content = self.icon.children(".content");
+            if (isLarge)
+                content.addClass("large");
+            else
+                content.removeClass("large");
         }
         
         // Sets the background of the task.
@@ -2134,11 +2143,11 @@ function Events()
         self.events = new Object(); // Stores the events and the objects binded to them
         
         // Events
-        $(document.body).mousedown(function (e) { self.call("mousedown", e); });
-        $(document.body).mousewheel(function (e, delta) { self.call("mousewheel", e, Math.round(delta * C.Desktop.mouseWheelMultiplier)); });
-        $(document.body).mousemove(function (e) { self.call("mousemove", e); });
+        $(window).mousedown(function (e) { self.call("mousedown", e); });
+        $(window).mousewheel(function (e, delta) { self.call("mousewheel", e, Math.round(delta * C.Desktop.mouseWheelMultiplier)); });
+        $(window).mousemove(function (e) { self.call("mousemove", e); });
         $(window).mouseup(function (e) { self.call("mouseup", e); });
-        $(document.body).mouseleave(function (e) { self.call("mouseleave", e); });
+        $(window).mouseleave(function (e) { self.call("mouseleave", e); });
     }
 
     // Binds an event to an object. The handler will be called when the event is called.

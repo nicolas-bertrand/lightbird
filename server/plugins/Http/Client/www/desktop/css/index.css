@@ -251,9 +251,9 @@ a:visited {
     width: 10px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0);
-    position: relative;
-    z-index: 1;
-    float: left;
+    position: absolute;
+    left: 0;
+    z-index: 2;
     cursor: move;
 }
 
@@ -347,6 +347,15 @@ a:visited {
 }
 #desktop>.middle>.area>.tasks_list>.icons>.page.window>.task>.content>.left {
     background-color: #53b85c;
+}
+
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content.large {
+    margin-left: 0px;
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content.large>.left {
+    left: 0px;
+    z-index: 1;
+    opacity: 0.66;
 }
 
 /* Target */
