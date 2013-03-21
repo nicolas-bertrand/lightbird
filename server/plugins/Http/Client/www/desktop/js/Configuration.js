@@ -48,7 +48,10 @@ var Configuration =
                 height: 9, // The height of the close path.
                 attr: {fill: "white", opacity: 0.5, stroke: "none"}, // The attributes of the close path.
                 attrOver: {opacity: 1}, // The attributes of the close path when the mouse is over it.
-                background: {fill: "#e34738", stroke: "none"}, // The attributes of the background.
+                // The attributes of the background.
+                backgroundDesktop: {fill: "#4895d0", stroke: "none"}, // When the icon is on the desktop
+                backgroundWindow: {fill: "#53b85c", stroke: "none"}, // When the icon is a window
+                backgroundOver: {fill: "#e34738", stroke: "none"}, // When the mouse is over the button
             },
             window:
             {

@@ -12,6 +12,7 @@ function ResourceFiles(task)
         resource.node.other = $(resource.node.controls).children(".other")[0];
         resource.node.header = $(resource.node.element).children(".header")[0];
         resource.node.list = $(resource.node.element).children(".list")[0];
+        resource.node.icon = task.getIconNodes();
         
         // Members
         resource.icons = new Icons(); // Generates the SVG icons
@@ -22,8 +23,10 @@ function ResourceFiles(task)
         resource.fileIndex = 0; // The index of the current file of the playlist
         resource.files = new Files(); // The list of the files to display.
         
-        // Sets the resource instance to the task, so that it can call close and onResize
+        // Default values
         task.setResource(resource);
+        resource.node.icon.content.css("padding", 5);
+        resource.updateIcon();
     }
     
     // The task have been resized.
@@ -41,6 +44,23 @@ function ResourceFiles(task)
             resource[key] = undefined;
     }
 
+    // Updates the content of the icon based on the files displayed
+    resource.updateIcon = function ()
+    {
+        // Total number of files
+        resource.node.icon.title.html(resource.files.length + " " + T.Files.files);
+        // Number of files of each type
+        var filesPerType = {audio: 0, document: 0, image: 0, other: 0, video: 0} ;
+        for (var i = 0; i < resource.files.length; ++i)
+            filesPerType[gl_files.list[resource.files[i]].type]++;
+        var content = "";
+        for (var t in filesPerType)
+            if (filesPerType[t])
+                content += filesPerType[t] + " " + t + "<br />";
+        resource.node.icon.content.html(content);
+        task.updateIconHeight();
+    }
+    
 // Playlist interface
     {
         resource.getNumberFiles = function ()
@@ -86,6 +106,7 @@ function Files()
                 self.push(self.raw[i]);
         }
         resource.container.onFilesChange();
+        resource.updateIcon();
     }
     
     // The files of this type will not be displayed.

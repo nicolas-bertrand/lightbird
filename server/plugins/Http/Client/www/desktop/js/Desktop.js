@@ -765,14 +765,12 @@ function Task(resource, html)
         // Adds the title of the icon
         var title = $("<div></div>");
         title.addClass("title");
-        title.html("<span>250 " + T.Tasks[resource] + "</span>");
+        title.html("<div class=\"container\"><div><span>" + T.Tasks[resource] + "</span></div></div>");
         title.appendTo(self.icon);
         // Adds the content of the icon
-        var content = $("<div></div>").addClass("content");
-        var container = $("<div></div>").addClass("container");
-        container.html("120 images<br />23 videos<br />12 audios<br />5 documents");
-        container.appendTo(content);
-        content.appendTo(self.icon);
+        var content = $("<div></div>").addClass("content").appendTo(self.icon);
+        var container = $("<div></div>").addClass("container").appendTo(content);
+        var text = $("<div></div>").addClass("text").appendTo(container);
         // Adds the left margin of the content
         var left = $("<div></div>").addClass("left");
         left.prependTo(content);
@@ -1321,6 +1319,23 @@ function Task(resource, html)
         self.setResource = function (resource)
         {
             self.resource = resource;
+        }
+        
+        // Returns the title and content nodes of the icon, which can be modified by the resource.
+        // updateIconHeight() must be calles after a modification that changed the height of the icon.
+        // @return {title: , content: }
+        self.getIconNodes = function ()
+        {
+            return ({
+                title: self.icon.find(".title span"),
+                content: self.icon.find(".content>.container>.text")
+            });
+        }
+        
+        // Must be called when the icon height has been modified.
+        self.updateIconHeight = function ()
+        {
+            self.getPage().updateIconHeight();
         }
         
         // Sets the background of the task.

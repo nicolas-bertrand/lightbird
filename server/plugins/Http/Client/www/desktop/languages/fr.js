@@ -36,7 +36,8 @@ var Translation =
         document: "Document",
         image: "Image",
         other: "Autre",
-        video: "Vidéo"
+        video: "Vidéo",
+        files: "Fichiers"
     },
     Uploads:
     {

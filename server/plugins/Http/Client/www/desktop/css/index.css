@@ -286,9 +286,16 @@ a:visited {
     color: #111111;
     text-shadow: 0 0 5px rgba(255, 255, 255, 1);
 }
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.title>span {
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.title>.container {
     position: absolute;
-    left: 10px;
+    left: -10px;
+    width: 100%;
+    overflow: hidden;
+}
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.title>.container>div {
+    position: relative;
+    left: 20px;
+    width: 1000px;
 }
 
 #desktop>.middle>.area>.tasks_list>.icons>.page.over>.task>.title,
@@ -326,7 +333,8 @@ a:visited {
     background-image: -ms-linear-gradient(top, #575757 0%, #464646 100%);
 }
 #desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.container {
-    padding:5px;
+    overflow: hidden;
+    position: relative;
 }
 
 #desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.left {
@@ -386,7 +394,7 @@ a:visited {
     height: 100%;
 }
 
-#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.window
+#desktop>.middle>.area>.tasks_list>.icons>.page>.task>.content>.container>.window
 {
     position: absolute;
     bottom: 0px;

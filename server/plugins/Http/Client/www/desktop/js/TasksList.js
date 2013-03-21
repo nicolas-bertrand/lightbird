@@ -338,23 +338,35 @@ TasksList.Buttons = function (task)
         c.path.attr(C.TasksList.Buttons.close.attr);
         c.path.hide();
         // Draws the background
-        c.background = c.paper.path("M0," + C.TasksList.taskTitleHeight + "L" + slope + " 0,H200,l0 " + C.TasksList.taskTitleHeight + "z");
+        c.background = c.paper.path("M0," + C.TasksList.taskTitleHeight + "L" + slope + " 0,H" + width + ",l0 " + C.TasksList.taskTitleHeight + "z");
         c.background.transform("T" + (Math.abs(slope / 2) - slope / 2) + ",0");
-        c.background.attr(C.TasksList.Buttons.close.background);
         c.background.toBack();
         c.background.hide();
         c.link = c.background.clone()
         c.link.attr(C.TasksList.Buttons.linkAttr);
         c.link.toFront();
         // Events
+        c.showBackground = function ()
+        {
+            if (c.over)
+                return ;
+            if (self.task.isWindow())
+                c.background.attr(C.TasksList.Buttons.close.backgroundWindow);
+            else
+                c.background.attr(C.TasksList.Buttons.close.backgroundDesktop);
+            c.background.show();
+        }
         $(c.link.node).mouseover(function ()
         {
+            c.over = true;
+            c.background.attr(C.TasksList.Buttons.close.backgroundOver);
             c.background.show();
             c.path.attr(C.TasksList.Buttons.close.attrOver);
         });
         $(c.link.node).mouseout(function ()
         {
-            c.background.hide();
+            c.over = false;
+            c.showBackground();
             c.path.attr(C.TasksList.Buttons.close.attr);
         });
         $(c.link.node).click(function ()
@@ -374,7 +386,7 @@ TasksList.Buttons = function (task)
         slope = Math.abs(C.TasksList.Buttons.slopeRatio) * height;
         // Creates the node
         c.node = $("<div></div>").addClass("window")
-        c.node.appendTo(self.task.icon.children(".content"));
+        c.node.appendTo(self.task.icon.children(".content").children(".container"));
         c.node.width(width);
         c.node.height(height);
         c.paper = Raphael(c.node[0], "100%", "100%");
@@ -421,6 +433,7 @@ TasksList.Buttons = function (task)
                 c.background.attr(C.TasksList.Buttons.window.backgroundWindow);
                 gl_windows.open(page);
             }
+            self.close.showBackground();
             page.onResize();
             page.display();
         });
@@ -430,6 +443,7 @@ TasksList.Buttons = function (task)
     self.startDrag = function ()
     {
         self.close.path.hide();
+        self.close.background.hide();
         self.window.path.hide();
         self.task.content.removeClass("highlight");
     }
@@ -447,6 +461,7 @@ TasksList.Buttons = function (task)
     self._display = function ()
     {
         // Displays the buttons
+        self.close.showBackground();
         self.close.path.show();
         self.window.path.show();
         $(self.task.icon).addClass("over");
@@ -462,6 +477,7 @@ TasksList.Buttons = function (task)
         if (!gl_desktop.drag.isDragging())
         {
             self.close.path.hide();
+            self.close.background.hide();
             self.window.path.hide();
             self.task.content.removeClass("highlight");
             self.task.icon.removeClass("over");
