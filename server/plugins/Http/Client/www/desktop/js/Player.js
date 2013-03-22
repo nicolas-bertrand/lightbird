@@ -196,7 +196,8 @@ function Player(task)
     }
 
     // Displays the player, in full screen mode.
-    self.displayFullScreen = function ()
+    // @param fullScreenTimeout: If the full screen timeout have to be enabled if the mouse is outside of the player.
+    self.displayFullScreen = function (fullScreenTimeout)
     {
         self.node.bottom.removeClass("hide");
         self.node.bottom.css("bottom", 0);
@@ -206,6 +207,12 @@ function Player(task)
             if (!$(e.target).parents("#desktop>.bottom").length)
                 self.hideFullScreen();
         });
+        // Sets the full screen timeout if the mouse is outside of the player
+        if (fullScreenTimeout && !self.mouseOverPlayer)
+            self.fullScreenHideTimeout = setTimeout(function () {
+                self.hideFullScreen();
+                delete self.fullScreenHideTimeout;
+            }, C.TasksList.FullScreen.displayDuration);
     }
     
     // Hides the player, in full screen mode.

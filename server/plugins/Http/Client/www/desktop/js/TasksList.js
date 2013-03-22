@@ -21,7 +21,7 @@ function TasksList(task)
         // Members
         self.width = C.TasksList.defaultWidth; // The width of the tasks list
         self.fullScreenHideTimeout; // Used to hide the tasks list in full screen mode
-        self.over = false; // True while the mouse is over the tasks list
+        self.mouseOverTasksList = false; // True while the mouse is over the tasks list
         self.scrollDelta; // The position of the mouse in the scrolling area
         self.scrollInterval; // The interval that actually scroll the tasks list
         self.top = gl_header.height; // The top position of the tasks list
@@ -50,7 +50,7 @@ function TasksList(task)
     // The mouse entered the tasks list.
     self.mouseEnter = function ()
     {
-        self.over = true;
+        self.mouseOverTasksList = true;
         // Displays the tasks list when the mouse enters it, in full screen mode.
         if (gl_desktop.isFullScreen())
             self.displayFullScreen();
@@ -59,7 +59,7 @@ function TasksList(task)
     // The mouse leaved the tasks list.
     self.mouseLeave = function ()
     {
-        self.over = false;
+        self.mouseOverTasksList = false;
         self.stopScroll();
         // Hides the tasks list after the timeout when the mouse leaves it, in full screen mode.
         if (gl_desktop.isFullScreen())
@@ -91,7 +91,7 @@ function TasksList(task)
     // Scrolls the tasks list using the mouse wheel.
     self.mouseWheel = function (e, delta)
     {
-        if (self.over)
+        if (self.mouseOverTasksList)
         {
             self.node.icons[0].scrollTop -= delta;
             if (gl_desktop.drag.isDragging("Task"))
@@ -218,8 +218,8 @@ function TasksList(task)
     }
     
     // Displays the tasks list in full screen mode.
-    // @param timeout: If the full screen timeout have to be enabled if the mouse is out of the tasks list.
-    self.displayFullScreen = function (timeout)
+    // @param fullScreenTimeout: If the full screen timeout have to be enabled if the mouse is outside of the tasks list.
+    self.displayFullScreen = function (fullScreenTimeout)
     {
         self.node.tasks_list.removeClass("hide_full_screen");
         self.node.tasks_list.css("left", 0);
@@ -229,8 +229,8 @@ function TasksList(task)
             if (!F.isMouseOverNode(self.node.tasks_list))
                 self.hideFullScreen();
         });
-        // Sets the full screen timeout if the mouse is out of the tasks list
-        if (timeout && !self.over)
+        // Sets the full screen timeout if the mouse is outside of the tasks list
+        if (fullScreenTimeout && !self.mouseOverTasksList)
             self.fullScreenHideTimeout = setTimeout(function () {
                 self.hideFullScreen();
                 delete self.fullScreenHideTimeout;
@@ -270,7 +270,7 @@ function TasksList(task)
         self.updateIconsHeight = false;
         if (gl_desktop.isFullScreen())
         {
-            if (newHeight || !self.over)
+            if (newHeight || !self.mouseOverTasksList)
                 self.setIconsOffset(newHeight);
             // If the mouse is over the tasks list, we will update the icons the next time the mouse leaves it
             else

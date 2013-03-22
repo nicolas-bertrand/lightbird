@@ -34,7 +34,7 @@ var Configuration =
         },
         FullScreen:
         {
-            hideWidth: 5, // The width of the tasksList while it is hidden, which allows to display it back when the mouse enters it again.
+            hideWidth: 1, // The width of the tasksList while it is hidden, which allows to display it back when the mouse enters it again.
             displayDuration: 2000, // The duration during which the player is kept displayed when the mouse leaves it.
             zIndex: 999999 // In full screen, the tasks list is above the windows.
         },
@@ -50,7 +50,7 @@ var Configuration =
                 attr: {fill: "white", opacity: 0.5, stroke: "none"}, // The attributes of the close path.
                 attrOver: {opacity: 1}, // The attributes of the close path when the mouse is over it.
                 // The attributes of the background.
-                backgroundDesktop: {fill: "#4895d0", stroke: "none"}, // When the icon is on the desktop
+                backgroundDesktop: {fill: "180-#4895d0:50-#4895d0", "fill-opacity": 0.5, stroke: "none"}, // When the icon is on the desktop
                 backgroundWindow: {fill: "#53b85c", stroke: "none"}, // When the icon is a window
                 backgroundOver: {fill: "#e34738", stroke: "none"}, // When the mouse is over the button
             },
@@ -106,7 +106,7 @@ var Configuration =
         mouseLeaveTimeout: 1000, // The delay before the effect of the mouse leave.
         FullScreen:
         {
-            hideHeight: 5, // The height of the player while it is hidden, which allows to display it back when the mouse enters it again.
+            hideHeight: 1, // The height of the player while it is hidden, which allows to display it back when the mouse enters it again.
             displayDuration: 2000 // The duration during which the player is kept displayed when the mouse leaves it.
         },
         Seek:
@@ -219,7 +219,7 @@ var Configuration =
         defaultHeight: 40, // The default height of the header.
         FullScreen:
         {
-            hideHeight: 5, // The height of the header while it is hidden, which allows to display it back when the mouse enters it again.
+            hideHeight: 1, // The height of the header while it is hidden, which allows to display it back when the mouse enters it again.
             displayDuration: 2000 // The duration during which the header is kept displayed when the mouse leaves it.
         },
         Menu:

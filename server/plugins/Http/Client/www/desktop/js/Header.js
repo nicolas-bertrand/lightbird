@@ -23,6 +23,7 @@ function Header(task)
         self.menu = new self.Menu(); // Manages the menu
         self.controls = new self.Controls(); // Manages the control buttons
         self.fullScreenHideTimeout; // Used to hide the header in full screen mode
+        self.mouseOverHeader; // True while the mouse is over the header
         
         // Default values
         self.node.top.height(self.height);
@@ -37,10 +38,10 @@ function Header(task)
     {
         self.clearFullScreenTimeout();
         if (fullScreen)
-            self.hide();
+            self.hideFullScreen();
         else
         {
-            self.display();
+            self.displayFullScreen();
             gl_desktop.events.unbind("mousedown", self);
         }
     }
@@ -48,9 +49,10 @@ function Header(task)
     // Displays the header when the mouse enters it, in full screen mode.
     self.mouseEnter = function ()
     {
+        self.mouseOverHeader = true;
         if (gl_desktop.isFullScreen())
         {
-            self.display();
+            self.displayFullScreen();
             self.clearFullScreenTimeout();
         }
     }
@@ -58,29 +60,38 @@ function Header(task)
     // Hides the header after the timeout when the mouse leaves it, in full screen mode.
     self.mouseLeave = function ()
     {
+        self.mouseOverHeader = false;
         if (gl_desktop.isFullScreen())
             self.fullScreenHideTimeout = setTimeout(function ()
             {
-                self.hide();
+                self.hideFullScreen();
                 self.fullScreenHideTimeout = undefined;
             }, C.Header.FullScreen.displayDuration);
     }
     
     // Displays the header, in full screen mode.
-    self.display = function ()
+    // @param fullScreenTimeout: If the full screen timeout have to be enabled if the mouse is outside of the header.
+    self.displayFullScreen = function (fullScreenTimeout)
     {
         self.node.top.removeClass("hide");
         self.node.top.css("height", C.Header.defaultHeight);
+        self.clearFullScreenTimeout();
         gl_tasksList.headerHeightChanged(C.Header.defaultHeight);
         // Hides the header when the user clicks outside it
         gl_desktop.events.bind("mousedown", self, function() {
             if (!F.isMouseOverNode(self.node.top))
-                self.hide();
+                self.hideFullScreen();
         });
+        // Sets the full screen timeout if the mouse is outside of the header
+        if (fullScreenTimeout && !self.mouseOverHeader)
+            self.fullScreenHideTimeout = setTimeout(function () {
+                self.hideFullScreen();
+                delete self.fullScreenHideTimeout;
+            }, C.TasksList.FullScreen.displayDuration);
     }
     
     // Hides the header, in full screen mode.
-    self.hide = function ()
+    self.hideFullScreen = function ()
     {
         self.node.top.addClass("hide");
         self.node.top.css("height", C.Header.FullScreen.hideHeight);

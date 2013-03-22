@@ -37,6 +37,7 @@ function Desktop(task)
         
         // Events
         self.events.bind("mousemove", self, function (e) { self.mouse = {pageX: e.pageX, pageY: e.pageY}; });
+        self.events.bind("mouseleave", self, function (e) { self.mouseLeave(e); });
     }
     
     // Called when the browser is resized. Updates the size of the desktop.
@@ -79,6 +80,23 @@ function Desktop(task)
         pages.each(function () { this.object.close(); });
     }
     
+    // The mouse leaved the desktop.
+    self.mouseLeave = function (e)
+    {
+        // Displays the menu which is on the side the mouse leaved desktop
+        if (self.fullScreen)
+        {
+            if (e.pageX == -1 && e.pageY == -1)
+                return ; // IE
+            else if (e.pageY <= 0)
+                gl_header.displayFullScreen(true);
+            else if (e.pageY >= gl_browserSize.height)
+                gl_player.displayFullScreen(true);
+            else if (e.pageX < 0)
+                gl_tasksList.displayFullScreen(true);
+        }
+    }
+
     // Opens a task in a new page.
     // @param resource : The name of the resource that will be loaded in the task.
     // @param parameter : An optional parameter for the resource.
