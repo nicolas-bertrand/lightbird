@@ -72,6 +72,7 @@ function Desktop(task)
     // Called when the user is disconnecting.
     self.onDisconnect = function ()
     {
+        self.setFullScreen(false);
         gl_files.onDisconnect();
         // Closes all the pages and their tasks.
         var pages = gl_tasksList.getPages();
@@ -101,9 +102,16 @@ function Desktop(task)
     }
     
     // Switches between the normal and the full screen modes.
-    self.setFullScreen = function ()
+    // @param fullScreen: If undefined, the screen mode is switched.
+    self.setFullScreen = function (fullScreen)
     {
-        self.fullScreen = !self.fullScreen;
+        currentMode = self.fullScreen;
+        if (fullScreen == undefined)
+            self.fullScreen = !self.fullScreen;
+        else
+            self.fullScreen = fullScreen;
+        if (currentMode == self.fullScreen)
+            return ;
         if (self.fullScreen)
         {
             // The desktop takes all the browser space in full screen

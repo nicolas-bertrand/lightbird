@@ -83,16 +83,14 @@ function Player(task)
     // We entered/leaved the full screen mode.
     self.onFullScreen = function (fullScreen)
     {
-        if (self.fullScreenHideTimeout)
-        {
-            clearTimeout(self.fullScreenHideTimeout);
-            self.fullScreenHideTimeout = undefined;
-        }
+        self.clearFullScreenTimeout();
         self.timeLine.opaqueTimeLine();
-        if (fullScreen)
-            self.display();
-        else
+        self.controls.onFullScreen(fullScreen);
+        self.displayFullScreen();
+        if (!fullScreen)
             gl_desktop.events.unbind("mousedown", self);
+        else if (!self.mouseOverPlayer)
+            self.hideFullScreen();
     }
     
     // The mouse entered the player area.
@@ -110,7 +108,7 @@ function Player(task)
             self.timeLine.expand();
         // Displays the player if we are in full screen mode
         if (gl_desktop.isFullScreen())
-            self.display();
+            self.displayFullScreen();
     }
     
     // The mouse leaved the player area.
@@ -143,36 +141,9 @@ function Player(task)
         if (gl_desktop.isFullScreen())
             self.fullScreenHideTimeout = setTimeout(function ()
             {
-                self.hide();
-                self.fullScreenHideTimeout = undefined;
+                self.hideFullScreen();
+                delete self.fullScreenHideTimeout;
             }, C.Player.FullScreen.displayDuration);
-    }
-    
-    // Displays the player, in full screen mode.
-    self.display = function ()
-    {
-        self.node.bottom.removeClass("hide");
-        self.node.bottom.css("bottom", 0);
-        if (self.fullScreenHideTimeout)
-        {
-            clearTimeout(self.fullScreenHideTimeout);
-            self.fullScreenHideTimeout = undefined;
-        }
-        // Hides the player when the user clicks outside it
-        gl_desktop.events.bind("mousedown", self, function(e) {
-            if (!$(e.target).parents("#desktop>.bottom").length)
-                self.hide();
-        });
-    }
-    
-    // Hides the player, in full screen mode.
-    self.hide = function ()
-    {
-        self.node.bottom.addClass("hide");
-        self.node.bottom.css("bottom", -self.height + C.Player.FullScreen.hideHeight);
-        if (!self.playlist.isPinned() && self.playlist.isDisplayed())
-            self.playlist.hide();
-        gl_desktop.events.unbind("mousedown", self);
     }
     
     // Converts the time in seconds to a string (0:00).
@@ -222,6 +193,39 @@ function Player(task)
         self.playback.hideTime();
         self.playback.setNumber(0, 0);
         self.fileName.setText();
+    }
+
+    // Displays the player, in full screen mode.
+    self.displayFullScreen = function ()
+    {
+        self.node.bottom.removeClass("hide");
+        self.node.bottom.css("bottom", 0);
+        self.clearFullScreenTimeout();
+        // Hides the player when the user clicks outside it
+        gl_desktop.events.bind("mousedown", self, function(e) {
+            if (!$(e.target).parents("#desktop>.bottom").length)
+                self.hideFullScreen();
+        });
+    }
+    
+    // Hides the player, in full screen mode.
+    self.hideFullScreen = function ()
+    {
+        self.node.bottom.addClass("hide");
+        self.node.bottom.css("bottom", -self.height + C.Player.FullScreen.hideHeight);
+        if (!self.playlist.isPinned() && self.playlist.isDisplayed())
+            self.playlist.hide();
+        gl_desktop.events.unbind("mousedown", self);
+    }
+    
+    // Clears the full screen timeout.
+    self.clearFullScreenTimeout = function ()
+    {
+        if (self.fullScreenHideTimeout)
+        {
+            clearTimeout(self.fullScreenHideTimeout);
+            delete self.fullScreenHideTimeout;
+        }
     }
 }
     
@@ -825,7 +829,7 @@ self.Controls = function ()
         self.noRepeat;
         self.random = {icon: 0, background: 0, link: 0, currentIcon: 0, nextIcon: 0};
         self.linear;
-        self.fullScreen = {icon: 0, background: 0, link: 0, currentIcon: 0, nextIcon: 0};
+        self.fullScreen = {icon: 0, background: 0, link: 0};
         self.normalScreen;
         
         // Default values
@@ -949,7 +953,6 @@ self.Controls = function ()
         fullScreen.attr(self.C.iconAttr);
         fullScreen.glow = fullScreen.glow(self.C.iconGlow);
         self.fullScreen.icon = fullScreen;
-        self.fullScreen.currentIcon = fullScreen;
         
         var normalScreen = fullScreen.clone().attr({path: gl_svg.Player.normalScreen});
         normalScreen.glow = normalScreen.glow(self.C.iconGlow);
@@ -957,7 +960,6 @@ self.Controls = function ()
         normalScreen.glow.hide();
         self.normalScreen = normalScreen;
         
-        self.fullScreen.nextIcon = self.normalScreen;
         left += self.C.fullScreenWidth;
         self.fullScreen.link = self.fullScreen.background.clone().attr(self.C.linkAttr);
         
@@ -1041,15 +1043,6 @@ self.Controls = function ()
         $(self.fullScreen.link.node).mouseout(function (e) { self.mouseLeave(self.fullScreen); });
         $(self.fullScreen.link.node).mousedown(function (e)
         {
-            var next = self.fullScreen.currentIcon;
-            self.fullScreen.currentIcon = self.fullScreen.nextIcon;
-            self.fullScreen.nextIcon = next;
-            
-            self.fullScreen.currentIcon.show();
-            self.fullScreen.currentIcon.glow.show();
-            self.fullScreen.nextIcon.hide();
-            self.fullScreen.nextIcon.glow.hide();
-            
             gl_desktop.setFullScreen();
         });
     }
@@ -1089,6 +1082,25 @@ self.Controls = function ()
     self.getWidth = function ()
     {
         return (self.width);
+    }
+    
+    // The full screen mode has changed.
+    self.onFullScreen = function (fullScreen)
+    {
+        if (fullScreen)
+        {
+            self.normalScreen.show();
+            self.normalScreen.glow.show();
+            self.fullScreen.icon.hide();
+            self.fullScreen.icon.glow.hide();
+        }
+        else
+        {
+            self.fullScreen.icon.show();
+            self.fullScreen.icon.glow.show();
+            self.normalScreen.hide();
+            self.normalScreen.glow.hide();
+        }
     }
     
     self.init();
