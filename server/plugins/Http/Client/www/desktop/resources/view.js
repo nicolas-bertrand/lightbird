@@ -11,6 +11,7 @@ function ResourceView(task, playlistInterface, fileIndex)
         resource.isFocus = true; // If the task had the focus in the last mouse down event
         resource.object; // The object that displays the file, based on its type. Implements the file and the player interfaces.
         resource.playlistInterface = playlistInterface; // The playlist that manages this file (may be undefined)
+        resource.icon = task.getIconNodes();
         
         // Capitalizes the first char of the type, to get the name of the object
         var type = resource.file.type[0].toUpperCase() + resource.file.type.slice(1);
@@ -21,6 +22,7 @@ function ResourceView(task, playlistInterface, fileIndex)
         task.setResource(resource);
         resource.playlistInterface.readyToPlay(resource.object);
         task.content.addClass("view_" + resource.file.type);
+        resource.icon.title.html(resource.file.name);
         
         // Events
         if (C.View.focusBeforeAction)
@@ -60,11 +62,20 @@ resource.Document = function ()
     {
         // Members
         self.pre = $(resource.root).children("pre"); // The element that stores the text of the document
+        self.iconContent = new Object(); // The informations displayed in the icon content
         
         F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
+            self.iconContent.words = HttpRequest.responseText.match(/\w+/g).length + " words";
+            self.iconContent.lines = HttpRequest.responseText.match(/\n+/g).length + 1 + " lines";
+            self.updateIconContent();
         });
+        
+        resource.icon.content.css("padding", 5);
+        self.iconContent.size = F.sizeToString(resource.file.size);
+        self.iconContent.modified = resource.file.modified.split(" ")[0].replace(/-/g, "/");
+        self.updateIconContent();
     }
     
     self.close = function ()
@@ -73,6 +84,20 @@ resource.Document = function ()
     
     self.onResize = function (left, top, width, height)
     {
+    }
+    
+    // Updates the content of the icon based on self.iconContent.
+    self.updateIconContent = function ()
+    {
+        var content = "";
+        if (self.iconContent.lines)
+            content += "<p>" + self.iconContent.lines + "</p>";
+        if (self.iconContent.words)
+            content += "<p>" + self.iconContent.words + "</p>";
+        content += "<p>" + self.iconContent.size + "</p>";
+        content += "<p>" + self.iconContent.modified + "</p>";
+        resource.icon.content.html(content);
+        task.updateIconHeight();
     }
     
 // File interface
@@ -113,6 +138,15 @@ resource.Image = function ()
         // Displays the image
         self.image.src = "/c/" + resource.file.name + "?fileId=" + resource.file.id + F.getSession();
         self.image.alt = resource.file.name;
+        
+        // Puts the preview of the image in the icon content
+        var preview = $("<img></img>");
+        preview[0].src = "/c/command/preview?fileId=" + resource.file.id + "&width=" + gl_tasksList.width + F.getSession();
+        preview.width("100%");
+        preview.css("display", "block");
+        preview.appendTo(resource.icon.content);
+        task.setLargeIconContent(true);
+        preview.load(function () { task.updateIconHeight(); });
         
         // Events
         task.content.click(function (e) { self.changeBackground(e); });
@@ -334,11 +368,20 @@ resource.Other = function ()
     {
         // Members
         self.pre = $(resource.root).children("pre"); // The element that stores the text of the file
+        self.iconContent = new Object(); // The informations displayed in the icon content
         
         F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
         });
+        
+        resource.icon.content.css("padding", 5);
+        self.iconContent.size = F.sizeToString(resource.file.size);
+        self.iconContent.modified = resource.file.modified.split(" ")[0].replace(/-/g, "/");
+        var content = "<p>" + self.iconContent.size + "</p>";
+        content += "<p>" + self.iconContent.modified + "</p>";
+        resource.icon.content.html(content);
+        task.updateIconHeight();
     }
     
     self.close = function ()
@@ -400,6 +443,15 @@ resource.Video = function ()
         else
             ;
         self.video.src = "/c/command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + F.getSession();
+        
+        // Puts a preview of the video in the icon content
+        var preview = $("<img></img>");
+        preview[0].src = "/c/command/preview?fileId=" + resource.file.id + "&width=" + gl_tasksList.width + F.getSession();
+        preview.width("100%");
+        preview.css("display", "block");
+        preview.appendTo(resource.icon.content);
+        task.setLargeIconContent(true);
+        preview.load(function () { task.updateIconHeight(); });
         
         // Events
         task.content.click(function (e) { self.changeBackground(e); });

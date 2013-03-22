@@ -41,6 +41,7 @@ void    Files::get(LightBird::IClient &client)
         object.insert("name", it.peekNext()["name"].toString());
         object.insert("type", it.peekNext()["type"].toString());
         object.insert("id_directory", it.peekNext()["id_directory"].toString());
+        object.insert("modified", it.peekNext()["modified"].toString());
         object.insert("created", it.peekNext()["created"].toString());
         array.append(object);
         it.next();
