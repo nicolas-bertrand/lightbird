@@ -98,8 +98,8 @@ function Desktop(task)
     }
 
     // Opens a task in a new page.
-    // @param resource : The name of the resource that will be loaded in the task.
-    // @param parameter : An optional parameter for the resource.
+    // @param resource: The name of the resource that will be loaded in the task.
+    // @param parameter: An optional parameter for the resource.
     self.openPage = function (resource, parameter, event)
     {
         if (event && $.Event(event).originalEvent.which != 1)
@@ -113,7 +113,7 @@ function Desktop(task)
             var page = new Page();
             var task = new Task(resource, html);
             page.addTask(task);
-            gl_resources.callJs(resource, task, parameter);
+            task.initializeResource(parameter);
             page.display();
             gl_tasksList.scrollToBottom();
         });
@@ -751,9 +751,9 @@ function Page()
 }
 
 // A task holds a resource and is stored in a page.
-// @param resource : The name of the resource displayed by the task.
-// @param content : The HTML content of the resource.
-function Task(resource, html)
+// @param resource: The name of the resource displayed by the task.
+// @param resourceContent: The HTML content of the resource.
+function Task(resource, resourceContent)
 {
     var self = this;
     
@@ -806,13 +806,23 @@ function Task(resource, html)
         // Creates the content of the task
         self.content = $("<div></div>").addClass("task");
         self.content[0].object = self;
-        self.content.html(html);
+        self.content.html(resourceContent);
         F.translate(self.content);
         // Events
         self.content.mousedown(function (e) { self.mouseDownContent(e); });
         self.content.mouseenter(function (e) { self.mouseEnterContent(e); });
         self.content.mouseleave(function (e) { self.mouseLeaveContent(e); });
         self.content.appendTo(gl_desktop.node.tasks);
+    }
+    
+    // Initializes the resource of the task.
+    // @param parameter: An optional parameter for the resource.
+    self.initializeResource = function (parameter)
+    {
+        // The content have to be displayed during the initialization
+        self.content.addClass("display");
+        gl_resources.callJs(resource, self, parameter);
+        self.content.removeClass("display");
     }
     
     // Closes the task.
