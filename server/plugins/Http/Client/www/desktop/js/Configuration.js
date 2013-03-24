@@ -267,14 +267,22 @@ var Configuration =
     Files:
     {
         controlsHeight: 40,
-        headerHeight: 28,
-        headerSeparatorWidth: 1, // The width of the header separators.
-        headerSeparatorMinColumnWidth: 15, // When the width of a column is lower than this, the active area of the separators next to it is shorten.
-        headerMinWidth: 40, // The default minimum width of the columns of the header.
-        headerTextPadding: 5, // The padding between the separator and the header columns.
-        headerDefaultWidth: 200, // The default width of the coulmns of the header.
         listRowHeight: 30, // The height of the rows of the files list.
-        columnTypeTextMinWidth: 30 // The minimum width required by the type column to display the type in text instead of the colors.
+        Header:
+        {
+            height: 30, // The default height of the header.
+            slopeRatio: 75 / 130, // The ratio of the slope of the columns.
+            backgroundAttr: {fill: "90-#9bd0f9-#afd9fa", stroke: "none"}, // The attributes of the background of the header.
+            oddAttr: {fill: "90-#48aaf0-#6cbbf3", stroke: "none"}, // The attributes of the odd columns.
+            evenAttr: {fill: "90-#2f9eed-#6cbbf3", stroke: "none"}, // The attributes of the even columns.
+            separatorWidth: 15, // The width of the separators.
+            separatorAttr: {fill: "90-#5ab7fb-#7ac5fc", stroke: "none"}, // The attributes of the separators.
+            columnMargin: 10, // The margin between the column text and the separator.
+            shortenString: ".", // A string that tells that a text has been shortened.
+            defaultWidth: 200, // The default width of the coulmns of the header.
+            minWidth: 40, // The default minimum width of the columns of the header.
+            typeTextMinWidth: 30, // The minimum width required by the type column to display the type in text instead of the colors.
+        }
     },
     View:
     {

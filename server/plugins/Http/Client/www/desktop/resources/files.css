@@ -1,5 +1,4 @@
 ﻿#tasks>.task>.files {
-    font-family: Helvetica, Arial, Verdana, sans-serif;
     border: 0px;
     margin: 0px;
     padding: 0px;
@@ -13,11 +12,7 @@
 
 #tasks>.task>.files>.controls {
     height: 40px;
-    background-image: linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
-    background-image: -moz-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
-    background-image: -webkit-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
-    background-image: -o-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
-    background-image: -ms-linear-gradient(top, #ffffff 0%, #f2f6fb 100%);
+    background-color: #fafafa;
     overflow: hidden;
 }
 
@@ -47,88 +42,26 @@
 
 #tasks>.task>.files>.header {
     width: 10000%;
-    height: 28px;
-    border-top: 1px solid #c4d1e0;
-    border-bottom: 1px solid #c4d1e0;
-    background-clip: border-box;
-    background-image: linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -moz-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -webkit-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -o-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -ms-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    box-shadow: inset 0px 1px #ffffff;
-    overflow: hidden;
-}
-
-#tasks>.task>.files>.header>div {
-    float: left;
-    height: 100%;
-}
-
-#tasks>.task>.files>.header>.separator {
-    width: 1px;
-    background-color: #c4d1e0;
-    box-shadow: -1px 0px rgba(255, 255, 255, 0.33), 1px 0px  rgba(255, 255, 255, 0.33);
+    height: 30px;
     position: relative;
-}
-
-#tasks>.task>.files>.header>.separator>div {
-    width: 11px;
-    height: 28px;
-    position: absolute;
-    left: -5px;
-    cursor: e-resize;
-}
-#tasks>.task>.files>.header>.separator.right>div {
-    width: 6px;
-    left: 0px;
-}
-#tasks>.task>.files>.header>.separator.left>div {
-    width: 6px;
-    left: -5px;
-}
-#tasks>.task>.files>.header>.separator.left.right>div {
-    width: 5px;
-    left: -2px;
-}
-
-#tasks>.task>.files>.header>.column {
-    width: 200px;
-    cursor: pointer;
     overflow: hidden;
 }
 
-#tasks>.task>.files>.header>.column>div {
-    margin: 6px 5px 0px 5px;
-    color: #252c35;
-    text-shadow: 0px 0px 2px #fff, 1px 1px 1px #fff;
-    font-size: 14px;
-    width: 10000%;
-}
-
-#tasks>.task>.files>.header>.column>div.hide {
-    display: none;
-}
-
-#tasks>.task>.files>.header>.column.right>div {
-    float: right;
-    text-align: right;
-}
-
-#tasks>.task>.files>.header>.add {
-    width: 20px;
-    height: 28px;
-    float: right;
-    border-left: 1px solid #c4d1e0;
-    box-shadow: -1px 0px rgba(255, 255, 255, 0.33), inset 1px 0px rgba(255, 255, 255, 0.33), inset 0px 1px #ffffff;
-    background-image: linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -moz-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -webkit-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -o-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    background-image: -ms-linear-gradient(top, #ebf3f7 0%, #d8e2ec 100%);
-    cursor: pointer;
+#tasks>.task>.files>.header>.text {
     position: absolute;
-    right: 0px;
+    top: 0px;
+    line-height: 30px;
+    color: white;
+    font-size: 17px;
+}
+
+#tasks>.task>.files>.header>.text,
+#tasks>.task>.files>.header .column {
+    cursor: pointer;
+}
+
+#tasks>.task>.files>.header .separator {
+    cursor: e-resize;
 }
 
 /*////////////////////////////////////////////////////////////////////////////
@@ -144,12 +77,12 @@
 }
 
 #tasks>.task>.files>.list>table {
+    font-size: 14px;
+    color: black;
     width: 100%;
     border: none;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 12px;
-    color: #111111;
 }
 
 #tasks>.task>.files>.list>table tr {
@@ -157,25 +90,34 @@
 }
 
 #tasks>.task>.files>.list>table tr.odd {
-    background-color: #ffffff;
+    background-color: #fafafa;
 }
-
 #tasks>.task>.files>.list>table tr.even {
-    background-color: #f2f6fa;
+    background-color: #f2f6f8;
+}
+#tasks>.task>.files>.list>table td {
+    box-shadow: inset 0px -1px 0px rgba(236, 236, 236, 1),
+                inset 0px 1px 0px rgba(255, 255, 255, 0.2);
 }
 
-#tasks>.task>.files>.list>table td {
-    padding-left: 5px;
-    padding-right: 5px;
+#tasks>.task>.files>.list>table td,
+#tasks>.task>.files>.list>table.type_text td.type {
+    padding-left: 18px;
+    padding-right: 18px;
     overflow: hidden;
     white-space: nowrap;
 }
 
-#tasks>.task>.files>.list>table td.first {
+#tasks>.task>.files>.list>table td:first-child,
+#tasks>.task>.files>.list>table.type_text td.type:first-child {
     padding-left: 10px;
 }
 
 /* Selected */
+
+#tasks>.task>.files>.list>table tr.selected td {
+    box-shadow: none;
+}
 
 #tasks>.task>.files>.list>table tr.selected.image {
     background-color: #bae9ff;
@@ -201,6 +143,7 @@
 
 #tasks>.task>.files>.list>table td.type {
     padding-left: 0px;
+    padding-right: 0px;
 }
 
 #tasks>.task>.files>.list>table td.type span {
@@ -208,7 +151,7 @@
 }
 
 #tasks>.task>.files>.list>table.type_text td.type {
-    padding-left: 5px;
+    padding-left: 18px;
 }
 #tasks>.task>.files>.list>table.type_text td.type div {
     display: none;

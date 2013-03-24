@@ -10,7 +10,7 @@ function ResourceFiles(task)
         resource.node.controls = $(resource.node.element).children(".controls")[0];
         resource.node.types = $(resource.node.controls).children(".types")[0];
         resource.node.other = $(resource.node.controls).children(".other")[0];
-        resource.node.header = $(resource.node.element).children(".header")[0];
+        resource.node.header = $(resource.node.element).children(".header");
         resource.node.list = $(resource.node.element).children(".list")[0];
         resource.node.icon = task.getIconNodes();
         
@@ -166,10 +166,18 @@ function Header()
     
     self.init = function ()
     {
-        self.columns; // The list of the columns in the header
+        // Members
+        self.C = C.Files.Header; // The configuration of the header
+        self.columns = new Array(); // The list of the columns in the header. {left, width, newWidth, background, separator, text, index, align, name, translation, shortened}
         self.sortColumn; // The name of the column by which the files are sorted
+        self.paper; // The SVG paper on which the columns are drawn
+        self.height = self.C.height; // The height of the header
+        self.slope = self.C.slopeRatio * self.height; // The slope of the columns
     
-        self.add = $(resource.node.header).children(".add")[0];
+        // Default values
+        resource.node.header.height(self.height);
+        self.paper = Raphael(resource.node.header[0], "100%", "100%");
+        self.paper.rect(0, 0, 10000, self.height).attr(self.C.backgroundAttr);
         self.addColumn("type");
         self.addColumn("name");
         self.addColumn("size");
@@ -180,43 +188,55 @@ function Header()
     // @param name : The name corresponds to the property of the file associated with the column.
     self.addColumn = function (name)
     {
-        var column = $("<div class='column'></div>");
-        var text = $("<div></div>");
-        var translated = name;
-        if (T.Files[name])
-            translated = T.Files[name];
-        text[0].innerHTML = translated;
-        text.appendTo(column);
-        column.addClass(name);
-        column.width(resource.layout.getDefaultWidth(name));
-        column.mousedown(function (e) { self.mouseDownHeader(e); });
-        column.insertBefore(self.add);
-        // Adds the separator
-        var separator = $("<div class='separator'></div>");
-        var inner = $("<div></div>");
-        inner.appendTo(separator);
-        separator.insertAfter(column);
-        separator.mousedown(function (e) { self.mouseDownSeparator(e); });
-        // Saves some information in the column
-        column[0].originalName = name;
-        column[0].align = resource.layout.getAlignment(name);
-        column.addClass(column[0].align);
-        // Updates the list of the columns
-        self.columns = $(resource.node.header).children(".column");
-        self.updateSeparators();
+        var c = new Object();
+        
+        // Coordinates
+        c.left = self.C.separatorWidth + (self.columns.length ? (self.columns[self.columns.length - 1].left + self.columns[self.columns.length - 1].width) : 0);
+        c.newWidth = resource.layout.getDefaultWidth(name);
+        // Background
+        c.background = self.paper.path();
+        c.background.attr(self.columns.length % 2 ? self.C.evenAttr : self.C.oddAttr);
+        c.background.node.setAttribute("class", "column");
+        $(c.background.node).mousedown(function (e) { self.mouseDownHeader(e, c); });
+        // Text
+        c.name = name;
+        c.translation = T.Files[name] ? T.Files[name] : name;
+        c.align = resource.layout.getAlignment(name);
+        c.text = $("<span></span>").addClass("text").appendTo(resource.node.header);
+        c.text.html(c.translation);
+        c.text.mousedown(function (e) { self.mouseDownHeader(e, c); });
+        // Separator
+        c.separator = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + (self.C.separatorWidth + self.slope) + ",l" + -self.slope + " " + self.height + "z");
+        c.separator.attr(self.C.separatorAttr);
+        c.separator.node.setAttribute("class", "separator");
+        $(c.separator.node).mousedown(function (e) { self.mouseDownSeparator(e, c); });
+        // Adds the column
+        c.index = self.columns.length;
+        self.columns.push(c);
+        self.updateColumns();
     }
     
     // Removes a column from the header and the container.
     self.removeColumn = function (column)
     {
+        if (self.columns.length == 1)
+            return ;
         // Notifies the container
         resource.container.removeColumn(column);
-        // Removes the separator
-        $(column).next().remove();
-        // And the column
-        $(column).remove();
-        // Updates the list of the columns
-        self.columns = $(resource.node.header).children(".column");
+        // Removes the column
+        column.text.remove();
+        column.background.remove();
+        column.separator.remove();
+        self.columns.splice(column.index, 1);
+        // Updates the index of the other columns
+        for (var i = column.index; i < self.columns.length; ++i)
+            self.columns[i].index = i;
+        // Ensures that the width of the first column is updated
+        if (column.index == 0)
+            self.columns[0].newWidth = self.columns[0].width;
+        // Updates positions of the other columns
+        self.updateColumns();
+        delete column;
     }
     
     // Returns the list of the columns in the header.
@@ -225,37 +245,43 @@ function Header()
         return (self.columns);
     }
     
-    self.mouseDownHeader = function (e)
+    // Sorts / removes a column.
+    self.mouseDownHeader = function (e, column)
     {
         // Sorts the column
         if (e.which == 1)
         {
             // If the column is already sorted, we just reverse the files list
-            if (self.sortColumn == e.currentTarget.originalName)
+            if (self.sortColumn == column.name)
                 resource.files.reverse();
             // Performs the actual sorting
             else
-                resource.files.sort(e.currentTarget.originalName);
-            self.sortColumn = e.currentTarget.originalName;
+                resource.files.sort(column.name);
+            self.sortColumn = column.name;
         }
         // Removes the column
         else if (e.which == 2)
-            self.removeColumn(e.currentTarget);
+            self.removeColumn(column);
     }
     
-    // Starts to resize the comumn.
-    self.mouseDownSeparator = function (e)
+    // Resizes / removes a column.
+    self.mouseDownSeparator = function (e, column)
     {
-        if (e.which != 1)
-            return ;
-        var param = new Object();
-        param.separator = e.currentTarget;
-        // Saves the width of the previous columns
-        param.width = new Array();
-        for (var p = $(e.currentTarget).prev(); p.length > 0; p = p.prev().prev())
-            param.width.push(p.width());
-        gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "mouseUpSeparator", param);
-        gl_desktop.drag.setCursor("e-resize");
+        // Starts to resize the column.
+        if (e.which == 1)
+        {
+            var param = new Object();
+            param.column = column;
+            // Saves the width of the previous columns
+            param.width = new Array();
+            for (var i = column.index; i >= 0; --i)
+                param.width.push(self.columns[i].width);
+            gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "mouseUpSeparator", param);
+            gl_desktop.drag.setCursor("e-resize");
+        }
+        // Removes the column of the separator
+        else if (e.which == 2)
+            self.removeColumn(column);
     }
     
     // Resizes the column.
@@ -266,12 +292,12 @@ function Header()
         var diff = e.pageX - (mouse.x + element.x);
         
         // Updates the width of the columns
-        var column = $(p.separator).prev();
+        var column = p.column;
         var flag = true;
-        for (var i = 0; p.width.length > i && flag; ++i, column = column.prev().prev())
+        for (var i = 0; p.width.length > i && flag; ++i, column = self.columns[column.index - 1])
         {
             var width = diff + p.width[i];
-            var minWidth = resource.layout.getMinWidth(column[0].originalName);
+            var minWidth = resource.layout.getMinWidth(column.name);
             // The column can absorb the shift
             if (width > minWidth)
                 flag = false;
@@ -282,43 +308,67 @@ function Header()
                 if (p.width.length > 1)
                     diff += (p.width[i] - minWidth);
             }
-            column.width(width);
-            resource.layout.onResize(column[0].originalName, width);
+            column.newWidth = width;
+            resource.layout.onResize(column.name, width);
         }
-        column = $(p.separator).prev();
+        column = p.column;
         // Ensures that the previous column have their original width
         if (i < p.i)
-            for (var j = 0; p.width.length > j; ++j, column = column.prev().prev())
+            for (var j = 0; p.width.length > j; ++j, column = self.columns[column.index - 1])
                 if (j >= i)
-                    column.width(p.width[j]);
+                    column.newWidth = p.width[j];
         p.i = i;
+        self.updateColumns();
         resource.container.updateColumns();
     }
-    
+
     // Resizes the column.
     self.mouseUpSeparator = function ()
     {
-        self.updateSeparators();
         task.updateMouseOverContent();
     }
     
-    // Shortens the width of the separators next to a small column.
-    self.updateSeparators = function ()
+    // Updates the width of the columns.
+    self.updateColumns = function ()
     {
-        self.getColumns().each(function ()
+        var left = 0;
+        for (var i = 0; i < self.columns.length; ++i)
         {
-            var column = $(this);
-            if (column.width() <= C.Files.headerSeparatorMinColumnWidth)
+            var column = self.columns[i];
+            var shiftFirstColumn = (i == 0 ? Math.abs(self.slope) : 0)
+            
+            // The width of the column has changed
+            if (column.newWidth != undefined)
             {
-                column.next().addClass("right");
-                column.prev().addClass("left");
+                column.width = column.newWidth;
+                column.background.attr("path", "M0," + self.height + "L" + self.slope + " 0,H" + (column.width + self.slope + shiftFirstColumn) + ",l" + -self.slope + " " + self.height + "z");
+                delete column.newWidth;
+                column.left = -1;
+                // Shortens the text if it is bigger than the column
+                var diff = column.width - column.text.width() - self.C.columnMargin - self.slope / 3;
+                if (diff < 0 || column.shortened)
+                {
+                    var text = column.translation;
+                    column.text.html(text);
+                    while (column.width - column.text.width() - self.C.columnMargin - self.slope / 3 < 0 && text.length)
+                        column.text.html((text = text.slice(0, text.length - 1)) + (text.length > 1 ? self.C.shortenString : ""));
+                    column.shortened = (text != column.translation);
+                }
             }
-            else
+            // The left position of the column has changed
+            if (left != column.left)
             {
-                column.next().removeClass("right");
-                column.prev().removeClass("left");
+                column.left = left;
+                if (column.align != "right")
+                    column.text.css("left", column.left + self.C.separatorWidth / 2 + self.C.columnMargin - self.C.separatorWidth / 2);
+                // Right align the text
+                else
+                    column.text.css("left", column.left + column.width + self.C.separatorWidth - column.text.width() - self.C.separatorWidth / 2 - self.C.columnMargin - self.C.separatorWidth / 2);
+                column.background.transform("T" + (left - self.slope / 2 - shiftFirstColumn) + ",0");
+                column.separator.transform("T" + (left - self.slope / 2 + column.width) + ",0");
             }
-        });
+            left += column.width + self.C.separatorWidth;
+        }
     }
     
     self.init();
@@ -350,8 +400,6 @@ function List()
         $(self.list).scroll(function (e) { self.scroll(e); });
         
         self.updateColumns();
-        // Initializes the type column
-        resource.header.getColumns().filter(".type").children().addClass("hide");
     }
     
     // Closes the list.
@@ -374,13 +422,13 @@ function List()
             if (cols.length <= i)
             {
                 col = $("<col></col>");
-                col[0].name = columns[i].originalName;
+                col[0].name = columns[i].name;
                 col.appendTo(colgroup);
             }
             else
                 col = $(cols[i]);
             // Updates the width
-            col.width($(columns[i]).width() + C.Files.headerSeparatorWidth);
+            col.width(columns[i].width + C.Files.Header.separatorWidth - (i == 0 ? C.Files.Header.separatorWidth / 2 : 0));
         }
     }
     
@@ -391,14 +439,14 @@ function List()
         var colgroup = $(self.table).children("colgroup");
         var cols = colgroup.children("col");
         for (var i = 0; i < cols.length; ++i)
-            if (cols[i].name == column.originalName)
+            if (cols[i].name == column.name)
                 $(cols[i]).remove();
         // Removes the column
         var rows = self.table.rows;
         var cells;
         for (var i = 0; i < rows.length; ++i)
             for (var j = 0, cells = rows[i].cells; j < cells.length; ++j)
-                if (cells[j].name == column.originalName)
+                if (cells[j].name == column.name)
                     $(cells[j]).remove();
     }
     
@@ -433,7 +481,7 @@ function List()
     // Resizes the list to fit into the task content height.
     self.onResize = function (left, top, width, height)
     {
-        self.listHeight = height - C.Files.controlsHeight - C.Files.headerHeight - 2; // -2 is the border of the header
+        self.listHeight = height - C.Files.controlsHeight - C.Files.Header.height;
         self.list.style.height = self.listHeight + "px";
         // Updates the files list
         self.updateRows();
@@ -630,7 +678,7 @@ function List()
                 var row = self.table.insertRow(-1);
                 // Creates the content of the row
                 for (var i = 0; i < headerColumns.length; ++i)
-                    $(row.insertCell(-1)).addClass(headerColumns[i].originalName);
+                    $(row.insertCell(-1)).addClass(headerColumns[i].name);
                 $(row.insertCell(-1));
             }
         // Removes the superfluous rows
@@ -666,12 +714,12 @@ function List()
             row.fileIndex = fileIndex;
             if (self.selectedFiles[globalFileIndex])
                 $(row).addClass("selected");
-            $(row).addClass("file").addClass(file.type);
+            $(row).addClass(file.type);
             for (var i = 0; i < headerColumns.length; ++i)
             {
                 var column = columns[i];
-                column.name = headerColumns[i].originalName;
-                column.originalText = resource.layout.convert(headerColumns[i].originalName, file[headerColumns[i].originalName]);
+                column.name = headerColumns[i].name;
+                column.originalText = resource.layout.convert(headerColumns[i].name, file[headerColumns[i].name]);
                 column.innerHTML = column.originalText;
                 if (headerColumns[i].align != "left")
                     column.style.textAlign = headerColumns[i].align;
@@ -741,7 +789,7 @@ function Layout()
     {
         if (self.columns[column] && self.columns[column].minWidth)
             return (self.columns[column].minWidth);
-        return (C.Files.headerMinWidth);
+        return (C.Files.Header.minWidth);
     }
     
     // Returns the min-width of the column.
@@ -749,7 +797,7 @@ function Layout()
     {
         if (self.columns[column] && self.columns[column].defaultWidth)
             return (self.columns[column].defaultWidth);
-        return (C.Files.headerDefaultWidth);
+        return (C.Files.Header.defaultWidth);
     }
 
     // Returns true if the column contains numerical values.
@@ -786,19 +834,13 @@ function Layout()
         {
             var table = $(resource.container.table);
             var isTypeText = table.hasClass("type_text");
-            if (width > C.Files.columnTypeTextMinWidth)
+            if (width > C.Files.Header.typeTextMinWidth)
             {
                 if (!isTypeText)
-                {
-                    resource.header.getColumns().filter(".type").children().removeClass("hide");
                     table.addClass("type_text");
-                }
             }
             else if (isTypeText)
-            {
-                resource.header.getColumns().filter(".type").children().addClass("hide");
                 table.removeClass("type_text");
-            }
             self.columns[column]
         }
     }
@@ -808,8 +850,8 @@ function Layout()
     {
         type:
         {
-            minWidth: 10,
-            defaultWidth: 10,
+            minWidth: 1,
+            defaultWidth: 1,
             convert: "convertType"
         },
         name:
@@ -820,15 +862,15 @@ function Layout()
         {
             convert: "sizeToString",
             alignment: "right",
-            minWidth: 50,
-            defaultWidth: 70,
+            minWidth: 60,
+            defaultWidth: 80,
             numerical: true
         },
         created:
         {
             convert: "convertDate",
-            minWidth: 67,
-            defaultWidth: 110
+            minWidth: 80,
+            defaultWidth: 130
         }
     };
     
@@ -847,7 +889,6 @@ function Icons()
             self.typeIcons($(resource.node.types).children("." + type)[0], type);
         for (var control in self.icons.controls)
             self.controlIcons($(resource.node.other).children("." + control)[0], self.icons.controls[control]);
-        self.headerIcon($(resource.node.header).children(".add")[0], self.icons.add);
     }
     
     // Generates the type icons.
@@ -944,7 +985,7 @@ function Icons()
     {
         var height = C.Files.controlsHeight;
         var path = Raphael(destination, icon.width, height).path(icon.path);
-        var color = "90-#6e7d8f-#929daa";
+        var color = "90-#606a76-#888f98";
         if (icon.selected)
             color = "90-#4cc3ff-#4cd8ff";
         path.attr("fill", color);
@@ -967,7 +1008,7 @@ function Icons()
     // Generates the header icon.
     self.headerIcon = function (destination, icon)
     {
-        var height = C.Files.headerHeight;
+        var height = C.Files.Header.height;
         var path = Raphael(destination, icon.width, height).path(icon.path);
         path.attr("fill", "#8191a5 ");
         path.attr("stroke", "none");
@@ -1021,7 +1062,7 @@ function Icons()
         },
         type:
         {
-            selected_color: "90-#6e7d8f-#929daa",
+            selected_color: "90-#606a76-#888f98",
             deselected_color: "90-#b1bac5-#c7cdd4",
         },
         controls:
@@ -1040,7 +1081,6 @@ function Icons()
             {
                 path: gl_svg.ResourceFiles.list,
                 width: 18,
-                selected: true,
             },
             hierarchy: 
             {
