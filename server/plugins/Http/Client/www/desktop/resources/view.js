@@ -19,7 +19,6 @@ function ResourceView(task, playlistInterface, fileIndex)
         resource.object = new resource[type]();
         
         // Default values
-        task.setResource(resource);
         resource.playlistInterface.readyToPlay(resource.object);
         task.content.addClass("view_" + resource.file.type);
         resource.icon.title.html(resource.file.name);
@@ -600,5 +599,5 @@ resource.Video = function ()
     return (resource);
 }
 
-function initialize_resource_view(task, parameters) { return new ResourceView(task, parameters.playlistInterface, parameters.fileIndex); }
+function initialize_resource_view(task, parameters) { return (new ResourceView(task, parameters.playlistInterface, parameters.fileIndex)); }
 gl_resources.jsLoaded("view");

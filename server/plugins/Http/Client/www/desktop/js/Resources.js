@@ -13,104 +13,98 @@ function Resources()
 // Load a resource.
 // @resource : The name of the resource to load.
 // @callback : A function that will be called when the resource has been loaded.
-// The content of the html is given in parameter.
-// @return True if the resource is going to be loaded.
+// The html of the resource is given in parameter.
 self.load = function (resource, callback)
 {
     if (self[resource] == undefined)
-        self.initialize(resource);
+        self.register(resource);
+    resource = self[resource];
     if (callback != undefined)
-        self[resource].queue.push(callback);
-    if (self[resource].loading)
-        return (true);
+        resource.callbacks.push(callback);
+    if (resource.loading)
+        return ;
     // Load the resource
-    if (!self[resource].loaded)
+    if (!resource.loaded)
     {
-        self[resource].loading = true;
+        resource.loading = true;
         // Load the HTML
-        F.request("GET", self[resource].html, function(HttpRequest)
+        F.request("GET", resource.files.html, function(HttpRequest)
         {
-            if (HttpRequest.status == 200)
-                gl_resources[resource].content = HttpRequest.responseText;
-            else
-                gl_resources[resource].content = "<h2>Unable to load the resource</h2>";
-            if (gl_resources[resource].jsLoaded ||
-                gl_resources[resource].js == undefined)
-                gl_resources.loaded(resource);
+            resource.html = HttpRequest.responseText;
+            self.loaded(resource);
         });
         // Load the CSS
-        if (self[resource].css != undefined)
-            loadJsCssFile(self[resource].css);
+        F.request("GET", resource.files.css, function(HttpRequest)
+        {
+            resource.css = HttpRequest.responseText;
+            self.loaded(resource);
+        });
         // Load the JavaScript
-        if (self[resource].js != undefined)
-            loadJsCssFile(self[resource].js);
+        $("head")[0].appendChild($("<script></script>").attr("src", "/c/" + resource.files.js)[0]);
     }
     // The resource has already been loaded
-    else if (self[resource].content != undefined)
-        gl_resources.loaded(resource);
-    return (true);
-}
-
-self.jsLoaded = function (resource)
-{
-    self[resource].jsLoaded = true;
-    if (self[resource].content != undefined)
+    else
         self.loaded(resource);
 }
 
+// Called by the resource javascript the first time it is loaded.
+self.jsLoaded = function (resource)
+{
+    if (self[resource] && self[resource].loading)
+    {
+        self[resource].js = true;
+        self.loaded(self[resource]);
+    }
+}
+
+// If all the files of the resource have been loaded, its callbacks are called.
 self.loaded = function (resource)
 {
-    self[resource].loading = false;
-    self[resource].loaded = true;
-    for (i = 0, s = self[resource].queue.length; i < s; ++i)
-        self[resource].queue[i](self[resource].content, self[resource].callback);
-    self[resource].queue.splice(0, self[resource].queue.length);
-}
-
-self.callJs = function(resource, task, parameter)
-{
-    if (self[resource] != undefined && self[resource].callback != undefined)
-        window[self[resource].callback](task, parameter);
-}
-
-// Load a javascript or a css file.
-// @name : The file to load. Its extension if used to find its type.
-function loadJsCssFile(name)
-{
-    var node;
-
-    if (name.match("\.js$") != null)
+    if (!resource.html || !resource.css || !resource.js)
+        return ;
+    if (resource.loading)
     {
-        node = document.createElement("script");
-        node.setAttribute("type", "text/javascript");
-        node.setAttribute("src", "/c/" + name);
+        resource.loading = false;
+        resource.loaded = true;
+        resource.css = $("<style></style>").html(resource.css).appendTo($("head"));
     }
-    else if (name.match("\.css$") != null)
+    if (resource.loaded)
     {
-        node = document.createElement("link");
-        node.setAttribute("rel", "stylesheet");
-        node.setAttribute("type", "text/css");
-        node.setAttribute("href", "/c/" + name);
+        // Callbacks
+        for (i = 0, s = resource.callbacks.length; i < s; ++i)
+            resource.callbacks[i](resource.html);
+        resource.callbacks = new Array();
     }
-    if (node != undefined)
-        document.getElementsByTagName("head")[0].appendChild(node);
 }
 
-// Register a new resource that can be loaded an any time using the method load.
+// Creates a new instance of the resource by calling "'initialize_resource_' + resource".
+// The two last parameters are passed to it.
+// @return The new instance.
+self.initialize = function(resource, task, parameter)
+{
+    if (self[resource] && self[resource].loaded)
+        return (window[self[resource].initialize](task, parameter));
+}
+
+// Registers a new resource that can be loaded an any time using the load method.
 // @resource : The name of the resource to register. It must correspond to the
-// files "resource.(css|js|html)". The Javascript must have a method
-// "initialize + resource" which is called the first time the resource is loaded.
-self.initialize = function(resource)
+// files "resource.(css|js|html)". The JavaScript must have a method
+// "'initialize_resource_' + resource" which is used to create the instances of the resource.
+self.register = function(resource)
 {
     self[resource] = new Object();
-    self[resource].html = "resources/" + resource + ".html";
-    self[resource].css = "resources/" + resource + ".css";
-    self[resource].js = "resources/" + resource + ".js";
-    self[resource].callback = "initialize_resource_" + resource;
-    self[resource].loaded = false;
-    self[resource].jsLoaded = false;
+    self[resource].files = {
+        html: "resources/" + resource + ".html",
+        css: "resources/" + resource + ".css",
+        js: "resources/" + resource + ".js"
+    };
+    self[resource].initialize = "initialize_resource_" + resource;
     self[resource].loading = false;
-    self[resource].queue = new Array();
+    self[resource].loaded = false;
+    self[resource].html = "";
+    self[resource].css = "";
+    self[resource].js = "";
+    self[resource].callbacks = new Array();
 }
 
     self.init();

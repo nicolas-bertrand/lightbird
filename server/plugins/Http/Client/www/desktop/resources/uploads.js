@@ -535,5 +535,5 @@ function UploadsSession(uploads)
     return (self);
 }
 
-function initialize_resource_uploads(task) { return new ResourceUploads(task); }
+function initialize_resource_uploads(task) { return (new ResourceUploads(task)); }
 gl_resources.jsLoaded("uploads");

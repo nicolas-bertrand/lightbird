@@ -820,9 +820,10 @@ function Task(resource, resourceContent)
     self.initializeResource = function (parameter)
     {
         // The content have to be displayed during the initialization
-        self.content.addClass("display");
-        gl_resources.callJs(resource, self, parameter);
-        self.content.removeClass("display");
+        var contentDisplayed = self.content.hasClass("display");
+        !contentDisplayed && self.content.addClass("display");
+        self.resource = gl_resources.initialize(resource, self, parameter);
+        !contentDisplayed && self.content.removeClass("display");
     }
     
     // Closes the task.
@@ -1367,13 +1368,6 @@ function Task(resource, resourceContent)
 // Resource API
 // These methods are called by the resources in order to interact with the task.
     {
-        // Sets the instance of the resource that manages the content.
-        // Allows the task to call the methods onResize and close of the resource.
-        self.setResource = function (resource)
-        {
-            self.resource = resource;
-        }
-        
         // Returns the title and content nodes of the icon, which can be modified by the resource.
         // updateIconHeight() must be calles after a modification that changed the height of the icon.
         // @return {title: , content: }
