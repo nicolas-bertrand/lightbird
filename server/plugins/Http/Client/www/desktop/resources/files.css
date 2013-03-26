@@ -64,6 +64,19 @@
     cursor: e-resize;
 }
 
+#tasks>.task>.files>.header>.move_column {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+#tasks>.task>.files>.header>.text.move_text {
+    z-index: 2;
+}
+
 /*////////////////////////////////////////////////////////////////////////////
 //                                    LIST                                  //
 ////////////////////////////////////////////////////////////////////////////*/
@@ -83,16 +96,17 @@
     border: none;
     border-collapse: collapse;
     table-layout: fixed;
+    background-color: #81aac7;
 }
 
 #tasks>.task>.files>.list>table tr {
     height: 30px;
 }
 
-#tasks>.task>.files>.list>table tr.odd {
+#tasks>.task>.files>.list>table tr.odd td {
     background-color: #fafafa;
 }
-#tasks>.task>.files>.list>table tr.even {
+#tasks>.task>.files>.list>table tr.even td {
     background-color: #f2f6f8;
 }
 #tasks>.task>.files>.list>table td {
@@ -119,23 +133,23 @@
     box-shadow: none;
 }
 
-#tasks>.task>.files>.list>table tr.selected.image {
+#tasks>.task>.files>.list>table tr.selected.image td {
     background-color: #bae9ff;
 }
 
-#tasks>.task>.files>.list>table tr.selected.audio {
+#tasks>.task>.files>.list>table tr.selected.audio td {
     background-color: #b5ffbd;
 }
 
-#tasks>.task>.files>.list>table tr.selected.video {
+#tasks>.task>.files>.list>table tr.selected.video td {
     background-color: #ffcdb5;
 }
 
-#tasks>.task>.files>.list>table tr.selected.document {
+#tasks>.task>.files>.list>table tr.selected.document td {
     background-color: #ffef9b;
 }
 
-#tasks>.task>.files>.list>table tr.selected.other {
+#tasks>.task>.files>.list>table tr.selected.other td {
     background-color: #d6d6d6;
 }
 
@@ -192,5 +206,5 @@
 #tasks>.task>.files>.list.filter_video>table tr.video td,
 #tasks>.task>.files>.list.filter_document>table tr.document td,
 #tasks>.task>.files>.list.filter_other>table tr.other td {
-    opacity: 0.5;
+    opacity: 0.66;
 }

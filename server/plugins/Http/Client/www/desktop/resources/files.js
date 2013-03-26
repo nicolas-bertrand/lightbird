@@ -24,7 +24,6 @@ function ResourceFiles(task)
         resource.files = new Files(); // The list of the files to display.
         
         // Default values
-        task.setResource(resource);
         resource.node.icon.content.css("padding", 5);
         resource.updateIcon();
     }
@@ -168,11 +167,39 @@ function Header()
     {
         // Members
         self.C = C.Files.Header; // The configuration of the header
-        self.columns = new Array(); // The list of the columns in the header. {left, width, newWidth, background, separator, text, index, align, name, translation, shortened}
         self.sortColumn; // The name of the column by which the files are sorted
         self.paper; // The SVG paper on which the columns are drawn
         self.height = self.C.height; // The height of the header
         self.slope = self.C.slopeRatio * self.height; // The slope of the columns
+        // The list of the columns in the header
+        self.columns = new Array();
+        var column = {
+            left: 0, // The left position of the column
+            width: 0, // The width of the column
+            newWidth: 0, // The new with that is going to be applied
+            background: 0, // The background of the column
+            separator: 0, // The right separator
+            index: 0, // The index of the column in the columns list
+            align: 0, // The alignment of the column (left / right)
+            name: 0, // The name of the column
+            text: 0, // The text node
+            translation: 0, // The translated text
+            shortened: 0, // True while the text is shortened
+            offset: 0, // The offset applied to the text (while the column is moved)
+            textWidth: 0, // The original width of the text
+            currentTextWidth: 0 // The current width of the (may be shortened) text
+        };
+        // Stores the values used to move a column
+        self.moveColumn = {
+            element: 0, // The position of the header
+            mouse: 0, // The position of the mouse when the move started
+            resistance: 0, // False when the resistance has been broken and the move started
+            positions: 0, // The positions where the columns are swapped
+            paper: 0, // A clone of the moved column, which follows the mouse
+            background: 0, // The clone of the background
+            separator: 0, // The clone of the separator
+            left: 0 // The left position of the column
+        }; 
     
         // Default values
         resource.node.header.height(self.height);
@@ -193,18 +220,23 @@ function Header()
         // Coordinates
         c.left = self.C.separatorWidth + (self.columns.length ? (self.columns[self.columns.length - 1].left + self.columns[self.columns.length - 1].width) : 0);
         c.newWidth = resource.layout.getDefaultWidth(name);
+        c.offset = 0;
         // Background
         c.background = self.paper.path();
         c.background.attr(self.columns.length % 2 ? self.C.evenAttr : self.C.oddAttr);
         c.background.node.setAttribute("class", "column");
-        $(c.background.node).mousedown(function (e) { self.mouseDownHeader(e, c); });
+        $(c.background.node).mousedown(function (e) { self.mouseDownColumn(e, c); });
+        $(c.background.node).click(function (e) { self.clickColumn(e, c); });
         // Text
         c.name = name;
         c.translation = T.Files[name] ? T.Files[name] : name;
         c.align = resource.layout.getAlignment(name);
         c.text = $("<span></span>").addClass("text").appendTo(resource.node.header);
         c.text.html(c.translation);
-        c.text.mousedown(function (e) { self.mouseDownHeader(e, c); });
+        c.text.mousedown(function (e) { self.mouseDownColumn(e, c); });
+        c.text.click(function (e) { self.clickColumn(e, c); });
+        c.textWidth = c.text.width();
+        c.currentTextWidth = c.textWidth;
         // Separator
         c.separator = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + (self.C.separatorWidth + self.slope) + ",l" + -self.slope + " " + self.height + "z");
         c.separator.attr(self.C.separatorAttr);
@@ -245,11 +277,97 @@ function Header()
         return (self.columns);
     }
     
-    // Sorts / removes a column.
-    self.mouseDownHeader = function (e, column)
+    // Starts to move a column.
+    self.mouseDownColumn = function (e, column)
     {
-        // Sorts the column
         if (e.which == 1)
+        {
+            gl_desktop.drag.start(e, resource.node.header, self, "mouseMoveColumn", "", "mouseUpColumn", column);
+            gl_desktop.drag.setCursor("pointer");
+            self.moveColumn.element = gl_desktop.drag.getElement();
+            self.moveColumn.mouse = gl_desktop.drag.getMouse();
+            self.moveColumn.resistance = true;
+        }
+    }
+    
+    // Moves a column
+    self.mouseMoveColumn = function (e, column)
+    {
+        var move = self.moveColumn;
+        // Starts to move the column as soon as the resistance breaks
+        if (move.resistance && Math.abs(e.pageX - move.mouse.x - move.element.x) > self.C.moveResistance)
+        {
+            gl_desktop.drag.setCursor("move");
+            move.resistance = false;
+            move.mouse.x += e.pageX - move.mouse.x - move.element.x;
+            // Creates a clone of the column which will move with the mouse 
+            move.node = $("<div></div>").addClass("move_column").appendTo(resource.node.header);
+            move.paper = Raphael(move.node[0], "100%", "100%");
+            move.background = move.paper.path();
+            move.background.attr(column.background.attr());
+            move.background.attr(self.C.moveAttr);
+            move.separator = move.paper.path();
+            move.separator.attr(column.separator.attr());
+            move.separator.attr(self.C.moveAttr);
+            move.left = column.left;
+            // Saves the current positions of the columns
+            self.moveColumn.positions = new Array();
+            for (var i = 0; i < self.columns.length; ++i)
+                if (i != column.index)
+                    self.moveColumn.positions.push({
+                        left: self.columns[i].left + (self.columns[i].width + self.C.separatorWidth) / 2,
+                        column: i
+                    });
+            // Updates the actual column
+            column.background.attr(self.C.moveBackgroundAttr);
+            column.separator.attr(self.C.moveBackgroundAttr);
+            column.text.addClass("move_text");
+            resource.container.moveStart(column.name);
+        }
+        // Moves the column
+        if (!move.resistance)
+        {
+            column.offset = e.pageX - move.mouse.x - move.element.x;
+            var left = move.left + column.offset;
+            // Moves the actual column
+            if (column.offset > 0)
+                left += column.width + self.C.separatorWidth;
+            for (var destination = 0; destination < move.positions.length && move.positions[destination].left < left; ++destination)
+                ;
+            if (destination != column.index)
+            {
+                resource.container.moveColumn(column.index, destination);
+                self.columns.splice(column.index, 1);
+                self.columns.splice(destination, 0, column);
+                for (var j = 0; j < self.columns.length; ++j)
+                {
+                    var c = self.columns[j];
+                    c.index = j;
+                    c.newWidth = self.columns[j].width;
+                    c.background.attr(j % 2 ? self.C.evenAttr : self.C.oddAttr);
+                }
+                column.background.attr(self.C.moveBackgroundAttr);
+            }
+            // Updates the other columns
+            column.left = -1;
+            self.updateColumns();
+            // Moves the clone of the column to follow the position of the mouse
+            var shiftFirstColumn = 0;
+            var left = move.left + column.offset + shiftFirstColumn - self.slope / 2;
+            move.background.transform("T" + left + ",0");
+            move.separator.transform("T" + (left + column.width) + ",0");
+            column.text.css("left", column.text.position().left + move.left - column.left);
+            resource.container.moveUpdate(column.offset + move.left - column.left);
+        }
+    }
+    
+    // Sorts the column, or stops its movement.
+    self.mouseUpColumn = function (e, column)
+    {
+        if (e.which != 1)
+            return ;
+        // Sorts the column
+        if (self.moveColumn.resistance)
         {
             // If the column is already sorted, we just reverse the files list
             if (self.sortColumn == column.name)
@@ -259,8 +377,28 @@ function Header()
                 resource.files.sort(column.name);
             self.sortColumn = column.name;
         }
-        // Removes the column
-        else if (e.which == 2)
+        // Stops the column movement
+        else
+        {
+            column.background.attr(column.index % 2 ? self.C.evenAttr : self.C.oddAttr);
+            column.separator.attr(self.C.separatorAttr);
+            self.moveColumn.background.remove();
+            self.moveColumn.separator.remove();
+            self.moveColumn.paper.remove();
+            self.moveColumn.node.remove();
+            self.moveColumn = new Object();
+            column.offset = 0;
+            column.text.removeClass("move_text");
+            column.left = -1;
+            self.updateColumns();
+            resource.container.moveStop();
+        }
+    }
+    
+    // Removes a column.
+    self.clickColumn = function (e, column)
+    {
+        if (e.which == 2)
             self.removeColumn(column);
     }
     
@@ -279,9 +417,6 @@ function Header()
             gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "mouseUpSeparator", param);
             gl_desktop.drag.setCursor("e-resize");
         }
-        // Removes the column of the separator
-        else if (e.which == 2)
-            self.removeColumn(column);
     }
     
     // Resizes the column.
@@ -328,42 +463,61 @@ function Header()
         task.updateMouseOverContent();
     }
     
-    // Updates the width of the columns.
+    // Updates the position and the width of the columns.
     self.updateColumns = function ()
     {
         var left = 0;
         for (var i = 0; i < self.columns.length; ++i)
         {
             var column = self.columns[i];
-            var shiftFirstColumn = (i == 0 ? Math.abs(self.slope) : 0)
+            var shiftFirstColumn = (i == 0 ? Math.abs(self.slope / 2) : 0);
             
             // The width of the column has changed
             if (column.newWidth != undefined)
             {
-                column.width = column.newWidth;
-                column.background.attr("path", "M0," + self.height + "L" + self.slope + " 0,H" + (column.width + self.slope + shiftFirstColumn) + ",l" + -self.slope + " " + self.height + "z");
-                delete column.newWidth;
-                column.left = -1;
                 // Shortens the text if it is bigger than the column
-                var diff = column.width - column.text.width() - self.C.columnMargin - self.slope / 3;
-                if (diff < 0 || column.shortened)
+                var diff = column.newWidth - column.textWidth - self.C.columnMargin - self.slope / 3;
+                if ((diff < 0 || column.shortened) && column.newWidth != column.width)
                 {
                     var text = column.translation;
-                    column.text.html(text);
-                    while (column.width - column.text.width() - self.C.columnMargin - self.slope / 3 < 0 && text.length)
-                        column.text.html((text = text.slice(0, text.length - 1)) + (text.length > 1 ? self.C.shortenString : ""));
-                    column.shortened = (text != column.translation);
+                    var numberLetters = (1 + diff / column.textWidth) * text.length;
+                    // Not enough space to display anything
+                    if (numberLetters < 1)
+                        column.text.html(text = "");
+                    // Displays as much text as possible
+                    else
+                    {
+                        text = text.substr(0, numberLetters);
+                        column.text.html(text + (text.length > 1 ? self.C.shortenString : ""));
+                        // Ensures that the approximation is correct
+                        while (column.newWidth - column.text.width() - self.C.columnMargin - self.slope / 3 < 0 && text.length)
+                            column.text.html((text = text.substr(0, text.length - 1)) + (text.length > 1 ? self.C.shortenString : ""));
+                    }
+                    // The text can be fully displayed
+                    if (text.length == column.translation.length)
+                    {
+                        column.shortened = false;
+                        column.text.html(column.translation);
+                    }
+                    else
+                        column.shortened = true;
+                    column.currentTextWidth = column.text.width();
                 }
+                // Updates the width of the column
+                column.width = column.newWidth;
+                column.background.attr("path", "M0," + self.height + "L" + self.slope + " 0,H" + (column.width + self.slope + shiftFirstColumn + 1) + ",l" + -self.slope + " " + self.height + "z");
+                delete column.newWidth;
+                column.left = -1;
             }
             // The left position of the column has changed
             if (left != column.left)
             {
                 column.left = left;
                 if (column.align != "right")
-                    column.text.css("left", column.left + self.C.separatorWidth / 2 + self.C.columnMargin - self.C.separatorWidth / 2);
+                    column.text.css("left", column.left + self.C.separatorWidth / 2 + self.C.columnMargin - self.C.separatorWidth / 2 + column.offset);
                 // Right align the text
                 else
-                    column.text.css("left", column.left + column.width + self.C.separatorWidth - column.text.width() - self.C.separatorWidth / 2 - self.C.columnMargin - self.C.separatorWidth / 2);
+                    column.text.css("left", column.left + column.width + self.C.separatorWidth - column.currentTextWidth - self.C.separatorWidth / 2 - self.C.columnMargin - self.C.separatorWidth / 2 + column.offset);
                 column.background.transform("T" + (left - self.slope / 2 - shiftFirstColumn) + ",0");
                 column.separator.transform("T" + (left - self.slope / 2 + column.width) + ",0");
             }
@@ -393,6 +547,12 @@ function List()
         self.selectedFiles = new Object(); // The list of the files selected by the user. The key is the global file index.
         self.lastFileSelected = { local: undefined, global: undefined }; // The last file selected or deselected
         self.oldTableLength; // The length of the table before its last modification
+        // Allows to move a column
+        self.move = {
+            updateColumns: 0, // True if the columns have to be updates the next time moveUpdate is called
+            style: 0, // CSS rule used to move the column
+            sheet: 0 // The style sheet node that contains the CSS rule
+        }
         
         // Events
         $(self.table).mousedown(function (e) { self.mouseDown(e); });
@@ -575,15 +735,19 @@ function List()
                 $(file).addClass("selected");
             }
         }
-        // Selects one file
+        // Selects / Deselects one file
         else
         {
+            var fileSelected = $(file).hasClass("selected");
             // Deselects all the files
             $(self.table.rows).removeClass("selected");
             self.selectedFiles = new Object();
-            // Selects the file
-            self.selectedFiles[globalFileIndex] = true;
-            $(file).addClass("selected");
+            // Selects the file if it was not selected
+            if (!fileSelected)
+            {
+                self.selectedFiles[globalFileIndex] = true;
+                $(file).addClass("selected");
+            }
         }
         self.lastFileSelected = { local: file.fileIndex, global: globalFileIndex };
     }
@@ -750,6 +914,59 @@ function List()
         return (undefined);
     }
     
+    // Moves a column
+    {
+        self.moveStart = function (name)
+        {
+            self.move = new Object();
+            self.move.updateColumns = false;
+            self.move.sheet = new Object();
+            self.move.sheet = $("<style></style>").appendTo($("head"));
+            var css = self.move.sheet[0].sheet;
+            css.insertRule("#tasks>.task>.files>.list>table td." + name + "{ }", css.length);
+            self.move.style = css.cssRules[0].style;
+            self.move.style.position = "relative";
+            self.move.style.left = "0px";
+            self.move.style.opacity = "0.9";
+        }
+        
+        self.moveUpdate = function (offset)
+        {
+            self.move.style.left = offset + "px";
+            if (self.move.updateColumns)
+                self.updateColumns();
+        }
+        
+        self.moveColumn = function (source, destination)
+        {
+            // Moves the col element
+            var cols = $(self.table).children("colgroup").children("col");
+            if (source < destination)
+                $(cols[source]).insertAfter(cols[destination]);
+            else
+                $(cols[source]).insertBefore(cols[destination]);
+            // Moves the column
+            var rows = self.table.rows;
+            var cells;
+            for (var i = 0; i < rows.length; ++i)
+            {
+                cells = rows[i].cells;
+                if (source < destination)
+                    $(cells[source]).insertAfter(cells[destination]);
+                else
+                    $(cells[source]).insertBefore(cells[destination]);
+            }
+            self.move.updateColumns = true;
+            // Resets the style for Firefox
+            self.move.style.left = "";
+        }
+        
+        self.moveStop = function ()
+        {
+            self.move.sheet.remove();
+        }
+    }
+    
     self.init();
     return (self);
 }
@@ -787,15 +1004,15 @@ function Layout()
     // Returns the min-width of the column.
     self.getMinWidth = function (column)
     {
-        if (self.columns[column] && self.columns[column].minWidth)
+        if (self.columns[column] && self.columns[column].minWidth != undefined)
             return (self.columns[column].minWidth);
-        return (C.Files.Header.minWidth);
+        return (C.Files.Header.defaultMinWidth);
     }
     
     // Returns the min-width of the column.
     self.getDefaultWidth = function (column)
     {
-        if (self.columns[column] && self.columns[column].defaultWidth)
+        if (self.columns[column] && self.columns[column].defaultWidth != undefined)
             return (self.columns[column].defaultWidth);
         return (C.Files.Header.defaultWidth);
     }
@@ -850,8 +1067,7 @@ function Layout()
     {
         type:
         {
-            minWidth: 1,
-            defaultWidth: 1,
+            defaultWidth: 0,
             convert: "convertType"
         },
         name:
@@ -862,14 +1078,12 @@ function Layout()
         {
             convert: "sizeToString",
             alignment: "right",
-            minWidth: 60,
             defaultWidth: 80,
             numerical: true
         },
         created:
         {
             convert: "convertDate",
-            minWidth: 80,
             defaultWidth: 130
         }
     };
@@ -1163,5 +1377,5 @@ var MergeSort =
     return (resource);
 }
 
-function initialize_resource_files(task) { return new ResourceFiles(task); }
+function initialize_resource_files(task) { return (new ResourceFiles(task)); }
 gl_resources.jsLoaded("files");

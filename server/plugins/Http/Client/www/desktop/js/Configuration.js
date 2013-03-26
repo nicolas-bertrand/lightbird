@@ -280,8 +280,11 @@ var Configuration =
             columnMargin: 10, // The margin between the column text and the separator.
             shortenString: ".", // A string that tells that a text has been shortened.
             defaultWidth: 200, // The default width of the coulmns of the header.
-            minWidth: 40, // The default minimum width of the columns of the header.
+            defaultMinWidth: 0, // The default minimum width of the columns of the header.
             typeTextMinWidth: 30, // The minimum width required by the type column to display the type in text instead of the colors.
+            moveResistance: 3, // The number of pixels the mouse have to move before to start to move the column.
+            moveAttr: {fill: "90-#f0a44a-#f4bb77"}, // The color of the column moved
+            moveBackgroundAttr: {fill: "#81aac7"}, // The color of the space that the moved column will take.
         }
     },
     View:
