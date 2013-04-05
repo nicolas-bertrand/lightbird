@@ -96,7 +96,6 @@
     border: none;
     border-collapse: collapse;
     table-layout: fixed;
-    background-color: #81aac7;
 }
 
 #tasks>.task>.files>.list>table tr {
@@ -206,5 +205,5 @@
 #tasks>.task>.files>.list.filter_video>table tr.video td,
 #tasks>.task>.files>.list.filter_document>table tr.document td,
 #tasks>.task>.files>.list.filter_other>table tr.other td {
-    opacity: 0.66;
+    opacity: 0.5;
 }

@@ -85,7 +85,7 @@ function Files()
     {
         self.raw = new Array(); // The unfiltered list of the files
         self.types = new Object(); // The types that don't have to be displayed
-        self.sortColumn; // The name of the column used to sort the files
+        self.sortedColumn; // The name of the column used to sort the files
         resource.files = self;
     
         // Fills the list
@@ -123,7 +123,7 @@ function Files()
     // Sorts the files.
     self.sort = function (column)
     {
-        self.sortColumn = column;
+        self.sortedColumn = column;
         if (resource.layout.isNumerical(column))
             self.raw.sort(self._compareNumber);
         else
@@ -141,14 +141,14 @@ function Files()
     // Numerical column comparison.
     self._compareNumber = function (a, b)
     {
-        return (parseInt(gl_files.list[a][self.sortColumn]) - parseInt(gl_files.list[b][self.sortColumn]));
+        return (parseInt(gl_files.list[a][self.sortedColumn]) - parseInt(gl_files.list[b][self.sortedColumn]));
     }
     
     // Alphabetical column comparison.
     self._compareString = function (i, j)
     {
-        var a = gl_files.list[i][self.sortColumn].toLowerCase();
-        var b = gl_files.list[j][self.sortColumn].toLowerCase();
+        var a = gl_files.list[i][self.sortedColumn].toLowerCase();
+        var b = gl_files.list[j][self.sortedColumn].toLowerCase();
         if (a < b) return -1;
         if (a > b) return 1;
         return 0;
@@ -167,7 +167,7 @@ function Header()
     {
         // Members
         self.C = C.Files.Header; // The configuration of the header
-        self.sortColumn; // The name of the column by which the files are sorted
+        self.sortedColumn = 10000; // The index of the column by which the files are sorted
         self.paper; // The SVG paper on which the columns are drawn
         self.height = self.C.height; // The height of the header
         self.slope = self.C.slopeRatio * self.height; // The slope of the columns
@@ -197,7 +197,7 @@ function Header()
             positions: 0, // The positions where the columns are swapped
             paper: 0, // A clone of the moved column, which follows the mouse
             background: 0, // The clone of the background
-            separator: 0, // The clone of the separator
+            target: 0, // A path that shows the space that the column will occupy
             left: 0 // The left position of the column
         }; 
     
@@ -238,7 +238,8 @@ function Header()
         c.textWidth = c.text.width();
         c.currentTextWidth = c.textWidth;
         // Separator
-        c.separator = self.paper.path("M0," + self.height + "L" + self.slope + " 0,H" + (self.C.separatorWidth + self.slope) + ",l" + -self.slope + " " + self.height + "z");
+        c.separator = self.paper.path();
+        self.drawPath(c.separator, self.C.separatorWidth, self.columns.length);
         c.separator.attr(self.C.separatorAttr);
         c.separator.node.setAttribute("class", "separator");
         $(c.separator.node).mousedown(function (e) { self.mouseDownSeparator(e, c); });
@@ -303,12 +304,13 @@ function Header()
             // Creates a clone of the column which will move with the mouse 
             move.node = $("<div></div>").addClass("move_column").appendTo(resource.node.header);
             move.paper = Raphael(move.node[0], "100%", "100%");
+            move.target = move.paper.path();
             move.background = move.paper.path();
-            move.background.attr(column.background.attr());
+            self.drawPath(move.background, column.width + self.C.separatorWidth - (column.index == self.sortedColumn ? self.slope : 0), column.index, true, true);
             move.background.attr(self.C.moveAttr);
-            move.separator = move.paper.path();
-            move.separator.attr(column.separator.attr());
-            move.separator.attr(self.C.moveAttr);
+            move.target.attr(move.background.attr());
+            move.target.attr(self.C.moveBackgroundAttr);
+            move.target.transform("T" + Math.floor(column.left - (column.index > 0 ? self.C.separatorWidth / 2 : 0)) + ",0");
             move.left = column.left;
             // Saves the current positions of the columns
             self.moveColumn.positions = new Array();
@@ -319,9 +321,8 @@ function Header()
                         column: i
                     });
             // Updates the actual column
-            column.background.attr(self.C.moveBackgroundAttr);
-            column.separator.attr(self.C.moveBackgroundAttr);
             column.text.addClass("move_text");
+            column.background.attr(self.C.moveBackgroundAttr);
             resource.container.moveStart(column.name);
         }
         // Moves the column
@@ -334,30 +335,38 @@ function Header()
                 left += column.width + self.C.separatorWidth;
             for (var destination = 0; destination < move.positions.length && move.positions[destination].left < left; ++destination)
                 ;
+            // Changes the order of the columns
             if (destination != column.index)
             {
                 resource.container.moveColumn(column.index, destination);
                 self.columns.splice(column.index, 1);
                 self.columns.splice(destination, 0, column);
+                var sortedColumn = self.sortedColumn;
                 for (var j = 0; j < self.columns.length; ++j)
                 {
-                    var c = self.columns[j];
-                    c.index = j;
-                    c.newWidth = self.columns[j].width;
-                    c.background.attr(j % 2 ? self.C.evenAttr : self.C.oddAttr);
+                    if (self.columns[j].index == sortedColumn)
+                        self.sortedColumn = j;
+                    self.columns[j].index = j;
                 }
+                self.updateSeparators();
+                // Updates the paths of the column moved
+                self.drawPath(move.background, column.width + self.C.separatorWidth - (column.index == self.sortedColumn ? self.slope : 0), column.index, true, true);
+                move.target.attr(move.background.attr());
+                move.target.attr(self.C.moveBackgroundAttr);
                 column.background.attr(self.C.moveBackgroundAttr);
+                var updateTargetPosition = true;
             }
             // Updates the other columns
             column.left = -1;
             self.updateColumns();
             // Moves the clone of the column to follow the position of the mouse
-            var shiftFirstColumn = 0;
-            var left = move.left + column.offset + shiftFirstColumn - self.slope / 2;
+            var left = move.left + column.offset - Math.floor(column.index > 0 ? self.C.separatorWidth / 2 : 0);
             move.background.transform("T" + left + ",0");
-            move.separator.transform("T" + (left + column.width) + ",0");
             column.text.css("left", column.text.position().left + move.left - column.left);
             resource.container.moveUpdate(column.offset + move.left - column.left);
+            // Moves the target that shows where the column will be moved
+            if (updateTargetPosition)
+                move.target.transform("T" + Math.floor(column.left - (column.index > 0 ? self.C.separatorWidth / 2 : 0)) + ",0");
         }
     }
     
@@ -370,20 +379,30 @@ function Header()
         if (self.moveColumn.resistance)
         {
             // If the column is already sorted, we just reverse the files list
-            if (self.sortColumn == column.name)
+            if (self.sortedColumn == column.index)
+            {
                 resource.files.reverse();
+                self.slope = -self.slope;
+            }
             // Performs the actual sorting
             else
+            {
                 resource.files.sort(column.name);
-            self.sortColumn = column.name;
+                self.slope = self.C.slopeRatio * self.height;
+            }
+            self.sortedColumn = column.index;
+            // Updates the paths of the columns
+            self.updateSeparators();
+            self.updateColumns();
         }
         // Stops the column movement
         else
         {
             column.background.attr(column.index % 2 ? self.C.evenAttr : self.C.oddAttr);
-            column.separator.attr(self.C.separatorAttr);
+            if (column.index == self.sortedColumn)
+                column.background.attr(self.C.sortAttr);
             self.moveColumn.background.remove();
-            self.moveColumn.separator.remove();
+            self.moveColumn.target.remove();
             self.moveColumn.paper.remove();
             self.moveColumn.node.remove();
             self.moveColumn = new Object();
@@ -463,6 +482,30 @@ function Header()
         task.updateMouseOverContent();
     }
     
+    // Updates the separators based on the sorted column.
+    // updateColumns() have to be called after.
+    self.updateSeparators = function ()
+    {
+        for (var i = 0; i < self.columns.length; ++i)
+        {
+            var c = self.columns[i];
+            // The separators adjacent to the sorted column have a special attribute
+            if (i == self.sortedColumn || i == self.sortedColumn - 1)
+                c.separator.attr(self.C.sortSeparatorAttr);
+            else
+                c.separator.attr(self.C.separatorAttr);
+            // Updates the odd / even attributes of the backgrounds
+            if (i == self.sortedColumn)
+                c.background.attr(self.C.sortAttr);
+            else
+                c.background.attr(i % 2 ? self.C.evenAttr : self.C.oddAttr);
+            // Updates the path of the saparators
+            self.drawPath(c.separator, self.C.separatorWidth, c.index);
+            // Ensures that the column will be redrawn by updateColumns
+            c.newWidth = c.width;
+        }
+    }
+    
     // Updates the position and the width of the columns.
     self.updateColumns = function ()
     {
@@ -470,7 +513,6 @@ function Header()
         for (var i = 0; i < self.columns.length; ++i)
         {
             var column = self.columns[i];
-            var shiftFirstColumn = (i == 0 ? Math.abs(self.slope / 2) : 0);
             
             // The width of the column has changed
             if (column.newWidth != undefined)
@@ -505,7 +547,7 @@ function Header()
                 }
                 // Updates the width of the column
                 column.width = column.newWidth;
-                column.background.attr("path", "M0," + self.height + "L" + self.slope + " 0,H" + (column.width + self.slope + shiftFirstColumn + 1) + ",l" + -self.slope + " " + self.height + "z");
+                self.drawPath(column.background, column.width, column.index, true);
                 delete column.newWidth;
                 column.left = -1;
             }
@@ -518,11 +560,40 @@ function Header()
                 // Right align the text
                 else
                     column.text.css("left", column.left + column.width + self.C.separatorWidth - column.currentTextWidth - self.C.separatorWidth / 2 - self.C.columnMargin - self.C.separatorWidth / 2 + column.offset);
-                column.background.transform("T" + (left - self.slope / 2 - shiftFirstColumn) + ",0");
-                column.separator.transform("T" + (left - self.slope / 2 + column.width) + ",0");
+                var shiftFirstColumn = (i == 0 ? Math.abs(self.slope / 2) : 0);
+                var slope = self.slope * (column.index > self.sortedColumn ? -1 : 1);
+                column.background.transform("T" + (left - slope / 2 - shiftFirstColumn) + ",0");
+                slope = self.slope * (column.index >= self.sortedColumn ? -1 : 1);
+                column.separator.transform("T" + (left - slope / 2 + column.width) + ",0");
             }
             left += column.width + self.C.separatorWidth;
         }
+    }
+    
+    // Draws a background or a separator.
+    // @param path: The Raphael target path.
+    // @param width: The width of the path.
+    // @param index: The index of the column drawn.
+    // @param background: True for a background and false for a separator.
+    // @param exactWidth: True if the width should not be modified.
+    self.drawPath = function (path, width, index, background, exactWidth)
+    {
+        // Changes the direction of the slope after the sorted column
+        var slope = self.slope;
+        if (index > self.sortedColumn || (index == self.sortedColumn && (!background || index == 0)))
+            slope = -self.slope;
+        width += slope;
+        // Ensures that the backgrounds and the separator overlap correctly (closes the gap between them)
+        width += (!exactWidth || index == 0 ? 1 : 0);
+        // The first column has a vertical left side
+        if (background && index == 0)
+            path.attr("path", "M0," + self.height + "L0 0,H" + (width + Math.abs(self.slope / 2) * (!exactWidth ? 1 : -1) - (index == self.sortedColumn ? slope : 0)) + ",l" + -slope + " " + self.height + "z");
+        // Normal column
+        else if (index != self.sortedColumn || !background)
+            path.attr("path", "M0," + self.height + "L" + slope + " 0,H" + width + ",l" + -slope + " " + self.height + "z");
+        // The sorted column background is a frustum
+        else 
+            path.attr("path", "M0," + self.height + "L" + slope + " 0,H" + (width - slope) + ",l" + slope + " " + self.height + "z");
     }
     
     self.init();
@@ -928,6 +999,7 @@ function List()
             self.move.style.position = "relative";
             self.move.style.left = "0px";
             self.move.style.opacity = "0.9";
+            css.insertRule("#tasks>.task>.files>.list>table { background-color: " + C.Files.Header.moveBackgroundAttr.fill + "; }", css.length);
         }
         
         self.moveUpdate = function (offset)
@@ -1067,7 +1139,8 @@ function Layout()
     {
         type:
         {
-            defaultWidth: 0,
+            minWidth: 0,
+            defaultWidth: 1,
             convert: "convertType"
         },
         name:
@@ -1078,12 +1151,14 @@ function Layout()
         {
             convert: "sizeToString",
             alignment: "right",
+            minWidth: 60,
             defaultWidth: 80,
             numerical: true
         },
         created:
         {
             convert: "convertDate",
+            minWidth: 80,
             defaultWidth: 130
         }
     };

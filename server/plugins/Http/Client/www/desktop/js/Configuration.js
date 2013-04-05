@@ -276,15 +276,17 @@ var Configuration =
             oddAttr: {fill: "90-#48aaf0-#6cbbf3", stroke: "none"}, // The attributes of the odd columns.
             evenAttr: {fill: "90-#2f9eed-#6cbbf3", stroke: "none"}, // The attributes of the even columns.
             separatorWidth: 15, // The width of the separators.
-            separatorAttr: {fill: "90-#5ab7fb-#7ac5fc", stroke: "none"}, // The attributes of the separators.
+            separatorAttr: {fill: "90-#5ab7fb-#83c9fc", stroke: "none"}, // The attributes of the separators.
             columnMargin: 10, // The margin between the column text and the separator.
             shortenString: ".", // A string that tells that a text has been shortened.
             defaultWidth: 200, // The default width of the coulmns of the header.
-            defaultMinWidth: 0, // The default minimum width of the columns of the header.
+            defaultMinWidth: 40, // The default minimum width of the columns of the header.
             typeTextMinWidth: 30, // The minimum width required by the type column to display the type in text instead of the colors.
             moveResistance: 3, // The number of pixels the mouse have to move before to start to move the column.
-            moveAttr: {fill: "90-#f0a44a-#f4bb77"}, // The color of the column moved
+            moveAttr: {fill: "90-#f0a44a-#f4bb77", stroke: "none"}, // The attribute of the column moved.
             moveBackgroundAttr: {fill: "#81aac7"}, // The color of the space that the moved column will take.
+            sortAttr: {fill: "90-#4a94f0-#77aff4"}, // The color of the sorted column.
+            sortSeparatorAttr: {fill: "90-#65a5f5-#8bbcf8"}, // The color of the separator adjacent to the sorted column.
         }
     },
     View:
