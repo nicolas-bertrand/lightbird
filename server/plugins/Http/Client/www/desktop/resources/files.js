@@ -26,6 +26,7 @@ function ResourceFiles(task)
         // Default values
         resource.node.icon.content.css("padding", 5);
         resource.updateIcon();
+        task.setBorder("window");
     }
     
     // The task have been resized.
@@ -226,7 +227,7 @@ function Header()
         c.background.attr(self.columns.length % 2 ? self.C.evenAttr : self.C.oddAttr);
         c.background.node.setAttribute("class", "column");
         $(c.background.node).mousedown(function (e) { self.mouseDownColumn(e, c); });
-        $(c.background.node).click(function (e) { self.clickColumn(e, c); });
+        $(c.background.node).mouseup(function (e) { self.clickColumn(e, c); });
         // Text
         c.name = name;
         c.translation = T.Files[name] ? T.Files[name] : name;
@@ -234,7 +235,7 @@ function Header()
         c.text = $("<span></span>").addClass("text").appendTo(resource.node.header);
         c.text.html(c.translation);
         c.text.mousedown(function (e) { self.mouseDownColumn(e, c); });
-        c.text.click(function (e) { self.clickColumn(e, c); });
+        c.text.mouseup(function (e) { self.clickColumn(e, c); });
         c.textWidth = c.text.width();
         c.currentTextWidth = c.textWidth;
         // Separator
@@ -254,6 +255,8 @@ function Header()
     {
         if (self.columns.length == 1)
             return ;
+        if (self.sortedColumn == column.index)
+            self.sortedColumn = 10000;
         // Notifies the container
         resource.container.removeColumn(column);
         // Removes the column
@@ -268,6 +271,7 @@ function Header()
         if (column.index == 0)
             self.columns[0].newWidth = self.columns[0].width;
         // Updates positions of the other columns
+        self.updateSeparators();
         self.updateColumns();
         delete column;
     }
@@ -999,7 +1003,7 @@ function List()
             self.move.style.position = "relative";
             self.move.style.left = "0px";
             self.move.style.opacity = "0.9";
-            css.insertRule("#tasks>.task>.files>.list>table { background-color: " + C.Files.Header.moveBackgroundAttr.fill + "; }", css.length);
+            $(self.table).addClass("move_column");
         }
         
         self.moveUpdate = function (offset)
@@ -1036,6 +1040,7 @@ function List()
         self.moveStop = function ()
         {
             self.move.sheet.remove();
+            $(self.table).removeClass("move_column");
         }
     }
     

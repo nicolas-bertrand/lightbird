@@ -767,6 +767,7 @@ function Task(resource, resourceContent)
         self.lastIconMouseDown = 0; // The time of the last mouse down event on the icon. Used to simulate the double click.
         self.lastBackgroundSet; // The last task background set using setBackground()
         self.overflow = true; // If the overflow of the content is enabled
+        self.contentBorder; // The border of the content. See setBorder(). 
         // The following members are used when the task icon is being dragged
         self.mouse; // The position of the mouse in the icon {x, y}
         self.element; // The initial position of the element {x, y}
@@ -1339,6 +1340,7 @@ function Task(resource, resourceContent)
             self.content.removeClass("window");
         self.focus(false);
         self.buttons.setContainer(container);
+        self.setBorder(self.contentBorder);
     }
     
     // Sets the z-indes of the content of the task.
@@ -1422,10 +1424,14 @@ function Task(resource, resourceContent)
         }
         
         // Displays / hides the task borders.
-        // @param border : True to display the task border.
+        // @param border : True if the border is always displayed, false if never.
+        // The value can also be "desktop" or "window" to display the border only for that container.
         self.setBorder = function (border)
         {
-            if (border)
+            self.contentBorder = border;
+            if ((border == "window" && self.isWindow()) ||
+                (border == "desktop" && !self.isWindow()) ||
+                border == true || border == undefined)
                 self.content.removeClass("no_border");
             else
                 self.content.addClass("no_border");
