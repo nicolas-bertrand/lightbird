@@ -814,6 +814,7 @@ function Task(resource, resourceContent)
         self.content.mouseenter(function (e) { self.mouseEnterContent(e); });
         self.content.mouseleave(function (e) { self.mouseLeaveContent(e); });
         self.content.appendTo(gl_desktop.node.tasks);
+        self.setBorder("window");
     }
     
     // Initializes the resource of the task.

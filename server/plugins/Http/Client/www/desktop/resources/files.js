@@ -26,7 +26,6 @@ function ResourceFiles(task)
         // Default values
         resource.node.icon.content.css("padding", 5);
         resource.updateIcon();
-        task.setBorder("window");
     }
     
     // The task have been resized.
@@ -711,6 +710,15 @@ function List()
         var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
         self.top.height(top);
         self.bottom.height(bottom);
+        self.updateRows();
+        // Hides the scroll if all the files can be seen at the same time
+        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+        {
+            $(self.list).removeClass("scroll");
+            self.list.scrollTop = 0;
+        }
+        else
+            $(self.list).addClass("scroll");
     }
     
     // Resizes the list to fit into the task content height.
