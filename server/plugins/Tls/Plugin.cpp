@@ -299,7 +299,7 @@ void    Plugin::_loadDHParams()
     bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_DH, this->secParam);
     ASSERT_INIT(gnutls_dh_params_init(&this->dhParams), "dh_params");
     // The Diffie-Hellman parameters expired
-    if (QFileInfo(file).created() < this->dhParamsExpiration)
+    if (QFileInfo(file).lastModified() < this->dhParamsExpiration)
         file.resize(0);
     // Import the DH parameters from the PEM file
     if (file.size() > 0)
