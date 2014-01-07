@@ -21,7 +21,7 @@ namespace LightBird
         /// @param format : The format of the preview image that will be generate.
         /// @param width : The width of the preview. If it is 0, it will be proportional to the height.
         /// @param height : The height of the preview. If it is 0, it will be proportional to the width.
-        /// @param position : For a video, this parameter could be the time where the preview is captured.
+        /// @param position : For a video this parameter could be the time where the preview is captured.
         /// @param quality : The quality factor must be in the range 0 to 1 or -1.
         /// Specify 0 to obtain small compressed files, 1 for large uncompressed files,
         /// and -1 (the default) to use the default settings.

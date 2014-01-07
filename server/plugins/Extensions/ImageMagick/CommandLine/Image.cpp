@@ -39,6 +39,7 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     QTemporaryFile  tmp;
     bool            replaceSource = false;
 
+    LOG_FATAL("TOTOTO");
     // Check that the source exists
     if (!QFileInfo(source).isFile() || source == destination)
         return (false);

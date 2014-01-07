@@ -43,9 +43,9 @@ void    Plugin::onUninstall(LightBird::IApi *api)
 
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 {
-    metadata.name = "ImageMagick";
-    metadata.brief = "This extension allows plugins to manage images using ImageMagick.";
-    metadata.description = "Allows plugins to manipulate images via the ImageMagick library.";
+    metadata.name = "ImageMagick/CommandLine";
+    metadata.brief = "This extension allows plugins to manage images using ImageMagick command line tools.";
+    metadata.description = "Allows plugins to manipulate images via the ImageMagick command line tools.";
     metadata.autor = "LightBird team";
     metadata.site = "lightbird.cc";
     metadata.email = "team@lightbird.cc";
