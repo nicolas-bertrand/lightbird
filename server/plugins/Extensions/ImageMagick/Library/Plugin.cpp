@@ -51,6 +51,7 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
     metadata.email = "team@lightbird.cc";
     metadata.version = "1.0";
     metadata.licence = "CC BY-NC-SA 3.0";
+    metadata.dependencies << "ImageMagick 6.8.9";
 }
 
 QStringList Plugin::getExtensionsNames()

@@ -3,7 +3,7 @@
 
 // Windows does not define ssize_t
 # ifdef Q_OS_WIN
-#  define ssize_t int
+#  define ssize_t qint64
 # endif // Q_OS_WIN
 
 #include <errno.h>
@@ -18,7 +18,6 @@
 #else
 # include <sys/socket.h>
 #endif // Q_OS_WIN
-typedef unsigned int SOCKET;
 
 // gnutls_session_t needs to be fully defined for Q_DECLARE_METATYPE, but gnutls_session_int is not a public struct,
 // so we declare a fake one (which does not affect the size of gnutls_session_t).

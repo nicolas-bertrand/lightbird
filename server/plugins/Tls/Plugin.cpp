@@ -121,7 +121,7 @@ ssize_t Plugin::push(gnutls_transport_ptr_t c, const void *data, size_t size)
 {
     LightBird::IClient  *client = (LightBird::IClient *)c;
 
-    return (send((SOCKET)client->getSocket().socketDescriptor(), (char *)data, size, 0));
+    return (send((SOCKET)client->getSocket().socketDescriptor(), (char *)data, (int)size, 0));
 }
 
 void    Plugin::log(gnutls_session_t, const char *log)
@@ -202,9 +202,9 @@ void    Plugin::_loadPrivateKey()
         ASSERT(gnutls_x509_privkey_generate(this->key, GNUTLS_PK_RSA, bits, 0));
         ASSERT(gnutls_x509_privkey_verify_params(this->key));
         size = bits;
-        data.resize(size);
+        data.resize((int)size);
         ASSERT(gnutls_x509_privkey_export_pkcs8(this->key, GNUTLS_X509_FMT_PEM, this->keyPassword.data(), GNUTLS_PKCS_USE_PBES2_AES_256, data.data(), &size));
-        data.resize(size);
+        data.resize((int)size);
         file.write(data);
     }
 }
@@ -213,7 +213,7 @@ void    Plugin::_loadCertificate()
 {
     QFile            file(this->crtFile);
     gnutls_datum_t   datum;
-    unsigned int     size = 2048;
+    size_t           size = 2048;
     QByteArray       data;
     gnutls_privkey_t privkey;
     gnutls_pubkey_t  pubkey;
@@ -243,8 +243,8 @@ void    Plugin::_loadCertificate()
         else if (gnutls_pubkey_import_x509(pubkeyCrt, this->crt, 0) != GNUTLS_E_SUCCESS)
             file.resize(0);
         // Ensures that the public keys of the certificate and the private key match
-        unsigned int size1 = size, size2 = size;
-        QByteArray pub1(size1, 0), pub2(size2, 0);
+        size_t size1 = size, size2 = size;
+        QByteArray pub1((int)size1, 0), pub2((int)size2, 0);
         if (gnutls_pubkey_export(pubkey, GNUTLS_X509_FMT_PEM, pub1.data(), &size1) != GNUTLS_E_SUCCESS
             || gnutls_pubkey_export(pubkeyCrt, GNUTLS_X509_FMT_PEM, pub2.data(), &size2) != GNUTLS_E_SUCCESS
             || size1 != size2 || pub1 != pub2)
@@ -271,7 +271,7 @@ void    Plugin::_loadCertificate()
         ASSERT(gnutls_x509_crt_set_basic_constraints(this->crt, 0, -1));
         ASSERT(gnutls_x509_crt_set_key_purpose_oid(this->crt, GNUTLS_KP_TLS_WWW_SERVER, 0));
         ASSERT(gnutls_x509_crt_set_key_usage(this->crt, GNUTLS_KEY_DIGITAL_SIGNATURE | GNUTLS_KEY_KEY_ENCIPHERMENT));
-        data.resize(size);
+        data.resize((int)size);
         ASSERT(gnutls_x509_crt_get_key_id(this->crt, 0, (unsigned char *)data.data(), &size));
         ASSERT(gnutls_x509_crt_set_subject_key_id(this->crt, (unsigned char *)data.data(), size));
         ASSERT(gnutls_x509_crt_set_version(this->crt, 3));
@@ -279,7 +279,7 @@ void    Plugin::_loadCertificate()
         ASSERT(gnutls_x509_crt_privkey_sign(this->crt, this->crt, privkey, digest, 0));
         size = data.size();
         ASSERT(gnutls_x509_crt_export(this->crt, GNUTLS_X509_FMT_PEM, data.data(), &size));
-        data.resize(size);
+        data.resize((int)size);
         file.write(data);
     }
     gnutls_pubkey_deinit(pubkey);
@@ -318,8 +318,9 @@ void    Plugin::_loadDHParams()
         datum.data = (unsigned char *)data.data();
         datum.size = bits;
         ASSERT(gnutls_dh_params_generate2(this->dhParams, bits));
-        ASSERT(gnutls_dh_params_export_pkcs3(this->dhParams, GNUTLS_X509_FMT_PEM, datum.data, &datum.size));
-        file.write(data.data(), datum.size);
+        size_t size = datum.size;
+        ASSERT(gnutls_dh_params_export_pkcs3(this->dhParams, GNUTLS_X509_FMT_PEM, datum.data, &size));
+        file.write(data.data(), size);
     }
 }
 

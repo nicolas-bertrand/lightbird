@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS = api \
+SUBDIRS = \
+    api \
     extensions \
     library \
     plugins \

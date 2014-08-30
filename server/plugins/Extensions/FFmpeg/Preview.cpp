@@ -65,7 +65,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
             throw false;
         }
         context = stream->codec;
-        if (!(frame = avcodec_alloc_frame()))
+        if (!(frame = av_frame_alloc()))
         {
             LOG_DEBUG("Could not allocate the frame", properties.toMap(), "Preview", "generate");
             throw false;
@@ -154,7 +154,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
     if (swsContext)
         sws_freeContext(swsContext);
     if (frame)
-        avcodec_free_frame(&frame);
+        av_frame_free(&frame);
     if (context)
         avcodec_close(context);
     if (format)

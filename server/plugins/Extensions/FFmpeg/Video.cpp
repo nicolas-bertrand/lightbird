@@ -331,7 +331,7 @@ void    Video::_clear(bool free, bool settings)
         if (this->packetIn.data)
             av_free_packet(&this->packetIn);
         if (this->frame)
-            avcodec_free_frame(&this->frame);
+            av_frame_free(&this->frame);
         if (this->ioContext)
             av_free(this->ioContext);
         if (this->videoFilterGraph)
@@ -423,7 +423,7 @@ void    Video::_initializeOutput()
     this->formatOut->pb = this->ioContext;
     if (this->formatOut->oformat->flags & AVFMT_NOFILE)
         LOG_WARNING("AVFMT_NOFILE is defined", this->_getProperties(), "Video", "transcode");
-    if (!(this->frame = avcodec_alloc_frame()))
+    if (!(this->frame = av_frame_alloc()))
     {
         LOG_ERROR("Could not allocate the frame", this->_getProperties(), "Video", "transcode");
         throw false;
@@ -823,7 +823,7 @@ bool    Video::_transcodeVideo()
     if (gotFrame)
     {
         this->frame->pts = (int)av_frame_get_best_effort_timestamp(this->frame);
-        if ((ret = av_buffersrc_add_frame(this->videoFilterIn, this->frame, AV_BUFFERSRC_FLAG_PUSH)) < 0)
+        if ((ret = av_buffersrc_add_frame_flags(this->videoFilterIn, this->frame, AV_BUFFERSRC_FLAG_PUSH)) < 0)
         {
             LOG_ERROR("Error while feeding the video filter graph", this->_getProperties(ret), "Video", "_transcodeVideo");
             throw false;
@@ -893,7 +893,7 @@ void    Video::_transcodeAudio(bool flush)
         if (gotFrame)
         {
             this->frame->pts = this->frame->pkt_pts;
-            if ((ret = av_buffersrc_add_frame(this->audioFilterIn, this->frame, AV_BUFFERSRC_FLAG_PUSH)) < 0)
+            if ((ret = av_buffersrc_add_frame_flags(this->audioFilterIn, this->frame, AV_BUFFERSRC_FLAG_PUSH)) < 0)
             {
                 LOG_ERROR("Error while feeding the audio filter graph", this->_getProperties(ret), "Video", "_transcodeAudio");
                 throw false;

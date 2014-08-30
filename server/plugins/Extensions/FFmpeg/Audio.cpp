@@ -198,7 +198,7 @@ void    Audio::_clear(bool free, bool settings)
         if (this->packetIn.data)
             av_free_packet(&this->packetIn);
         if (this->frame)
-            avcodec_free_frame(&this->frame);
+            av_frame_free(&this->frame);
         if (this->ioContext)
             av_free(this->ioContext);
         if (this->filterGraph)
@@ -273,7 +273,7 @@ void    Audio::_initializeOutput()
     this->formatOut->pb = this->ioContext;
     if (this->formatOut->oformat->flags & AVFMT_NOFILE)
         LOG_WARNING("AVFMT_NOFILE is defined", this->_getProperties(), "Audio", "transcode");
-    if (!(this->frame = avcodec_alloc_frame()))
+    if (!(this->frame = av_frame_alloc()))
     {
         LOG_ERROR("Could not allocate the frame", this->_getProperties(), "Audio", "transcode");
         throw false;
@@ -495,7 +495,7 @@ void    Audio::_transcode(bool flush)
         if (gotFrame)
         {
             this->frame->pts = this->frame->pkt_pts;
-            if ((ret = av_buffersrc_add_frame(this->filterIn, this->frame, AV_BUFFERSRC_FLAG_PUSH)) < 0)
+            if ((ret = av_buffersrc_add_frame_flags(this->filterIn, this->frame, AV_BUFFERSRC_FLAG_PUSH)) < 0)
             {
                 LOG_ERROR("Error while feeding the filter graph", this->_getProperties(ret), "Audio", "_transcode");
                 throw false;

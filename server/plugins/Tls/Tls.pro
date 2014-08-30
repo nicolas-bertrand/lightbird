@@ -13,10 +13,17 @@ INCLUDEPATH += \
 TARGET = Tls
 DESTDIR = ../../build/plugins/Tls
 LIBS += -L../../build -lLightBirdLibrary
-# GnuTLS should be located in the GnuTLS folder of the plugin
-LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll
-# winsock2 is required on Windows
-win32:LIBS += -lWs2_32
+win32:LIBS += -lWs2_32 # winsock2 is required on Windows
+
+QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
+X64 = $$find(QT_INSTALL_PREFIX, 64)
+isEmpty(X64) {
+    CONFIG(debug, debug|release):LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll.32D
+    CONFIG(release, debug|release):LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll.32
+} else {
+    CONFIG(debug, debug|release):LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll.64D
+    CONFIG(release, debug|release):LIBS += -L../../../server/plugins/Tls/GnuTLS/lib -lgnutls.dll.64
+}
 
 HEADERS = \
     Handshake.h \

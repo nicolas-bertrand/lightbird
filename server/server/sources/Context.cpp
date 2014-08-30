@@ -10,6 +10,8 @@ Context::Context(const QString &id)
     , allPorts(false)
     , allModes(true)
     , allTransports(true)
+    , mode(LightBird::IClient::CLIENT)
+    , transport(LightBird::INetwork::TCP)
 {
 }
 

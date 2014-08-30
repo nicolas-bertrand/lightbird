@@ -1,6 +1,8 @@
 TEMPLATE = subdirs
 
-SUBDIRS = Mime \
-#   FFmpeg \
-#   ImageMagick \
-#   TagLib
+SUBDIRS = \
+    FFmpeg \
+    ImageMagick \
+    Mime \
+    TagLib \
+    #Vlc

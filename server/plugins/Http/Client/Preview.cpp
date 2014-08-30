@@ -39,7 +39,11 @@ void    Preview::generate()
     this->previewFileName = LightBird::preview(this->file.getId(), LightBird::IImage::JPEG, this->width, this->height, position, quality);
     // No extensions has been able to generate the preview
     if (this->previewFileName.isEmpty())
+    {
+        if (Plugin::api().log().isTrace())
+            Plugin::api().log().trace("Unable to generate a preview from this file.", Properties("fileId", this->file.getId()).toMap(), "Preview", "generate");
         return this->_error("Preview", 404, "Not Found", "Unable to generate a preview from this file.");
+    }
     // Put the preview in the response
     this->response.getContent().setStorage(LightBird::IContent::FILE, this->previewFileName);
     this->response.setType("image/jpeg");

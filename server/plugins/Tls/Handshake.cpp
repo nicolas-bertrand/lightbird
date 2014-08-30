@@ -130,7 +130,7 @@ ssize_t Handshake::pull(gnutls_transport_ptr_t c, void *data, size_t size)
     }
     // All the data can be read
     memcpy(data, content.data(), size);
-    content.remove(0, size);
+    content.remove(0, (int)size);
     return (size);
 }
 
@@ -138,7 +138,7 @@ ssize_t Handshake::push(gnutls_transport_ptr_t c, const void *data, size_t size)
 {
     LightBird::IClient  *client = (LightBird::IClient *)c;
 
-    client->getResponse().getContent().setData(QByteArray((char *)data, size));
+    client->getResponse().getContent().setData(QByteArray((char *)data, (int)size));
     return (size);
 }
 

@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
-SUBDIRS = Example \
+SUBDIRS = \
+    Example \
     Extensions \
     Files \
     Ftp \
@@ -8,4 +9,4 @@ SUBDIRS = Example \
     Json \
     Log \
     Test \
-#   Tls
+    Tls

@@ -41,7 +41,7 @@ bool    ParserServer::doDeserializeHeader(const QByteArray &data, quint64 &used)
     {
         // Split the header from the content
         used = this->header.size();
-        this->header.resize(this->header.indexOf(END_OF_HEADER) + strlen(END_OF_HEADER));
+        this->header.resize(this->header.indexOf(END_OF_HEADER) + (sizeof(END_OF_HEADER) - 1));
         used = this->header.size() - (used - data.size());
         // Parse the header
         if (!this->_checkHeaderCharacters() || !this->_parseHeaderFirstLine() || !this->_parseHeaderProperties())

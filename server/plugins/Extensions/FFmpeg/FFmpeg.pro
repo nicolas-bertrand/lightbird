@@ -13,7 +13,16 @@ INCLUDEPATH += \
 TARGET = FFmpeg
 DESTDIR = ../../../build/plugins/Extensions/FFmpeg
 LIBS += -L../../../build -lLightBirdLibrary
-LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec -lavfilter -lavformat -lavutil -lswscale
+
+QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
+X64 = $$find(QT_INSTALL_PREFIX, 64)
+isEmpty(X64) {
+    CONFIG(debug, debug|release):LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec32D -lavfilter32D -lavformat32D -lavutil32D -lswscale32D
+    CONFIG(release, debug|release):LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec32 -lavfilter32 -lavformat32 -lavutil32 -lswscale32
+} else {
+    CONFIG(debug, debug|release):LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec64D -lavfilter64D -lavformat64D -lavutil64D -lswscale64D
+    CONFIG(release, debug|release):LIBS += -L../../../../server/plugins/Extensions/FFmpeg/lib -lavcodec64 -lavfilter64 -lavformat64 -lavutil64 -lswscale64
+}
 
 HEADERS = \
     Audio.h \

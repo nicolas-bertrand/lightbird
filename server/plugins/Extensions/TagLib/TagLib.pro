@@ -15,7 +15,16 @@ DEFINES += TAGLIB_STATIC
 TARGET = TagLib
 DESTDIR = ../../../build/plugins/Extensions/TagLib
 LIBS += -L../../../build -lLightBirdLibrary
-LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib
+
+QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
+X64 = $$find(QT_INSTALL_PREFIX, 64)
+isEmpty(X64) {
+    CONFIG(debug, debug|release):LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib32D
+    CONFIG(release, debug|release):LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib32
+} else {
+    CONFIG(debug, debug|release):LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib64D
+    CONFIG(release, debug|release):LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib64
+}
 
 HEADERS = \
     Identify.h \
