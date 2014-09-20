@@ -51,9 +51,14 @@ QString LightBird::cleanPath(const QString &p, bool removeFirstSlash)
     return (result);
 }
 
-void    LightBird::identify(const QString &file, LightBird::IIdentify::Information *information)
+void    LightBird::identify(const QString &fileId)
 {
-    LightBird::Library::getIdentify()->identify(file, information);
+    LightBird::Library::getIdentify()->identify(fileId);
+}
+
+void    LightBird::identify(const QString &filePath, LightBird::IIdentify::Information &information)
+{
+    LightBird::Library::getIdentify()->identify(filePath, information);
 }
 
 bool    LightBird::isValidName(const QString &objectName)

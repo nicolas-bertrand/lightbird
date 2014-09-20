@@ -35,21 +35,26 @@ namespace LightBird
     /// @param removeFirstSlash : Removes the first char if it is "/".
     LIB QString     cleanPath(const QString &path, bool removeFirstSlash = false);
 
-    /// @brief Allows to get information on a file.
+    /// @brief Identifies a file in the database. The identification is performed
+    /// in a dedicated thread, so this method returns immediatly.
+    /// The result will be inserted in the database.
     ///
     /// Calls the IIdentify interface of each plugins that implement it. Then
     /// tries to mix all the data gathered in order to get the final list of
     /// information on the file and its type.
-    /// - If the information parameter is NULL, the file parameter is the id of
-    /// the file to identify. The identification is done in a dedicated thread,
-    /// so this function returns immediatly. The result will be inserted in the
-    /// database.
-    /// - If information is not NULL the file parameter is the path to the file
-    /// to identify. The identification is performed in the current thread and
-    /// the information parameter is filled with the result.
-    /// @param file : The path or the id of the file that will be probed,
-    /// depending on the information parameter.
-    LIB void        identify(const QString &file, LightBird::IIdentify::Information *information = NULL);
+    /// @param fileId : The id of the fine to identify in the database.
+    LIB void        identify(const QString &fileId);
+
+    /// @brief Allows to get information on a file. The identification is
+    /// performed in the current thread, and the information parameter is
+    /// filled with the result.
+    ///
+    /// Calls the IIdentify interface of each plugins that implement it. Then
+    /// tries to mix all the data gathered in order to get the final list of
+    /// information on the file and its type.
+    /// @param filePath : The path to the file to idenfity.
+    /// @param information : This parameter is filled with the data collected.
+    LIB void        identify(const QString &filePath, LightBird::IIdentify::Information &information);
 
     /// @brief Returns true if the file or directory name is valid and can be safely used.
     LIB bool        isValidName(const QString &objectName);

@@ -69,7 +69,7 @@ void    Engine::_onDeserialize(LightBird::IOnDeserialize::Deserialize type)
     QMapIterator<QString, LightBird::IOnDeserialize *> it(Plugins::instance()->getInstances<LightBird::IOnDeserialize>(this->client.getValidator()));
     while (it.hasNext())
     {
-        LOG_TRACE("Calling IOnDeserialize::onDeserialize()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()), "Engine", "_onDeserialize");
+        LOG_TRACE("Calling IOnDeserialize::onDeserialize()", Properties("id", this->client.getId()).add("plugin", it.peekNext().key()).add("type", type), "Engine", "_onDeserialize");
         it.peekNext().value()->onDeserialize(this->client, type);
         Plugins::instance()->release(it.next().key());
     }

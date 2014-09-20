@@ -22,7 +22,9 @@ public:
     ~Identify();
 
     /// @see LightBird::identify
-    void    identify(const QString &file, LightBird::IIdentify::Information *information = NULL);
+    void    identify(const QString &fileId);
+    /// @see LightBird::identify
+    void    identify(const QString &filePath, LightBird::IIdentify::Information &information);
 
 private slots:
     /// @brief Deletes the thread when it is finished.
@@ -38,7 +40,7 @@ private:
     void    _hashThread(LightBird::TableFiles &file, Identify::Info &information);
     /// @brief Identifies the file by calling the IIdentify interfaces.
     /// @param computeHash : True if the hashes of the file have to be computed.
-    Info    _identify(const QString &file, bool computeHash);
+    Info    _identify(const QString &file, const QString &fileName, bool computeHash);
     void    _identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
     bool    _add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
     void    _document(Info &result);

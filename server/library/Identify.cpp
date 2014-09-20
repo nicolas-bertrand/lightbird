@@ -52,21 +52,15 @@ Identify::~Identify()
     this->mutex.unlock();
 }
 
-void    Identify::identify(const QString &file, LightBird::IIdentify::Information *information)
+void    Identify::identify(const QString &fileId)
 {
-    // Identifies the file directly
-    if (information)
-    {
-        *information = this->_identify(file, true);
-        return ;
-    }
     // Identifies the file via a thread
     this->mutex.lock();
     // Starts the identification thread
     if (!this->identifyThread)
     {
         this->identifyThread = new Thread();
-        this->identifyThread->files << file;
+        this->identifyThread->files << fileId;
         this->identifyThread->thread = &this->identifyThread;
         this->identifyThread->method = &Identify::_identifyThread;
         this->identifyThread->moveToThread(this->identifyThread);
@@ -74,12 +68,12 @@ void    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
         this->identifyThread->start();
     }
     else
-        this->identifyThread->files << file;
+        this->identifyThread->files << fileId;
     // Starts the hash thread
     if (!this->hashThread)
     {
         this->hashThread = new Thread();
-        this->hashThread->files << file;
+        this->hashThread->files << fileId;
         this->hashThread->thread = &this->hashThread;
         this->hashThread->method = &Identify::_hashThread;
         this->hashThread->moveToThread(this->hashThread);
@@ -87,8 +81,14 @@ void    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
         this->hashThread->start();
     }
     else
-        this->hashThread->files << file;
+        this->hashThread->files << fileId;
     this->mutex.unlock();
+}
+
+void    Identify::identify(const QString &filePath, LightBird::IIdentify::Information &information)
+{
+    // Identifies the file directly
+    information = this->_identify(filePath, filePath, true);
 }
 
 void    Identify::finished()
@@ -138,7 +138,7 @@ void    Identify::Thread::run()
 
 void    Identify::_identifyThread(LightBird::TableFiles &file, Identify::Info &information)
 {
-    information = this->_identify(file.getFullPath(), false);
+    information = this->_identify(file.getFullPath(), file.getName(), false);
     file.setType(this->typeString.value(information.type));
 }
 
@@ -147,7 +147,7 @@ void    Identify::_hashThread(LightBird::TableFiles &file, Identify::Info &infor
     this->_hash(file.getFullPath(), information);
 }
 
-Identify::Info  Identify::_identify(const QString &file, bool computeHash)
+Identify::Info  Identify::_identify(const QString &file, const QString &fileName, bool computeHash)
 {
     Info            result;
     Info            tmp;
@@ -177,11 +177,11 @@ Identify::Info  Identify::_identify(const QString &file, bool computeHash)
         this->_identify(info, result);
     // Gets the size, the extension and the mime of the file
     result.data.insert("size", QFileInfo(file).size());
-    if (file.contains("."))
+    if (fileName.contains("."))
     {
-        result.data.insert("extension", file.right(file.size() - file.lastIndexOf(".") - 1));
+        result.data.insert("extension", fileName.right(fileName.size() - fileName.lastIndexOf(".") - 1));
         extensions = LightBird::Library::extension().get("IMime");
-        if (!extensions.isEmpty() && !(mime = static_cast<LightBird::IMime *>(extensions.first())->getMime(file)).isEmpty())
+        if (!extensions.isEmpty() && !(mime = static_cast<LightBird::IMime *>(extensions.first())->getMime(fileName)).isEmpty())
             result.data.insert("mime", mime);
         LightBird::Library::extension().release(extensions);
     }
