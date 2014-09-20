@@ -1362,10 +1362,10 @@ function Task(resource, resourceContent)
 // Resource interface
 // The resources have to implement this interface in order to receive the task events.
     {
-        // Closes the resource.
-        function close() {}
         // The task have been resized.
         function onResize(left, top, width, height) {}
+        // Closes the resource.
+        function close() {}
     }
 
 // Resource API

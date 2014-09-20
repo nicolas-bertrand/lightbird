@@ -20,11 +20,10 @@ Uploads::~Uploads()
 
 void        Uploads::onDeserializeHeader(LightBird::IClient &client)
 {
-    QString id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
     Upload  upload;
 
     // Gets some data on the files to upload
-    upload.id = id;
+    upload.id = LightBird::createUuid();
     upload.idClient = client.getId();
     upload.idAccount = client.getAccount().getId();
     upload.file = QSharedPointer<QFile>(new QFile());
@@ -35,25 +34,16 @@ void        Uploads::onDeserializeHeader(LightBird::IClient &client)
     upload.boundary = "--" + upload.boundary.right(upload.boundary.size() - upload.boundary.indexOf('=') - 1);
     upload.header = true;
     upload.complete = false;
-    client.getInformations().insert("idUpload", id);
+    client.getInformations().insert("idUpload", upload.id);
     this->mutex.lock();
-    // If the id is valid, insert it in the map
-    if (!id.isEmpty() && !this->uploads.contains(id))
-    {
-        Plugin::api().log().debug("Upload started", Properties("idUpload", id).add("idClient", client.getId()).add("path", upload.path).toMap(), "Uploads", "onDeserializeHeader");
-        this->uploads.insert(id, upload);
-    }
-    // Otherwise an upload is already using this id
-    else
-    {
-        Plugin::api().log().error("This upload id is already used", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
-        Plugin::api().network().disconnect(client.getId(), true);
-    }
+    this->uploads.insert(upload.id, upload);
     this->mutex.unlock();
+    if (Plugin::api().log().isDebug())
+        Plugin::api().log().debug("Upload started", Properties("idUpload", upload.id).add("idClient", client.getId()).add("path", upload.path).toMap(), "Uploads", "onDeserializeHeader");
     // Some browsers send a negative content length when there is too many files (firefox 10, safari 5)
     if (client.getRequest().getHeader().value("content-length").toLongLong() < 0)
     {
-        Plugin::api().log().error("Negative content-length", Properties("idUpload", id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
+        Plugin::api().log().error("Negative content-length", Properties("idUpload", upload.id).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeHeader");
         Plugin::api().network().disconnect(client.getId(), true);
     }
     // Tells the parser to store the data in the memory and not in a temporary file
@@ -182,103 +172,8 @@ void            Uploads::onDeserializeContent(LightBird::IClient &client)
     data.clear();
 }
 
-void        Uploads::doExecution(LightBird::IClient &client)
+void    Uploads::doExecution(LightBird::IClient &)
 {
-    QString id = client.getInformations().value("idUpload").toString();
-
-    this->mutex.lock();
-    if (this->uploads.contains(id) && this->uploads[id].idClient == client.getId())
-        Plugin::api().timers().setTimer("uploads");
-    this->mutex.unlock();
-}
-
-void            Uploads::check(LightBird::IClient &client)
-{
-    QJsonArray  array;
-    LightBird::TableFiles file;
-    LightBird::TableDirectories directory;
-
-    // Gets the names if the files in the directory
-    QStringListIterator it(directory.getFiles());
-    while (it.hasNext())
-    {
-        file.setId(it.next());
-        array.append(file.getName());
-    }
-    // Sends the list
-    client.getResponse().setType("application/json");
-    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(array);
-}
-
-void        Uploads::progress(LightBird::IClient &client)
-{
-    QString id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
-
-    client.getResponse().setType("application/json");
-    this->mutex.lock();
-    if (this->uploads.contains(id) && this->uploads[id].idAccount == client.getAccount().getId())
-        client.getResponse().getContent().setData("{\"size\":" + QByteArray::number(this->uploads[id].size) +
-                                                  ",\"progress\":" + QByteArray::number(this->uploads[id].progress) +
-                                                  ",\"complete\":" + QVariant(this->uploads[id].complete).toString().toLatin1() + "}");
-    // The upload request is not yet arrived.
-    else
-        client.getResponse().getContent().setData("{\"complete\":false}");
-    this->mutex.unlock();
-}
-
-void        Uploads::stop(LightBird::IClient &client)
-{
-    QString id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
-
-    this->mutex.lock();
-    if (this->uploads.contains(id) && this->uploads[id].idAccount == client.getAccount().getId())
-    {
-        Plugin::api().log().info("Upload stopped", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).toMap(), "Uploads", "stop");
-        if (!this->uploads[id].complete)
-            Plugin::api().network().disconnect(this->uploads[id].idClient, true);
-        this->uploads[id].complete = true;
-        Plugin::api().timers().setTimer("uploads");
-    }
-    this->mutex.unlock();
-}
-
-void                Uploads::cancel(LightBird::IClient &client)
-{
-    QString         id = QUrlQuery(client.getRequest().getUri()).queryItemValue("id");
-    QVariantList    files;
-    LightBird::TableFiles file;
-
-    this->mutex.lock();
-    if (this->uploads.contains(id) && this->uploads[id].idAccount == client.getAccount().getId())
-    {
-        // Removes all the files uploaded so far
-        QListIterator<File> it(this->uploads[id].files);
-        while (it.hasNext())
-            if (file.setIdFromVirtualPath(this->uploads[id].path + it.next().name)
-                && file.getIdAccount() == client.getAccount().getId())
-            {
-                file.remove(true);
-                Plugin::api().log().debug("File removed", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
-            }
-        Plugin::api().log().info("Upload canceled", Properties("idClient", this->uploads[id].idClient).add("idUpload", id).toMap(), "Uploads", "cancel");
-        if (!this->uploads[id].complete)
-            Plugin::api().network().disconnect(this->uploads[id].idClient, true);
-        this->uploads[id].complete = true;
-    }
-    // If the upload is not found, we remove the files asked by the client, provided that he is the owner
-    else if (client.getRequest().getContent().getStorage() == LightBird::IContent::VARIANT
-             && !(files = client.getRequest().getContent().getVariant()->toList()).isEmpty())
-    {
-        QListIterator<QVariant> it(files);
-        while (it.hasNext())
-            if (!it.next().toString().isEmpty() && file.setIdFromVirtualPath(it.peekPrevious().toByteArray())
-                && file.getIdAccount() == client.getAccount().getId())
-            {
-                file.remove(true);
-                Plugin::api().log().debug("File removed", Properties("idClient", client.getId()).add("idUpload", id).add("file", file.getFullPath()).toMap(), "Uploads", "cancel");
-            }
-    }
-    this->mutex.unlock();
 }
 
 void        Uploads::onFinish(LightBird::IClient &client)

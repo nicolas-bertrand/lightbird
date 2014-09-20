@@ -92,15 +92,8 @@ F.getBrowserSize = function ()
 // The response may be invalid.
 F.request = function (method, url, callback, data, type)
 {
-    var HttpRequest;
-
     // Creates the XMLHttpRequest object
-    if (window.XMLHttpRequest)
-        // code for IE7+, Firefox, Chrome, Opera, Safari
-        HttpRequest = new XMLHttpRequest();
-    else
-        // code for IE6, IE5
-        HttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+    var HttpRequest = new XMLHttpRequest();
 
     // Sets the ready state anonym function
     HttpRequest.onreadystatechange = function()

@@ -58,19 +58,6 @@ public:
     void    onDeserializeContent(LightBird::IClient &client);
     /// @brief Starts the identification of the files in a timer thread.
     void    doExecution(LightBird::IClient &client);
-    /// @brief Identifies the files in the identification queue.
-    bool    timer();
-    /// @brief Returns the list of the files in the directory in order to allow
-    /// the client to check that the files that will be uploaded are not already
-    /// on the server.
-    void    check(LightBird::IClient &client);
-    /// @brief Returns the number of bytes downloaded so far, in JSON.
-    void    progress(LightBird::IClient &client);
-    /// @brief Stops the upload and removes the current file.
-    void    stop(LightBird::IClient &client);
-    /// @brief Cancels the upload and removes all the files uploaded so far.
-    /// The files are removed even if the upload is already finished.
-    void    cancel(LightBird::IClient &client);
     void    onFinish(LightBird::IClient &client);
     void    onDestroy(LightBird::IClient &client);
 
@@ -79,8 +66,7 @@ private:
     Uploads &operator=(const Uploads &);
 
     /// @brief Removes the uploads completed after REMOVE_COMPLETE_UPLOAD_TIME
-    /// seconds. This allows to keep their data accessible by the progress
-    /// method even after they are finished.
+    /// seconds. This allows to keep their data accessible even after they are finished.
     void    _removeCompleteUploads();
     /// @brief Inserts the file in the database and creates it in the file system.
     void    _createFile(LightBird::IClient &client, Upload &upload, File &file);
