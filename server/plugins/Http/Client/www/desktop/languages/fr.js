@@ -37,7 +37,13 @@ var Translation =
         image: "Image",
         other: "Autre",
         video: "Vidéo",
-        files: "Fichiers"
+        files: "Fichiers",
+        Context:
+        {
+            open: "Ouvrir",
+            rename: "Renommer",
+            delete: "Supprimer",
+        },
     },
     Uploads:
     {

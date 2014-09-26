@@ -893,6 +893,33 @@ a:visited {
 }
 
 /*////////////////////////////////////////////////////////////////////////////
+//                                 CONTEXT                                  //
+////////////////////////////////////////////////////////////////////////////*/
+
+body>#context
+{
+    position: absolute;
+    z-index: 1000001;
+    background-color: #ffffff;
+    border: solid 1px #bababa;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body>#context>.action
+{
+    font-size: 14px;
+    padding: 5px 10px 5px 10px;
+    cursor: pointer;
+    color: #333333;
+}
+
+body>#context>.action:hover
+{
+    background-color: #4895d0;
+    color: #ffffff;
+}
+
+/*////////////////////////////////////////////////////////////////////////////
 //                                  OTHER                                   //
 ////////////////////////////////////////////////////////////////////////////*/
 

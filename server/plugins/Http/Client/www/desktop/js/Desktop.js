@@ -36,7 +36,7 @@ function Desktop(task)
         self.height;
         
         // Events
-        self.events.bind("mousemove", self, function (e) { self.mouse = {pageX: e.pageX, pageY: e.pageY}; });
+        self.events.bind("mousemove", self, function (e) { self.mouse = {x: e.pageX, y: e.pageY}; });
         self.events.bind("mouseleave", self, function (e) { self.mouseLeave(e); });
     }
     
@@ -64,7 +64,7 @@ function Desktop(task)
         gl_windows.onFullScreen(fullScreen);
     }
     
-    // Called when the user has been authentified.
+    // Called when the user has been authenticated.
     self.onConnect = function ()
     {
         gl_files.onConnect();

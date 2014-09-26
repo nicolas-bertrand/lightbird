@@ -18,6 +18,7 @@ function load()
     new Header();
     new Player();
     new TasksList();
+    new Context();
     new Files();
     new User();
     // Updates the size of the window
@@ -25,11 +26,11 @@ function load()
     // Events
     window.onresize = onResize;
     $(document.body).keydown(function (e) { onKeyDown(e); });
-    // The right click is disabled in order to replace the normal contextual menu of the browser.
-    //document.oncontextmenu = function() { return (false); };
+    // Disables the context menu of the browser when our own is displayed.
+    document.oncontextmenu = function() { return (!gl_context.isDisplayed()); };
     // Disables the text selection
-    //$(document.body).mousedown(function (e) { disableSelection(false); });
-    //$(document.body).mouseup(function () { disableSelection(true); });
+    $(document.body).mousedown(function (e) { disableSelection(false); });
+    $(document.body).mouseup(function () { disableSelection(true); });
     // Asks a confirmation when the user is about to leave the page.
     //window.onbeforeunload = function() { return ("Leaving now will save the current session."); }
     // Ensures that the load function will not be called twice

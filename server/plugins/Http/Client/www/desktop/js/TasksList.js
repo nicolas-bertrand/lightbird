@@ -128,9 +128,9 @@ function TasksList(task)
             self.node.icons[0].scrollTop += (Math.exp(Math.abs(self.scrollDelta)) - 1) * C.TasksList.Scroll.speed;
         // Updates the position of the dragged task or page
         if (gl_desktop.drag.isDragging("Task"))
-            gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.pageY - self.top);
+            gl_desktop.drag.getObject().updateTasksList(gl_desktop.mouse.y - self.top);
         else if (gl_desktop.drag.isDragging("Page"))
-            gl_desktop.drag.getObject().mouseMove(undefined, gl_desktop.mouse.pageY);
+            gl_desktop.drag.getObject().mouseMove(undefined, gl_desktop.mouse.y);
         // Scroll up finished
         if (self.node.icons[0].scrollTop <= 0)
         {
