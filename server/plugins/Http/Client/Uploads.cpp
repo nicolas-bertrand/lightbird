@@ -49,6 +49,9 @@ void        Uploads::onDeserializeHeader(LightBird::IClient &client)
     // Tells the parser to store the data in the memory and not in a temporary file
     client.getInformations().insert("keepInMemory", true);
     this->_removeCompleteUploads();
+    // Prepare the response, which will contain the id of the files successfully uploaded
+    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(QJsonArray());
+    client.getResponse().setType("application/json");
 }
 
 void            Uploads::onDeserializeContent(LightBird::IClient &client)
@@ -259,6 +262,7 @@ void        Uploads::_createFile(LightBird::IClient &client, Upload &upload, Fil
     }
     else
         Plugin::api().log().warning("Failed to create the virtual path", Properties("path", upload.path).add("idUpload", upload.id).add("file", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
+    (*client.getResponse().getContent().getVariant()) = QJsonDocument(client.getResponse().getContent().getVariant()->toJsonDocument().array() << "");
 }
 
 void        Uploads::_fileComplete(LightBird::IClient &client, Upload &upload)
@@ -271,6 +275,10 @@ void        Uploads::_fileComplete(LightBird::IClient &client, Upload &upload)
     // Identify the file
     LightBird::identify(upload.fileTable.getId());
     Plugin::api().log().info("File uploaded", Properties("idFile", upload.fileTable.getId()).add("path", upload.path + file.name).add("idClient", client.getId()).toMap(), "Uploads", "_insert");
+    // Adds the id of the file to the json response
+    QJsonArray filesId = client.getResponse().getContent().getVariant()->toJsonDocument().array();
+    filesId[filesId.size() - 1] = upload.fileTable.getId();
+    (*client.getResponse().getContent().getVariant()) = QJsonDocument(filesId);
 }
 
 void    Uploads::_clean(Upload &upload)
