@@ -66,8 +66,10 @@ resource.Document = function ()
         F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
-            self.iconContent.words = HttpRequest.responseText.match(/\w+/g).length + " words";
-            self.iconContent.lines = HttpRequest.responseText.match(/\n+/g).length + 1 + " lines";
+            var lines = (HttpRequest.responseText.match(/\n+/g) || "").length + 1;
+            self.iconContent.lines = lines + " " + (lines > 1 ? T.View.lines : T.View.line);
+            var words = (HttpRequest.responseText.match(/\w+/g) || " ").length;
+            self.iconContent.words = words + " " + (words > 1 ? T.View.words : T.View.word);
             self.updateIconContent();
         });
         

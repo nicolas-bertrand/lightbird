@@ -126,14 +126,22 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
         if (!client.getAccount().exists())
             this->_api->network().disconnect(client.getId(), true);
         // Manages the upload of files
-        else if (!request.isError() && !client.getResponse().isError() && request.getUri().path().endsWith("/command/uploads"))
+        else if (request.getUri().path().endsWith("/command/uploads"))
         {
+            if (request.isError() || client.getResponse().isError())
+                return ;
             if (type == LightBird::IOnDeserialize::IDoDeserializeHeader)
                 this->_uploads.onDeserializeHeader(client);
             else if (type == LightBird::IOnDeserialize::IDoDeserializeContent)
                 this->_uploads.onDeserializeContent(client);
         }
-        else if (!request.getUri().path().contains("/commands/uploads"))
+        else if (request.getUri().path().endsWith("/command/files/delete"))
+        {
+            if (type == LightBird::IOnDeserialize::IDoDeserializeContent)
+                this->_files.deleteFiles(client);
+        }
+        // The url is not authorized to upload something
+        else
             this->_api->network().disconnect(client.getId(), true);
     }
 }

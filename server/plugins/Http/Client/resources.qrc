@@ -3,7 +3,6 @@
         <file alias="queries">Queries.xml</file>
         <file alias="configuration">Configuration.xml</file>
         <file alias="desktop/index.html">www/desktop/index.html</file>
-        <file alias="desktop/css/identification.css">www/desktop/css/identification.css</file>
         <file alias="desktop/css/index.css">www/desktop/css/index.css</file>
         <file alias="desktop/css/window.css">www/desktop/css/window.css</file>
         <file alias="desktop/images/favicon.png">www/desktop/images/favicon.png</file>

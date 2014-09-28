@@ -176,9 +176,10 @@ void    Commands::_select(LightBird::IClient &client, const QString &)
     client.getResponse().setType("application/json");
 }
 
-void    Commands::_files(LightBird::IClient &client, const QString &)
+void    Commands::_files(LightBird::IClient &client, const QString &parameter)
 {
-    Plugin::files().get(client);
+    if (parameter == "get")
+        Plugin::files().get(client);
 }
 
 void    Commands::_uploads(LightBird::IClient &client, const QString &)

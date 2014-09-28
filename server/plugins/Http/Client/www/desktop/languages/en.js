@@ -38,6 +38,7 @@ var Translation =
         other: "Other",
         video: "Video",
         files: "Files",
+        empty: "Empty",
         Context:
         {
             open: "Open",
@@ -52,7 +53,14 @@ var Translation =
         upload: "Upload",
         ignore: "ignore",
         replace: "replace",
-        rename: "rename"
+        rename: "rename",
+    },
+    View:
+    {
+        lines: "lines",
+        line: "line",
+        words: "words",
+        word: "word",
     },
     sizeUnits: [ "bytes", "Kb", "Mb", "Gb", "Tb" ]
 };

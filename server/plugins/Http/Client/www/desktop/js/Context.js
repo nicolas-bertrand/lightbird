@@ -20,7 +20,7 @@ function Context()
     
     // Displays the context menu.
     // @param x, y: The position of the mouse.
-	// @param actions: The list of the actions in the menu: [{name, callback, param}]
+	// @param actions: The list of the actions in the menu: [{name, handler, param}]
     // If undefined, the context menu is displayed as is.
     self.display = function (x, y, actions)
     {
@@ -31,7 +31,7 @@ function Context()
             {
                 var action = $('<div class="action">' + actions[i].name + '</div>');
                 action[0].contextAction = actions[i];
-                action.mouseup(function (e) { if (e.which == 1) { e.delegateTarget.contextAction.callback(e.delegateTarget.contextAction.param); self.hide(); }});
+                action.mouseup(function (e) { if (e.which == 1) { e.delegateTarget.contextAction.handler(e.delegateTarget.contextAction.param); self.hide(); }});
                 self.root.append(action);
             }
         }

@@ -2217,7 +2217,7 @@ function Events()
         if (!self.events[type])
             return ;
         var list = self.events[type];
-        // Makes a copy of the events so that they can be safely unbinded and iterated at the same time
+        // Makes a copy of the events so that they can be safely unbound and iterated at the same time
         var copy = new Array();
         for (var i = 0; i < list.length; ++i)
             copy.push(list[i]);
