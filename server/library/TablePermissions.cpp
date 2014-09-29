@@ -189,10 +189,11 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (account && account->isAdministrator())
         return (true);
     QSharedPointer<TableObjects> object(dynamic_cast<TableObjects *>(Library::database().getTable(Table::Object, id_object)));
-    if (object.isNull())
+    // An empty id_object is the root directory
+    if (!object && !id_object.isEmpty())
         return (false);
     // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
-    if (account && account->getId() == object->getIdAccount())
+    if (account && object && account->getId() == object->getIdAccount())
         return (true);
     // Get all the accessors concerned by the permission
     if (account)
@@ -230,7 +231,9 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     }
     accessors.push_front(accessor->getId());
     // Get the id of the first object in the hierarchy
-    if (object->isTable(Table::Files))
+    if (!object)
+        ;
+    else if (object->isTable(Table::Files))
     {
         // Check the permission of the file
         file = dynamic_cast<TableFiles *>(object.data());
@@ -239,12 +242,12 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
         id = file->getIdDirectory();
         checked = true;
     }
-    if (object->isTable(Table::Directories))
+    else if (object->isTable(Table::Directories))
     {
         directory = dynamic_cast<TableDirectories *>(object.data());
         id = directory->getId();
     }
-    if (object->isTable(Table::Collections))
+    else if (object->isTable(Table::Collections))
     {
         collection = dynamic_cast<TableCollections *>(object.data());
         id = collection->getId();
@@ -272,6 +275,10 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
             id = col.getIdCollection();
             checked = true;
         }
+    // The root directory of the server
+    else if (!object && this->_idAllowed(accessors, groups, "", right) == 2)
+        return (true);
+
     // The permission has been granted
     if (granted == 2)
         return (true);
@@ -324,10 +331,11 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
         return (true);
     }
     QSharedPointer<TableObjects> object(dynamic_cast<TableObjects *>(Library::database().getTable(Table::Object, id_object)));
-    if (object.isNull())
+    // An empty id_object is the root directory
+    if (!object && !id_object.isEmpty())
         return (false);
     // If the accessor is an account, and the account is the owner of the object, he has all the rights on it
-    if (account && account->getId() == object->getIdAccount())
+    if (account && object && account->getId() == object->getIdAccount())
     {
         allowed.push_back("");
         return (true);
@@ -368,19 +376,21 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     }
     accessors.push_front(accessor->getId());
     // Get the id of the first object in the hierarchy
-    if (object->isTable(Table::Files))
+    if (!object)
+        ;
+    else if (object->isTable(Table::Files))
     {
         file = dynamic_cast<TableFiles *>(object.data());
         id = file->getIdDirectory();
         this->_getRights(accessors, groups, file->getId(), allowed, denied);
         checked = true;
     }
-    if (object->isTable(Table::Directories))
+    else if (object->isTable(Table::Directories))
     {
         directory = dynamic_cast<TableDirectories *>(object.data());
         id = directory->getId();
     }
-    if (object->isTable(Table::Collections))
+    else if (object->isTable(Table::Collections))
     {
         collection = dynamic_cast<TableCollections *>(object.data());
         id = collection->getId();
@@ -418,8 +428,11 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
             id = col.getIdCollection();
             checked = true;
         }
+    // The root directory of the server
+    else if (!object)
+        this->_getRights(accessors, groups, "", allowed, denied);
     // Check if there is a permission at the root of the server
-    if (inheritance)
+    if (inheritance && object)
         this->_getRights(accessors, groups, "", allowed, denied);
     // If there is no global permission, the default is applied
     if (!allowed.contains("") && !denied.contains(""))

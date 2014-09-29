@@ -383,6 +383,21 @@ void            Database::_directories()
         ASSERT(d1.getParents().isEmpty());
         ASSERT(!d1.setIdDirectory(d1.getId()));
         ASSERT(d1.remove(d1.getIdFromVirtualPath("videos")));
+        // Rights on the root directory
+        ASSERT(!p.isAllowed(a.getId(), "", "add"));
+        ASSERT(p.add(a.getId(), "", "add", true));
+        ASSERT(p.isAllowed(a.getId(), "", "add"));
+        QStringList allowed, denied;
+        ASSERT(p.getRights(a.getId(), "", allowed, denied));
+        ASSERT(allowed.size() == 1 && allowed[0] == "add");
+        ASSERT(denied.size() == 1 && denied[0] == "");
+        ASSERT(p.isGranted(false));
+        ASSERT(!p.isAllowed(a.getId(), "", "add"));
+        ASSERT(p.getRights(a.getId(), "", allowed, denied));
+        ASSERT(allowed.isEmpty());
+        ASSERT(denied.size() == 1 && denied[0] == "");
+        ASSERT(a.remove());
+        ASSERT(!p.exists());
     }
     catch (unsigned int line)
     {
@@ -813,7 +828,7 @@ void            Database::_permissions()
         id_object = f.getIdFromVirtualPath("Directory1/Directory2/File4");
         // Test getRights
         ASSERT(!p.getRights("", id_object, allowed, denied));
-        ASSERT(!p.getRights(id, "", allowed, denied));
+        ASSERT(!p.getRights(id, "42", allowed, denied));
         ASSERT(!p.getRights("42", id_object, allowed, denied));
         ASSERT(p.getRights(id, id_object, allowed, denied) && allowed.contains("read"));
         ASSERT(denied.contains(""));
