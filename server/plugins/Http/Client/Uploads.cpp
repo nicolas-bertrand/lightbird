@@ -225,8 +225,8 @@ void    Uploads::_removeCompleteUploads()
 void        Uploads::_createFile(LightBird::IClient &client, Upload &upload, File &file)
 {
     QString filesPath = LightBird::getFilesPath();
-    QString idDirectory;
     LightBird::TableDirectories directory;
+    QString idDirectory;
 
     // Defines the name of the file in the file system
     file.name = LightBird::cleanPath(file.name);
@@ -243,26 +243,36 @@ void        Uploads::_createFile(LightBird::IClient &client, Upload &upload, Fil
     // Creates the virtual path if it doesn't exist
     if (upload.path == "/" || !(idDirectory = directory.createVirtualPath(upload.path)).isEmpty())
     {
-        // Adds the files to the database
-        if (upload.fileTable.add(file.name, file.path, "other", idDirectory, client.getAccount().getId()))
+        directory.setId(idDirectory);
+        // Checks if the account has the right to add a file
+        if (directory.isAllowed(client.getAccount().getId(), "add"))
         {
-            upload.fileTable.setInformation("mime", file.contentType);
-            // Creates the filesPath if it doesn't exist
-            if (!QFileInfo(filesPath).isDir())
-                QDir().mkpath(filesPath);
-            // And opens the file
-            if (!upload.file->open(QIODevice::WriteOnly))
+            // Adds the files to the database
+            if (upload.fileTable.add(file.name, file.path, "other", directory.getId(), client.getAccount().getId()))
             {
-                upload.fileTable.remove(true);
-                Plugin::api().log().warning("Failed to open the file", Properties("idUpload", upload.id).add("file", file.path).toMap(), "Uploads", "onDeserializeContent");
+                upload.fileTable.setInformation("mime", file.contentType);
+                // Creates the filesPath if it doesn't exist
+                if (!QFileInfo(filesPath).isDir())
+                    QDir().mkpath(filesPath);
+                // And opens the file
+                if (!upload.file->open(QIODevice::WriteOnly))
+                {
+                    upload.fileTable.remove(true);
+                    Plugin::api().log().warning("Failed to open the file", Properties("idUpload", upload.id).add("file", file.path).toMap(), "Uploads", "onDeserializeContent");
+                }
             }
+            else
+                Plugin::api().log().warning("Failed to add the file in the database", Properties("idDirectory", directory.getId()).add("path", file.path).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
         }
         else
-            Plugin::api().log().warning("Failed to add the file in the database", Properties("idDirectory", idDirectory).add("path", file.path).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
+            Plugin::api().log().warning("The account is not allowed to add a file in this directory", Properties("idDirectory", directory.getId()).add("path", file.path).add("name", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
     }
     else
         Plugin::api().log().warning("Failed to create the virtual path", Properties("path", upload.path).add("idUpload", upload.id).add("file", file.name).add("idClient", client.getId()).toMap(), "Uploads", "onDeserializeContent");
     (*client.getResponse().getContent().getVariant()) = QJsonDocument(client.getResponse().getContent().getVariant()->toJsonDocument().array() << "");
+    // Disconnects the client if the file can't be uploaded
+    if (!upload.file->isOpen() && QUrlQuery(client.getRequest().getUri()).queryItemValue("disconnectOnError") == "true")
+        Plugin::api().network().disconnect(client.getId(), true);
 }
 
 void        Uploads::_fileComplete(LightBird::IClient &client, Upload &upload)

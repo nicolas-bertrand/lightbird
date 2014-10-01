@@ -2184,7 +2184,7 @@ function Events()
         $(window).mousewheel(function (e, delta) { self.call("mousewheel", e, Math.round(delta * C.Desktop.mouseWheelMultiplier)); });
         $(window).mousemove(function (e) { self.call("mousemove", e); });
         $(window).mouseup(function (e) { self.call("mouseup", e); });
-        $(window).mouseleave(function (e) { self.call("mouseleave", e); });
+        $(document.body).mouseleave(function (e) { self.call("mouseleave", e); });
     }
 
     // Binds an event to an object. The handler will be called when the event is called.

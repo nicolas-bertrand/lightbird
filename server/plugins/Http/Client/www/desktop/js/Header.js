@@ -16,7 +16,8 @@ function Header(task)
         self.node.menu = self.node.top.children(".menu");
         self.node.controls = self.node.top.children(".controls");
         self.node.files = self.node.menu.children(".files");
-        self.node.uploads = self.node.menu.children(".uploads");
+        self.node.upload = self.node.menu.children("span.upload");
+        self.node.uploadInput = self.node.menu.children("div.upload").children("input");
 
         // Members
         self.height = C.Header.defaultHeight; // The height of the header
@@ -126,7 +127,7 @@ self.Menu = function ()
         // The buttons properties
         self.defaultBackground;
         self.files = {background: 0, link: 0, over: 0};
-        self.uploads = {background: 0, link: 0, over: 0};
+        self.upload = {background: 0, link: 0, over: 0, input: gl_header.node.uploadInput, div: gl_header.node.uploadInput.parent()};
         
         // Default values
         self.slope = self.C.slopeRatio * gl_header.height;
@@ -155,14 +156,17 @@ self.Menu = function ()
         self.addEvents(self.files, node.files, "files");
         left += self.C.defaultButtonWidth;
 
-        // Uploads
+        // Upload
         left += self.C.margin;
         var backgroundLeft = left - slope - self.C.margin / 2;
         var backgroundWidth = self.C.margin + self.C.defaultButtonWidth + slope * 2;
-        self.uploads.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.uploadsBackgroundAttr).hide();
-        self.uploads.link = self.uploads.background.clone().attr(self.C.linkAttr);
-        node.uploads.css("left", left);
-        self.addEvents(self.uploads, node.uploads, "uploads");
+        self.upload.background = self.createBackground(backgroundLeft, backgroundWidth, self.C.uploadBackgroundAttr).hide();
+        self.upload.link = self.upload.background.clone().attr(self.C.linkAttr);
+        node.upload.css("left", left);
+        self.addEventsUpload(self.upload, node.upload);
+        // Upload input
+        self.upload.div.css("left", self.upload.input._left = (left - self.C.margin / 2 + slope));
+        self.upload.div.width(self.upload.input._width = (self.C.margin + self.C.defaultButtonWidth - slope * 2));
         left += self.C.defaultButtonWidth;
         
         // The width of the paper
@@ -172,25 +176,36 @@ self.Menu = function ()
     // Adds the events to a button.
     self.addEvents = function (button, text, task)
     {
+        var mouseEnter = function (button)
+        {
+            button.over = true;
+            button.background.show();
+        }
+        var mouseLeave = function (button)
+        {
+            button.over = false;
+            button.background.hide();
+        }
+    
         $(button.link.node).mouseover(function (e)
         {
             if (!button.over)
-                self.mouseEnter(button);
+                mouseEnter(button);
         });
         $(button.link.node).mouseout(function (e)
         {
             if (e.relatedTarget != text[0])
-                self.mouseLeave(button);
+                mouseLeave(button);
         });
         text.mouseover(function (e)
         {
             if (!button.over)
-                self.mouseEnter(button);
+                mouseEnter(button);
         });
         text.mouseout(function (e)
         {
             if (e.relatedTarget != button.link.node)
-                self.mouseLeave(button);
+                mouseLeave(button);
         });
         var mousedown = function (e)
         {
@@ -204,13 +219,56 @@ self.Menu = function ()
         text.mousedown(mousedown);
     }
     
+    // Adds the events of the upload button
+    self.addEventsUpload = function (button, text)
+    {
+        // The mouse leaved the upload button.
+        var mouseLeave = function ()
+        {
+            gl_desktop.events.unbind("mousemove", self);
+            self.upload.div.unbind("mouseleave");
+            button.over = false;
+            button.background.hide();
+            self.upload.div.removeClass("display");
+        }
+        
+        // The mouse entered the upload button.
+        var mouseEnter = function ()
+        {
+            button.over = true;
+            button.background.show();
+            self.upload.div.addClass("display");
+            gl_desktop.events.bind("mousemove", self, function (e)
+            {
+                // Checks if the mouse is outside the button
+                var left = e.pageX - self.upload.input._left + (self.C.slopeRatio * e.pageY);
+                var right = e.pageX - self.upload.input._left + (self.C.slopeRatio * e.pageY) - self.upload.input._width - self.slope;
+                if (left < 0 || right > 0)
+                    mouseLeave(button);
+            });
+        }
+    
+        $(button.link.node).mouseover(function (e) { if (!button.over) mouseEnter(button); });
+        $(button.link.node).mousemove(function (e) { if (!button.over) mouseEnter(button); });
+        text.mouseover(function (e) { if (!button.over) mouseEnter(button); });
+        self.upload.div.mouseleave(function (e) { mouseLeave(button); });
+        self.upload.input.mouseleave(function (e) { mouseLeave(button); });
+        self.upload.input.change(function (e)
+        {
+            if (this.files.length <= 0)
+                return ;
+            for (var i = 0; i < this.files.length; ++i)
+                gl_uploads.add(this.files[i]);
+        });
+    }
+    
     // Update the position and the width of the buttons based on their texts width.
     self.updatePositions = function ()
     {
         var slope = self.slope / 2;
         var left = self.C.margin / 2;
         var filesWidth = node.files.width();
-        var uploadsWidth = node.uploads.width();
+        var uploadWidth = node.upload.width();
         
         // Default background
         var backgroundWidth = left + filesWidth + slope + self.C.margin / 2;
@@ -222,14 +280,17 @@ self.Menu = function ()
         self.updateBackground(self.files.link, -100, backgroundWidth + 100);
         left += filesWidth;
 
-        // Uploads
+        // Upload
         left += self.C.margin;
         var backgroundLeft = left - slope - self.C.margin / 2;
-        var backgroundWidth = self.C.margin + uploadsWidth + slope * 2;
-        self.updateBackground(self.uploads.background, backgroundLeft, backgroundWidth);
-        self.updateBackground(self.uploads.link, backgroundLeft, backgroundWidth);
-        node.uploads.css("left", left);
-        left += uploadsWidth;
+        var backgroundWidth = self.C.margin + uploadWidth + slope * 2;
+        self.updateBackground(self.upload.background, backgroundLeft, backgroundWidth);
+        self.updateBackground(self.upload.link, backgroundLeft, backgroundWidth);
+        node.upload.css("left", left);
+        // Upload input
+        self.upload.div.css("left", self.upload.input._left = (left - self.C.margin / 2 + slope));
+        self.upload.div.width(self.upload.input._width = (self.C.margin + uploadWidth - slope * 2));
+        left += uploadWidth;
         
         // The width of the paper
         node.menu.css("width", left + self.C.margin / 2 + Math.abs(slope));
@@ -254,20 +315,6 @@ self.Menu = function ()
             width++;
         background.attr({path: "M0," + gl_header.height + "L" + self.slope + " 0,H" + width + ",l" + -self.slope + " " + gl_header.height + "z"});
         background.transform("T" + left + ",0");
-    }
-    
-    // The mouse entered a button.
-    self.mouseEnter = function (button)
-    {
-        button.over = true;
-        button.background.show();
-    }
-    
-    // The mouse leaved a button.
-    self.mouseLeave = function (button)
-    {
-        button.over = false;
-        button.background.hide();
     }
     
     self.init();

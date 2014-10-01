@@ -20,6 +20,7 @@ function load()
     new TasksList();
     new Context();
     new Files();
+    new Uploads();
     new User();
     // Updates the size of the window
     onResize();
@@ -185,7 +186,8 @@ F.ISODateString = function (d)
       + pad(d.getUTCMonth()+1)+'-'
       + pad(d.getUTCDate())+' '
       + pad(d.getUTCHours())+':'
-      + pad(d.getUTCMinutes());
+      + pad(d.getUTCMinutes())+':'
+      + pad(d.getUTCSeconds());
 }
 
 // Returns the session information that have to be added at the end of the URLs in order to communicate with the server.

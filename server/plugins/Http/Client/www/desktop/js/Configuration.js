@@ -230,7 +230,7 @@ var Configuration =
             margin: 30, // The margin between the buttons.
             defaultBackgroundAttr: {fill: "90-#2b2b2b-#404040", stroke: "none"},
             filesBackgroundAttr: {fill: "90-#0075c0-#009bfe", stroke: "none"},
-            uploadsBackgroundAttr: {fill: "90-#1b8828-#24b335", stroke: "none"},
+            uploadBackgroundAttr: {fill: "90-#b62e14-#f13d1a", stroke: "none"},
             linkAttr: {fill: "white", opacity: 0}, // This transparent background is used to detect when the mouse enters or clicks on a button.
             correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         },

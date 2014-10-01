@@ -26,6 +26,7 @@ function ResourceFiles(task)
         // Default values
         resource.node.icon.content.css("padding", 5);
         resource.updateIcon();
+        gl_files.bindOnAdd(resource, resource.onAdd);
         gl_files.bindOnDelete(resource, resource.onDelete);
     }
     
@@ -39,6 +40,7 @@ function ResourceFiles(task)
     resource.close = function ()
     {
         gl_player.closePlaylist(resource);
+        gl_files.unbindOnAdd(resource);
         gl_files.unbindOnDelete(resource);
         resource.container.close();
         for (var key in resource)
@@ -77,11 +79,18 @@ function ResourceFiles(task)
             gl_desktop.openPage("view", { playlistInterface : resource, fileIndex : resource.fileIndex });
     }
     
-    // Called when files have been deleted.
-    resource.onDelete = function (globalFileIndices)
+    // Called when files have been added.
+    resource.onAdd = function (files)
     {
-        resource.files.onDelete(globalFileIndices);
-        resource.container.onDelete(globalFileIndices);
+        resource.files.onAdd(files);
+        resource.container.onAdd(files);
+    }
+    
+    // Called when files have been deleted.
+    resource.onDelete = function (files)
+    {
+        resource.files.onDelete(files);
+        resource.container.onDelete(files);
     }
 
 // Playlist interface
@@ -168,6 +177,13 @@ function Files()
         for (var i = 0; i < self.length; ++i)
             if (self[i] == globalFileIndex)
                 return i;
+    }
+    
+    // Called when files have been added.
+    self.onAdd = function (added)
+    {
+        for (var i = 0; i < added.length; ++i)
+            self.raw.push(added[i]);
     }
     
     // Called when files have been deleted.
@@ -1040,6 +1056,12 @@ function List()
         return false;
     }
     
+    // Called when files have been added.
+    self.onAdd = function (added)
+    {
+        resource.files.applyFilters();
+    }
+    
     // Called when files have been deleted.
     self.onDelete = function (deleted)
     {
@@ -1196,6 +1218,8 @@ function Layout()
     // Converts the value depending on the key.
     self.convert = function (key, value)
     {
+        if (value == undefined)
+            return "";
         if (self.columns[key] && self.columns[key].convert)
         {
             if (self[self.columns[key].convert])

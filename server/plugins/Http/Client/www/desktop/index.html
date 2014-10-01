@@ -19,6 +19,7 @@
     <script src="/c/js/Selection.js"></script>
     <script src="/c/js/Svg.js"></script>
     <script src="/c/js/TasksList.js"></script>
+    <script src="/c/js/Uploads.js"></script>
     <script src="/c/js/User.js"></script>
     <script src="/c/js/Window.js"></script>
     <script src="/c/libs/jQuery/jquery.js"></script>
@@ -41,7 +42,10 @@
         <div class="top">
             <div class="menu">
                 <span class="files"><script>tr(T.Menu.files)</script></span>
-                <span class="uploads"><script>tr(T.Menu.uploads)</script></span>
+                <span class="upload"><script>tr(T.Menu.upload)</script></span>
+                <div class="upload">
+                    <input type="file" name="upload" multiple="true" />
+                </div>
             </div>
             <div class="controls"></div>
         </div>

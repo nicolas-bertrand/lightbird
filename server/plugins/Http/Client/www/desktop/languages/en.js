@@ -11,7 +11,7 @@ var Translation =
     Menu:
     {
         files: "Files",
-        uploads: "Uploads",
+        upload: "Upload",
         collections: "Collections",
         sessions: "Sessions"
     },

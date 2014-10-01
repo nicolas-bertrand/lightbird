@@ -22,7 +22,7 @@ var Translation =
     Tasks:
     {
         files: "Fichiers",
-        uploads: "Envois",
+        upload: "Envoyer",
         view: "Voir"
     },
     Files:
