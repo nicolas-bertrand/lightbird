@@ -805,6 +805,8 @@ function List()
                 self.filesSelected = new Object();
                 $(self.table.rows).removeClass("selected");
             }
+            if (rightButton)
+                self.filesContext.display(e);
             return ;
         }
         var localFileIndex = file.fileIndex;
@@ -1582,6 +1584,8 @@ function FilesContext()
             [ gl_context.createAction(T.Files.Context.open, self.open)
             , gl_context.createAction(T.Files.Context.rename, self.rename)
             , gl_context.createAction(T.Files.Context.delete + (numberFilesSelected > 1 ? " " + numberFilesSelected : ""), self.delete)];
+        if (numberFilesSelected == 0)
+            actions = [];
         if (numberFilesSelected <= 1)
             actions.push(add = gl_context.createAction(T.Files.Context.add).addClass("files_add"));
         gl_context.display(e.pageX, e.pageY, actions);
