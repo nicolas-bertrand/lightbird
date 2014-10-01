@@ -1595,7 +1595,7 @@ function FilesContext()
             var input = $('<input type="file" name="upload" multiple="true" />');
             add.append(input);
             input.change(function (e)
-            { 
+            {
                 for (var i = 0; i < this.files.length; ++i)
                     gl_uploads.add(this.files[i]);
             });

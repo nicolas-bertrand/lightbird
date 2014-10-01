@@ -9,6 +9,8 @@ function Uploads()
     self.init = function ()
     {
         self.list = {}; // The list of the uploads in progress. The key is the id of the file.
+        $(document.body).bind("dragover", self.onDragover);
+        $(document.body).bind("drop", self.onDrop);
     }
     
     self.add = function (file)
@@ -41,14 +43,9 @@ function Uploads()
             {
                 var filesUploaded = jsonParse(request.responseText || "[]");
                 if (request.status == 200 && filesUploaded.length && filesUploaded[0])
-                {
                     gl_files.list[id].id = filesUploaded[0];
-                    console.log(gl_files.list);
-                }
                 else
-                {
-                    console.log("error");
-                }
+                    console.log("An error occured during the upload of " + file.name);
                 delete self.list[id];
             }
         };
@@ -58,6 +55,19 @@ function Uploads()
         formData.append("file", file);
         request.open('POST', '/c/command/uploads?disconnectOnError=true' + F.getSession(false));
         request.send(formData);
+    }
+    
+    self.onDragover = function (e)
+    {
+        e.preventDefault();
+    }
+    
+    self.onDrop = function (e)
+    {
+        var files = e.originalEvent.dataTransfer.files;
+        for (var i = 0; i < files.length; ++i)
+            gl_uploads.add(files[i]);
+        e.preventDefault();
     }
     
     self.init();
