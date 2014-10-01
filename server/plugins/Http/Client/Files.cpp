@@ -60,6 +60,9 @@ void    Files::deleteFiles(LightBird::IClient &client)
     bool readingNextId = request.getInformations().value("files/delete/readingNextId").toBool(); // True if an id is being read
     int indexOf;
 
+    if (data.isEmpty())
+        return ;
+
     request.getContent().clear();
     request.getInformations()["files/delete/oldData"] = "";
 
@@ -68,7 +71,7 @@ void    Files::deleteFiles(LightBird::IClient &client)
     // First pass
     if (!started)
     {
-        if (data.isEmpty() || data[0] != '[')
+        if (data[0] != '[')
             return this->_deleteError(client, "The content must start with [");
         data.remove(0, 1);
         (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(QJsonArray());
