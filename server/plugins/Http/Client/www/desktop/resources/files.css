@@ -210,3 +210,20 @@
 #tasks>.task>.files>.list>table.move_column tr.selected {
     background-color: inherit;
 }
+
+/* Context */
+body>#context>.action.files_add
+{
+    overflow: hidden;
+}
+
+body>#context>.action.files_add input
+{
+    position: absolute;
+    cursor: pointer;
+    top: -20px;
+    left: -200px;
+    height: 200px;
+    width: 400px;
+    opacity: 0;
+}

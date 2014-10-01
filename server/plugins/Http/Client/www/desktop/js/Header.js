@@ -255,8 +255,6 @@ self.Menu = function ()
         self.upload.input.mouseleave(function (e) { mouseLeave(button); });
         self.upload.input.change(function (e)
         {
-            if (this.files.length <= 0)
-                return ;
             for (var i = 0; i < this.files.length; ++i)
                 gl_uploads.add(this.files[i]);
         });

@@ -1575,12 +1575,31 @@ function FilesContext()
     // Displays the context menu.
     self.display = function (e)
     {
+        // Creates the actions
+        var add;
         var numberFilesSelected = resource.container.getFilesSelected().length;
         var actions =
-            [ {name: T.Files.Context.open, handler: self.open}
-            , {name: T.Files.Context.rename, handler: self.rename}
-            , {name: T.Files.Context.delete + (numberFilesSelected > 1 ? " " + numberFilesSelected : ""), handler: self.delete}]
+            [ gl_context.createAction(T.Files.Context.open, self.open)
+            , gl_context.createAction(T.Files.Context.rename, self.rename)
+            , gl_context.createAction(T.Files.Context.delete + (numberFilesSelected > 1 ? " " + numberFilesSelected : ""), self.delete)];
+        if (numberFilesSelected <= 1)
+            actions.push(add = gl_context.createAction(T.Files.Context.add).addClass("files_add"));
         gl_context.display(e.pageX, e.pageY, actions);
+        
+        // Creates the input of the add action
+        if (add)
+        {
+            add.width(add.width());
+            add.height(add.height());
+            add.css("position", "relative");
+            var input = $('<input type="file" name="upload" multiple="true" />');
+            add.append(input);
+            input.change(function (e)
+            { 
+                for (var i = 0; i < this.files.length; ++i)
+                    gl_uploads.add(this.files[i]);
+            });
+        }
     }
     
     // Plays the selected files.

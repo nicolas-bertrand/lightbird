@@ -12,15 +12,9 @@ function Context()
         self.hide();
     }
     
-    // Returns the root of the context menu.
-    self.getRoot = function ()
-    {
-        return self.root;
-    }
-    
     // Displays the context menu.
     // @param x, y: The position of the mouse.
-	// @param actions: The list of the actions in the menu: [{name, handler, param}]
+	// @param actions: The list of the actions to add to the context (can be created with createAction()).
     // If undefined, the context menu is displayed as is.
     self.display = function (x, y, actions)
     {
@@ -28,12 +22,7 @@ function Context()
         {
             self.root.children().remove();
             for (var i = 0; i < actions.length; ++i)
-            {
-                var action = $('<div class="action">' + actions[i].name + '</div>');
-                action[0].contextAction = actions[i];
-                action.mouseup(function (e) { if (e.which == 1) { e.delegateTarget.contextAction.handler(e.delegateTarget.contextAction.param); self.hide(); }});
-                self.root.append(action);
-            }
+                self.root.append(actions[i]);
         }
         self.root.css("display", "block");
         self.root.css("top", y);
@@ -47,7 +36,7 @@ function Context()
     self.hide = function (e)
     {
         // Hides the context menu if the mouse is outside it.
-        if (!e || (e.target != self.root[0] && e.target.parentNode != self.root[0]))
+        if (!e || (e.target != self.root[0] && e.target.parentNode != self.root[0] && e.target.parentNode.parentNode != self.root[0]))
         {
             self.root.css("display", "none");
             gl_desktop.events.unbind("mousedown", self);
@@ -58,6 +47,22 @@ function Context()
     self.isDisplayed = function ()
     {
         return (self.root.css("display") == "block");
+    }
+    
+    // Creates an action that can be added to the root div of the context.
+    self.createAction = function (name, handler, param)
+    {
+        var action = $('<div class="action">' + name + '</div>');
+            action.mouseup(function (e)
+            {
+                if (e.which == 1)
+                {
+                    if (handler)
+                        handler(param);
+                    self.hide();
+                }
+            });
+        return action;
     }
     
     self.init();

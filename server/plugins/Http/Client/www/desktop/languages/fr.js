@@ -44,6 +44,7 @@ var Translation =
             open: "Ouvrir",
             rename: "Renommer",
             delete: "Supprimer",
+            add: "Ajouter",
         },
     },
     Uploads:
