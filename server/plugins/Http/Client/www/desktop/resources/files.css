@@ -37,17 +37,17 @@
 }
 
 /*////////////////////////////////////////////////////////////////////////////
-//                                  HEADER                                  //
+//                                 COLUMNS                                  //
 ////////////////////////////////////////////////////////////////////////////*/
 
-#tasks>.task>.files>.header {
+#tasks>.task>.files>.columns {
     width: 10000%;
     height: 30px;
     position: relative;
     overflow: hidden;
 }
 
-#tasks>.task>.files>.header>.text {
+#tasks>.task>.files>.columns>.text {
     position: absolute;
     top: 0px;
     line-height: 30px;
@@ -56,16 +56,16 @@
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
 }
 
-#tasks>.task>.files>.header>.text,
-#tasks>.task>.files>.header .column {
+#tasks>.task>.files>.columns>.text,
+#tasks>.task>.files>.columns .column {
     cursor: pointer;
 }
 
-#tasks>.task>.files>.header .separator {
+#tasks>.task>.files>.columns .separator {
     cursor: e-resize;
 }
 
-#tasks>.task>.files>.header>.move_column {
+#tasks>.task>.files>.columns>.move_column {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -74,8 +74,23 @@
     z-index: 1;
 }
 
-#tasks>.task>.files>.header>.text.move_text {
+#tasks>.task>.files>.columns>.text.move_text {
     z-index: 2;
+}
+
+/* Context */
+body>#context.files_columns>.action
+{
+    color: #777777;
+}
+body>#context.files_columns>.action.selected
+{
+    color: #333333;
+    font-weight: bold;
+}
+body>#context.files_columns>.action:hover
+{
+    color: #ffffff;
 }
 
 /*////////////////////////////////////////////////////////////////////////////

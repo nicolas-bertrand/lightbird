@@ -10,14 +10,14 @@ function ResourceFiles(task)
         resource.node.controls = $(resource.node.element).children(".controls")[0];
         resource.node.types = $(resource.node.controls).children(".types")[0];
         resource.node.other = $(resource.node.controls).children(".other")[0];
-        resource.node.header = $(resource.node.element).children(".header");
+        resource.node.columns = $(resource.node.element).children(".columns");
         resource.node.list = $(resource.node.element).children(".list")[0];
         resource.node.icon = task.getIconNodes();
         
         // Members
         resource.icons = new Icons(); // Generates the SVG icons
         resource.layout = new Layout(); // Manages the layout of the columns
-        resource.header = new Header(); // The header of the files list
+        resource.columns = new Columns(); // The columns of the files list
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
         resource.fileNumber = 0; // The number of the current file of the playlist
         resource.fileIndex = 0; // The index of the current file of the playlist
@@ -225,20 +225,22 @@ function Files()
     return (self);
 }
 
-// Manages the files list header.
-function Header()
+// Manages the columns.
+function Columns()
 {
     var self = this;
     
     self.init = function ()
     {
         // Members
-        self.C = C.Files.Header; // The configuration of the header
+        self.C = C.Files.Columns; // The configuration of the columns
         self.sortedColumn = 10000; // The index of the column by which the files are sorted
         self.paper; // The SVG paper on which the columns are drawn
-        self.height = self.C.height; // The height of the header
+        self.height = self.C.height; // The height of the columns
         self.slope = self.C.slopeRatio * self.height; // The slope of the columns
-        // The list of the columns in the header
+        self.context = new ColumnsContext(); // Manages the context menu
+        self.background; // The background of the columns.
+        // The list of the columns
         self.columns = new Array();
         var column = {
             left: 0, // The left position of the column
@@ -246,7 +248,7 @@ function Header()
             newWidth: 0, // The new with that is going to be applied
             background: 0, // The background of the column
             separator: 0, // The right separator
-            index: 0, // The index of the column in the columns list
+            index: 0, // The index of the column
             align: 0, // The alignment of the column (left / right)
             name: 0, // The name of the column
             text: 0, // The text node
@@ -258,7 +260,7 @@ function Header()
         };
         // Stores the values used to move a column
         self.moveColumn = {
-            element: 0, // The position of the header
+            element: 0, // The position of the columns
             mouse: 0, // The position of the mouse when the move started
             resistance: 0, // False when the resistance has been broken and the move started
             positions: 0, // The positions where the columns are swapped
@@ -269,16 +271,17 @@ function Header()
         }; 
     
         // Default values
-        resource.node.header.height(self.height);
-        self.paper = Raphael(resource.node.header[0], "100%", "100%");
-        self.paper.rect(0, 0, 10000, self.height).attr(self.C.backgroundAttr);
+        resource.node.columns.height(self.height);
+        self.paper = Raphael(resource.node.columns[0], "100%", "100%");
+        self.background = self.paper.rect(0, 0, 10000, self.height).attr(self.C.backgroundAttr);
+        $(self.background.node).mousedown(self.mouseDownBackground);
         self.addColumn("type");
         self.addColumn("name");
         self.addColumn("size");
         self.addColumn("created");
     }
     
-    // Adds a column to the header.
+    // Adds a column.
     // @param name : The name corresponds to the property of the file associated with the column.
     self.addColumn = function (name)
     {
@@ -296,9 +299,9 @@ function Header()
         $(c.background.node).mouseup(function (e) { self.clickColumn(e, c); });
         // Text
         c.name = name;
-        c.translation = T.Files[name] ? T.Files[name] : name;
+        c.translation = self.translateName(name);
         c.align = resource.layout.getAlignment(name);
-        c.text = $("<span></span>").addClass("text").appendTo(resource.node.header);
+        c.text = $("<span></span>").addClass("text").appendTo(resource.node.columns);
         c.text.html(c.translation);
         c.text.mousedown(function (e) { self.mouseDownColumn(e, c); });
         c.text.mouseup(function (e) { self.clickColumn(e, c); });
@@ -314,9 +317,10 @@ function Header()
         c.index = self.columns.length;
         self.columns.push(c);
         self.updateColumns();
+        return c;
     }
     
-    // Removes a column from the header and the container.
+    // Removes a column.
     self.removeColumn = function (column)
     {
         if (self.columns.length == 1)
@@ -342,23 +346,34 @@ function Header()
         delete column;
     }
     
-    // Returns the list of the columns in the header.
+    // Returns the list of the columns.
     self.getColumns = function ()
     {
         return (self.columns);
     }
     
-    // Starts to move a column.
+    // Returns the column.
+    self.getColumn = function (name)
+    {
+        for (var i = 0; i < self.columns.length; ++i)
+            if (self.columns[i].name == name)
+                return self.columns[i];
+    }
+    
+    // Starts to move a column / displays the context menu.
     self.mouseDownColumn = function (e, column)
     {
         if (e.which == 1)
         {
-            gl_desktop.drag.start(e, resource.node.header, self, "mouseMoveColumn", "", "mouseUpColumn", column);
+            gl_desktop.drag.start(e, resource.node.columns, self, "mouseMoveColumn", "", "mouseUpColumn", column);
             gl_desktop.drag.setCursor("pointer");
             self.moveColumn.element = gl_desktop.drag.getElement();
             self.moveColumn.mouse = gl_desktop.drag.getMouse();
             self.moveColumn.resistance = true;
         }
+        // Displays the context menu
+        else if (e.which == 3)
+            self.context.display(e, column);
     }
     
     // Moves a column
@@ -372,7 +387,7 @@ function Header()
             move.resistance = false;
             move.mouse.x += e.pageX - move.mouse.x - move.element.x;
             // Creates a clone of the column which will move with the mouse 
-            move.node = $("<div></div>").addClass("move_column").appendTo(resource.node.header);
+            move.node = $("<div></div>").addClass("move_column").appendTo(resource.node.columns);
             move.paper = Raphael(move.node[0], "100%", "100%");
             move.target = move.paper.path();
             move.background = move.paper.path();
@@ -491,7 +506,7 @@ function Header()
             self.removeColumn(column);
     }
     
-    // Resizes / removes a column.
+    // Resizes a column / displays the context menu.
     self.mouseDownSeparator = function (e, column)
     {
         // Starts to resize the column.
@@ -506,6 +521,9 @@ function Header()
             gl_desktop.drag.start(e, e.currentTarget, self, "mouseMoveSeparator", undefined, "mouseUpSeparator", param);
             gl_desktop.drag.setCursor("e-resize");
         }
+        // Displays the context menu
+        else if (e.which == 3)
+            self.context.display(e);
     }
     
     // Resizes the column.
@@ -640,6 +658,22 @@ function Header()
         }
     }
     
+    // Displays the context menu.
+    self.mouseDownBackground = function (e)
+    {
+        if (e.which == 3)
+            self.context.display(e);
+    }
+    
+    // Translates the name of the column.
+    self.translateName = function (name)
+    {
+        var translation = T.Files.Columns[name];
+        if (translation)
+            return translation;
+        return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    
     // Draws a background or a separator.
     // @param path: The Raphael target path.
     // @param width: The width of the path.
@@ -714,7 +748,7 @@ function List()
     // Updates the width of the columns.
     self.updateColumns = function ()
     {
-        var columns = resource.header.getColumns();
+        var columns = resource.columns.getColumns();
         var colgroup = $(self.table).children("colgroup");
         var cols = colgroup.children("col");
         for (var i = 0; i < columns.length; ++i)
@@ -730,7 +764,31 @@ function List()
             else
                 col = $(cols[i]);
             // Updates the width
-            col.width(columns[i].width + C.Files.Header.separatorWidth - (i == 0 ? C.Files.Header.separatorWidth / 2 : 0));
+            col.width(columns[i].width + C.Files.Columns.separatorWidth - (i == 0 ? C.Files.Columns.separatorWidth / 2 : 0));
+        }
+    }
+    
+    // Adds a column to the list.
+    self.addColumn = function (column)
+    {
+        // Creates the <col>
+        self.updateColumns();
+        var firstRowFileNumber = Math.floor(self.top.height() / C.Files.listRowHeight);
+        var rows = self.table.rows;
+        // Adds the cell to the row
+        for (var i = 0; i < rows.length; ++i)
+        {
+            var row = rows[i];
+            $(row.insertCell(column.index)).addClass(column.name);
+            if (!$(row).hasClass("empty"))
+            {
+                var file = gl_files.list[resource.files[firstRowFileNumber + i]];
+                var cell = row.cells[column.index];
+                cell.originalText = resource.layout.convert(column.name, file[column.name]);
+                cell.innerHTML = cell.originalText;
+                if (column.align != "left")
+                    cell.style.textAlign = column.align;
+            }
         }
     }
     
@@ -740,16 +798,11 @@ function List()
         // Removes the col element
         var colgroup = $(self.table).children("colgroup");
         var cols = colgroup.children("col");
-        for (var i = 0; i < cols.length; ++i)
-            if (cols[i].name == column.name)
-                $(cols[i]).remove();
+        $(cols[column.index]).remove();
         // Removes the column
         var rows = self.table.rows;
-        var cells;
         for (var i = 0; i < rows.length; ++i)
-            for (var j = 0, cells = rows[i].cells; j < cells.length; ++j)
-                if (cells[j].name == column.name)
-                    $(cells[j]).remove();
+            $(rows[i].cells[column.index]).remove();
     }
     
     // The files have been sorted or filtered, so we have to update the displayed rows.
@@ -960,14 +1013,14 @@ function List()
         }
     }
     
-    // Creates / removes enouth rows to fill the visible part of the list.
+    // Creates / removes enough rows to fill the visible part of the list.
     self.updateRows = function ()
     {
         var numberRows = Math.max(Math.ceil(self.listHeight / C.Files.listRowHeight) + 1, 1);
-        var headerColumns = resource.header.getColumns();
+        var columns = resource.columns.getColumns();
         var j = 0;
         
-        // There is enouth rows to display all the files
+        // There is enough rows to display all the files
         if (resource.files.length <= numberRows - 1)
             numberRows--;
         // Adds the necessary rows
@@ -976,8 +1029,8 @@ function List()
             {
                 var row = self.table.insertRow(-1);
                 // Creates the content of the row
-                for (var i = 0; i < headerColumns.length; ++i)
-                    $(row.insertCell(-1)).addClass(headerColumns[i].name);
+                for (var i = 0; i < columns.length; ++i)
+                    $(row.insertCell(-1)).addClass(columns[i].name);
                 $(row.insertCell(-1));
             }
         // Removes the superfluous rows
@@ -1002,7 +1055,7 @@ function List()
     self.setFileInRow = function (fileIndex, row)
     {
         var columns = $(row).children();
-        var headerColumns = resource.header.getColumns();
+        var headerColumns = resource.columns.getColumns();
         
         row.className = (fileIndex % 2 ? "even" : "odd");
         // Sets the file to the row
@@ -1016,7 +1069,6 @@ function List()
             for (var i = 0; i < headerColumns.length; ++i)
             {
                 var column = columns[i];
-                column.name = headerColumns[i].name;
                 column.originalText = resource.layout.convert(headerColumns[i].name, file[headerColumns[i].name]);
                 column.innerHTML = column.originalText;
                 if (headerColumns[i].align != "left")
@@ -1030,7 +1082,6 @@ function List()
             for (var i = 0; i < headerColumns.length; ++i)
             {
                 var column = columns[i];
-                delete column.name;
                 delete column.originalText;
                 column.innerHTML = "";
                 column.style.textAlign = "";
@@ -1159,7 +1210,7 @@ function List()
         // Resizes the list to fit into the task content height.
         self.onResize = function (left, top, width, height)
         {
-            self.listHeight = height - C.Files.controlsHeight - C.Files.Header.height;
+            self.listHeight = height - C.Files.controlsHeight - C.Files.Columns.height;
             self.list.style.height = self.listHeight + "px";
             // Updates the files list
             self.updateRows();
@@ -1245,7 +1296,7 @@ function Layout()
     {
         if (self.columns[column] && self.columns[column].minWidth != undefined)
             return (self.columns[column].minWidth);
-        return (C.Files.Header.defaultMinWidth);
+        return (C.Files.Columns.defaultMinWidth);
     }
     
     // Returns the min-width of the column.
@@ -1253,7 +1304,7 @@ function Layout()
     {
         if (self.columns[column] && self.columns[column].defaultWidth != undefined)
             return (self.columns[column].defaultWidth);
-        return (C.Files.Header.defaultWidth);
+        return (C.Files.Columns.defaultWidth);
     }
 
     // Returns true if the column contains numerical values.
@@ -1290,7 +1341,7 @@ function Layout()
         {
             var table = $(resource.container.table);
             var isTypeText = table.hasClass("type_text");
-            if (width > C.Files.Header.typeTextMinWidth)
+            if (width > C.Files.Columns.typeTextMinWidth)
             {
                 if (!isTypeText)
                     table.addClass("type_text");
@@ -1461,10 +1512,10 @@ function Icons()
         });
     }
     
-    // Generates the header icon.
-    self.headerIcon = function (destination, icon)
+    // Generates the columns icon.
+    self.columnsIcon = function (destination, icon)
     {
-        var height = C.Files.Header.height;
+        var height = C.Files.Columns.height;
         var path = Raphael(destination, icon.width, height).path(icon.path);
         path.attr("fill", "#8191a5 ");
         path.attr("stroke", "none");
@@ -1568,7 +1619,7 @@ function Icons()
 // Manages the context menu of the files.
 function FilesContext()
 {
-    var self = new Array();
+    var self = this;
     
     self.init = function ()
     {
@@ -1629,6 +1680,83 @@ function FilesContext()
     self.delete = function ()
     {
         gl_files.delete(resource.container.getFilesSelected());
+    }
+    
+    self.init();
+    return (self);
+}
+
+// Manages the context menu of the columns.
+function ColumnsContext()
+{
+    var self = this;
+    
+    self.init = function ()
+    {
+    }
+    
+    // Displays the context menu.
+    self.display = function (e, currentColumn)
+    {
+        var numberFilesSelected = resource.container.getFilesSelected().length;
+        var actions = [];
+        var action;
+        var columns = {};
+        
+        // Gets all the columns names
+        for (var i = 0; i < resource.files.length; ++i)
+        {
+            var file = gl_files.list[resource.files[i]];
+            for (var column in file)
+                if (!columns[column])
+                    columns[column] = true;
+        }
+        // Adds the current column to the action
+        if (currentColumn)
+        {
+            delete columns[currentColumn.name];
+            actions.push(action = gl_context.createAction(currentColumn.translation, self.select, currentColumn.name, false));
+            action.addClass("selected");
+        }
+        // Then adds the columns displayed, from left to right
+        for (var i = 0; i < resource.columns.columns.length; ++i)
+        {
+            var column = resource.columns.columns[i];
+            if (currentColumn && currentColumn.name == column.name)
+                continue;
+            delete columns[column.name];
+            actions.push(action = gl_context.createAction(column.translation, self.select, column.name, false));
+            action.addClass("selected");
+        }
+        // And finally adds the rest if the columns of the files filtered, sorted by name
+        var c = [];
+        for (var column in columns)
+            c.push(column);
+        c.sort(function (a,b) { return a.localeCompare(b); });
+        for (var i = 0; i < c.length; ++i)
+            actions.push(gl_context.createAction(resource.columns.translateName(c[i]), self.select, c[i], false));
+        
+        // Displays the context menu
+        gl_context.display(e.pageX, e.pageY, actions);
+        gl_context.getRoot().addClass("files_columns");
+    }
+    
+    // Selects / unselects a column.
+    self.select = function (name, action)
+    {
+        if (action.hasClass("selected"))
+        {
+            if (resource.columns.columns.length == 1)
+                return ;
+            action.removeClass("selected");
+            resource.columns.removeColumn(resource.columns.getColumn(name));
+        }
+        else
+        {
+            action.addClass("selected");
+            var column = resource.columns.addColumn(name);
+            resource.container.addColumn(column);
+        }
     }
     
     self.init();

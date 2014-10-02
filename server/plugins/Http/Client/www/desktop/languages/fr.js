@@ -27,10 +27,6 @@ var Translation =
     },
     Files:
     {
-        type: "Type",
-        name: "Nom",
-        size: "Taille",
-        created: "Date",
         dateFormat: "d/M/y h:m",
         audio: "Audio",
         document: "Document",
@@ -39,6 +35,13 @@ var Translation =
         video: "Vidéo",
         files: "Fichiers",
         empty: "Vide",
+        Columns:
+        {
+            type: "Type",
+            name: "Nom",
+            size: "Taille",
+            created: "Date créé",
+        },
         Context:
         {
             open: "Ouvrir",

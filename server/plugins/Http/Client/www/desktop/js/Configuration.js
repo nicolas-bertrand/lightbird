@@ -268,19 +268,19 @@ var Configuration =
     {
         controlsHeight: 40,
         listRowHeight: 30, // The height of the rows of the files list.
-        Header:
+        Columns:
         {
-            height: 30, // The default height of the header.
+            height: 30, // The default height of the columns.
             slopeRatio: 75 / 130, // The ratio of the slope of the columns.
-            backgroundAttr: {fill: "90-#9bd0f9-#afd9fa", stroke: "none"}, // The attributes of the background of the header.
+            backgroundAttr: {fill: "90-#9bd0f9-#afd9fa", stroke: "none"}, // The attributes of the background of the columns.
             oddAttr: {fill: "90-#48aaf0-#6cbbf3", stroke: "none"}, // The attributes of the odd columns.
             evenAttr: {fill: "90-#2f9eed-#6cbbf3", stroke: "none"}, // The attributes of the even columns.
             separatorWidth: 15, // The width of the separators.
             separatorAttr: {fill: "90-#5ab7fb-#83c9fc", stroke: "none"}, // The attributes of the separators.
             columnMargin: 10, // The margin between the column text and the separator.
             shortenString: ".", // A string that tells that a text has been shortened.
-            defaultWidth: 200, // The default width of the coulmns of the header.
-            defaultMinWidth: 40, // The default minimum width of the columns of the header.
+            defaultWidth: 200, // The default width of the coulmns of the columns.
+            defaultMinWidth: 40, // The default minimum width of the columns of the columns.
             typeTextMinWidth: 30, // The minimum width required by the type column to display the type in text instead of the colors.
             moveResistance: 3, // The number of pixels the mouse have to move before to start to move the column.
             moveAttr: {fill: "90-#f0a44a-#f4bb77", stroke: "none"}, // The attribute of the column moved.

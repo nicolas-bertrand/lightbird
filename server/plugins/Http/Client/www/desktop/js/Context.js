@@ -20,6 +20,7 @@ function Context()
     {
         if (actions)
         {
+            self.root.removeClass();
             self.root.children().remove();
             for (var i = 0; i < actions.length; ++i)
                 self.root.append(actions[i]);
@@ -50,7 +51,11 @@ function Context()
     }
     
     // Creates an action that can be added to the root div of the context.
-    self.createAction = function (name, handler, param)
+    // @param name: The text displayed in the action.
+    // @param handler: The function called when the action is fired. It takes param and the action node in parameter.
+    // @param param: The parameter passed to the handler when it is called.
+    // @param hide: False if the context is not hidden when the action is fired. True is the default.
+    self.createAction = function (name, handler, param, hide)
     {
         var action = $('<div class="action">' + name + '</div>');
             action.mouseup(function (e)
@@ -58,11 +63,17 @@ function Context()
                 if (e.which == 1)
                 {
                     if (handler)
-                        handler(param);
-                    self.hide();
+                        handler(param, action);
+                    if (hide !== false)
+                        self.hide();
                 }
             });
         return action;
+    }
+    
+    self.getRoot = function ()
+    {
+        return self.root;
     }
     
     self.init();
