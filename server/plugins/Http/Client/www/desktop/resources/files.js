@@ -93,6 +93,12 @@ function ResourceFiles(task)
         resource.container.onDelete(files);
     }
 
+    // Converts the name into a valid class name.
+    resource.encodeClassName = function (name)
+    {
+        return encodeURI(name).replace(/%/g, "_");
+    }
+    
 // Playlist interface
     {
         resource.getNumberFiles = function ()
@@ -779,7 +785,7 @@ function List()
         for (var i = 0; i < rows.length; ++i)
         {
             var row = rows[i];
-            $(row.insertCell(column.index)).addClass(column.name);
+            $(row.insertCell(column.index)).addClass(resource.encodeClassName(column.name));
             if (!$(row).hasClass("empty"))
             {
                 var file = gl_files.list[resource.files[firstRowFileNumber + i]];
@@ -1030,7 +1036,7 @@ function List()
                 var row = self.table.insertRow(-1);
                 // Creates the content of the row
                 for (var i = 0; i < columns.length; ++i)
-                    $(row.insertCell(-1)).addClass(columns[i].name);
+                    $(row.insertCell(-1)).addClass(resource.encodeClassName(columns[i].name));
                 $(row.insertCell(-1));
             }
         // Removes the superfluous rows
@@ -1159,7 +1165,7 @@ function List()
             self.move.sheet = new Object();
             self.move.sheet = $("<style></style>").appendTo($("head"));
             var css = self.move.sheet[0].sheet;
-            css.insertRule("#tasks>.task>.files>.list>table td." + name + "{ }", css.length);
+            css.insertRule("#tasks>.task>.files>.list>table td." + resource.encodeClassName(name) + "{ }", css.length);
             self.move.style = css.cssRules[0].style;
             self.move.style.position = "relative";
             self.move.style.left = "0px";
@@ -1731,13 +1737,13 @@ function ColumnsContext()
         // And finally adds the rest if the columns of the files filtered, sorted by name
         var c = [];
         for (var column in columns)
-            c.push(column);
-        c.sort(function (a,b) { return a.localeCompare(b); });
+            c.push({name: column, translation: resource.columns.translateName(column)});
+        c.sort(function (a,b) { return a.translation.localeCompare(b.translation); });
         for (var i = 0; i < c.length; ++i)
-            actions.push(gl_context.createAction(resource.columns.translateName(c[i]), self.select, c[i], false));
+            actions.push(gl_context.createAction(c[i].translation, self.select, c[i].name, false));
         
         // Displays the context menu
-        gl_context.display(e.pageX, e.pageY, actions);
+        gl_context.display(e.pageX, e.pageY, actions, true);
         gl_context.getRoot().addClass("files_columns");
     }
     

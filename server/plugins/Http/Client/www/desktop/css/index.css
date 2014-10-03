@@ -928,6 +928,11 @@ body>#context
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+body>#context.scroll
+{
+    overflow-y: scroll;
+}
+
 body>#context>.action
 {
     font-size: 14px;

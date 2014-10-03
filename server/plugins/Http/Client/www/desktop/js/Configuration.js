@@ -260,6 +260,10 @@ var Configuration =
             correctGap: false // If the width of the background have to be incremented by one to close a gap between adjacent backgrounds.
         }
     },
+    Context:
+    {
+        cyclicScroll: true, // Allows to scroll the actions with an infinite loop.
+    },
     Uploads:
     {
         requestProgressInterval: 1000 // The number of milliseconds between each progress request.
