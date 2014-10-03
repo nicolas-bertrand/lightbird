@@ -279,7 +279,7 @@ function Columns()
         // Default values
         resource.node.columns.height(self.height);
         self.paper = Raphael(resource.node.columns[0], "100%", "100%");
-        self.background = self.paper.rect(0, 0, 10000, self.height).attr(self.C.backgroundAttr);
+        self.background = self.paper.rect(0, 0, 1000000, self.height).attr(self.C.backgroundAttr);
         $(self.background.node).mousedown(self.mouseDownBackground);
         self.addColumn("type");
         self.addColumn("name");
@@ -680,6 +680,12 @@ function Columns()
         return name.charAt(0).toUpperCase() + name.slice(1);
     }
     
+    // Updates the horizontal scroll of the columns.
+    self.scrollHorizonltal = function (left)
+    {
+        resource.node.columns.css("left", -left);
+    }
+    
     // Draws a background or a separator.
     // @param path: The Raphael target path.
     // @param width: The width of the path.
@@ -1017,6 +1023,8 @@ function List()
             }
             self.oldTableLength = self.table.rows.length;
         }
+        // Updates the horizontal scroll of the columns
+        resource.columns.scrollHorizonltal(self.list.scrollLeft);
     }
     
     // Creates / removes enough rows to fill the visible part of the list.
