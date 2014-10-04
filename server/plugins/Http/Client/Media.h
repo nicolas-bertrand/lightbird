@@ -29,7 +29,7 @@ protected:
     QUrl                  uri;        ///< The uri of the request.
     LightBird::TableFiles file;       ///< The file pointed by the uri.
     LightBird::IResponse  &response;  ///< The response that will be sent.
-    bool                  error;      ///< True if an error occured at some point.
+    bool                  error;      ///< True if an error occurred at some point.
     QList<void *>         extensions; ///< The list of the extensions that implements IVideo or IAudio.
     QString               mediaId;    ///< The media id allows the clients to manipulate the media later.
 };

@@ -74,7 +74,7 @@ private:
     void    _fileComplete(LightBird::IClient &client, Upload &upload);
     /// @brief Get ready for the next file.
     void    _clean(Upload &upload);
-    /// @brief An error occured during the upload and the client is disconnected.
+    /// @brief An error occurred during the upload and the client is disconnected.
     void    _error(LightBird::IClient &client, Upload &upload, const QString &error);
 
     QMap<QString, Upload>   uploads;         ///< List of the upload requests being processed.

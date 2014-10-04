@@ -23,7 +23,7 @@ void    Preview::generate()
 
     // Extracts the file id from the uri
     this->file.setId(query.queryItemValue("fileId"));
-    // If the file does not exist, an error occured
+    // If the file does not exist, an error occurred
     if (!this->file.exists() || !QFileInfo(this->file.getFullPath()).isFile())
         return this->_error("Preview", 404, "Not Found", "File not found.");
     // If the client has not the right to read the file

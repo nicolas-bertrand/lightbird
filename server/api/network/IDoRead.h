@@ -19,7 +19,7 @@ namespace LightBird
         /// @brief Called to read on a socket.
         /// @param client : Informations about the client and its socket.
         /// @param data : The data that have been read.
-        /// @return False if an error occured, true otherwise.
+        /// @return False if an error occurred, true otherwise.
         virtual bool    doRead(LightBird::IClient &client, QByteArray &data) = 0;
     };
 }

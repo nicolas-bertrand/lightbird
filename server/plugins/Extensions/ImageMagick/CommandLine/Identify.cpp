@@ -54,14 +54,14 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
         process.waitForFinished(1000);
     }
     output = process.readAllStandardOutput();
-    // If the exit code is not 0, an error occured
+    // If the exit code is not 0, an error occurred
     if (process.exitCode())
     {
         QString output;
         if (!output.isEmpty())
             output += "\n";
         output += process.readAllStandardError();
-        LOG_DEBUG("An error occured while executing ImageMagick", Properties("programOutput", output).add("exitCode", QString::number(process.exitCode())).add("commandLine", this->imageMagickPath + "/" + this->binaryName + " " + arguments.join(" ")).toMap(), "Identify", "identify");
+        LOG_DEBUG("An error occurred while executing ImageMagick", Properties("programOutput", output).add("exitCode", QString::number(process.exitCode())).add("commandLine", this->imageMagickPath + "/" + this->binaryName + " " + arguments.join(" ")).toMap(), "Identify", "identify");
         return (false);
     }
     LOG_TRACE("ImageMagick command line", Properties("commandLine", this->imageMagickPath + "/" + this->binaryName + " " + arguments.join(" ")).toMap(), "Identify", "identify");

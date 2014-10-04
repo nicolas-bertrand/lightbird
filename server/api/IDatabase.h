@@ -44,7 +44,7 @@ namespace LightBird
         /// prevent SQL injections. You can also use it to get the error of the last
         /// query. This method can be used for all the statements, except for SELECT.
         /// @param request : The SQL query.
-        /// @return False if an error occured, true otherwise.
+        /// @return False if an error occurred, true otherwise.
         virtual bool    query(QSqlQuery &query) = 0;
         /// @brief Executes the SELECT statement of a SQL query, and returns its results.
         /// @param request : The SQL query.
@@ -52,13 +52,13 @@ namespace LightBird
         /// for SELECT). The vector represents the rows, and the map represents the
         /// fields. Plugins can access to a value like this : result[0]["field"].
         /// But first, plugins have to test that the row 1 exists.
-        /// @return False if an error occured, true otherwise.
+        /// @return False if an error occurred, true otherwise.
         virtual bool    query(QSqlQuery &query, QVector<QVariantMap> &result) = 0;
         /// @brief Executes the SELECT statement of a SQL query, and returns the first result.
         /// @param request : The SQL query.
         /// @param result : The first result of the query is stored in this variable (only for SELECT).
         /// The map represents the fields. Plugins can access to a value like this : result["field"]. 
-        /// @return False if an error occured or no result was found, true otherwise.
+        /// @return False if an error occurred or no result was found, true otherwise.
         virtual bool    query(QSqlQuery &query, QVariantMap &result) = 0;
         /// @brief Returns an instance of the table requested in parameter. Users
         /// MUST delete themself the instance returned, or a memory leak will occure.

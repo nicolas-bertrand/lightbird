@@ -88,7 +88,7 @@ bool    Configuration::_load(const QString &configurationPath, const QString &al
     // Parse the configuration file into a DOM representation
     if (!this->doc.setContent(&this->file, false, &errorMsg, &errorLine, &errorColumn))
     {
-        LOG_ERROR("An error occured while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
+        LOG_ERROR("An error occurred while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
                   .add("line", QString::number(errorLine)).add("column", errorColumn), "Configuration", "_load");
         return (false);
     }
@@ -183,7 +183,7 @@ bool    Configuration::save()
         return (false);
     }
     this->file.close();
-    // If the configuration of the server has been saved, an event occured
+    // If the configuration of the server has been saved, an event occurred
     if (Configurations::instance() == this)
         Events::instance()->send("configuration_saved");
     LOG_DEBUG("Configuration saved", Properties("file", this->file.fileName()), "Configuration", "save");

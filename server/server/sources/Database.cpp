@@ -61,7 +61,7 @@ bool    Database::query(QSqlQuery &query)
     this->_checkBoundValues(query);
     // Executes the request
     if ((error = query.exec()) == false)
-        Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
+        Log::error("An SQL error occurred", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
     else
         LOG_TRACE("SQL query executed", Properties("query", query.lastQuery()).add(query.boundValues()).add("rows", query.numRowsAffected()), "Database", "query");
     return (error);
@@ -77,7 +77,7 @@ bool    Database::query(QSqlQuery &query, QVector<QVariantMap> &result)
     this->_checkBoundValues(query);
     // Executes the query
     if ((error = query.exec()) == false)
-        Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
+        Log::error("An SQL error occurred", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
     // Puts the result in the reference
     else
     {
@@ -104,7 +104,7 @@ bool    Database::query(QSqlQuery &query, QVariantMap &result)
     this->_checkBoundValues(query);
     // Executes the query
     if ((error = query.exec()) == false)
-        Log::error("An SQL error occured", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
+        Log::error("An SQL error occurred", Properties("query", query.lastQuery()).add("error", query.lastError().text()).add(query.boundValues()), "Database", "query");
     // Puts the result in the reference
     else
     {
@@ -418,7 +418,7 @@ bool    Database::_loadQueries(const QString &id)
     // Parses the XML file
     if (this->queries[id].setContent(&file, false, &errorMsg, &errorLine, &errorColumn) == false)
     {
-        LOG_ERROR("An error occured while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
+        LOG_ERROR("An error occurred while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
                    .add("line", QString::number(errorLine)).add("column", QString::number(errorColumn)), "Configuration", "_load");
         this->queries.remove(id);
         return (false);

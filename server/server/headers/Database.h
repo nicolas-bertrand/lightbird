@@ -60,7 +60,7 @@ private:
     /// their is one (for example with SQLite).
     /// @param name : The name of the database, which can be the path to its
     /// file (with SQLite).
-    /// @return If an error occured while managing the database file.
+    /// @return If an error occurred while managing the database file.
     bool            _getDatabaseName(QString &databaseName);
     /// @brief Loads a query file.
     /// @param id : The id of the plugin for which the quety will be loaded.

@@ -126,7 +126,7 @@ private:
     void                _unload();
     /// @brief Creates the configuration of the plugin inside the configuration
     /// of the server if it does not exist yet.
-    /// @return False if an error occured while creating the configuration.
+    /// @return False if an error occurred while creating the configuration.
     bool                _createConfiguration();
     /// @brief Removes the configuration of the plugin in the configuration of
     /// the server, and calls _clean().

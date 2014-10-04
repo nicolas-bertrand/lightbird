@@ -25,7 +25,7 @@ public:
 private:
     /// @brief Deletes a file.
     void    _deleteFile(LightBird::IClient &client, const QString &id);
-    /// @brief A fatal error occured. The client is disconnected.
+    /// @brief A fatal error occurred. The client is disconnected.
     void    _deleteError(LightBird::IClient &client, const QString &message);
 };
 

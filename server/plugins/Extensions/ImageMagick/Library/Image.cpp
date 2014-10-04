@@ -55,7 +55,7 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     }
     catch(Magick::Exception &e)
     {
-        LOG_DEBUG("An error occured while converting the image", properties.add("what", e.what()).add("source", source).add("destination", destination).toMap(), "Image", "convert");
+        LOG_DEBUG("An error occurred while converting the image", properties.add("what", e.what()).add("source", source).add("destination", destination).toMap(), "Image", "convert");
         if (replaceSource)
             destination = "";
         return (false);

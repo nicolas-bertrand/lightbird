@@ -30,7 +30,7 @@ void    Extensions::add(Plugin *plugin)
     // Check that the plugin implements the IExtensions interface
     if ((extension = qobject_cast<LightBird::IExtension *>(plugin->instanceObject)) == NULL)
         return ;
-    // If the plugin is already managed, an error occured
+    // If the plugin is already managed, an error occurred
     if (this->plugins.contains(plugin->id))
     {
         LOG_ERROR("The plugin is already managed", "Extensions", "add");

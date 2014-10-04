@@ -307,5 +307,5 @@ void    Uploads::_error(LightBird::IClient &client, Upload &upload, const QStrin
     // Disconnects the client
     client.getRequest().getContent().clear();
     Plugin::api().network().disconnect(client.getId(), true);
-    Plugin::api().log().error("An error occured in the upload: " + error, Properties("idClient", client.getId()).add("idUpload", upload.id).toMap(), "Uploads", "_error");
+    Plugin::api().log().error("An error occurred in the upload: " + error, Properties("idClient", client.getId()).add("idUpload", upload.id).toMap(), "Uploads", "_error");
 }

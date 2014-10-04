@@ -92,7 +92,7 @@ void    Handshake::onFinish(LightBird::IClient &client)
 {
     gnutls_session_t session = client.getInformations().value("gnutls_session").value<gnutls_session_t>();
 
-    // An error occured in the handshake, so the client is disconnected
+    // An error occurred in the handshake, so the client is disconnected
     if (client.getResponse().isError())
         this->api->network().disconnect(client.getId(), true);
     // The handshake succeeded, so we go to the record context

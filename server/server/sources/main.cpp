@@ -22,7 +22,7 @@ int                     main(int argc, char **argv)
         result = application->exec();
         Log::info("The main event loop has finished", Properties("code", QString::number(result)), "main.cpp", "main");
     }
-    // An error occured during the initialization
+    // An error occurred during the initialization
     else
     {
         Log::instance()->print();

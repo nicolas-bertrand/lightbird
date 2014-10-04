@@ -116,7 +116,7 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
         // Manages the session
         this->_session(client, uri);
     }
-    // If an error occured we don't execute the request
+    // If an error occurred we don't execute the request
     else if (type == LightBird::IOnDeserialize::IDoDeserialize && client.getResponse().getCode() >= 400)
         request.setError(true);
     // The client is uploading something
@@ -178,7 +178,7 @@ bool    Plugin::doExecution(LightBird::IClient &client)
             client.getResponse().setType(this->_getMime(uri));
             client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
         }
-        // If the folder has not been found, an error occured
+        // If the folder has not been found, an error occurred
         else if (uri.contains("/") || uri.contains("favicon"))
             this->response(client, 404, "Not Found", "File not found.");
         // Otherwise the client is redirected

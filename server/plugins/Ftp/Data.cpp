@@ -128,7 +128,7 @@ void    Data::onDestroy(LightBird::IClient &client)
         // If we just uploaded a file, we identify it
         if (informations.contains(DATA_UPLOAD) && informations.contains(DATA_UPLOAD_ID))
             LightBird::identify(informations.value(DATA_UPLOAD_ID).toString());
-        // If the download was not completed before the disconnection, an error occured
+        // If the download was not completed before the disconnection, an error occurred
         if (informations.contains(DATA_DOWNLOAD) && informations.contains(DATA_MESSAGE) && !informations.contains(DATA_DOWNLOAD_COMPLETED))
             Plugin::sendControlMessage(session->getInformation(SESSION_CONTROL_ID).toString(), Commands::Result(426, "Transfer aborted."));
         // A message have to be sent after the transfer

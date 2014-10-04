@@ -570,7 +570,7 @@ bool    Plugin::_createConfiguration()
             // Try to parse the default XML configuration of the plugin, from its resources
             if (!doc.setContent(&file, false, &errorMsg, &errorLine, &errorColumn))
             {
-                LOG_ERROR("An error occured while parsing the configuration file of a plugin", Properties("message", errorMsg).add("file", file.fileName())
+                LOG_ERROR("An error occurred while parsing the configuration file of a plugin", Properties("message", errorMsg).add("file", file.fileName())
                           .add("line", QString::number(errorLine)).add("column", errorColumn).add("id", this->id), "Plugin", "_createConfigurations");
                 Configurations::instance()->release();
                 return (false);

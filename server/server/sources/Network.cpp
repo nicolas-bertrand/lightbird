@@ -38,7 +38,7 @@ bool    Network::openPort(unsigned short port, const QStringList &protocols, Lig
         p = new PortTcp(port, protocols, maxClients);
     else
         p = new PortUdp(port, protocols, maxClients);
-    // If the port is not listening an error occured
+    // If the port is not listening an error occurred
     if (!p->isListening())
     {
         Threads::instance()->removeThread(p);

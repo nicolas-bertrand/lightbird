@@ -125,7 +125,7 @@ void    PortTcp::_read(Client *client)
         data.resize(client->getSocket().size());
         if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
         {
-            LOG_WARNING("An error occured while reading the data", Properties("id", client->getId())
+            LOG_WARNING("An error occurred while reading the data", Properties("id", client->getId())
                          .add("error", read).add("size", data.size()), "PortTcp", "_read");
             data.resize(read);
         }
@@ -182,7 +182,7 @@ void    PortTcp::_write()
                     result = client->getSocket().write(w.getData(), w.getSize());
                 w.bytesWriting(result);
                 if (result < 0)
-                    LOG_WARNING("An error occured while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "PortTcp", "_write");
+                    LOG_WARNING("An error occurred while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "PortTcp", "_write");
                 if (result == 0)
                     LOG_ERROR("Write returned 0", Properties("size", w.getTotalSize()).add("id", client->getId()), "PortTcp", "_write");
             }

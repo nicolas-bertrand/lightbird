@@ -91,7 +91,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
     }
     catch (Magick::Exception &e)
     {
-        LOG_DEBUG("An error occured while identifying an image, using ImageMagick", Properties("what", e.what()).add("image", file).toMap(), "Identify", "identify");
+        LOG_DEBUG("An error occurred while identifying an image, using ImageMagick", Properties("what", e.what()).add("image", file).toMap(), "Identify", "identify");
         return (false);
     }
 

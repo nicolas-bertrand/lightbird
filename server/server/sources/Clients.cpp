@@ -296,7 +296,7 @@ void    Clients::_connect(QString id)
             client->setPort(client->getSocket().localPort());
             future->setResult(id);
         }
-        // An error occured
+        // An error occurred
         else
             LOG_ERROR("Connection failed", Properties("address", client->getPeerAddress().toString())
                       .add("port", client->getPeerPort())
@@ -323,7 +323,7 @@ void    Clients::_read(Client *client)
         data.resize(client->getSocket().size());
         if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
         {
-            LOG_WARNING("An error occured while reading the data", Properties("id", client->getId())
+            LOG_WARNING("An error occurred while reading the data", Properties("id", client->getId())
                         .add("error", read).add("size", data.size()), "Clients", "_read");
             data.resize(read);
         }
@@ -380,7 +380,7 @@ void    Clients::_write()
                     result = client->getSocket().write(w.getData(), w.getSize());
                 w.bytesWriting(result);
                 if (result < 0)
-                    LOG_WARNING("An error occured while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
+                    LOG_WARNING("An error occurred while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
                 if (result == 0)
                     LOG_ERROR("Write returned 0", Properties("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
             }

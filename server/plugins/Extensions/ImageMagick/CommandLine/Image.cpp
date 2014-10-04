@@ -70,14 +70,14 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
         process.kill();
         process.waitForFinished(1000);
     }
-    // If the exit code is not 0, an error occured
+    // If the exit code is not 0, an error occurred
     if (process.exitCode())
     {
         QString output;
         if (!(output = process.readAllStandardOutput()).isEmpty())
             output += "\n";
         output += process.readAllStandardError();
-        LOG_DEBUG("An error occured while executing ImageMagick", properties.add("programOutput", output).add("exitCode", QString::number(process.exitCode())).toMap(), "Image", "convert");
+        LOG_DEBUG("An error occurred while executing ImageMagick", properties.add("programOutput", output).add("exitCode", QString::number(process.exitCode())).toMap(), "Image", "convert");
         if (replaceSource)
             destination = "";
         return (false);

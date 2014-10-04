@@ -73,7 +73,7 @@ private:
     bool    _loadTranslation(const QString &file, const QString &resource);
     /// @brief Manages the temporary directory. Creates it if it does not exist, or
     /// removes its files.
-    /// @return True if no error occured.
+    /// @return True if no error occurred.
     bool    _temporaryDirectory();
     /// @brief Opens each ports mentionned in the configuration file of the server,
     /// under the nodes <port>, childrens of the node <ports>.
