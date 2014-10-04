@@ -48,6 +48,8 @@ var Translation =
             rename: "Rename",
             delete: "Delete",
             add: "Add",
+            adjustColumn: "Adjust",
+            adjustAllColumns: "Adjust all columns",
         },
     },
     Uploads:

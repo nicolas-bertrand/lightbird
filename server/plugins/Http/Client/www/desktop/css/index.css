@@ -938,13 +938,20 @@ body>#context>.action
     font-size: 14px;
     padding: 5px 10px 5px 10px;
     cursor: pointer;
-    color: #333333;
+    color: #222222;
 }
 
 body>#context>.action:hover
 {
     background-color: #4895d0;
     color: #ffffff;
+}
+
+body>#context>.separator
+{
+    background-color: #dddddd;
+    margin: 5px 0px 5px 0px;
+    height: 1px;
 }
 
 /*////////////////////////////////////////////////////////////////////////////

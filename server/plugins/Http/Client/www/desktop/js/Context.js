@@ -54,12 +54,15 @@ function Context()
         if ((!inverse && y + height > gl_browserSize.height) || (inverse && y < 0))
         {
             self.root.addClass("scroll");
-            self.root.scrollTop(0);
             if (!inverse)
+            {
                 self.root.height(gl_browserSize.height - y);
+                self.root.scrollTop(0);
+            }
             else
             {
                 self.root.height(y + height);
+                self.root.scrollTop(0);
                 y = 0;
                 if (reverseActions)
                     self.root.scrollTop(height);
@@ -109,17 +112,22 @@ function Context()
     self.createAction = function (name, handler, param, hide)
     {
         var action = $('<div class="action">' + name + '</div>');
-            action.mouseup(function (e)
+        action.mouseup(function (e)
+        {
+            if (e.which == 1)
             {
-                if (e.which == 1)
-                {
-                    if (handler)
-                        handler(param, action);
-                    if (hide !== false)
-                        self.hide();
-                }
-            });
+                if (handler)
+                    handler(param, action);
+                if (hide !== false)
+                    self.hide();
+            }
+        });
         return action;
+    }
+    
+    self.createSeparator = function ()
+    {
+        return $('<div class="separator" />');
     }
     
     self.getRoot = function ()

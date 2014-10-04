@@ -291,6 +291,8 @@ var Configuration =
             moveBackgroundAttr: {fill: "#81aac7"}, // The color of the space that the moved column will take.
             sortAttr: {fill: "90-#4a94f0-#77aff4"}, // The color of the sorted column.
             sortSeparatorAttr: {fill: "90-#65a5f5-#8bbcf8"}, // The color of the separator adjacent to the sorted column.
+            adjustContext: true, // True if the context menu to adjust the columns has to be displayed.
+            actionHideContext: false, // True if an action on the context menu should hide it.
         }
     },
     View:

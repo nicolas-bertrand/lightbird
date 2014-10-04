@@ -220,11 +220,11 @@ function Files()
     // Alphabetical column comparison.
     self._compareString = function (i, j)
     {
-        var a = gl_files.list[i][self.sortedColumn].toLowerCase();
-        var b = gl_files.list[j][self.sortedColumn].toLowerCase();
-        if (a < b) return -1;
-        if (a > b) return 1;
-        return 0;
+        var a = gl_files.list[i][self.sortedColumn];
+        var b = gl_files.list[j][self.sortedColumn];
+        a = a ? a : "";
+        b = b ? b : "";
+        return a.localeCompare(b);
     }
     
     self.init();
@@ -529,7 +529,7 @@ function Columns()
         }
         // Displays the context menu
         else if (e.which == 3)
-            self.context.display(e);
+            self.context.displaySeparator(e, column);
     }
     
     // Resizes the column.
@@ -684,6 +684,45 @@ function Columns()
     self.scrollHorizonltal = function (left)
     {
         resource.node.columns.css("left", -left);
+    }
+    
+    // Adjusts the size of the column to the minimum size of its content.
+    self.adjustColumn = function (column)
+    {
+        // Gets the minimum width necessary to display all the elements of the column
+        var oldWidth = column.width;
+        var width = column.textWidth;
+        if (!resource.layout.isStaticMinWidth(column.name))
+        {
+            var containerMinWidth;
+            if (resource.container.getMinWidth)
+                width = Math.max(width, containerMinWidth = resource.container.getMinWidth(column));
+            width = Math.max(width + C.Files.Columns.columnMargin * 2, resource.layout.getMinWidth(column.name));
+            // If the column was already adjusted, we don't take the column name into account this time
+            if (width == oldWidth && containerMinWidth)
+                width = Math.max(containerMinWidth + C.Files.Columns.columnMargin * 2, resource.layout.getMinWidth(column.name));
+        }
+        else
+            width = resource.layout.getMinWidth(column.name);
+        // Makes sure the column name is not shortened
+        if (width == column.textWidth + C.Files.Columns.columnMargin * 2)
+        {
+            column.shortened = false;
+            column.text.html(column.translation);
+        }
+        
+        // Updates the width of the column
+        column.newWidth = width;
+        resource.layout.onResize(column.name, width);
+        self.updateColumns();
+        resource.container.updateColumns();
+    }
+    
+    // Adjusts the size of all the columns to the minimum size of their contents.
+    self.adjustAllColumns = function ()
+    {
+        for (var i = 0; i < self.columns.length; ++i)
+            self.adjustColumn(self.columns[i]);
     }
     
     // Draws a background or a separator.
@@ -1097,7 +1136,7 @@ function List()
             {
                 var column = columns[i];
                 delete column.originalText;
-                column.innerHTML = "";
+                column.innerHTML = "<span />";
                 column.style.textAlign = "";
             }
             $(row).addClass("empty");
@@ -1121,6 +1160,16 @@ function List()
             if (++n > 1)
                 return true;
         return false;
+    }
+    
+    // Returns the minimum width necessary to display all the elements of the column.
+    self.getMinWidth = function (column)
+    {
+        var rows = self.table.rows;
+        var minWidth = Math.max(0, $(rows[0].cells[column.index].firstChild).width());
+        for (var i = 1; i < rows.length; ++i)
+            minWidth = Math.max(minWidth, $(rows[i].cells[column.index].firstChild).width());
+        return minWidth;
     }
     
     // Called when files have been added.
@@ -1287,14 +1336,19 @@ function Layout()
     {
         if (value == undefined)
             return "";
+        var result;
         if (self.columns[key] && self.columns[key].convert)
         {
             if (self[self.columns[key].convert])
-                return (self[self.columns[key].convert](value));
+                result = self[self.columns[key].convert](value);
             else if (F[self.columns[key].convert])
-                return (F[self.columns[key].convert](value));
+                result = F[self.columns[key].convert](value);
+            if (!self.columns[key].noSpan)
+                result = "<span>" + result + "</span>";
         }
-        return (value);
+        else
+            result = "<span>" + value + "</span>";
+        return (result);
     }
     
     // Returns the alignment of the column.
@@ -1327,10 +1381,16 @@ function Layout()
         return (self.columns[column] && self.columns[column].numerical)
     }
 
+    // Returns true if the column has a static minimum width.
+    self.isStaticMinWidth = function (column)
+    {
+        return (self.columns[column] && self.columns[column].staticMinWidth === true);
+    }
+    
     // Converts the generic type name (image audio video document other).
     self.convertType = function (type)
     {
-        return ("<div></div><span>" + T.Files[type] + "</span>");
+        return ("<span>" + T.Files[type] + "</span><div></div>");
     }
     
     // Makes the date more readable.
@@ -1373,11 +1433,13 @@ function Layout()
         {
             minWidth: 0,
             defaultWidth: 1,
-            convert: "convertType"
+            convert: "convertType",
+            noSpan: true,
+            staticMinWidth: true,
         },
         name:
         {
-            defaultWidth: 300
+            defaultWidth: 300,
         },
         size:
         {
@@ -1385,13 +1447,13 @@ function Layout()
             alignment: "right",
             minWidth: 60,
             defaultWidth: 80,
-            numerical: true
+            numerical: true,
         },
         created:
         {
             convert: "convertDate",
             minWidth: 80,
-            defaultWidth: 130
+            defaultWidth: 130,
         }
     };
     
@@ -1725,11 +1787,12 @@ function ColumnsContext()
                 if (!columns[column])
                     columns[column] = true;
         }
+        
         // Adds the current column to the action
         if (currentColumn)
         {
             delete columns[currentColumn.name];
-            actions.push(action = gl_context.createAction(currentColumn.translation, self.select, currentColumn.name, false));
+            actions.push(action = gl_context.createAction(currentColumn.translation, self.select, currentColumn.name, C.Files.Columns.actionHideContext));
             action.addClass("selected");
         }
         // Then adds the columns displayed, from left to right
@@ -1739,7 +1802,7 @@ function ColumnsContext()
             if (currentColumn && currentColumn.name == column.name)
                 continue;
             delete columns[column.name];
-            actions.push(action = gl_context.createAction(column.translation, self.select, column.name, false));
+            actions.push(action = gl_context.createAction(column.translation, self.select, column.name, C.Files.Columns.actionHideContext));
             action.addClass("selected");
         }
         // And finally adds the rest if the columns of the files filtered, sorted by name
@@ -1748,7 +1811,7 @@ function ColumnsContext()
             c.push({name: column, translation: resource.columns.translateName(column)});
         c.sort(function (a,b) { return a.translation.localeCompare(b.translation); });
         for (var i = 0; i < c.length; ++i)
-            actions.push(gl_context.createAction(c[i].translation, self.select, c[i].name, false));
+            actions.push(gl_context.createAction(c[i].translation, self.select, c[i].name, C.Files.Columns.actionHideContext));
         
         // Displays the context menu
         gl_context.display(e.pageX, e.pageY, actions, true);
@@ -1771,6 +1834,18 @@ function ColumnsContext()
             var column = resource.columns.addColumn(name);
             resource.container.addColumn(column);
         }
+    }
+    
+    // Displays the adjust columns actions.
+    self.displaySeparator = function (e, column)
+    {
+        // Displays the normal actions if adjust column is not enabled
+        if (!C.Files.Columns.adjustContext)
+            return self.display(e, column);
+        // Creates the adjust actions
+        var actions = [gl_context.createAction(T.Files.Context.adjustColumn + ' "' + resource.columns.translateName(column.name) + '"', resource.columns.adjustColumn, column),
+                       gl_context.createAction(T.Files.Context.adjustAllColumns, resource.columns.adjustAllColumns)];
+        gl_context.display(e.pageX, e.pageY, actions);
     }
     
     self.init();

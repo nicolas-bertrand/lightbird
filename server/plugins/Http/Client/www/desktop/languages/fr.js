@@ -48,6 +48,8 @@ var Translation =
             rename: "Renommer",
             delete: "Supprimer",
             add: "Ajouter",
+            adjustColumn: "Ajuster",
+            adjustAllColumns: "Ajuster toutes les colonnes",
         },
     },
     Uploads:
