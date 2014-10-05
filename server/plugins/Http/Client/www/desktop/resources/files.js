@@ -28,6 +28,7 @@ function ResourceFiles(task)
         resource.updateIcon();
         gl_files.bindOnAdd(resource, resource.onAdd);
         gl_files.bindOnDelete(resource, resource.onDelete);
+        gl_uploads.bindOnUpload(resource, resource.onUpload);
     }
     
     // The task have been resized.
@@ -42,6 +43,7 @@ function ResourceFiles(task)
         gl_player.closePlaylist(resource);
         gl_files.unbindOnAdd(resource);
         gl_files.unbindOnDelete(resource);
+        gl_uploads.unbindOnUpload(resource);
         resource.container.close();
         for (var key in resource)
             resource[key] = undefined;
@@ -91,6 +93,12 @@ function ResourceFiles(task)
     {
         resource.files.onDelete(files);
         resource.container.onDelete(files);
+    }
+
+    // Called while files are being uploaded.
+    resource.onUpload = function ()
+    {
+        resource.container.onUpload();
     }
 
     // Converts the name into a valid class name.
@@ -681,7 +689,7 @@ function Columns()
     }
     
     // Updates the horizontal scroll of the columns.
-    self.scrollHorizonltal = function (left)
+    self.scrollHorizontal = function (left)
     {
         resource.node.columns.css("left", -left);
     }
@@ -781,10 +789,18 @@ function List()
             sheet: 0 // The style sheet node that contains the CSS rule
         }
         
+        // Creates the CSS sheet that manage the uploads
+        self.uploadsCss = new Object();
+        self.uploadsCss.sheet = $("<style></style>").appendTo($("head"));
+        var css = self.uploadsCss.sheet[0].sheet;
+        css.insertRule("#tasks>#" + task.getContentId() + ">.files>.list>table tr.upload td:last-child>div.progress { }", css.length);
+        self.uploadsCss.style = css.cssRules[0].style;
+        self.uploadsCss.style.width = "100px";
+        
         // Events
-        $(self.table).mousedown(function (e) { self.mouseDown(e); });
-        $(self.table).dblclick(function (e) { self.dblClick(e); });
-        $(self.list).scroll(function (e) { self.scroll(e); });
+        $(self.table).mousedown(self.mouseDown);
+        $(self.table).dblclick(self.dblClick);
+        $(self.list).scroll(self.scroll);
         
         self.updateColumns();
     }
@@ -792,6 +808,7 @@ function List()
     // Closes the list.
     self.close = function ()
     {
+        self.uploadsCss.sheet.remove();
         for (var key in self)
             resource[key] = undefined;
     }
@@ -854,32 +871,6 @@ function List()
         var rows = self.table.rows;
         for (var i = 0; i < rows.length; ++i)
             $(rows[i].cells[column.index]).remove();
-    }
-    
-    // The files have been sorted or filtered, so we have to update the displayed rows.
-    self.onFilesChange = function (column)
-    {
-        // The local file index is no longer valid
-        self.lastFileSelected.local = undefined;
-        // Updates the scroll padding
-        var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
-        top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight));
-        var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
-        self.top.height(top);
-        self.bottom.height(bottom);
-        self.updateRows();
-        // Hides the scroll if all the files can be seen at the same time
-        if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
-        {
-            $(self.list).removeClass("scroll");
-            self.list.scrollTop = 0;
-        }
-        else
-            $(self.list).addClass("scroll");
-        // Updates the content of the rows
-        var firstRowFileNumber = Math.floor(self.top.height() / C.Files.listRowHeight);
-        for (var i = 0; i < self.table.rows.length; ++i)
-            self.setFileInRow(firstRowFileNumber + i, self.table.rows[i]);
     }
     
     // Adds / removes a file from the selection, depending if the keys shift or ctrl are pressed.
@@ -1063,7 +1054,9 @@ function List()
             self.oldTableLength = self.table.rows.length;
         }
         // Updates the horizontal scroll of the columns
-        resource.columns.scrollHorizonltal(self.list.scrollLeft);
+        resource.columns.scrollHorizontal(self.list.scrollLeft);
+        // Updates the uploads css
+        self.uploadsCss.style.right = (self.table.offsetWidth - self.top.width() - self.list.scrollLeft) + "px";
     }
     
     // Creates / removes enough rows to fill the visible part of the list.
@@ -1126,6 +1119,16 @@ function List()
                 column.innerHTML = column.originalText;
                 if (headerColumns[i].align != "left")
                     column.style.textAlign = headerColumns[i].align;
+            }
+            // If the file has no id, it is being uploaded
+            if (!file.id)
+            {
+                $(row).addClass("upload");
+                columns[columns.length - 1].innerHTML = "";
+                var progress = $('<div class="progress" />').appendTo(columns[columns.length - 1]);
+                progress.height(C.Files.listRowHeight);
+                var upload = gl_uploads.currentUploads[resource.files[fileIndex]];
+                $('<div />').appendTo(progress).width((upload ? upload.percent : 0) + "%");
             }
         }
         // Cleans the row
@@ -1213,13 +1216,38 @@ function List()
         resource.files.applyFilters();
     }
     
+    // Called while files are being uploaded.
+    self.onUpload = function ()
+    {
+        for (var i = 0; i < self.table.rows.length && i < resource.files.length; ++i)
+        {
+            var row = self.table.rows[i];
+            var upload = gl_uploads.currentUploads[resource.files[row.fileIndex]];
+            if (upload)
+            {
+                // Updates the progress bar
+                if (!upload.finished)
+                    $(row.cells[row.cells.length - 1].firstChild.firstChild).css("width", upload.percent + "%");
+                // Ends the upload
+                else
+                {
+                    $(row).removeClass("upload");
+                    $(row).addClass("uploaded");
+                    $(row).bind("mousemove", function (e) {
+                        $(e.currentTarget).removeClass("uploaded");
+                        $(e.currentTarget).unbind("mousemove");
+                    });
+                }
+            }
+        }
+    }
+    
     // Moves a column
     {
         self.moveStart = function (name)
         {
             self.move = new Object();
             self.move.updateColumns = false;
-            self.move.sheet = new Object();
             self.move.sheet = $("<style></style>").appendTo($("head"));
             var css = self.move.sheet[0].sheet;
             css.insertRule("#tasks>.task>.files>.list>table td." + resource.encodeClassName(name) + "{ }", css.length);
@@ -1286,6 +1314,35 @@ function List()
             }
             else
                 $(self.list).addClass("scroll");
+            // Updates the uploads css
+            self.uploadsCss.style.width = self.top.width() + "px";
+            self.uploadsCss.style.right = (self.table.offsetWidth - self.top.width() - self.list.scrollLeft) + "px";
+        }
+        
+        // The files have been sorted or filtered, so we have to update the displayed rows.
+        self.onFilesChange = function (column)
+        {
+            // The local file index is no longer valid
+            self.lastFileSelected.local = undefined;
+            // Updates the scroll padding
+            var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
+            top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight));
+            var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
+            self.top.height(top);
+            self.bottom.height(bottom);
+            self.updateRows();
+            // Hides the scroll if all the files can be seen at the same time
+            if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+            {
+                $(self.list).removeClass("scroll");
+                self.list.scrollTop = 0;
+            }
+            else
+                $(self.list).addClass("scroll");
+            // Updates the content of the rows
+            var firstRowFileNumber = Math.floor(self.top.height() / C.Files.listRowHeight);
+            for (var i = 0; i < self.table.rows.length; ++i)
+                self.setFileInRow(firstRowFileNumber + i, self.table.rows[i]);
         }
         
         // Hides the files that have the given type.
@@ -1727,8 +1784,7 @@ function FilesContext()
             add.append(input);
             input.change(function (e)
             {
-                for (var i = 0; i < this.files.length; ++i)
-                    gl_uploads.add(this.files[i]);
+                gl_uploads.add(this.files);
             });
         }
     }

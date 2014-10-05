@@ -266,7 +266,8 @@ var Configuration =
     },
     Uploads:
     {
-        requestProgressInterval: 1000 // The number of milliseconds between each progress request.
+        onUploadInterval: 1000 / 10, // The number of milliseconds between the onUpload event calls.
+        concurrent: 4, // The number of files that can be sent at the same time. 
     },
     Files:
     {

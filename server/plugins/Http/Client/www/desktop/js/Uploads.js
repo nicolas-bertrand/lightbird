@@ -8,66 +8,168 @@ function Uploads()
     
     self.init = function ()
     {
-        self.list = {}; // The list of the uploads in progress. The key is the id of the file.
-        $(document.body).bind("dragover", self.onDragover);
-        $(document.body).bind("drop", self.onDrop);
+        self.pendingUploads = {}; // The files waiting to be uploaded.
+        self.currentUploads = {}; // The files currently uploading.
+        // This object represents an upload in the above list
+        var upload =
+        {
+            id: 0, // The id of the file in gl_files
+            cancelId: "", // A uuid used to cancel the upload
+            size: 0, // The size of the file
+            uploaded: 0, // The amount of data uploaded so far
+            percent: 0, // The percentage of the file uploaded
+            previousPercent: undefined, // The percentage the last time onUpload was called
+            request: {}, // The XMLHttpRequest
+            file: {}, // The File to upload
+            finished: false // True if the upload is finished
+        };
+        self.onUpload = new Array(); // The list of the functions to call while a file is uploading.
+        self.onUploadInterval; // The interval that calls onUpload
+        
+        // These events allows to drop a file in the browser
+        $(document.body).bind("dragover", self._onDragover);
+        $(document.body).bind("drop", self._onDrop);
     }
     
-    self.add = function (file)
+    // Uploads the files in parameter.
+    // @param files: The FileList to upload.
+    self.add = function (files)
     {
         // Adds the file to the list
-        var id = gl_files.add(file.name, file.size, "");
-        if (id < 0)
+        var f = [];
+        for (var i = 0; i < files.length; ++i)
+            f.push({name: files[i].name, size: files[i].size, id_directory: ""});
+        var ids = gl_files.add(f);
+        // setTimeout is used to let the browser display the files
+        setTimeout(function ()
         {
-            console.log("The file " + file.name + " already exists in this directory.");
-            return false;
+            // Creates the uploads
+            for (var i = 0; i < ids.length; ++i)
+            {
+                if (ids[i] >= 0)
+                    self._create(ids[i], files[i]);
+                else
+                    console.log("The file " + files[i].name + " already exists in this directory.");
+            }
+        }, 0);
+    }
+
+    // Allows an object to be notified of the progression of the uploads.
+    self.bindOnUpload = function (object, handler)
+    {
+        for (var i = 0; i < self.onUpload.length; ++i)
+            if (self.onUpload[i].object == object)
+                self.onUpload.splice(i--, 1);
+        self.onUpload.push({object: object, handler: handler});
+    }
+    
+    // Unbinds the onUpload event.
+    self.unbindOnUpload = function (object)
+    {
+        for (var i = 0; i < self.onUpload.length; ++i)
+            if (self.onUpload[i].object == object)
+                self.onUpload.splice(i--, 1);
+    }
+    
+    // Private
+    {
+        // Creates an upload.
+        self._create = function (id, file)
+        {
+            var request = new XMLHttpRequest();
+            var upload = self.pendingUploads[id] =
+            {
+                id: id,
+                cancelId: F.getUuid(),
+                size: file.size,
+                uploaded: 0,
+                percent: 0,
+                previousPercent: undefined,
+                request: request,
+                file: file,
+                finished: false
+            };
+            
+            // Creates the onUpload event
+            if (!self.onUploadInterval)
+                self.onUploadInterval = setInterval(self._callOnUpload, C.Uploads.onUploadInterval);
+            
+            // Starts the next upload
+            var n = 0;
+            for (var u in self.currentUploads)
+                if (++n >= C.Uploads.concurrent)
+                    return ;
+            self._start();
         }
-        var upload = self.list[id] = {size: file.size, uploaded: 0};
-        var request = new XMLHttpRequest();
         
-        // Called while the file is uploading
-        request.upload.addEventListener('progress', function (e)
+        // Starts the next upload.
+        self._start = function ()
+        {
+            for (var u in self.pendingUploads)
+                break ;
+            if (!u)
+                return ;
+            var upload = self.pendingUploads[u]
+            self.currentUploads[upload.id] = upload;
+            delete self.pendingUploads[upload.id];
+            
+            var formData = new FormData();
+            formData.append("file", upload.file);
+            upload.request.upload.addEventListener('progress', function (e) { self._progress(e, upload); });
+            upload.request.onreadystatechange = function() { if (upload.request.readyState == 4) self._finished(upload); };
+            upload.request.open('POST', '/c/command/uploads?disconnectOnError=true&cancelId=' + upload.cancelId + F.getSession(false));
+            upload.request.send(formData);
+        }
+        
+        // The upload has progressed.
+        self._progress = function (e, upload)
         {
             if (e.total)
             {
                 upload.size = e.total;
                 upload.uploaded = e.loaded;
-                console.log("Progress " + file.name, Math.ceil(e.loaded / e.total * 100) + '%');
+                upload.previousPercent = upload.percent;
+                upload.percent = Math.min(e.loaded / e.total, 1) * 100;
             }
-        });
-        
-        // Called when the file has been uploaded
-        request.onreadystatechange = function()
-        {
-            if(request.readyState == 4)
-            {
-                var filesUploaded = jsonParse(request.responseText || "[]");
-                if (request.status == 200 && filesUploaded.length && filesUploaded[0])
-                    gl_files.list[id].id = filesUploaded[0];
-                else
-                    console.log("An error occured during the upload of " + file.name);
-                delete self.list[id];
-            }
-        };
+        }
 
-        // Sends the file
-        var formData = new FormData();
-        formData.append("file", file);
-        request.open('POST', '/c/command/uploads?disconnectOnError=true' + F.getSession(false));
-        request.send(formData);
-    }
+        // The file has been uploaded.
+        self._finished = function (upload)
+        {
+            var filesUploaded = jsonParse(upload.request.responseText || "[]");
+            if (upload.request.status == 200 && filesUploaded.length && filesUploaded[0])
+                gl_files.list[upload.id].id = filesUploaded[0];
+            else
+                console.log("An error occurred during the upload of " + upload.file.name);
+            upload.finished = true;
+            self._callOnUpload();
+            delete self.currentUploads[upload.id];
+            // Starts the next upload
+            self._start();
+            // Removes the onUpload event if there is no file to upload
+            for (var u in self.currentUploads)
+                return ;
+            clearInterval(self.onUploadInterval);
+            delete self.onUploadInterval;
+        }
+        
+        self._onDragover = function (e)
+        {
+            e.preventDefault();
+        }
+        
+        self._onDrop = function (e)
+        {
+            e.preventDefault();
+            gl_uploads.add(e.originalEvent.dataTransfer.files);
+        }
     
-    self.onDragover = function (e)
-    {
-        e.preventDefault();
-    }
-    
-    self.onDrop = function (e)
-    {
-        var files = e.originalEvent.dataTransfer.files;
-        for (var i = 0; i < files.length; ++i)
-            gl_uploads.add(files[i]);
-        e.preventDefault();
+        // Calls the onUpload event of the bound objects.
+        self._callOnUpload = function ()
+        {
+            for (var i = 0; i < self.onUpload.length; ++i)
+                self.onUpload[i].handler();
+        }
     }
     
     self.init();

@@ -761,6 +761,7 @@ function Task(resource, resourceContent)
     {
         self.icon; // The icon element of the task in the tasks list, inside the icon of the page
         self.content; // The content of the task, which stores its resource
+        self.contentId = "id" + F.getUuid().replace(/-/g, ""); // The id of the content node
         self.resource = new Object(); // The instance of the resource that manages the content
         self.buttons; // Manages the buttons of the task
         self.lastFocusDate = 0; // The date of the last time the task was focused. Used by isFocus to tell if the task has the focus regardless of the events timing.
@@ -805,7 +806,7 @@ function Task(resource, resourceContent)
         self.buttons = new TasksList.Buttons(self);
         
         // Creates the content of the task
-        self.content = $("<div></div>").addClass("task");
+        self.content = $("<div></div>").addClass("task").attr("id", self.contentId);
         self.content[0].object = self;
         self.content.html(resourceContent);
         F.translate(self.content);
@@ -1380,6 +1381,12 @@ function Task(resource, resourceContent)
                 title: self.icon.find(".title span"),
                 content: self.icon.find(".content>.container>.text")
             });
+        }
+        
+        // Returns the id of the content of the task.
+        self.getContentId = function ()
+        {
+            return self.contentId;
         }
         
         // Must be called when the icon height has been modified.

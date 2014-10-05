@@ -29,25 +29,43 @@ function Files()
         self.list = new Array();
     }
     
-    // Adds a file to the list.
-    // @return The id of the file, or -1 if it can't be added.
-    self.add = function (name, size, id_directory)
+    // Adds the files to the list.
+    // @param files: The files to add: [{name, size, id_directory}].
+    // @return The id of the files, or -1 for the ones that can't be added.
+    self.add = function (files)
     {
-        // Ensures that there is no file with the same name in this directory
-        for (var i = 0; i < self.list.length; ++i)
-            if (self.list[i].id_directory == id_directory && self.list[i].name == name)
-                return -1;
-    
-        // Adds the file to the list
-        var id = self.list.length;
-        var date = F.ISODateString(new Date());
-        self.list.push({name: name, size: size, created: date, modified: date, id_directory: id_directory, type: "other"});
+        var id = []; // The id of the files that can be added
+        var result = []; // The id of all the files (or -1)
+        
+        for (var i = 0; i < files.length; ++i)
+        {
+            var file = files[i];
+            // Ensures that there is no file with the same name in this directory
+            var duplicate = false;
+            for (var j = 0; j < self.list.length; ++j)
+                if (self.list[j].id_directory == file.id_directory && self.list[j].name == file.name)
+                {
+                    duplicate = true;
+                    break ;
+                }
+        
+            // Adds the file to the list
+            if (!duplicate)
+            {
+                id.push(self.list.length);
+                result.push(self.list.length);
+                var date = F.ISODateString(new Date());
+                self.list.push({name: file.name, size: file.size, created: date, modified: date, id_directory: file.id_directory, type: "other"});
+            }
+            else
+                result.push(-1);
+        }
 
         // Calls the onAdd event of the bound objects.
         for (var i = 0; i < self.onAdd.length; ++i)
-            self.onAdd[i].handler([id]);
+            self.onAdd[i].handler(id);
 
-        return id;
+        return result;
     }
     
     // Deletes the files in parameter.

@@ -120,11 +120,13 @@ body>#context.files_columns>.action:hover
 }
 
 #tasks>.task>.files>.list>table tr.odd,
-#tasks>.task>.files>.list>table.move_column tr.odd td {
+#tasks>.task>.files>.list>table.move_column tr.odd td,
+#tasks>.task>.files>.list>table tr.upload.odd td:last-child>div.progress div {
     background-color: #fafafa;
 }
 #tasks>.task>.files>.list>table tr.even,
-#tasks>.task>.files>.list>table.move_column tr.even td {
+#tasks>.task>.files>.list>table.move_column tr.even td,
+#tasks>.task>.files>.list>table tr.upload.even td:last-child>div.progress div {
     background-color: #f2f6f8;
 }
 
@@ -139,6 +141,52 @@ body>#context.files_columns>.action:hover
 #tasks>.task>.files>.list>table td:first-child,
 #tasks>.task>.files>.list>table.type_text td.type:first-child {
     padding-left: 10px;
+}
+
+/* Upload */
+
+#tasks>.task>.files>.list>table tr.upload,
+#tasks>.task>.files>.list>table.move_column tr.upload td {
+    background-color: transparent;
+}
+
+#tasks>.task>.files>.list>table tr.upload td {
+    position: relative;
+    z-index: 2;
+}
+
+#tasks>.task>.files>.list>table tr.upload td:last-child {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+}
+
+#tasks>.task>.files>.list>table tr td:last-child>div.progress {
+    display: none;
+}
+
+#tasks>.task>.files>.list>table tr.upload td:last-child>div.progress {
+    display: block;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    background-color: rgba(210, 220, 240, 1);
+}
+
+#tasks>.task>.files>.list>table tr.upload td:last-child>div.progress div {
+    height: 100%;
+}
+
+#tasks>.task>.files>.list>table tr.upload
+{
+    font-weight: bold;
+}
+#tasks>.task>.files>.list>table tr.uploaded
+{
+}
+
+#tasks>.task>.files>.list>table tr.selected.other.upload td:last-child>div.progress {
+    background-color: #cccccc;
 }
 
 /* Selected */
@@ -160,7 +208,8 @@ body>#context.files_columns>.action:hover
     background-color: #ffef9b;
 }
 #tasks>.task>.files>.list>table tr.selected.other,
-#tasks>.task>.files>.list>table.move_column tr.selected.other td {
+#tasks>.task>.files>.list>table.move_column tr.selected.other td,
+#tasks>.task>.files>.list>table tr.selected.other.upload td:last-child>div.progress div {
     background-color: #d6d6d6;
 }
 
