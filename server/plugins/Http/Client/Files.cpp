@@ -8,6 +8,7 @@
 #include "Plugin.h"
 #include "TableFiles.h"
 #include "Properties.h"
+#include "Defines.h"
 
 Files::Files()
 {
@@ -22,33 +23,37 @@ void    Files::get(LightBird::IClient &client)
     LightBird::TableFiles file;
     QSqlQuery             query(Plugin::api().database().getDatabase());
     QVector<QVariantMap>  result;
-    QJsonArray            array;
+    QJsonObject           rootObject;
+    QJsonArray            filesArray;
 
     query.prepare(Plugin::api().database().getQuery("HttpClient", "select_all_files"));
     if (!Plugin::api().database().query(query, result))
         return Plugin::response(client, 500, "Internal Server Error");
-    QVectorIterator<QVariantMap> it(result);
-    while (it.hasNext())
+    rootObject.insert("date", QDateTime::currentDateTimeUtc().addSecs(-1).toString(DATE_FORMAT));
+    for (QVectorIterator<QVariantMap> it(result); it.hasNext(); it.next())
     {
-        QJsonObject object;
         file.setId(it.peekNext()["id"].toString());
-        QMapIterator<QString, QVariant> info(file.getInformations());
-        while (info.hasNext())
+        if (file.isAllowed(client.getAccount().getId(), "read"))
         {
-            object.insert(info.peekNext().key(), info.peekNext().value().toString());
-            info.next();
+            QJsonObject fileObject;
+            QMapIterator<QString, QVariant> info(file.getInformations());
+            while (info.hasNext())
+            {
+                fileObject.insert(info.peekNext().key(), info.peekNext().value().toString());
+                info.next();
+            }
+            fileObject.insert("id", it.peekNext()["id"].toString());
+            fileObject.insert("name", it.peekNext()["name"].toString());
+            fileObject.insert("type", it.peekNext()["type"].toString());
+            fileObject.insert("id_directory", it.peekNext()["id_directory"].toString());
+            fileObject.insert("modified", it.peekNext()["modified"].toString());
+            fileObject.insert("created", it.peekNext()["created"].toString());
+            filesArray.append(fileObject);
         }
-        object.insert("id", it.peekNext()["id"].toString());
-        object.insert("name", it.peekNext()["name"].toString());
-        object.insert("type", it.peekNext()["type"].toString());
-        object.insert("id_directory", it.peekNext()["id_directory"].toString());
-        object.insert("modified", it.peekNext()["modified"].toString());
-        object.insert("created", it.peekNext()["created"].toString());
-        array.append(object);
-        it.next();
     }
+    rootObject.insert("files", filesArray);
     client.getResponse().setType("application/json");
-    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(array);
+    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(rootObject);
 }
 
 void    Files::deleteFiles(LightBird::IClient &client)

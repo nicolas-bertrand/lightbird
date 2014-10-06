@@ -13,7 +13,7 @@ public:
     Files();
     ~Files();
 
-    /// @brief Returns the list of the files in json.
+    /// @brief Returns the list of the files in json {date: "yyyy-MM-dd hh:mm:ss", files: [{files_informations}, {files_informations}]}.
     void    get(LightBird::IClient &client);
     /// @brief Deletes the files in the content of the request.
     /// The content must have the form of a JSON array:

@@ -9,6 +9,7 @@ function Files()
     self.init = function ()
     {
         self.list = new Array(); // The list of the files of the user currently connected.
+        self.date; // The date of the last update of the files list from the server.
         self.onAdd = new Array(); // The list of the functions to call when a file is added.
         self.onDelete = new Array(); // The list of the functions to call when a file is deleted.
     }
@@ -19,7 +20,11 @@ function Files()
         F.request("GET", "command/files/get", function (httpRequest)
         {
             if (httpRequest.status == 200)
-                self.list = jsonParse(httpRequest.responseText);
+            {
+                var json = jsonParse(httpRequest.responseText);
+                self.list = json.files;
+                self.date = json.date;
+            }
         });
     }
     
