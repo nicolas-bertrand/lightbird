@@ -271,40 +271,47 @@ var Configuration =
     },
     Files:
     {
-        controlsHeight: 40,
-        listRowHeight: 30, // The height of the rows of the files list.
-        Columns:
-        {
-            height: 30, // The default height of the columns.
-            slopeRatio: 75 / 130, // The ratio of the slope of the columns.
-            backgroundAttr: {fill: "90-#9bd0f9-#afd9fa", stroke: "none"}, // The attributes of the background of the columns.
-            oddAttr: {fill: "90-#48aaf0-#6cbbf3", stroke: "none"}, // The attributes of the odd columns.
-            evenAttr: {fill: "90-#2f9eed-#6cbbf3", stroke: "none"}, // The attributes of the even columns.
-            separatorWidth: 15, // The width of the separators.
-            separatorAttr: {fill: "90-#5ab7fb-#83c9fc", stroke: "none"}, // The attributes of the separators.
-            columnMargin: 10, // The margin between the column text and the separator.
-            shortenString: ".", // A string that tells that a text has been shortened.
-            defaultWidth: 200, // The default width of the coulmns of the columns.
-            defaultMinWidth: 40, // The default minimum width of the columns of the columns.
-            typeTextMinWidth: 30, // The minimum width required by the type column to display the type in text instead of the colors.
-            moveResistance: 3, // The number of pixels the mouse have to move before to start to move the column.
-            moveAttr: {fill: "90-#f0a44a-#f4bb77", stroke: "none"}, // The attribute of the column moved.
-            moveBackgroundAttr: {fill: "#81aac7"}, // The color of the space that the moved column will take.
-            sortAttr: {fill: "90-#4a94f0-#77aff4"}, // The color of the sorted column.
-            sortSeparatorAttr: {fill: "90-#65a5f5-#8bbcf8"}, // The color of the separator adjacent to the sorted column.
-            adjustContext: true, // True if the context menu to adjust the columns has to be displayed.
-            actionHideContext: false, // True if an action on the context menu should hide it.
-        }
-    },
-    View:
-    {
-        minHeight: 15, // The minimal height of the images and videos.
-        focusBeforeAction: true // If the page have to be focused before doing any action when the mouse clicks on a task.
+        updateInterval: 1 * 1000, // The number of milliseconds between the file update request to the server.
     },
     User:
     {
-        passwordCharacter: "\u25CF", // The charecter used to replace the password.
+        passwordCharacter: "\u25CF", // The character used to replace the password.
         activeElementLoop: true, // If true the tab key will loop the focus between the inputs of the authentication form.
-    }
+    },
+    R: // Resources
+    {
+        Files:
+        {
+            controlsHeight: 40,
+            listRowHeight: 30, // The height of the rows of the files list.
+            Columns:
+            {
+                height: 30, // The default height of the columns.
+                slopeRatio: 75 / 130, // The ratio of the slope of the columns.
+                backgroundAttr: {fill: "90-#9bd0f9-#afd9fa", stroke: "none"}, // The attributes of the background of the columns.
+                oddAttr: {fill: "90-#48aaf0-#6cbbf3", stroke: "none"}, // The attributes of the odd columns.
+                evenAttr: {fill: "90-#2f9eed-#6cbbf3", stroke: "none"}, // The attributes of the even columns.
+                separatorWidth: 15, // The width of the separators.
+                separatorAttr: {fill: "90-#5ab7fb-#83c9fc", stroke: "none"}, // The attributes of the separators.
+                columnMargin: 10, // The margin between the column text and the separator.
+                shortenString: ".", // A string that tells that a text has been shortened.
+                defaultWidth: 200, // The default width of the coulmns of the columns.
+                defaultMinWidth: 40, // The default minimum width of the columns of the columns.
+                typeTextMinWidth: 30, // The minimum width required by the type column to display the type in text instead of the colors.
+                moveResistance: 3, // The number of pixels the mouse have to move before to start to move the column.
+                moveAttr: {fill: "90-#f0a44a-#f4bb77", stroke: "none"}, // The attribute of the column moved.
+                moveBackgroundAttr: {fill: "#81aac7"}, // The color of the space that the moved column will take.
+                sortAttr: {fill: "90-#4a94f0-#77aff4"}, // The color of the sorted column.
+                sortSeparatorAttr: {fill: "90-#65a5f5-#8bbcf8"}, // The color of the separator adjacent to the sorted column.
+                adjustContext: true, // True if the context menu to adjust the columns has to be displayed.
+                actionHideContext: false, // True if an action on the context menu should hide it.
+            },
+        },
+        View:
+        {
+            minHeight: 15, // The minimal height of the images and videos.
+            focusBeforeAction: true // If the page have to be focused before doing any action when the mouse clicks on a task.
+        },
+    },
 };
 var C = Configuration;

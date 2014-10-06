@@ -27,6 +27,7 @@ function ResourceFiles(task)
         resource.node.icon.content.css("padding", 5);
         resource.updateIcon();
         gl_files.bindOnAdd(resource, resource.onAdd);
+        gl_files.bindOnUpdate(resource, resource.onUpdate);
         gl_files.bindOnDelete(resource, resource.onDelete);
         gl_uploads.bindOnUpload(resource, resource.onUpload);
     }
@@ -42,6 +43,7 @@ function ResourceFiles(task)
     {
         gl_player.closePlaylist(resource);
         gl_files.unbindOnAdd(resource);
+        gl_files.unbindOnUpdate(resource);
         gl_files.unbindOnDelete(resource);
         gl_uploads.unbindOnUpload(resource);
         resource.container.close();
@@ -85,6 +87,12 @@ function ResourceFiles(task)
     resource.onAdd = function (files)
     {
         resource.files.onAdd(files);
+        resource.container.onAdd(files);
+    }
+    
+    // Called when files have been updated.
+    resource.onUpdate = function (files)
+    {
         resource.container.onAdd(files);
     }
     
@@ -247,7 +255,7 @@ function Columns()
     self.init = function ()
     {
         // Members
-        self.C = C.Files.Columns; // The configuration of the columns
+        self.C = C.R.Files.Columns; // The configuration of the columns
         self.sortedColumn = 10000; // The index of the column by which the files are sorted
         self.paper; // The SVG paper on which the columns are drawn
         self.height = self.C.height; // The height of the columns
@@ -705,15 +713,15 @@ function Columns()
             var containerMinWidth;
             if (resource.container.getMinWidth)
                 width = Math.max(width, containerMinWidth = resource.container.getMinWidth(column));
-            width = Math.max(width + C.Files.Columns.columnMargin * 2, resource.layout.getMinWidth(column.name));
+            width = Math.max(width + self.C.columnMargin * 2, resource.layout.getMinWidth(column.name));
             // If the column was already adjusted, we don't take the column name into account this time
             if (width == oldWidth && containerMinWidth)
-                width = Math.max(containerMinWidth + C.Files.Columns.columnMargin * 2, resource.layout.getMinWidth(column.name));
+                width = Math.max(containerMinWidth + self.C.columnMargin * 2, resource.layout.getMinWidth(column.name));
         }
         else
             width = resource.layout.getMinWidth(column.name);
         // Makes sure the column name is not shortened
-        if (width == column.textWidth + C.Files.Columns.columnMargin * 2)
+        if (width == column.textWidth + self.C.columnMargin * 2)
         {
             column.shortened = false;
             column.text.html(column.translation);
@@ -832,7 +840,7 @@ function List()
             else
                 col = $(cols[i]);
             // Updates the width
-            col.width(columns[i].width + C.Files.Columns.separatorWidth - (i == 0 ? C.Files.Columns.separatorWidth / 2 : 0));
+            col.width(columns[i].width + C.R.Files.Columns.separatorWidth - (i == 0 ? C.R.Files.Columns.separatorWidth / 2 : 0));
         }
     }
     
@@ -841,7 +849,7 @@ function List()
     {
         // Creates the <col>
         self.updateColumns();
-        var firstRowFileNumber = Math.floor(self.top.height() / C.Files.listRowHeight);
+        var firstRowFileNumber = Math.floor(self.top.height() / C.R.Files.listRowHeight);
         var rows = self.table.rows;
         // Adds the cell to the row
         for (var i = 0; i < rows.length; ++i)
@@ -886,7 +894,7 @@ function List()
         // If the event is directly on the table we use an other way to get the selected file
         if (e.target == self.table)
         {
-            var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.Files.listRowHeight));
+            var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.R.Files.listRowHeight));
             if (n < self.table.rows.length)
                 file = self.table.rows[n];
             else
@@ -1000,14 +1008,14 @@ function List()
         // If the event is directly on the table we use an other way to get the selected file
         else
         {
-            var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.Files.listRowHeight));
+            var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.R.Files.listRowHeight));
             if (n >= self.table.rows.length)
                 return ;
             file = self.table.rows[n];
         }
         if ($(file).hasClass("empty"))
             return ;
-        var firstRowFileNumber = Math.floor(self.top.height() / C.Files.listRowHeight);
+        var firstRowFileNumber = Math.floor(self.top.height() / C.R.Files.listRowHeight);
         resource.open(resource.files[file.fileIndex], firstRowFileNumber + file.rowIndex);
     }
     
@@ -1015,17 +1023,17 @@ function List()
     self.scroll = function ()
     {
         // Computes the top padding that simutates the scroll
-        var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
-        top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight));
+        var top = Math.floor(self.list.scrollTop / C.R.Files.listRowHeight) * C.R.Files.listRowHeight;
+        top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.R.Files.listRowHeight));
         
         // Update the file list if needed
         if (top != self.top.height() || self.table.rows.length != self.oldTableLength)
         {
-            var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
+            var bottom = Math.max(Math.floor((resource.files.length * C.R.Files.listRowHeight - self.listHeight - top) / C.R.Files.listRowHeight - 1) * C.R.Files.listRowHeight, 0);
             self.top.height(top);
             self.bottom.height(bottom);
             
-            var firstFileIndex = Math.floor(self.top.height() / C.Files.listRowHeight);
+            var firstFileIndex = Math.floor(self.top.height() / C.R.Files.listRowHeight);
             var diff = firstFileIndex - self.table.rows[0].fileIndex;
             var row;
             
@@ -1062,7 +1070,7 @@ function List()
     // Creates / removes enough rows to fill the visible part of the list.
     self.updateRows = function ()
     {
-        var numberRows = Math.max(Math.ceil(self.listHeight / C.Files.listRowHeight) + 1, 1);
+        var numberRows = Math.max(Math.ceil(self.listHeight / C.R.Files.listRowHeight) + 1, 1);
         var columns = resource.columns.getColumns();
         var j = 0;
         
@@ -1087,7 +1095,7 @@ function List()
                 // If the last row is displayed we remove the top row
                 if (lastRowDisplayed)
                 {
-                    self.top.height(self.top.height() + C.Files.listRowHeight);
+                    self.top.height(self.top.height() + C.R.Files.listRowHeight);
                     self.table.deleteRow(0);
                 }
                 else
@@ -1126,7 +1134,7 @@ function List()
                 $(row).addClass("upload");
                 columns[columns.length - 1].innerHTML = "";
                 var progress = $('<div class="progress" />').appendTo(columns[columns.length - 1]);
-                progress.height(C.Files.listRowHeight);
+                progress.height(C.R.Files.listRowHeight);
                 var upload = gl_uploads.currentUploads[resource.files[fileIndex]];
                 $('<div />').appendTo(progress).width((upload ? upload.percent : 0) + "%");
             }
@@ -1177,6 +1185,12 @@ function List()
     
     // Called when files have been added.
     self.onAdd = function (added)
+    {
+        resource.files.applyFilters();
+    }
+    
+    // Called when files have been updated.
+    self.onUpdate = function (updated)
     {
         resource.files.applyFilters();
     }
@@ -1301,13 +1315,13 @@ function List()
         // Resizes the list to fit into the task content height.
         self.onResize = function (left, top, width, height)
         {
-            self.listHeight = height - C.Files.controlsHeight - C.Files.Columns.height;
+            self.listHeight = height - C.R.Files.controlsHeight - C.R.Files.Columns.height;
             self.list.style.height = self.listHeight + "px";
             // Updates the files list
             self.updateRows();
             self.scroll();
             // Hides the scroll when all the files can be seen at the same time
-            if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+            if (self.listHeight / C.R.Files.listRowHeight >= resource.files.length)
             {
                 $(self.list).removeClass("scroll");
                 self.list.scrollTop = 0;
@@ -1325,14 +1339,14 @@ function List()
             // The local file index is no longer valid
             self.lastFileSelected.local = undefined;
             // Updates the scroll padding
-            var top = Math.floor(self.list.scrollTop / C.Files.listRowHeight) * C.Files.listRowHeight;
-            top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.Files.listRowHeight));
-            var bottom = Math.max(Math.floor((resource.files.length * C.Files.listRowHeight - self.listHeight - top) / C.Files.listRowHeight - 1) * C.Files.listRowHeight, 0);
+            var top = Math.floor(self.list.scrollTop / C.R.Files.listRowHeight) * C.R.Files.listRowHeight;
+            top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.R.Files.listRowHeight));
+            var bottom = Math.max(Math.floor((resource.files.length * C.R.Files.listRowHeight - self.listHeight - top) / C.R.Files.listRowHeight - 1) * C.R.Files.listRowHeight, 0);
             self.top.height(top);
             self.bottom.height(bottom);
             self.updateRows();
             // Hides the scroll if all the files can be seen at the same time
-            if (self.listHeight / C.Files.listRowHeight >= resource.files.length)
+            if (self.listHeight / C.R.Files.listRowHeight >= resource.files.length)
             {
                 $(self.list).removeClass("scroll");
                 self.list.scrollTop = 0;
@@ -1340,7 +1354,7 @@ function List()
             else
                 $(self.list).addClass("scroll");
             // Updates the content of the rows
-            var firstRowFileNumber = Math.floor(self.top.height() / C.Files.listRowHeight);
+            var firstRowFileNumber = Math.floor(self.top.height() / C.R.Files.listRowHeight);
             for (var i = 0; i < self.table.rows.length; ++i)
                 self.setFileInRow(firstRowFileNumber + i, self.table.rows[i]);
         }
@@ -1421,7 +1435,7 @@ function Layout()
     {
         if (self.columns[column] && self.columns[column].minWidth != undefined)
             return (self.columns[column].minWidth);
-        return (C.Files.Columns.defaultMinWidth);
+        return (C.R.Files.Columns.defaultMinWidth);
     }
     
     // Returns the min-width of the column.
@@ -1429,7 +1443,7 @@ function Layout()
     {
         if (self.columns[column] && self.columns[column].defaultWidth != undefined)
             return (self.columns[column].defaultWidth);
-        return (C.Files.Columns.defaultWidth);
+        return (C.R.Files.Columns.defaultWidth);
     }
 
     // Returns true if the column contains numerical values.
@@ -1472,7 +1486,7 @@ function Layout()
         {
             var table = $(resource.container.table);
             var isTypeText = table.hasClass("type_text");
-            if (width > C.Files.Columns.typeTextMinWidth)
+            if (width > C.R.Files.Columns.typeTextMinWidth)
             {
                 if (!isTypeText)
                     table.addClass("type_text");
@@ -1535,7 +1549,7 @@ function Icons()
     self.typeIcons = function (destination, type)
     {
         var icon = self.icons.types[type];
-        var height = C.Files.controlsHeight;
+        var height = C.R.Files.controlsHeight;
         var paper = Raphael(destination, icon.width, height);
         var path = paper.path(icon.path);
         path.attr("fill", self.icons.type.selected_color);
@@ -1623,7 +1637,7 @@ function Icons()
     // Generates the control icons.
     self.controlIcons = function (destination, icon)
     {
-        var height = C.Files.controlsHeight;
+        var height = C.R.Files.controlsHeight;
         var path = Raphael(destination, icon.width, height).path(icon.path);
         var color = "90-#606a76-#888f98";
         if (icon.selected)
@@ -1648,7 +1662,7 @@ function Icons()
     // Generates the columns icon.
     self.columnsIcon = function (destination, icon)
     {
-        var height = C.Files.Columns.height;
+        var height = C.R.Files.Columns.height;
         var path = Raphael(destination, icon.width, height).path(icon.path);
         path.attr("fill", "#8191a5 ");
         path.attr("stroke", "none");
@@ -1848,7 +1862,7 @@ function ColumnsContext()
         if (currentColumn)
         {
             delete columns[currentColumn.name];
-            actions.push(action = gl_context.createAction(currentColumn.translation, self.select, currentColumn.name, C.Files.Columns.actionHideContext));
+            actions.push(action = gl_context.createAction(currentColumn.translation, self.select, currentColumn.name, C.R.Files.Columns.actionHideContext));
             action.addClass("selected");
         }
         // Then adds the columns displayed, from left to right
@@ -1858,7 +1872,7 @@ function ColumnsContext()
             if (currentColumn && currentColumn.name == column.name)
                 continue;
             delete columns[column.name];
-            actions.push(action = gl_context.createAction(column.translation, self.select, column.name, C.Files.Columns.actionHideContext));
+            actions.push(action = gl_context.createAction(column.translation, self.select, column.name, C.R.Files.Columns.actionHideContext));
             action.addClass("selected");
         }
         // And finally adds the rest if the columns of the files filtered, sorted by name
@@ -1867,7 +1881,7 @@ function ColumnsContext()
             c.push({name: column, translation: resource.columns.translateName(column)});
         c.sort(function (a,b) { return a.translation.localeCompare(b.translation); });
         for (var i = 0; i < c.length; ++i)
-            actions.push(gl_context.createAction(c[i].translation, self.select, c[i].name, C.Files.Columns.actionHideContext));
+            actions.push(gl_context.createAction(c[i].translation, self.select, c[i].name, C.R.Files.Columns.actionHideContext));
         
         // Displays the context menu
         gl_context.display(e.pageX, e.pageY, actions, true);
@@ -1896,7 +1910,7 @@ function ColumnsContext()
     self.displaySeparator = function (e, column)
     {
         // Displays the normal actions if adjust column is not enabled
-        if (!C.Files.Columns.adjustContext)
+        if (!C.R.Files.Columns.adjustContext)
             return self.display(e, column);
         // Creates the adjust actions
         var actions = [gl_context.createAction(T.Files.Context.adjustColumn + ' "' + resource.columns.translateName(column.name) + '"', resource.columns.adjustColumn, column),

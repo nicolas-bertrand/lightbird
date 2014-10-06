@@ -1,6 +1,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrlQuery>
 
 #include "IDatabase.h"
 
@@ -51,6 +52,54 @@ void    Files::get(LightBird::IClient &client)
             filesArray.append(fileObject);
         }
     }
+    rootObject.insert("files", filesArray);
+    client.getResponse().setType("application/json");
+    (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(rootObject);
+}
+
+void    Files::update(LightBird::IClient &client)
+{
+    QSqlQuery query(Plugin::api().database().getDatabase());
+    QString date = QUrlQuery(client.getRequest().getUri()).queryItemValue("date");
+    QDateTime datetime = QDateTime::fromString(QString(date).replace(' ', 'T'), Qt::ISODate);
+    QVector<QVariantMap>  result;
+    QJsonObject rootObject;
+    QJsonArray filesArray;
+    LightBird::TableFiles tableFiles;
+    QString idAccount = client.getAccount().getId();
+    QStringList filesCreatedId;
+
+    rootObject.insert("date", QDateTime::currentDateTimeUtc().addSecs(-1).toString(DATE_FORMAT));
+
+    // Selects the files modified
+    query.prepare(Plugin::api().database().getQuery("HttpClient", "select_modified_files"));
+    query.bindValue(":date", date);
+    if (!Plugin::api().database().query(query, result))
+        return Plugin::response(client, 500, "Internal Server Error");
+    for (QVectorIterator<QVariantMap> it(result); it.hasNext(); it.next())
+    {
+        QDateTime created = it.peekNext()["created"].toDateTime();
+        tableFiles.setId(it.peekNext()["id"].toString());
+        if (tableFiles.isAllowed(idAccount, "read"))
+        {
+            QJsonObject fileObject;
+            // Updates the informations if the file was created
+            if (created > datetime)
+            {
+                filesCreatedId.append(tableFiles.getId());
+                for (QMapIterator<QString, QVariant> info(tableFiles.getInformations()); info.hasNext(); info.next())
+                    fileObject.insert(info.peekNext().key(), info.peekNext().value().toString());
+            }
+            fileObject.insert("id", tableFiles.getId());
+            fileObject.insert("name", it.peekNext()["name"].toString());
+            fileObject.insert("type", it.peekNext()["type"].toString());
+            fileObject.insert("id_directory", it.peekNext()["id_directory"].toString());
+            fileObject.insert("modified", it.peekNext()["modified"].toString());
+            fileObject.insert("created", it.peekNext()["created"].toString());
+            filesArray.append(fileObject);
+        }
+    }
+
     rootObject.insert("files", filesArray);
     client.getResponse().setType("application/json");
     (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(rootObject);

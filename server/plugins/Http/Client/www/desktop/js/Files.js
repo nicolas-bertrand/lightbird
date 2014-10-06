@@ -10,8 +10,10 @@ function Files()
     {
         self.list = new Array(); // The list of the files of the user currently connected.
         self.date; // The date of the last update of the files list from the server.
-        self.onAdd = new Array(); // The list of the functions to call when a file is added.
-        self.onDelete = new Array(); // The list of the functions to call when a file is deleted.
+        self.onAdd = new Array(); // The list of the functions to call when files are added.
+        self.onUpdate = new Array(); // The list of the functions to call when files are updated.
+        self.onDelete = new Array(); // The list of the functions to call when files are deleted.
+        self.updateInterval; // The interval used to update the files list. from the server.
     }
     
     // Downloads the files list.
@@ -26,12 +28,15 @@ function Files()
                 self.date = json.date;
             }
         });
+        self.updateInterval = setInterval(self.update, C.Files.updateInterval);
     }
     
     // Clears the files list.
     self.onDisconnect = function ()
     {
         self.list = new Array();
+        clearInterval(self.updateInterval);
+        delete self.updateInterval;
     }
     
     // Adds the files to the list.
@@ -116,9 +121,75 @@ function Files()
             self.onDelete[i].handler(files);
     }
     
+    // Updates the files list by sending an update request to the server.
+    self.update = function ()
+    {
+        F.request("GET", "command/files/update?date=" + self.date, function (httpRequest)
+        {
+            if (httpRequest.status == 200)
+            {
+                var json = jsonParse(httpRequest.responseText);
+                if (json.files.length)
+                    console.log(json);
+                var modified = []; // The list of the files modified
+                var created = []; // The list of the files created
+                for (var i = 0; i < json.files.length; ++i)
+                {
+                    var remote = json.files[i];
+                    var found = false;
+                    // Checks if the files uploading are in the list
+                    for (var u in gl_uploads.currentUploads)
+                    {
+                        var local = gl_files.list[gl_uploads.currentUploads[u].id];
+                        if (local.id_directory == remote.id_directory && local.name == remote.name)
+                        {
+                            for (var f in remote)
+                                local[f] = remote[f];
+                            delete local.id;
+                            found = true;
+                            console.log(json.files[i].name, "UPLOAD");
+                            break;
+                        }
+                    }
+                    // Searches the file in the files list
+                    if (!found)
+                        for (var j = 0; j < self.list.length; ++j)
+                        {
+                            var local = self.list[j];
+                            if (local.id == remote.id)
+                            {
+                                for (var f in remote)
+                                    local[f] = remote[f];
+                                modified.push(local.id);
+                                found = true;
+                                console.log(json.files[i].name, "MODIFIED");
+                                break;
+                            }
+                        }
+                    // If the file was not found, it is a new one
+                    if (!found)
+                    {
+                        created.push(self.list.length);
+                        self.list.push(remote);
+                        console.log(json.files[i].name, "CREATED");
+                    }
+                }
+                // Updates the modified files
+                if (modified.length)
+                    for (var i = 0; i < self.onUpdate.length; ++i)
+                        self.onUpdate[i].handler(modified);
+                // Adds the created files
+                if (created.length)
+                    for (var i = 0; i < self.onAdd.length; ++i)
+                        self.onAdd[i].handler(created);
+                self.date = json.date;
+            }
+        });
+    }
+    
     // Events
     {
-        // Allows an object to be notified when a file is added.
+        // Allows an object to be notified when files are added.
         self.bindOnAdd = function (object, handler)
         {
             for (var i = 0; i < self.onAdd.length; ++i)
@@ -134,7 +205,23 @@ function Files()
                     self.onAdd.splice(i--, 1);
         }
         
-        // Allows an object to be notified when a file is deleted.
+        // Allows an object to be notified when files are updated.
+        self.bindOnUpdate = function (object, handler)
+        {
+            for (var i = 0; i < self.onUpdate.length; ++i)
+                if (self.onUpdate[i].object == object)
+                    self.onUpdate.splice(i--, 1);
+            self.onUpdate.push({object: object, handler: handler});
+        }
+        
+        self.unbindOnUpdate = function (object)
+        {
+            for (var i = 0; i < self.onUpdate.length; ++i)
+                if (self.onUpdate[i].object == object)
+                    self.onUpdate.splice(i--, 1);
+        }
+        
+        // Allows an object to be notified when files are deleted.
         self.bindOnDelete = function (object, handler)
         {
             for (var i = 0; i < self.onDelete.length; ++i)
@@ -150,7 +237,7 @@ function Files()
                     self.onDelete.splice(i--, 1);
         }
     }
-    
+
     self.init();
     return (self);
 }

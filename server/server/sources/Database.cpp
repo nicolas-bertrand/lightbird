@@ -419,7 +419,7 @@ bool    Database::_loadQueries(const QString &id)
     if (this->queries[id].setContent(&file, false, &errorMsg, &errorLine, &errorColumn) == false)
     {
         LOG_ERROR("An error occurred while parsing the configuration file", Properties("message", errorMsg).add("file", file.fileName())
-                   .add("line", QString::number(errorLine)).add("column", QString::number(errorColumn)), "Configuration", "_load");
+                   .add("line", QString::number(errorLine)).add("column", QString::number(errorColumn)), "Database", "_loadQueries");
         this->queries.remove(id);
         return (false);
     }

@@ -180,6 +180,8 @@ void    Commands::_files(LightBird::IClient &client, const QString &parameter)
 {
     if (parameter == "get")
         Plugin::files().get(client);
+    else if (parameter == "update")
+        Plugin::files().update(client);
 }
 
 void    Commands::_uploads(LightBird::IClient &client, const QString &parameter)

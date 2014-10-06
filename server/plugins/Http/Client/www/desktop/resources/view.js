@@ -24,7 +24,7 @@ function ResourceView(task, playlistInterface, fileIndex)
         resource.icon.title.html(resource.file.name);
         
         // Events
-        if (C.View.focusBeforeAction)
+        if (C.R.View.focusBeforeAction)
             task.content.mousedown(function (e) { resource.isFocus = task.isFocus(); });
         task.content.mouseenter(function (e) { gl_player.setFileName(resource.fileIndex); });
         task.content.mouseleave(function (e) { gl_player.setFileName(); });
@@ -187,9 +187,9 @@ resource.Image = function ()
             height = naturalHeight;
         }
         // Sets the minimal size
-        if (height < C.View.minHeight)
+        if (height < C.R.View.minHeight)
         {
-            height = C.View.minHeight;
+            height = C.R.View.minHeight;
             width = Math.floor(height * naturalWidth / naturalHeight);
             task.setOverflow(true);
         }
@@ -236,10 +236,10 @@ resource.Image = function ()
     {
         $(resource.root).width(width - 2);
         $(resource.root).height(height - 2);
-        if (height < C.View.minHeight)
+        if (height < C.R.View.minHeight)
         {
             task.setOverflow(true);
-            height = C.View.minHeight;
+            height = C.R.View.minHeight;
         }
         else
             task.setOverflow(false);
@@ -483,9 +483,9 @@ resource.Video = function ()
             height = h;
         }
         // Sets the minimal size
-        if (height < C.View.minHeight)
+        if (height < C.R.View.minHeight)
         {
-            height = C.View.minHeight;
+            height = C.R.View.minHeight;
             width = Math.floor(height * naturalWidth / naturalHeight);
             task.setOverflow(true);
         }

@@ -15,6 +15,9 @@ public:
 
     /// @brief Returns the list of the files in json {date: "yyyy-MM-dd hh:mm:ss", files: [{files_informations}, {files_informations}]}.
     void    get(LightBird::IClient &client);
+    /// @brief Returns the list of the files created/modified/deleted since the date in parameter:
+    /// {date: "yyyy-MM-dd hh:mm:ss", files: [{files_informations}, {files_informations}], deleted: [id1, id2]}
+    void    update(LightBird::IClient &client);
     /// @brief Deletes the files in the content of the request.
     /// The content must have the form of a JSON array:
     /// ["id_file_1","id_file_2","id_file_3"]
