@@ -4,8 +4,7 @@
         <select_all_files>SELECT id, name, type, id_directory, modified, created FROM files</select_all_files>
         <select_modified_files>SELECT id, name, type, id_directory, modified, created FROM files WHERE modified > :date</select_modified_files>
         <select_modified_files_informations>SELECT id_file, name, value FROM files_informations WHERE modified > :date ORDER BY id_file</select_modified_files_informations>
-        <select_deleted_files>SELECT id FROM deleted WHERE table=files AND :date > date</select_deleted_files>
-        <select_deleted_files_informations>SELECT id FROM deleted WHERE table=files_informations AND :date > date</select_deleted_files_informations>
+        <select_deleted_files>SELECT id FROM deleted WHERE "table"="files" AND date > :date</select_deleted_files>
         <select_all_accounts>SELECT id, name, password FROM accounts</select_all_accounts>
     </HttpClient>
 </queries>

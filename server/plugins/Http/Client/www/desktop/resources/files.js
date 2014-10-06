@@ -981,11 +981,12 @@ function List()
         else
         {
             var fileSelected = $(file).hasClass("selected");
+            var multipleFilesSelected = self.isMultipleFilesSelected();
             // Deselects all the files
             $(self.table.rows).removeClass("selected");
             self.filesSelected = new Object();
             // Selects the file if it was not selected
-            if (!fileSelected || self.isMultipleFilesSelected())
+            if (!fileSelected || multipleFilesSelected)
             {
                 self.filesSelected[globalFileIndex] = true;
                 $(file).addClass("selected");

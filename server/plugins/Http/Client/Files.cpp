@@ -65,6 +65,7 @@ void    Files::update(LightBird::IClient &client)
     QVector<QVariantMap>  result;
     QJsonObject rootObject;
     QJsonArray filesArray;
+    QJsonArray deletedArray;
     LightBird::TableFiles tableFiles;
     QString idAccount = client.getAccount().getId();
     QStringList filesCreatedId;
@@ -132,7 +133,18 @@ void    Files::update(LightBird::IClient &client)
         }
     }
 
-    rootObject.insert("files", filesArray);
+    // Selects the files deleted
+    query.prepare(Plugin::api().database().getQuery("HttpClient", "select_deleted_files"));
+    query.bindValue(":date", date);
+    if (!Plugin::api().database().query(query, result))
+        return Plugin::response(client, 500, "Internal Server Error");
+    for (QVectorIterator<QVariantMap> it(result); it.hasNext(); it.next())
+        deletedArray.append(it.peekNext()["id"].toString());
+
+    if (!filesArray.isEmpty())
+        rootObject.insert("files", filesArray);
+    if (!deletedArray.isEmpty())
+        rootObject.insert("deleted", deletedArray);
     client.getResponse().setType("application/json");
     (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(rootObject);
 }

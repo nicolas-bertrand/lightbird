@@ -135,59 +135,75 @@ function Files()
             if (httpRequest.status == 200)
             {
                 var json = jsonParse(httpRequest.responseText);
-                if (json.files.length)
-                    console.log(json);
                 var modified = []; // The list of the files modified
                 var created = []; // The list of the files created
-                for (var i = 0; i < json.files.length; ++i)
+                if (json.files)
                 {
-                    var remote = json.files[i];
-                    var found = false;
-                    // Checks if the files uploading are in the list
-                    for (var u in gl_uploads.currentUploads)
+                    for (var i = 0; i < json.files.length; ++i)
                     {
-                        var local = gl_files.list[gl_uploads.currentUploads[u].id];
-                        if (local.id_directory == remote.id_directory && local.name == remote.name)
+                        var remote = json.files[i];
+                        var found = false;
+                        // Checks if the files uploading are in the list
+                        for (var u in gl_uploads.currentUploads)
                         {
-                            for (var f in remote)
-                                local[f] = remote[f];
-                            delete local.id;
-                            found = true;
-                            console.log(json.files[i].name, "UPLOAD");
-                            break;
-                        }
-                    }
-                    // Searches the file in the files list
-                    if (!found)
-                        for (var j = 0; j < self.list.length; ++j)
-                        {
-                            var local = self.list[j];
-                            if (local.id == remote.id)
+                            var local = gl_files.list[gl_uploads.currentUploads[u].id];
+                            if (local.id_directory == remote.id_directory && local.name == remote.name)
                             {
                                 for (var f in remote)
                                     local[f] = remote[f];
-                                modified.push(local.id);
+                                delete local.id;
                                 found = true;
-                                console.log(json.files[i].name, "MODIFIED");
+                                console.log(local.name, "UPLOAD");
                                 break;
                             }
                         }
-                    // If the file was not found, it is a new one
-                    if (!found)
-                    {
-                        created.push(self.list.length);
-                        self.list.push(remote);
-                        console.log(json.files[i].name, "CREATED");
+                        // Searches the file in the files list
+                        if (!found)
+                            for (var j = 0; j < self.list.length; ++j)
+                            {
+                                var local = self.list[j];
+                                if (local.id == remote.id)
+                                {
+                                    for (var f in remote)
+                                        local[f] = remote[f];
+                                    modified.push(local.id);
+                                    found = true;
+                                    console.log(local.name, "MODIFIED");
+                                    break;
+                                }
+                            }
+                        // If the file was not found, it is a new one
+                        if (!found)
+                        {
+                            created.push(self.list.length);
+                            self.list.push(remote);
+                            console.log(json.files[i].name, "CREATED");
+                        }
                     }
+                    // Updates the modified files
+                    if (modified.length)
+                        for (var i = 0; i < self.onUpdate.length; ++i)
+                            self.onUpdate[i].handler(modified);
+                    // Adds the created files
+                    if (created.length)
+                        for (var i = 0; i < self.onAdd.length; ++i)
+                            self.onAdd[i].handler(created);
                 }
-                // Updates the modified files
-                if (modified.length)
-                    for (var i = 0; i < self.onUpdate.length; ++i)
-                        self.onUpdate[i].handler(modified);
-                // Adds the created files
-                if (created.length)
-                    for (var i = 0; i < self.onAdd.length; ++i)
-                        self.onAdd[i].handler(created);
+                if (json.deleted)
+                {
+                    var deleted = [];
+                    for (var i = 0; i < json.deleted.length; ++i)
+                        for (var j = 0; j < self.list.length; ++j)
+                        {
+                            if (json.deleted[i] == self.list[j].id)
+                            {
+                                console.log(self.list[j].name, "DELETED");
+                                deleted.push(j);
+                            }
+                        }
+                    if (deleted.length)
+                        self.delete(deleted);
+                }
                 self.date = json.date;
             }
         });
