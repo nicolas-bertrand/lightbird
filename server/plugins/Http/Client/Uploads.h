@@ -86,8 +86,8 @@ private:
     // Cancels the uploads
     void    _cancel_onDeserializeHeader(LightBird::IClient &client);
 
-    QMap<QString, Upload>   uploads;    ///< List of the upload requests being processed.
-    QMutex                  mutex;      ///< Makes this->uploads thread safe.
+    QMap<QString, QSharedPointer<Upload> > uploads; ///< List of the upload requests being processed.
+    QMutex mutex;///< Makes this->uploads thread safe.
 };
 
 

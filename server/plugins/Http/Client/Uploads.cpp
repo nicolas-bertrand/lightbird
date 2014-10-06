@@ -36,31 +36,33 @@ void    Uploads::onDeserialize(LightBird::IClient &client, LightBird::IOnDeseria
 void        Uploads::onFinish(LightBird::IClient &client)
 {
     QString id = client.getInformations().value("idUpload").toString();
-
     this->mutex.lock();
-    if (this->uploads.contains(id) && this->uploads[id].idClient == client.getId())
-    {
-        this->uploads[id].fileTable.remove();
-        if (this->uploads[id].file->isOpen())
-            this->uploads[id].file->remove();
-        this->uploads[id].finished = QDateTime::currentDateTime();
-    }
+    QSharedPointer<Upload> upload(this->uploads.value(id));
     this->mutex.unlock();
+
+    if (upload && upload->idClient == client.getId())
+    {
+        upload->fileTable.remove();
+        if (upload->file->isOpen())
+            upload->file->remove();
+        upload->finished = QDateTime::currentDateTime();
+    }
 }
 
 void        Uploads::onDestroy(LightBird::IClient &client)
 {
     QString id = client.getInformations().value("idUpload").toString();
-
     this->mutex.lock();
-    if (this->uploads.contains(id) && this->uploads[id].idClient == client.getId())
-    {
-        this->uploads[id].fileTable.remove();
-        if (this->uploads[id].file->isOpen())
-            this->uploads[id].file->remove();
-        this->uploads[id].finished = QDateTime::currentDateTime();
-    }
+    QSharedPointer<Upload> upload(this->uploads.value(id));
     this->mutex.unlock();
+
+    if (this->uploads.contains(id) && upload->idClient == client.getId())
+    {
+        upload->fileTable.remove();
+        if (upload->file->isOpen())
+            upload->file->remove();
+        upload->finished = QDateTime::currentDateTime();
+    }
 }
 
 void    Uploads::cancel(LightBird::IClient &client)
@@ -72,61 +74,67 @@ void    Uploads::cancel(LightBird::IClient &client)
     else
         document = QJsonDocument::fromJson(content.getData());
     QJsonArray array = document.array();
-    LightBird::TableFiles tableFiles;
     if (array.isEmpty())
         return Plugin::httpError(client, 400, "Bad request", "Empty array");
+    QStringList filesToRemove;
 
+    // Searches the files to delete
     for (int i = 0, s = array.size(); i < s; ++i)
     {
         this->mutex.lock();
-        QMutableMapIterator<QString, Upload> it(this->uploads);
+        QMapIterator<QString, QSharedPointer<Upload> > it(this->uploads);
         while (it.hasNext())
         {
             it.next();
-            if (it.value().cancelId == array[i].toString())
+            if (it.value()->cancelId == array[i].toString())
             {
                 // Only the account that started the upload can cancel it
-                if (it.value().idAccount == client.getAccount().getId())
+                if (it.value()->idAccount == client.getAccount().getId())
                     // Removes the files of the upload
-                    for (QListIterator<File> file(it.value().files); file.hasNext(); file.next())
-                    {
-                        tableFiles.setId(file.peekNext().id);
-                        tableFiles.remove(true);
-                    }
+                    for (QListIterator<File> file(it.value()->files); file.hasNext(); file.next())
+                        filesToRemove.append(file.peekNext().id);
                 break;
             }
         }
         this->mutex.unlock();
     }
+
+    // Removes the files outside the mutex
+    LightBird::TableFiles tableFiles;
+    for (QStringListIterator file(filesToRemove); file.hasNext(); file.next())
+    {
+        tableFiles.setId(file.peekNext());
+        tableFiles.remove(true);
+    }
 }
 
 void        Uploads::_send_onDeserializeHeader(LightBird::IClient &client)
 {
-    Upload  upload;
+    Upload  *upload = new Upload();
 
     // Gets some data on the files to upload
-    upload.id = LightBird::createUuid();
-    upload.cancelId = QUrlQuery(client.getRequest().getUri()).queryItemValue("cancelId");
-    upload.idClient = client.getId();
-    upload.idAccount = client.getAccount().getId();
-    upload.file = QSharedPointer<QFile>(new QFile());
-    upload.progress = 0;
-    upload.path = LightBird::cleanPath(QUrl::fromPercentEncoding(QUrlQuery(client.getRequest().getUri()).queryItemValue("path").toLatin1()), true) + "/";
-    upload.size = client.getRequest().getHeader().value("content-length").toULongLong();
-    upload.boundary = client.getRequest().getInformations().value("media-type").toMap().value("boundary").toByteArray();
-    upload.boundary = "--" + upload.boundary.right(upload.boundary.size() - upload.boundary.indexOf('=') - 1);
-    upload.header = true;
-    upload.complete = false;
-    client.getInformations().insert("idUpload", upload.id);
+    upload->id = LightBird::createUuid();
+    upload->cancelId = QUrlQuery(client.getRequest().getUri()).queryItemValue("cancelId");
+    upload->idClient = client.getId();
+    upload->idAccount = client.getAccount().getId();
+    upload->file = QSharedPointer<QFile>(new QFile());
+    upload->progress = 0;
+    upload->path = LightBird::cleanPath(QUrl::fromPercentEncoding(QUrlQuery(client.getRequest().getUri()).queryItemValue("path").toLatin1()), true) + "/";
+    upload->size = client.getRequest().getHeader().value("content-length").toULongLong();
+    upload->boundary = client.getRequest().getInformations().value("media-type").toMap().value("boundary").toByteArray();
+    upload->boundary = "--" + upload->boundary.right(upload->boundary.size() - upload->boundary.indexOf('=') - 1);
+    upload->header = true;
+    upload->complete = false;
+    client.getInformations().insert("idUpload", upload->id);
     this->mutex.lock();
-    this->uploads.insert(upload.id, upload);
+    this->uploads.insert(upload->id, QSharedPointer<Upload>(upload));
     this->mutex.unlock();
     if (Plugin::api().log().isDebug())
-        Plugin::api().log().debug("Upload started", Properties("idUpload", upload.id).add("idClient", client.getId()).add("path", upload.path).toMap(), "Uploads", "_send_onDeserializeHeader");
+        Plugin::api().log().debug("Upload started", Properties("idUpload", upload->id).add("idClient", client.getId()).add("path", upload->path).toMap(), "Uploads", "_send_onDeserializeHeader");
     // Some browsers send a negative content length when there is too many files (firefox 10, safari 5)
     if (client.getRequest().getHeader().value("content-length").toLongLong() < 0)
     {
-        Plugin::api().log().error("Negative content-length", Properties("idUpload", upload.id).add("idClient", client.getId()).toMap(), "Uploads", "_send_onDeserializeHeader");
+        Plugin::api().log().error("Negative content-length", Properties("idUpload", upload->id).add("idClient", client.getId()).toMap(), "Uploads", "_send_onDeserializeHeader");
         Plugin::api().network().disconnect(client.getId(), true);
     }
     // Tells the parser to store the data in the memory and not in a temporary file
@@ -145,31 +153,32 @@ void            Uploads::_send_onDeserializeContent(LightBird::IClient &client)
     qint64      position = 0;
     qint64      i = 0, j = 0;
     qint64      boundarySize;
-    Mutex       mutex(this->mutex, Plugin::api().getId(), "Uploads", "_send_onDeserializeContent");
 
-    if (!mutex || !this->uploads.contains(id) || this->uploads[id].idClient != client.getId())
+    this->mutex.lock();
+    QSharedPointer<Upload> upload(this->uploads.value(id));
+    this->mutex.unlock();
+    if (!upload || upload->idClient != client.getId())
         return ;
-    Upload &upload = this->uploads[id];
     // \r\n + boundary
-    boundarySize = upload.boundary.size() + 2;
+    boundarySize = upload->boundary.size() + 2;
     // The upload has already been completed
-    if (upload.complete)
+    if (upload->complete)
     {
         data.clear();
         return ;
     }
     // Too few data to continue
-    if (data.size() < boundarySize && upload.progress + size < upload.size)
+    if (data.size() < boundarySize && upload->progress + size < upload->size)
         return ;
     // Parses the multipart/form-data
     while (position < size)
     {
         // Each header represents an uploaded file
-        if (upload.header)
+        if (upload->header)
         {
             // Header not found
             if ((j = data.indexOf("\r\n\r\n", position)) < 0 && size - position > MAX_HEADER_LENGTH)
-                return this->_send_error(client, upload, "Header missing");
+                return this->_send_error(client, *upload, "Header missing");
             // Extracts data from it
             else if (j >= 0)
             {
@@ -185,87 +194,87 @@ void            Uploads::_send_onDeserializeContent(LightBird::IClient &client)
                 position = j + 4;
                 // If the content is a file we create it
                 if (!file.name.isEmpty() && !file.contentType.isEmpty())
-                    this->_send_createFile(client, upload, file);
-                upload.header = false;
+                    this->_send_createFile(client, *upload, file);
+                upload->header = false;
             }
             // The header is not complete yet, so we wait for more data
             else
             {
                 data = data.right(data.size() - position);
-                upload.progress += position;
+                upload->progress += position;
                 return ;
             }
         }
         // The content of the current file
-        if (!upload.header)
+        if (!upload->header)
         {
             // The boundary of the content is between two piece of data
-            if (!upload.oldData.isEmpty() && (i = (upload.oldData + data.left(boundarySize)).indexOf("\r\n" + upload.boundary)) > 0)
+            if (!upload->oldData.isEmpty() && (i = (upload->oldData + data.left(boundarySize)).indexOf("\r\n" + upload->boundary)) > 0)
             {
                 // Writes the old data content in the file
-                upload.file->write(upload.oldData.data(), i);
-                position = boundarySize - upload.oldData.size() + i;
-                upload.oldData.clear();
+                upload->file->write(upload->oldData.data(), i);
+                position = boundarySize - upload->oldData.size() + i;
+                upload->oldData.clear();
                 // The file is complete
-                this->_send_fileComplete(client, upload);
-                this->_send_clean(upload);
+                this->_send_fileComplete(client, *upload);
+                this->_send_clean(*upload);
                 // End of the upload
-                if ((upload.complete = (data.indexOf("\r\n", position) != position)))
+                if ((upload->complete = (data.indexOf("\r\n", position) != position)))
                     break;
                 // Extracts the next header
                 continue;
             }
             // Writes the old data in the file since they don't contains a part of the boundary
-            else if (!upload.oldData.isEmpty())
+            else if (!upload->oldData.isEmpty())
             {
-                upload.file->write(upload.oldData);
-                upload.oldData.clear();
+                upload->file->write(upload->oldData);
+                upload->oldData.clear();
             }
             // Searches the end of the content
-            if ((i = data.indexOf("\r\n" + upload.boundary, position)) >= 0)
+            if ((i = data.indexOf("\r\n" + upload->boundary, position)) >= 0)
             {
                 // Writes the data in the file
-                upload.file->write(data.data() + position, i - position);
+                upload->file->write(data.data() + position, i - position);
                 position = i + 2;
                 // The file is complete
-                this->_send_fileComplete(client, upload);
-                this->_send_clean(upload);
+                this->_send_fileComplete(client, *upload);
+                this->_send_clean(*upload);
                 // End of the upload
-                if ((upload.complete = (data.indexOf("\r\n", position) - position > upload.boundary.size())))
+                if ((upload->complete = (data.indexOf("\r\n", position) - position > upload->boundary.size())))
                     break;
                 // Extracts the next header
                 continue;
             }
             // The end of the content is missing
-            else if (upload.progress + size == upload.size)
-                return this->_send_error(client, upload, "The end of content is missing");
+            else if (upload->progress + size == upload->size)
+                return this->_send_error(client, *upload, "The end of content is missing");
             // Writes the content in the file and waits for more data
             else if (size - position > boundarySize)
             {
-                upload.file->write(data.data() + position, size - position - boundarySize);
-                upload.oldData = data.right(boundarySize);
+                upload->file->write(data.data() + position, size - position - boundarySize);
+                upload->oldData = data.right(boundarySize);
                 break;
             }
             // Waits for more data
             else
             {
-                upload.oldData = data.right(size - position);
+                upload->oldData = data.right(size - position);
                 break;
             }
         }
     }
-    upload.progress += size;
+    upload->progress += size;
     data.clear();
 }
 
 void    Uploads::_send_removeCompleteUploads()
 {
     this->mutex.lock();
-    QMutableMapIterator<QString, Upload> it(this->uploads);
+    QMutableMapIterator<QString, QSharedPointer<Upload> > it(this->uploads);
     while (it.hasNext())
     {
         it.next();
-        if (it.value().finished.isValid() && it.value().finished.addSecs(REMOVE_COMPLETE_UPLOAD_TIME) < QDateTime::currentDateTime())
+        if (it.value()->finished.isValid() && it.value()->finished.addSecs(REMOVE_COMPLETE_UPLOAD_TIME) < QDateTime::currentDateTime())
             it.remove();
     }
     this->mutex.unlock();
