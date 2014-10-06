@@ -20,6 +20,7 @@
 # include "Files.h"
 # include "Medias.h"
 # include "Uploads.h"
+# include "Properties.h"
 
 # define DEFAULT_CONTENT_TYPE    "application/octet-stream" // This is the default MIME type. The browser should download the content.
 # define DEFAULT_INTERFACE_NAME  "desktop"
@@ -88,6 +89,13 @@ public:
     /// @brief Called when a identification attempt failed.
     void            identificationFailed(LightBird::IClient &client);
 
+    /// @brief Sets an http error in the response of the client.
+    static inline void httpError(LightBird::IClient &client, int code, const QString &message);
+    /// @brief Sets an http error in the response of the client.
+    static inline void httpError(LightBird::IClient &client, int code, const QString &message, const QByteArray &content);
+    /// @brief Sets an http error in the response of the client.
+    static inline void httpError(LightBird::IClient &client, int code, const QString &message, const QByteArray &content, const QString &log, const QString &object, const QString &method, const Properties &properties, LightBird::ILogs::Level level);
+
 private:
     /// @brief Manages the session.
     void    _session(LightBird::IClient &client, const QString &uri);
@@ -117,5 +125,26 @@ private:
     Uploads             _uploads;   ///< Manages the uploads.
     QMutex              mutex;      ///< Makes this class thread safe.
 };
+
+void    Plugin::httpError(LightBird::IClient &client, int code, const QString &message)
+{
+    client.getResponse().getContent().setStorage(LightBird::IContent::BYTEARRAY);
+    client.getResponse().setCode(code);
+    client.getResponse().setMessage(message);
+}
+
+void    Plugin::httpError(LightBird::IClient &client, int code, const QString &message, const QByteArray &content)
+{
+    Plugin::httpError(client, code, message);
+    if (!content.isEmpty())
+        client.getResponse().getContent().setData(content);
+}
+
+void    Plugin::httpError(LightBird::IClient &client, int code, const QString &message, const QByteArray &content, const QString &log, const QString &object, const QString &method, const Properties &properties, LightBird::ILogs::Level level)
+{
+    Plugin::httpError(client, code, message, content);
+    if (!log.isEmpty() && Plugin::api().log().getLevel() >= level)
+        Plugin::api().log().write(level, log, properties.toMap(), object, method);
+}
 
 #endif // PLUGIN_H

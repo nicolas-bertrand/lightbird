@@ -182,13 +182,10 @@ void    Commands::_files(LightBird::IClient &client, const QString &parameter)
         Plugin::files().get(client);
 }
 
-void    Commands::_uploads(LightBird::IClient &client, const QString &)
+void    Commands::_uploads(LightBird::IClient &client, const QString &parameter)
 {
-    Plugin::uploads().doExecution(client);
-    //Plugin::uploads().check(client);
-    //Plugin::uploads().progress(client);
-    //Plugin::uploads().stop(client);
-    //Plugin::uploads().cancel(client);
+    if (parameter == "cancel")
+        Plugin::uploads().cancel(client);
 }
 
 void    Commands::_video(LightBird::IClient &client, const QString &parameter)

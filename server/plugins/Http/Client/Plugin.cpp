@@ -122,20 +122,18 @@ void    Plugin::onDeserializeContext(LightBird::IClient &client, LightBird::IOnD
     // The client is uploading something
     if (request.getHeader().contains("content-length"))
     {
+        uri = request.getUri().path();
         // One must be identified to upload data
         if (!client.getAccount().exists())
             this->_api->network().disconnect(client.getId(), true);
         // Manages the upload of files
-        else if (request.getUri().path().endsWith("/command/uploads"))
+        else if (uri.contains("/command/uploads"))
         {
             if (request.isError() || client.getResponse().isError())
                 return ;
-            if (type == LightBird::IOnDeserialize::IDoDeserializeHeader)
-                this->_uploads.onDeserializeHeader(client);
-            else if (type == LightBird::IOnDeserialize::IDoDeserializeContent)
-                this->_uploads.onDeserializeContent(client);
+            this->_uploads.onDeserialize(client, type, uri);
         }
-        else if (request.getUri().path().endsWith("/command/files/delete"))
+        else if (uri.endsWith("/command/files/delete"))
         {
             if (type == LightBird::IOnDeserialize::IDoDeserializeContent)
                 this->_files.deleteFiles(client);

@@ -72,20 +72,34 @@ function Files()
     // @param files: The list of the files to delete.
     self.delete = function (files)
     {
-        // Sends the delete request to the server
         var filesId = [];
+        var cancelUploads = [];
         for (var i = 0; i < files.length; ++i)
-            filesId.push(self.list[files[i]].id);
-        F.request("POST", "command/files/delete", function (httpRequest)
         {
-            if (httpRequest.status == 200)
+            var id = self.list[files[i]].id;
+            // If the file has no id, it is still being uploaded
+            if (!id)
+                cancelUploads.push(files[i]);
+            else
+                filesId.push(id);
+        }
+        
+        // Cancels the upload of the files to delete
+        if (cancelUploads.length)
+            gl_uploads.cancel(cancelUploads);
+        
+        // Sends the delete request to the server
+        if (filesId.length)
+            F.request("POST", "command/files/delete", function (httpRequest)
             {
-                var filesNotDeleted = jsonParse(httpRequest.responseText);
-                if (filesNotDeleted.length)
-                    console.log("Files not deleted: ", filesNotDeleted);
-            }
-                
-        }, JSON.stringify(filesId), "application/json");
+                if (httpRequest.status == 200)
+                {
+                    var filesNotDeleted = jsonParse(httpRequest.responseText);
+                    if (filesNotDeleted.length)
+                        console.log("Files not deleted: ", filesNotDeleted);
+                }
+                    
+            }, JSON.stringify(filesId), "application/json");
         
         // Removes the files from the list
         files.sort(function (a, b) { return (a - b); });

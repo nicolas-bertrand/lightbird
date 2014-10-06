@@ -88,21 +88,21 @@ F.getBrowserSize = function ()
 // Executes a Http Request on the server.
 // @method : The Http method to execute (GET or POST).
 // @url : The url of the Http request.
-// @callback : A function that will be called once the responce has been received.
+// @handler : A function that will be called once the response has been received.
 // @data : The data that has to be sent with the POST method.
 // @type : The content-type of the data. The default is "application/x-www-form-urlencoded".
 // The response may be invalid.
-F.request = function (method, url, callback, data, type)
+F.request = function (method, url, handler, data, type)
 {
     // Creates the XMLHttpRequest object
-    var HttpRequest = new XMLHttpRequest();
+    var httpRequest = new XMLHttpRequest();
 
     // Sets the ready state anonym function
-    HttpRequest.onreadystatechange = function()
+    httpRequest.onreadystatechange = function()
     {
-        if (HttpRequest.readyState == 4)
-            if (callback != null)
-                callback(HttpRequest);
+        if (httpRequest.readyState == 4)
+            if (handler)
+                handler(httpRequest);
     }
 
     // Adds a random string in the uri to prevent the result from being cached
@@ -112,15 +112,15 @@ F.request = function (method, url, callback, data, type)
     url += F.getSession();
 
     // Executes the request
-    HttpRequest.open(method, "/c/" + url, true);
+    httpRequest.open(method, "/c/" + url, true);
     if (method.toUpperCase() == "POST")
     {
-        HttpRequest.setRequestHeader("Content-type", (type ? type : "application/x-www-form-urlencoded"));
-        HttpRequest.send(data);
+        httpRequest.setRequestHeader("Content-type", (type ? type : "application/x-www-form-urlencoded"));
+        httpRequest.send(data);
     }
     else
-        HttpRequest.send();
-    return (HttpRequest);
+        httpRequest.send();
+    return (httpRequest);
 }
 
 // Replaces the end of line characters of the text (\r\n \n or \r) by the HTML equivalent (<br />).

@@ -53,7 +53,7 @@ void    Plugin::onDeserialize(LightBird::IClient &client, LightBird::IOnDeserial
     {
         QJsonParseError error;
         QVariant deserialized = QJsonDocument::fromJson(content.getData(), &error);
-        if (!error.error == QJsonParseError::NoError)
+        if (error.error == QJsonParseError::NoError || content.size() == 0)
         {
             content.setStorage(LightBird::IContent::VARIANT);
             *content.getVariant() = deserialized;

@@ -10,7 +10,7 @@ function Uploads()
     {
         self.pendingUploads = {}; // The files waiting to be uploaded.
         self.currentUploads = {}; // The files currently uploading.
-        // This object represents an upload in the above list
+        // This object represents an upload in the above arrays
         var upload =
         {
             id: 0, // The id of the file in gl_files
@@ -21,6 +21,7 @@ function Uploads()
             previousPercent: undefined, // The percentage the last time onUpload was called
             request: {}, // The XMLHttpRequest
             file: {}, // The File to upload
+            cancelled: false, // True if the upload has been cancelled
             finished: false // True if the upload is finished
         };
         self.onUpload = new Array(); // The list of the functions to call while a file is uploading.
@@ -54,6 +55,28 @@ function Uploads()
         }, 0);
     }
 
+    // Cancels the uploads.
+    // @param files: The array of the id of the files to cancel.
+    self.cancel = function (files)
+    {
+        var upload;
+        var cancelIds = [];
+        for (var i = 0; i < files.length; ++i)
+            if (self.pendingUploads[files[i]])
+                delete self.pendingUploads[files[i]];
+        for (var i = 0; i < files.length; ++i)
+            if ((upload = self.currentUploads[files[i]]))
+            {
+                delete self.currentUploads[files[i]];
+                upload.cancelled = true;
+                upload.request.abort();
+                cancelIds.push(upload.cancelId);
+            }
+        // Cancels the current uploads
+        if (cancelIds.length)
+            F.request("POST", "command/uploads/cancel", null, JSON.stringify(cancelIds), "application/json");
+    }
+    
     // Allows an object to be notified of the progression of the uploads.
     self.bindOnUpload = function (object, handler)
     {
@@ -87,6 +110,7 @@ function Uploads()
                 previousPercent: undefined,
                 request: request,
                 file: file,
+                cancelled: false,
                 finished: false
             };
             
@@ -117,7 +141,7 @@ function Uploads()
             formData.append("file", upload.file);
             upload.request.upload.addEventListener('progress', function (e) { self._progress(e, upload); });
             upload.request.onreadystatechange = function() { if (upload.request.readyState == 4) self._finished(upload); };
-            upload.request.open('POST', '/c/command/uploads?disconnectOnError=true&cancelId=' + upload.cancelId + F.getSession(false));
+            upload.request.open('POST', '/c/command/uploads/send?disconnectOnError=true&cancelId=' + upload.cancelId + F.getSession(false));
             upload.request.send(formData);
         }
         
@@ -136,13 +160,16 @@ function Uploads()
         // The file has been uploaded.
         self._finished = function (upload)
         {
-            var filesUploaded = jsonParse(upload.request.responseText || "[]");
-            if (upload.request.status == 200 && filesUploaded.length && filesUploaded[0])
-                gl_files.list[upload.id].id = filesUploaded[0];
-            else
-                console.log("An error occurred during the upload of " + upload.file.name);
             upload.finished = true;
-            self._callOnUpload();
+            if (!upload.cancelled)
+            {
+                var filesUploaded = jsonParse(upload.request.responseText || "[]");
+                if (upload.request.status == 200 && filesUploaded.length && filesUploaded[0])
+                    gl_files.list[upload.id].id = filesUploaded[0];
+                else
+                    console.log("An error occurred during the upload of " + upload.file.name);
+                self._callOnUpload();
+            }
             delete self.currentUploads[upload.id];
             // Starts the next upload
             self._start();
