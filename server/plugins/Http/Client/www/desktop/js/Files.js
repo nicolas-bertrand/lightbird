@@ -26,16 +26,22 @@ function Files()
                 var json = jsonParse(httpRequest.responseText);
                 self.list = json.files;
                 self.date = json.date;
+                self.updateInterval = setInterval(self.update, C.Files.updateInterval);
+                var ids = [];
+                for (var i = 0; i < self.list.length; ++i)
+                    ids.push(i);
+                for (var i = 0; i < self.onAdd.length; ++i)
+                    self.onAdd[i].handler(ids);
             }
         });
-        self.updateInterval = setInterval(self.update, C.Files.updateInterval);
     }
     
     // Clears the files list.
     self.onDisconnect = function ()
     {
         self.list = new Array();
-        clearInterval(self.updateInterval);
+        if (self.updateInterval)
+            clearInterval(self.updateInterval);
         delete self.updateInterval;
     }
     

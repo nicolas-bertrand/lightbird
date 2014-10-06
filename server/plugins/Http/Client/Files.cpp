@@ -100,6 +100,38 @@ void    Files::update(LightBird::IClient &client)
         }
     }
 
+    // Selects the files informations modified
+    query.prepare(Plugin::api().database().getQuery("HttpClient", "select_modified_files_informations"));
+    query.bindValue(":date", date);
+    if (!Plugin::api().database().query(query, result))
+        return Plugin::response(client, 500, "Internal Server Error");
+    QString idFile;
+    for (QVectorIterator<QVariantMap> it(result); it.hasNext(); it.next())
+    {
+        idFile = it.peekNext()["id_file"].toString();
+        // If the file was created, we already have all its informations
+        if (!filesCreatedId.contains(idFile))
+        {
+            tableFiles.setId(idFile);
+            if (tableFiles.isAllowed(idAccount, "read"))
+            {
+                QJsonObject fileObject;
+                fileObject.insert("id", idFile);
+                fileObject.insert("name", tableFiles.getName());
+                fileObject.insert("id_directory", tableFiles.getIdDirectory());
+                // Adds the informations of the file that changed
+                do
+                {
+                    fileObject.insert(it.peekNext()["name"].toString(), it.peekNext()["value"].toString());
+                    it.next();
+                }
+                while (it.hasNext() && idFile == it.peekNext()["id_file"].toString());
+                it.previous();
+                filesArray.append(fileObject);
+            }
+        }
+    }
+
     rootObject.insert("files", filesArray);
     client.getResponse().setType("application/json");
     (*client.getResponse().getContent().setStorage(LightBird::IContent::VARIANT).getVariant()) = QJsonDocument(rootObject);
