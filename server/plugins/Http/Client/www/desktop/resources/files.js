@@ -20,7 +20,7 @@ function ResourceFiles(task)
         resource.columns = new Columns(); // The columns of the files list
         resource.container = new List(); // The container handles the display of the files list. Each container have its own layout.
         resource.fileNumber = 0; // The number of the current file of the playlist
-        resource.fileIndex = 0; // The index of the current file of the playlist
+        resource.currentFile; // The current file of the playlist
         resource.files = new Files(); // The list of the files to display.
         
         // Default values
@@ -59,7 +59,7 @@ function ResourceFiles(task)
         // Number of files of each type
         var filesPerType = {audio: 0, document: 0, image: 0, other: 0, video: 0} ;
         for (var i = 0; i < resource.files.length; ++i)
-            filesPerType[gl_files.list[resource.files[i]].type]++;
+            filesPerType[resource.files[i].file.info.type]++;
         var content = "";
         for (var t in filesPerType)
             if (filesPerType[t])
@@ -71,36 +71,37 @@ function ResourceFiles(task)
     }
     
     // Opens a file.
-    resource.open = function (globalFileIndex, localFileIndex)
+    resource.open = function (file)
     {
-        resource.fileNumber = localFileIndex + 1;
-        resource.fileIndex = globalFileIndex;
+        for (var fileNumber = 0; fileNumber < resource.files.length; ++fileNumber)
+            if (resource.files[fileNumber].file == file)
+                break;
+        resource.fileNumber = fileNumber + 1;
+        resource.currentFile = file;
         // If it is an audio file we play it in the global player
-        if (gl_files.list[resource.fileIndex].type == "audio")
-            gl_player.openAudio(resource, resource.fileIndex);
+        if (file.info.type == "audio")
+            gl_player.openAudio(resource, resource.currentFile);
         // Otherwise we open a new page to view the file
         else
-            gl_desktop.openPage("view", { playlistInterface : resource, fileIndex : resource.fileIndex });
+            gl_desktop.openPage("view", {playlistInterface: resource, file: file});
     }
     
     // Called when files have been added.
     resource.onAdd = function (files)
     {
         resource.files.onAdd(files);
-        resource.container.onAdd(files);
     }
     
     // Called when files have been updated.
     resource.onUpdate = function (files)
     {
-        resource.container.onAdd(files);
+        resource.files.onUpdate(files);
     }
     
     // Called when files have been deleted.
     resource.onDelete = function (files)
     {
         resource.files.onDelete(files);
-        resource.container.onDelete(files);
     }
 
     // Called while files are being uploaded.
@@ -117,11 +118,15 @@ function ResourceFiles(task)
     
 // Playlist interface
     {
+        resource.getFile = function ()
+        {
+            return (resource.file);
+        }
+        
         resource.getNumberFiles = function ()
         {
             return ({ fileNumber : resource.fileNumber,
-                      numberOfFiles : resource.files.length,
-                      fileIndex : resource.fileIndex });
+                      numberOfFiles : resource.files.length});
         }
         
         resource.readyToPlay = function (fileInterface)
@@ -135,17 +140,25 @@ function Files()
 {
     var self = new Array();
     
-    // The id of the files in the lists point to gl_files.
     self.init = function ()
     {
+        // Represents a file in the array.
+        var File =
+        {
+            file: {}, // The gl_files.File object
+            selectedId: 0, // > 0 if the file is selected. Represents the id of the selection.
+        };
         self.raw = new Array(); // The unfiltered list of the files
         self.types = new Object(); // The types that don't have to be displayed
         self.sortedColumn; // The name of the column used to sort the files
+        self.filesSelected = {}; // The list of the files selected by the user
+        self.nextFileSelectedId = 1; // The id of the next file selected, used to retrieve it in filesSelected
+        self.lastFileSelected = { fileIndex: undefined, file: undefined }; // The last file selected or deselected
         resource.files = self;
     
         // Fills the list
-        for (var i = 0; i < gl_files.list.length; ++i)
-            self.raw.push(i);
+        for (var i = 0; i < gl_files.length; ++i)
+            self.raw.push({file: gl_files[i], selectedId: 0});
         self.applyFilters();
     }
     
@@ -155,9 +168,9 @@ function Files()
         self.length = 0;
         for (var i = 0; i < self.raw.length; ++i)
         {
-            var file = gl_files.list[self.raw[i]];
-            if (!self.types[file.type])
-                self.push(self.raw[i]);
+            var file = self.raw[i];
+            if (!self.types[file.file.info.type])
+                self.push(file);
         }
         resource.container.onFilesChange();
         resource.updateIcon();
@@ -193,54 +206,138 @@ function Files()
         self.applyFilters();
     }
     
-    // Returns the local file index that corresponds to the global one.
-    self.getLocalFileIndex = function (globalFileIndex)
-    {
-        for (var i = 0; i < self.length; ++i)
-            if (self[i] == globalFileIndex)
-                return i;
-    }
-    
     // Called when files have been added.
     self.onAdd = function (added)
     {
         for (var i = 0; i < added.length; ++i)
-            self.raw.push(added[i]);
+            self.raw.push({file: added[i], selectedId: 0});
+        resource.files.applyFilters();
+    }
+    
+    // Called when files have been updates.
+    self.onUpdate = function (updated)
+    {
+        resource.files.applyFilters();
     }
     
     // Called when files have been deleted.
     self.onDelete = function (deleted)
     {
+        // Removes the deleted file from raw
         for (var i = 0; i < self.raw.length; ++i)
             for (var j = deleted.length - 1; j >= 0; --j)
-                // Removes the deletes file
-                if (self.raw[i] == deleted[j])
+                if (self.raw[i].file == deleted[j])
                 {
                     self.raw.splice(i--, 1);
                     break ;
                 }
-                // Updates the global id of the file
-                else if (self.raw[i] > deleted[j])
+        
+        // Removes the deleted files from the selection
+        for (var i = 0; i < deleted.length; ++i)
+            for (var f in self.filesSelected)
+            {
+                var file = self.filesSelected[f];
+                if (file.file == deleted[i])
                 {
-                    self.raw[i] -= j + 1;
+                    self.deselect(file);
+                    break;
+                }
+            }
+        
+        // Updates lastFileSelected
+        if (self.lastFileSelected.file)
+            for (var i = 0; i < deleted.length; ++i)
+                if (self.lastFileSelected.file.file == deleted[i])
+                {
+                    self.lastFileSelected = { fileIndex: undefined, file: undefined };
                     break ;
                 }
+        resource.files.applyFilters();
     }
     
-    // Numerical column comparison.
-    self._compareNumber = function (a, b)
+    // Returns the local file index that corresponds to the given file.
+    self.getLocalFileId = function (file)
     {
-        return (parseInt(gl_files.list[a][self.sortedColumn]) - parseInt(gl_files.list[b][self.sortedColumn]));
+        for (var i = 0; i < self.length; ++i)
+            if (self[i] == file)
+                return (i);
+        return (undefined);
     }
     
-    // Alphabetical column comparison.
-    self._compareString = function (i, j)
+    // Selection
     {
-        var a = gl_files.list[i][self.sortedColumn];
-        var b = gl_files.list[j][self.sortedColumn];
-        a = a ? a : "";
-        b = b ? b : "";
-        return a.localeCompare(b);
+        self.select = function (file, node)
+        {
+            self.filesSelected[self.nextFileSelectedId] = file;
+            file.selectedId = self.nextFileSelectedId;
+            self.nextFileSelectedId++;
+            if (node)
+                $(node).addClass("selected");
+        }
+        
+        self.deselect = function (file, node)
+        {
+            delete self.filesSelected[file.selectedId];
+            file.selectedId = 0;
+            if (node)
+                $(node).removeClass("selected");
+        }
+        
+        self.deselectAll = function (node)
+        {
+            for (var f in self.filesSelected)
+                self.filesSelected[f].selectedId = 0;
+            self.filesSelected = {};
+            if (node)
+                $(node).removeClass("selected");
+        }
+        
+        // Returns true if more than one file is selected.
+        self.isMultipleFilesSelected = function ()
+        {
+            var n = 0;
+            for (var f in self.filesSelected)
+                if (++n > 1)
+                    return true;
+            return false;
+        }
+        
+        // Returns the list of the files selected and not filtered.
+        self.getFilesSelected = function ()
+        {
+            var filesSelected = [];
+            
+            for (var f in self.filesSelected)
+            {
+                var file = self.filesSelected[f];
+                for (var i = 0; i < self.length; ++i)
+                    if (self[i] == file)
+                    {
+                        filesSelected.push(file.file);
+                        break ;
+                    }
+            }
+            return filesSelected;
+        }
+    }
+    
+    // Private
+    {
+        // Numerical column comparison.
+        self._compareNumber = function (a, b)
+        {
+            return (parseInt(a.file.info[self.sortedColumn]) - parseInt(b.file.info[self.sortedColumn]));
+        }
+        
+        // Alphabetical column comparison.
+        self._compareString = function (i, j)
+        {
+            var a = i.file.info[self.sortedColumn];
+            var b = j.file.info[self.sortedColumn];
+            a = a ? a : "";
+            b = b ? b : "";
+            return a.localeCompare(b);
+        }
     }
     
     self.init();
@@ -786,8 +883,6 @@ function List()
         
         // Members
         self.listHeight; // The height of the file list
-        self.filesSelected = new Object(); // The list of the files selected by the user. The key is the global file index.
-        self.lastFileSelected = { local: undefined, global: undefined }; // The last file selected or deselected
         self.oldTableLength; // The length of the table before its last modification
         self.filesContext = new FilesContext(); // Manages the context menu of the files
         // Allows to move a column
@@ -858,9 +953,8 @@ function List()
             $(row.insertCell(column.index)).addClass(resource.encodeClassName(column.name));
             if (!$(row).hasClass("empty"))
             {
-                var file = gl_files.list[resource.files[firstRowFileNumber + i]];
                 var cell = row.cells[column.index];
-                cell.originalText = resource.layout.convert(column.name, file[column.name]);
+                cell.originalText = resource.layout.convert(column.name, resource.files[firstRowFileNumber + i].file.info[column.name]);
                 cell.innerHTML = cell.originalText;
                 if (column.align != "left")
                     cell.style.textAlign = column.align;
@@ -888,111 +982,84 @@ function List()
             return ;
         var rightButton = (e.which == 3);
         // Gets the file selected by the user
-        var file = e.target;
-        for (var i = 0; i < 3 && file.tagName.toLowerCase() != "tr"; ++i, file = file.parentNode)
+        var row = e.target;
+        for (var i = 0; i < 3 && row.tagName.toLowerCase() != "tr"; ++i, row = row.parentNode)
             ;
         // If the event is directly on the table we use an other way to get the selected file
         if (e.target == self.table)
         {
             var n = Math.floor(((e.pageY - $(self.table).offset().top) / C.R.Files.listRowHeight));
             if (n < self.table.rows.length)
-                file = self.table.rows[n];
+                row = self.table.rows[n];
             else
                 return ;
         }
         // The row is empty
-        if ($(file).hasClass("empty"))
+        if ($(row).hasClass("empty"))
         {
             if (e.ctrlKey == false && e.shiftKey == false)
-            {
-                self.filesSelected = new Object();
-                $(self.table.rows).removeClass("selected");
-            }
+                resource.files.deselectAll(self.table.rows);
             if (rightButton)
                 self.filesContext.display(e);
             return ;
         }
-        var localFileIndex = file.fileIndex;
-        var globalFileIndex = resource.files[localFileIndex];
+        var fileIndex = row.fileIndex;
+        var file = resource.files[fileIndex];
         // Selects or deselects one file
         if (e.ctrlKey == true && e.shiftKey == false)
         {
             // Selects the file
-            if (!$(file).hasClass("selected"))
-            {
-                self.filesSelected[globalFileIndex] = true;
-                $(file).addClass("selected");
-            }
+            if (!file.selectedId)
+                resource.files.select(file, row);
             // Deselects the file
-            else if (self.filesSelected[globalFileIndex] && (!rightButton || self.isMultipleFilesSelected()))
-            {
-                delete self.filesSelected[globalFileIndex];
-                $(file).removeClass("selected");
-            }
+            else if (!rightButton || resource.files.isMultipleFilesSelected())
+                resource.files.deselect(file, row);
         }
         // Selects / deselects multiple files
         else if (e.shiftKey == true)
         {
             // Deselects all the files when ctrl is not pressed
             if (e.ctrlKey == false)
-            {
-                self.filesSelected = new Object();
-                $(self.table.rows).removeClass("selected");
-            }
+                resource.files.deselectAll(self.table.rows);
             // Selects all the files between the selected file and the last file selected
-            if (self.lastFileSelected != undefined)
+            if (resource.files.lastFileSelected.fileIndex === undefined)
+                if (!resource.files.lastFileSelected.file || (resource.files.lastFileSelected.fileIndex = resource.files.getLocalFileId(resource.files.lastFileSelected.file)) === undefined)
+                    resource.files.lastFileSelected = { fileIndex: row.fileIndex, file: file };
+            var start = row.fileIndex;
+            var end = resource.files.lastFileSelected.fileIndex;
+            var increment = (start > end ? -1 : 1);
+            for (var i = 0; i <= Math.abs(start - end); i++)
             {
-                if (self.lastFileSelected.local == undefined)
-                    if (!(self.lastFileSelected.local = self.searchLocalFromGlobalFileIntex(self.lastFileSelected.global)))
-                        self.lastFileSelected = { local: file.fileIndex, global: globalFileIndex };
-                var start = file.fileIndex;
-                var end = self.lastFileSelected.local;
-                var increment = (start > end ? -1 : 1);
-                for (var i = 0; i <= Math.abs(start - end); i++)
-                {
-                    var rowIndex = file.rowIndex + i * increment;
-                    if (rowIndex >= 0 && rowIndex < self.table.rows.length)
-                        $(self.table.rows[rowIndex]).addClass("selected");
-                    self.filesSelected[resource.files[file.fileIndex + i * increment]] = true;
-                }
-                if (rightButton)
-                    self.filesContext.display(e);
-                return ;
+                var rowIndex = row.rowIndex + i * increment;
+                if (rowIndex >= 0 && rowIndex < self.table.rows.length)
+                    $(self.table.rows[rowIndex]).addClass("selected");
+                resource.files.select(resource.files[row.fileIndex + i * increment]);
             }
-            // Selects the file
-            else
-            {
-                self.filesSelected[globalFileIndex] = true;
-                $(file).addClass("selected");
-            }
+            if (rightButton)
+                self.filesContext.display(e);
+            return ;
         }
         // Selects the file if it was not selected (right button)
         else if (rightButton)
         {
-            if (!$(file).hasClass("selected"))
+            if (!$(row).hasClass("selected"))
             {
-                $(self.table.rows).removeClass("selected");
-                self.filesSelected = new Object();
-                self.filesSelected[globalFileIndex] = true;
-                $(file).addClass("selected");
+                resource.files.deselectAll(self.table.rows);
+                resource.files.select(file, row);
             }
         }
         // Selects / Deselects one file
         else
         {
-            var fileSelected = $(file).hasClass("selected");
-            var multipleFilesSelected = self.isMultipleFilesSelected();
+            var fileSelected = $(row).hasClass("selected");
+            var multipleFilesSelected = resource.files.isMultipleFilesSelected();
             // Deselects all the files
-            $(self.table.rows).removeClass("selected");
-            self.filesSelected = new Object();
+            resource.files.deselectAll(self.table.rows);
             // Selects the file if it was not selected
             if (!fileSelected || multipleFilesSelected)
-            {
-                self.filesSelected[globalFileIndex] = true;
-                $(file).addClass("selected");
-            }
+                resource.files.select(file, row);
         }
-        self.lastFileSelected = { local: localFileIndex, global: globalFileIndex };
+        resource.files.lastFileSelected = { fileIndex: fileIndex, file: file };
         if (rightButton)
             self.filesContext.display(e);
     }
@@ -1017,7 +1084,7 @@ function List()
         if ($(file).hasClass("empty"))
             return ;
         var firstRowFileNumber = Math.floor(self.top.height() / C.R.Files.listRowHeight);
-        resource.open(resource.files[file.fileIndex], firstRowFileNumber + file.rowIndex);
+        resource.open(resource.files[file.fileIndex].file);
     }
     
     // Scrolls the file list.
@@ -1116,27 +1183,27 @@ function List()
         // Sets the file to the row
         if (fileIndex < resource.files.length)
         {
-            var file = gl_files.list[resource.files[fileIndex]];
+            var file = resource.files[fileIndex];
             row.fileIndex = fileIndex;
-            if (self.filesSelected[resource.files[fileIndex]])
+            if (file.selectedId)
                 $(row).addClass("selected");
-            $(row).addClass(file.type);
+            $(row).addClass(file.file.info.type);
             for (var i = 0; i < headerColumns.length; ++i)
             {
                 var column = columns[i];
-                column.originalText = resource.layout.convert(headerColumns[i].name, file[headerColumns[i].name]);
+                column.originalText = resource.layout.convert(headerColumns[i].name, file.file.info[headerColumns[i].name]);
                 column.innerHTML = column.originalText;
                 if (headerColumns[i].align != "left")
                     column.style.textAlign = headerColumns[i].align;
             }
-            // If the file has no id, it is being uploaded
-            if (!file.id)
+            // The file is being uploaded
+            if (file.file.upload || !file.file.info.id)
             {
                 $(row).addClass("upload");
                 columns[columns.length - 1].innerHTML = "";
                 var progress = $('<div class="progress" />').appendTo(columns[columns.length - 1]);
                 progress.height(C.R.Files.listRowHeight);
-                var upload = gl_uploads.currentUploads[resource.files[fileIndex]];
+                var upload = file.file.upload;
                 $('<div />').appendTo(progress).width((upload ? upload.percent : 0) + "%");
             }
         }
@@ -1155,25 +1222,6 @@ function List()
         }
     }
     
-    // Searches and returns the local file index that corresponds to the given global index.
-    self.searchLocalFromGlobalFileIntex = function (global)
-    {
-        for (var local = 0; local < resource.files.length; ++local)
-            if (resource.files[local] == global)
-                return (local);
-        return (undefined);
-    }
-    
-    // Returns true if more than one file is selected.
-    self.isMultipleFilesSelected = function ()
-    {
-        var n = 0;
-        for (var f in self.filesSelected)
-            if (++n > 1)
-                return true;
-        return false;
-    }
-    
     // Returns the minimum width necessary to display all the elements of the column.
     self.getMinWidth = function (column)
     {
@@ -1184,60 +1232,13 @@ function List()
         return minWidth;
     }
     
-    // Called when files have been added.
-    self.onAdd = function (added)
-    {
-        resource.files.applyFilters();
-    }
-    
-    // Called when files have been updated.
-    self.onUpdate = function (updated)
-    {
-        resource.files.applyFilters();
-    }
-    
-    // Called when files have been deleted.
-    self.onDelete = function (deleted)
-    {
-        // Removes the deleted files from the selection
-        var newFilesSelected = {};
-        for (var g in self.filesSelected)
-        {
-            var found = false;
-            var globalFileIndex = parseInt(g);
-            for (var i = 0; i < deleted.length && !found; ++i)
-                found = (globalFileIndex == deleted[i]);
-            if (!found)
-            {
-                // Updates the global id of the file
-                for (var j = deleted.length - 1; j >= 0; --j)
-                    if (globalFileIndex > deleted[j])
-                    {
-                        globalFileIndex -= j + 1;
-                        break ;
-                    }
-                newFilesSelected[globalFileIndex] = true;
-            }
-        }
-        self.filesSelected = newFilesSelected;
-        
-        // Updates lastFileSelected
-        for (var i = 0; i < deleted.length; ++i)
-            if (self.lastFileSelected.global == deleted[i])
-            {
-                self.lastFileSelected = { local: undefined, global: undefined };
-                break ;
-            }
-        resource.files.applyFilters();
-    }
-    
     // Called while files are being uploaded.
     self.onUpload = function ()
     {
         for (var i = 0; i < self.table.rows.length && i < resource.files.length; ++i)
         {
             var row = self.table.rows[i];
-            var upload = gl_uploads.currentUploads[resource.files[row.fileIndex]];
+            var upload = resource.files[row.fileIndex].file.upload;
             if (upload)
             {
                 // Updates the progress bar
@@ -1337,8 +1338,8 @@ function List()
         // The files have been sorted or filtered, so we have to update the displayed rows.
         self.onFilesChange = function (column)
         {
-            // The local file index is no longer valid
-            self.lastFileSelected.local = undefined;
+            // The file index is no longer valid
+            resource.files.lastFileSelected.fileIndex = undefined;
             // Updates the scroll padding
             var top = Math.floor(self.list.scrollTop / C.R.Files.listRowHeight) * C.R.Files.listRowHeight;
             top = Math.max(0, Math.min(top, (resource.files.length - self.table.rows.length) * C.R.Files.listRowHeight));
@@ -1369,24 +1370,6 @@ function List()
             else
                 for (var type in resource.icons.icons.types)
                     $(resource.node.list).removeClass("filter_" + type);
-        }
-        
-        // Returns the list of the files selected and not filtered.
-        self.getFilesSelected = function ()
-        {
-            var filesSelected = [];
-            
-            for (var g in self.filesSelected)
-            {
-                var globalFileIndex = parseInt(g);
-                for (var i = 0; i < resource.files.length; ++i)
-                    if (resource.files[i] == globalFileIndex)
-                    {
-                        filesSelected.push(globalFileIndex);
-                        break ;
-                    }
-            }
-            return filesSelected;
         }
     }
     
@@ -1778,7 +1761,7 @@ function FilesContext()
     {
         // Creates the actions
         var add;
-        var numberFilesSelected = resource.container.getFilesSelected().length;
+        var numberFilesSelected = resource.files.getFilesSelected().length;
         var actions =
             [ gl_context.createAction(T.Files.Context.open, self.open)
             , gl_context.createAction(T.Files.Context.rename, self.rename)
@@ -1807,14 +1790,14 @@ function FilesContext()
     // Plays the selected files.
     self.open = function ()
     {
-        var filesSelected = resource.container.getFilesSelected();
+        var filesSelected = resource.files.getFilesSelected();
         
         if (filesSelected.length == 0)
             console.log("No file selected");
         else if (filesSelected.length == 1)
-            resource.open(filesSelected[0], resource.files.getLocalFileIndex(filesSelected[0]));
+            resource.open(filesSelected[0]);
         else
-            resource.open(filesSelected[0], resource.files.getLocalFileIndex(filesSelected[0]));
+            resource.open(filesSelected[0]);
     }
     
     // Renames the selected files.
@@ -1826,7 +1809,7 @@ function FilesContext()
     // Deletes the selected files.
     self.delete = function ()
     {
-        gl_files.delete(resource.container.getFilesSelected());
+        gl_files.delete(resource.files.getFilesSelected());
     }
     
     self.init();
@@ -1845,7 +1828,6 @@ function ColumnsContext()
     // Displays the context menu.
     self.display = function (e, currentColumn)
     {
-        var numberFilesSelected = resource.container.getFilesSelected().length;
         var actions = [];
         var action;
         var columns = {};
@@ -1853,7 +1835,7 @@ function ColumnsContext()
         // Gets all the columns names
         for (var i = 0; i < resource.files.length; ++i)
         {
-            var file = gl_files.list[resource.files[i]];
+            var file = resource.files[i].file.info;
             for (var column in file)
                 if (!columns[column])
                     columns[column] = true;
@@ -1964,12 +1946,12 @@ var MergeSort =
     
     compareNumber: function (a, b)
     {
-        return (parseInt(gl_files.list[a][MergeSort.column]) <= parseInt(gl_files.list[b][MergeSort.column]));
+        return (parseInt(a.file.info[MergeSort.column]) <= parseInt(b.file.info[MergeSort.column]));
     },
     
     compareString: function (a, b)
     {
-        return (gl_files.list[a][MergeSort.column].toLowerCase() <= gl_files.list[b][MergeSort.column].toLowerCase());
+        return (a.file.info[MergeSort.column].toLowerCase() <= b.file.info[MergeSort.column].toLowerCase());
     }
 };
 

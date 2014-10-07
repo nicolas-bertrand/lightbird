@@ -11,9 +11,9 @@ function Uploads()
         self.pendingUploads = {}; // The files waiting to be uploaded.
         self.currentUploads = {}; // The files currently uploading.
         // This object represents an upload in the above arrays
-        var upload =
+        var Upload =
         {
-            id: 0, // The id of the file in gl_files
+            id: 0, // A unique id in gl_uploads used to retrieve the upload in pendingUploads and currentUploads
             cancelId: "", // A uuid used to cancel the upload
             size: 0, // The size of the file
             uploaded: 0, // The amount of data uploaded so far
@@ -21,9 +21,11 @@ function Uploads()
             previousPercent: undefined, // The percentage the last time onUpload was called
             request: {}, // The XMLHttpRequest
             file: {}, // The File to upload
+            pending: true, // True if the upload was not started yet
             cancelled: false, // True if the upload has been cancelled
             finished: false // True if the upload is finished
         };
+        self.nextId = 0; // The next id used to identify the uploads in pendingUploads and currentUploads.
         self.onUpload = new Array(); // The list of the functions to call while a file is uploading.
         self.onUploadInterval; // The interval that calls onUpload
         
@@ -33,24 +35,24 @@ function Uploads()
     }
     
     // Uploads the files in parameter.
-    // @param files: The FileList to upload.
-    self.add = function (files)
+    // @param fileList: The FileList to upload.
+    self.add = function (fileList)
     {
         // Adds the file to the list
         var f = [];
-        for (var i = 0; i < files.length; ++i)
-            f.push({name: files[i].name, size: files[i].size, id_directory: ""});
-        var ids = gl_files.add(f);
+        for (var i = 0; i < fileList.length; ++i)
+            f.push({name: fileList[i].name, size: fileList[i].size, id_directory: ""});
+        var files = gl_files.add(f);
         // setTimeout is used to let the browser display the files
         setTimeout(function ()
         {
             // Creates the uploads
-            for (var i = 0; i < ids.length; ++i)
+            for (var i = 0; i < files.length; ++i)
             {
-                if (ids[i] >= 0)
-                    self._create(ids[i], files[i]);
+                if (files[i])
+                    self._create(files[i], fileList[i]);
                 else
-                    console.log("The file " + files[i].name + " already exists in this directory.");
+                    console.log("The file " + fileList[i].name + " already exists in this directory.");
             }
         }, 0);
     }
@@ -62,16 +64,23 @@ function Uploads()
         var upload;
         var cancelIds = [];
         for (var i = 0; i < files.length; ++i)
-            if (self.pendingUploads[files[i]])
-                delete self.pendingUploads[files[i]];
+        {
+            upload = files[i].upload;
+            if (upload && upload.pending)
+                delete self.pendingUploads[upload.id];
+        }
         for (var i = 0; i < files.length; ++i)
-            if ((upload = self.currentUploads[files[i]]))
+        {
+            upload = files[i].upload;
+            if (upload && !upload.pending)
             {
-                delete self.currentUploads[files[i]];
+                delete self.currentUploads[upload.id];
                 upload.cancelled = true;
                 upload.request.abort();
                 cancelIds.push(upload.cancelId);
             }
+            delete files[i].upload;
+        }
         // Cancels the current uploads
         if (cancelIds.length)
             F.request("POST", "command/uploads/cancel", null, JSON.stringify(cancelIds), "application/json");
@@ -97,22 +106,25 @@ function Uploads()
     // Private
     {
         // Creates an upload.
-        self._create = function (id, file)
+        self._create = function (file, fileData)
         {
             var request = new XMLHttpRequest();
-            var upload = self.pendingUploads[id] =
+            file.upload = 
             {
-                id: id,
+                id: self.nextId,
                 cancelId: F.getUuid(),
-                size: file.size,
+                size: fileData.size,
                 uploaded: 0,
                 percent: 0,
                 previousPercent: undefined,
                 request: request,
-                file: file,
+                file: fileData,
+                pending: true,
                 cancelled: false,
                 finished: false
             };
+            self.pendingUploads[self.nextId] = file;
+            self.nextId++;
             
             // Creates the onUpload event
             if (!self.onUploadInterval)
@@ -133,14 +145,16 @@ function Uploads()
                 break ;
             if (!u)
                 return ;
-            var upload = self.pendingUploads[u]
-            self.currentUploads[upload.id] = upload;
-            delete self.pendingUploads[upload.id];
+            var file = self.pendingUploads[u];
+            var upload = file.upload;
+            upload.pending = false;
+            self.currentUploads[u] = file;
+            delete self.pendingUploads[u];
             
             var formData = new FormData();
             formData.append("file", upload.file);
             upload.request.upload.addEventListener('progress', function (e) { self._progress(e, upload); });
-            upload.request.onreadystatechange = function() { if (upload.request.readyState == 4) self._finished(upload); };
+            upload.request.onreadystatechange = function() { if (upload.request.readyState == 4) self._finished(file); };
             upload.request.open('POST', '/c/command/uploads/send?disconnectOnError=true&cancelId=' + upload.cancelId + F.getSession(false));
             upload.request.send(formData);
         }
@@ -158,19 +172,21 @@ function Uploads()
         }
 
         // The file has been uploaded.
-        self._finished = function (upload)
+        self._finished = function (file)
         {
+            var upload = file.upload;
             upload.finished = true;
             if (!upload.cancelled)
             {
                 var filesUploaded = jsonParse(upload.request.responseText || "[]");
                 if (upload.request.status == 200 && filesUploaded.length && filesUploaded[0])
-                    gl_files.list[upload.id].id = filesUploaded[0];
+                    file.info.id = filesUploaded[0];
                 else
                     console.log("An error occurred during the upload of " + upload.file.name);
                 self._callOnUpload();
             }
             delete self.currentUploads[upload.id];
+            delete file.upload;
             // Starts the next upload
             self._start();
             // Removes the onUpload event if there is no file to upload

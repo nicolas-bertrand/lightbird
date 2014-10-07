@@ -1,32 +1,31 @@
-function ResourceView(task, playlistInterface, fileIndex)
+function ResourceView(task, playlistInterface, file)
 {
     var resource = this;
     
     resource.init = function ()
     {
         // Members
-        resource.file = gl_files.list[fileIndex]; // The file displayed by the resource
-        resource.fileIndex = fileIndex; // The index of the file displayed
-        resource.root = task.content.children("." + resource.file.type)[0]; // The root element of the resource
+        resource.file = file; // The file displayed by the resource
+        resource.root = task.content.children("." + resource.file.info.type)[0]; // The root element of the resource
         resource.isFocus = true; // If the task had the focus in the last mouse down event
         resource.object; // The object that displays the file, based on its type. Implements the file and the player interfaces.
         resource.playlistInterface = playlistInterface; // The playlist that manages this file (may be undefined)
         resource.icon = task.getIconNodes();
         
         // Capitalizes the first char of the type, to get the name of the object
-        var type = resource.file.type[0].toUpperCase() + resource.file.type.slice(1);
+        var type = resource.file.info.type[0].toUpperCase() + resource.file.info.type.slice(1);
         // Displays the file
         resource.object = new resource[type]();
         
         // Default values
         resource.playlistInterface.readyToPlay(resource.object);
-        task.content.addClass("view_" + resource.file.type);
-        resource.icon.title.html(resource.file.name);
+        task.content.addClass("view_" + resource.file.info.type);
+        resource.icon.title.html(resource.file.info.name);
         
         // Events
         if (C.R.View.focusBeforeAction)
             task.content.mousedown(function (e) { resource.isFocus = task.isFocus(); });
-        task.content.mouseenter(function (e) { gl_player.setFileName(resource.fileIndex); });
+        task.content.mouseenter(function (e) { gl_player.setFileName(resource.file); });
         task.content.mouseleave(function (e) { gl_player.setFileName(); });
     }
     
@@ -63,7 +62,7 @@ resource.Document = function ()
         self.pre = $(resource.root).children("pre"); // The element that stores the text of the document
         self.iconContent = new Object(); // The informations displayed in the icon content
         
-        F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
+        F.request("GET", resource.file.info.name + "?fileId=" + resource.file.info.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
             var lines = (HttpRequest.responseText.match(/\n+/g) || "").length + 1;
@@ -74,8 +73,8 @@ resource.Document = function ()
         });
         
         resource.icon.content.css("padding", 5);
-        self.iconContent.size = F.sizeToString(resource.file.size);
-        self.iconContent.modified = resource.file.modified.split(" ")[0].replace(/-/g, "/");
+        self.iconContent.size = F.sizeToString(resource.file.info.size);
+        self.iconContent.modified = resource.file.info.modified.split(" ")[0].replace(/-/g, "/");
         self.updateIconContent();
     }
     
@@ -103,9 +102,9 @@ resource.Document = function ()
     
 // File interface
     {
-        self.getFileIndex = function ()
+        self.getFile = function ()
         {
-            return (resource.fileIndex);
+            return (resource.file);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -137,12 +136,12 @@ resource.Image = function ()
         task.setOverflow(false); // No overflow
     
         // Displays the image
-        self.image.src = "/c/" + resource.file.name + "?fileId=" + resource.file.id + F.getSession();
-        self.image.alt = resource.file.name;
+        self.image.src = "/c/" + resource.file.info.name + "?fileId=" + resource.file.info.id + F.getSession();
+        self.image.alt = resource.file.info.name;
         
         // Puts the preview of the image in the icon content
         var preview = $("<img></img>");
-        preview[0].src = "/c/command/preview?fileId=" + resource.file.id + "&width=" + gl_tasksList.width + F.getSession();
+        preview[0].src = "/c/command/preview?fileId=" + resource.file.info.id + "&width=" + gl_tasksList.width + F.getSession();
         preview.width("100%");
         preview.css("display", "block");
         preview.appendTo(resource.icon.content);
@@ -163,8 +162,8 @@ resource.Image = function ()
     // Resizes the image while keeping its natural ratio.
     self.keepRatio = function (left, top, w, h)
     {
-        var naturalWidth = self.image.naturalWidth ? self.image.naturalWidth : resource.file.width;
-        var naturalHeight = self.image.naturalHeight ? self.image.naturalHeight : resource.file.height;
+        var naturalWidth = self.image.naturalWidth ? self.image.naturalWidth : resource.file.info.width;
+        var naturalHeight = self.image.naturalHeight ? self.image.naturalHeight : resource.file.info.height;
         var width = w;
         var height = h;
         
@@ -217,8 +216,8 @@ resource.Image = function ()
     // Displays the image with its natural size.
     self.naturalSize = function (left, top, width, height)
     {
-        var naturalWidth = self.image.naturalWidth ? self.image.naturalWidth : resource.file.width;
-        var naturalHeight = self.image.naturalHeight ? self.image.naturalHeight : resource.file.height;
+        var naturalWidth = self.image.naturalWidth ? self.image.naturalWidth : resource.file.info.width;
+        var naturalHeight = self.image.naturalHeight ? self.image.naturalHeight : resource.file.info.height;
         
         // Centers the image
         var marginLeft = (naturalWidth < width ? Math.floor((width - naturalWidth) / 2) : 0);
@@ -345,9 +344,9 @@ resource.Image = function ()
     
 // File interface
     {
-        self.getFileIndex = function ()
+        self.getFile = function ()
         {
-            return (resource.fileIndex);
+            return (resource.file);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -371,14 +370,14 @@ resource.Other = function ()
         self.pre = $(resource.root).children("pre"); // The element that stores the text of the file
         self.iconContent = new Object(); // The informations displayed in the icon content
         
-        F.request("GET", resource.file.name + "?fileId=" + resource.file.id, function (HttpRequest)
+        F.request("GET", resource.file.info.name + "?fileId=" + resource.file.info.id, function (HttpRequest)
         {
             self.pre.html(resource.escape(HttpRequest.responseText));
         });
         
         resource.icon.content.css("padding", 5);
-        self.iconContent.size = F.sizeToString(resource.file.size);
-        self.iconContent.modified = resource.file.modified.split(" ")[0].replace(/-/g, "/");
+        self.iconContent.size = F.sizeToString(resource.file.info.size);
+        self.iconContent.modified = resource.file.info.modified.split(" ")[0].replace(/-/g, "/");
         var content = "<p>" + self.iconContent.size + "</p>";
         content += "<p>" + self.iconContent.modified + "</p>";
         resource.icon.content.html(content);
@@ -395,9 +394,9 @@ resource.Other = function ()
     
 // File interface
     {
-        self.getFileIndex = function ()
+        self.getFile = function ()
         {
-            return (resource.fileIndex);
+            return (resource.file);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -431,7 +430,6 @@ resource.Video = function ()
         task.setOverflow(false);
         
         // Creates the video
-        var file = resource.file;
         self.video.mediaId = F.getUuid();
         // Checks the supported video formats
         if (self.video.canPlayType("video/webm; codecs=\"vp8.0, vorbis\""))
@@ -443,11 +441,11 @@ resource.Video = function ()
         // The browser can't play any common formats
         else
             ;
-        self.video.src = "/c/command/video." + self.format + "?fileId=" + file.id + "&mediaId=" + self.video.mediaId + F.getSession();
+        self.video.src = "/c/command/video." + self.format + "?fileId=" + resource.file.info.id + "&mediaId=" + self.video.mediaId + F.getSession();
         
         // Puts a preview of the video in the icon content
         var preview = $("<img></img>");
-        preview[0].src = "/c/command/preview?fileId=" + resource.file.id + "&width=" + gl_tasksList.width + F.getSession();
+        preview[0].src = "/c/command/preview?fileId=" + resource.file.info.id + "&width=" + gl_tasksList.width + F.getSession();
         preview.width("100%");
         preview.css("display", "block");
         preview.appendTo(resource.icon.content);
@@ -470,8 +468,8 @@ resource.Video = function ()
     
     self.onResize = function (left, top, w, h)
     {
-        var naturalWidth = self.video.videoWidth ? self.video.videoWidth : resource.file.width;
-        var naturalHeight = self.video.videoHeight ? self.video.videoHeight : resource.file.height;
+        var naturalWidth = self.video.videoWidth ? self.video.videoWidth : resource.file.info.width;
+        var naturalHeight = self.video.videoHeight ? self.video.videoHeight : resource.file.info.height;
         var width = w;
         var height = h;
         
@@ -551,9 +549,9 @@ resource.Video = function ()
 
 // File and Player interfaces
     {
-        self.getFileIndex = function ()
+        self.getFile = function ()
         {
-            return (resource.fileIndex);
+            return (resource.file);
         }
         
         self.setPlaylist = function (playlistInterface)
@@ -582,7 +580,7 @@ resource.Video = function ()
             // Seeks to the new position
             self.video.timeOffset = time;
             self.video.mediaId = F.getUuid();
-            self.video.src = "/c/command/video." + self.format + "?fileId=" + resource.file.id + "&mediaId=" + self.video.mediaId + "&start=" + time + F.getSession();
+            self.video.src = "/c/command/video." + self.format + "?fileId=" + resource.file.info.id + "&mediaId=" + self.video.mediaId + "&start=" + time + F.getSession();
             if (!paused)
                 self.video.play();
         }
@@ -601,5 +599,5 @@ resource.Video = function ()
     return (resource);
 }
 
-function initialize_resource_view(task, parameters) { return (new ResourceView(task, parameters.playlistInterface, parameters.fileIndex)); }
+function initialize_resource_view(task, parameters) { return (new ResourceView(task, parameters.playlistInterface, parameters.file)); }
 gl_resources.jsLoaded("view");
