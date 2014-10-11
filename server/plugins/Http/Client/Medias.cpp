@@ -23,7 +23,7 @@ void    Medias::start(LightBird::IClient &client, Medias::Type type)
     Media   *media = NULL;
 
     if (!mutex)
-        return;
+        return ;
     if (this->medias.contains(client.getId()))
     {
         delete this->medias[client.getId()];

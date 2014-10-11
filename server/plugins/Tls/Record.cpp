@@ -13,10 +13,10 @@ bool    Record::doRead(LightBird::IClient &client, QByteArray &data)
 {
     int result;
 
-    if (client.getSocket().size() == 0)
+    data.resize(client.getSocket().size());
+    if (data.isEmpty())
         return (true);
-    data.resize(1024);
-    result = gnutls_record_recv(client.getInformations().value("gnutls_session").value<gnutls_session_t>(), data.data(), 1024);
+    result = gnutls_record_recv(client.getInformations().value("gnutls_session").value<gnutls_session_t>(), data.data(), data.size());
     data.resize(result);
     if (result < 0)
     {

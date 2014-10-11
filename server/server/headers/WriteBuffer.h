@@ -12,40 +12,34 @@ class WriteBuffer : public QObject
     Q_OBJECT
 
 public:
-    /// @param data : This object takes ownership of the data and will delete
-    /// them in its destructor.
-    WriteBuffer(Client *client, QByteArray *data, QThread *thread);
+    WriteBuffer(Client *_client, const QByteArray &data, qint64 written);
     ~WriteBuffer();
 
     /// @brief Returns the next data to send.
-    const char  *getData() const;
+    inline const char  *getData() const { return this->_data.data() + this->_written; }
+
     /// @brief Returns the number of bytes remaining.
-    int         getSize() const;
+    inline qint64 getSize() const { return qMax(this->_data.size() - this->_written, qint64(0)); }
+
     /// @brief Return the total size of the data managed by the WriteBuffer.
-    int         getTotalSize() const;
+    inline qint64 getTotalSize() const { return _data.size(); }
+
     /// @brief Increases the number of bytes written, and sets writing to true.
-    void        bytesWriting(int written);
-    /// @brief Returns true if data are being written.
-    bool        isWriting() const;
+    inline void bytesWritten(qint64 written) { this->_written += written; }
+
+    /// @brief Returns the number of bytes written so far.
+    inline qint64 bytesWritten() const { return _written; }
+
     /// @brief Returns true if all the data have been written.
-    bool        isWritten() const;
-
-signals:
-    /// @brief Emitted when a chunk of data has been written.
-    void        bytesWritten();
-
-private slots:
-    /// @brief A chunk of data has been written on the socket.
-    void        _bytesWritten();
+    inline bool isWritten() const { return this->_written >= this->_data.size(); }
 
 private:
     WriteBuffer(const WriteBuffer &);
     WriteBuffer &operator=(const WriteBuffer &);
 
-    Client      *client; ///< The client to which the data will be written.
-    QByteArray  *data;   ///< The data to write.
-    int         written; ///< The number of bytes already written.
-    bool        writing; ///< True if data are being written.
+    Client *_client; ///< The client to which the data will be written.
+    const QByteArray &_data; ///< The data to write.
+    qint64 _written; ///< The number of bytes already written.
 };
 
 #endif // WRITEBUFFER_H

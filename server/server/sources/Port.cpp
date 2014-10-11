@@ -9,21 +9,12 @@ Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const 
     this->port = port;
     this->transport = transport;
     this->protocols = protocols;
-    this->listening = false;
     if ((this->maxClients = maxClients) == 0)
         this->maxClients = ~0;
 }
 
 Port::~Port()
 {
-    // Deletes all the remaining clients
-    QListIterator<Client *> it(this->clients);
-
-    while (it.hasNext())
-    {
-        delete it.peekNext();
-        it.next();
-    }
 }
 
 Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
@@ -33,13 +24,12 @@ Future<bool>    Port::getClient(const QString &id, LightBird::INetwork::Client &
     found = false;
     if (!mutex)
         return (false);
-    QListIterator<Client *> it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == id)
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
         {
             Future<bool> *future = new Future<bool>(false);
             Future<bool> result(*future);
-            it.peekPrevious()->getInformations(client, future);
+            it.peekNext()->getInformations(client, future);
             found = true;
             return (result);
         }
@@ -53,10 +43,9 @@ QStringList Port::getClients() const
 
     if (!mutex)
         return (result);
-    QListIterator<Client *> it(this->clients);
     // Stores the id of the clients in the string list
-    while (it.hasNext())
-        result << it.next()->getId();
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        result << it.peekNext()->getId();
     return (result);
 }
 
@@ -66,12 +55,11 @@ bool    Port::disconnect(const QString &id, bool fatal)
 
     if (!mutex)
         return (false);
-    QListIterator<Client *> it(this->clients);
     // Searches the client that has the given id and disconnects it
-    while (it.hasNext())
-        if (it.next()->getId() == id)
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
         {
-            it.peekPrevious()->disconnect(fatal);
+            it.peekNext()->disconnect(fatal);
             return (true);
         }
     return (false);
@@ -85,11 +73,13 @@ bool    Port::send(const QString &id, const QString &p, const QVariantMap &infor
 
     if (!mutex)
         return (false);
-    QListIterator<Client *> it(this->clients);
     // Searches the client
-    while (it.hasNext() && !client)
-        if (it.next()->getId() == id)
-            client = it.peekPrevious();
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            client = it.peekNext().data();
+            break;
+        }
     // The client does not exist
     if (!client)
         return (false);
@@ -108,10 +98,9 @@ bool    Port::pause(const QString &idClient, int msec)
 
     if (!mutex)
         return (false);
-    QListIterator<Client *> it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == idClient)
-            return (it.peekPrevious()->pause(msec));
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == idClient)
+            return (it.peekNext()->pause(msec));
     return (false);
 }
 
@@ -121,66 +110,60 @@ bool    Port::resume(const QString &idClient)
 
     if (!mutex)
         return (false);
-    QListIterator<Client *> it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == idClient)
-            return (it.peekPrevious()->resume());
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == idClient)
+            return (it.peekNext()->resume());
     return (false);
 }
 
 void    Port::close()
 {
-    QListIterator<Client *> it(this->clients);
-
-    this->listening = false;
     // Disconnects all the clients in the map
     if (this->clients.size() > 0)
-        while (it.hasNext())
-            this->_removeClient(it.next());
+        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+            it.peekNext()->disconnect();
     // Or quit the thread if there is already no remaining clients
     else
         this->quit();
 }
 
-Client  *Port::_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort)
+Client  *Port::_addClient(Socket *)
 {
     Client  *client;
 
     // Creates the client
-    client = new Client(socket, this->protocols, this->transport, this->port,
-                        socket->socketDescriptor(), peerAddress, peerPort,
-                        socket->peerName(), LightBird::IClient::SERVER, this);
+    /*client = new Client(socket, this->protocols, this->transport, this->port, LightBird::IClient::SERVER, this);
     // Adds the client
-    this->clients.push_back(client);
+    this->clients.push_back(QSharedPointer<Client>(client));
     // When the client is finished, _finished is called
-    QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
+    QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);*/
     return (client);
 }
 
-void    Port::_removeClient(Client *client)
+QSharedPointer<Client> Port::_getClient(Client *client)
 {
-    // Checks if the client is in the clients list
-    if (this->clients.contains(client))
-        // Disconnects the client
-        client->disconnect();
+    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        if (it.peekNext() == client)
+            return it.peekNext();
+    return QSharedPointer<Client>(NULL);
 }
 
 Client  *Port::_finished(Client *client)
 {
     // Searches a finished client
-    QListIterator<Client *> it(this->clients);
+    /*QListIterator<Client *> it(this->clients);
     while (it.hasNext() && !client)
         if (it.next()->isFinished())
             client = it.peekPrevious();
     // No client found
     if (!client)
-        return (NULL);
+        return (NULL);*/
     // Deletes the client
-    this->clients.removeAll(client);
+    //this->clients.removeAll(client);
     delete client;
     // If there are no more connected client and the server is no longer listening, we quit the thread
-    if (this->clients.size() == 0 && !this->_isListening())
-        this->quit();
+    //if (this->clients.size() == 0 && !this->_isListening())
+    //    this->quit();
     return (client);
 }
 
@@ -202,21 +185,4 @@ const QStringList   &Port::getProtocols() const
 unsigned int    Port::getMaxClients() const
 {
     return (this->maxClients);
-}
-
-bool            Port::isListening() const
-{
-    Mutex   mutex(this->mutex, Mutex::READ, "Port", "isListening");
-
-    return (mutex && this->_isListening());
-}
-
-bool    Port::_isListening() const
-{
-    return (this->listening && this->isRunning());
-}
-
-void    Port::_isListening(bool listening)
-{
-    this->listening = listening;
 }

@@ -56,7 +56,7 @@ public:
     /// thread of the class Clients.
     bool            connect(Client *client);
     void            read(Client *client);
-    bool            write(QByteArray *data, Client *client);
+    void            write(Client *client, const QByteArray &data);
 
 signals:
     /// @brief Connects a TCP client to the server.

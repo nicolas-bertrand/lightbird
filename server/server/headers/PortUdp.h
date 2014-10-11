@@ -16,12 +16,14 @@ public:
     PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0);
     ~PortUdp();
 
+    /// @brief Returns true if the port is currently listening the network.
+    bool    isListening() const;
     /// @brief Closes the UDP socket. No new connections will be accepted.
     void    close();
 
     // IReadWrite
     void    read(Client *client);
-    bool    write(QByteArray *data, Client *client);
+    void    write(Client *client, const QByteArray &data);
 
 private slots:
     /// @brief This slot is called when datagrams are ready to be read.
@@ -41,6 +43,7 @@ private:
     QUdpSocket   socket;        ///< This UDP socket is bound on the port to receive all datagrams sent to it.
     Future<bool> threadStarted; ///< This future is unlocked when the thread is started.
     QMultiHash<Client *, QByteArray *> readBuffer; ///< The list of the datagrams read, waiting to be processed by the Client.
+    bool listenning; ///< True if the port is listenning the network.
 };
 
 #endif // PORTUDP_H

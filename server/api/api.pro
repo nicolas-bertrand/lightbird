@@ -52,4 +52,5 @@ HEADERS = \
     network/IOnSerialize.h \
     network/IOnWrite.h \
     network/IRequest.h \
-    network/IResponse.h
+    network/IResponse.h \
+    network/ISocket.h

@@ -33,16 +33,16 @@ namespace LightBird
         /// Stores the informations on a client.
         struct Client
         {
-            Transport       transport;        ///< The transport protocol used by the underlaying socket.
-            QStringList     protocols;        ///< The names of the protocols used to communicate with the client.
-            unsigned short  port;             ///< The local port through which the client is connected.
-            int             socketDescriptor; ///< The descriptor of the socket.
-            QHostAddress    peerAddress;      ///< The address of the client.
-            unsigned short  peerPort;         ///< The peer port through which the client is connected.
-            QString         peerName;         ///< The name of the client's host (usually empty).
-            QDateTime       connectionDate;   ///< The date of the connection, in local time.
-            QString         idAccount;        ///< The id of the account identified.
-            QVariantMap     informations;     ///< Information on the client.
+            Transport       transport;      ///< The transport protocol used by the underlaying socket.
+            QStringList     protocols;      ///< The names of the protocols used to communicate with the client.
+            unsigned short  port;           ///< The local port through which the client is connected.
+            int             descriptor;     ///< The descriptor of the socket.
+            QHostAddress    peerAddress;    ///< The address of the client.
+            unsigned short  peerPort;       ///< The peer port through which the client is connected.
+            QString         peerName;       ///< The name of the client's host (usually empty).
+            QDateTime       connectionDate; ///< The date of the connection, in local time.
+            QString         idAccount;      ///< The id of the account identified.
+            QVariantMap     informations;   ///< Information on the client.
         };
 
         /// @brief Opens a port on the server.

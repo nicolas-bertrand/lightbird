@@ -52,30 +52,23 @@ public:
     /// @brief Returns the maximum number of clients connected to this port.
     unsigned int    getMaxClients() const;
     /// @brief Returns true if the port is listening the network.
-    bool            isListening() const;
+    virtual bool    isListening() const = 0;
     // IReadWrite
     virtual void    read(Client *client) = 0;
-    virtual bool    write(QByteArray *data, Client *client) = 0;
+    virtual void    write(Client *client, const QByteArray &data) = 0;
 
 protected:
     /// @brief The main method of the thread.
     void            run() = 0;
     /// @brief Adds a new client.
     /// @param socket : The socket through which the client is connected.
-    /// @param peerAddress : The address of the peer.
-    /// @param peerPort : The port of the host from which the client is connected.
     /// @return The new client.
-    Client          *_addClient(QAbstractSocket *socket, const QHostAddress &peerAddress, unsigned short peerPort);
-    /// @brief Removes a client and disconnect it if it is connected.
-    /// @param client : The client to disconnect and remove.
-    void            _removeClient(Client *client);
-    /// @brief Returns true if the port is listening.
-    virtual bool    _isListening() const;
-    /// @brief Sets if the port is listening the network.
-    void            _isListening(bool listening);
+    Client          *_addClient(Socket *socket);
+    /// @brief Returns the shared pointer of a client.
+    QSharedPointer<Client> _getClient(Client *client);
 
-    QList<Client *>         clients; ///< Contains the list of all the clients connected to this port.
-    mutable QReadWriteLock  mutex;   ///< Makes this class is thread safe.
+    QList<QSharedPointer<Client> > clients; ///< Contains the list of all the clients connected to this port.
+    mutable QReadWriteLock mutex; ///< Makes this class is thread safe.
 
 protected slots:
     /// @brief Called when a client is finished.
@@ -84,13 +77,12 @@ protected slots:
     /// @return The address of the finished Client (no longer valid), or NULL.
     virtual Client  *_finished(Client *client = NULL);
 
-private:
+protected:
     Port(const Port &);
     Port &operator=(const Port &);
 
     LightBird::INetwork::Transport  transport;  ///< The transport protocol used by the port.
     QStringList                     protocols;  ///< The names of the protocols used to communicate with the clients connected to this port.
-    bool                            listening;  ///< If the port is listening the network.
     unsigned short                  port;       ///< The number of the port.
     unsigned int                    maxClients; ///< The maximum number of clients simultaneously connected.
 };

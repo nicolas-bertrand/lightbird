@@ -8,6 +8,7 @@
 
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
     : Port(port, LightBird::INetwork::UDP, protocols, maxClients)
+    , listenning(false)
 {
     this->moveToThread(this);
     this->socket.moveToThread(this);
@@ -39,20 +40,18 @@ void    PortUdp::run()
     }
     LOG_INFO("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
              .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
-    Port::_isListening(true);
+    this->listenning = true;
     this->threadStarted.setResult(true);
     this->exec();
     Mutex mutex(this->mutex, "PortUdp", "run");
     this->socket.close();
+    this->listenning = false;
     // Removes the unread datagrams
     QHashIterator<Client *, QByteArray *> readBuffer(this->readBuffer);
     while (readBuffer.hasNext())
         delete readBuffer.next().value();
     this->readBuffer.clear();
     // Removes the remaining clients
-    QListIterator<Client *> client(this->clients);
-    while (client.hasNext())
-        delete client.next();
     this->clients.clear();
     this->moveToThread(QCoreApplication::instance()->thread());
     LOG_INFO("Port closed", Properties("port", this->getPort()), "PortUdp", "PortUdp");
@@ -64,6 +63,7 @@ void    PortUdp::close()
 
     if (!mutex)
         return ;
+    this->listenning = false;
     // Close the udp socket and disconect its signals
     this->socket.close();
     this->socket.disconnect();
@@ -96,24 +96,19 @@ void    PortUdp::read(Client *client)
     client->bytesRead();
 }
 
-bool    PortUdp::write(QByteArray *data, Client *client)
+void PortUdp::write(Client *client, const QByteArray &data)
 {
     Mutex   mutex(this->mutex, "PortUdp", "write");
     int     wrote;
-    bool    result = true;
 
     if (!mutex)
-        return (false);
+        return ;
     // Writes the data on the socket
-    if ((wrote = this->socket.writeDatagram(*data, client->getPeerAddress(), client->getPeerPort())) != data->size())
-    {
-        LOG_DEBUG("All data has not been written", Properties("wrote", wrote).add("toWrite", data->size()).add("id", client->getId()), "PortUdp", "write");
-        result = false;
-    }
+    if ((wrote = this->socket.writeDatagram(data, client->getPeerAddress(), client->getPeerPort())) != data.size())
+        LOG_DEBUG("All data has not been written", Properties("wrote", wrote).add("toWrite", data.size()).add("id", client->getId()), "PortUdp", "write");
     // Notifies the Client that the data have been written
     QTimer::singleShot(0, client, SLOT(bytesWritten()));
-    delete data;
-    return (result);
+    return ;
 }
 
 void    PortUdp::_readPendingDatagrams()
@@ -133,19 +128,19 @@ void    PortUdp::_readPendingDatagrams()
         data->resize(this->socket.pendingDatagramSize());
         this->socket.readDatagram(data->data(), data->size(), &peerAddress, &peerPort);
         client = NULL;
-        QListIterator<Client *> it(this->clients);
+        /*QListIterator<Client *> it(this->clients);
         while (it.hasNext() == true && client == NULL)
         {
             // The client is already connected
             if (it.peekNext()->getPeerAddress() == peerAddress && it.peekNext()->getPeerPort() == peerPort)
                 client = it.peekNext();
             it.next();
-        }
+        }*/
         if (client != NULL || (unsigned int)this->clients.size() < this->getMaxClients())
         {
             // If the client does not exist yet it is created
-            if (client == NULL)
-                client = this->_addClient(&this->socket, peerAddress, peerPort);
+            //if (client == NULL)
+            //    client = this->_addClient(&this->socket, peerAddress, peerPort);
             // Notifies the Client that data are ready to be read
             this->readBuffer.insert(client, data);
             client->readyRead();
@@ -174,7 +169,7 @@ Client  *PortUdp::_finished(Client *client)
     return (NULL);
 }
 
-bool    PortUdp::_isListening() const
+bool PortUdp::isListening() const
 {
-    return (Port::_isListening() && this->socket.state() == QAbstractSocket::BoundState);
+    return this->listenning;
 }

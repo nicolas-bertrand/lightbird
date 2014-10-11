@@ -20,16 +20,11 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-Client::Client(QAbstractSocket *s, const QStringList &pr, LightBird::INetwork::Transport t,
-               unsigned short p, int sd, const QHostAddress &pa, unsigned short pp,
-               const QString &pn, LightBird::IClient::Mode m, IReadWrite *r, const QStringList &c)
+Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetwork::Transport t,
+               unsigned short p, LightBird::IClient::Mode m, IReadWrite *r, const QStringList &c)
     : transport(t)
     , protocols(pr)
     , port(p)
-    , socketDescriptor(sd)
-    , peerAddress(pa)
-    , peerPort(pp)
-    , peerName(pn)
     , mode(m)
     , readWriteInterface(r)
     , contexts(c)
@@ -63,6 +58,7 @@ Client::~Client()
     // Ensures that all the informations requests has been processed
     this->_getInformations();
     delete this->engine;
+    delete this->writing;
     LOG_TRACE("Client destroyed!", Properties("id", this->id), "Client", "~Client");
 }
 
@@ -81,10 +77,10 @@ void    Client::run()
             if (!this->readWriteInterface->connect(this))
                 return this->_finish();
             LOG_INFO("Client connected", Properties("id", this->id).add("port", this->port)
-                     .add("socket", ((this->socketDescriptor >= 0) ? QString::number(this->socketDescriptor) : ""), false)
-                     .add("peerAddress", this->peerAddress.toString()).add("peerName", this->peerName, false)
+                     .add("socket", ((socket->descriptor() >= 0) ? QString::number(socket->descriptor()) : ""), false)
+                     .add("peerAddress", socket->peerAddress().toString()).add("peerName", socket->peerName(), false)
                      .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server")
-                     .add("peerPort", this->peerPort), "Client", "run");
+                     .add("peerPort", socket->peerPort()), "Client", "run");
             // If the client is not allowed to connect, it is disconnected
             if (!this->_onConnect())
                 return this->_finish();
@@ -92,8 +88,8 @@ void    Client::run()
 
         case Client::READING :
             // The execution is paused while data are being read
-            this->reading = false;
             this->readWriteInterface->read(this);
+            this->reading = false;
             return ;
 
         case Client::READ :
@@ -202,8 +198,10 @@ void    Client::run()
 
 void    Client::readyRead()
 {
-    Mutex   mutex(this->mutex, "Client", "readyRead");
+    if (this->reading)
+        return ;
 
+    Mutex   mutex(this->mutex, "Client", "readyRead");
     if (!mutex)
         return ;
     this->reading = true;
@@ -256,7 +254,7 @@ void    Client::write(QByteArray *data)
 void    Client::_write(Client::State newTask)
 {
     this->written = newTask;
-    this->readWriteInterface->write(this->writing, this);
+    this->readWriteInterface->write(this, *this->writing);
 }
 
 void    Client::bytesWritten()
@@ -265,6 +263,7 @@ void    Client::bytesWritten()
 
     if (mutex && this->writing)
     {
+        delete this->writing;
         this->writing = NULL;
         this->_newTask(Client::WRITTEN);
     }
@@ -552,7 +551,7 @@ bool    Client::_onDisconnect()
             finish = false;
         Plugins::instance()->release(it.next().key());
     }
-    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish).add("still connected", (this->socket->state() == QAbstractSocket::ConnectedState)).add("fatal", this->disconnectFatal), "Client", "run");
+    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish).add("still connected", this->socket->isConnected()).add("fatal", this->disconnectFatal), "Client", "run");
     return (finish);
 }
 
@@ -572,89 +571,14 @@ bool    Client::isFinished() const
     return (this->disconnectState == Disconnect::DISCONNECTED);
 }
 
-const QString   &Client::getId() const
-{
-    return (this->id);
-}
-
-QAbstractSocket &Client::getSocket()
-{
-    return (*this->socket);
-}
-
-unsigned short  Client::getPort() const
-{
-    return (this->port);
-}
-
-const QStringList   &Client::getProtocols() const
-{
-    return (this->protocols);
-}
-
-LightBird::INetwork::Transport Client::getTransport() const
-{
-    return (this->transport);
-}
-
-int Client::getSocketDescriptor() const
-{
-    return (this->socketDescriptor);
-}
-
-const QHostAddress  &Client::getPeerAddress() const
-{
-    return (this->peerAddress);
-}
-
-unsigned short  Client::getPeerPort() const
-{
-    return (this->peerPort);
-}
-
-const QString   &Client::getPeerName() const
-{
-    return (this->peerName);
-}
-
-const QDateTime &Client::getConnectionDate() const
-{
-    return (this->connectionDate);
-}
-
-quint64 Client::getBufferSize() const
-{
-    return (this->data.size() + this->socket->size());
-}
-
-LightBird::IClient::Mode Client::getMode() const
-{
-    return (this->mode);
-}
-
-QStringList &Client::getContexts()
-{
-    return (this->contexts);
-}
-
-QVariantMap &Client::getInformations()
-{
-    return (this->informations);
-}
-
-LightBird::TableAccounts &Client::getAccount()
-{
-    return (this->account);
-}
-
 LightBird::IRequest &Client::getRequest()
 {
-    return (this->engine->getRequest());
+    return engine->getRequest();
 }
 
-LightBird::IResponse    &Client::getResponse()
+LightBird::IResponse &Client::getResponse()
 {
-    return (this->engine->getResponse());
+    return engine->getResponse();
 }
 
 QStringList Client::getSessions(const QString &id_account) const
@@ -767,10 +691,9 @@ void    Client::_getInformations(LightBird::INetwork::Client &client, Future<boo
     client.transport = this->transport;
     client.protocols = this->protocols;
     client.port = this->port;
-    client.socketDescriptor = this->socketDescriptor;
-    client.peerAddress = this->peerAddress;
-    client.peerPort = this->peerPort;
-    client.peerName = this->peerName;
+    client.peerAddress = socket->peerAddress();
+    client.peerPort = socket->peerPort();
+    client.peerName = socket->peerName();
     client.connectionDate = this->connectionDate;
     client.idAccount = this->account.getId();
     client.informations = this->getInformations();

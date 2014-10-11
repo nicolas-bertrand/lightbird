@@ -35,10 +35,10 @@ void    Clients::run()
 
 Future<QString> Clients::connect(const QHostAddress &address
     , quint16 port
-    , const QStringList &protocols
+    , const QStringList &
     , LightBird::INetwork::Transport transport
     , const QVariantMap &informations
-    , const QStringList &contexts
+    , const QStringList &
     , int wait)
 {
     Mutex           mutex(this->mutex, "Clients", "connect");
@@ -51,8 +51,7 @@ Future<QString> Clients::connect(const QHostAddress &address
         // Creates the socket. The connection is made by the client in the ThreadPool, via IReadWrite
         QTcpSocket *socket = new QTcpSocket(NULL);
         // Creates the client
-        Client *client = new Client(socket, protocols, transport, socket->localPort(), socket->socketDescriptor(),
-                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this, contexts);
+        Client *client;// = new Client(socket, protocols, transport, socket->localPort(), LightBird::IClient::CLIENT, this, contexts);
         client->getInformations() = informations;
         this->clients.push_back(client);
         socket->setParent(client);
@@ -84,8 +83,7 @@ Future<QString> Clients::connect(const QHostAddress &address
         QUdpSocket *socket = new QUdpSocket(NULL);
         socket->connectToHost(address, port);
         // Creates the client
-        Client *client = new Client(socket, protocols, transport, socket->localPort(), socket->socketDescriptor(),
-                                    address, port, socket->peerName(), LightBird::IClient::CLIENT, this, contexts);
+        Client *client = NULL;//new Client(socket, protocols, transport, socket->localPort(), LightBird::IClient::CLIENT, this, contexts);
         this->clients.push_back(client);
         socket->setParent(client);
         client->moveToThread(this);
@@ -280,7 +278,7 @@ void    Clients::_connect(QString id)
             client = it.peekPrevious();
     // Gets the future that is waiting for the connection
     QSharedPointer<Future<QString> > future(this->connections.value(id).first);
-    int wait = this->connections.value(id).second;
+    //int wait = this->connections.value(id).second;
     this->connections.remove(id);
     if (!client)
         return Log::error("Client not found", Properties("id", id), "Clients", "_connect");
@@ -289,7 +287,7 @@ void    Clients::_connect(QString id)
         // The connection is done outside the mutex
         mutex.unlock();
         // Connects to the client
-        client->getSocket().connectToHost(client->getPeerAddress(), client->getPeerPort());
+        /*client->getSocket().connectToHost(client->getPeerAddress(), client->getPeerPort());
         // Waits until the connection is established
         if (client->getSocket().waitForConnected(wait))
         {
@@ -301,7 +299,7 @@ void    Clients::_connect(QString id)
             LOG_ERROR("Connection failed", Properties("address", client->getPeerAddress().toString())
                       .add("port", client->getPeerPort())
                       .add("transport", (client->getTransport() == LightBird::INetwork::TCP ? "TCP" : "UDP"))
-                      .add("error", client->getSocket().errorString(), false), "Clients", "connect");
+                      .add("error", client->getSocket().errorString(), false), "Clients", "connect");*/
     }
 }
 
@@ -313,7 +311,7 @@ void    Clients::read(Client *client)
 void    Clients::_read(Client *client)
 {
     QByteArray  &data = client->getData();
-    int         read;
+    //int         read;
 
     data.clear();
     // Calls the IDoRead interface of the plugins
@@ -321,29 +319,29 @@ void    Clients::_read(Client *client)
     {
         // If no plugin implements it, the server read the data itself
         data.resize(client->getSocket().size());
-        if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
+        /*if ((read = client->getSocket().read(data.data(), data.size())) != data.size())
         {
             LOG_WARNING("An error occurred while reading the data", Properties("id", client->getId())
                         .add("error", read).add("size", data.size()), "Clients", "_read");
             data.resize(read);
-        }
+        }*/
     }
     client->bytesRead();
 }
 
-bool    Clients::write(QByteArray *data, Client *client)
+void Clients::write(Client *, const QByteArray &)
 {
     Mutex   mutex(this->mutex, "Clients", "write");
 
     if (!mutex)
-        return (false);
+        return ;
     // Creates the write buffer
-    QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, this->thread()));
+    /*QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, this->thread()));
     QObject::connect(writeBuffer.data(), SIGNAL(bytesWritten()), this, SLOT(_write()), Qt::QueuedConnection);
-    this->writeBuffer.insert(client, writeBuffer);
+    this->writeBuffer.insert(client, writeBuffer);*/
     // Writes the data via _write()
     emit writeSignal();
-    return (true);
+    return ;
 }
 
 void    Clients::_write()
@@ -369,22 +367,22 @@ void    Clients::_write()
         client = it.key();
         result = -1;
         // Ensures that we are still connected to the client
-        if (!w.isWritten() && client->getSocket().state() == QAbstractSocket::ConnectedState)
+        if (!w.isWritten() && client->getSocket().isConnected())
         {
             // The WriteBuffer is ready to write more data
-            if (!w.isWriting())
+            //if (!w.isWriting())
             {
                 // Tries to call the IDoWrite interface of the plugins
-                if (!client->doWrite(w.getData(), w.getSize(), result))
+                /*if (!client->doWrite(w.getData(), w.getSize(), result))
                     // If no plugins implements IDoWrite, we write the data ourselves
-                    result = client->getSocket().write(w.getData(), w.getSize());
-                w.bytesWriting(result);
+                    result = client->getSocket().write(w.getData(), w.getSize());*/
+                w.bytesWritten(result);
                 if (result < 0)
                     LOG_WARNING("An error occurred while writing the data", Properties("return", result).add("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
                 if (result == 0)
                     LOG_ERROR("Write returned 0", Properties("size", w.getTotalSize()).add("id", client->getId()), "Clients", "_write");
             }
-            else
+            //else
                 result = 0;
         }
         if (result < 0)
@@ -410,8 +408,8 @@ void    Clients::_disconnected()
     if ((socket = qobject_cast<QAbstractSocket *>(this->sender())))
     {
         // Searches the client associated with this socket
-        QListIterator<Client *> it(this->clients);
-        while (it.hasNext())
+        //QListIterator<Client *> it(this->clients);
+        /*while (it.hasNext())
             // And disconnect it
             if (&(it.next()->getSocket()) == socket)
             {
@@ -419,7 +417,7 @@ void    Clients::_disconnected()
                 // Removes the client from the write buffer since we won't be able to write to him anymore
                 this->writeBuffer.remove(it.peekPrevious());
                 break;
-            }
+            }*/
     }
 }
 

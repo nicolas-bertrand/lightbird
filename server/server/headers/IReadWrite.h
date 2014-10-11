@@ -23,10 +23,9 @@ public:
     /// The data have to be filled in the reference returned by Client::getData,
     /// from any thread. Client::bytesRead have to be called afterward.
     virtual void    read(Client *client) = 0;
-    /// @brief Writes the data on the stream. This method takes ownership
-    /// of the data, ie it takes the responsability to delete them.
-    /// Client::bytesWriting and bytesWritten have to be called afterward.
-    virtual bool    write(QByteArray *data, Client *client) = 0;
+    /// @brief Writes the data to the stream.
+    /// Client::bytesWritten have to be called afterward.
+    virtual void    write(Client *client, const QByteArray &data) = 0;
 };
 
 #endif // IREADWRITE_H

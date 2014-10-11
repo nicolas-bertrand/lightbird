@@ -34,6 +34,7 @@ QT += \
 TARGET = LightBird
 DESTDIR = ../build
 LIBS += -L../build -lLightBirdLibrary
+win32:LIBS += -lWs2_32
 
 # Resources
 RESOURCES = resources/resources.qrc
@@ -79,7 +80,12 @@ HEADERS += \
     headers/Request.h \
     headers/Response.h \
     headers/Server.h \
+    headers/ServerTcp.h \
+    headers/ServerTcpWindows.h \
     headers/Session.h \
+    headers/Socket.h \
+    headers/SocketTcp.h \
+    headers/SocketTcpWindows.h \
     headers/Thread.h \
     headers/ThreadPool.h \
     headers/Threads.h \
@@ -120,7 +126,12 @@ SOURCES += \
     sources/Request.cpp \
     sources/Response.cpp \
     sources/Server.cpp \
+    sources/ServerTcp.cpp \
+    sources/ServerTcpWindows.cpp \
     sources/Session.cpp \
+    sources/Socket.cpp \
+    sources/SocketTcp.cpp \
+    sources/SocketTcpWindows.cpp \
     sources/Thread.cpp \
     sources/ThreadPool.cpp \
     sources/Threads.cpp \

@@ -106,7 +106,7 @@ void    Plugin::onDestroy(LightBird::IClient &client)
     {
         session = client.getInformations().value("gnutls_session").value<gnutls_session_t>();
         // Properly terminates the TLS session
-        if (client.getSocket().state() == QAbstractSocket::ConnectedState)
+        if (client.getSocket().isConnected())
         {
             gnutls_transport_set_pull_function(session, Record::pull);
             gnutls_transport_set_push_function(session, Plugin::push);
@@ -121,7 +121,8 @@ ssize_t Plugin::push(gnutls_transport_ptr_t c, const void *data, size_t size)
 {
     LightBird::IClient  *client = (LightBird::IClient *)c;
 
-    return (send((SOCKET)client->getSocket().socketDescriptor(), (char *)data, (int)size, 0));
+    ssize_t result = client->getSocket().write((char *)data, (int)size);
+    return (result);
 }
 
 void    Plugin::log(gnutls_session_t, const char *log)

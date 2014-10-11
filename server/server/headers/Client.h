@@ -13,6 +13,7 @@
 # include "Context.h"
 # include "Future.hpp"
 # include "ThreadPool.h"
+# include "Socket.h"
 
 class Engine;
 
@@ -30,14 +31,10 @@ public:
     /// @param protocols : The protocols used to communicate with the client.
     /// @param transport : The transport protocol used by this client.
     /// @param port : The local port from which the client is connected.
-    /// @param socketDescriptor : The descriptor of the socket used by the client.
-    /// @param peerAddress : The address of the client.
-    /// @param peerPort : The port from which the client is connected in his host.
-    /// @param peerName : The name of the client's host. May be empty.
     /// @param mode : The connection mode of the client.
     /// @param readWriteInterface : Allows the client to read and write on the network.
     /// @param contexts : The names of the contexts of the client.
-    Client(QAbstractSocket *socket, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned short port, int socketDescriptor, const QHostAddress &peerAddress, unsigned short peerPort, const QString &peerName, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface, const QStringList &contexts = QStringList(QString()));
+    Client(QSharedPointer<Socket> socket, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned short port, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface, const QStringList &contexts = QStringList(QString()));
     ~Client();
 
     /// @brief Performs the actions of the client in a thread of the ThreadPool.
@@ -94,21 +91,20 @@ public:
     void    getInformations(LightBird::INetwork::Client &client, Future<bool> *future);
 
     // LightBird::IClient
-    const QString           &getId() const;
-    QAbstractSocket         &getSocket();
-    unsigned short          getPort() const;
-    const QStringList       &getProtocols() const;
-    LightBird::INetwork::Transport getTransport() const;
-    int                     getSocketDescriptor() const;
-    const QHostAddress      &getPeerAddress() const;
-    unsigned short          getPeerPort() const;
-    const QString           &getPeerName() const;
-    const QDateTime         &getConnectionDate() const;
-    quint64                 getBufferSize() const;
-    LightBird::IClient::Mode getMode() const;
-    QStringList             &getContexts();
-    QVariantMap             &getInformations();
-    LightBird::TableAccounts &getAccount();
+    inline const QString    &getId() const { return id; }
+    inline Socket           &getSocket() { return *socket; }
+    inline unsigned short   getPort() const { return port; }
+    inline const QStringList &getProtocols() const { return protocols; }
+    inline LightBird::INetwork::Transport getTransport() const { return transport; }
+    inline const QHostAddress &getPeerAddress() const { return socket->peerAddress(); }
+    inline unsigned short   getPeerPort() const { return socket->peerPort(); }
+    inline const QString    &getPeerName() const { return socket->peerName(); }
+    inline const QDateTime  &getConnectionDate() const { return connectionDate; }
+    inline quint64          getBufferSize() const { return (data.size() + socket->size()); }
+    inline LightBird::IClient::Mode getMode() const { return mode; }
+    inline QStringList      &getContexts() { return contexts; }
+    inline QVariantMap      &getInformations() { return informations; }
+    inline LightBird::TableAccounts &getAccount() { return account; }
     LightBird::IRequest     &getRequest();
     LightBird::IResponse    &getResponse();
     QStringList             getSessions(const QString &id_account = QString()) const;
@@ -225,16 +221,12 @@ private:
     LightBird::INetwork::Transport transport;     ///< The transport protocol used by the underlaying socket.
     QStringList              protocols;           ///< The names of the protocols used to communicate with the client.
     unsigned short           port;                ///< The local port through which the client is connected.
-    int                      socketDescriptor;    ///< The descriptor of the socket.
-    QHostAddress             peerAddress;         ///< The address of the client.
-    unsigned short           peerPort;            ///< The peer port through which the client is connected.
-    QString                  peerName;            ///< The name of the client's host (usually empty).
     LightBird::IClient::Mode mode;                ///< The connection mode of the client.
     IReadWrite               *readWriteInterface; ///< This interface is used to read and write data on network.
     QDateTime                connectionDate;      ///< The date of the connection, in local time.
     QStringList              contexts;            ///< The names of the contexts of the client.
     QVariantMap              informations;        ///< Contains information on the client.
-    QAbstractSocket          *socket;             ///< An abstract representation of the socket of the client.
+    QSharedPointer<Socket>   socket;              ///< An abstract representation of the socket of the client.
     LightBird::TableAccounts account;             ///< Allows the client to be identified as a know account.
     QByteArray               data;                ///< The data read on the network, waiting to be processed.
     Engine                   *engine;             ///< Used to process the requests and the responses.
