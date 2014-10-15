@@ -58,6 +58,8 @@ HEADERS += \
     headers/Arguments.h \
     headers/Client.h \
     headers/Clients.h \
+    headers/ClientsNetwork.h \
+    headers/ClientsNetworkWindows.h \
     headers/Configuration.h \
     headers/Configurations.h \
     headers/Content.h \
@@ -106,6 +108,8 @@ SOURCES += \
     sources/Arguments.cpp \
     sources/Client.cpp \
     sources/Clients.cpp \
+    sources/ClientsNetwork.cpp \
+    sources/ClientsNetworkWindows.cpp \
     sources/Configuration.cpp \
     sources/Configurations.cpp \
     sources/Content.cpp \

@@ -103,7 +103,8 @@ void    Server::_initialize()
     LightBird::Library::initialize();
     // Loads the network
     Log::info("Loading the network", "Server", "_initialize");
-    this->network = new Network(this);
+    if (!*(this->network = new Network(this)))
+        return Log::fatal("Failed to load the network", "Server", "_initialize");
     this->_loadNetwork();
     // Loads the plugins
     Log::info("Loading the plugins", "Server", "_initialize");

@@ -60,13 +60,13 @@ public:
     /// @brief The informations against which the context is validated.
     struct Validator
     {
-        Validator(QStringList &n, LightBird::IClient::Mode mo, LightBird::INetwork::Transport tr, QStringList &pr, ushort &po)
+        Validator(QStringList &n, LightBird::IClient::Mode mo, LightBird::INetwork::Transport tr, QStringList &pr, ushort po)
             : names(&n), mode(mo), transport(tr), protocols(&pr), port(po), method(NULL), type(NULL) {}
         const QStringList *names;
         const LightBird::IClient::Mode mode;
         const LightBird::INetwork::Transport transport;
         const QStringList *protocols;
-        const ushort      &port;
+        const ushort      port;
         const QString     *method;
         const QString     *type;
     };

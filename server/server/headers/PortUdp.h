@@ -43,7 +43,7 @@ private:
     QUdpSocket   socket;        ///< This UDP socket is bound on the port to receive all datagrams sent to it.
     Future<bool> threadStarted; ///< This future is unlocked when the thread is started.
     QMultiHash<Client *, QByteArray *> readBuffer; ///< The list of the datagrams read, waiting to be processed by the Client.
-    bool listenning; ///< True if the port is listenning the network.
+    bool listening; ///< True if the port is listening the network.
 };
 
 #endif // PORTUDP_H

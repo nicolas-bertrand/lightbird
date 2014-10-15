@@ -20,21 +20,20 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetwork::Transport t,
-               unsigned short p, LightBird::IClient::Mode m, IReadWrite *r, const QStringList &c)
+Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetwork::Transport t, LightBird::IClient::Mode m, IReadWrite *r, const QStringList &c)
     : transport(t)
     , protocols(pr)
-    , port(p)
     , mode(m)
     , readWriteInterface(r)
     , contexts(c)
     , socket(s)
-    , validator(contexts, mode, transport, protocols, port)
+    , validator(contexts, mode, transport, protocols, socket->localPort())
 {
     // Generates the uuid of the client
     this->id = LightBird::createUuid();
+    this->connecting = true;
     this->reading = false;
-    this->running = false;
+    this->running = true;
     this->writing = NULL;
     this->state = Client::NONE;
     this->pauseState = Pause::NONE;
@@ -49,8 +48,6 @@ Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetw
         this->engine = new EngineServer(*this);
     else
         this->engine = new EngineClient(*this);
-    // Adds a task to call the _onConnect method
-    this->_newTask(Client::CONNECT);
 }
 
 Client::~Client()
@@ -73,10 +70,7 @@ void    Client::run()
     switch (this->state)
     {
         case Client::CONNECT :
-            // Tries to connect to the client
-            if (!this->readWriteInterface->connect(this))
-                return this->_finish();
-            LOG_INFO("Client connected", Properties("id", this->id).add("port", this->port)
+            LOG_INFO("Client connected", Properties("id", this->id).add("localPort", socket->localPort())
                      .add("socket", ((socket->descriptor() >= 0) ? QString::number(socket->descriptor()) : ""), false)
                      .add("peerAddress", socket->peerAddress().toString()).add("peerName", socket->peerName(), false)
                      .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server")
@@ -141,6 +135,10 @@ void    Client::run()
             s = this->runStateDisconnect;
             break;
 
+        case Client::FINISH :
+            return this->_finish();
+            break;
+
         default:
             break;
     }
@@ -194,6 +192,18 @@ void    Client::run()
     // All the tasks of the client has been completed
     else
         this->running = false;
+}
+
+void    Client::connected(bool success)
+{
+    if (this->connecting)
+    {
+        this->connecting = false;
+        if (success)
+            this->_newTask(Client::CONNECT);
+        else
+            this->_newTask(Client::FINISH);
+    }
 }
 
 void    Client::readyRead()
@@ -551,7 +561,7 @@ bool    Client::_onDisconnect()
             finish = false;
         Plugins::instance()->release(it.next().key());
     }
-    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish).add("still connected", this->socket->isConnected()).add("fatal", this->disconnectFatal), "Client", "run");
+    LOG_INFO("Client disconnected", Properties("id", this->id).add("disconnecting", !finish).add("still connected", this->socket->isConnected()).add("fatal", this->disconnectFatal).add("socket", this->socket->descriptor()), "Client", "run");
     return (finish);
 }
 
@@ -609,11 +619,6 @@ bool    Client::isDisconnecting() const
 QByteArray  &Client::getData()
 {
     return (this->data);
-}
-
-void    Client::setPort(unsigned short port)
-{
-    this->port = port;
 }
 
 QString Client::getProtocol(QString protocol)
@@ -690,7 +695,7 @@ void    Client::_getInformations(LightBird::INetwork::Client &client, Future<boo
 {
     client.transport = this->transport;
     client.protocols = this->protocols;
-    client.port = this->port;
+    client.localPort = socket->localPort();
     client.peerAddress = socket->peerAddress();
     client.peerPort = socket->peerPort();
     client.peerName = socket->peerName();
@@ -709,5 +714,6 @@ void    Client::_finish()
     // Finishes the client
     this->_onDestroy();
     this->disconnectState = Disconnect::DISCONNECTED;
+    this->socket->close();
     emit this->finished();
 }

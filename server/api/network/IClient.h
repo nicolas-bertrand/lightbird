@@ -42,8 +42,6 @@ namespace LightBird
         virtual const QString        &getId() const = 0;
         /// @brief The socket through which the client is connected.
         virtual LightBird::ISocket   &getSocket() = 0;
-        /// @brief The local port from which the client is connected.
-        virtual unsigned short       getPort() const = 0;
         /// @brief The name of the protocols used to communicate with the client.
         virtual const QStringList    &getProtocols() const = 0;
         /// @brief The transport protocol used by the connection.

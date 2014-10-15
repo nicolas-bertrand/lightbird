@@ -8,14 +8,37 @@
 #include "Server.h"
 #include "Mutex.h"
 
+#ifdef Q_OS_WIN
+# include <WinSock2.h>
+# include <Ws2tcpip.h>
+#endif // Q_OS_WIN
+
 Network::Network(QObject *parent)
     : QObject(parent)
+    , clients(NULL)
 {
+#ifdef Q_OS_WIN
+    // Initializes Winsock on Windows
+    WSADATA wsaData;
+    int result = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if (result != 0)
+    {
+        LOG_FATAL("WSAStartup failed", Properties("result", result), "ServerTcpWindows", "ServerTcpWindows");
+        return ;
+    }
+#endif // Q_OS_WIN
+
+    this->clients = new Clients();
+    isInitialized(*this->clients);
 }
 
 Network::~Network()
 {
     this->shutdown();
+#ifdef Q_OS_WIN
+    // Cleans Winsock on Windows
+    WSACleanup();
+#endif // Q_OS_WIN
     LOG_TRACE("Network destroyed!", "Network", "~Network");
 }
 
@@ -105,7 +128,7 @@ bool    Network::getClient(const QString &id, LightBird::INetwork::Client &clien
     if (!mutex)
         return (false);
     // The client is connected in CLIENT mode
-    Future<bool> clients(this->clients.getClient(id, client, found));
+    Future<bool> clients(this->clients->getClient(id, client, found));
     if (found)
     {
         mutex.unlock();
@@ -139,7 +162,7 @@ QStringList Network::getClients(int port, LightBird::INetwork::Transport transpo
         return (QStringList());
     // Gets the clients in CLIENT mode
     if (port < 0)
-        result = this->clients.getClients();
+        result = this->clients->getClients();
     // Gets the clients of the port
     else if (this->ports[transport].contains(port))
         result = this->ports[transport][port]->getClients();
@@ -148,7 +171,7 @@ QStringList Network::getClients(int port, LightBird::INetwork::Transport transpo
 
 Future<QString> Network::connect(const QHostAddress &address, quint16 port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QVariantMap &informations, const QStringList &contexts, int wait)
 {
-    return (this->clients.connect(address, port, protocols, transport, informations, contexts, wait));
+    return (this->clients->connect(address, port, protocols, transport, informations, contexts, wait));
 }
 
 bool    Network::disconnect(const QString &id, bool fatal)
@@ -158,7 +181,7 @@ bool    Network::disconnect(const QString &id, bool fatal)
 
     if (!mutex)
         return (false);
-    found = this->clients.disconnect(id, fatal);
+    found = this->clients->disconnect(id, fatal);
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext() && !found)
     {
@@ -176,7 +199,7 @@ bool    Network::send(const QString &idClient, const QString &idPlugin, const QS
 
     if (!mutex)
         return (false);
-    if (this->clients.send(idClient, idPlugin, protocol, informations))
+    if (this->clients->send(idClient, idPlugin, protocol, informations))
         return (true);
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext())
@@ -191,7 +214,7 @@ bool    Network::send(const QString &idClient, const QString &idPlugin, const QS
 
 bool    Network::receive(const QString &idClient, const QString &protocol, const QVariantMap &informations)
 {
-    return (this->clients.receive(idClient, protocol, informations));
+    return (this->clients->receive(idClient, protocol, informations));
 }
 
 bool    Network::pause(const QString &idClient, int msec)
@@ -200,7 +223,7 @@ bool    Network::pause(const QString &idClient, int msec)
 
     if (!mutex)
         return (false);
-    if (this->clients.pause(idClient, msec))
+    if (this->clients->pause(idClient, msec))
         return (true);
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext())
@@ -219,7 +242,7 @@ bool    Network::resume(const QString &idClient)
 
     if (!mutex)
         return (false);
-    if (this->clients.resume(idClient))
+    if (this->clients->resume(idClient))
         return (true);
     QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
     while (transport.hasNext())
@@ -244,16 +267,10 @@ void    Network::shutdown()
     {
         QMapIterator<unsigned short, Port *> it(transport.next().value());
         while (it.hasNext())
-            it.next().value()->quit();
+            it.next().value()->close();
     }
-    transport.toFront();
-    // Waits until the threads are finished
-    while (transport.hasNext())
-    {
-        QMapIterator<unsigned short, Port *> it(transport.next().value());
-        while (it.hasNext())
-            it.next().value()->wait();
-    }
+    if (this->clients)
+        this->clients->close();
     transport.toFront();
     // Destroys the ports
     while (transport.hasNext())
@@ -263,6 +280,8 @@ void    Network::shutdown()
             delete it.next().value();
     }
     this->ports.clear();
+    delete this->clients;
+    this->clients = NULL;
 }
 
 void    Network::_finished()

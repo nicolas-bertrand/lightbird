@@ -83,7 +83,7 @@ bool    Plugin::onConnect(LightBird::IClient &client)
     Parser  *parser = NULL;
 
     // Control connection
-    if (client.getMode() == LightBird::IClient::SERVER && !this->configuration.passivePorts.contains(client.getPort()))
+    if (client.getMode() == LightBird::IClient::SERVER && !this->configuration.passivePorts.contains(client.getSocket().localPort()))
     {
         client.getContexts() << CONTROL_CONNECTION;
         parser = new ParserControl(*this->api, client);
@@ -202,7 +202,7 @@ QSharedPointer<Mutex> Plugin::getControlConnection(LightBird::IClient &client, Q
 {
     QSharedPointer<Mutex> mutex(new Mutex(Plugin::instance->mutex, "Plugin", "getControlConnection"));
     QHostAddress ip(client.getPeerAddress());
-    ushort       port = client.getPort();
+    ushort       port = client.getSocket().localPort();
 
     isValid = false;
     // Ensures that no over data client is waiting for the same control connection

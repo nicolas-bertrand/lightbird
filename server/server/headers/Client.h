@@ -30,15 +30,19 @@ public:
     /// @param socket : The socket from which the client is connected.
     /// @param protocols : The protocols used to communicate with the client.
     /// @param transport : The transport protocol used by this client.
-    /// @param port : The local port from which the client is connected.
     /// @param mode : The connection mode of the client.
     /// @param readWriteInterface : Allows the client to read and write on the network.
     /// @param contexts : The names of the contexts of the client.
-    Client(QSharedPointer<Socket> socket, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned short port, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface, const QStringList &contexts = QStringList(QString()));
+    Client(QSharedPointer<Socket> socket, const QStringList &protocols, LightBird::INetwork::Transport transport, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface, const QStringList &contexts = QStringList(QString()));
     ~Client();
 
     /// @brief Performs the actions of the client in a thread of the ThreadPool.
     void                    run();
+    /// @brief Must be called as soon as the connection to the client is done,
+    /// which is immediate in SERVER mode, but may take some time in CLIENT mode.
+    /// If the connection failed the client is finished.
+    /// @param success : True if the connection succeeded, false otherwise.
+    void                    connected(bool success);
     /// @brief Called by the readWriteInterface to notifity the Client that data
     /// have been read and are ready to be processed.
     void                    bytesRead();
@@ -67,8 +71,6 @@ public:
     /// @brief Returns the data buffer of the client. This method should only be
     /// used when the Client is in reading phase.
     QByteArray              &getData();
-    /// @brief Changes the port member of the client (doesn't affect the real port).
-    void                    setPort(unsigned short port);
     /// @brief Checks if the client accepts the protocol in parameter. If it is
     /// empty, the first protocol in the protocols list is returned. If nothing
     /// is returned, the protocol is invalid.
@@ -93,7 +95,6 @@ public:
     // LightBird::IClient
     inline const QString    &getId() const { return id; }
     inline Socket           &getSocket() { return *socket; }
-    inline unsigned short   getPort() const { return port; }
     inline const QStringList &getProtocols() const { return protocols; }
     inline LightBird::INetwork::Transport getTransport() const { return transport; }
     inline const QHostAddress &getPeerAddress() const { return socket->peerAddress(); }
@@ -145,9 +146,10 @@ private:
         SEND,       ///< Data have to be sent to the client.
         RECEIVE,    ///< Data have to be received without sending a request.
         RUN,        ///< The engine is running.
-        DISCONNECT, ///< The client is going to be disconnected.
         PAUSE,      ///< The network workflow has to be paused.
         RESUME,     ///< The network workflow has to be resumed.
+        DISCONNECT, ///< The client is going to be disconnected.
+        FINISH,     ///< The client will be finished and can't be used anymore.
         NONE        ///< The client is idle.
     };
     /// @brief The pause states of the network workflow.
@@ -220,7 +222,6 @@ private:
     QString                  id;                  ///< The id of the client.
     LightBird::INetwork::Transport transport;     ///< The transport protocol used by the underlaying socket.
     QStringList              protocols;           ///< The names of the protocols used to communicate with the client.
-    unsigned short           port;                ///< The local port through which the client is connected.
     LightBird::IClient::Mode mode;                ///< The connection mode of the client.
     IReadWrite               *readWriteInterface; ///< This interface is used to read and write data on network.
     QDateTime                connectionDate;      ///< The date of the connection, in local time.
@@ -231,6 +232,7 @@ private:
     QByteArray               data;                ///< The data read on the network, waiting to be processed.
     Engine                   *engine;             ///< Used to process the requests and the responses.
     State                    state;               ///< The state of the client.
+    bool                     connecting;          ///< True while the client is connecting. connected() have to be called if the connection succeeded.
     RunState                 runStatePause;       ///< Used to restore the state of the client in order to complete its tasks after resuming.
     RunState                 runStateDisconnect;  ///< Used to restore the state of the client in order to complete its tasks before disconnecting.
     bool                     running;             ///< A task is running in a thread of the threadpool.

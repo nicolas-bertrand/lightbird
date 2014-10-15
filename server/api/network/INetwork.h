@@ -35,7 +35,7 @@ namespace LightBird
         {
             Transport       transport;      ///< The transport protocol used by the underlaying socket.
             QStringList     protocols;      ///< The names of the protocols used to communicate with the client.
-            unsigned short  port;           ///< The local port through which the client is connected.
+            unsigned short  localPort;      ///< The local port through which the client is connected.
             int             descriptor;     ///< The descriptor of the socket.
             QHostAddress    peerAddress;    ///< The address of the client.
             unsigned short  peerPort;       ///< The peer port through which the client is connected.

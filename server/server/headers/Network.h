@@ -12,9 +12,12 @@
 # include "Clients.h"
 # include "Future.hpp"
 # include "Port.h"
+# include "Initialize.h"
 
 /// @brief Manages the network.
-class Network : public QObject
+class Network
+    : public QObject
+    , public LightBird::Initialize
 {
     Q_OBJECT
 
@@ -63,7 +66,7 @@ private:
 
     typedef QMap<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > PortList;
     PortList               ports;   ///< The list of the open ports.
-    Clients                clients; ///< Manages the clients in CLIENT mode.
+    Clients                *clients; ///< Manages the clients in CLIENT mode.
     mutable QReadWriteLock mutex;   ///< Makes the class thread safe.
 };
 

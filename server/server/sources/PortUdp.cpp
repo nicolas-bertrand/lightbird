@@ -8,7 +8,7 @@
 
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
     : Port(port, LightBird::INetwork::UDP, protocols, maxClients)
-    , listenning(false)
+    , listening(false)
 {
     this->moveToThread(this);
     this->socket.moveToThread(this);
@@ -40,12 +40,12 @@ void    PortUdp::run()
     }
     LOG_INFO("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" "))
              .add("transport", "UDP").add("maxClients", this->getMaxClients()), "PortUdp", "PortUdp");
-    this->listenning = true;
+    this->listening = true;
     this->threadStarted.setResult(true);
     this->exec();
     Mutex mutex(this->mutex, "PortUdp", "run");
     this->socket.close();
-    this->listenning = false;
+    this->listening = false;
     // Removes the unread datagrams
     QHashIterator<Client *, QByteArray *> readBuffer(this->readBuffer);
     while (readBuffer.hasNext())
@@ -63,7 +63,7 @@ void    PortUdp::close()
 
     if (!mutex)
         return ;
-    this->listenning = false;
+    this->listening = false;
     // Close the udp socket and disconect its signals
     this->socket.close();
     this->socket.disconnect();
@@ -171,5 +171,5 @@ Client  *PortUdp::_finished(Client *client)
 
 bool PortUdp::isListening() const
 {
-    return this->listenning;
+    return this->listening;
 }

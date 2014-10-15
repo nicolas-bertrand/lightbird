@@ -13,12 +13,6 @@ class IReadWrite
 public:
     virtual ~IReadWrite() {}
 
-    /// @brief This method can be reimplemented in order to connect the
-    /// server to a client.
-    virtual bool    connect(Client *)
-    {
-        return (true);
-    }
     /// @brief Tells the network that the client is ready to read more data.
     /// The data have to be filled in the reference returned by Client::getData,
     /// from any thread. Client::bytesRead have to be called afterward.

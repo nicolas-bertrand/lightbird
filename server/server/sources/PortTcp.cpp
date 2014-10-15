@@ -1,5 +1,4 @@
 #include <QCoreApplication>
-#include <QTcpSocket>
 
 #include "Log.h"
 #include "PortTcp.h"
@@ -25,6 +24,7 @@ PortTcp::~PortTcp()
         return ;
     if (_serverTcp)
         _serverTcp->close();
+    mutex.unlock();
     // Quit the thread if it is still running
     this->quit();
     this->wait();
@@ -51,7 +51,6 @@ void PortTcp::run()
     // This method only returns when the port is closed
     _serverTcp->execute();
     Mutex mutex(this->mutex, "PortTcp", "run");
-    _serverTcp->close();
     // If some clients are still running, we wait for them
     if (this->clients.size())
         _threadFinished.wait(&this->mutex);
@@ -69,7 +68,8 @@ void PortTcp::close()
     if (!mutex)
         return ;
     // Stop listening on the network
-    _serverTcp->close();
+    if (_serverTcp)
+        _serverTcp->close();
     // Disconnects all the clients in the map
     if (this->clients.size() > 0)
         for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
@@ -94,19 +94,16 @@ void PortTcp::_newConnection()
         if ((socket = _serverTcp->nextPendingConnection()))
         {
             // Creates the client
-            client = new Client(socket, this->protocols, this->transport, this->port, LightBird::IClient::SERVER, this);
+            client = new Client(socket, this->protocols, this->transport, LightBird::IClient::SERVER, this);
+            client->connected(true);
             // Adds the client
             this->clients.push_back(QSharedPointer<Client>(client));
+            // When new data are received on this socket, Client::readyRead is called
+            QObject::connect(socket.data(), SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::DirectConnection);
+            // When the socket is disconnected, _disconnected() is called
+            QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
             // When the client is finished, _finished is called
             QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
-            // When new data are received on this socket, readyRead() is called on the client
-            QObject::connect(socket.data(), SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::DirectConnection);
-            // When all the data have been written on this socket, bytesWritten() is called on the client
-            QObject::connect(socket.data(), SIGNAL(bytesWritten()), client, SLOT(bytesWritten()), Qt::DirectConnection);
-            // When the client is disconnected, _disconnected() is called
-            QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
-            // Read the data received between the creation of the client and the connection of the read signal
-            client->readyRead();
         }
     }
 }
@@ -211,6 +208,8 @@ void PortTcp::_write()
                 client->bytesWritten();
             }
         }
+        else
+            it.remove();
     }
 
     mutex.lock();
@@ -234,6 +233,7 @@ void PortTcp::_disconnected(Socket *socket)
             // Removes the client from the write buffer since we won't be able to write to him anymore
             if (_writeBuffers.remove(it.peekNext()))
                 it.peekNext()->bytesWritten();
+            break;
         }
 }
 
