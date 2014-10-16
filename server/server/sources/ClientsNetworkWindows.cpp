@@ -1,5 +1,6 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "Log.h"
+#include "Mutex.h"
 #include "ClientsNetworkWindows.h"
 #ifdef Q_OS_WIN
 #include <Ws2tcpip.h>
@@ -90,20 +91,11 @@ void ClientsNetworkWindows::execute()
                         else
                         {
                             if (_fds[i].revents & POLLRDNORM)
-                            {
-                                Log::fatal("READ " + QString::number(socketTcp->size()));
                                 socketTcp->readyRead();
-                            }
                             if (_fds[i].revents & POLLWRNORM)
-                            {
-                                Log::fatal("WRITE");
                                 socketTcp->readyWrite();
-                            }
                             if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
-                            {
-                                Log::fatal("DISCONNECT");
                                 _disconnect(socketTcp, i);
-                            }
                         }
                     }
                     else
@@ -113,6 +105,10 @@ void ClientsNetworkWindows::execute()
                     if (--result <= 0)
                         break;
                 }
+
+        // Checks if there is any sockets to add
+        if (socketsToAdd.size())
+            _addSockets();
     }
     _disconnectAll();
     return ;
@@ -120,19 +116,39 @@ void ClientsNetworkWindows::execute()
 
 void ClientsNetworkWindows::addSocket(QSharedPointer<Socket> socket, int wait)
 {
-    WSAPOLLFD fd;
-    // In TCP we need to connect check if the socket is connected first
-    if (socket->transport() == LightBird::INetwork::TCP)
-        fd.events = POLLRDNORM | POLLWRNORM;
-    else
-        fd.events = POLLRDNORM;
-    fd.fd = socket->descriptor();
-    _fds.append(fd);
-    _sockets.append(socket);
-    _connections.append(_fds.size() - 1);
-    if (socket->transport() == LightBird::INetwork::TCP)
-        static_cast<SocketTcpWindows *>(socket.data())->setFdEvents(&_fds.last().events);
+    Mutex mutex(_socketsToAddMutex, "ClientsNetworkWindows", "addSocket");
+    if (!mutex)
+        return ;
+    _socketsToAdd.append(qMakePair(socket, wait));
+    mutex.unlock();
     _interruptPoll();
+}
+
+void ClientsNetworkWindows::_addSockets()
+{
+    Mutex mutex(_socketsToAddMutex, "ClientsNetworkWindows", "_addSockets");
+    if (!mutex)
+        return ;
+
+    for (QMutableListIterator<QPair<QSharedPointer<Socket>, int> > it(_socketsToAdd); it.hasNext(); it.next())
+    {
+        WSAPOLLFD fd;
+        QSharedPointer<Socket> &socket = it.peekNext().first;
+        int &wait = it.peekNext().second;
+
+        // In TCP we need to connect check if the socket is connected first
+        if (socket->transport() == LightBird::INetwork::TCP)
+            fd.events = POLLRDNORM | POLLWRNORM;
+        else
+            fd.events = POLLRDNORM;
+        fd.fd = socket->descriptor();
+        _fds.append(fd);
+        _sockets.append(socket);
+        _connections.append(_fds.size() - 1);
+        if (socket->transport() == LightBird::INetwork::TCP)
+            static_cast<SocketTcpWindows *>(socket.data())->setFdEvents(&_fds.last().events);
+    }
+    _socketsToAdd.clear();
 }
 
 void ClientsNetworkWindows::close()

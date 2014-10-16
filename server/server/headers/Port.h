@@ -1,7 +1,6 @@
 #ifndef PORT_H
 # define PORT_H
 
-# include <QAbstractSocket>
 # include <QReadWriteLock>
 # include <QString>
 # include <QStringList>

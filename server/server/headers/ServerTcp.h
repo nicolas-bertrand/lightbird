@@ -28,6 +28,7 @@ public:
     inline bool hasPendingConnections() const { return !_pendingConnections.isEmpty(); }
     /// @brief Returns the next pending connection as a connected SocketTcp object.
     /// NULL is returned if this function is called when there are no pending connections.
+    /// @warning Must be called in the same thread as execute().
     QSharedPointer<Socket> nextPendingConnection();
     /// @brief Closes the server. The server will no longer listen for incoming connections.
     virtual void close() = 0;

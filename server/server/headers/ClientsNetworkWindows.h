@@ -8,6 +8,7 @@
 #include <winsock2.h>
 
 /// @brief Windows implementation of ClientsNetwork.
+/// This class is thread safe as long as execute() is called once.
 class ClientsNetworkWindows : public ClientsNetwork
 {
 public:
@@ -16,12 +17,14 @@ public:
 
     /// @brief This method only returns when the Clients is closed.
     void execute();
-    /// @brief Returns a socket to manage.
+    /// @brief Adds a socket to manage.
     void addSocket(QSharedPointer<Socket> socket, int wait = -1);
     /// @brief Closes all the clients, making execute() return.
     void close();
 
 private:
+    /// @brief Adds a socket to manage.
+    void _addSockets();
     /// @brief A client has been disconnected.
     void _disconnect(SocketTcpWindows *socketTcp, int &i);
     /// @brief Disconnects all the sockets.
@@ -36,6 +39,8 @@ private:
     QVector<WSAPOLLFD> _fds; ///< The FD used by WSAPoll.
     QList<QSharedPointer<Socket> > _sockets; ///< The list of the sockets connected to the clients.
     QList<int> _connections; ///< The list of the connecting sockets.
+    QList<QPair<QSharedPointer<Socket>, int> > _socketsToAdd; ///< The list of the sockets so add. This allows addSocket() to be thread safe.
+    QMutex _socketsToAddMutex; ///< Allows _socketsToAdd to be thread safe.
 
     /// @brief Allows to interrupt WSAPoll by writing a UDP datagram.
     /// @see _interruptPoll

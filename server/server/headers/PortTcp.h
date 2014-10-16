@@ -32,9 +32,9 @@ public slots:
 private slots:
     /// @brief This slot is called when a new connection is pending on the port of the serverTcp.
     void    _newConnection();
-    /// @brief Called when the a socket is ready to write data.
+    /// @brief Writes the data that could not be wrote in write().
     void    _write();
-    /// @brief Called when a QTcpSocket is disconnected.
+    /// @brief Called when a socket is disconnected.
     void    _disconnected(Socket *socket);
     /// @brief Called when a client is finished and should be destroyed.
     void    _finished();
