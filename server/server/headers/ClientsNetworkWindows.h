@@ -25,6 +25,10 @@ public:
 private:
     /// @brief Adds a socket to manage.
     void _addSockets();
+    /// @brief The connection to the socket is done (success or not).
+    void _connected(SocketTcpWindows *socketTcp, int i);
+    /// @brief The connection to the socket failed.
+    void _connectionFailed(int i);
     /// @brief A client has been disconnected.
     void _disconnect(SocketTcpWindows *socketTcp, int &i);
     /// @brief Disconnects all the sockets.
@@ -38,7 +42,7 @@ private:
     int _wsaPollTimeout; ///< The timeout of the WSAPoll.
     QVector<WSAPOLLFD> _fds; ///< The FD used by WSAPoll.
     QList<QSharedPointer<Socket> > _sockets; ///< The list of the sockets connected to the clients.
-    QList<int> _connections; ///< The list of the connecting sockets.
+    QMap<qint64, int> _connections; ///< The list of the connecting sockets, sorted by their timeout.
     QList<QPair<QSharedPointer<Socket>, int> > _socketsToAdd; ///< The list of the sockets so add. This allows addSocket() to be thread safe.
     QMutex _socketsToAddMutex; ///< Allows _socketsToAdd to be thread safe.
 

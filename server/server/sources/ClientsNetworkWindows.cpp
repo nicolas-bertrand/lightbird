@@ -2,8 +2,10 @@
 #include "Log.h"
 #include "Mutex.h"
 #include "ClientsNetworkWindows.h"
+#include <limits>
 #ifdef Q_OS_WIN
 #include <Ws2tcpip.h>
+#undef max
 
 ClientsNetworkWindows::ClientsNetworkWindows()
     : _wsaPollTimeout(1000)
@@ -27,15 +29,17 @@ void ClientsNetworkWindows::execute()
     int sockAddrLen;
     SocketTcpWindows *socketTcp;
     //SocketUdpWindows *socketUdp;
+    int timeout = _wsaPollTimeout;
 
     _listening = true;
     while (_listening)
     {
-        if ((result = WSAPoll(_fds.data(), _fds.size(), _wsaPollTimeout)) == SOCKET_ERROR)
+        if ((result = WSAPoll(_fds.data(), _fds.size(), timeout)) == SOCKET_ERROR)
         {
             LOG_ERROR("An error occured while executing the TCP server: WSAPoll failed", Properties("error", WSAGetLastError()), "ClientsNetworkWindows", "execute");
             break;
         }
+        timeout = _wsaPollTimeout;
 
         // WSAPoll was interrupted
         if (_fds[0].revents)
@@ -57,22 +61,20 @@ void ClientsNetworkWindows::execute()
         }
 
         // Checks the state of the connection of each connecting sockets (WSAPoll won't tell us if a connection failed)
-        if (result == 0 && _connections.size())
+        if (result == 0 && !_connections.isEmpty())
         {
             int error = 0;
             int errorSize = sizeof(error);
-            for (int i = 0, s = _connections.size(); i < s; ++i)
-                if ((getsockopt(_fds[_connections[i]].fd, SOL_SOCKET, SO_ERROR, (char *)&error, &errorSize)) == SOCKET_ERROR || error)
+            QMutableMapIterator<qint64, int> it(_connections);
+            while (it.hasNext())
+            {
+                it.next();
+                if ((getsockopt(_fds[it.value()].fd, SOL_SOCKET, SO_ERROR, (char *)&error, &errorSize)) == SOCKET_ERROR || error)
                 {
-                    int j = _connections[i];
-                    socketTcp = static_cast<SocketTcpWindows *>(_sockets[j - 1].data());
-                    socketTcp->connected(false);
-                    socketTcp->setFdEvents(NULL);
-                    _fds.remove(j);
-                    _sockets.removeAt(j - 1);
-                    _connections.removeAt(i--);
-                    s--;
+                    _connectionFailed(it.value());
+                    it.remove();
                 }
+            }
         }
 
         // Checks the other clients
@@ -84,10 +86,7 @@ void ClientsNetworkWindows::execute()
                     {
                         socketTcp = static_cast<SocketTcpWindows *>(_sockets[i - 1].data());
                         if (socketTcp->isConnecting())
-                        {
-                            socketTcp->connected((_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) == 0);
-                            _connections.removeOne(i);
-                        }
+                            _connected(socketTcp, i);
                         else
                         {
                             if (_fds[i].revents & POLLRDNORM)
@@ -107,8 +106,27 @@ void ClientsNetworkWindows::execute()
                 }
 
         // Checks if there is any sockets to add
-        if (socketsToAdd.size())
+        if (!_socketsToAdd.isEmpty())
             _addSockets();
+
+        // Checks the timeout of the connections
+        if (!_connections.isEmpty())
+        {
+            qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+            // The socket could not connect to the client in the given time
+            while (_connections.firstKey() - currentTime <= 0)
+            {
+                _connectionFailed(_connections.first());
+                QMutableMapIterator<qint64, int> it(_connections);
+                it.next();
+                it.remove();
+                if (_connections.isEmpty())
+                    break;
+            }
+            // Sets the next timeout
+            if (!_connections.isEmpty())
+                timeout = qMin(_wsaPollTimeout, int(_connections.firstKey() - currentTime));
+        }
     }
     _disconnectAll();
     return ;
@@ -134,7 +152,7 @@ void ClientsNetworkWindows::_addSockets()
     {
         WSAPOLLFD fd;
         QSharedPointer<Socket> &socket = it.peekNext().first;
-        int &wait = it.peekNext().second;
+        qint64 wait = it.peekNext().second;
 
         // In TCP we need to connect check if the socket is connected first
         if (socket->transport() == LightBird::INetwork::TCP)
@@ -144,7 +162,9 @@ void ClientsNetworkWindows::_addSockets()
         fd.fd = socket->descriptor();
         _fds.append(fd);
         _sockets.append(socket);
-        _connections.append(_fds.size() - 1);
+        if (wait < 0)
+            wait = std::numeric_limits<int>::max();
+        _connections.insert(QDateTime::currentMSecsSinceEpoch() + wait, _fds.size() - 1);
         if (socket->transport() == LightBird::INetwork::TCP)
             static_cast<SocketTcpWindows *>(socket.data())->setFdEvents(&_fds.last().events);
     }
@@ -164,6 +184,38 @@ void ClientsNetworkWindows::close()
     _interrupt.clientSocket = INVALID_SOCKET;
 }
 
+void ClientsNetworkWindows::_connected(SocketTcpWindows *socketTcp, int i)
+{
+    bool result = ((_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) == 0);
+
+    // Sets the result of the connection
+    if (result)
+        socketTcp->connected(true);
+    else
+        _connectionFailed(i);
+
+    // Removes the socket from the connections list
+    QMutableMapIterator<qint64, int> it(_connections);
+    while (it.hasNext())
+    {
+        it.next();
+        if (it.value() == i)
+        {
+            it.remove();
+            break;
+        }
+    }
+}
+
+void ClientsNetworkWindows::_connectionFailed(int i)
+{
+    SocketTcpWindows *socketTcp = static_cast<SocketTcpWindows *>(_sockets[i - 1].data());
+    socketTcp->connected(false);
+    socketTcp->setFdEvents(NULL);
+    _fds.remove(i);
+    _sockets.removeAt(i - 1);
+}
+
 void ClientsNetworkWindows::_disconnect(SocketTcpWindows *socketTcp, int &i)
 {
     socketTcp->disconnected();
@@ -178,7 +230,7 @@ void ClientsNetworkWindows::_disconnectAll()
     for (int i = 1; i < _fds.size(); ++i)
     {
         SocketTcpWindows *socketTcp = static_cast<SocketTcpWindows *>(_sockets[i - 1].data());
-        if (_connections.removeOne(i))
+        if (!_connections.keys(i).isEmpty())
             socketTcp->connected(false);
         else
             socketTcp->disconnected();
@@ -212,7 +264,7 @@ bool ClientsNetworkWindows::_createInterruptSockets()
 
         // Resolves the local address and port to be used by the server
         struct addrinfo *addrInfo = NULL, hints;
-        ZeroMemory(&hints, sizeof (hints));
+        ZeroMemory(&hints, sizeof(hints));
         hints.ai_family = AF_INET6;
         hints.ai_socktype = SOCK_DGRAM;
         hints.ai_protocol = IPPROTO_UDP;
