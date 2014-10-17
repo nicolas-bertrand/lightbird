@@ -88,6 +88,8 @@ HEADERS += \
     headers/Socket.h \
     headers/SocketTcp.h \
     headers/SocketTcpWindows.h \
+    headers/SocketUdp.h \
+    headers/SocketUdpWindows.h \
     headers/Thread.h \
     headers/ThreadPool.h \
     headers/Threads.h \
@@ -136,6 +138,8 @@ SOURCES += \
     sources/Socket.cpp \
     sources/SocketTcp.cpp \
     sources/SocketTcpWindows.cpp \
+    sources/SocketUdp.cpp \
+    sources/SocketUdpWindows.cpp \
     sources/Thread.cpp \
     sources/ThreadPool.cpp \
     sources/Threads.cpp \

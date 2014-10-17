@@ -217,7 +217,8 @@ private:
     /// @brief Fills the informations of the client in the client struct, and unlock the future.
     void    _getInformations(LightBird::INetwork::Client &client, Future<bool> *future);
     /// @brief Emit the finished signal and set disconnected to true.
-    void    _finish();
+    /// @param onDestroy : True if onDestroy have to be called.
+    void    _finish(bool onDestroy = true);
 
     QString                  id;                  ///< The id of the client.
     LightBird::INetwork::Transport transport;     ///< The transport protocol used by the underlaying socket.

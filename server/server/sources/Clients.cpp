@@ -4,6 +4,7 @@
 #include "Log.h"
 #include "Mutex.h"
 #include "SocketTcp.h"
+#include "SocketUdp.h"
 #include "Threads.h"
 
 Clients::Clients()
@@ -94,26 +95,27 @@ Future<QString> Clients::connect(const QHostAddress &address
     else
     {
         // Ensures that the client is not already connected
-        QListIterator<QSharedPointer<Client> > it(this->clients);
-        while (it.hasNext())
-        {
+        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
             if (it.peekNext()->getPeerAddress() == address && it.peekNext()->getPeerPort() == port)
                 return (Future<QString>(it.peekNext()->getId()));
-            it.next();
-        }
-        // Creates the socket and connects it virtually to the peer
-        /*QUdpSocket *socket = new QUdpSocket(NULL);
-        socket->connectToHost(address, port);
+        // Creates the socket
+        QSharedPointer<Socket> socket(SocketUdp::create(address, port));
+        if (!socket->isConnected())
+            return (Future<QString>());
         // Creates the client
-        Client *client = NULL;//new Client(socket, protocols, transport, socket->localPort(), LightBird::IClient::CLIENT, this, contexts);
-        this->clients.push_back(client);
-        socket->setParent(client);
-        client->moveToThread(this);
-        // When new data are received on this socket, Client::read is called
-        QObject::connect(socket, SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::QueuedConnection);*/
+        Client *client = new Client(socket, protocols, transport, LightBird::IClient::CLIENT, this, contexts);
+        client->getInformations() = informations;
+        this->clients.push_back(QSharedPointer<Client>(client));
+        // When new data are received on this socket, Client::readyRead is called
+        QObject::connect(socket.data(), SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::DirectConnection);
+        // When the socket is disconnected, _disconnected is called
+        QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
         // When the client is finished, _finished is called
-        //QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::QueuedConnection);
-        //return (Future<QString>(client->getId()));
+        QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+        // The client is now connected
+        _network->addSocket(socket);
+        client->connected(true);
+        return (Future<QString>(client->getId()));
     }
     return (Future<QString>());
 }

@@ -28,7 +28,7 @@ void ClientsNetworkWindows::execute()
     QVector<char> buf(64 * 1024);
     int sockAddrLen;
     SocketTcpWindows *socketTcp;
-    //SocketUdpWindows *socketUdp;
+    SocketUdpWindows *socketUdp;
     int timeout = _wsaPollTimeout;
 
     _listening = true;
@@ -99,7 +99,13 @@ void ClientsNetworkWindows::execute()
                     }
                     else
                     {
-
+                        socketUdp = static_cast<SocketUdpWindows *>(_sockets[i - 1].data());
+                        if (_fds[i].revents & POLLRDNORM)
+                            socketUdp->readyRead();
+                        if (_fds[i].revents & POLLWRNORM)
+                            socketUdp->readyWrite();
+                        if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+                            _disconnect(socketUdp, i);
                     }
                     if (--result <= 0)
                         break;
@@ -162,11 +168,17 @@ void ClientsNetworkWindows::_addSockets()
         fd.fd = socket->descriptor();
         _fds.append(fd);
         _sockets.append(socket);
-        if (wait < 0)
-            wait = std::numeric_limits<int>::max();
-        _connections.insert(QDateTime::currentMSecsSinceEpoch() + wait, _fds.size() - 1);
+
+        // Perpares the TCP connection
         if (socket->transport() == LightBird::INetwork::TCP)
+        {
+            if (wait < 0)
+                wait = std::numeric_limits<int>::max();
+            _connections.insert(QDateTime::currentMSecsSinceEpoch() + wait, _fds.size() - 1);
             static_cast<SocketTcpWindows *>(socket.data())->setFdEvents(&_fds.last().events);
+        }
+        else
+            static_cast<SocketUdpWindows *>(socket.data())->setFdEvents(&_fds.last().events);
     }
     _socketsToAdd.clear();
 }
@@ -224,17 +236,34 @@ void ClientsNetworkWindows::_disconnect(SocketTcpWindows *socketTcp, int &i)
     _fds.remove(i--);
 }
 
+void ClientsNetworkWindows::_disconnect(SocketUdpWindows *socketUdp, int &i)
+{
+    socketUdp->disconnected();
+    socketUdp->setFdEvents(NULL);
+    _sockets.removeAt(i - 1);
+    _fds.remove(i--);
+}
+
 void ClientsNetworkWindows::_disconnectAll()
 {
     close();
     for (int i = 1; i < _fds.size(); ++i)
     {
-        SocketTcpWindows *socketTcp = static_cast<SocketTcpWindows *>(_sockets[i - 1].data());
-        if (!_connections.keys(i).isEmpty())
-            socketTcp->connected(false);
+        if (_sockets[i - 1]->transport() == LightBird::INetwork::TCP)
+        {
+            SocketTcpWindows *socketTcp = static_cast<SocketTcpWindows *>(_sockets[i - 1].data());
+            if (!_connections.keys(i).isEmpty())
+                socketTcp->connected(false);
+            else
+                socketTcp->disconnected();
+            socketTcp->setFdEvents(NULL);
+        }
         else
-            socketTcp->disconnected();
-        socketTcp->setFdEvents(NULL);
+        {
+            SocketUdpWindows *socketUdp = static_cast<SocketUdpWindows *>(_sockets[i - 1].data());
+            socketUdp->disconnected();
+            socketUdp->setFdEvents(NULL);
+        }
     }
     _fds.clear();
     _sockets.clear();
@@ -270,7 +299,6 @@ bool ClientsNetworkWindows::_createInterruptSockets()
         hints.ai_protocol = IPPROTO_UDP;
         hints.ai_flags = AI_PASSIVE;
         int addrinfoResult;
-
         if ((addrinfoResult = getaddrinfo("::1", "0", &hints, &addrInfo)))
         {
             LOG_ERROR("Server getaddrinfo failed", Properties("error", addrinfoResult), "ClientsNetworkWindows", "_createInterruptSockets");
@@ -280,7 +308,7 @@ bool ClientsNetworkWindows::_createInterruptSockets()
         // Binds the TCP listening socket to the address and port
         if (bind(_interrupt.serverSocket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen) == SOCKET_ERROR)
         {
-            LOG_ERROR("Unable to find a valid port to bind the server interrupt socket", "ClientsNetworkWindows", "_createInterruptSockets");
+            LOG_ERROR("Unable to find a valid port to bind the server interrupt socket", Properties("error", WSAGetLastError()), "ClientsNetworkWindows", "_createInterruptSockets");
             freeaddrinfo(addrInfo);
             return false;
         }

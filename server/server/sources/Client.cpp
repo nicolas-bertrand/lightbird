@@ -71,10 +71,11 @@ void    Client::run()
     {
         case Client::CONNECT :
             LOG_INFO("Client connected", Properties("id", this->id).add("localPort", socket->localPort())
-                     .add("socket", ((socket->descriptor() >= 0) ? QString::number(socket->descriptor()) : ""), false)
+                     .add("socket", socket->descriptor(), false)
+                     .add("transport", (socket->transport() == LightBird::INetwork::TCP) ? "TCP" : "UDP")
                      .add("peerAddress", socket->peerAddress().toString()).add("peerName", socket->peerName(), false)
-                     .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server")
-                     .add("peerPort", socket->peerPort()), "Client", "run");
+                     .add("peerPort", socket->peerPort())
+                     .add("mode", (this->getMode() == LightBird::IClient::CLIENT) ? "client" : "server"), "Client", "run");
             // If the client is not allowed to connect, it is disconnected
             if (!this->_onConnect())
                 return this->_finish();
@@ -136,7 +137,7 @@ void    Client::run()
             break;
 
         case Client::FINISH :
-            return this->_finish();
+            return this->_finish(false);
             break;
 
         default:
@@ -706,13 +707,14 @@ void    Client::_getInformations(LightBird::INetwork::Client &client, Future<boo
     delete future;
 }
 
-void    Client::_finish()
+void    Client::_finish(bool onDestroy)
 {
     // Calls IOnResume before finishing the client if it is paused
     if (this->pauseState != Pause::NONE)
         this->_onResume();
     // Finishes the client
-    this->_onDestroy();
+    if (onDestroy)
+        this->_onDestroy();
     this->disconnectState = Disconnect::DISCONNECTED;
     this->socket->close();
     emit this->finished();

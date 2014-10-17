@@ -3,6 +3,7 @@
 
 #include "ClientsNetwork.h"
 #include "SocketTcpWindows.h"
+#include "SocketUdpWindows.h"
 
 #ifdef Q_OS_WIN
 #include <winsock2.h>
@@ -31,6 +32,7 @@ private:
     void _connectionFailed(int i);
     /// @brief A client has been disconnected.
     void _disconnect(SocketTcpWindows *socketTcp, int &i);
+    void _disconnect(SocketUdpWindows *socketUdp, int &i);
     /// @brief Disconnects all the sockets.
     void _disconnectAll();
     /// @brief Creates the client and server sockets that allow to interrupt WSAPoll.
