@@ -58,18 +58,16 @@ public:
     virtual void    write(Client *client, const QByteArray &data) = 0;
 
 protected:
+    Port(const Port &);
+    Port &operator=(const Port &);
+
     /// @brief The main method of the thread.
     void            run() = 0;
     /// @brief Returns the shared pointer of a client.
     QSharedPointer<Client> _getClient(Client *client);
 
-    QList<QSharedPointer<Client> > clients; ///< Contains the list of all the clients connected to this port.
-    mutable QReadWriteLock mutex; ///< Makes this class is thread safe.
-
-protected:
-    Port(const Port &);
-    Port &operator=(const Port &);
-
+    QList<QSharedPointer<Client> > _clients; ///< Contains the list of all the clients connected to this port.
+    mutable QReadWriteLock _mutex; ///< Makes this class is thread safe.
     LightBird::INetwork::Transport _transport; ///< The transport protocol used by the port.
     QStringList _protocols; ///< The names of the protocols used to communicate with the clients connected to this port.
     unsigned short _port; ///< The number of the port.

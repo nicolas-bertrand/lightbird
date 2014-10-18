@@ -10,7 +10,7 @@ PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int
     , _serverUdp(NULL)
     , _maxReadBufferSize(1000)
 {
-    this->moveToThread(this);
+    moveToThread(this);
     // Starts the thread
     Threads::instance()->newThread(this, false);
     // Waits that the thread is started
@@ -19,7 +19,7 @@ PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int
 
 PortUdp::~PortUdp()
 {
-    Mutex mutex(this->mutex, "PortUdp", "~PortUdp");
+    Mutex mutex(_mutex, "PortUdp", "~PortUdp");
 
     if (!mutex)
         return ;
@@ -27,8 +27,8 @@ PortUdp::~PortUdp()
         _serverUdp->close();
     mutex.unlock();
     // Quit the thread if it is still running
-    this->quit();
-    this->wait();
+    quit();
+    wait();
     delete _serverUdp;
     LOG_TRACE("Port UDP destroyed!", Properties("port", _port), "PortUdp", "~PortUdp");
 }
@@ -41,8 +41,8 @@ void    PortUdp::run()
     if (!_serverUdp->isListening())
     {
         LOG_ERROR("Failed to listen on the port", Properties("port", _port).add("protocols", _protocols.join(" ")).add("transport", "UDP").add("maxClients", _maxClients), "PortUdp", "run");
-        this->_threadStarted.setResult(false);
-        this->moveToThread(QCoreApplication::instance()->thread());
+        _threadStarted.setResult(false);
+        moveToThread(QCoreApplication::instance()->thread());
         return ;
     }
     // When a client connects to the server, the slot _newConnection is called
@@ -51,25 +51,25 @@ void    PortUdp::run()
     _threadStarted.setResult(true);
     // This method only returns when the port is closed
     _serverUdp->execute();
-    Mutex mutex(this->mutex, "PortUdp", "run");
+    Mutex mutex(_mutex, "PortUdp", "run");
     // If some clients are still running, we wait for them
-    if (this->clients.size())
-        _threadFinished.wait(&this->mutex);
+    if (_clients.size())
+        _threadFinished.wait(&_mutex);
     // Remove the remaining clients
-    this->clients.clear();
+    _clients.clear();
     _writeBuffers.clear();
     // Removes the unread datagrams
-    QHashIterator<Client *, QByteArray *> readBuffer(this->_readBuffer);
+    QHashIterator<Client *, QByteArray *> readBuffer(_readBuffer);
     while (readBuffer.hasNext())
         delete readBuffer.next().value();
     _readBuffer.clear();
-    this->moveToThread(QCoreApplication::instance()->thread());
+    moveToThread(QCoreApplication::instance()->thread());
     LOG_INFO("Port closed", Properties("port", _port), "PortUdp", "run");
 }
 
 void    PortUdp::close()
 {
-    Mutex mutex(this->mutex, "PortUdp", "close");
+    Mutex mutex(_mutex, "PortUdp", "close");
 
     if (!mutex)
         return ;
@@ -77,8 +77,8 @@ void    PortUdp::close()
     if (_serverUdp)
         _serverUdp->close();
     // Disconnects all the clients in the map
-    if (this->clients.size() > 0)
-        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    if (_clients.size() > 0)
+        for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
             it.peekNext()->disconnect();
     // Or quit the thread if there is already no remaining clients
     else
@@ -87,7 +87,7 @@ void    PortUdp::close()
 
 void    PortUdp::_readPendingDatagrams()
 {
-    Mutex mutex(this->mutex, "PortUdp", "_readPendingDatagrams");
+    Mutex mutex(_mutex, "PortUdp", "_readPendingDatagrams");
     Client *client;
     QHostAddress peerAddress;
     quint16 peerPort;
@@ -104,13 +104,13 @@ void    PortUdp::_readPendingDatagrams()
         _serverUdp->readDatagram(data->data(), data->size(), peerAddress, peerPort);
         client = NULL;
         // Checks if the client is already connected
-        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
             if (it.peekNext()->getPeerAddress() == peerAddress && it.peekNext()->getPeerPort() == peerPort)
             {
                 client = it.peekNext().data();
                 break;
             }
-        if ((client || (uint)this->clients.size() < _maxClients) && (uint)_readBuffer.size() < _maxReadBufferSize)
+        if ((client || (uint)_clients.size() < _maxClients) && (uint)_readBuffer.size() < _maxReadBufferSize)
         {
             // If the client does not exist yet it is created
             if (client == NULL)
@@ -119,12 +119,12 @@ void    PortUdp::_readPendingDatagrams()
                 client = new Client(_serverUdp->getListenSocket(), _protocols, _transport, LightBird::IClient::SERVER, this);
                 client->connected(true);
                 // Adds the client
-                this->clients.push_back(QSharedPointer<Client>(client));
+                _clients.push_back(QSharedPointer<Client>(client));
                 // When the client is finished, _finished is called
                 QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
             }
             // Notifies the Client that data are ready to be read
-            this->_readBuffer.insert(client, data);
+            _readBuffer.insert(client, data);
             client->readyRead();
         }
         // There is already too many clients connected
@@ -135,7 +135,7 @@ void    PortUdp::_readPendingDatagrams()
 
 void    PortUdp::read(Client *client)
 {
-    Mutex       mutex(this->mutex, "PortUdp", "read");
+    Mutex       mutex(_mutex, "PortUdp", "read");
     QByteArray  &data = client->getData();
     quint64     size = 0;
 
@@ -143,7 +143,7 @@ void    PortUdp::read(Client *client)
         return ;
     data.clear();
     // Gets the total size of the data buffers of this client
-    QListIterator<QByteArray *> it(this->_readBuffer.values(client));
+    QListIterator<QByteArray *> it(_readBuffer.values(client));
     while (it.hasNext())
         size += it.next()->size();
     data.resize(size);
@@ -154,7 +154,7 @@ void    PortUdp::read(Client *client)
         data.append(*it.peekNext());
         delete it.next();
     }
-    this->_readBuffer.remove(client);
+    _readBuffer.remove(client);
     client->bytesRead();
 }
 
@@ -177,7 +177,7 @@ void PortUdp::write(Client *client, const QByteArray &data)
             // The socket is not ready to write more data, so we wait until readyWrite is emited
             else if (result == 0)
             {
-                Mutex mutex(this->mutex, "PortTcp", "write");
+                Mutex mutex(_mutex, "PortTcp", "write");
                 if (!mutex)
                     return ;
                 QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, written));
@@ -203,7 +203,7 @@ void PortUdp::_write()
     Client *client;
     qint64 result;
     QHash<QSharedPointer<Client>, QSharedPointer<WriteBuffer> > writeBuffer;
-    Mutex mutex(this->mutex, "PortUdp", "_write");
+    Mutex mutex(_mutex, "PortUdp", "_write");
 
     if (!mutex || _writeBuffers.isEmpty())
         return ;
@@ -253,12 +253,12 @@ void PortUdp::_write()
 
 void PortUdp::_finished()
 {
-    Mutex mutex(this->mutex, "PortUdp", "_finished");
+    Mutex mutex(_mutex, "PortUdp", "_finished");
 
     if (!mutex)
         return ;
     // Searches the clients that have been finished
-    QMutableListIterator<QSharedPointer<Client> > it(this->clients);
+    QMutableListIterator<QSharedPointer<Client> > it(_clients);
     while (it.hasNext())
         if (it.next()->isFinished())
         {
@@ -268,7 +268,7 @@ void PortUdp::_finished()
                 delete it2.next();
             _readBuffer.remove(it.peekPrevious().data());
             it.remove();
-            if (clients.size() == 0 && !_serverUdp->isListening())
+            if (_clients.size() == 0 && !_serverUdp->isListening())
                 _threadFinished.wakeAll();
         }
 }

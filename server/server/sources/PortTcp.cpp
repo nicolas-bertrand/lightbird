@@ -9,7 +9,7 @@ PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int
     : Port(port, LightBird::INetwork::TCP, protocols, maxClients)
     , _serverTcp(NULL)
 {
-    this->moveToThread(this);
+    moveToThread(this);
     // Starts the thread
     Threads::instance()->newThread(this, false);
     // Waits that the thread is started
@@ -18,7 +18,7 @@ PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int
 
 PortTcp::~PortTcp()
 {
-    Mutex mutex(this->mutex, "PortTcp", "~PortTcp");
+    Mutex mutex(_mutex, "PortTcp", "~PortTcp");
 
     if (!mutex)
         return ;
@@ -26,8 +26,8 @@ PortTcp::~PortTcp()
         _serverTcp->close();
     mutex.unlock();
     // Quit the thread if it is still running
-    this->quit();
-    this->wait();
+    quit();
+    wait();
     delete _serverTcp;
     LOG_TRACE("Port TCP destroyed!", Properties("port", _port), "PortTcp", "~PortTcp");
 }
@@ -40,8 +40,8 @@ void PortTcp::run()
     if (!_serverTcp->isListening())
     {
         LOG_ERROR("Failed to listen on the port", Properties("port", _port).add("protocols", _protocols.join(" ")).add("transport", "TCP").add("maxClients", _maxClients), "PortTcp", "run");
-        this->_threadStarted.setResult(false);
-        this->moveToThread(QCoreApplication::instance()->thread());
+        _threadStarted.setResult(false);
+        moveToThread(QCoreApplication::instance()->thread());
         return ;
     }
     // When a client connects to the server, the slot _newConnection is called
@@ -50,20 +50,20 @@ void PortTcp::run()
     _threadStarted.setResult(true);
     // This method only returns when the port is closed
     _serverTcp->execute();
-    Mutex mutex(this->mutex, "PortTcp", "run");
+    Mutex mutex(_mutex, "PortTcp", "run");
     // If some clients are still running, we wait for them
-    if (this->clients.size())
-        _threadFinished.wait(&this->mutex);
+    if (_clients.size())
+        _threadFinished.wait(&_mutex);
     // Remove the remaining clients
-    this->clients.clear();
+    _clients.clear();
     _writeBuffers.clear();
-    this->moveToThread(QCoreApplication::instance()->thread());
+    moveToThread(QCoreApplication::instance()->thread());
     LOG_INFO("Port closed", Properties("port", _port), "PortTcp", "run");
 }
 
 void PortTcp::close()
 {
-    Mutex mutex(this->mutex, "PortTcp", "close");
+    Mutex mutex(_mutex, "PortTcp", "close");
 
     if (!mutex)
         return ;
@@ -71,8 +71,8 @@ void PortTcp::close()
     if (_serverTcp)
         _serverTcp->close();
     // Disconnects all the clients in the map
-    if (this->clients.size() > 0)
-        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    if (_clients.size() > 0)
+        for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
             it.peekNext()->disconnect();
     // Or quit the thread if there is already no remaining clients
     else
@@ -81,23 +81,23 @@ void PortTcp::close()
 
 void PortTcp::_newConnection()
 {
-    Mutex mutex(this->mutex, "PortTcp", "_newConnection");
+    Mutex mutex(_mutex, "PortTcp", "_newConnection");
     QSharedPointer<Socket> socket;
     Client *client;
 
     if (!mutex)
         return ;
     // Iterates other all the pending connections
-    while (_serverTcp->hasPendingConnections() && (unsigned int)this->clients.size() < _maxClients)
+    while (_serverTcp->hasPendingConnections() && (unsigned int)_clients.size() < _maxClients)
     {
         // Creates the socket of the client if the socket is in connected state
         if ((socket = _serverTcp->nextPendingConnection()))
         {
             // Creates the client
-            client = new Client(socket, this->_protocols, this->_transport, LightBird::IClient::SERVER, this);
+            client = new Client(socket, _protocols, _transport, LightBird::IClient::SERVER, this);
             client->connected(true);
             // Adds the client
-            this->clients.push_back(QSharedPointer<Client>(client));
+            _clients.push_back(QSharedPointer<Client>(client));
             // When new data are received on this socket, Client::readyRead is called
             QObject::connect(socket.data(), SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::DirectConnection);
             // When the socket is disconnected, _disconnected() is called
@@ -144,7 +144,7 @@ void PortTcp::write(Client *client, const QByteArray &data)
             // The socket is not ready to write more data, so we wait until readyWrite is emited
             else if (result == 0)
             {
-                Mutex mutex(this->mutex, "PortTcp", "write");
+                Mutex mutex(_mutex, "PortTcp", "write");
                 if (!mutex)
                     return ;
                 QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, written));
@@ -170,7 +170,7 @@ void PortTcp::_write()
     Client *client;
     qint64 result;
     QHash<QSharedPointer<Client>, QSharedPointer<WriteBuffer> > writeBuffer;
-    Mutex mutex(this->mutex, "PortTcp", "_write");
+    Mutex mutex(_mutex, "PortTcp", "_write");
 
     if (!mutex || _writeBuffers.isEmpty())
         return ;
@@ -220,12 +220,12 @@ void PortTcp::_write()
 
 void PortTcp::_disconnected(Socket *socket)
 {
-    Mutex mutex(this->mutex, Mutex::READ, "PortTcp", "_disconnected");
+    Mutex mutex(_mutex, Mutex::READ, "PortTcp", "_disconnected");
 
     if (!mutex)
         return ;
     // Searches the client associated with this socket
-    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
         if (&it.peekNext()->getSocket() == socket)
         {
             // Removes the client of the disconnected socket
@@ -239,17 +239,17 @@ void PortTcp::_disconnected(Socket *socket)
 
 void PortTcp::_finished()
 {
-    Mutex mutex(this->mutex, "PortTcp", "_finished");
+    Mutex mutex(_mutex, "PortTcp", "_finished");
 
     if (!mutex)
         return ;
     // Searches the clients that have been finished
-    QMutableListIterator<QSharedPointer<Client> > it(this->clients);
+    QMutableListIterator<QSharedPointer<Client> > it(_clients);
     while (it.hasNext())
         if (it.next()->isFinished())
         {
             it.remove();
-            if (this->clients.size() == 0 && !_serverTcp->isListening())
+            if (_clients.size() == 0 && !_serverTcp->isListening())
                 _threadFinished.wakeAll();
         }
 }
