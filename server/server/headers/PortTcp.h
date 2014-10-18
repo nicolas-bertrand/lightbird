@@ -1,7 +1,6 @@
 #ifndef PORTTCP_H
 # define PORTTCP_H
 
-# include <QPair>
 # include <QSharedPointer>
 
 # include "ServerTcp.h"
@@ -25,8 +24,6 @@ public:
 
     // IReadWrite
     void    read(Client *client);
-
-public slots:
     void    write(Client *client, const QByteArray &data);
 
 private slots:

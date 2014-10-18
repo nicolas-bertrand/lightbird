@@ -14,7 +14,7 @@ public:
     /// @brief Creates a new socket (client mode).
     SocketUdpWindows(const QHostAddress &peerAddress, quint16 peerPort);
     /// @brief Builds the UDP socket around an existing socket (server mode).
-    SocketUdpWindows(const QHostAddress &peerAddress, quint16 peerPort, quint16 localPort, SOCKET socket);
+    SocketUdpWindows(quint16 localPort, qintptr socket);
     ~SocketUdpWindows();
 
     // SocketUdp
@@ -40,6 +40,7 @@ private:
     int _peerAddressSize; ///< The size of the peer address (depends on IPv4 or IPv6).
     short *_events; ///< The WSAPoll events of this socket. Must never point to an invalid address.
     short _noEvents; ///< The address pointed by _events when it is not set.
+    bool _disableWriteBuffer; ///< True to disable the write buffer (less CPU overhead, but more protocol overhead).
 };
 
 #endif // Q_OS_WIN

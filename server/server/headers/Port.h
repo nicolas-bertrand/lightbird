@@ -19,7 +19,7 @@ class Port : public QThread,
     Q_OBJECT
 
 public:
-    Port(unsigned short port, LightBird::INetwork::Transport transport,
+    Port(unsigned short _port, LightBird::INetwork::Transport transport,
          const QStringList &protocols = QStringList(), unsigned int maxClients = ~0);
     virtual ~Port();
 
@@ -38,20 +38,21 @@ public:
     bool            pause(const QString &idClient, int msec = -1);
     /// @see LightBird::INetwork::resume
     bool            resume(const QString &idClient);
-    /// @brief Closes the port. Denies all the new connections to the port and
-    /// remove all the clients currently connected.
-    virtual void    close();
-    /// @brief Returns the port number.
-    unsigned short  getPort() const;
-    /// @brief Returns the transport protocol used by this port.
-    LightBird::INetwork::Transport getTransport() const;
-    /// @brief Returns the names of the protocols used to communicate with the
-    /// clients connected to this port.
-    const QStringList &getProtocols() const;
-    /// @brief Returns the maximum number of clients connected to this port.
-    unsigned int    getMaxClients() const;
     /// @brief Returns true if the port is listening the network.
     virtual bool    isListening() const = 0;
+    /// @brief Closes the port. Denies all the new connections to the port and
+    /// remove all the clients currently connected.
+    virtual void    close() = 0;
+    /// @brief Returns the port number.
+    inline unsigned short getPort() const { return _port; }
+    /// @brief Returns the transport protocol used by this port.
+    inline LightBird::INetwork::Transport getTransport() const { return _transport; }
+    /// @brief Returns the names of the protocols used to communicate with the
+    /// clients connected to this port.
+    inline const QStringList &getProtocols() const { return _protocols; }
+    /// @brief Returns the maximum number of clients connected to this port.
+    inline unsigned int getMaxClients() const { return _maxClients; }
+
     // IReadWrite
     virtual void    read(Client *client) = 0;
     virtual void    write(Client *client, const QByteArray &data) = 0;
@@ -59,31 +60,20 @@ public:
 protected:
     /// @brief The main method of the thread.
     void            run() = 0;
-    /// @brief Adds a new client.
-    /// @param socket : The socket through which the client is connected.
-    /// @return The new client.
-    Client          *_addClient(Socket *socket);
     /// @brief Returns the shared pointer of a client.
     QSharedPointer<Client> _getClient(Client *client);
 
     QList<QSharedPointer<Client> > clients; ///< Contains the list of all the clients connected to this port.
     mutable QReadWriteLock mutex; ///< Makes this class is thread safe.
 
-protected slots:
-    /// @brief Called when a client is finished.
-    /// @param client : The finished client. If not provided, the first finished
-    /// client will be used.
-    /// @return The address of the finished Client (no longer valid), or NULL.
-    virtual Client  *_finished(Client *client = NULL);
-
 protected:
     Port(const Port &);
     Port &operator=(const Port &);
 
-    LightBird::INetwork::Transport  transport;  ///< The transport protocol used by the port.
-    QStringList                     protocols;  ///< The names of the protocols used to communicate with the clients connected to this port.
-    unsigned short                  port;       ///< The number of the port.
-    unsigned int                    maxClients; ///< The maximum number of clients simultaneously connected.
+    LightBird::INetwork::Transport _transport; ///< The transport protocol used by the port.
+    QStringList _protocols; ///< The names of the protocols used to communicate with the clients connected to this port.
+    unsigned short _port; ///< The number of the port.
+    unsigned int _maxClients; ///< The maximum number of clients simultaneously connected.
 };
 
 #endif // PORT_H

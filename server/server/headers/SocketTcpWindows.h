@@ -39,6 +39,7 @@ private:
     sockaddr_in6 _sockaddr;
     short *_events; ///< The WSAPoll events of this socket. Must never point to an invalid address.
     short _noEvents; ///< The address pointed by _events when it is not set.
+    bool _disableWriteBuffer; ///< True to disable the write buffer (less CPU overhead, but more protocol overhead).
 };
 
 #endif // Q_OS_WIN

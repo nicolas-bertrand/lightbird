@@ -29,24 +29,24 @@ PortTcp::~PortTcp()
     this->quit();
     this->wait();
     delete _serverTcp;
-    LOG_TRACE("Port TCP destroyed!", Properties("port", this->getPort()), "PortTcp", "~PortTcp");
+    LOG_TRACE("Port TCP destroyed!", Properties("port", _port), "PortTcp", "~PortTcp");
 }
 
 void PortTcp::run()
 {
     // Creates the TCP server
-    _serverTcp = ServerTcp::create(port);
+    _serverTcp = ServerTcp::create(_port);
     // Listen on the given port
     if (!_serverTcp->isListening())
     {
-        LOG_ERROR("Failed to listen on the port", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" ")).add("transport", "TCP").add("maxClients", this->getMaxClients()), "PortTcp", "PortTcp");
+        LOG_ERROR("Failed to listen on the port", Properties("port", _port).add("protocols", _protocols.join(" ")).add("transport", "TCP").add("maxClients", _maxClients), "PortTcp", "run");
         this->_threadStarted.setResult(false);
         this->moveToThread(QCoreApplication::instance()->thread());
         return ;
     }
     // When a client connects to the server, the slot _newConnection is called
     QObject::connect(_serverTcp, SIGNAL(newConnection()), this, SLOT(_newConnection()), Qt::DirectConnection);
-    LOG_INFO("Listening...", Properties("port", this->getPort()).add("protocols", this->getProtocols().join(" ")).add("transport", "TCP").add("maxClients", this->getMaxClients()), "PortTcp", "PortTcp");
+    LOG_INFO("Listening...", Properties("port", _port).add("protocols", _protocols.join(" ")).add("transport", "TCP").add("maxClients", _maxClients), "PortTcp", "run");
     _threadStarted.setResult(true);
     // This method only returns when the port is closed
     _serverTcp->execute();
@@ -58,7 +58,7 @@ void PortTcp::run()
     this->clients.clear();
     _writeBuffers.clear();
     this->moveToThread(QCoreApplication::instance()->thread());
-    LOG_INFO("Port closed", Properties("port", this->getPort()), "PortTcp", "PortTcp");
+    LOG_INFO("Port closed", Properties("port", _port), "PortTcp", "run");
 }
 
 void PortTcp::close()
@@ -88,13 +88,13 @@ void PortTcp::_newConnection()
     if (!mutex)
         return ;
     // Iterates other all the pending connections
-    while (_serverTcp->hasPendingConnections() && (unsigned int)this->clients.size() < this->getMaxClients())
+    while (_serverTcp->hasPendingConnections() && (unsigned int)this->clients.size() < _maxClients)
     {
         // Creates the socket of the client if the socket is in connected state
         if ((socket = _serverTcp->nextPendingConnection()))
         {
             // Creates the client
-            client = new Client(socket, this->protocols, this->transport, LightBird::IClient::SERVER, this);
+            client = new Client(socket, this->_protocols, this->_transport, LightBird::IClient::SERVER, this);
             client->connected(true);
             // Adds the client
             this->clients.push_back(QSharedPointer<Client>(client));

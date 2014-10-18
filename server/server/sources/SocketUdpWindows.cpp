@@ -8,6 +8,7 @@ SocketUdpWindows::SocketUdpWindows(const QHostAddress &peerAddress, quint16 peer
     , _events(&_noEvents)
     , _peerAddress(NULL)
     , _peerAddressRecv(NULL)
+    , _disableWriteBuffer(true)
 {
     _socket = INVALID_SOCKET;
     _connected = false;
@@ -23,7 +24,7 @@ SocketUdpWindows::SocketUdpWindows(const QHostAddress &peerAddress, quint16 peer
     int addrinfoResult;
     if ((addrinfoResult = getaddrinfo(addressArray.data(), portArray.data(), &hints, &addrInfo)))
     {
-        LOG_ERROR("Server getaddrinfo failed", Properties("error", addrinfoResult), "SocketUdpWindows", "SocketUdpWindows");
+        LOG_ERROR("Server getaddrinfo failed", Properties("error", addrinfoResult).add("peerPort", peerPort).add("peerAddress", peerAddress.toString()), "SocketUdpWindows", "SocketUdpWindows");
         return ;
     }
     if (addrInfo->ai_family == AF_INET)
@@ -38,7 +39,7 @@ SocketUdpWindows::SocketUdpWindows(const QHostAddress &peerAddress, quint16 peer
     }
     else
     {
-        LOG_ERROR("Unsuported ai_family", Properties("ai_family", addrInfo->ai_family), "SocketUdpWindows", "SocketUdpWindows");
+        LOG_ERROR("Unsuported ai_family", Properties("ai_family", addrInfo->ai_family).add("peerPort", peerPort).add("peerAddress", peerAddress.toString()), "SocketUdpWindows", "SocketUdpWindows");
         freeaddrinfo(addrInfo);
         return ;
     }
@@ -48,11 +49,19 @@ SocketUdpWindows::SocketUdpWindows(const QHostAddress &peerAddress, quint16 peer
     // Creates the socket to listen to
     if ((_socket = _descriptor = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol)) == INVALID_SOCKET)
     {
-        LOG_ERROR("Server socket() failed", Properties("error", WSAGetLastError()), "SocketUdpWindows", "SocketUdpWindows");
+        LOG_ERROR("Server socket() failed", Properties("error", WSAGetLastError()).add("peerPort", peerPort).add("peerAddress", peerAddress.toString()), "SocketUdpWindows", "SocketUdpWindows");
         freeaddrinfo(addrInfo);
         return ;
     }
     freeaddrinfo(addrInfo);
+
+    // Disables the write buffer
+    int sndbuff = 0;
+    if (_disableWriteBuffer && setsockopt(_socket, SOL_SOCKET, SO_SNDBUF, (char *)&sndbuff, sizeof(sndbuff)) == SOCKET_ERROR)
+    {
+        LOG_ERROR("setsockopt SO_SNDBUF failed", Properties("error", WSAGetLastError()).add("peerPort", peerPort).add("peerAddress", peerAddress.toString()), "ServerUdpWindows", "ServerUdpWindows");
+        return ;
+    }
 
     // Non blocking mode
     u_long nonBlockingMode = 1;
@@ -64,16 +73,13 @@ SocketUdpWindows::SocketUdpWindows(const QHostAddress &peerAddress, quint16 peer
     _connected = true;
 }
 
-SocketUdpWindows::SocketUdpWindows(const QHostAddress &peerAddress, quint16 peerPort, quint16 localPort, SOCKET socket)
-    : SocketUdp(peerAddress, peerPort, localPort, socket)
+SocketUdpWindows::SocketUdpWindows(quint16 localPort, qintptr socket)
+    : SocketUdp(QHostAddress(), 0, localPort, socket)
     , _events(&_noEvents)
     , _peerAddress(NULL)
     , _peerAddressRecv(NULL)
+    , _disableWriteBuffer(true)
 {
-    // Non blocking mode
-    u_long nonBlockingMode = 1;
-    if ((ioctlsocket(_socket, FIONBIO, &nonBlockingMode)) == SOCKET_ERROR)
-        LOG_DEBUG("Failed to set the socket in non blocking mode", Properties("error", WSAGetLastError()).add("socket", _socket), "SocketUdpWindows", "SocketUdpWindows");
 }
 
 SocketUdpWindows::~SocketUdpWindows()

@@ -84,6 +84,8 @@ HEADERS += \
     headers/Server.h \
     headers/ServerTcp.h \
     headers/ServerTcpWindows.h \
+    headers/ServerUdp.h \
+    headers/ServerUdpWindows.h \
     headers/Session.h \
     headers/Socket.h \
     headers/SocketTcp.h \
@@ -134,6 +136,8 @@ SOURCES += \
     sources/Server.cpp \
     sources/ServerTcp.cpp \
     sources/ServerTcpWindows.cpp \
+    sources/ServerUdp.cpp \
+    sources/ServerUdpWindows.cpp \
     sources/Session.cpp \
     sources/Socket.cpp \
     sources/SocketTcp.cpp \

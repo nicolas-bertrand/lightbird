@@ -6,6 +6,7 @@
 SocketTcpWindows::SocketTcpWindows(const QHostAddress &peerAddress, quint16 peerPort)
     : SocketTcp(peerAddress, peerPort, 0, INVALID_SOCKET)
     , _events(&_noEvents)
+    , _disableWriteBuffer(true)
 {
     _socket = INVALID_SOCKET;
     _connected = false;
@@ -31,6 +32,14 @@ SocketTcpWindows::SocketTcpWindows(const QHostAddress &peerAddress, quint16 peer
     {
         LOG_ERROR("Unable to connect to the client: socket() failed", Properties("error", WSAGetLastError()).add("peerPort", port).add("peerAddress", address), "SocketTcpWindows", "SocketTcpWindows");
         freeaddrinfo(addrInfo);
+        return ;
+    }
+
+    // Disables the write buffer
+    int sndbuff = 0;
+    if (_disableWriteBuffer && setsockopt(_socket, SOL_SOCKET, SO_SNDBUF, (char *)&sndbuff, sizeof(sndbuff)) == SOCKET_ERROR)
+    {
+        LOG_ERROR("Client setsockopt SO_SNDBUF failed", Properties("error", WSAGetLastError()), "SocketTcpWindows", "SocketTcpWindows");
         return ;
     }
 
@@ -67,6 +76,7 @@ SocketTcpWindows::SocketTcpWindows(const QHostAddress &peerAddress, quint16 peer
 SocketTcpWindows::SocketTcpWindows(const QHostAddress &peerAddress, quint16 peerPort, quint16 localPort, SOCKET socket)
     : SocketTcp(peerAddress, peerPort, localPort, socket)
     , _events(&_noEvents)
+    , _disableWriteBuffer(true)
 {
     // Non blocking mode
     u_long nonBlockingMode = 1;

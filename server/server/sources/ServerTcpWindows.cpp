@@ -178,20 +178,12 @@ void ServerTcpWindows::_newConnection()
     }
 
     // Gets its IP and port
-    QHostAddress peerAddress;
-    quint16 peerPort = 0;
-    char ipstringbuffer[46];
-    DWORD ipbufferlength = 46;
-    if (!WSAAddressToStringA((LPSOCKADDR)&addr, (DWORD)sizeof(addr), NULL, ipstringbuffer, &ipbufferlength))
-    {
-        QString ip(ipstringbuffer);
-        QRegExp *rx = (ip.contains('.') ? &_regexIPv4 : &_regexIPv6);
-        rx->indexIn(ip);
-        peerAddress = QHostAddress(rx->cap(1));
-        peerPort = rx->cap(2).toUShort();
-    }
-    else
+    QByteArray ip = "::1";
+    ip.reserve(46);
+    if (!InetNtopA(AF_INET6, &addr.sin6_addr, ip.data(), ip.size()))
         LOG_ERROR("WSAAddressToString failed", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerTcpWindows", "_newConnection");
+    QHostAddress peerAddress = QHostAddress(QString(ip.data()));
+    quint16 peerPort = ntohs(addr.sin6_port);
 
     // Adds the socket to the lists
     WSAPOLLFD fd;
