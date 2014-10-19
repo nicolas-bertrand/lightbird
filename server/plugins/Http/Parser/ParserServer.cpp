@@ -35,7 +35,7 @@ bool    ParserServer::doProtocol(const QByteArray &data, QString &protocol, bool
 bool    ParserServer::doDeserializeHeader(const QByteArray &data, quint64 &used)
 {
     this->header.append(data);
-    // If the header contains the characteres END_OF_HEADER, this mean that all the header
+    // If the header contains the characters END_OF_HEADER, this mean that all the header
     // has been received. The data after that is the content.
     if (this->header.contains(END_OF_HEADER) == true)
     {

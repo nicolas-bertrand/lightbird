@@ -6,6 +6,7 @@
 # include <QObject>
 # include <QString>
 
+# include "../library/Configuration.h"
 # include "Configuration.h"
 # include "Initialize.h"
 
@@ -39,6 +40,8 @@ public:
     /// @brief Returns the instance of this class created by the Server.
     /// @see getConfiguration
     static Configuration *instance(const QString &path = "", const QString &alternative = "");
+    /// @brief Provides a fast way to access the general configuration of the server.
+    static inline const LightBird::Configuration &c() { return LightBird::Configuration::get(); }
 
 private:
     QMap<QString, Configuration *> configurations;  ///< The instances of the loaded configurations.

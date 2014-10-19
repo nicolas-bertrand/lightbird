@@ -79,6 +79,7 @@ public:
     static void trace(const QString &message, const Properties &properties, const QString &object = "", const QString &method = "");
     LightBird::ILogs::Level getLevel() const;
     void    setLevel(LightBird::ILogs::Level level);
+    LightBird::ILogs::Level getLevelFromString(const QString &level) const;
     bool    isDisplay() const;
     void    isDisplay(bool display);
     bool    isError() const;
@@ -144,7 +145,7 @@ private:
     QMutex                  waitMutex;  ///< Used by QWaitCondition.
     bool                    awake;      ///< If the wait condition has been called.
     QObject                 *parent;    ///< The parent of the Log.
-    QMap<LightBird::ILogs::Level, QString>  levels; ///< Combines the levels and their names.
+    QMap<LightBird::ILogs::Level, QString> levels; ///< Combines the levels and their names.
 };
 
 /// Undefines the defines of LightBird::ILogs.

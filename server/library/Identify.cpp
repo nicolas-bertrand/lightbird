@@ -25,9 +25,7 @@ Identify::Identify()
     this->typeString.insert(LightBird::IIdentify::IMAGE, "image");
     this->typeString.insert(LightBird::IIdentify::OTHER, "other");
     this->typeString.insert(LightBird::IIdentify::VIDEO, "video");
-    this->maxSizeHash = LightBird::Library::configuration().get("hashSizeLimit").toLongLong();
-    if (!LightBird::Library::configuration().count("hashSizeLimit"))
-        this->maxSizeHash = -1;
+    this->maxSizeHash = LightBird::c().hashSizeLimit;
 }
 
 Identify::~Identify()

@@ -21,7 +21,7 @@ public:
     ~ApiConfiguration();
 
     QString         getPath() const;
-    QString         get(const QString &nodeName) const;
+    QString         get(const QString &nodeName, const QString &defaultValue = "") const;
     unsigned int    count(const QString &nodeName) const;
     LightBird::IConfiguration &set(const QString &nodeName, const QString &nodeValue);
     bool            remove(const QString &nodeName);

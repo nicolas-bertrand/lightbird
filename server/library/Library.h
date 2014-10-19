@@ -16,6 +16,8 @@ class Preview;
 
 namespace LightBird
 {
+    class Configuration;
+
     /// @brief Allows the library to access some parts of the Api, and to
     /// allocate various objects.
     class Library
@@ -48,16 +50,17 @@ namespace LightBird
         Library(const Library &);
         Library &operator=(const Library &);
 
-        static Library *instance;
+        static Library *_instance;
         // Api
         IConfiguration *_configuration;
         IDatabase      *_database;
         IExtensions    *_extension;
         ILogs          *_log;
         // Other
-        Identify       *identify;
-        Preview        *preview;
-        QHash<LightBird::IImage::Format, QString> imageExtensions;
+        Configuration  *_c;
+        Identify       *_identify;
+        Preview        *_preview;
+        QHash<LightBird::IImage::Format, QString> _imageExtensions;
     };
 }
 

@@ -8,7 +8,7 @@
 ThreadPool::ThreadPool(QObject *parent)
     : QObject(parent)
 {
-    this->threadsNumber = Configurations::instance()->get("threadsNumber").toUInt();
+    this->threadsNumber = Configurations::c().threadsNumber;
     for (unsigned int i = 0; i < this->threadsNumber; ++i)
         this->_createThread();
 }

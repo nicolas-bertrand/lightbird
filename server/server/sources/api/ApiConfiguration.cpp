@@ -11,7 +11,7 @@ ApiConfiguration::ApiConfiguration(const QString &idPlugin)
     , configuration(*Configurations::instance())
 {
     // The plugin does not exist
-    if (!QFileInfo(Configurations::instance()->get("pluginsPath") + "/" + this->id).isDir())
+    if (!QFileInfo(Configurations::c().pluginsPath + "/" + this->id).isDir())
     {
         LOG_WARNING("The plugin does not exist", Properties("id", this->id), "ApiConfiguration", "ApiConfiguration");
         return ;
@@ -34,11 +34,11 @@ QString     ApiConfiguration::getPath() const
     return (this->id);
 }
 
-QString     ApiConfiguration::get(const QString &nodeName) const
+QString     ApiConfiguration::get(const QString &nodeName, const QString &defaultValue) const
 {
     QString result;
 
-    result = this->_get(nodeName, this->_findConfiguration(this->configuration.readDom()));
+    result = this->_get(nodeName, defaultValue, this->_findConfiguration(this->configuration.readDom()));
     this->configuration.release();
     return (result);
 }

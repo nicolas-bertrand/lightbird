@@ -67,7 +67,7 @@ void    Server::_initialize()
         return Log::fatal("Failed to load the server configuration", "Server", "_initialize");
     Log::instance()->setState(Log::CONFIGURATION);
     // Tells Qt where are its plugins
-    QCoreApplication::addLibraryPath(Configurations::instance()->get("QtPluginsPath"));
+    QCoreApplication::addLibraryPath(Configurations::c().QtPluginsPath);
     // The threads manager must be initialized just after the configuration
     Log::info("Loading the thread manager", "Server", "_initialize");
     this->threads = new Threads(this);
@@ -76,10 +76,10 @@ void    Server::_initialize()
     this->threadPool = new ThreadPool(this);
     // Loads the translator
     Log::info("Loading the translation", "Server", "_initialize");
-    if (!this->_loadTranslation(Configurations::instance()->get("languagesPath") + "/", ":languages/"))
+    if (!this->_loadTranslation(Configurations::c().languagesPath + "/", ":languages/"))
         Log::error("Unable to load the translation of the server", "Server", "_initialize");
     // Creates the file path if it does not exist
-    QString filesPath = Configurations::instance()->get("filesPath");
+    QString filesPath = Configurations::c().filesPath;
     if (!QFileInfo(filesPath).isDir() && !QDir().mkpath(filesPath))
         return Log::fatal("Failed to create the files path", Properties("filesPath", filesPath), "Server", "_initialize");
     // Creates the temporary directory
@@ -163,7 +163,7 @@ bool            Server::_loadTranslation(const QString &file, const QString &res
     QTranslator translator;
     QString     language;
 
-    language = Configurations::instance()->get("language");
+    language = Configurations::c().language;
     if (language.isEmpty())
         language = QLocale::system().name().section('_', 0, 0);
     if (language.isEmpty())
@@ -187,12 +187,12 @@ bool        Server::_temporaryDirectory()
     QString path;
     QDir    directory;
 
-    path = LightBird::cleanPath(Configurations::instance()->get("temporaryPath"));
+    path = LightBird::cleanPath(Configurations::c().temporaryPath);
     // If the temporary directory is not the working directory
     if (!path.isEmpty() && path != ".")
     {
         // Removes all the files in the temporary directory if needed
-        if (LightBird::cleanPath(Configurations::instance()->get("cleanTemporaryPath")) == "true" && QFileInfo(path).isDir())
+        if (Configurations::c().cleanTemporaryPath && QFileInfo(path).isDir())
         {
             Log::debug("Cleaning the temporary directory", Properties("path", path), "Server", "_temporaryDirectory");
             directory.setPath(path);
@@ -315,7 +315,7 @@ void                Server::_pluginLoaded(QString id)
     QString         path;
 
     // Loads the translation of the plugin if possible
-    path = Configurations::instance()->get("pluginsPath") + "/" + id + "/";
+    path = Configurations::c().pluginsPath + "/" + id + "/";
     if (Configurations::instance(id)->count("translation") &&
         Configurations::instance(id)->get("translation") == "true")
     {

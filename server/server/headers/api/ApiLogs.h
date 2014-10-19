@@ -32,6 +32,7 @@ public:
     void    trace(const QString &message, const QMap<QString, QString> &properties, const QString &className = "", const QString &method = "") const;
     LightBird::ILogs::Level getLevel() const;
     void    setLevel(LightBird::ILogs::Level level);
+    LightBird::ILogs::Level getLevelFromString(const QString &level) const;
     bool    isDisplay() const;
     void    isDisplay(bool display);
     bool    isError() const;

@@ -25,13 +25,14 @@ public:
     /// @param alternativePath : The content of this file will be used to create the configuration
     /// if it does not exist. If this parameter is empty and configurationPath does not exist,
     /// Configuration will not try to creates the file.
-    Configuration(const QString &configurationPath, const QString &alternativePath = "", QObject *parent = 0);
+    /// @param server : True if this is the configuration of the server.
+    Configuration(const QString &configurationPath, const QString &alternativePath = "", QObject *parent = 0, bool server = false);
     ~Configuration();
 
     /// @see LightBird::IConfiguration::getPath
     virtual QString     getPath() const;
     /// @see LightBird::IConfiguration::get
-    virtual QString     get(const QString &nodeName) const;
+    virtual QString     get(const QString &nodeName, const QString &defaultValue = "") const;
     /// @see LightBird::IConfiguration::count
     virtual unsigned    count(const QString &nodeName) const;
     /// @see LightBird::IConfiguration::set
@@ -66,7 +67,7 @@ protected:
     /// @return If the file has been correctly loaded.
     bool                _load(const QString &configurationPath, const QString &alternativePath);
     /// @param root : The root element of the nodeName.
-    virtual QString     _get(const QString &nodeName, QDomElement root) const;
+    virtual QString     _get(const QString &nodeName, const QString &defaultValue, QDomElement root) const;
     /// @param root : The root element of the nodeName.
     virtual unsigned    _count(const QString &nodeName, QDomElement root) const;
     /// @param root : The root element of the nodeName.
@@ -74,6 +75,7 @@ protected:
     /// @param root : The root element of the nodeName.
     virtual bool        _remove(const QString &nodeName, QDomElement root);
 
+    bool                    server; ///< True if this instance stores the configuration of the server.
     QDomDocument            doc;    ///< The in-memory DOM representation of the XML document.
     QDomElement             dom;    ///< The root of the XML document.
     QFile                   file;   ///< The XML configuration file.

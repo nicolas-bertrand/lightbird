@@ -12,12 +12,9 @@
 
 Preview::Preview()
 {
-    this->cacheEnabled = false;
-    if (LightBird::Library::configuration().get("preview/cacheEnabled") == "true")
-        this->cacheEnabled = true;
-    if ((this->cachePath = LightBird::Library::configuration().get("preview/cachePath")).isEmpty())
-        this->cachePath = "cache";
-    this->cacheSizeLimit = LightBird::Library::configuration().get("preview/cacheSizeLimit").toUInt();
+    this->cacheEnabled = LightBird::c().preview.cacheEnabled;
+    this->cachePath = LightBird::c().preview.cachePath;
+    this->cacheSizeLimit = LightBird::c().preview.cacheSizeLimit;
 }
 
 Preview::~Preview()
@@ -45,7 +42,7 @@ QString Preview::generate(const QString &fileId, LightBird::IImage::Format forma
     // Generates the path and the name of the preview file
     if (this->cacheEnabled)
     {
-        params.previewFileName = LightBird::Library::configuration().get("temporaryPath") + "/" + params.file.getId() + "_" + QString::number(params.width) + "x" + QString::number(params.height) + params.position;
+        params.previewFileName = LightBird::c().temporaryPath + "/" + params.file.getId() + "_" + QString::number(params.width) + "x" + QString::number(params.height) + params.position;
         // Search the file in the cache
         if (this->_useCache(params))
             return (params.previewFileName);
@@ -53,7 +50,7 @@ QString Preview::generate(const QString &fileId, LightBird::IImage::Format forma
     // If the cache is disabled, the preview is stored in a temporary file
     else
     {
-        tmpFile.setFileTemplate(LightBird::Library::configuration().get("temporaryPath") + "/XXXXXX" + params.extension);
+        tmpFile.setFileTemplate(LightBird::c().temporaryPath + "/XXXXXX" + params.extension);
         tmpFile.open();
         tmpFile.setAutoRemove(false);
         params.previewFileName = tmpFile.fileName();
@@ -145,8 +142,8 @@ void    Preview::_cache()
     QDir    dir(this->cachePath);
     double  size = 0;
 
-    // If the cache size limit is 0, there is no limit
-    if (!this->cacheSizeLimit)
+    // If the cache size limit is negative or zero, there is no limit
+    if (this->cacheSizeLimit <= 0)
         return ;
     // Removes the oldest files if the cache size is too big
     QStringListIterator it(dir.entryList(QDir::Files, QDir::Time));

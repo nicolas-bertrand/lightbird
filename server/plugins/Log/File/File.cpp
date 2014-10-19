@@ -1,6 +1,7 @@
 #include <iostream>
 #include <QDateTime>
 
+#include "LightBird.h"
 #include "File.h"
 
 File::File()
@@ -16,23 +17,19 @@ bool    File::onLoad(LightBird::IApi *api)
     QMap<QString, QString>  properties;
 
     this->api = api;
-    this->path = this->_getNodeValue("path") + "/";
-    if (this->path == "/")
-        this->path = "logs/";
+    this->path = LightBird::c().log.path + "/";
     this->directory.setPath(this->path);
-    if ((this->name = this->_getNodeValue("file")).isEmpty())
-        this->name = "server.log";
-    this->maxSize = this->_toBytes(this->_getNodeValue("maxSize"));
-    if ((this->expires = this->_getNodeValue("expires").toInt()) < 1)
+    this->name = LightBird::c().log.file;
+    if ((this->maxSize = LightBird::c().log.maxSize) < 1024)
+        this->maxSize = 1024 * 1024;
+    if ((this->expires = LightBird::c().log.expires) < 1)
         this->expires = 30;
-    if ((this->maxNbOfFile = this->_getNodeValue("maxNbOfFile").toInt()) < 1)
+    if ((this->maxNbOfFile = LightBird::c().log.maxNbOfFile) < 1)
     {
         LOG_WARNING("Invalid maxNbOfFile (" + QString::number(this->maxNbOfFile) + "). It should be greater than 0.", "File", "onLoad");
         this->maxNbOfFile = 10;
     }
-    this->display = true;
-    if (this->_getNodeValue("display") == "false")
-        this->display = false;
+    this->display = LightBird::c().log.display;
 
     // Display the configuration of the plugin
     properties["path"] = this->path;
@@ -150,41 +147,6 @@ bool            File::timer(const QString &name)
         this->mutex.unlock();
     }
     return (true);
-}
-
-QString File::_getNodeValue(const QString &nodeName)
-{
-    // Return the node of the configuration of the server if it exists
-    if (this->api->configuration(false).count("log/" + nodeName))
-        return (this->api->configuration(false).get("log/" + nodeName));
-    // Otherwise return the node of the configuration of the plugin
-    return (this->api->configuration(true).get(nodeName));
-}
-
-unsigned int     File::_toBytes(const QString &str)
-{
-    char         type;
-    unsigned int bytes;
-    QString      string = str;
-
-    if (string.remove(' ').isEmpty())
-        return (1024 * 1024);
-    if (string.at(string.size() - 1).isLetter())
-    {
-        bytes = string.left(string.size() - 1).toInt();
-        type = string.at(string.size() - 1).toUpper().toLatin1();
-        if (type == 'K')
-            bytes *= 1024;
-        else if (type == 'M')
-            bytes *= 1024 * 1024;
-        else if (type == 'G')
-            bytes *= 1024 * 1024 * 1024;
-    }
-    else
-        bytes = string.toInt();
-    if (bytes < 1024)
-        bytes = 1024 * 1024;
-    return (bytes);
 }
 
 bool        File::_createLogFile()

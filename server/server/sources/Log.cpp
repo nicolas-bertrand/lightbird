@@ -157,6 +157,11 @@ void    Log::setLevel(LightBird::ILogs::Level level)
     this->level = level;
 }
 
+LightBird::ILogs::Level Log::getLevelFromString(const QString &level) const
+{
+    return this->levels.key(level.left(1).toUpper() + level.right(level.size() - 1), LightBird::ILogs::INFO);
+}
+
 bool    Log::isDisplay() const
 {
     return (this->display);
@@ -220,16 +225,8 @@ void    Log::run()
 
 void    Log::_initializeConfiguration()
 {
-    QString level;
-
-    // Loads the current log level
-    level = Configurations::instance()->get("log/level").toLower();
-    // Puts the first letter in upper case, to match the values of the map
-    level = level.left(1).toUpper() + level.right(level.size() - 1);
-    this->level = this->levels.key(level, LightBird::ILogs::INFO);
-    this->display = false;
-    if (Configurations::instance()->get("log/display") == "true")
-        this->display = true;
+    this->level = Configurations::c().log.level;
+    this->display = Configurations::c().log.display;
     // Prints the buffered logs
     QListIterator<Log::LogInformations> log(this->buffer);
     while (log.hasNext())

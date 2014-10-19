@@ -15,7 +15,7 @@ Image::Image(LightBird::IApi *a)
     if (this->imageMagickPath.isEmpty())
         this->imageMagickPath = this->api->getPluginPath() + "/ImageMagick";
     this->binaryName = "convert";
-    this->fileTemplate = this->api->configuration().get("temporaryPath") + "/" + "XXXXXX";
+    this->fileTemplate = LightBird::c().temporaryPath + "/" + "XXXXXX";
     // Ensure that the identify binary exists
     QString path = this->imageMagickPath + "/" + this->binaryName;
     if (QFileInfo(path).isFile() || QFileInfo(path + ".exe").isFile())

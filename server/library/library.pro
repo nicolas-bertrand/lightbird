@@ -11,6 +11,7 @@ DESTDIR = ../build
 DEFINES += LIGHTBIRD_LIBRARY
 
 HEADERS = \
+    Configuration.h \
     Defines.h \
     Export.h \
     Identify.h \
@@ -36,6 +37,7 @@ HEADERS = \
     File.h \
     Node.h
 SOURCES = \
+    Configuration.cpp \
     Identify.cpp \
     Initialize.cpp \
     Library.cpp \

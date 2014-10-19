@@ -49,7 +49,7 @@ LightBird::IContent &Content::setStorage(LightBird::IContent::Storage storage, c
     }
     else if (this->storage == LightBird::IContent::TEMPORARYFILE && !this->temporaryFile)
     {
-        QString filePath = Configurations::instance()->get("temporaryPath");
+        QString filePath = Configurations::c().temporaryPath;
         if (filePath.isEmpty())
             filePath = ".";
         this->temporaryFile = new QTemporaryFile(filePath + "/" + fileName);

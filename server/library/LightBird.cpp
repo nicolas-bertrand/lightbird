@@ -76,8 +76,8 @@ QString LightBird::createUuid()
 QString LightBird::getFilesPath(bool finalSlash)
 {
     if (finalSlash)
-        return (Library::configuration().get("filesPath") + "/");
-    return (Library::configuration().get("filesPath"));
+        return (LightBird::c().filesPath + "/");
+    return (LightBird::c().filesPath);
 }
 
 QString LightBird::getImageExtension(LightBird::IImage::Format format, bool dot)
@@ -151,6 +151,30 @@ void    LightBird::sleep(unsigned long time)
     mutex.lock();
     wait.wait(&mutex, time);
     mutex.unlock();
+}
+
+quint64 LightBird::stringToBytes(const QString &str)
+{
+    char    type;
+    quint64 bytes;
+    QString string = str;
+
+    if (string.at(string.size() - 1).isLetter())
+    {
+        bytes = string.left(string.size() - 1).toInt();
+        type = string.at(string.size() - 1).toUpper().toLatin1();
+        if (type == 'K')
+            bytes *= 1024;
+        else if (type == 'M')
+            bytes *= 1024 * 1024;
+        else if (type == 'G')
+            bytes *= 1024 * 1024 * 1024;
+        else
+            bytes = string.toULongLong();
+    }
+    else
+        bytes = string.toULongLong();
+    return (bytes);
 }
 
 qint64  LightBird::currentMSecsSinceEpochUtc()

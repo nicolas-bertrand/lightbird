@@ -259,18 +259,18 @@ bool    Database::_addDatabase(const QString &connectionName)
     QString      options;
 
     // Creates the database manager
-    if (!(database = QSqlDatabase::addDatabase(Configurations::instance()->get("database/type"), connectionName)).isValid())
+    if (!(database = QSqlDatabase::addDatabase(Configurations::c().database.type, connectionName)).isValid())
     {
-        LOG_ERROR("Unvalid database type", Properties("type", Configurations::instance()->get("database/type")), "Database", "_addDatabase");
+        LOG_ERROR("Unvalid database type", Properties("type", Configurations::c().database.type), "Database", "_addDatabase");
         return (false);
     }
     // Calls the _removeDatabase slot when the current thread is finiched
     QObject::connect(QThread::currentThread(), SIGNAL(finished()), this, SLOT(_removeDatabase()), Qt::DirectConnection);
     // Sets the database informations from the configutation
-    database.setUserName(Configurations::instance()->get("database/user"));
-    database.setPassword(Configurations::instance()->get("database/password"));
-    database.setHostName(Configurations::instance()->get("database/host"));
-    database.setPort(Configurations::instance()->get("database/port").toInt());
+    database.setUserName(Configurations::c().database.user);
+    database.setPassword(Configurations::c().database.password);
+    database.setHostName(Configurations::c().database.host);
+    database.setPort(Configurations::c().database.port);
     if (!this->_getDatabaseName(name))
         return (false);
     database.setDatabaseName(name);
@@ -288,11 +288,11 @@ bool    Database::_addDatabase(const QString &connectionName)
     // Opens the connection
     if (!database.open())
     {
-        LOG_ERROR("Cannot open the database", Properties("name", database.databaseName()).add("type", Configurations::instance()->get("database/type")).add("port", QString::number(database.port()))
+        LOG_ERROR("Cannot open the database", Properties("name", database.databaseName()).add("type", Configurations::c().database.type).add("port", QString::number(database.port()))
                   .add("user", database.userName()).add("password", database.password()).add("host", database.hostName()).add("options", options).add("error", database.lastError().text()), "Database", "_addDatabase");
         return (false);
     }
-    LOG_DEBUG("Database connected", Properties("name", database.databaseName()).add("type", Configurations::instance()->get("database/type"))
+    LOG_DEBUG("Database connected", Properties("name", database.databaseName()).add("type", Configurations::c().database.type)
                .add("port", QString::number(database.port())).add("user", database.userName()).add("host", database.hostName()).add("options", options), "Database", "_addDatabase");
     // Executes pragmas
     e = Configurations::instance()->readDom().firstChildElement("database").firstChildElement("pragmas").firstChildElement("pragma");
@@ -323,7 +323,7 @@ bool    Database::_getDatabaseName(QString &databaseName)
     QString databaseResource;
 
     // If the name is defined, the database is server based (like MySQL), not file based (like SQLite)
-    if (!(databaseName = Configurations::instance()->get("database/name")).isEmpty())
+    if (!(databaseName = Configurations::c().database.name).isEmpty())
     {
         LOG_DEBUG("The database is server based", "Database", "_getDatabaseName");
         return (true);
@@ -331,8 +331,8 @@ bool    Database::_getDatabaseName(QString &databaseName)
     LOG_DEBUG("The database is file based", "Database", "_getDatabaseName");
 
     // Gets the path and the file name of the database
-    databasePath = Configurations::instance()->get("database/path");
-    databaseFile = Configurations::instance()->get("database/file");
+    databasePath = Configurations::c().database.path;
+    databaseFile = Configurations::c().database.file;
     file = databasePath + "/" + databaseFile;
 
     // If the database directory does not exist, we creates it
@@ -346,7 +346,7 @@ bool    Database::_getDatabaseName(QString &databaseName)
     if (!QFileInfo(file).isFile())
     {
         // Gets the resource of the database
-        databaseResource = Configurations::instance()->get("database/resource");
+        databaseResource = Configurations::c().database.resource;
         LOG_DEBUG("The database file does not exist, so it will be created using the alternative file", Properties("file", file).add("alternative", databaseResource), "Database", "_getDatabaseName");
         // If the resource file does not exist either
         if (!QFileInfo(databaseResource).isFile())
@@ -377,14 +377,10 @@ bool    Database::_loadQueries(const QString &id)
 
     if (this->queries.contains(id))
         return (false);
-    type = Configurations::instance()->get("database/type");
+    type = Configurations::c().database.type;
     // Defines the path to the queries file
     if (id.isEmpty())
-    {
-        path = Configurations::instance()->get("database/path");
-        if (path.isEmpty())
-            path = DEFAULT_DATABASE_PATH;
-    }
+        path = Configurations::c().database.path;
     else
         path = id;
     // Searches the queries file using the database type

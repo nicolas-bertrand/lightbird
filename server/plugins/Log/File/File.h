@@ -48,15 +48,6 @@ public:
     bool        timer(const QString &name);
 
 private:
-    /// @brief Return the value of the node in parameter from the configuration
-    /// of the server, or the plugin.
-    QString     _getNodeValue(const QString &nodeName);
-    /// @brief Converts a string to a int using the caractere at the end of the string.
-    /// This caractere could be K (Kilobyte), M (Megabyte), or G (Gigabyte). For example
-    /// "42K" is converted to 43008 (42 * 1024), and "42" is converted to 42.
-    /// @param string : The string to convert.
-    /// @return The result of the conversion. The minumum value returned is 1.
-    unsigned    _toBytes(const QString &string);
     /// @brief Open the log file with the appropriate attributes.
     /// @return If the log file has been correctly opened.
     bool        _createLogFile();
@@ -71,7 +62,7 @@ private:
     LightBird::IApi     *api;                       ///< The LightBird API.
     QString             path;                       ///< The path of the log directory.
     QString             name;                       ///< The name of the log file.
-    unsigned int        maxSize;                    ///< The maximum size of the log file in byte. When it exceeds this size, an archive file is created and the log file is gutted.
+    qint64              maxSize;                    ///< The maximum size of the log file in byte. When it exceeds this size, an archive file is created and the log file is gutted.
     int                 expires;                    ///< The maximum number of days during witch the archives of the log file are kept.
     int                 maxNbOfFile;                ///< The maximum number of files in the log directory.
     bool                display;                    ///< If the logs have to be displayed on the standard output

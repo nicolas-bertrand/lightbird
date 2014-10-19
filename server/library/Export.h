@@ -1,5 +1,10 @@
-#ifdef LIGHTBIRD_LIBRARY
-# define LIB Q_DECL_EXPORT
-#else
-# define LIB Q_DECL_IMPORT
-#endif
+#ifndef LIGHTBIRD_EXPORT_H
+# define LIGHTBIRD_EXPORT_H
+
+# ifdef LIGHTBIRD_LIBRARY
+#  define LIB Q_DECL_EXPORT
+# else
+#  define LIB Q_DECL_IMPORT
+#endif // LIGHTBIRD_LIBRARY
+
+#endif // LIGHTBIRD_EXPORT_H

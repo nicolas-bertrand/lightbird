@@ -284,7 +284,7 @@ void    Plugin::_initialize()
     this->loader = NULL;
     this->api = NULL;
     this->_clean();
-    this->path = Configurations::instance()->get("pluginsPath") + "/" + this->id + "/";
+    this->path = Configurations::c().pluginsPath + "/" + this->id + "/";
     this->_loadLibrary();
     this->_loadDefaultConfiguration();
     Configurations::instance(this->id);

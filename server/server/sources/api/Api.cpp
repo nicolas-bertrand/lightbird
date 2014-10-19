@@ -24,7 +24,7 @@ Api::Api(const QString &id, LightBird::IConfiguration &configuration, LightBird:
     if (timers)
         this->timersApi = new ApiTimers(this->id, this);
     // Set the plugin path
-    this->pluginPath = Configurations::instance()->get("pluginsPath") + "/" + this->id + "/";
+    this->pluginPath = Configurations::c().pluginsPath + "/" + this->id + "/";
     this->resourcesPath = QString(PLUGINS_RESOURCES_PATH) + "/" + this->id;
 }
 
@@ -136,7 +136,7 @@ QString                     Api::getServerVersion() const
 
 QString                     Api::getLanguage() const
 {
-    QString language = Configurations::instance()->get("language");
+    QString language = Configurations::c().language;
 
     if (language.isEmpty())
         language = QLocale::system().name().section('_', 0, 0);

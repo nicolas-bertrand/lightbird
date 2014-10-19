@@ -1,6 +1,7 @@
 #ifndef LIGHTBIRD_H
 # define LIGHTBIRD_H
 
+# include <iostream>
 # include <QByteArray>
 # include <QImage>
 # include <QObject>
@@ -11,6 +12,7 @@
 
 # include "Export.h"
 # include "Initialize.h"
+# include "Configuration.h"
 # include "Properties.h"
 # include "Mutex.h"
 # include "TableAccounts.h"
@@ -27,6 +29,9 @@ namespace LightBird
 {
     /// @brief Converts an address into a hexadecimal lowercase string.
     LIB QString     addressToString(void *address);
+
+    /// @brief Provides a fast way to access the general configuration of the server.
+    LIB inline const Configuration &c() { return Configuration::get(); }
 
     /// @brief LightBird's implementation of Qt::copy.
     LIB bool        copy(const QString &source, const QString &destination);
@@ -106,10 +111,10 @@ namespace LightBird
     /// @brief Generates the SHA-256 of data.
     LIB QByteArray  sha256(const QByteArray &data);
 
-    /// @brief Replaces the unprintable ascii characteres of data by a dot (by default)
+    /// @brief Replaces the unprintable ascii characters of data by a dot (by default)
     /// and truncates the data if necessary.
     /// @param data : The data to simplify.
-    /// @param replace : Replaces the unprintable ascii characteres by this value.
+    /// @param replace : Replaces the unprintable ascii characters by this value.
     /// @param maxSize : If the data size exceeds maxSize it is truncated. If the
     /// value is zero the data are not truncated.
     /// @return The simplified data.
@@ -118,6 +123,13 @@ namespace LightBird
     /// @brief A cross-platform sleep.
     /// @param The number of milliseconds to sleep.
     LIB void        sleep(unsigned long time);
+
+    /// @brief Converts a string to a quint64 using the character at the end of the string.
+    /// This character could be K (Kilobyte), M (Megabyte), or G (Gigabyte). For example
+    /// "42K" is converted to 43008 (42 * 1024), and "42" is converted to 42.
+    /// @param string : The string to convert.
+    /// @return The result of the conversion.
+    LIB quint64     stringToBytes(const QString &str);
 
     /// @brief Returns the current number of milliseconds since epoch in UTC. This
     /// method is needed because QDateTime::currentDateTimeUtc().toMSecsSinceEpoch()

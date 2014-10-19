@@ -23,7 +23,7 @@ Configurations::Configurations(const QString &configurationPath, QObject *parent
     // Creates the configuration of the server
     if (path.isEmpty())
         path = DEFAULT_CONFIGURATION_DIRECTORY + QString("/") + DEFAULT_CONFIGURATION_FILE;
-    this->configurations[""] = new Configuration(path, DEFAULT_CONFIGURATION_RESSOURCE, parent);
+    this->configurations[""] = new Configuration(path, DEFAULT_CONFIGURATION_RESSOURCE, parent, true);
     // If the configuration failed to load
     if (*this->configurations[""] == false)
     {
@@ -111,7 +111,7 @@ Configuration   *Configurations::getConfiguration(const QString &configuration, 
     if (cleaned.at(cleaned.size() - 1) == '/')
         cleaned += DEFAULT_CONFIGURATION_FILE;
     // Otherwise it can be the id of a plugin
-    else if (QFileInfo(this->configurations[""]->get("pluginsPath") + "/" + cleaned).isDir())
+    else if (QFileInfo(Configurations::c().pluginsPath + "/" + cleaned).isDir())
     {
         path = Plugins::checkId(LightBird::cleanPath(cleaned));
         // Creates the configuration of the plugin if it does not exist

@@ -16,7 +16,7 @@
 Preview::Preview(LightBird::IApi *a)
     : api(a)
 {
-    this->fileTemplate = this->api->configuration().get("temporaryPath") + "/" + "XXXXXX.jpeg";
+    this->fileTemplate = LightBird::c().temporaryPath + "/" + "XXXXXX.jpeg";
 }
 
 Preview::~Preview()

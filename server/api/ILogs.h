@@ -3,6 +3,7 @@
 
 # include <QString>
 # include <QMap>
+# include <iostream>
 
 namespace LightBird
 {
@@ -76,6 +77,8 @@ namespace LightBird
         /// @brief Modifies the log level.
         /// @param level : The new log level.
         virtual void        setLevel(LightBird::ILogs::Level level) = 0;
+        /// @brief Returns the level that corresponds to the string.
+        virtual LightBird::ILogs::Level getLevelFromString(const QString &level) const = 0;
         /// @brief Returns true if the logs are displayed on the standard output.
         virtual bool        isDisplay() const = 0;
         /// @brief Display or hide the logs on the standard output.

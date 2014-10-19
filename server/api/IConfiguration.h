@@ -19,8 +19,9 @@ namespace LightBird
         /// @brief Returns the value of the node identified by nodeName.
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName[.attribut]", or simply "nodeName".
+        /// @param defaultValue : The value returned if the nodeName is not found.
         /// @return The node value.
-        virtual QString     get(const QString &nodeName) const = 0;
+        virtual QString     get(const QString &nodeName, const QString &defaultValue = "") const = 0;
         /// @brief Count the number of occurence of nodeName in his parent node.
         /// @param nodeName : The node name. NodeName can be in the form
         /// "parentNode/[..]/parentName[n]/nodeName", or simply "nodeName".

@@ -329,7 +329,7 @@ QString Plugins::checkId(const QString &identifier)
     QString path;
     QString result;
 
-    path = Configurations::instance()->get("pluginsPath");
+    path = Configurations::c().pluginsPath;
     QStringListIterator dir(LightBird::cleanPath(identifier).split("/"));
     // Iterates over each directory of the id of the plugin
     while (dir.hasNext())
@@ -388,7 +388,7 @@ QStringList Plugins::getPlugins() const
 {
     QStringList plugins;
 
-    this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins);
+    this->_findPlugins(Configurations::c().pluginsPath, "", plugins);
     return (plugins);
 }
 
@@ -434,7 +434,7 @@ QStringList Plugins::getUninstalledPlugins() const
     QStringList plugins;
 
     // Gets all the plugins
-    this->_findPlugins(Configurations::instance()->get("pluginsPath"), "", plugins);
+    this->_findPlugins(Configurations::c().pluginsPath, "", plugins);
     // Removes the plugins installed
     QStringListIterator it(this->getInstalledPlugins());
     while (it.hasNext())
@@ -468,7 +468,7 @@ LightBird::IPlugins::State Plugins::_getState(const QString &id) const
     if (this->plugins.contains(id))
         return (this->plugins.value(id)->getState());
     // The plugin was not found
-    else if (!QFileInfo(Configurations::instance()->get("pluginsPath") + "/" + id).isDir())
+    else if (!QFileInfo(Configurations::c().pluginsPath + "/" + id).isDir())
         return (LightBird::IPlugins::UNKNOW);
     // The plugin is installed but not loaded
     else if (Plugins::isInstalled(id))

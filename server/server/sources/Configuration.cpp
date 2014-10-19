@@ -8,14 +8,16 @@
 #include "Log.h"
 #include "Mutex.h"
 
-Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent)
+Configuration::Configuration(const QString &configurationPath, const QString &alternativePath, QObject *parent, bool s)
     : QObject(parent)
+    , server(s)
 {
     this->_load(configurationPath, alternativePath);
     QObject::connect(this, SIGNAL(setParentSignal(QObject*)), this, SLOT(_setParent(QObject*)), Qt::QueuedConnection);
 }
 
 Configuration::Configuration()
+    : server(false)
 {
     QObject::connect(this, SIGNAL(setParentSignal(QObject*)), this, SLOT(_setParent(QObject*)), Qt::QueuedConnection);
 }
@@ -104,13 +106,13 @@ QString Configuration::getPath() const
     return (this->file.fileName());
 }
 
-QString Configuration::get(const QString &nodeName) const
+QString Configuration::get(const QString &nodeName, const QString &defaultValue) const
 {
     Mutex   mutex(this->mutex, Mutex::READ, "Configuration", "get");
 
     if (!mutex)
-        return ("");
-    return (this->_get(nodeName, this->dom));
+        return (defaultValue);
+    return (this->_get(nodeName, defaultValue, this->dom));
 }
 
 unsigned int    Configuration::count(const QString &nodeName) const
@@ -190,9 +192,9 @@ bool    Configuration::save()
     return (true);
 }
 
-QString Configuration::_get(const QString &nodeName, QDomElement element) const
+QString Configuration::_get(const QString &nodeName, const QString &defaultValue, QDomElement element) const
 {
-    QString  result = "";
+    QString  result;
     QDomNode node;
     QString  name;
     QString  attribut;
@@ -200,7 +202,7 @@ QString Configuration::_get(const QString &nodeName, QDomElement element) const
     int      index;
 
     if (*this == false)
-        return ("");
+        return (defaultValue);
     QStringListIterator it(nodeName.split('/'));
     while (it.hasNext() == true && element.isNull() == false)
     {
@@ -239,7 +241,7 @@ QString Configuration::_get(const QString &nodeName, QDomElement element) const
             }
         }
     }
-    return (result);
+    return (!result.isEmpty() ? result : defaultValue);
 }
 
 unsigned int    Configuration::_count(const QString &nodeName, QDomElement element) const
@@ -290,6 +292,8 @@ void    Configuration::_set(const QString &nodeName, const QString &nodeValue, Q
     QString     tmp;
     int         index;
 
+    if (this->server)
+        LightBird::Configuration::set(nodeName, nodeValue);
     if (*this == false || element.isNull())
         return ;
     QStringListIterator it(nodeName.split('/'));

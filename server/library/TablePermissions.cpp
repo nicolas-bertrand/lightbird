@@ -163,8 +163,8 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     TableDirectories    *directory = NULL;
     TableCollections    *collection = NULL;
     TableGroups         group;
-    bool                inheritance = false;
-    bool                ownerInheritance = false;
+    bool                inheritance;
+    bool                ownerInheritance;
     bool                checked = false;
     int                 granted = 0;
     QString             id;
@@ -174,12 +174,10 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     QList<QStringList>  groups;
 
     // If the permissions system is not activated, we don't need to check the rights
-    if (Library::configuration().get("permissions/activate") != "true")
+    if (!LightBird::c().permissions.activate)
         return (true);
-    if (Library::configuration().get("permissions/ownerInheritance") == "true")
-        ownerInheritance = true;
-    if (Library::configuration().get("permissions/inheritance") == "true")
-        inheritance = true;
+    ownerInheritance = LightBird::c().permissions.ownerInheritance;
+    inheritance = LightBird::c().permissions.inheritance;
     QSharedPointer<TableAccessors> accessor(dynamic_cast<TableAccessors *>(Library::database().getTable(Table::Accessor, id_accessor)));
     if (accessor.isNull())
         return (false);
@@ -226,7 +224,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
         }
         accessors.removeDuplicates();
         // If groupInheritance is disables, we don't need to keep the groups hierarchy
-        if (Library::configuration().get("permissions/groupInheritance") != "true")
+        if (!LightBird::c().permissions.groupInheritance)
             groups.clear();
     }
     accessors.push_front(accessor->getId());
@@ -286,7 +284,7 @@ bool    TablePermissions::isAllowed(const QString &id_accessor, const QString &i
     if (!granted && inheritance && (granted = this->_idAllowed(accessors, groups, "", right)) == 2)
         return (true);
     // If there is no permissions for the accessor on the object, the default is applied
-    if (!granted && Library::configuration().get("permissions/default") == "true")
+    if (!granted && LightBird::c().permissions.default_)
         return (true);
     return (false);
 }
@@ -298,8 +296,8 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     TableDirectories    *directory = NULL;
     TableCollections    *collection = NULL;
     TableGroups         group;
-    bool                inheritance = false;
-    bool                ownerInheritance = false;
+    bool                inheritance;
+    bool                ownerInheritance;
     bool                checked = false;
     QString             id;
     TableDirectories    dir;
@@ -310,15 +308,13 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     allowed.clear();
     denied.clear();
     // If the permissions system is not activated, all the rights are granted
-    if (Library::configuration().get("permissions/activate") != "true")
+    if (!LightBird::c().permissions.activate)
     {
         allowed.push_back("");
         return (true);
     }
-    if (Library::configuration().get("permissions/ownerInheritance") == "true")
-        ownerInheritance = true;
-    if (Library::configuration().get("permissions/inheritance") == "true")
-        inheritance = true;
+    ownerInheritance = LightBird::c().permissions.ownerInheritance;
+    inheritance = LightBird::c().permissions.inheritance;
     QSharedPointer<TableAccessors> accessor(dynamic_cast<TableAccessors *>(Library::database().getTable(Table::Accessor, id_accessor)));
     if (accessor.isNull())
         return (false);
@@ -371,7 +367,7 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
         }
         accessors.removeDuplicates();
         // If groupInheritance is disables, we don't need to keep the groups hierarchy
-        if (Library::configuration().get("permissions/groupInheritance") != "true")
+        if (!LightBird::c().permissions.groupInheritance)
             groups.clear();
     }
     accessors.push_front(accessor->getId());
@@ -437,7 +433,7 @@ bool    TablePermissions::getRights(const QString &id_accessor, const QString &i
     // If there is no global permission, the default is applied
     if (!allowed.contains("") && !denied.contains(""))
     {
-        if (Library::configuration().get("permissions/default") == "true")
+        if (LightBird::c().permissions.default_)
         {
             allowed.clear();
             allowed.push_back("");

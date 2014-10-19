@@ -80,6 +80,11 @@ LightBird::ILogs::Level ApiLogs::getLevel() const
     return (Log::instance()->getLevel());
 }
 
+LightBird::ILogs::Level ApiLogs::getLevelFromString(const QString &level) const
+{
+    return (Log::instance()->getLevelFromString(level));
+}
+
 void    ApiLogs::setLevel(LightBird::ILogs::Level level)
 {
     Log::instance()->setLevel(level);
