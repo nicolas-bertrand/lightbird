@@ -38,8 +38,6 @@ public:
 private:
     /// @brief Authenticate the client using the basic access authentication of HTTP.
     bool    _authenticate(LightBird::IClient &client, LightBird::IRequest &request, LightBird::IResponse &response);
-    /// @brief Returns the MIME type of the file, based on its extension.
-    QString _getMime(const QString &file);
     /// @brief Converts the size into a string with the closest unit.
     QString _size(quint64 size);
 

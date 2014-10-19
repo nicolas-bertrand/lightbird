@@ -108,8 +108,6 @@ private:
     /// @brief Returns a file that is stored in the filesPath instead of the www directory.
     /// The account must have the right to read the file.
     void    _getFile(LightBird::IClient &client);
-    /// @brief Returns the mime type of the file in parameter.
-    QString _getMime(const QString &file);
 
     LightBird::IApi     *_api;      ///< The LightBird's Api.
     static Plugin       *_instance; ///< The instance of the plugin.

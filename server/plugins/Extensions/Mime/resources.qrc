@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/Extensions/Mime">
-        <file alias="configuration">Configuration.xml</file>
-        <file alias="mime">Mime.xml</file>
-    </qresource>
-</RCC>

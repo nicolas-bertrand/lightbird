@@ -43,8 +43,7 @@ private:
     Info    _identify(const QString &file, const QString &fileName, bool computeHash);
     void    _identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
     bool    _add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
-    void    _document(Info &result);
-    void    _typeFromMime(Info &result);
+    void    _document(Info &result, const QString &mime);
     /// @brief Computes the SHA1 and the MD5 of the file.
     void    _hash(const QString &file, Info &result);
 
