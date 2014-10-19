@@ -1,3 +1,5 @@
+#include <QFileInfo>
+
 #include "Library.h"
 #include "LightBird.h"
 #include "Configuration.h"
@@ -23,6 +25,9 @@ void LightBird::Configuration::_update()
     pluginsPath = _c.get("pluginsPath", DEFAULT_PLUGINS_PATH);
     QtPluginsPath = _c.get("QtPluginsPath", DEFAULT_QT_PLUGINS_PATH);
     filesPath = _c.get("filesPath", DEFAULT_FILES_PATH);
+    filesExtensionsPath = _c.get("filesExtensionsPath", FILES_EXTENSIONS_RESOURCES_PATH);
+    if (!QFileInfo(filesExtensionsPath).isFile())
+        filesExtensionsPath = FILES_EXTENSIONS_RESOURCES_PATH;
     temporaryPath = _c.get("temporaryPath", DEFAULT_TEMPORARY_PATH);
     cleanTemporaryPath = _c.get("cleanTemporaryPath", DEFAULT_CLEAN_TEMPORARY_PATH) == "true";
     languagesPath = _c.get("languagesPath", DEFAULT_LANGUAGES_PATH);
@@ -73,6 +78,8 @@ void LightBird::Configuration::_set(const QString &key, const QString &value)
             QtPluginsPath = value;
         else if (key == "filesPath")
             filesPath = value;
+        else if (key == "filesExtensionsPath")
+            filesExtensionsPath = value;
         else if (key == "temporaryPath")
             temporaryPath = value;
         else if (key == "cleanTemporaryPath")

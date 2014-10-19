@@ -2,6 +2,7 @@
 #include "Identify.h"
 #include "Library.h"
 #include "Preview.h"
+#include "FilesExtensions.h"
 
 using namespace LightBird;
 
@@ -18,6 +19,7 @@ void Library::initialize()
 {
     Library::getInstance()->_identify = new Identify();
     Library::getInstance()->_preview = new Preview();
+    Library::getInstance()->_filesExtensions = new FilesExtensions();
 }
 
 void Library::shutdown()
@@ -34,6 +36,7 @@ Library::Library()
     , _c(NULL)
     , _identify(NULL)
     , _preview(NULL)
+    , _filesExtensions(NULL)
 {
     _imageExtensions.insert(LightBird::IImage::BMP, "bmp");
     _imageExtensions.insert(LightBird::IImage::GIF, "gif");
@@ -50,6 +53,7 @@ Library::~Library()
     delete _c;
     delete _identify;
     delete _preview;
+    delete _filesExtensions;
 }
 
 void Library::setConfiguration(IConfiguration *configuration)
@@ -107,6 +111,11 @@ Identify *Library::getIdentify()
 Preview *Library::getPreview()
 {
     return (Library::_instance->_preview);
+}
+
+FilesExtensions *Library::getFilesExtensions()
+{
+    return (Library::_instance->_filesExtensions);
 }
 
 QHash<LightBird::IImage::Format, QString> &Library::getImageExtensions()

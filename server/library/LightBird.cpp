@@ -6,6 +6,7 @@
 #include <QWaitCondition>
 
 #include "Identify.h"
+#include "FilesExtensions.h"
 #include "Library.h"
 #include "LightBird.h"
 #include "Preview.h"
@@ -71,6 +72,16 @@ bool    LightBird::isValidName(const QString &objectName)
 QString LightBird::createUuid()
 {
     return (QUuid::createUuid().toString().remove(0, 1).remove(36, 1));
+}
+
+QString LightBird::getFileMime(const QString &fileName)
+{
+    return (Library::getFilesExtensions()->getFileMime(fileName));
+}
+
+LightBird::IIdentify::Type LightBird::getFileType(const QString &fileName)
+{
+    return (Library::getFilesExtensions()->getFileType(fileName));
 }
 
 QString LightBird::getFilesPath(bool finalSlash)

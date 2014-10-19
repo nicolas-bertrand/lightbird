@@ -161,6 +161,7 @@ SOURCES += \
     sources/api/ApiTimers.cpp
 OTHER_FILES = \
     resources/configurations/Configuration.xml \
+    resources/configurations/FilesExtensions.json \
     resources/databases/queries.xml \
     resources/databases/foreign_keys.sql \
     resources/databases/structure.sql \

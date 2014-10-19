@@ -67,6 +67,15 @@ namespace LightBird
     /// @brief Returns a new Universally Unique Identifier.
     LIB QString     createUuid();
 
+    /// @brief Returns the MIME of the file based on its extension.
+    /// The default MIME type is "application/octet-stream".
+    /// @param fileName : The name of the file or just its extension.
+    LIB QString     getFileMime(const QString &fileName);
+
+    /// @brief Returns the type of the file based on its extension.
+    /// @param fileName : The name of the file or just its extension.
+    LIB IIdentify::Type getFileType(const QString &fileName);
+
     /// @brief Returns the filesPath, which is the relative path to the
     /// directory that stores the files managed by the server. The filesPath
     /// is defined by the configuration node "filesPath".

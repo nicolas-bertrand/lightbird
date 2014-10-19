@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file alias="configuration">configurations/Configuration.xml</file>
+        <file alias="filesExtensions">configurations/FilesExtensions.json</file>
         <file alias="database">databases/database.sqlite</file>
         <file alias="queries">databases/queries.xml</file>
     </qresource>

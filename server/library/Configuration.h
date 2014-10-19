@@ -20,6 +20,7 @@ namespace LightBird
         QString pluginsPath;
         QString QtPluginsPath;
         QString filesPath;
+        QString filesExtensionsPath;
         QString temporaryPath;
         bool cleanTemporaryPath;
         QString languagesPath;

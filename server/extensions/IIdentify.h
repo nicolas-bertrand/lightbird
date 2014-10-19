@@ -16,10 +16,10 @@ namespace LightBird
         /// @brief List the file types available.
         enum Type
         {
+            OTHER = 0,
             AUDIO,
             DOCUMENT,
             IMAGE,
-            OTHER,
             VIDEO
         };
 

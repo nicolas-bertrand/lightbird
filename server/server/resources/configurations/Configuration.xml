@@ -4,6 +4,7 @@
   <pluginsPath>plugins</pluginsPath>
   <QtPluginsPath>QtPlugins</QtPluginsPath>
   <filesPath>files</filesPath>
+  <filesExtensionsPath></filesExtensionsPath>
   <temporaryPath>tmp</temporaryPath>
   <cleanTemporaryPath>true</cleanTemporaryPath>
   <languagesPath>languages</languagesPath>

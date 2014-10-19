@@ -47,6 +47,7 @@
                 <span class="chevron">&lt;</span>pluginsPath<span class="chevron">&gt;</span><span class="text">plugins</span><span class="chevron">&lt;/</span>pluginsPath<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>QtPluginsPath<span class="chevron">&gt;</span><span class="text">QtPlugins</span><span class="chevron">&lt;/</span>QtPluginsPath<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>filesPath<span class="chevron">&gt;</span><span class="text">files</span><span class="chevron">&lt;/</span>filesPath<span class="chevron">&gt;</span><br />
+                <span class="chevron">&lt;</span>filesExtensionsPath<span class="chevron">&gt;</span><span class="text"></span><span class="chevron">&lt;/</span>filesExtensionsPath<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>temporaryPath<span class="chevron">&gt;</span><span class="text">tmp</span><span class="chevron">&lt;/</span>temporaryPath<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>cleanTemporaryPath<span class="chevron">&gt;</span><span class="text">true</span><span class="chevron">&lt;/</span>cleanTemporaryPath<span class="chevron">&gt;</span><br />
                 <span class="chevron">&lt;</span>languagesPath<span class="chevron">&gt;</span><span class="text">languages</span><span class="chevron">&lt;/</span>languagesPath<span class="chevron">&gt;</span><br />
@@ -151,31 +152,36 @@
                 <td class="value">files</td>
             </tr>
             <tr class="odd">
+                <td class="key">filesExtensionsPath</td>
+                <td>Le chemin vers le fichier JSON qui associe les extensions des fichiers à leurs type et MIME. S'il n'est pas trouvé, le fichier par défaut sera utilisé.</td>
+                <td class="value">:filesExtensions</td>
+            </tr>
+            <tr>
                 <td class="key">temporaryPath</td>
                 <td>Ce dossier stocke les fichiers temporairement créés lors de l’exécution du serveur. Ces fichiers sont en général supprimés lorsque le serveur ou ses plugins n’en ont plus besoin. Ce dossier est créé s’il n’existe pas.</td>
                 <td class="value">tmp</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">cleanTemporaryPath</td>
                 <td>Si la valeur de ce nœud est <strong>true</strong>, le dossier temporaire défini par temporaryPath est vidé à chaque démarrage du serveur.</td>
                 <td class="value">true</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">languagesPath</td>
                 <td>Le chemin du dossier qui contient les fichiers de traductions. Ces fichiers ont l’extension <strong>.qm</strong>,  et sont générés via les outils de Qt.</td>
                 <td class="value">languages</td>
             </tr>
-            <tr>
+            <tr class="odd">
                 <td class="key">language</td>
                 <td>Le nom du fichier de langage à charger afin de traduire le serveur, sans son extension finale. Si ce fichier n’existe pas dans le dossier des langages, il sera cherché dans les resources du serveur, sous le dossier « languages ». Si ce nœud est vide ou non défini, la langue locale du système est utilisée (en, fr…).</td>
                 <td class="value">Langue locale</td>
             </tr>
-            <tr class="odd">
+            <tr>
                 <td class="key">threadsNumber</td>
                 <td>Le nombre de threads dans la thread pool. Ces threads sont principalement utilisés pour traiter les requêtes et les réponses du serveur. Cette valeur dépend de l’utilisation qui est faite du serveur et de l’environnement dans lequel il est exécuté.</td>
                 <td class="value">10</td>
             </tr>
-            <tr class="last">
+            <tr class="odd last">
                 <td class="key">hashSizeLimit</td>
                 <td>Les empreintes MD5 et SHA1 ne sont pas calculées pour les fichiers excédant cette taille. Si elle vaut zéro, les empreintes ne sont jamais calculées. Une valeur négative enléve la limite. Cette option est utile car le temps calcule d'une empreinte est proportionnel à la taille du fichier.</td>
                 <td class="value">-1</td>
@@ -373,7 +379,7 @@
             </tr>
             <tr class="odd last">
                 <td class="key">cacheSizeLimit</td>
-                <td>La taille maximal du dossier de cache en Mo. Une fois dépassée, les fichier les plus anciens sont supprimés.</td>
+                <td>La taille maximal du dossier de cache en Mo. Une fois dépassée, les fichier les plus anciens sont supprimés. Une valeur null ou négative signifie pas de limite.</td>
                 <td class="value">Pas de limite</td>
             </tr>
         </table>

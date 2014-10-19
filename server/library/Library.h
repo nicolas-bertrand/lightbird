@@ -13,6 +13,7 @@
 
 class Identify;
 class Preview;
+class FilesExtensions;
 
 namespace LightBird
 {
@@ -23,26 +24,27 @@ namespace LightBird
     class Library
     {
     public:
-        static Library        *getInstance();
+        static Library         *getInstance();
         // Api
-        static IConfiguration &configuration();
-        static IDatabase      &database();
-        static IExtensions    &extension();
-        static ILogs          &log();
+        static IConfiguration  &configuration();
+        static IDatabase       &database();
+        static IExtensions     &extension();
+        static ILogs           &log();
         // Other
-        static Identify       *getIdentify();
-        static Preview        *getPreview();
+        static Identify        *getIdentify();
+        static Preview         *getPreview();
+        static FilesExtensions *getFilesExtensions();
         static QHash<LightBird::IImage::Format, QString> &getImageExtensions();
 
         // These methods must only be used by the server
         /// @brief Initializes the library.
-        LIB static void initialize();
-        LIB static void setConfiguration(IConfiguration *configuration);
-        LIB static void setDatabase(IDatabase *database);
-        LIB static void setExtension(IExtensions *extension);
-        LIB static void setLog(ILogs *log);
+        LIB static void        initialize();
+        LIB static void        setConfiguration(IConfiguration *configuration);
+        LIB static void        setDatabase(IDatabase *database);
+        LIB static void        setExtension(IExtensions *extension);
+        LIB static void        setLog(ILogs *log);
         /// @brief Cleans the library.
-        LIB static void shutdown();
+        LIB static void        shutdown();
 
     private:
         Library();
@@ -50,16 +52,17 @@ namespace LightBird
         Library(const Library &);
         Library &operator=(const Library &);
 
-        static Library *_instance;
+        static Library  *_instance;
         // Api
-        IConfiguration *_configuration;
-        IDatabase      *_database;
-        IExtensions    *_extension;
-        ILogs          *_log;
+        IConfiguration  *_configuration;
+        IDatabase       *_database;
+        IExtensions     *_extension;
+        ILogs           *_log;
         // Other
-        Configuration  *_c;
-        Identify       *_identify;
-        Preview        *_preview;
+        Configuration   *_c;
+        Identify        *_identify;
+        Preview         *_preview;
+        FilesExtensions *_filesExtensions;
         QHash<LightBird::IImage::Format, QString> _imageExtensions;
     };
 }

@@ -14,6 +14,7 @@ HEADERS = \
     Configuration.h \
     Defines.h \
     Export.h \
+    FilesExtensions.h \
     Identify.h \
     Initialize.h \
     Library.h \
@@ -38,6 +39,7 @@ HEADERS = \
     Node.h
 SOURCES = \
     Configuration.cpp \
+    FilesExtensions.cpp \
     Identify.cpp \
     Initialize.cpp \
     Library.cpp \
