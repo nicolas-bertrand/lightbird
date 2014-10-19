@@ -1,7 +1,6 @@
 #include <QFileInfo>
 #include <qmath.h>
 
-#include "IMime.h"
 #include "LightBird.h"
 #include "Plugin.h"
 
@@ -89,7 +88,7 @@ bool    Plugin::doExecution(LightBird::IClient &client)
     if (file.setIdFromVirtualPath(path))
     {
         response.getHeader().insert("server", "LightBird");
-        response.setType(this->_getMime(file.getFullPath()));
+        response.setType(LightBird::getFileMime(file.getName()));
         response.getContent().setStorage(LightBird::IContent::FILE, file.getFullPath());
     }
     // Displays the content of a directory
@@ -175,18 +174,6 @@ bool    Plugin::_authenticate(LightBird::IClient &client, LightBird::IRequest &r
         return (false);
     }
     return (true);
-}
-
-QString             Plugin::_getMime(const QString &file)
-{
-    QList<void *>   extensions;
-    QString         result = DEFAULT_CONTENT_TYPE;
-
-    extensions = this->api->extensions().get("IMime");
-    if (!extensions.isEmpty())
-        result = static_cast<LightBird::IMime *>(extensions.first())->getMime(file);
-    this->api->extensions().release(extensions);
-    return (result);
 }
 
 QString Plugin::_size(quint64 s)

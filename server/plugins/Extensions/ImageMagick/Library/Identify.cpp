@@ -7,7 +7,7 @@
 Identify::Identify(LightBird::IApi *a)
     : api(a)
 {
-    this->isInitialized();
+    _types << LightBird::IIdentify::IMAGE;
 
     this->colorSpace.insert(MagickCore::UndefinedColorspace, "Undefined");
     this->colorSpace.insert(MagickCore::LabColorspace, "CIELab");
@@ -60,6 +60,8 @@ Identify::Identify(LightBird::IApi *a)
     this->compression.insert(MagickCore::ZipCompression, "Zip");
     this->compression.insert(MagickCore::RLECompression, "RunlengthEncoded");
     this->compression.insert(MagickCore::ZipSCompression, "ZipS");
+
+    this->isInitialized();
 }
 
 Identify::~Identify()

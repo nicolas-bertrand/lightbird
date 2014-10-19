@@ -15,15 +15,17 @@
 #include <apetag.h>
 
 Identify::Identify(LightBird::IApi *a)
-    : api(a)
+    : _api(a)
 {
-    id3v2["TALB"] = "album";
-    id3v2["TIT2"] = "title";
-    id3v2["TLAN"] = "language";
-    id3v2["TCOM"] = "composer";
-    id3v2["TCON"] = "genre";
-    id3v2["TRCK"] = "track";
-    id3v2["TPE2"] = "artist";
+    _types << LightBird::IIdentify::AUDIO;
+
+    _id3v2["TALB"] = "album";
+    _id3v2["TIT2"] = "title";
+    _id3v2["TLAN"] = "language";
+    _id3v2["TCOM"] = "composer";
+    _id3v2["TCON"] = "genre";
+    _id3v2["TRCK"] = "track";
+    _id3v2["TPE2"] = "artist";
 }
 
 Identify::~Identify()
@@ -87,8 +89,8 @@ void    Identify::_addID3v2Data(LightBird::IIdentify::Information &information, 
     if(!id3v2tag)
         return ;
     for(it = id3v2tag->frameList().begin(); it != id3v2tag->frameList().end(); it++)
-        if (this->id3v2.contains((*it)->frameID().data()))
-            this->_addData(information, this->id3v2[(*it)->frameID().data()], (*it)->toString().toCString());
+        if (this->_id3v2.contains((*it)->frameID().data()))
+            this->_addData(information, this->_id3v2[(*it)->frameID().data()], (*it)->toString().toCString());
 }
 
 void    Identify::_addID3v1Data(LightBird::IIdentify::Information &information, TagLib::MPEG::File &file)

@@ -11,14 +11,14 @@
 class Identify : public LightBird::IIdentify
 {
 public:
-    Identify(LightBird::IApi *api);
+    Identify(LightBird::IApi *_api);
     ~Identify();
 
     bool    identify(const QString &file, LightBird::IIdentify::Information &information);
 
 private:
-    LightBird::IApi         *api;
-    QMap<QString, QString>  id3v2;
+    LightBird::IApi         *_api;
+    QMap<QString, QString>  _id3v2;
 
     void    _addTags(LightBird::IIdentify::Information &information, TagLib::FileRef &file);
     void    _addID3v2Data(LightBird::IIdentify::Information &information, TagLib::MPEG::File &file);

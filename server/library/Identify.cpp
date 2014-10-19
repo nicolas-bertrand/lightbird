@@ -3,7 +3,6 @@
 #include <QFileInfo>
 
 #include "Identify.h"
-#include "IMime.h"
 #include "Library.h"
 #include "LightBird.h"
 
@@ -12,14 +11,6 @@ Identify::Identify()
     , hashThread(NULL)
 {
     this->mimeDocument.push_back("text/");
-    this->mimeDocument.push_back("pdf");
-    this->mimeDocument.push_back("excel");
-    this->mimeDocument.push_back("msword");
-    this->mimeDocument.push_back("powerpoint");
-    this->mimeDocument.push_back("opendocument");
-    this->mimeDocument.push_back("postscript");
-    this->mimeDocument.push_back("xml");
-    this->mimeDocument.push_back("json");
     this->typeString.insert(LightBird::IIdentify::AUDIO, "audio");
     this->typeString.insert(LightBird::IIdentify::DOCUMENT, "document");
     this->typeString.insert(LightBird::IIdentify::IMAGE, "image");
@@ -149,46 +140,51 @@ Identify::Info  Identify::_identify(const QString &file, const QString &fileName
 {
     Info            result;
     Info            tmp;
-    QList<void *>   extensions;
     QString         mime;
+    QList<void *>   extensions;
     QMap<LightBird::IIdentify::Type, QVariantMap> info;
 
+    // Checks if the file exists
     result.type = LightBird::IIdentify::OTHER;
-    // Checks that the file exists
     if (!QFileInfo(file).isFile())
         return (result);
-    // Gets the extensions that implements IIdentify
-    QListIterator<void *> it(extensions = LightBird::Library::extension().get("IIdentify"));
-    while (it.hasNext())
+
+    // Gets the size, the extension, the mime and the type of the file
+    result.data.insert("size", QFileInfo(file).size());
+    int dotIndex = fileName.lastIndexOf(".");
+    if (dotIndex >= 0)
     {
-        tmp.data.clear();
-        tmp.type = LightBird::IIdentify::OTHER;
-        // If the plugin could identify the file, adds it to the map
-        if (static_cast<LightBird::IIdentify *>(it.peekNext())->identify(file, tmp))
-            info.insertMulti(tmp.type, tmp.data);
-        it.next();
+        QString extension = fileName.right(fileName.size() - dotIndex - 1);
+        result.data.insert("extension", extension);
+        result.data.insert("mime", (mime = LightBird::getFileMime(extension)));
+        if (result.type == LightBird::IIdentify::OTHER)
+            result.type = LightBird::getFileType(extension);
+    }
+    else
+        result.data.insert("mime", "application/octet-stream");
+
+    // Gets the extensions that implements IIdentify
+    for (QListIterator<void *> it(extensions = LightBird::Library::extension().get("IIdentify")); it.hasNext(); it.next())
+    {
+        LightBird::IIdentify *extension = static_cast<LightBird::IIdentify *>(it.peekNext());
+        if (extension->types().contains(result.type))
+        {
+            tmp.data.clear();
+            tmp.type = result.type;
+            // If the plugin could identify the file, adds it to the map
+            if (extension->identify(file, tmp))
+                info.insertMulti(tmp.type, tmp.data);
+        }
     }
     // Releases the extensions
     LightBird::Library::extension().release(extensions);
+
     // Puts the data gathered in the result
     if (info.size() > 0)
         this->_identify(info, result);
-    // Gets the size, the extension and the mime of the file
-    result.data.insert("size", QFileInfo(file).size());
-    if (fileName.contains("."))
-    {
-        result.data.insert("extension", fileName.right(fileName.size() - fileName.lastIndexOf(".") - 1));
-        extensions = LightBird::Library::extension().get("IMime");
-        if (!extensions.isEmpty() && !(mime = static_cast<LightBird::IMime *>(extensions.first())->getMime(fileName)).isEmpty())
-            result.data.insert("mime", mime);
-        LightBird::Library::extension().release(extensions);
-    }
     // Determines if the file is a document
     if (result.type == LightBird::IIdentify::OTHER)
-        this->_document(result);
-    // If the type is still other, we try to guess it using the MIME
-    if (result.type == LightBird::IIdentify::OTHER)
-        this->_typeFromMime(result);
+        this->_document(result, mime);
     // Computes the hashes of the file
     if (computeHash)
         this->_hash(file, result);
@@ -209,14 +205,16 @@ void    Identify::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, 
         return ;
     if (this->_add(LightBird::IIdentify::IMAGE, info, result))
         return ;
-    if (this->_add(LightBird::IIdentify::VIDEO, info, result))
-        return ;
     if (this->_add(LightBird::IIdentify::AUDIO, info, result))
+        return ;
+    if (this->_add(LightBird::IIdentify::VIDEO, info, result))
         return ;
 }
 
 bool    Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
 {
+    int oldSize = result.data.size();
+
     if (info.contains(type))
     {
         QListIterator<QVariantMap> i(info.values(type));
@@ -227,19 +225,17 @@ bool    Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentif
                 if (!j.next().value().toString().isEmpty())
                     result.data.insert(j.peekPrevious().key(), j.peekPrevious().value());
         }
-        if (!result.data.isEmpty() || type == LightBird::IIdentify::DOCUMENT)
+        if (result.data.size() != oldSize)
         {
             result.type = type;
-            return (true);
+            return true;
         }
     }
     return (false);
 }
 
-void        Identify::_document(Info &result)
+void        Identify::_document(Info &result, const QString &mime)
 {
-    QString mime = result.data.value("mime").toString();
-
     QStringListIterator it(this->mimeDocument);
     while (it.hasNext())
         if (mime.contains(it.next()))
@@ -247,18 +243,6 @@ void        Identify::_document(Info &result)
             result.type = LightBird::IIdentify::DOCUMENT;
             return ;
         }
-}
-
-void        Identify::_typeFromMime(Info &result)
-{
-    QString mime = result.data.value("mime").toString();
-
-    if (mime.startsWith("image"))
-        result.type = LightBird::IIdentify::IMAGE;
-    else if (mime.startsWith("audio"))
-        result.type = LightBird::IIdentify::AUDIO;
-    else if (mime.startsWith("video"))
-        result.type = LightBird::IIdentify::VIDEO;
 }
 
 void    Identify::_hash(const QString &fileName, Info &result)

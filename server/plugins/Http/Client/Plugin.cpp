@@ -4,8 +4,6 @@
 #include <QUrl>
 #include <QUrlQuery>
 
-#include "IMime.h"
-
 #include "LightBird.h"
 #include "Medias.h"
 #include "Plugin.h"
@@ -172,8 +170,8 @@ bool    Plugin::doExecution(LightBird::IClient &client)
         // If the file exists in the www directory
         else if (QFileInfo(path).isFile())
         {
-            // Set the MIME type of the file from the IMime extension
-            client.getResponse().setType(this->_getMime(uri));
+            // Sets the MIME type of the file
+            client.getResponse().setType(LightBird::getFileMime(uri));
             client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
         }
         // If the folder has not been found, an error occurred
@@ -310,7 +308,7 @@ void    Plugin::_translation(LightBird::IClient &client, const QString &interfac
     else
         path += "en.js";
     // Sends the translation
-    client.getResponse().setType(this->_getMime(path));
+    client.getResponse().setType(LightBird::getFileMime(path));
     client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
 }
 
@@ -328,24 +326,10 @@ void    Plugin::_getFile(LightBird::IClient &client)
         return (this->response(client, 404, "Not Found", "File not found."));
     // If the file has to be downloaded by the browser, a special MIME is used
     if (QUrlQuery(client.getRequest().getUri()).queryItemValue("download") != "true")
-        client.getResponse().setType(this->_getMime(path));
+        client.getResponse().setType(LightBird::getFileMime(path));
     else
         client.getResponse().setType(DEFAULT_CONTENT_TYPE);
     client.getResponse().getContent().setStorage(LightBird::IContent::FILE, path);
-}
-
-QString Plugin::_getMime(const QString &file)
-{
-    QList<void *>   extensions;
-    QString         result;
-
-    if (!file.contains('.'))
-        return (result);
-    extensions = this->_api->extensions().get("IMime");
-    if (!extensions.isEmpty())
-        result = static_cast<LightBird::IMime *>(extensions.first())->getMime(file);
-    this->_api->extensions().release(extensions);
-    return (result);
 }
 
 void    Plugin::response(LightBird::IClient &client, int code, const QString &message, const QByteArray &content)

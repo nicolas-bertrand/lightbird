@@ -4,6 +4,7 @@
 # include <QMap>
 # include <QString>
 # include <QVariant>
+# include <QList>
 
 namespace LightBird
 {
@@ -30,12 +31,18 @@ namespace LightBird
             QVariantMap data; ///< More data on the file.
         };
 
+        /// @brief Returns the list of the types the extension can identify.
+        inline const QList<LightBird::IIdentify::Type> &types() { return _types; }
         /// @brief Gets information on a file.
         /// @param file : The path of the file that will be probed.
         /// @param information : If true is returned, this parameter is filled
         /// with the information on the file.
         /// @return True if the extension has been able to get information on the file.
         virtual bool    identify(const QString &file, LightBird::IIdentify::Information &information) = 0;
+
+    protected:
+        ///< The list of the types the extension can identify.
+        QList<LightBird::IIdentify::Type> _types;
     };
 }
 
