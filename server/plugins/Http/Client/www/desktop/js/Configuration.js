@@ -271,7 +271,8 @@ var Configuration =
     },
     Files:
     {
-        updateInterval: 1 * 1000, // The number of milliseconds between the file update request to the server.
+        updateInterval: 2 * 1000, // The number of milliseconds between the file update request to the server.
+        cleanFilesDeleted: 30 * 1000, // The number of milliseconds after which the list of the files deleted is cleaned.
     },
     User:
     {

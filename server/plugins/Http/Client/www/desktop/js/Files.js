@@ -27,6 +27,8 @@ function Files()
         self.onUpdate = new Array(); // The list of the functions to call when files are updated.
         self.onDelete = new Array(); // The list of the functions to call when files are deleted.
         self.updateInterval; // The interval used to update the files list. from the server.
+        self.filesDeleted = {}; // The list of the files deleted. This ensures that they are not added later by the files update.
+        self.filesDeletedModified = (new Date()).getTime(); // The last time self.filesDeleted was modified, which allows to clean it after C.Files.cleanFilesDeleted milliseconds.
         self.filesExtensionsTypes = {}; // Associates the files extensions with their types.
         
         // Gets the json of self.filesExtensionsTypes
@@ -118,6 +120,12 @@ function Files()
     // @param files: The list of the files to delete.
     self.delete = function (deleted)
     {
+        // Cleans self.filesDeleted
+        if ((new Date()).getTime() - self.filesDeletedModified > C.Files.cleanFilesDeleted)
+            self.filesDeleted = {};
+        self.filesDeletedModified = (new Date()).getTime();
+
+        // Gets the files that are on the server (and not uploading)
         var filesId = [];
         var cancelUploads = [];
         for (var i = 0; i < deleted.length; ++i)
@@ -125,7 +133,10 @@ function Files()
             if (deleted[i].upload)
                 cancelUploads.push(deleted[i]);
             else
+            {
+                self.filesDeleted[deleted[i].info.id] = true;
                 filesId.push(deleted[i].info.id);
+            }
         }
         
         // Cancels the upload of the files to delete
@@ -142,7 +153,6 @@ function Files()
                     if (filesNotDeleted.length)
                         console.log("Files not deleted: ", filesNotDeleted);
                 }
-                    
             }, JSON.stringify(filesId), "application/json");
         
         // Removes the files from the list
@@ -175,6 +185,9 @@ function Files()
                     {
                         var remote = json.files[i];
                         var found = false;
+                        // Ensures that the file was not already deleted
+                        if (self.filesDeleted[remote.id])
+                            continue;
                         // Checks if the files uploading are in the list
                         for (var u in gl_uploads.currentUploads)
                         {
