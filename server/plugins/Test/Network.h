@@ -6,8 +6,9 @@
 # include "ITest.h"
 
 /// @brief Tests the Network of the server.
-class Network : public QObject,
-                public ITest
+class Network
+    : public QObject
+    , public ITest
 {
     Q_OBJECT
 

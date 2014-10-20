@@ -34,7 +34,7 @@ public:
     bool    isIdle();
 
 private slots:
-    // This methods calls the interfaces implemented by the plugins,
+    // These methods call the interfaces implemented by the plugins,
     // in order to generate a request and execute the response.
     bool    _doSend();
     bool    _onSend();

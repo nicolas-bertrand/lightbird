@@ -18,12 +18,14 @@ HEADERS = \
     Database.h \
     Ftp.h \
     ITest.h \
+    Library.h \
     Network.h \
     Plugin.h
 SOURCES = \
     Configuration.cpp \
     Database.cpp \
     Ftp.cpp \
+    Library.cpp \
     Network.cpp \
     Plugin.cpp
 OTHER_FILES = Configuration.xml

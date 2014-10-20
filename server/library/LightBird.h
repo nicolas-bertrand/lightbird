@@ -134,8 +134,8 @@ namespace LightBird
     LIB void        sleep(unsigned long time);
 
     /// @brief Converts a string to a quint64 using the character at the end of the string.
-    /// This character could be K (Kilobyte), M (Megabyte), or G (Gigabyte). For example
-    /// "42K" is converted to 43008 (42 * 1024), and "42" is converted to 42.
+    /// This character could be K (Kilobyte), M (Megabyte), G (Gigabyte), or T (Terabyte).
+    /// For example "42K" is converted to 43008 (42 * 1024), and "42" is converted to 42.
     /// @param string : The string to convert.
     /// @return The result of the conversion.
     LIB quint64     stringToBytes(const QString &str);

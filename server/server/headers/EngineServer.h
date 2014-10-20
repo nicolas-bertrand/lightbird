@@ -28,7 +28,7 @@ public:
     bool    isIdle();
 
 private slots:
-    // This methods calls the interfaces implemented by the plugins,
+    // These methods call the interfaces implemented by the plugins,
     // in order to execute the request and generate a response.
     bool    _doProtocol();
     void    _onProtocol();

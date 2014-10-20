@@ -40,6 +40,18 @@ unsigned int    Library::run()
         ASSERT(LightBird::getImageExtension(LightBird::IImage::PNG) == "png");
         ASSERT(LightBird::getImageExtension(LightBird::IImage::TGA) == "tga");
         ASSERT(LightBird::getImageExtension(LightBird::IImage::TIFF) == "tiff");
+
+        ASSERT(LightBird::stringToBytes("1") == 1);
+        ASSERT(LightBird::stringToBytes("15489489") == 15489489);
+        ASSERT(LightBird::stringToBytes("1K") == 1024);
+        ASSERT(LightBird::stringToBytes("1565k") == 1565 * 1024);
+        ASSERT(LightBird::stringToBytes("1 k") == 1024);
+        ASSERT(LightBird::stringToBytes("1  k ") == 1024);
+        ASSERT(LightBird::stringToBytes("  1   K  ") == 1024);
+        ASSERT(LightBird::stringToBytes("  3   K  ") == 3 * 1024);
+        ASSERT(LightBird::stringToBytes("1M") == 1024 * 1024);
+        ASSERT(LightBird::stringToBytes("1g") == 1024 * 1024 * 1024);
+        ASSERT(LightBird::stringToBytes("5t") == quint64(5) * 1024 * 1024 * 1024 * 1024);
     }
     catch (unsigned int line)
     {

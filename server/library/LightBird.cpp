@@ -170,6 +170,7 @@ quint64 LightBird::stringToBytes(const QString &str)
     quint64 bytes;
     QString string = str;
 
+    string.remove(' ');
     if (string.at(string.size() - 1).isLetter())
     {
         bytes = string.left(string.size() - 1).toInt();
@@ -180,6 +181,8 @@ quint64 LightBird::stringToBytes(const QString &str)
             bytes *= 1024 * 1024;
         else if (type == 'G')
             bytes *= 1024 * 1024 * 1024;
+        else if (type == 'T')
+            bytes *= quint64(1024) * 1024 * 1024 * 1024;
         else
             bytes = string.toULongLong();
     }
