@@ -52,6 +52,20 @@ QString LightBird::cleanPath(const QString &p, bool removeFirstSlash)
     return (result);
 }
 
+QString LightBird::fileTypeToString(IIdentify::Type type)
+{
+    if (type == IIdentify::AUDIO)
+        return "audio";
+    else if (type == IIdentify::DOCUMENT)
+        return "document";
+    else if (type == IIdentify::IMAGE)
+        return "image";
+    else if (type == IIdentify::VIDEO)
+        return "video";
+    else
+        return "other";
+}
+
 void    LightBird::identify(const QString &fileId)
 {
     LightBird::Library::getIdentify()->identify(fileId);

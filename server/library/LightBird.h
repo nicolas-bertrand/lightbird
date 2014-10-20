@@ -40,6 +40,9 @@ namespace LightBird
     /// @param removeFirstSlash : Removes the first char if it is "/".
     LIB QString     cleanPath(const QString &path, bool removeFirstSlash = false);
 
+    /// @brief Converts the file type to a string (IIdentify::AUDIO becomes "audio"...).
+    LIB QString     fileTypeToString(IIdentify::Type type);
+
     /// @brief Identifies a file in the database. The identification is performed
     /// in a dedicated thread, so this method returns immediatly.
     /// The result will be inserted in the database.
