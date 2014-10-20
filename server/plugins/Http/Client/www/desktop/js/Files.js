@@ -27,6 +27,14 @@ function Files()
         self.onUpdate = new Array(); // The list of the functions to call when files are updated.
         self.onDelete = new Array(); // The list of the functions to call when files are deleted.
         self.updateInterval; // The interval used to update the files list. from the server.
+        self.filesExtensionsTypes = {}; // Associates the files extensions with their types.
+        
+        // Gets the json of self.filesExtensionsTypes
+        F.request("GET", "filesExtensionsTypes.json", function (httpRequest)
+        {
+            if (httpRequest.status == 200)
+                self.filesExtensionsTypes = jsonParse(httpRequest.responseText);
+        });
     }
     
     // Downloads the files list.
@@ -81,7 +89,15 @@ function Files()
             if (!duplicate)
             {
                 var date = F.ISODateString(new Date());
-                var file = {info: {name: file.name, size: file.size, created: date, modified: date, id_directory: file.id_directory, type: "other"}}
+                var dotIndex = file.name.lastIndexOf('.');
+                var extension = "";
+                var type = "other";
+                if (dotIndex >= 0)
+                {
+                    extension = file.name.substring(dotIndex + 1);
+                    type = self.filesExtensionsTypes[extension.toLowerCase()] || "other";
+                }
+                var file = {info: {name: file.name, size: file.size, created: date, modified: date, id_directory: file.id_directory, type: type, extension: extension}};
                 self.push(file);
                 onAddFiles.push(file);
                 result.push(file);

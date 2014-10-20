@@ -4,6 +4,7 @@
 # include <QHash>
 # include <QMap>
 # include <QMutex>
+# include <QJsonDocument>
 # include <QObject>
 
 # include "IPlugin.h"
@@ -105,23 +106,26 @@ private:
     QString _getInterface(LightBird::IClient &client);
     /// @brief Returns the correct translation of the client.
     void    _translation(LightBird::IClient &client, const QString &interface);
+    /// @brief Returns a json that associates the files extensions with their type.
+    void    _filesExtensionsTypes(LightBird::IClient &client);
     /// @brief Returns a file that is stored in the filesPath instead of the www directory.
     /// The account must have the right to read the file.
     void    _getFile(LightBird::IClient &client);
 
-    LightBird::IApi     *_api;      ///< The LightBird's Api.
-    static Plugin       *_instance; ///< The instance of the plugin.
-    QStringList         interfaces; ///< Contains the name of the interfaces available.
-    QString             wwwDir;     ///< The path to the www directory (where the interface is stored).
-    QMap<int, QString>  daysOfWeek; ///< The names of the days of the week in english in three letters.
-    QMap<int, QString>  months;     ///< The names of the months in three letters.
-    QHash<QHostAddress, QPair<QDateTime, quint32> > attempts; ///< Stores the number of failed connection attempts per ip and date.
-    Commands            commands;   ///< Executes the commands of the client.
-    Context             _context;   ///< The context that calls the network interfaces.
-    Files               _files;     ///< Manages the files.
-    Medias              _medias;    ///< Manages the medias.
-    Uploads             _uploads;   ///< Manages the uploads.
-    QMutex              mutex;      ///< Makes this class thread safe.
+    LightBird::IApi     *_api;       ///< The LightBird's Api.
+    static Plugin       *_instance;  ///< The instance of the plugin.
+    QStringList         _interfaces; ///< Contains the name of the interfaces available.
+    QString             _wwwDir;     ///< The path to the www directory (where the interface is stored).
+    QMap<int, QString>  _daysOfWeek; ///< The names of the days of the week in english in three letters.
+    QMap<int, QString>  _months;     ///< The names of the months in three letters.
+    Commands            _commands;   ///< Executes the commands of the client.
+    Context             _context;    ///< The context that calls the network interfaces.
+    Files               _files;      ///< Manages the files.
+    Medias              _medias;     ///< Manages the medias.
+    Uploads             _uploads;    ///< Manages the uploads.
+    QMutex              _mutex;      ///< Makes this class thread safe.
+    QByteArray          _filesExtensionsTypesJson; ///< A json that associates the files extensions with their type.
+    QHash<QHostAddress, QPair<QDateTime, quint32> > _attempts; ///< Stores the number of failed connection attempts per ip and date.
 };
 
 void    Plugin::httpError(LightBird::IClient &client, int code, const QString &message)

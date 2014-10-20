@@ -306,10 +306,10 @@ void        Uploads::_send_createFile(LightBird::IClient &client, Upload &upload
         if (directory.isAllowed(client.getAccount().getId(), "add"))
         {
             // Adds the files to the database
-            if (upload.fileTable.add(file.name, file.path, "other", directory.getId(), client.getAccount().getId()))
+            if (upload.fileTable.add(file.name, file.path, LightBird::fileTypeToString(LightBird::getFileType(file.name)), directory.getId(), client.getAccount().getId()))
             {
                 upload.files.last().id = upload.fileTable.getId();
-                upload.fileTable.setInformation("mime", file.contentType);
+                upload.fileTable.setInformation("mime", LightBird::getFileMime(file.name));
                 // Creates the filesPath if it doesn't exist
                 if (!QFileInfo(filesPath).isDir())
                     QDir().mkpath(filesPath);

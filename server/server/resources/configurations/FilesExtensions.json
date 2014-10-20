@@ -357,6 +357,7 @@
 "ms": { "type": "other", "mime": "application/x-troff-ms" },
 "msg": { "type": "other", "mime": "application/vnd.ms-outlook" },
 "msi": { "type": "other", "mime": "application/x-msdownload" },
+"mts": { "type": "video", "mime": "video/mp2t" },
 "mv": { "type": "video", "mime": "video/x-sgi-movie" },
 "mvb": { "type": "other", "mime": "application/x-msmediaview" },
 "my": { "type": "audio", "mime": "audio/make" },
