@@ -23,6 +23,9 @@ unsigned int    Library::run()
         ASSERT(LightBird::getFileMime(".tavi") == "application/octet-stream");
         ASSERT(LightBird::getFileMime("video.tavi") == "application/octet-stream");
         ASSERT(LightBird::getFileMime("") == "application/octet-stream");
+        ASSERT(LightBird::getFileMime("AVI") == "video/avi");
+        ASSERT(LightBird::getFileMime("Avi") == "video/avi");
+        ASSERT(LightBird::getFileMime("AvI") == "video/avi");
 
         ASSERT(LightBird::getFileType("avi") == LightBird::IIdentify::VIDEO);
         ASSERT(LightBird::getFileType(".avi") == LightBird::IIdentify::VIDEO);
@@ -31,6 +34,9 @@ unsigned int    Library::run()
         ASSERT(LightBird::getFileType(".tavi") == LightBird::IIdentify::OTHER);
         ASSERT(LightBird::getFileType("video.tavi") == LightBird::IIdentify::OTHER);
         ASSERT(LightBird::getFileType("") == LightBird::IIdentify::OTHER);
+        ASSERT(LightBird::getFileType("AVI") == LightBird::IIdentify::VIDEO);
+        ASSERT(LightBird::getFileType("Avi") == LightBird::IIdentify::VIDEO);
+        ASSERT(LightBird::getFileType("AvI") == LightBird::IIdentify::VIDEO);
 
         ASSERT(LightBird::getImageExtension(LightBird::IImage::BMP) == "bmp");
         ASSERT(LightBird::getImageExtension(LightBird::IImage::BMP, false) == "bmp");
