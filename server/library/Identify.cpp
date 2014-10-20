@@ -167,7 +167,7 @@ Identify::Info  Identify::_identify(const QString &file, const QString &fileName
     for (QListIterator<void *> it(extensions = LightBird::Library::extension().get("IIdentify")); it.hasNext(); it.next())
     {
         LightBird::IIdentify *extension = static_cast<LightBird::IIdentify *>(it.peekNext());
-        if (extension->types().contains(result.type))
+        if (result.type == LightBird::IIdentify::OTHER || extension->types().contains(result.type))
         {
             tmp.data.clear();
             tmp.type = result.type;
