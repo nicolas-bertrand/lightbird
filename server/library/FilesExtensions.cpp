@@ -56,9 +56,9 @@ LightBird::IIdentify::Type FilesExtensions::getFileType(const QString &fileName)
     defaultValue.type = LightBird::IIdentify::OTHER;
 
     if ((index = fileName.lastIndexOf('.')) >= 0)
-        return _extensions.value(fileName.right(fileName.size() - index - 1), defaultValue).type;
+        return _extensions.value(fileName.right(fileName.size() - index - 1).toLower(), defaultValue).type;
     else
-        return _extensions.value(fileName, defaultValue).type;
+        return _extensions.value(fileName.toLower(), defaultValue).type;
 }
 
 QString FilesExtensions::getFileMime(const QString &fileName)
@@ -68,7 +68,7 @@ QString FilesExtensions::getFileMime(const QString &fileName)
     defaultValue.mime = _defaultMime;
 
     if ((index = fileName.lastIndexOf('.')) >= 0)
-        return _extensions.value(fileName.right(fileName.size() - index - 1), defaultValue).mime;
+        return _extensions.value(fileName.right(fileName.size() - index - 1).toLower(), defaultValue).mime;
     else
-        return _extensions.value(fileName, defaultValue).mime;
+        return _extensions.value(fileName.toLower(), defaultValue).mime;
 }
