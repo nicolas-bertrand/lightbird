@@ -164,7 +164,7 @@ void    Files::deleteFiles(LightBird::IClient &client)
     request.getContent().clear();
     request.getInformations()["files/delete/oldData"] = "";
 
-    if (request.getHeader()["content-length"].toInt() > deleteMaxContentLength)
+    if (request.getHeader()["content-length"].toUInt() > deleteMaxContentLength)
         return this->_deleteError(client, "Maximum content length exceeded: " + request.getHeader()["content-length"] + " > " + QString::number(deleteMaxContentLength));
     // First pass
     if (!started)
@@ -186,7 +186,7 @@ void    Files::deleteFiles(LightBird::IClient &client)
             if (indexOf < 0)
             {
                 request.getInformations()["files/delete/oldData"] = data;
-                if (data.size() > deleteFileIdMaxSize)
+                if (data.size() > (int)deleteFileIdMaxSize)
                     return this->_deleteError(client, "The size of this file id is abnormally large");
             }
             // File id complete

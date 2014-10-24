@@ -71,7 +71,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
             data.insert("channels", audio->channels);
             data.insert("sample rate", audio->sample_rate);
             if (audioStream->nb_frames)
-                data.insert("audio frames", audioStream->nb_frames);
+                data.insert("audio frames", (qint64)audioStream->nb_frames);
             data.insert("audio time base", QString("%1/%2").arg(QString::number(audioStream->time_base.num), QString::number(audioStream->time_base.den)));
             data.insert("sample format", av_get_sample_fmt_name(audio->sample_fmt));
             this->_addMetadata(audioStream->metadata, data);
@@ -89,7 +89,7 @@ bool    Identify::identify(const QString &file, LightBird::IIdentify::Informatio
             data.insert("frame rate", QString("%1/%2").arg(QString::number(videoStream->r_frame_rate.num), QString::number(videoStream->r_frame_rate.den)));
             data.insert("pixel format", av_get_pix_fmt_name(video->pix_fmt));
             if (videoStream->nb_frames)
-                data.insert("video frames", videoStream->nb_frames);
+                data.insert("video frames", (qint64)videoStream->nb_frames);
             if (video->has_b_frames)
                 data.insert("has b frames", "true");
             data.insert("video time base", QString("%1/%2").arg(QString::number(videoStream->time_base.num), QString::number(videoStream->time_base.den)));

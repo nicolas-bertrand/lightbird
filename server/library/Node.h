@@ -30,6 +30,7 @@ namespace LightBird
             /// @param type : The node's type. Cannot be AnyNode.
             /// The returned instance may only be used as set by the type parameter.
             Node(NodeType type);
+            virtual ~Node() {}
 
             /// @brief Sets the node's id.
             /// This method does not change the node's id in the database but only

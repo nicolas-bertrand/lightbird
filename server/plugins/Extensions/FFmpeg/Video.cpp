@@ -801,7 +801,7 @@ QByteArray  Video::_getSampleRates(const AVCodec *codec, unsigned int prefered)
 
 QByteArray  Video::_getChannelLayouts(const AVCodec *codec, unsigned int prefered)
 {
-    const quint64 *p = codec->channel_layouts;
+    const quint64 *p = (const quint64 *)codec->channel_layouts;
     QStringList result;
 
     while (p && *p != 0)
