@@ -34,6 +34,7 @@ public:
 private:
     LightBird::IApi *api;
     QList<QPair<QString, ITest *> > tests;
+    bool shutdown; ///< If true the server is shut down after the tests.
 };
 
 #endif // PLUGIN_H

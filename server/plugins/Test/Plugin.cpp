@@ -9,6 +9,7 @@
 #include "Plugin.h"
 
 Plugin::Plugin()
+    : shutdown(false)
 {
 }
 
@@ -33,6 +34,8 @@ bool    Plugin::onLoad(LightBird::IApi *api)
         this->tests << QPair<QString, ITest *>("Library", new Library(*this->api));
     if (configuration.count("network"))
         this->tests << QPair<QString, ITest *>("Network", new Network(*this->api));
+    if (configuration.get("shutdown") == "true")
+        this->shutdown = true;
     return (true);
 }
 
@@ -80,4 +83,9 @@ void    Plugin::event(const QString &, const QVariant &)
         this->api->log().info("All the tests were successful!", "Plugin", "event");
     else
         LOG_ERROR("At least one test failed!", Properties("class", test.peekPrevious().first).add("line", line).toMap(), "Plugin", "event");
+    if (this->shutdown)
+    {
+        this->api->log().info("Shutting down the server", "Plugin", "event");
+        this->api->stop();
+    }
 }
