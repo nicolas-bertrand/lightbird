@@ -4,6 +4,7 @@
 #include "PortUdp.h"
 #include "Mutex.h"
 #include "Threads.h"
+#include "Server.h"
 
 PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
     : Port(port, LightBird::INetwork::UDP, protocols, maxClients)
@@ -53,7 +54,7 @@ void    PortUdp::run()
     _serverUdp->execute();
     Mutex mutex(_mutex, "PortUdp", "run");
     // If some clients are still running, we wait for them
-    if (_clients.size())
+    if (_clients.size() && Server::isRunning())
         _threadFinished.wait(&_mutex);
     // Remove the remaining clients
     _clients.clear();

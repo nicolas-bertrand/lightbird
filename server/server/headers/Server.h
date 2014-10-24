@@ -31,6 +31,8 @@ public:
     static Server   &instance();
     /// @brief Shutdown the Server and delete its instance.
     static void     shutdown();
+    /// @brief Returns true while the server is running.
+    static bool     isRunning();
 
     /// @brief Stops the server, ie this entire process.
     /// @param restart : If true, the server will be restarted in another process.
@@ -84,6 +86,7 @@ private:
 
     Arguments       arguments;  ///< Stores the arguments used to launch the server.
     bool            restart;    ///< If true, the server is going to be restarted.
+    static bool     running;   ///< True while the server is running.
     static Server   *_instance; ///< The instance of the Server singleton.
     // The following members manages all the features of the server.
     ApiGuis         *apiGuis;

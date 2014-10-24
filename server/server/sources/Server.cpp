@@ -12,6 +12,7 @@
 #include "Server.h"
 
 Server  *Server::_instance = NULL;
+bool    Server::running = false;
 
 Server  &Server::instance(Arguments &args, QObject *parent)
 {
@@ -33,6 +34,11 @@ void    Server::shutdown()
     Server::_instance = NULL;
 }
 
+bool    Server::isRunning()
+{
+    return Server::running;
+}
+
 Server::Server(Arguments args, QObject *parent)
     : QObject(parent)
     , arguments(args)
@@ -49,6 +55,7 @@ Server::Server(Arguments args, QObject *parent)
     , threadPool(NULL)
     , threads(NULL)
 {
+    Server::running = true;
     Server::_instance = this;
     Log::info("Server starting", Properties("command line", this->arguments.toString()), "Server", "Server");
     this->_initialize();
@@ -119,6 +126,7 @@ void    Server::_initialize()
 
 Server::~Server()
 {
+    Server::running = false;
     Log::info("Server shutdown", "Server", "~Server");
     // From now on, the logs are printed directly on the standard output, and ILog will not be called anymore
     Log::instance()->setState(Log::END);

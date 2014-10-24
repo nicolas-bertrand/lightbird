@@ -6,6 +6,7 @@
 #include "SocketTcp.h"
 #include "SocketUdp.h"
 #include "Threads.h"
+#include "Server.h"
 
 Clients::Clients()
     : _network(NULL)
@@ -42,7 +43,7 @@ void    Clients::run()
         _network->execute();
     Mutex mutex(this->mutex, "Clients", "run");
     // If some clients are still running, we wait for them
-    if (this->clients.size())
+    if (this->clients.size() && Server::isRunning())
         _threadFinished.wait(&this->mutex);
     // Remove the remaining clients
     this->clients.clear();

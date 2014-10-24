@@ -4,6 +4,7 @@
 #include "PortTcp.h"
 #include "Mutex.h"
 #include "Threads.h"
+#include "Server.h"
 
 PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
     : Port(port, LightBird::INetwork::TCP, protocols, maxClients)
@@ -52,7 +53,7 @@ void PortTcp::run()
     _serverTcp->execute();
     Mutex mutex(_mutex, "PortTcp", "run");
     // If some clients are still running, we wait for them
-    if (_clients.size())
+    if (_clients.size() && Server::isRunning())
         _threadFinished.wait(&_mutex);
     // Remove the remaining clients
     _clients.clear();
