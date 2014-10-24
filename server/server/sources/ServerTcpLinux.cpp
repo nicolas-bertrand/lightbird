@@ -9,6 +9,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/eventfd.h>
 
 ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     : ServerTcp(p, address)
@@ -16,6 +17,7 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     , _disableWriteBuffer(true)
     , _maxPendingConnections(1000)
     , _epoll(-1)
+    , _eventfd(-1)
 {
     // Resolves the local address and port to be used by the server
     QByteArray port = QByteArray::number(_port);
@@ -101,9 +103,29 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     if (epoll_ctl(_epoll, EPOLL_CTL_ADD, _listenSocket, &e) == -1)
     {
         LOG_ERROR("Failed to add the socket to epoll: epoll_ctl EPOLL_CTL_ADD failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "ServerTcpLinux");
-        close();
         return ;
     }
+
+    // Creates the eventfd that allows to interrupt epoll_wait
+    if ((_eventfd = eventfd(0, 0)) == -1)
+    {
+        LOG_ERROR("Error with eventfd", Properties("error", errno), "ServerTcpLinux", "ServerTcpLinux");
+        return ;
+    }
+    if ((ioctl(_eventfd, FIONBIO, &nonBlockingMode)) == -1)
+    {
+        LOG_DEBUG("Failed to set eventFd in non blocking mode", Properties("error", errno), "ServerTcpLinux", "ServerTcpLinux");
+        return ;
+    }
+    memset(&e, 0, sizeof(e));
+    e.events = EPOLLIN;
+    e.data.ptr = this;
+    if (epoll_ctl(_epoll, EPOLL_CTL_ADD, _eventfd, &e) == -1)
+    {
+        LOG_ERROR("Failed to add the eventFd to epoll: epoll_ctl EPOLL_CTL_ADD failed", Properties("error", errno), "ServerTcpLinux", "ServerTcpLinux");
+        return ;
+    }
+
     _listening = true;
 }
 
@@ -115,16 +137,20 @@ ServerTcpLinux::~ServerTcpLinux()
         ::close(_epoll);
         _epoll = -1;
     }
+    if (_eventfd != -1)
+    {
+        ::close(_eventfd);
+        _eventfd = -1;
+    }
 }
 
 void ServerTcpLinux::execute()
 {
     int result;
-    bool execute = true;
     QVector<epoll_event> events;
     events.reserve(200);
 
-    while (execute)
+    while (_listening)
     {
         if (events.size() != _sockets.size())
             events.resize(_sockets.size());
@@ -143,7 +169,21 @@ void ServerTcpLinux::execute()
                 if (events[i].events & EPOLLIN)
                     _newConnection();
                 if (events[i].events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
-                    execute = false;
+                    _listening = false;
+            }
+            // epoll_wait was interrupted by the eventfd
+            else if (events[i].data.ptr == this)
+            {
+                if (events[i].events & EPOLLIN)
+                {
+                    quint64 buf;
+                    read(_eventfd, &buf, sizeof(buf));
+                }
+                else
+                {
+                    LOG_ERROR("Error with the eventfd", Properties("error", events[i].events), "ServerTcpLinux", "execute");
+                    _listening = false;
+                }
             }
             // Checks the other sockets
             else
@@ -173,6 +213,8 @@ void ServerTcpLinux::close()
         _listenSocket = -1;
     }
     _listening = false;
+    if (_eventfd != -1)
+        _interruptEpoll();
 }
 
 void ServerTcpLinux::_newConnection()
@@ -300,6 +342,7 @@ void ServerTcpLinux::_socketClosed(epoll_event &events)
     if (events.data.ptr)
         _socketsToClose.append(events.data.ptr);
     mutex.unlock();
+    _interruptEpoll();
 }
 
 void ServerTcpLinux::_closeSockets()
@@ -325,6 +368,12 @@ void ServerTcpLinux::_closeSockets()
             }
     }
     _socketsToClose.clear();
+}
+
+void ServerTcpLinux::_interruptEpoll()
+{
+    quint64 buf = 1;
+    write(_eventfd, &buf, sizeof(buf));
 }
 
 #endif // Q_OS_LINUX

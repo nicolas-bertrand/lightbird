@@ -7,11 +7,13 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/eventfd.h>
 
 ServerUdpLinux::ServerUdpLinux(quint16 port, const QHostAddress &address)
     : ServerUdp(port, address)
     , _disableWriteBuffer(true)
     , _epoll(-1)
+    , _eventfd(-1)
 {
     _ip.resize(46);
 
@@ -87,12 +89,44 @@ ServerUdpLinux::ServerUdpLinux(quint16 port, const QHostAddress &address)
         LOG_ERROR("Failed to add the socket to epoll: epoll_ctl EPOLL_CTL_ADD failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerUdpLinux", "ServerUdpLinux");
         return ;
     }
+
+    // Creates the eventfd that allows to interrupt epoll_wait
+    if ((_eventfd = eventfd(0, 0)) == -1)
+    {
+        LOG_ERROR("Error with eventfd", Properties("error", errno), "ServerUdpLinux", "ServerUdpLinux");
+        return ;
+    }
+    if ((ioctl(_eventfd, FIONBIO, &nonBlockingMode)) == -1)
+    {
+        LOG_DEBUG("Failed to set eventFd in non blocking mode", Properties("error", errno), "ServerUdpLinux", "ServerUdpLinux");
+        return ;
+    }
+    epoll_event e;
+    memset(&e, 0, sizeof(e));
+    e.events = EPOLLIN;
+    e.data.ptr = this;
+    if (epoll_ctl(_epoll, EPOLL_CTL_ADD, _eventfd, &e) == -1)
+    {
+        LOG_ERROR("Failed to add the eventFd to epoll: epoll_ctl EPOLL_CTL_ADD failed", Properties("error", errno), "ServerUdpLinux", "ServerUdpLinux");
+        return ;
+    }
+
     _listening = true;
 }
 
 ServerUdpLinux::~ServerUdpLinux()
 {
     close();
+    if (_epoll != -1)
+    {
+        ::close(_epoll);
+        _epoll = -1;
+    }
+    if (_eventfd != -1)
+    {
+        ::close(_eventfd);
+        _eventfd = -1;
+    }
 }
 
 void ServerUdpLinux::execute()
@@ -105,19 +139,36 @@ void ServerUdpLinux::execute()
     {
         if ((result = epoll_wait(_epoll, &event, 1, -1)) == -1 && errno != EINTR)
         {
-            LOG_ERROR("An error occured while executing the TCP server: epoll_wait failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerUdpLinux", "execute");
+            LOG_ERROR("An error occured while executing the UDP server: epoll_wait failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerUdpLinux", "execute");
             break;
         }
 
-        // Checks if something appenned on the listen socket
         if (result > 0)
         {
-            if (event.events & EPOLLIN)
-                socket->readyRead();
-            if (event.events & EPOLLOUT)
-                socket->readyWrite();
-            if (event.events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
-                break;
+            // epoll_wait was interrupted by the eventfd
+            if (event.data.ptr == this)
+            {
+                if (event.events & EPOLLIN)
+                {
+                    quint64 buf;
+                    read(_eventfd, &buf, sizeof(buf));
+                }
+                else
+                {
+                    LOG_ERROR("Error with the eventfd", Properties("error", event.events), "ServerUdpLinux", "execute");
+                    _listening = false;
+                }
+            }
+            // Something appenned on the listen socket
+            else
+            {
+                if (event.events & EPOLLIN)
+                    socket->readyRead();
+                if (event.events & EPOLLOUT)
+                    socket->readyWrite();
+                if (event.events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
+                    break;
+            }
         }
     }
     _disconnectAll();
@@ -158,11 +209,8 @@ void ServerUdpLinux::close()
     if (_listenSocket)
         _listenSocket->close();
     _listening = false;
-    if (_epoll != -1)
-    {
-        ::close(_epoll);
-        _epoll = -1;
-    }
+    if (_eventfd != -1)
+        _interruptEpoll();
 }
 
 void ServerUdpLinux::_disconnectAll()
@@ -175,10 +223,16 @@ void ServerUdpLinux::_setEpollEvents(epoll_event &events)
 {
     if (epoll_ctl(_epoll, EPOLL_CTL_MOD, static_cast<QSharedPointer<Socket> *>(events.data.ptr)->data()->descriptor(), &events) == -1)
     {
-        LOG_ERROR("Failed to modify the socket from epoll: epoll_ctl EPOLL_CTL_MOD failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "setEvents");
+        LOG_ERROR("Failed to modify the socket from epoll: epoll_ctl EPOLL_CTL_MOD failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerUdpLinux", "setEvents");
         ::close(static_cast<QSharedPointer<Socket> *>(events.data.ptr)->data()->descriptor());
         return ;
     }
+}
+
+void ServerUdpLinux::_interruptEpoll()
+{
+    quint64 buf = 1;
+    write(_eventfd, &buf, sizeof(buf));
 }
 
 #endif // Q_OS_LINUX

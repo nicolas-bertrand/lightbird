@@ -34,6 +34,8 @@ private:
     void _disconnectAll();
     /// @brief Closes the sockets in _socketsToClose.
     void _closeSockets();
+    /// @brief Interrupts epoll_wait by writing on the eventfd.
+    void _interruptEpoll();
 
     int _listenSocket; ///< The socket on which the server is listening.
     bool _disableWriteBuffer; ///< True to disable the write buffer (less CPU overhead, but more protocol overhead).
@@ -42,6 +44,7 @@ private:
     QList<void *> _socketsToClose; ///< The list of the sockets so close. This allows _socketClosed() to be thread safe.
     QMutex _socketsToCloseMutex; ///< Allows _socketsToAdd to be thread safe.
     int _epoll; ///< The epoll file descriptor.
+    int _eventfd; ///< Allows to interrupt epoll_wait.
 
 private slots:
     /// @brief Modifies the epoll events of a socket.

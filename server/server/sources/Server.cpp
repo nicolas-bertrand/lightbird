@@ -129,12 +129,12 @@ Server::~Server()
     Log::info("Closes the thread pool", "Server", "~Server");
     if (this->threadPool)
         this->threadPool->shutdown();
-    Log::info("Finishes the other threads", "Server", "~Server");
-    if (this->threads)
-        this->threads->shutdown();
     Log::info("Shutdown the network", "Server", "~Server");
     if (this->network)
         this->network->shutdown();
+    Log::info("Finishes the other threads", "Server", "~Server");
+    if (this->threads)
+        this->threads->shutdown();
     LightBird::Library::shutdown();
     Log::info("Cleans the server features", "Server", "~Server");
     // The reason why we dont delete directly these objects and call shutdown
@@ -153,6 +153,7 @@ Server::~Server()
     delete this->threads;
     delete this->configurations;
     Log::info("Server stopped", "Server", "~Server");
+    Log::deleteInstance();
     // Restarts the server if necessary
     if (this->restart)
         QProcess::startDetached(QCoreApplication::instance()->applicationFilePath(), this->arguments.toStringList(), QDir::currentPath());

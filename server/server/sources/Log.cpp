@@ -1,4 +1,5 @@
 #include <iostream>
+#include <QCoreApplication>
 
 #include "ILog.h"
 
@@ -17,6 +18,12 @@ Log *Log::instance()
     if (Log::_instance == NULL)
         Log::_instance = new Log();
     return (Log::_instance);
+}
+
+void Log::deleteInstance()
+{
+    delete Log::_instance;
+    Log::_instance = NULL;
 }
 
 Log::Log()
@@ -48,7 +55,6 @@ Log::~Log()
         this->quit();
         this->wait();
     }
-    Log::trace("Log destroyed!", "Log", "Log");
 }
 
 void    Log::write(LightBird::ILogs::Level level, const QString &message, const QString &plugin, const Properties &properties, const QString &object, const QString &method)
@@ -218,9 +224,7 @@ void    Log::run()
     Log::debug("Log thread started", "Log", "run");
     this->exec();
     Log::debug("Log thread finished", "Log", "run");
-    // The thread where lives the Log is changed to the thread of its parent
-    if (this->parent != NULL)
-        this->moveToThread(this->parent->thread());
+    this->moveToThread(QCoreApplication::instance()->thread());
 }
 
 void    Log::_initializeConfiguration()

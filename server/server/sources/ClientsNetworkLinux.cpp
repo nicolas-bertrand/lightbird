@@ -86,7 +86,7 @@ void ClientsNetworkLinux::execute()
                 }
                 else
                 {
-                    LOG_ERROR("Error with the eventfd", Properties("error", events[i].events).add("socket", socket->data()->descriptor()), "ClientsNetworkLinux", "execute");
+                    LOG_ERROR("Error with the eventfd", Properties("error", events[i].events), "ClientsNetworkLinux", "execute");
                     _listening = false;
                 }
             }

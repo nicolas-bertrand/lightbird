@@ -43,7 +43,7 @@ private:
     void _disconnectAll();
     /// @brief Closes the sockets in _socketsToClose.
     void _closeSockets();
-    /// @brief Interrupts epoll_wait by sending a signal to its thread.
+    /// @brief Interrupts epoll_wait by writing on the eventfd.
     void _interruptEpoll();
     /// @brief Closes the files descriptors.
     void _close();

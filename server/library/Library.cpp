@@ -48,12 +48,13 @@ Library::Library()
 
 Library::~Library()
 {
-    // This ILogs was allocated just for us
-    delete _log;
     delete _c;
     delete _identify;
     delete _preview;
     delete _filesExtensions;
+    // This IDatabase and ILogs were allocated just for us
+    delete _database;
+    delete _log;
 }
 
 void Library::setConfiguration(IConfiguration *configuration)

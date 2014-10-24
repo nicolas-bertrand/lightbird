@@ -36,6 +36,8 @@ public:
 private:
     /// @brief Disconnects all the sockets.
     void _disconnectAll();
+    /// @brief Interrupts epoll_wait by writing on the eventfd.
+    void _interruptEpoll();
 
     QSharedPointer<Socket> _listenSocket; ///< The socket on which the server is listening.
     bool _disableWriteBuffer; ///< True to disable the write buffer (less CPU overhead, but more protocol overhead).
@@ -44,6 +46,7 @@ private:
     QMutex _socketsToCloseMutex; ///< Allows _socketsToAdd to be thread safe.
     int _epoll; ///< The epoll file descriptor.
     epoll_event _epollEvents; ///< The events monitored by the epoll.
+    int _eventfd; ///< Allows to interrupt epoll_wait.
 
 private slots:
     /// @brief Modifies the epoll events of a socket.

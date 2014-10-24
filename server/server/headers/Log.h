@@ -108,6 +108,7 @@ private:
     ~Log();
     Log(const Log &);
     Log &operator=(const Log &);
+    static void deleteInstance();
 
     /// @brief Store all the informations used in a log entry.
     struct LogInformations
@@ -144,8 +145,9 @@ private:
     QWaitCondition          waitRun;    ///< This condition is awakened when the thread is running for the first time.
     QMutex                  waitMutex;  ///< Used by QWaitCondition.
     bool                    awake;      ///< If the wait condition has been called.
-    QObject                 *parent;    ///< The parent of the Log.
     QMap<LightBird::ILogs::Level, QString> levels; ///< Combines the levels and their names.
+
+    friend class Server;
 };
 
 /// Undefines the defines of LightBird::ILogs.

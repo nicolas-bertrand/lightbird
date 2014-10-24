@@ -40,9 +40,9 @@ namespace LightBird
         /// @brief Initializes the library.
         LIB static void        initialize();
         LIB static void        setConfiguration(IConfiguration *configuration);
-        LIB static void        setDatabase(IDatabase *database);
+        LIB static void        setDatabase(IDatabase *database); ///< Takes ownership of database.
         LIB static void        setExtension(IExtensions *extension);
-        LIB static void        setLog(ILogs *log);
+        LIB static void        setLog(ILogs *log); ///< Takes ownership of log.
         /// @brief Cleans the library.
         LIB static void        shutdown();
 
