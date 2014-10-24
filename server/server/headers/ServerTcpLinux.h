@@ -13,6 +13,8 @@
 /// @brief The Linux implementation of the TCP server.
 class ServerTcpLinux : public ServerTcp
 {
+    Q_OBJECT
+
 public:
     ServerTcpLinux(quint16 port, const QHostAddress &address = QHostAddress::Any);
     ~ServerTcpLinux();
