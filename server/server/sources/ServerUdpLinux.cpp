@@ -98,7 +98,7 @@ ServerUdpLinux::ServerUdpLinux(quint16 port, const QHostAddress &address)
     }
     if ((ioctl(_eventfd, FIONBIO, &nonBlockingMode)) == -1)
     {
-        LOG_DEBUG("Failed to set eventFd in non blocking mode", Properties("error", errno), "ServerUdpLinux", "ServerUdpLinux");
+        LOG_ERROR("Failed to set eventFd in non blocking mode", Properties("error", errno), "ServerUdpLinux", "ServerUdpLinux");
         return ;
     }
     epoll_event e;

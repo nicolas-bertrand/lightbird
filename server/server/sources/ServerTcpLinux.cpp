@@ -48,7 +48,6 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     {
         LOG_ERROR("Can't listen the to the TCP port: setsockopt IPV6_V6ONLY failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "ServerTcpLinux");
         freeaddrinfo(addrInfo);
-        close();
         return ;
     }
 
@@ -57,7 +56,6 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     {
         LOG_ERROR("Can't listen the to the TCP port: bind failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "ServerTcpLinux");
         freeaddrinfo(addrInfo);
-        close();
         return ;
     }
     freeaddrinfo(addrInfo);
@@ -66,7 +64,6 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     if (::listen(_listenSocket, SOMAXCONN) == -1)
     {
         LOG_ERROR("Can't listen the to the TCP port: listen failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "ServerTcpLinux");
-        close();
         return ;
     }
 
@@ -83,7 +80,6 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     if ((ioctl(_listenSocket, FIONBIO, &nonBlockingMode)) == -1)
     {
         LOG_ERROR("Failed to set the socket in non blocking mode", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "ServerTcpLinux");
-        close();
         return ;
     }
 
@@ -91,7 +87,6 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     if ((_epoll = epoll_create1(0)) == -1)
     {
         LOG_ERROR("Failed to create the epoll: epoll_create1 failed", Properties("error", errno).add("port", _port).add("address", _address.toString()), "ServerTcpLinux", "ServerTcpLinux");
-        close();
         return ;
     }
 
@@ -114,7 +109,7 @@ ServerTcpLinux::ServerTcpLinux(quint16 p, const QHostAddress &address)
     }
     if ((ioctl(_eventfd, FIONBIO, &nonBlockingMode)) == -1)
     {
-        LOG_DEBUG("Failed to set eventFd in non blocking mode", Properties("error", errno), "ServerTcpLinux", "ServerTcpLinux");
+        LOG_ERROR("Failed to set eventFd in non blocking mode", Properties("error", errno), "ServerTcpLinux", "ServerTcpLinux");
         return ;
     }
     memset(&e, 0, sizeof(e));
