@@ -95,7 +95,6 @@ void PortTcp::_newConnection()
         {
             // Creates the client
             client = new Client(socket, _protocols, _transport, LightBird::IClient::SERVER, this);
-            client->connected(true);
             // Adds the client
             _clients.push_back(QSharedPointer<Client>(client));
             // When new data are received on this socket, Client::readyRead is called
@@ -104,6 +103,7 @@ void PortTcp::_newConnection()
             QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
             // When the client is finished, _finished is called
             QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+            client->connected(true);
         }
     }
 }
@@ -136,7 +136,7 @@ void PortTcp::write(Client *client, const QByteArray &data)
         while (written < data.size())
         {
             // Tries to call the IDoWrite interface of the plugins
-            if (doWrite && !(doWrite = client->doWrite(data.data() + written, data.size() - written, result)))
+            if (!doWrite || !(doWrite = client->doWrite(data.data() + written, data.size() - written, result)))
                 // If no plugins implements IDoWrite, we write the data ourselves
                 result = client->getSocket().write(data.data() + written, data.size() - written);
             if (result > 0)

@@ -10,8 +10,6 @@ ServerTcpWindows::ServerTcpWindows(quint16 p, const QHostAddress &address)
     , _disableWriteBuffer(true)
     , _wsaPollTimeout(1000)
     , _maxPendingConnections(1000)
-    , _regexIPv4("^\\[.*fff:(.*)\\]:(\\d+)$")
-    , _regexIPv6("^\\[(.*)\\]:(\\d+)$")
 {
     // Resolves the local address and port to be used by the server
     QByteArray port = QByteArray::number(_port);
@@ -29,8 +27,7 @@ ServerTcpWindows::ServerTcpWindows(quint16 p, const QHostAddress &address)
     }
 
     // Creates the socket to listen to
-    _listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
-    if (_listenSocket == INVALID_SOCKET)
+    if ((_listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol)) == INVALID_SOCKET)
     {
         LOG_ERROR("Failed to create the listen socket", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerTcpWindows", "ServerTcpWindows");
         freeaddrinfo(addrInfo);
@@ -181,7 +178,7 @@ void ServerTcpWindows::_newConnection()
     QByteArray ip = "::1";
     ip.reserve(46);
     if (!InetNtopA(AF_INET6, &addr.sin6_addr, ip.data(), ip.size()))
-        LOG_ERROR("WSAAddressToString failed", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerTcpWindows", "_newConnection");
+        LOG_ERROR("InetNtopA failed", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerTcpWindows", "_newConnection");
     QHostAddress peerAddress = QHostAddress(QString(ip.data()));
     quint16 peerPort = ntohs(addr.sin6_port);
 

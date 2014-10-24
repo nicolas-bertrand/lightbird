@@ -1,7 +1,7 @@
 #include "SocketTcp.h"
 #ifdef Q_OS_WIN
 # include "SocketTcpWindows.h"
-#else
+#elif defined Q_OS_LINUX
 # include "SocketTcpLinux.h"
 #endif // Q_OS_WIN
 
@@ -9,7 +9,7 @@ SocketTcp *SocketTcp::create(const QHostAddress &peerAddress, quint16 peerPort)
 {
 #ifdef Q_OS_WIN
     return new SocketTcpWindows(peerAddress, peerPort);
-#else
+#elif defined Q_OS_LINUX
     return new SocketTcpLinux(peerAddress, peerPort);
 #endif // Q_OS_WIN
     return NULL;

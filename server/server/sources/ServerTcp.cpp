@@ -1,7 +1,7 @@
 #include "ServerTcp.h"
 #ifdef Q_OS_WIN
 # include "ServerTcpWindows.h"
-#else
+#elif defined Q_OS_LINUX
 # include "ServerTcpLinux.h"
 #endif // Q_OS_WIN
 
@@ -9,7 +9,7 @@ ServerTcp *ServerTcp::create(quint16 port, const QHostAddress &address)
 {
 #ifdef Q_OS_WIN
     return new ServerTcpWindows(port, address);
-#else
+#elif defined Q_OS_LINUX
     return new ServerTcpLinux(port, address);
 #endif // Q_OS_WIN
     return NULL;

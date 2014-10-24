@@ -117,11 +117,11 @@ void    PortUdp::_readPendingDatagrams()
             {
                 // Creates the client
                 client = new Client(_serverUdp->getListenSocket(), _protocols, _transport, LightBird::IClient::SERVER, this);
-                client->connected(true);
                 // Adds the client
                 _clients.push_back(QSharedPointer<Client>(client));
                 // When the client is finished, _finished is called
                 QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+                client->connected(true);
             }
             // Notifies the Client that data are ready to be read
             _readBuffer.insert(client, data);
@@ -169,7 +169,7 @@ void PortUdp::write(Client *client, const QByteArray &data)
         while (written < data.size())
         {
             // Tries to call the IDoWrite interface of the plugins
-            if (doWrite && !(doWrite = client->doWrite(data.data() + written, data.size() - written, result)))
+            if (!doWrite || !(doWrite = client->doWrite(data.data() + written, data.size() - written, result)))
                 // If no plugins implements IDoWrite, we write the data ourselves
                 result = client->getSocket().write(data.data() + written, data.size() - written);
             if (result > 0)

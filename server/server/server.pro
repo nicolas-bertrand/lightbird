@@ -36,6 +36,9 @@ DESTDIR = ../build
 LIBS += -L../build -lLightBirdLibrary
 win32:LIBS += -lWs2_32
 
+# We need to define __linux__ ourselves because MOC can't see built-in defines (QTBUG-34593)
+linux:DEFINES += __linux__
+
 # Resources
 RESOURCES = resources/resources.qrc
 
@@ -59,6 +62,7 @@ HEADERS += \
     headers/Client.h \
     headers/Clients.h \
     headers/ClientsNetwork.h \
+    headers/ClientsNetworkLinux.h \
     headers/ClientsNetworkWindows.h \
     headers/Configuration.h \
     headers/Configurations.h \
@@ -83,14 +87,18 @@ HEADERS += \
     headers/Response.h \
     headers/Server.h \
     headers/ServerTcp.h \
+    headers/ServerTcpLinux.h \
     headers/ServerTcpWindows.h \
     headers/ServerUdp.h \
+    headers/ServerUdpLinux.h \
     headers/ServerUdpWindows.h \
     headers/Session.h \
     headers/Socket.h \
     headers/SocketTcp.h \
+    headers/SocketTcpLinux.h \
     headers/SocketTcpWindows.h \
     headers/SocketUdp.h \
+    headers/SocketUdpLinux.h \
     headers/SocketUdpWindows.h \
     headers/Thread.h \
     headers/ThreadPool.h \
@@ -113,6 +121,7 @@ SOURCES += \
     sources/Client.cpp \
     sources/Clients.cpp \
     sources/ClientsNetwork.cpp \
+    sources/ClientsNetworkLinux.cpp \
     sources/ClientsNetworkWindows.cpp \
     sources/Configuration.cpp \
     sources/Configurations.cpp \
@@ -135,14 +144,18 @@ SOURCES += \
     sources/Response.cpp \
     sources/Server.cpp \
     sources/ServerTcp.cpp \
+    sources/ServerTcpLinux.cpp \
     sources/ServerTcpWindows.cpp \
     sources/ServerUdp.cpp \
+    sources/ServerUdpLinux.cpp \
     sources/ServerUdpWindows.cpp \
     sources/Session.cpp \
     sources/Socket.cpp \
     sources/SocketTcp.cpp \
+    sources/SocketTcpLinux.cpp \
     sources/SocketTcpWindows.cpp \
     sources/SocketUdp.cpp \
+    sources/SocketUdpLinux.cpp \
     sources/SocketUdpWindows.cpp \
     sources/Thread.cpp \
     sources/ThreadPool.cpp \

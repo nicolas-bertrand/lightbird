@@ -1,8 +1,8 @@
 #include "ClientsNetwork.h"
 #ifdef Q_OS_WIN
 # include "ClientsNetworkWindows.h"
-#else
-# include "ClientsLinux.h"
+#elif defined Q_OS_LINUX
+# include "ClientsNetworkLinux.h"
 #endif // Q_OS_WIN
 
 ClientsNetwork *ClientsNetwork::create()
@@ -11,8 +11,8 @@ ClientsNetwork *ClientsNetwork::create()
 
 #ifdef Q_OS_WIN
     clientsNetwork = new ClientsNetworkWindows();
-#else
-    clientsNetwork = new ClientsLinux();
+#elif defined Q_OS_LINUX
+    clientsNetwork = new ClientsNetworkLinux();
 #endif // Q_OS_WIN
 
     if (clientsNetwork && !*clientsNetwork)

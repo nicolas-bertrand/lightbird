@@ -6,6 +6,8 @@
 /// @brief Represents a platform independent UDP socket.
 class SocketUdp : public Socket
 {
+    Q_OBJECT
+
 public:
     /// @brief Creates an instance of SocketUdp for the current platform.
     /// NULL is returned if no implementation is available for the current platform.

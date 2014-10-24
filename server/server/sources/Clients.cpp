@@ -285,7 +285,7 @@ void    Clients::_connected(Socket *socket, bool success)
             if (success)
                 future->setResult(client->getId());
             else
-                LOG_ERROR("Connection failed", Properties("address", client->getPeerAddress().toString()).add("port", client->getPeerPort()).add("transport", "TCP"), "Clients", "_connected");
+                LOG_ERROR("Connection failed", Properties("address", client->getPeerAddress().toString()).add("port", client->getPeerPort()).add("socket", client->getSocket().descriptor()).add("transport", "TCP"), "Clients", "_connected");
             return ;
         }
 }
@@ -318,7 +318,7 @@ void Clients::write(Client *client, const QByteArray &data)
         while (written < data.size())
         {
             // Tries to call the IDoWrite interface of the plugins
-            if (doWrite && !(doWrite = client->doWrite(data.data() + written, data.size() - written, result)))
+            if (!doWrite || !(doWrite = client->doWrite(data.data() + written, data.size() - written, result)))
                 // If no plugins implements IDoWrite, we write the data ourselves
                 result = client->getSocket().write(data.data() + written, data.size() - written);
             if (result > 0)

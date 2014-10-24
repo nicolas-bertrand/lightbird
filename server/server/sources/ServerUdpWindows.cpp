@@ -18,9 +18,7 @@ ServerUdpWindows::ServerUdpWindows(quint16 port, const QHostAddress &address)
         LOG_ERROR("Server socket() failed", Properties("error", WSAGetLastError()), "ServerUdpWindows", "ServerUdpWindows");
         return ;
     }
-
     _listenSocket = QSharedPointer<Socket>(new SocketUdpWindows(_port, (qintptr)socket));
-    //_listenSocket = QSharedPointer<Socket>(new SocketUdpWindows(_port, socket));
 
     // Turns IPV6_V6ONLY off to allow dual stack socket (IPv4 + IPv6)
     int ipv6only = 0;
@@ -74,6 +72,7 @@ ServerUdpWindows::ServerUdpWindows(quint16 port, const QHostAddress &address)
     fd.fd = s;
     fd.events = POLLRDNORM;
     _fds.append(fd);
+    _listening = true;
 }
 
 ServerUdpWindows::~ServerUdpWindows()
@@ -139,7 +138,8 @@ QSharedPointer<Socket> ServerUdpWindows::getListenSocket()
 
 void ServerUdpWindows::close()
 {
-    _listenSocket->close();
+    if (_listenSocket)
+        _listenSocket->close();
     _listening = false;
 }
 

@@ -135,7 +135,6 @@ void ClientsNetworkWindows::execute()
         }
     }
     _disconnectAll();
-    return ;
 }
 
 void ClientsNetworkWindows::addSocket(QSharedPointer<Socket> socket, int wait)
@@ -198,7 +197,7 @@ void ClientsNetworkWindows::close()
 
 void ClientsNetworkWindows::_connected(SocketTcpWindows *socketTcp, int i)
 {
-    bool result = ((_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) == 0);
+    bool result = ((_fds[i].revents & (POLLRDNORM | POLLWRNORM)) != 0 || ((_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) == 0));
 
     // Sets the result of the connection
     if (result)

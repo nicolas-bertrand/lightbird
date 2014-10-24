@@ -36,8 +36,6 @@ private:
     SOCKET _listenSocket; ///< The socket on which the server is listening.
     QVector<WSAPOLLFD> _fds; ///< The FD used by WSAPoll.
     QList<QSharedPointer<Socket> > _sockets; ///< The list of the sockets connected to the server.
-    QRegExp _regexIPv4; ///< Parses IPv4 encoded in IPv6.
-    QRegExp _regexIPv6; ///< Parses IPv6.
 };
 
 #endif // Q_OS_WIN
