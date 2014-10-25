@@ -42,7 +42,7 @@ Network::~Network()
     LOG_TRACE("Network destroyed!", "Network", "~Network");
 }
 
-bool    Network::openPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients)
+bool    Network::openPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QStringList &contexts, unsigned int maxClients)
 {
     Mutex   mutex(this->mutex, "Network", "openPort");
     Port    *p;
@@ -58,9 +58,9 @@ bool    Network::openPort(unsigned short port, const QStringList &protocols, Lig
     }
     // Creates the port
     if (transport == LightBird::INetwork::TCP)
-        p = new PortTcp(port, protocols, maxClients);
+        p = new PortTcp(port, protocols, contexts, maxClients);
     else
-        p = new PortUdp(port, protocols, maxClients);
+        p = new PortUdp(port, protocols, contexts, maxClients);
     // If the port is not listening an error occurred
     if (!p->isListening())
     {

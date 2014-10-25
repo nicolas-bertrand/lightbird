@@ -34,7 +34,7 @@ public:
     /// @param mode : The connection mode of the client.
     /// @param readWriteInterface : Allows the client to read and write on the network.
     /// @param contexts : The names of the contexts of the client.
-    Client(QSharedPointer<Socket> socket, const QStringList &protocols, LightBird::INetwork::Transport transport, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface, const QStringList &contexts = QStringList(QString()));
+    Client(QSharedPointer<Socket> socket, const QStringList &protocols, LightBird::INetwork::Transport transport, const QStringList &contexts, LightBird::IClient::Mode mode, IReadWrite *readWriteInterface);
     ~Client();
 
     /// @brief Performs the actions of the client in a thread of the ThreadPool.

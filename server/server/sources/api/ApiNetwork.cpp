@@ -11,9 +11,9 @@ ApiNetwork::~ApiNetwork()
 {
 }
 
-bool    ApiNetwork::openPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, unsigned int maxClients)
+bool    ApiNetwork::openPort(unsigned short port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QStringList &contexts, unsigned int maxClients)
 {
-    return (Network::instance()->openPort(port, protocols, transport, maxClients));
+    return (Network::instance()->openPort(port, protocols, transport, contexts, maxClients));
 }
 
 bool    ApiNetwork::closePort(unsigned short port, LightBird::INetwork::Transport transport)

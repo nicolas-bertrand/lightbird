@@ -26,7 +26,7 @@ public:
     ~Network();
 
     /// @see LightBird::INetwork::openPort
-    bool            openPort(unsigned short port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, unsigned int maxClients = ~0);
+    bool            openPort(unsigned short port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QStringList &contexts = QStringList(QString()), unsigned int maxClients = ~0);
     /// @see LightBird::INetwork::closePort
     bool            closePort(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP);
     /// @see LightBird::INetwork::getPort

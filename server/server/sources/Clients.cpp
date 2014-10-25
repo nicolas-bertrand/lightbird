@@ -76,7 +76,7 @@ Future<QString> Clients::connect(const QHostAddress &address
         if (!socket->isConnected() && !(static_cast<SocketTcp *>(socket.data()))->isConnecting())
             return (Future<QString>());
         // Creates the client
-        Client *client = new Client(socket, protocols, transport, LightBird::IClient::CLIENT, this, contexts);
+        Client *client = new Client(socket, protocols, transport, contexts, LightBird::IClient::CLIENT, this);
         client->getInformations() = informations;
         _clients.push_back(QSharedPointer<Client>(client));
         // When the socket is connected, _connected is called
@@ -104,7 +104,7 @@ Future<QString> Clients::connect(const QHostAddress &address
         if (!socket->isConnected())
             return (Future<QString>());
         // Creates the client
-        Client *client = new Client(socket, protocols, transport, LightBird::IClient::CLIENT, this, contexts);
+        Client *client = new Client(socket, protocols, transport, contexts, LightBird::IClient::CLIENT, this);
         client->getInformations() = informations;
         _clients.push_back(QSharedPointer<Client>(client));
         // When new data are received on this socket, Client::readyRead is called

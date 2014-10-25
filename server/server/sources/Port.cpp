@@ -4,11 +4,12 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols, unsigned int maxClients)
+Port::Port(unsigned short port, LightBird::INetwork::Transport transport, const QStringList &protocols, const QStringList &contexts, unsigned int maxClients)
 {
     _port = port;
     _transport = transport;
     _protocols = protocols;
+    _contexts = contexts;
     if ((_maxClients = maxClients) == 0)
         _maxClients = ~0;
 }

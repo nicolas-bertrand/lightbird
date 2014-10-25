@@ -15,7 +15,7 @@ class PortUdp : public Port
     Q_OBJECT
 
 public:
-    PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0);
+    PortUdp(unsigned short port, const QStringList &protocols, const QStringList &contexts = QStringList(QString()), unsigned int maxClients = ~0);
     ~PortUdp();
 
     /// @brief Returns true if the port is listening the network.

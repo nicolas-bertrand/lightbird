@@ -6,8 +6,8 @@
 #include "Threads.h"
 #include "Server.h"
 
-PortUdp::PortUdp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
-    : Port(port, LightBird::INetwork::UDP, protocols, maxClients)
+PortUdp::PortUdp(unsigned short port, const QStringList &protocols, const QStringList &contexts, unsigned int maxClients)
+    : Port(port, LightBird::INetwork::UDP, protocols, contexts, maxClients)
     , _serverUdp(NULL)
     , _maxReadBufferSize(1000)
 {
@@ -117,7 +117,7 @@ void    PortUdp::_readPendingDatagrams()
             if (client == NULL)
             {
                 // Creates the client
-                client = new Client(_serverUdp->getListenSocket(), _protocols, _transport, LightBird::IClient::SERVER, this);
+                client = new Client(_serverUdp->getListenSocket(), _protocols, _transport, _contexts, LightBird::IClient::SERVER, this);
                 // Adds the client
                 _clients.push_back(QSharedPointer<Client>(client));
                 // When the client is finished, _finished is called

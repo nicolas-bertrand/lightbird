@@ -50,6 +50,7 @@ namespace LightBird
         /// @param protocols : The names of the protocols used to communicate with
         /// the clients that connect to this port.
         /// @param transport : The transport protocol used by this port.
+        /// @param contexts : The default contexts of all the clients connected to this port.
         /// @param maxClients : The maximum number of clients simultaneously
         /// connected to this port. When the number of client reach this limit, new
         /// connections are waiting that a connected client disconnect.
@@ -57,6 +58,7 @@ namespace LightBird
         virtual bool    openPort(unsigned short port
             , const QStringList &protocols = QStringList()
             , LightBird::INetwork::Transport transport = LightBird::INetwork::TCP
+            , const QStringList &contexts = QStringList(QString())
             , unsigned int maxClients = ~0) = 0;
 
         /// @brief Closes a port. This may take some time since all the operations

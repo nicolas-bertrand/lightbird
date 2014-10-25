@@ -14,7 +14,7 @@ class PortTcp : public Port
     Q_OBJECT
 
 public:
-    PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients = ~0);
+    PortTcp(unsigned short port, const QStringList &protocols, const QStringList &contexts = QStringList(QString()), unsigned int maxClients = ~0);
     ~PortTcp();
 
     /// @brief Returns true if the port is listening the network.

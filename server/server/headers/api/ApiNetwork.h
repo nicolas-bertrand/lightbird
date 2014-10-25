@@ -16,7 +16,7 @@ public:
     ApiNetwork(const QString &id);
     ~ApiNetwork();
 
-    bool        openPort(unsigned short port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, unsigned int maxClients = ~0);
+    bool        openPort(unsigned short port, const QStringList &protocols = QStringList(), LightBird::INetwork::Transport transport = LightBird::INetwork::TCP, const QStringList &contexts = QStringList(QString()), unsigned int maxClients = ~0);
     bool        closePort(unsigned short port, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP);
     bool        getPort( unsigned short port, QStringList &protocols, unsigned int &maxClients, LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const;
     QList<unsigned short> getPorts(LightBird::INetwork::Transport transport = LightBird::INetwork::TCP) const;

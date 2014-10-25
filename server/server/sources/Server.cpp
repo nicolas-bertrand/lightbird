@@ -273,7 +273,8 @@ void    Server::_loadNetwork()
             transport = LightBird::INetwork::UDP;
         if (Network::instance()->openPort(it.peekNext().value("port").toShort(),
                                           it.peekNext().value("protocols").simplified().split(' '),
-                                          transport, it.peekNext().value("maxClients").toUInt()))
+                                          transport, it.peekNext().value("contexts").simplified().split(' '),
+                                          it.peekNext().value("maxClients").toUInt()))
             loaded = true;
         it.next();
     }

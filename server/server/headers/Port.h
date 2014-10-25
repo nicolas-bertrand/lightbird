@@ -19,8 +19,8 @@ class Port : public QThread,
     Q_OBJECT
 
 public:
-    Port(unsigned short _port, LightBird::INetwork::Transport transport,
-         const QStringList &protocols = QStringList(), unsigned int maxClients = ~0);
+    Port(unsigned short _port, LightBird::INetwork::Transport transport, const QStringList &protocols = QStringList(),
+         const QStringList &contexts = QStringList(QString()), unsigned int maxClients = ~0);
     virtual ~Port();
 
     /// @see LightBird::INetwork::getClient
@@ -78,6 +78,7 @@ protected:
     mutable QReadWriteLock _mutex; ///< Makes this class is thread safe.
     LightBird::INetwork::Transport _transport; ///< The transport protocol used by the port.
     QStringList _protocols; ///< The names of the protocols used to communicate with the clients connected to this port.
+    QStringList _contexts; ///< The default contexts of all the clients connected to this port.
     unsigned short _port; ///< The number of the port.
     unsigned int _maxClients; ///< The maximum number of clients simultaneously connected.
 };

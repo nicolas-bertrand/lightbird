@@ -6,8 +6,8 @@
 #include "Threads.h"
 #include "Server.h"
 
-PortTcp::PortTcp(unsigned short port, const QStringList &protocols, unsigned int maxClients)
-    : Port(port, LightBird::INetwork::TCP, protocols, maxClients)
+PortTcp::PortTcp(unsigned short port, const QStringList &protocols, const QStringList &contexts, unsigned int maxClients)
+    : Port(port, LightBird::INetwork::TCP, protocols, contexts, maxClients)
     , _serverTcp(NULL)
 {
     moveToThread(this);
@@ -95,7 +95,7 @@ void PortTcp::_newConnection()
         if ((socket = _serverTcp->nextPendingConnection()))
         {
             // Creates the client
-            client = new Client(socket, _protocols, _transport, LightBird::IClient::SERVER, this);
+            client = new Client(socket, _protocols, _transport, _contexts, LightBird::IClient::SERVER, this);
             // Adds the client
             _clients.push_back(QSharedPointer<Client>(client));
             // When new data are received on this socket, Client::readyRead is called

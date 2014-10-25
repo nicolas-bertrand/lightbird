@@ -20,12 +20,12 @@
 #include "Mutex.h"
 #include "Threads.h"
 
-Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetwork::Transport t, LightBird::IClient::Mode m, IReadWrite *r, const QStringList &c)
+Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetwork::Transport t, const QStringList &c, LightBird::IClient::Mode m, IReadWrite *r)
     : transport(t)
     , protocols(pr)
+    , contexts(c)
     , mode(m)
     , readWriteInterface(r)
-    , contexts(c)
     , socket(s)
     , disconnectTimers(NULL)
     , validator(contexts, mode, transport, protocols, socket->localPort())
