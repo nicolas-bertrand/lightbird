@@ -9,9 +9,12 @@
 
 namespace LightBird
 {
-    /// @brief Manages the contexts of the current plugin.
+    /// @brief Manages the contexts and the context instances of the current plugin.
     /// The contexts of a plugin are loaded from the "contexts" node of its
-    /// configuration, just after IPlugin::onLoad.
+    /// configuration, just after IPlugin::onLoad (see loadContextsFromConfiguration).
+    ///
+    /// The contexts allow to specify in what circumstances the network interfaces
+    /// of a context instance have to be called (mode, protocol, port...).
     /// @see LightBird::IContext
     /// @see LightBird::IClient::getContexts
     class IContexts
@@ -29,7 +32,7 @@ namespace LightBird
         /// remove it and it must stay instanciated as long as the plugin is loaded.
         /// @warning It is the responsability of the plugin to delete its
         /// declared instances in LightBird::IPlugin::onUnload.
-        /// @param name : The name is used to associate an instance with a context.
+        /// @param name : This name is used to associate an instance with a context.
         /// @param instance : The instance must implement QObject, and must be
         /// instanciated as long as the plugin is loaded.
         /// @return False if the name is already used by an instance.

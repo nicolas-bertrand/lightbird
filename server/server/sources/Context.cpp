@@ -128,6 +128,13 @@ void    Context::setMode(QString mode)
         this->allModes = true;
 }
 
+void    Context::setMode(LightBird::IClient::Mode mode)
+{
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Context", "setMode");
+
+    this->mode = mode;
+}
+
 QString Context::getTransport() const
 {
     Mutex   mutex(this->mutex, Mutex::READ, "Context", "getTransport");
@@ -153,6 +160,13 @@ void    Context::setTransport(QString transport)
         this->transport = LightBird::INetwork::UDP;
     else
         this->allTransports = true;
+}
+
+void    Context::setTransport(LightBird::INetwork::Transport transport)
+{
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Context", "setTransport");
+
+    this->transport = transport;
 }
 
 QStringList Context::getProtocols() const
@@ -243,6 +257,14 @@ void    Context::addPorts(const QString &ports)
     }
 }
 
+void    Context::addPort(quint16 port)
+{
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Context", "addPort");
+
+    if (port != 0 && !this->ports.contains(port))
+        this->ports.push_back(port);
+}
+
 void    Context::removePorts(const QStringList &ports)
 {
     Mutex   mutex(this->mutex, Mutex::WRITE, "Context", "removePorts");
@@ -256,6 +278,13 @@ void    Context::removePorts(const QStringList &ports)
             this->allPorts = false;
         this->ports.removeAll(port.toUShort());
     }
+}
+
+void    Context::removePort(quint16 port)
+{
+    Mutex   mutex(this->mutex, Mutex::WRITE, "Context", "removePort");
+
+    this->ports.removeAll(port);
 }
 
 QStringList Context::getMethods() const
