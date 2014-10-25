@@ -34,7 +34,7 @@ void ClientsNetworkWindows::execute()
     _listening = true;
     while (_listening)
     {
-        if ((result = WSAPoll(_fds.data(), _fds.size(), timeout)) == SOCKET_ERROR)
+        if ((result = WSAPoll(_fds.data(), _fds.size(), timeout)) == SOCKET_ERROR && WSAGetLastError() != WSAEINVAL && WSAGetLastError() != WSAENOTSOCK)
         {
             LOG_ERROR("An error occured while executing the TCP server: WSAPoll failed", Properties("error", WSAGetLastError()), "ClientsNetworkWindows", "execute");
             break;
@@ -54,7 +54,8 @@ void ClientsNetworkWindows::execute()
             // There is a problem with the server interrupt socket
             if (_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
             {
-                Log::error("An error occured with the interrupt socket", "ClientsNetworkWindows", "execute");
+                if (_listening)
+                    Log::error("An error occured with the interrupt socket", "ClientsNetworkWindows", "execute");
                 break;
             }
             --result;

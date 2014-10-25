@@ -97,7 +97,7 @@ void ServerTcpWindows::execute()
 
     while (true)
     {
-        if ((result = WSAPoll(_fds.data(), _fds.size(), _wsaPollTimeout)) == SOCKET_ERROR)
+        if ((result = WSAPoll(_fds.data(), _fds.size(), _wsaPollTimeout)) == SOCKET_ERROR && WSAGetLastError() != WSAEINVAL && WSAGetLastError() != WSAENOTSOCK)
         {
             LOG_ERROR("An error occured while executing the TCP server: WSAPoll failed", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerTcpWindows", "execute");
             break;
@@ -176,7 +176,7 @@ void ServerTcpWindows::_newConnection()
 
     // Gets its IP and port
     QByteArray ip = "::1";
-    ip.reserve(46);
+    ip.resize(46);
     if (!InetNtopA(AF_INET6, &addr.sin6_addr, ip.data(), ip.size()))
         LOG_ERROR("InetNtopA failed", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerTcpWindows", "_newConnection");
     QHostAddress peerAddress = QHostAddress(QString(ip.data()));

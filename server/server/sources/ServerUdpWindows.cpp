@@ -86,7 +86,7 @@ void ServerUdpWindows::execute()
 
     while (_listening)
     {
-        if (WSAPoll(_fds.data(), _fds.size(), _wsaPollTimeout) == SOCKET_ERROR)
+        if (WSAPoll(_fds.data(), _fds.size(), _wsaPollTimeout) == SOCKET_ERROR && WSAGetLastError() != WSAEINVAL && WSAGetLastError() != WSAENOTSOCK)
         {
             LOG_ERROR("An error occured while executing the UDP server: WSAPoll failed", Properties("error", WSAGetLastError()).add("port", _port).add("address", _address.toString()), "ServerUdpWindows", "execute");
             break;
