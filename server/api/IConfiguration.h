@@ -42,13 +42,13 @@ namespace LightBird
         virtual bool        remove(const QString &nodeName) = 0;
         /// @brief Gets the configuration tree as a Qt Object for read access.
         /// As soon as you have finished working with the tree, it MUST be released
-        /// via release(). Otherwise, a deadlock will occure.
+        /// via release(). Otherwise, a deadlock will occur.
         /// @see release
         /// @return the configuration tree
         virtual QDomElement readDom() const = 0;
         /// @brief Gets the configuration tree as a Qt Object for write access.
         /// As soon as you have finished working with the tree, it MUST be released
-        /// via release(). Otherwise, a deadlock will occure.
+        /// via release(). Otherwise, a deadlock will occur.
         /// @see release
         /// @return the configuration tree.
         virtual QDomElement writeDom() = 0;

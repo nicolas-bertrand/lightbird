@@ -26,7 +26,7 @@ namespace LightBird
         /// as soon as possible.
         /// @param client : This object represents the client.
         /// @param data : The data received so far by the server. It is used to
-        /// determine the protocol of the request. These data may contains a part
+        /// determine the protocol of the request. These data may contain a part
         /// of a request, or several requests.
         /// @param protocol : The name of the protocol. Must be filled when true
         /// is returned.

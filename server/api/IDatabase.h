@@ -61,7 +61,7 @@ namespace LightBird
         /// @return False if an error occurred or no result was found, true otherwise.
         virtual bool    query(QSqlQuery &query, QVariantMap &result) = 0;
         /// @brief Returns an instance of the table requested in parameter. Users
-        /// MUST delete themself the instance returned, or a memory leak will occure.
+        /// MUST delete themself the instance returned, or a memory leak will occur.
         /// @param table : The table to get. If the table is accessor, object or unknow
         /// this method will search the table in the database based on the provided id.
         /// @param id : The id of the row to put by default in the table instance.

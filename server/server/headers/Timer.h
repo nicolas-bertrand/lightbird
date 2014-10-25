@@ -7,7 +7,7 @@
 
 class ApiTimers;
 
-/// @brief Manages one timer of a plugin. The events of the timer occure in a
+/// @brief Manages one timer of a plugin. The events of the timer occur in a
 /// specific thread, created by this class. The timers are manage by ApiTimers.
 /// @see LightBird::ITimer
 class Timer : public QThread
