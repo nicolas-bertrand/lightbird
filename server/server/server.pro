@@ -60,6 +60,7 @@ MOC_DIR = tmp
 HEADERS += \
     headers/Arguments.h \
     headers/Client.h \
+    headers/ClientDisconnectTimers.h \
     headers/Clients.h \
     headers/ClientsNetwork.h \
     headers/ClientsNetworkLinux.h \
@@ -119,6 +120,7 @@ SOURCES += \
     sources/main.cpp \
     sources/Arguments.cpp \
     sources/Client.cpp \
+    sources/ClientDisconnectTimers.cpp \
     sources/Clients.cpp \
     sources/ClientsNetwork.cpp \
     sources/ClientsNetworkLinux.cpp \
