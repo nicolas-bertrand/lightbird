@@ -34,14 +34,14 @@ public:
     Future<QString> connect(const QHostAddress &address, quint16 port, const QStringList &protocols, LightBird::INetwork::Transport transport, const QVariantMap &informations, const QStringList &contexts, int wait);
     /// @brief Asks the engine of a client to generate a new request.
     /// @see LightBird::INetwork::send
-    bool            send(const QString &idClient, const QString &idPlugin, const QString &protocol, const QVariantMap &informations);
+    bool            send(const QString &id, const QString &idPlugin, const QString &protocol, const QVariantMap &informations);
     /// @brief Asks the engine of a client to read a response.
     /// @see LightBird::INetwork::receive
     bool            receive(const QString &id, const QString &protocol, const QVariantMap &informations);
     /// @see LightBird::INetwork::pause
-    bool            pause(const QString &idClient, int msec = -1);
+    bool            pause(const QString &id, int msec = -1);
     /// @see LightBird::INetwork::resume
-    bool            resume(const QString &idClient);
+    bool            resume(const QString &id);
     /// @see LightBird::INetwork::getClient
     /// @param found : True if the client has been found.
     Future<bool>    getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const;
@@ -50,6 +50,14 @@ public:
     /// @brief Disconnects the client.
     /// @see LightBird::INetwork::disconnect
     bool            disconnect(const QString &id, bool fatal = false);
+    /// @see LightBird::INetwork::setDisconnectIdle
+    bool            setDisconnectIdle(const QString &id, qint64 msec = -1, bool fatal = false);
+    /// @see LightBird::INetwork::getDisconnectIdle
+    bool            getDisconnectIdle(const QString &id, bool *fatal, qint64 &result);
+    /// @see LightBird::INetwork::setDisconnectTime
+    bool            setDisconnectTime(const QString &id, const QDateTime &time = QDateTime(), bool fatal = false);
+    /// @see LightBird::INetwork::getDisconnectTime
+    bool            getDisconnectTime(const QString &id, bool *fatal, QDateTime &result);
     /// @brief Closes the clients and ends the thread.
     void            close();
 
@@ -65,7 +73,7 @@ private slots:
     /// @brief Called when a socket is disconnected.
     void            _disconnected(Socket *socket);
     /// @brief Called when the client is finished.
-    void            _finished();
+    void            _finished(Client *client);
 
 private:
     Clients(const Clients &);
@@ -77,12 +85,12 @@ private:
     /// @brief Returns the shared pointer of a client.
     QSharedPointer<Client> _getClient(Client *client);
 
-    ClientsNetwork *_network;
-    QList<QSharedPointer<Client> > clients; ///< The list of the clients managed.
-    mutable QMutex  mutex; ///< Makes the class thread safe.
-    Future<bool>    threadStarted; ///< This future is unlocked when the thread is started.
+    ClientsNetwork *_network; ///< Manages the clients to which the server is connected.
+    QList<QSharedPointer<Client> > _clients; ///< The list of the clients managed.
+    mutable QReadWriteLock _mutex; ///< Makes the class thread safe.
+    Future<bool> _threadStarted; ///< This future is unlocked when the thread is started.
     QWaitCondition _threadFinished; ///< Allows to wait until all the client are finished before quitting the thread.
-    QMap<QString, Future<QString> *> connections; ///< The list of the futures waiting for the connection of the client in order to set their results.
+    QMap<QString, Future<QString> *> _connections; ///< The list of the futures waiting for the connection of the client in order to set their results.
     QHash<QSharedPointer<Client>, QSharedPointer<WriteBuffer> > _writeBuffers; ///< Stores the data that could not be written in write().
 };
 

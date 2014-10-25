@@ -103,7 +103,7 @@ void PortTcp::_newConnection()
             // When the socket is disconnected, _disconnected() is called
             QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
             // When the client is finished, _finished is called
-            QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+            QObject::connect(client, SIGNAL(finished(Client*)), this, SLOT(_finished(Client*)), Qt::DirectConnection);
             client->connected(true);
         }
     }
@@ -238,19 +238,19 @@ void PortTcp::_disconnected(Socket *socket)
         }
 }
 
-void PortTcp::_finished()
+void PortTcp::_finished(Client *client)
 {
     Mutex mutex(_mutex, "PortTcp", "_finished");
 
     if (!mutex)
         return ;
-    // Searches the clients that have been finished
     QMutableListIterator<QSharedPointer<Client> > it(_clients);
     while (it.hasNext())
-        if (it.next()->isFinished())
+        if (it.next().data() == client)
         {
             it.remove();
             if (_clients.size() == 0 && !_serverTcp->isListening())
                 _threadFinished.wakeAll();
+            break;
         }
 }

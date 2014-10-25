@@ -121,7 +121,7 @@ void    PortUdp::_readPendingDatagrams()
                 // Adds the client
                 _clients.push_back(QSharedPointer<Client>(client));
                 // When the client is finished, _finished is called
-                QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+                QObject::connect(client, SIGNAL(finished(Client*)), this, SLOT(_finished(Client*)), Qt::DirectConnection);
                 client->connected(true);
             }
             // Notifies the Client that data are ready to be read
@@ -252,24 +252,24 @@ void PortUdp::_write()
     _writeBuffers.unite(writeBuffer);
 }
 
-void PortUdp::_finished()
+void PortUdp::_finished(Client *client)
 {
     Mutex mutex(_mutex, "PortUdp", "_finished");
 
     if (!mutex)
         return ;
-    // Searches the clients that have been finished
     QMutableListIterator<QSharedPointer<Client> > it(_clients);
     while (it.hasNext())
-        if (it.next()->isFinished())
+        if (it.next().data() == client)
         {
             // Removes the data that have not been read by the Client
-            QListIterator<QByteArray *> it2(_readBuffer.values(it.peekPrevious().data()));
+            QListIterator<QByteArray *> it2(_readBuffer.values(client));
             while (it2.hasNext())
                 delete it2.next();
-            _readBuffer.remove(it.peekPrevious().data());
+            _readBuffer.remove(client);
             it.remove();
             if (_clients.size() == 0 && !_serverUdp->isListening())
                 _threadFinished.wakeAll();
+            break;
         }
 }

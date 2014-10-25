@@ -11,16 +11,16 @@
 Clients::Clients()
     : _network(NULL)
 {
-    this->moveToThread(this);
+    moveToThread(this);
     // Starts the thread
     Threads::instance()->newThread(this, false);
     // Waits that the thread is started
-    isInitialized(Future<bool>(this->threadStarted).getResult());
+    isInitialized(Future<bool>(_threadStarted).getResult());
 }
 
 Clients::~Clients()
 {
-    Mutex mutex(this->mutex, "Clients", "~Clients");
+    Mutex mutex(_mutex, "Clients", "~Clients");
 
     if (!mutex)
         return ;
@@ -28,8 +28,8 @@ Clients::~Clients()
         _network->close();
     mutex.unlock();
     // Quit the thread if it is still running
-    this->quit();
-    this->wait();
+    quit();
+    wait();
     delete _network;
     LOG_TRACE("Clients destroyed!", "Clients", "~Clients");
 }
@@ -37,23 +37,23 @@ Clients::~Clients()
 void    Clients::run()
 {
     _network = ClientsNetwork::create();
-    this->threadStarted.setResult(_network != NULL);
+    _threadStarted.setResult(_network != NULL);
     // This method only returns when the clients is shutdown
     if (_network)
         _network->execute();
-    Mutex mutex(this->mutex, "Clients", "run");
+    Mutex mutex(_mutex, "Clients", "run");
     // If some clients are still running, we wait for them
-    if (this->clients.size() && Server::isRunning())
-        _threadFinished.wait(&this->mutex);
+    if (_clients.size() && Server::isRunning())
+        _threadFinished.wait(&_mutex);
     // Remove the remaining clients
-    this->clients.clear();
+    _clients.clear();
     _writeBuffers.clear();
     // Releases the remaining connections requests
-    QMapIterator<QString, Future<QString> *> it(this->connections);
+    QMapIterator<QString, Future<QString> *> it(_connections);
     while (it.hasNext())
         delete it.next().value();
-    this->connections.clear();
-    this->moveToThread(QCoreApplication::instance()->thread());
+    _connections.clear();
+    moveToThread(QCoreApplication::instance()->thread());
 }
 
 Future<QString> Clients::connect(const QHostAddress &address
@@ -64,7 +64,7 @@ Future<QString> Clients::connect(const QHostAddress &address
     , const QStringList &contexts
     , int wait)
 {
-    Mutex           mutex(this->mutex, "Clients", "connect");
+    Mutex           mutex(_mutex, "Clients", "connect");
     Future<QString> *future;
 
     if (!mutex)
@@ -78,7 +78,7 @@ Future<QString> Clients::connect(const QHostAddress &address
         // Creates the client
         Client *client = new Client(socket, protocols, transport, LightBird::IClient::CLIENT, this, contexts);
         client->getInformations() = informations;
-        this->clients.push_back(QSharedPointer<Client>(client));
+        _clients.push_back(QSharedPointer<Client>(client));
         // When the socket is connected, _connected is called
         QObject::connect(socket.data(), SIGNAL(connected(Socket*,bool)), this, SLOT(_connected(Socket*,bool)), Qt::DirectConnection);
         // When new data are received on this socket, Client::readyRead is called
@@ -86,17 +86,17 @@ Future<QString> Clients::connect(const QHostAddress &address
         // When the socket is disconnected, _disconnected is called
         QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
         // When the client is finished, _finished is called
-        QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+        QObject::connect(client, SIGNAL(finished(Client*)), this, SLOT(_finished(Client*)), Qt::DirectConnection);
         // Keeps the future in order to set its result in IReadWrite::connect
         future = new Future<QString>();
-        this->connections.insert(client->getId(), future);
+        _connections.insert(client->getId(), future);
         _network->addSocket(socket, wait);
         return (Future<QString>(*future));
     }
     else
     {
         // Ensures that the client is not already connected
-        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+        for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
             if (it.peekNext()->getPeerAddress() == address && it.peekNext()->getPeerPort() == port)
                 return (Future<QString>(it.peekNext()->getId()));
         // Creates the socket
@@ -106,13 +106,13 @@ Future<QString> Clients::connect(const QHostAddress &address
         // Creates the client
         Client *client = new Client(socket, protocols, transport, LightBird::IClient::CLIENT, this, contexts);
         client->getInformations() = informations;
-        this->clients.push_back(QSharedPointer<Client>(client));
+        _clients.push_back(QSharedPointer<Client>(client));
         // When new data are received on this socket, Client::readyRead is called
         QObject::connect(socket.data(), SIGNAL(readyRead()), client, SLOT(readyRead()), Qt::DirectConnection);
         // When the socket is disconnected, _disconnected is called
         QObject::connect(socket.data(), SIGNAL(disconnected(Socket*)), this, SLOT(_disconnected(Socket*)), Qt::DirectConnection);
         // When the client is finished, _finished is called
-        QObject::connect(client, SIGNAL(finished()), this, SLOT(_finished()), Qt::DirectConnection);
+        QObject::connect(client, SIGNAL(finished(Client*)), this, SLOT(_finished(Client*)), Qt::DirectConnection);
         // The client is now connected
         _network->addSocket(socket);
         client->connected(true);
@@ -121,26 +121,28 @@ Future<QString> Clients::connect(const QHostAddress &address
     return (Future<QString>());
 }
 
-bool    Clients::send(const QString &idClient, const QString &idPlugin, const QString &p, const QVariantMap &informations)
+bool    Clients::send(const QString &id, const QString &idPlugin, const QString &p, const QVariantMap &informations)
 {
-    Mutex   mutex(this->mutex, "Clients", "send");
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "send");
     Client  *client = NULL;
     QString protocol;
 
     if (!mutex)
         return (false);
     // Searches the client
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext() && !client)
-        if (it.next()->getId() == idClient)
-            client = it.peekPrevious().data();
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            client = it.peekNext().data();
+            break;
+        }
     // The client does not exist
     if (!client)
         return (false);
     // Checks the protocol
     if ((protocol = client->getProtocol(p)).isEmpty())
     {
-        LOG_WARNING("Invalid protocol", Properties("idClient", idClient).add("idPlugin", idPlugin).add("protocol", p, false), "Clients", "send");
+        LOG_WARNING("Invalid protocol", Properties("idClient", id).add("idPlugin", idPlugin).add("protocol", p, false), "Clients", "send");
         return (false);
     }
     client->send(protocol, informations, idPlugin);
@@ -149,17 +151,19 @@ bool    Clients::send(const QString &idClient, const QString &idPlugin, const QS
 
 bool    Clients::receive(const QString &id, const QString &p, const QVariantMap &informations)
 {
-    Mutex   mutex(this->mutex, "Clients", "send");
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "send");
     Client  *client = NULL;
     QString protocol;
 
     if (!mutex)
         return (false);
     // Searches the client
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext() && !client)
-        if (it.next()->getId() == id)
-            client = it.peekPrevious().data();
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            client = it.peekNext().data();
+            break;
+        }
     // The client does not exist
     if (!client)
         return (false);
@@ -172,46 +176,43 @@ bool    Clients::receive(const QString &id, const QString &p, const QVariantMap 
     return (client->receive(protocol, informations));
 }
 
-bool    Clients::pause(const QString &idClient, int msec)
+bool    Clients::pause(const QString &id, int msec)
 {
-    Mutex   mutex(this->mutex, "Clients", "pause");
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "pause");
 
     if (!mutex)
         return (false);
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == idClient)
-            return (it.peekPrevious()->pause(msec));
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+            return (it.peekNext()->pause(msec));
     return (false);
 }
 
-bool    Clients::resume(const QString &idClient)
+bool    Clients::resume(const QString &id)
 {
-    Mutex   mutex(this->mutex, "Clients", "resume");
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "resume");
 
     if (!mutex)
         return (false);
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == idClient)
-            return (it.peekPrevious()->resume());
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+            return (it.peekNext()->resume());
     return (false);
 }
 
 Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Client &client, bool &found) const
 {
-    Mutex   mutex(this->mutex, "Clients", "getClient");
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "getClient");
 
     found = false;
     if (!mutex)
         return (Future<bool>(false));
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == id)
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
         {
             Future<bool> *future = new Future<bool>(false);
             Future<bool> result(*future);
-            it.peekPrevious()->getInformations(client, future);
+            it.peekNext()->getInformations(client, future);
             found = true;
             return (result);
         }
@@ -220,29 +221,87 @@ Future<bool>    Clients::getClient(const QString &id, LightBird::INetwork::Clien
 
 QStringList Clients::getClients() const
 {
-    Mutex       mutex(this->mutex, "Clients", "getClients");
+    Mutex       mutex(_mutex, Mutex::READ, "Clients", "getClients");
     QStringList result;
 
     if (!mutex)
         return (QStringList());
     // Stores the id of the clients in a string list
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext())
-        result << it.next()->getId();
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        result << it.peekNext()->getId();
     return (result);
 }
 
 bool    Clients::disconnect(const QString &id, bool fatal)
 {
-    Mutex   mutex(this->mutex, "Clients", "disconnect");
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "disconnect");
 
     if (!mutex)
         return (false);
-    QListIterator<QSharedPointer<Client> > it(this->clients);
-    while (it.hasNext())
-        if (it.next()->getId() == id)
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
         {
-            it.peekPrevious()->disconnect(fatal);
+            it.peekNext()->disconnect(fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Clients::setDisconnectIdle(const QString &id, qint64 msec, bool fatal)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "setDisconnectIdle");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            it.peekNext()->setDisconnectIdle(msec, fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Clients::getDisconnectIdle(const QString &id, bool *fatal, qint64 &result)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "getDisconnectIdle");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            result = it.peekNext()->getDisconnectIdle(fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Clients::setDisconnectTime(const QString &id, const QDateTime &time, bool fatal)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "setDisconnectTime");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            it.peekNext()->setDisconnectTime(time, fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Clients::getDisconnectTime(const QString &id, bool *fatal, QDateTime &result)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Clients", "getDisconnectTime");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            result = it.peekNext()->getDisconnectTime(fatal);
             return (true);
         }
     return (false);
@@ -250,7 +309,7 @@ bool    Clients::disconnect(const QString &id, bool fatal)
 
 void    Clients::close()
 {
-    Mutex mutex(this->mutex, "Clients", "close");
+    Mutex mutex(_mutex, "Clients", "close");
 
     if (!mutex)
         return ;
@@ -258,8 +317,8 @@ void    Clients::close()
     if (_network)
         _network->close();
     // Disconnects all the clients in the map
-    if (this->clients.size() > 0)
-        for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    if (_clients.size() > 0)
+        for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
             it.peekNext()->disconnect();
     // Or quit the thread if there is already no remaining clients
     else
@@ -268,21 +327,21 @@ void    Clients::close()
 
 void    Clients::_connected(Socket *socket, bool success)
 {
-    Mutex   mutex(this->mutex, "Clients", "_connected");
+    Mutex   mutex(_mutex, "Clients", "_connected");
 
     if (!mutex)
         return ;
     // Searches the client associated with this socket
-    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
         if (&it.peekNext()->getSocket() == socket)
         {
             Client *client = it.peekNext().data();
             client->connected(success);
             // Unlocks the future that is waiting for the connection
-            if (!this->connections.contains(client->getId()))
+            if (!_connections.contains(client->getId()))
                 return ;
-            QSharedPointer<Future<QString> > future(this->connections.value(client->getId()));
-            this->connections.remove(client->getId());
+            QSharedPointer<Future<QString> > future(_connections.value(client->getId()));
+            _connections.remove(client->getId());
             if (success)
                 future->setResult(client->getId());
             else
@@ -327,7 +386,7 @@ void Clients::write(Client *client, const QByteArray &data)
             // The socket is not ready to write more data, so we wait until readyWrite is emited
             else if (result == 0)
             {
-                Mutex mutex(this->mutex, "Clients", "write");
+                Mutex mutex(_mutex, "Clients", "write");
                 if (!mutex)
                     return ;
                 QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, written));
@@ -353,7 +412,7 @@ void Clients::_write()
     Client *client;
     qint64 result;
     QHash<QSharedPointer<Client>, QSharedPointer<WriteBuffer> > writeBuffer;
-    Mutex mutex(this->mutex, "Clients", "_write");
+    Mutex mutex(_mutex, "Clients", "_write");
 
     if (!mutex || _writeBuffers.isEmpty())
         return ;
@@ -403,12 +462,12 @@ void Clients::_write()
 
 void    Clients::_disconnected(Socket *socket)
 {
-    Mutex   mutex(this->mutex, "Clients", "_disconnected");
+    Mutex   mutex(_mutex, "Clients", "_disconnected");
 
     if (!mutex)
         return ;
     // Searches the client associated with this socket
-    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
         if (&it.peekNext()->getSocket() == socket)
         {
             // Removes the client of the disconnected socket
@@ -420,26 +479,27 @@ void    Clients::_disconnected(Socket *socket)
         }
 }
 
-void        Clients::_finished()
+void        Clients::_finished(Client *client)
 {
-    Mutex mutex(this->mutex, "Clients", "_finished");
+    Mutex mutex(_mutex, "Clients", "_finished");
 
     if (!mutex)
         return ;
     // Searches the clients that have been finished
-    QMutableListIterator<QSharedPointer<Client> > it(this->clients);
+    QMutableListIterator<QSharedPointer<Client> > it(_clients);
     while (it.hasNext())
-        if (it.next()->isFinished())
+        if (it.next().data() == client)
         {
             it.remove();
-            if (this->clients.size() == 0 && !_network->isListening())
+            if (_clients.size() == 0 && !_network->isListening())
                 _threadFinished.wakeAll();
+            break;
         }
 }
 
 QSharedPointer<Client> Clients::_getClient(Client *client)
 {
-    for (QListIterator<QSharedPointer<Client> > it(this->clients); it.hasNext(); it.next())
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
         if (it.peekNext() == client)
             return it.peekNext();
     return QSharedPointer<Client>(NULL);

@@ -34,7 +34,7 @@ private slots:
     /// @brief Called when a socket is disconnected.
     void    _disconnected(Socket *socket);
     /// @brief Called when a client is finished and should be destroyed.
-    void    _finished();
+    void    _finished(Client *client);
 
 private:
     PortTcp(const PortTcp &);

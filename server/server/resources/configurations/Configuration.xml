@@ -16,7 +16,6 @@
     <port protocol="HTTP" transport="TCP" maxClients="100">4242</port>
   </ports>
   <plugins>
-    <plugin>Extensions/Mime</plugin>
     <plugin>Files</plugin>
     <plugin>Http/Client</plugin>
     <plugin>Http/Parser</plugin>
@@ -62,7 +61,6 @@
     <cacheSizeLimit>100</cacheSizeLimit>
   </preview>
   <configurations>
-    <plugin id="Extensions/Mime"/>
     <plugin id="Files"/>
     <plugin id="Ftp"/>
     <plugin id="Http/Client"/>

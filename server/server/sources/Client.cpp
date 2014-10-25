@@ -27,6 +27,7 @@ Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetw
     , readWriteInterface(r)
     , contexts(c)
     , socket(s)
+    , disconnectTimers(NULL)
     , validator(contexts, mode, transport, protocols, socket->localPort())
 {
     // Generates the uuid of the client
@@ -43,6 +44,8 @@ Client::Client(QSharedPointer<Socket> s, const QStringList &pr, LightBird::INetw
     this->disconnectFatal = false;
     // Sets the connection date at the current date
     this->connectionDate = QDateTime::currentDateTime();
+    // Creates the disconnect timers
+    this->disconnectTimers = new ClientDisconnectTimers(this);
     // Creates the engine
     if (this->mode == LightBird::IClient::SERVER)
         this->engine = new EngineServer(*this);
@@ -56,6 +59,7 @@ Client::~Client()
     this->_getInformations();
     delete this->engine;
     delete this->writing;
+    this->disconnectTimers->clientDestroyed();
     LOG_TRACE("Client destroyed!", Properties("id", this->id), "Client", "~Client");
 }
 
@@ -192,7 +196,10 @@ void    Client::run()
     }
     // All the tasks of the client has been completed
     else
+    {
         this->running = false;
+        this->disconnectTimers->clientIdle();
+    }
 }
 
 void    Client::connected(bool success)
@@ -577,11 +584,6 @@ void    Client::_onDestroy()
     }
 }
 
-bool    Client::isFinished() const
-{
-    return (this->disconnectState == Disconnect::DISCONNECTED);
-}
-
 LightBird::IRequest &Client::getRequest()
 {
     return engine->getRequest();
@@ -717,5 +719,5 @@ void    Client::_finish(bool onDestroy)
         this->_onDestroy();
     this->disconnectState = Disconnect::DISCONNECTED;
     this->socket->close();
-    emit this->finished();
+    emit this->finished(this);
 }

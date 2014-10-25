@@ -224,6 +224,40 @@ namespace LightBird
         /// @see LightBird::IOnResume
         /// @return False if the client does not exists or is not paused.
         virtual bool    resume(const QString &id) = 0;
+
+        /// @brief Sets the number of milliseconds of inactivity after which the
+        /// client will be automatically disconnected.
+        /// @param id : The id of the client.
+        /// @param msec : If msec is negative, disconnect idle is cleared and the
+        /// client will never be disconnected (which is the default behavior).
+        /// @param fatal : See the fatal behavior of IClient::disconnect.
+        virtual void    setDisconnectIdle(const QString &id, qint64 msec = -1, bool fatal = false) = 0;
+        /// @brief Returns the number of milliseconds of inactivity after which
+        /// the client will be disconnected. A negative value means that the
+        /// client will never be disconnected, which is the default behavior.
+        /// @param fatal : If used, allows to know if the disconnection will be fatal.
+        virtual qint64  getDisconnectIdle(const QString &id, bool *fatal = NULL) = 0;
+
+        /// @brief Sets the time at which the client will be automatically
+        /// disconnected no matter what.
+        /// @param id : The id of the client.
+        /// @param time : The date at which the client will be disconnected.
+        /// If the QDateTime is not valid, the disconnect time is cleared and
+        /// the client will never be disconnected (which is the default behavior).
+        /// @param fatal : See the fatal behavior of IClient::disconnect.
+        virtual void    setDisconnectTime(const QString &id, const QDateTime &time = QDateTime(), bool fatal = false) = 0;
+        /// @brief Sets the time at which the client will be automatically
+        /// disconnected no matter what.
+        /// @param msec : The number of milliseconds from now after which the
+        /// client will be disconnected.
+        /// If msec is negative, the disconnect time is cleared and the
+        /// client will never be disconnected (which is the default behavior).
+        /// @param fatal : See the fatal behavior of IClient::disconnect.
+        inline void     setDisconnectTime(const QString &id, qint64 msec = -1, bool fatal = false) { setDisconnectTime(id, (msec >= 0 ? QDateTime::currentDateTime().addMSecs(msec) : QDateTime()), fatal); }
+        /// @brief Returns the time at which the client will be disconnected.
+        /// A null QDateTime means that the client will never be disconnected.
+        /// @param fatal : If used, allows to know if the disconnection will be fatal.
+        virtual QDateTime getDisconnectTime(const QString &id, bool *fatal = NULL) = 0;
     };
 }
 

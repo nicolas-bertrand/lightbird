@@ -31,13 +31,21 @@ public:
     /// @brief Disconnects a client from this port.
     /// @see LightBird::INetwork::disconnect
     bool            disconnect(const QString &id, bool fatal = false);
+    /// @see LightBird::INetwork::setDisconnectIdle
+    bool            setDisconnectIdle(const QString &id, qint64 msec = -1, bool fatal = false);
+    /// @see LightBird::INetwork::getDisconnectIdle
+    bool            getDisconnectIdle(const QString &id, bool *fatal, qint64 &result);
+    /// @see LightBird::INetwork::setDisconnectTime
+    bool            setDisconnectTime(const QString &id, const QDateTime &time = QDateTime(), bool fatal = false);
+    /// @see LightBird::INetwork::getDisconnectTime
+    bool            getDisconnectTime(const QString &id, bool *fatal, QDateTime &result);
     /// @brief Tries to send a response without waiting for a request.
     /// @see LightBird::INetwork::send
     bool            send(const QString &id, const QString &protocol, const QVariantMap &informations);
     /// @see LightBird::INetwork::pause
-    bool            pause(const QString &idClient, int msec = -1);
+    bool            pause(const QString &id, int msec = -1);
     /// @see LightBird::INetwork::resume
-    bool            resume(const QString &idClient);
+    bool            resume(const QString &id);
     /// @brief Returns true if the port is listening the network.
     virtual bool    isListening() const = 0;
     /// @brief Closes the port. Denies all the new connections to the port and

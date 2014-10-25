@@ -255,6 +255,82 @@ bool    Network::resume(const QString &idClient)
     return (false);
 }
 
+void    Network::setDisconnectIdle(const QString &idClient, qint64 msec, bool fatal)
+{
+    Mutex   mutex(this->mutex, Mutex::READ, "Network", "setDisconnectIdle");
+
+    if (!mutex)
+        return ;
+    if (this->clients->setDisconnectIdle(idClient, msec, fatal))
+        return ;
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->setDisconnectIdle(idClient, msec, fatal))
+                return ;
+    }
+}
+
+qint64  Network::getDisconnectIdle(const QString &idClient, bool *fatal)
+{
+    Mutex mutex(this->mutex, Mutex::READ, "Network", "getDisconnectIdle");
+    qint64 result = -1;
+
+    if (!mutex)
+        return result;
+    if (this->clients->getDisconnectIdle(idClient, fatal, result))
+        return result;
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->getDisconnectIdle(idClient, fatal, result))
+                return result;
+    }
+    return result;
+}
+
+void    Network::setDisconnectTime(const QString &idClient, const QDateTime &time, bool fatal)
+{
+    Mutex   mutex(this->mutex, Mutex::READ, "Network", "setDisconnectTime");
+
+    if (!mutex)
+        return ;
+    if (this->clients->setDisconnectTime(idClient, time, fatal))
+        return ;
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->setDisconnectTime(idClient, time, fatal))
+                return ;
+    }
+}
+
+QDateTime Network::getDisconnectTime(const QString &idClient, bool *fatal)
+{
+    Mutex mutex(this->mutex, Mutex::READ, "Network", "getDisconnectTime");
+    QDateTime result;
+
+    if (!mutex)
+        return result;
+    if (this->clients->getDisconnectTime(idClient, fatal, result))
+        return result;
+    QMapIterator<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > transport(this->ports);
+    while (transport.hasNext())
+    {
+        QMapIterator<unsigned short, Port *> it(transport.next().value());
+        while (it.hasNext())
+            if (it.next().value()->getDisconnectTime(idClient, fatal, result))
+                return result;
+    }
+    return result;
+}
+
 void    Network::shutdown()
 {
     Mutex   mutex(this->mutex, "Network", "shutdown");

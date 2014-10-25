@@ -29,6 +29,10 @@ public:
     bool        receive(const QString &id, const QString &protocol = "", const QVariantMap &informations = QVariantMap());
     bool        pause(const QString &idClient, int msec = -1);
     bool        resume(const QString &idClient);
+    void        setDisconnectIdle(const QString &id, qint64 msec = -1, bool fatal = false);
+    qint64      getDisconnectIdle(const QString &id, bool *fatal = NULL);
+    void        setDisconnectTime(const QString &id, const QDateTime &time = QDateTime(), bool fatal = false);
+    QDateTime   getDisconnectTime(const QString &id, bool *fatal = NULL);
 
 private:
     ApiNetwork();

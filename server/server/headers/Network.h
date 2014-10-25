@@ -51,6 +51,14 @@ public:
     bool            pause(const QString &idClient, int msec = -1);
     /// @see LightBird::INetwork::resume
     bool            resume(const QString &idClient);
+    /// @see LightBird::INetwork::setDisconnectIdle
+    void            setDisconnectIdle(const QString &idClient, qint64 msec = -1, bool fatal = false);
+    /// @see LightBird::INetwork::getDisconnectIdle
+    qint64          getDisconnectIdle(const QString &idClient, bool *fatal = NULL);
+    /// @see LightBird::INetwork::setDisconnectTime
+    void            setDisconnectTime(const QString &idClient, const QDateTime &time = QDateTime(), bool fatal = false);
+    /// @see LightBird::INetwork::getDisconnectTime
+    QDateTime       getDisconnectTime(const QString &idClient, bool *fatal = NULL);
     /// @brief Quits all the ports threads and delete them.
     void            shutdown();
     /// @brief Returns the instance of this class created by the Server.
@@ -65,9 +73,9 @@ private:
     Network &operator=(const Network &);
 
     typedef QMap<LightBird::INetwork::Transport, QMap<unsigned short, Port *> > PortList;
-    PortList               ports;   ///< The list of the open ports.
+    PortList               ports; ///< The list of the open ports.
     Clients                *clients; ///< Manages the clients in CLIENT mode.
-    mutable QReadWriteLock mutex;   ///< Makes the class thread safe.
+    mutable QReadWriteLock mutex; ///< Makes the class thread safe.
 };
 
 #endif // NETWORK_H

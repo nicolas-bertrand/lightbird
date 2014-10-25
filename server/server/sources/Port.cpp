@@ -65,6 +65,66 @@ bool    Port::disconnect(const QString &id, bool fatal)
     return (false);
 }
 
+bool    Port::setDisconnectIdle(const QString &id, qint64 msec, bool fatal)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Port", "setDisconnectIdle");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            it.peekNext()->setDisconnectIdle(msec, fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Port::getDisconnectIdle(const QString &id, bool *fatal, qint64 &result)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Port", "getDisconnectIdle");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            result = it.peekNext()->getDisconnectIdle(fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Port::setDisconnectTime(const QString &id, const QDateTime &time, bool fatal)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Port", "setDisconnectTime");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            it.peekNext()->setDisconnectTime(time, fatal);
+            return (true);
+        }
+    return (false);
+}
+
+bool    Port::getDisconnectTime(const QString &id, bool *fatal, QDateTime &result)
+{
+    Mutex   mutex(_mutex, Mutex::READ, "Port", "getDisconnectTime");
+
+    if (!mutex)
+        return (false);
+    for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
+        if (it.peekNext()->getId() == id)
+        {
+            result = it.peekNext()->getDisconnectTime(fatal);
+            return (true);
+        }
+    return (false);
+}
+
 bool    Port::send(const QString &id, const QString &p, const QVariantMap &informations)
 {
     Mutex   mutex(_mutex, Mutex::READ, "Port", "send");
@@ -92,26 +152,26 @@ bool    Port::send(const QString &id, const QString &p, const QVariantMap &infor
     return (client->send(protocol, informations));
 }
 
-bool    Port::pause(const QString &idClient, int msec)
+bool    Port::pause(const QString &id, int msec)
 {
     Mutex   mutex(_mutex, Mutex::READ, "Port", "pause");
 
     if (!mutex)
         return (false);
     for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
-        if (it.peekNext()->getId() == idClient)
+        if (it.peekNext()->getId() == id)
             return (it.peekNext()->pause(msec));
     return (false);
 }
 
-bool    Port::resume(const QString &idClient)
+bool    Port::resume(const QString &id)
 {
     Mutex   mutex(_mutex, Mutex::READ, "Port", "resume");
 
     if (!mutex)
         return (false);
     for (QListIterator<QSharedPointer<Client> > it(_clients); it.hasNext(); it.next())
-        if (it.peekNext()->getId() == idClient)
+        if (it.peekNext()->getId() == id)
             return (it.peekNext()->resume());
     return (false);
 }

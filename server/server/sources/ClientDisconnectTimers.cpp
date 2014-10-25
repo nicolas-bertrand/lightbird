@@ -32,7 +32,7 @@ void ClientDisconnectTimers::setDisconnectIdle(qint64 msec, bool fatal)
     if (!mutex)
         return ;
 
-    if (msec > 0)
+    if (msec >= 0)
     {
         _idleMsec = msec;
         _idleFatal = fatal;
@@ -57,10 +57,10 @@ void ClientDisconnectTimers::setDisconnectTime(const QDateTime &time, bool fatal
     if (!mutex)
         return ;
 
-    _timeMsec = time.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch();
-    if (_timeMsec > 0)
+    if (time.isValid())
     {
         _timeNextTimeout = time;
+        _timeMsec = time.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch();
         _timeFatal = fatal;
         emit startTimeTimer();
     }
@@ -109,7 +109,7 @@ void ClientDisconnectTimers::_disconnectIdle()
     {
         if (_idleNextTimeout - QDateTime::currentMSecsSinceEpoch() < _errorMargin)
         {
-            LOG_DEBUG("Client disconnected after being idle for too long", Properties("client id", _client->getId()).add("idle time", _idleMsec), "ClientDisconnectTimers", "_disconnectIdle");
+            LOG_DEBUG("Client disconnected after being idle for too long", Properties("idClient", _client->getId()).add("idle time", _idleMsec), "ClientDisconnectTimers", "_disconnectIdle");
             _client->disconnect(_idleFatal);
             _clientDisconnected();
         }
@@ -130,7 +130,7 @@ void ClientDisconnectTimers::_disconnectTime()
     {
         if (_timeNextTimeout.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch() < _errorMargin)
         {
-            LOG_DEBUG("Client disconnected at the scheduled time", Properties("client id", _client->getId()).add("scheduled duration", _timeMsec), "ClientDisconnectTimers", "_disconnectTime");
+            LOG_DEBUG("Client disconnected at the scheduled time", Properties("idClient", _client->getId()).add("scheduled duration", _timeMsec), "ClientDisconnectTimers", "_disconnectTime");
             _client->disconnect(_timeFatal);
             _clientDisconnected();
         }

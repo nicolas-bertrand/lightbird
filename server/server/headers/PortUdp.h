@@ -33,7 +33,7 @@ private slots:
     /// @brief Writes the data that could not be wrote in write().
     void    _write();
     /// @brief Called when a client is finished and should be destroyed.
-    void    _finished();
+    void    _finished(Client *client);
 
 private:
     PortUdp(const PortUdp &);

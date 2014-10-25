@@ -21,11 +21,11 @@ public:
 
     // LightBird::IClient
     /// @see LightBird::IClient::setDisconnectIdle
-    void setDisconnectIdle(qint64 msec, bool fatal = false);
+    void setDisconnectIdle(qint64 msec = -1, bool fatal = false);
     /// @see LightBird::IClient::getDisconnectIdle
     qint64 getDisconnectIdle(bool *fatal = NULL) const;
     /// @see LightBird::IClient::setDisconnectTime
-    void setDisconnectTime(const QDateTime &time, bool fatal = false);
+    void setDisconnectTime(const QDateTime &time = QDateTime(), bool fatal = false);
     /// @see LightBird::IClient::getDisconnectTime
     const QDateTime &getDisconnectTime(bool *fatal = NULL) const;
 

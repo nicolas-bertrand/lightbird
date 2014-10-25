@@ -80,3 +80,23 @@ bool    ApiNetwork::resume(const QString &idClient)
 {
     return (Network::instance()->resume(idClient));
 }
+
+void    ApiNetwork::setDisconnectIdle(const QString &id, qint64 msec, bool fatal)
+{
+    Network::instance()->setDisconnectIdle(id, msec, fatal);
+}
+
+qint64  ApiNetwork::getDisconnectIdle(const QString &id, bool *fatal)
+{
+    return (Network::instance()->getDisconnectIdle(id, fatal));
+}
+
+void    ApiNetwork::setDisconnectTime(const QString &id, const QDateTime &time, bool fatal)
+{
+    Network::instance()->setDisconnectTime(id, time, fatal);
+}
+
+QDateTime ApiNetwork::getDisconnectTime(const QString &id, bool *fatal)
+{
+    return (Network::instance()->getDisconnectTime(id, fatal));
+}

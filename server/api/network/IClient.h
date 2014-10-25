@@ -89,6 +89,47 @@ namespace LightBird
         /// @param id_account : The id of the account of the session to get.
         /// Ignored by default.
         virtual LightBird::Session   getSession(const QString &id_account = QString()) const = 0;
+
+        /// @brief Allows to pause the network workflow of the client. No more
+        /// network interface is called for the client until the resume method
+        /// is called, the time has elapsed or the client is disconnected.
+        /// In the latter case IOnDisconnect is called, but the workflow will
+        /// still be paused until one of the other conditions is met, except if
+        /// onDisconnect returned true, in which case IOnResume is called
+        /// followed by IOnDestroy.
+        /// In any cases the IOnResume interface is called when the pause ends.
+        /// The IOnPause interface is called just after this method.
+        /// @param msec : The maximum duration of the pause in milliseconds.
+        /// If the value is negative or zero, the pause will never timeout
+        /// (resume must be called).
+        /// @see resume
+        /// @see LightBird::IOnPause
+        /// @see LightBird::IOnResume
+        /// @see LightBird::IClient::isPaused
+        /// @see LightBird::IOnDisconnect
+        /// @return False if the client does not exists or is already paused.
+        virtual bool                 pause(int msec = -1) = 0;
+        /// @brief Resumes the network workflow of the paused client.
+        /// The IOnResume interface is called just after this method.
+        /// @see pause
+        /// @see LightBird::IOnPause
+        /// @see LightBird::IOnResume
+        /// @return False if the client does not exists or is not paused.
+        virtual bool                 resume() = 0;
+        /// @brief Returns true if the client has been paused using INetwork::pause.
+        /// @see LightBird::INetwork::pause
+        virtual bool                 isPaused() const = 0;
+
+        /// @brief Disconnects the client.
+        /// If data are being processed for this client, it may be interrupted.
+        /// The interface IOnDisconnect is called when the client is being
+        /// disconnected.
+        /// @param fatal : If false, the disconnection behavior is based on
+        /// the value returned by IOnDisconnect. However if fatal is true,
+        /// the client is immediatly disconnected regardless the return value
+        /// of IOnDisconnect, and IOnDestroy is called just after it.
+        /// @see LightBird::IOnDisconnect
+        virtual void                 disconnect(bool fatal = false) = 0;
         /// @brief Returns true if the client is disconnecting. This occurs when
         /// a client is disconnected but false has been returned on a call to
         /// LightBird::IOnDisconnect. As a result the client is not destroyed
@@ -96,9 +137,36 @@ namespace LightBird
         /// remaining data to be processed normally.
         /// @see LightBird::IOnDisconnect
         virtual bool                 isDisconnecting() const = 0;
-        /// @brief Returns true if the client has been paused using INetwork::pause.
-        /// @see LightBird::INetwork::pause
-        virtual bool                 isPaused() const = 0;
+        /// @brief Sets the number of milliseconds of inactivity after which the
+        /// client will be automatically disconnected.
+        /// @param msec : If msec is negative, disconnect idle is cleared and the
+        /// client will never be disconnected (which is the default behavior).
+        /// @param fatal : See the fatal behavior of IClient::disconnect.
+        virtual void                 setDisconnectIdle(qint64 msec = -1, bool fatal = false) = 0;
+        /// @brief Returns the number of milliseconds of inactivity after which
+        /// the client will be disconnected. A negative value means that the
+        /// client will never be disconnected, which is the default behavior.
+        /// @param fatal : If used, allows to know if the disconnection will be fatal.
+        virtual qint64               getDisconnectIdle(bool *fatal = NULL) const = 0;
+        /// @brief Sets the time at which the client will be automatically
+        /// disconnected no matter what.
+        /// @param time : The date at which the client will be disconnected.
+        /// If the QDateTime is not valid, the disconnect time is cleared
+        /// and the client will never be disconnected (which is the default behavior).
+        /// @param fatal : See the fatal behavior of IClient::disconnect.
+        virtual void                 setDisconnectTime(const QDateTime &time = QDateTime(), bool fatal = false) = 0;
+        /// @brief Sets the time at which the client will be automatically
+        /// disconnected no matter what.
+        /// @param msec : The number of milliseconds from now after which the
+        /// client will be disconnected.
+        /// If the msec is negative, the disconnect time is cleared and the
+        /// client will never be disconnected (which is the default behavior).
+        /// @param fatal : See the fatal behavior of IClient::disconnect.
+        inline void                  setDisconnectTime(qint64 msec = -1, bool fatal = false) { setDisconnectTime((msec >= 0 ? QDateTime::currentDateTime().addMSecs(msec) : QDateTime()), fatal); }
+        /// @brief Returns the time at which the client will be disconnected.
+        /// A null QDateTime means that the client will never be disconnected.
+        /// @param fatal : If used, allows to know if the disconnection will be fatal.
+        virtual const QDateTime      &getDisconnectTime(bool *fatal = NULL) const = 0;
     };
 }
 

@@ -14,6 +14,7 @@
 # include "Future.hpp"
 # include "ThreadPool.h"
 # include "Socket.h"
+# include "ClientDisconnectTimers.h"
 
 class Engine;
 
@@ -59,6 +60,7 @@ public:
     /// @see LightBird::INetwork::pause
     bool                    pause(int msec = -1);
     /// @brief Disconnects the client.
+    /// @see LightBird::IClient::disconnect
     void                    disconnect(bool fatal = false);
     /// @brief Calls the IDoRead interface of the plugins.
     bool                    doRead(QByteArray &data);
@@ -66,8 +68,10 @@ public:
     /// @param result : The return of the IDoWrite call.
     /// @return True if doWrite has been called.
     bool                    doWrite(const char *data, qint64 size, qint64 &result);
+    /// @brief Returns true if the client is running.
+    inline bool             isRunning() const { return running; }
     /// @brief Returns true if the client is finished and can be safely destroyed.
-    bool                    isFinished() const;
+    inline bool             isFinished() const { return this->disconnectState == Disconnect::DISCONNECTED; }
     /// @brief Returns the data buffer of the client. This method should only be
     /// used when the Client is in reading phase.
     QByteArray              &getData();
@@ -112,6 +116,10 @@ public:
     LightBird::Session      getSession(const QString &id_account = QString()) const;
     bool                    isPaused() const;
     bool                    isDisconnecting() const;
+    inline void             setDisconnectIdle(qint64 msec = -1, bool fatal = false) { this->disconnectTimers->setDisconnectIdle(msec, fatal); }
+    inline qint64           getDisconnectIdle(bool *fatal = NULL) const { return this->disconnectTimers->getDisconnectIdle(fatal); }
+    inline void             setDisconnectTime(const QDateTime &time = QDateTime(), bool fatal = false) { this->disconnectTimers->setDisconnectTime(time, fatal); }
+    inline const QDateTime  &getDisconnectTime(bool *fatal = NULL) const { return this->disconnectTimers->getDisconnectTime(fatal); }
 
 public slots:
     /// @brief Calling this method tells the Client that new data are available,
@@ -129,7 +137,7 @@ public slots:
 
 signals:
     /// @brief The client has been disconnected and can be safely destroyed.
-    void                    finished();
+    void                    finished(Client*);
 
 private:
     Client();
@@ -245,6 +253,7 @@ private:
     QTimer                   *pauseTimer;         ///< Resumes the network workflow when the pause duration elapsed.
     Disconnect::State        disconnectState;     ///< The disconnect state of the client.
     bool                     disconnectFatal;     ///< True if the disconnection is fatal.
+    ClientDisconnectTimers   *disconnectTimers;   ///< Manages the disconnection timers of the client.
     QMutex                   mutex;               ///< Makes this class thread safe.
     QList<QVariantMap>       sendRequests;        ///< Stores the idPlugin, the informations and the protocol of the requests that are going to be sent.
     QList<QVariantMap>       receiveResponses;    ///< Stores the protocol and the informations of the responses that are going to be received.
@@ -256,6 +265,7 @@ inline void Client::_newTask(Client::State state)
 {
     this->state = state;
     this->running = true;
+    this->disconnectTimers->clientRunning();
     ThreadPool::instance()->addTask(this);
 }
 
