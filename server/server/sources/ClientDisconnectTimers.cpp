@@ -147,6 +147,7 @@ void ClientDisconnectTimers::clientDestroyed()
         return ;
 
     _client = NULL;
+    mutex.unlock();
     deleteLater();
 }
 
