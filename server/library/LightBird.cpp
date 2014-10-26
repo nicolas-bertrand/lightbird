@@ -178,6 +178,12 @@ void    LightBird::sleep(unsigned long time)
     mutex.unlock();
 }
 
+void    LightBird::srand()
+{
+    ::qsrand((unsigned int)(QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000));
+    std::cout << "aaaaaaaaaaaaaa" << std::endl;
+}
+
 quint64 LightBird::stringToBytes(const QString &str)
 {
     char    type;

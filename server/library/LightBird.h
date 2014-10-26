@@ -136,6 +136,9 @@ namespace LightBird
     /// @param The number of milliseconds to sleep.
     LIB void        sleep(unsigned long time);
 
+    /// @brief Seeds the rand() of the current thread.
+    LIB void        srand();
+
     /// @brief Converts a string to a quint64 using the character at the end of the string.
     /// This character could be K (Kilobyte), M (Megabyte), G (Gigabyte), or T (Terabyte).
     /// For example "42K" is converted to 43008 (42 * 1024), and "42" is converted to 42.
