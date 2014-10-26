@@ -5,8 +5,8 @@
 Ftp::Ftp(LightBird::IApi &api)
     : ITest(api)
 {
-    if (!(this->port = this->api.configuration(true).get("ftp/port").toUShort()))
-        this->port = 21;
+    if (!(_port = _api.configuration(true).get("ftp/port").toUShort()))
+        _port = 21;
 }
 
 Ftp::~Ftp()
@@ -15,17 +15,17 @@ Ftp::~Ftp()
 
 unsigned int    Ftp::run()
 {
-    log.debug("Running the tests of the FTP server...", "Ftp", "run");
+    _log.debug("Running the tests of the FTP server...", "Ftp", "run");
     try
     {
-        this->_tests();
+        _tests();
     }
     catch (unsigned int line)
     {
-        this->log.debug("Tests of the FTP server failed!", Properties("line", line).toMap(), "Ftp", "run");
+        _log.debug("Tests of the FTP server failed!", Properties("line", line).toMap(), "Ftp", "run");
         return (line);
     }
-    this->log.debug("Tests of the FTP server successful!", "Ftp", "run");
+    _log.debug("Tests of the FTP server successful!", "Ftp", "run");
     return (0);
 }
 
@@ -44,7 +44,7 @@ void              Ftp::_tests()
         a.remove(a.getIdFromName(FTP_USER));
         ASSERT(a.add(FTP_USER, FTP_PASS, true, false));
         // -----
-        control.connectToHost(QHostAddress::LocalHost, this->port);
+        control.connectToHost(QHostAddress::LocalHost, _port);
         ASSERT(control.waitForConnected(MSEC));
         ASSERT(control.waitForReadyRead(MSEC));
         ASSERT(control.readAll().contains("220"));
@@ -107,7 +107,7 @@ void              Ftp::_tests()
         // -----
         data = new QTcpSocket();
         regex.setPattern("^227.+\\((\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3})\\)");
-        ASSERT(regex.indexIn(this->_command(control, "PASV")) >= 0);
+        ASSERT(regex.indexIn(_command(control, "PASV")) >= 0);
         port = regex.cap(5).toInt() << 8 | regex.cap(6).toInt();
         data->connectToHost(QHostAddress::LocalHost, port);
         ASSERT(data->waitForConnected(MSEC));
@@ -123,7 +123,7 @@ void              Ftp::_tests()
         COMMAND("EPSV 3", "522");
         data = new QTcpSocket();
         regex.setPattern("^229.+\\(\\|\\|\\|(\\d{1,5})\\|\\)");
-        ASSERT(regex.indexIn(this->_command(control, "EPSV")) == 0);
+        ASSERT(regex.indexIn(_command(control, "EPSV")) == 0);
         port = regex.cap(1).toInt();
         data->connectToHost(QHostAddress::LocalHost, port);
         ASSERT(data->waitForConnected(MSEC));
@@ -171,7 +171,7 @@ void              Ftp::_tests()
         str.clear();
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
-        ASSERT(this->_retr("RETR /testFtp/file1.txt", "content1", server, control));
+        ASSERT(_retr("RETR /testFtp/file1.txt", "content1", server, control));
         COMMAND("STOR /testFtp/file1.txt", "");
         ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
         ASSERT(data->write("content2") && data->waitForBytesWritten(MSEC));
@@ -179,7 +179,7 @@ void              Ftp::_tests()
         str.clear();
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
-        ASSERT(this->_retr("RETR /testFtp/file1.txt", "content2", server, control));
+        ASSERT(_retr("RETR /testFtp/file1.txt", "content2", server, control));
         COMMAND("STOR /testFtp/false/file1.txt", "");
         ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
         ASSERT(data->write("content3") && data->waitForBytesWritten(MSEC));
@@ -194,7 +194,7 @@ void              Ftp::_tests()
         str.clear();
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
-        ASSERT(this->_retr("RETR /testFtp/file1.txt", "content2content3", server, control));
+        ASSERT(_retr("RETR /testFtp/file1.txt", "content2content3", server, control));
         COMMAND("STOU /testFtp/file1.txt", "");
         ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
         ASSERT(data->write("content4") && data->waitForBytesWritten(MSEC));
@@ -203,7 +203,7 @@ void              Ftp::_tests()
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str += control.readAll()).isEmpty());
         ASSERT(str.contains("150 FILE: /testFtp/file1 - 1.txt"));
-        ASSERT(this->_retr("RETR /testFtp/file1 - 1.txt", "content4", server, control));
+        ASSERT(_retr("RETR /testFtp/file1 - 1.txt", "content4", server, control));
         // -----
         COMMAND("REST -42", "501");
         COMMAND("REST 4", "350");
@@ -222,7 +222,7 @@ void              Ftp::_tests()
         str.clear();
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
-        ASSERT(this->_retr("RETR /testFtp/file1.txt", "contcontent6", server, control));
+        ASSERT(_retr("RETR /testFtp/file1.txt", "contcontent6", server, control));
         COMMAND("REST 13", "350");
         COMMAND("STOR /testFtp/file1.txt", "");
         ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
@@ -239,7 +239,7 @@ void              Ftp::_tests()
         str.clear();
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
-        ASSERT(this->_retr("RETR /testFtp/file1.txt", "contcontent68", server, control));
+        ASSERT(_retr("RETR /testFtp/file1.txt", "contcontent68", server, control));
         COMMAND("APPE /testFtp/file3.txt", "");
         ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
         ASSERT(data->write("content9") && data->waitForBytesWritten(MSEC));
@@ -247,7 +247,7 @@ void              Ftp::_tests()
         str.clear();
         while (!str.contains("250"))
             ASSERT(control.waitForReadyRead(MSEC) && !(str = control.readAll()).isEmpty());
-        ASSERT(this->_retr("RETR /testFtp/file3.txt", "content9", server, control));
+        ASSERT(_retr("RETR /testFtp/file3.txt", "content9", server, control));
         COMMAND("STOR /testFtp/file4.txt", "");
         ASSERT(server.waitForNewConnection(MSEC) && (data = server.nextPendingConnection()));
         delete data;
@@ -291,7 +291,7 @@ void              Ftp::_tests()
         COMMAND("SIZE testFtp/file2.txt", "213 13");
         COMMAND("SIZE testFtp/false", "550");
         regex.setPattern(QString("213 %1\\d{4}").arg(QDateTime::currentDateTimeUtc().toString("yyyyMMddhh")));
-        ASSERT(regex.indexIn(this->_command(control, "MDTM testFtp/file2.txt")) == 0);
+        ASSERT(regex.indexIn(_command(control, "MDTM testFtp/file2.txt")) == 0);
         COMMAND("MDTM testFtp/false", "550");
         COMMAND("DELE testFtp/file2.txt", "250");
         COMMAND("DELE testFtp/file2.txt", "550");
@@ -316,7 +316,7 @@ bool        Ftp::_command(QTcpSocket &s, const QString &request, const QString &
         return (false);
     if (!response.isEmpty() && (!s.waitForReadyRead(MSEC) || !(result = s.readAll()).contains(response.toLatin1())))
     {
-        this->log.error("Test failed", Properties("response", result.trimmed()).toMap(), "Ftp", "_command");
+        _log.error("Test failed", Properties("response", result.trimmed()).toMap(), "Ftp", "_command");
         return (false);
     }
     return (true);
@@ -353,7 +353,7 @@ bool           Ftp::_retr(const QString &file, const QString &result, QTcpServer
 void            Ftp::_data()
 {
 
-    this->log.debug("Running the tests...", "Ftp", "_data");
+    _log.debug("Running the tests...", "Ftp", "_data");
     try
     {
         QTcpSocket c;
@@ -361,24 +361,24 @@ void            Ftp::_data()
         ASSERT(c.waitForConnected(MSEC));
         ASSERT(c.waitForReadyRead(MSEC));
         ASSERT(c.readAll().contains("220"));
-        this->_print(c, "USER anonymous");
-        this->_print(c, "PASS anonymous");
-        this->_print(c, "TYPE I");
-        QString addr = this->_print(c, "PASV");
+        _print(c, "USER anonymous");
+        _print(c, "PASS anonymous");
+        _print(c, "TYPE I");
+        QString addr = _print(c, "PASV");
         QRegExp reg("(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3}),(\\d{1,3})");
         reg.indexIn(addr);
         QTcpSocket s;
         s.connectToHost(reg.cap(1) + "." + reg.cap(2) + "." + reg.cap(3) + "." + reg.cap(4), reg.cap(5).toInt() << 8 | reg.cap(6).toInt());
         ASSERT(s.waitForConnected(MSEC));
-        this->_print(c, "LIST index.html");
-        this->_print(s, "");
+        _print(c, "LIST index.html");
+        _print(s, "");
     }
     catch (unsigned int line)
     {
-        this->log.error("Test failed", Properties("line", line).toMap(), "Ftp", "_data");
+        _log.error("Test failed", Properties("line", line).toMap(), "Ftp", "_data");
         throw line;
     }
-    this->log.debug("Test successful!", "Ftp", "_data");
+    _log.debug("Test successful!", "Ftp", "_data");
 }
 
 #ifdef WIN32
@@ -396,6 +396,6 @@ QString     Ftp::_print(QTcpSocket &s, const QString &request)
 #endif
     if (!s.waitForReadyRead(MSEC) || (result = s.readAll()).isEmpty())
         return (result);
-    this->log.info(request + " =\n" + result.trimmed());
+    _log.info(request + " =\n" + result.trimmed());
     return (result);
 }

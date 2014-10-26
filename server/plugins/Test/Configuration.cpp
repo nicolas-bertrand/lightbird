@@ -12,9 +12,9 @@ Configuration::~Configuration()
 
 unsigned int    Configuration::run()
 {
-    LightBird::IConfiguration   &c = this->api.configuration();
+    LightBird::IConfiguration   &c = _api.configuration();
 
-    log.debug("Running the unit tests of the configuration...", "Configuration", "run");
+    _log.debug("Running the unit tests of the configuration...", "Configuration", "run");
     // Builds the test tree
     c.remove("unitTests");
     c.set("unitTests/node1", "node1A1");
@@ -77,9 +77,9 @@ unsigned int    Configuration::run()
     }
     catch (unsigned int line)
     {
-        this->log.debug("Unit tests of the configuration failed!", Properties("line", line).toMap(), "Configuration", "run");
+        _log.debug("Unit tests of the configuration failed!", Properties("line", line).toMap(), "Configuration", "run");
         return (line);
     }
-    this->log.debug("Unit tests of the configuration successful!", "Configuration", "run");
+    _log.debug("Unit tests of the configuration successful!", "Configuration", "run");
     return (0);
 }

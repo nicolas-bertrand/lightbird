@@ -32,9 +32,9 @@ public:
     void    event(const QString &event, const QVariant &property = QVariant());
 
 private:
-    LightBird::IApi *api;
-    QList<QPair<QString, ITest *> > tests;
-    bool shutdown; ///< If true the server is shut down after the tests.
+    LightBird::IApi *_api;
+    QList<QPair<QString, ITest *> > _tests;
+    bool _shutdown; ///< If true the server is shut down after the tests.
 };
 
 #endif // PLUGIN_H

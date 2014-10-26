@@ -9,7 +9,7 @@
 #include "Plugin.h"
 
 Plugin::Plugin()
-    : shutdown(false)
+    : _shutdown(false)
 {
 }
 
@@ -21,27 +21,27 @@ bool    Plugin::onLoad(LightBird::IApi *api)
 {
     LightBird::IConfiguration &configuration = api->configuration(true);
 
-    this->api = api;
-    this->api->events().subscribe(QStringList() << "server_started");
+    _api = api;
+    _api->events().subscribe(QStringList() << "server_started");
     // Loads the tests
     if (configuration.count("configuration"))
-        this->tests << QPair<QString, ITest *>("Configuration", new Configuration(*this->api));
+        _tests << QPair<QString, ITest *>("Configuration", new Configuration(*_api));
     if (configuration.count("database"))
-        this->tests << QPair<QString, ITest *>("Database", new Database(*this->api));
+        _tests << QPair<QString, ITest *>("Database", new Database(*_api));
     if (configuration.count("ftp"))
-        this->tests << QPair<QString, ITest *>("Ftp", new Ftp(*this->api));
+        _tests << QPair<QString, ITest *>("Ftp", new Ftp(*_api));
     if (configuration.count("library"))
-        this->tests << QPair<QString, ITest *>("Library", new Library(*this->api));
+        _tests << QPair<QString, ITest *>("Library", new Library(*_api));
     if (configuration.count("network"))
-        this->tests << QPair<QString, ITest *>("Network", new Network(*this->api));
+        _tests << QPair<QString, ITest *>("Network", new Network(*_api));
     if (configuration.get("shutdown") == "true")
-        this->shutdown = true;
+        _shutdown = true;
     return (true);
 }
 
 void    Plugin::onUnload()
 {
-    QListIterator<QPair<QString, ITest *> > test(this->tests);
+    QListIterator<QPair<QString, ITest *> > test(_tests);
 
     while (test.hasNext())
         delete test.next().second;
@@ -49,13 +49,13 @@ void    Plugin::onUnload()
 
 bool    Plugin::onInstall(LightBird::IApi *api)
 {
-    this->api = api;
+    _api = api;
     return (true);
 }
 
 void    Plugin::onUninstall(LightBird::IApi *api)
 {
-    this->api = api;
+    _api = api;
 }
 
 void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
@@ -73,19 +73,20 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 void    Plugin::event(const QString &, const QVariant &)
 {
     unsigned int    line = 0;
-    QListIterator<QPair<QString, ITest *> > test(this->tests);
+    QListIterator<QPair<QString, ITest *> > test(_tests);
 
-    LOG_INFO("Running the tests of the server...", "Plugin", "event");
+    _api->log().info("Running the tests of the server...", "Plugin", "event");
     // Runs the tests
     while (test.hasNext() && !line)
         line = test.next().second->run();
     if (!line)
-        this->api->log().info("All the tests were successful!", "Plugin", "event");
+        _api->log().info("All the tests were successful!", "Plugin", "event");
     else
-        LOG_ERROR("At least one test failed!", Properties("class", test.peekPrevious().first).add("line", line).toMap(), "Plugin", "event");
-    if (this->shutdown)
+        _api->log().error("At least one test failed!", Properties("class", test.peekPrevious().first).add("line", line).toMap(), "Plugin", "event");
+    if (_shutdown)
     {
-        this->api->log().info("Shutting down the server", "Plugin", "event");
-        this->api->stop();
+        ::exit(42);
+        _api->log().info("Shutting down the server", "Plugin", "event");
+        _api->stop();
     }
 }

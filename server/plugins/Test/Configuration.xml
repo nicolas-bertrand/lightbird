@@ -8,4 +8,5 @@
     </ftp>
     <library />
     <network />
+    <shutdown>true</shutdown>
 </configuration>

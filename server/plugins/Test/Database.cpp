@@ -16,26 +16,26 @@ Database::~Database()
 
 unsigned int    Database::run()
 {
-    log.debug("Running the unit tests of the database...", "Database", "run");
+    _log.debug("Running the unit tests of the database...", "Database", "run");
     try
     {
-        this->_accounts();
-        this->_collections();
-        this->_directories();
-        this->_events();
-        this->_files();
-        this->_groups();
-        this->_limits();
-        this->_permissions();
-        this->_sessions();
-        this->_tags();
+        _accounts();
+        _collections();
+        _directories();
+        _events();
+        _files();
+        _groups();
+        _limits();
+        _permissions();
+        _sessions();
+        _tags();
     }
     catch (unsigned int line)
     {
-        this->log.debug("Unit tests of the database failed!", Properties("line", line).toMap(), "Database", "run");
+        _log.debug("Unit tests of the database failed!", Properties("line", line).toMap(), "Database", "run");
         return (line);
     }
-    this->log.debug("Unit tests of the database successful!", "Database", "run");
+    _log.debug("Unit tests of the database successful!", "Database", "run");
     return (0);
 }
 
@@ -44,15 +44,15 @@ void            Database::_accounts()
     LightBird::TableAccounts a1;
     LightBird::TableAccounts a2;
     LightBird::TableGroups g;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QString     id1;
     QString     id2;
 
-    this->log.trace("Running unit tests of the accounts...", "Database", "_accounts");
+    _log.trace("Running unit tests of the accounts...", "Database", "_accounts");
     query.prepare("DELETE FROM accounts WHERE name=\"a1\" OR name=\"a2\" OR name=\"a3\"");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM groups WHERE name=\"g1\" OR name=\"g2\" OR name=\"g3\"");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(a1.add("a1", "p1", true, true));
@@ -151,10 +151,10 @@ void            Database::_accounts()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the accounts failed!", Properties("line", line).toMap(), "Database", "_accounts");
+        _log.trace("Unit tests of the accounts failed!", Properties("line", line).toMap(), "Database", "_accounts");
         throw line;
     }
-    this->log.trace("Unit tests of the accounts successful!", "Database", "_accounts");
+    _log.trace("Unit tests of the accounts successful!", "Database", "_accounts");
 }
 
 void            Database::_collections()
@@ -164,20 +164,20 @@ void            Database::_collections()
     LightBird::TableAccounts a;
     LightBird::TableFiles f;
     LightBird::TablePermissions p;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QStringList l;
 
-    this->log.trace("Running unit tests of the collections...", "Database", "_collections");
+    _log.trace("Running unit tests of the collections...", "Database", "_collections");
     query.prepare("DELETE FROM collections WHERE name IN('videos', 'pictures', 'images', 'egypte', 'spiders')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM files WHERE name IN('toto.xml', 'titi.xml')");
-    this->database.query(query);
-    this->api.configuration().set("permissions/activate", "true");
-    this->api.configuration().set("permissions/default", "false");
-    this->api.configuration().set("permissions/inheritance", "true");
-    this->api.configuration().set("permissions/ownerInheritance", "true");
+    _database.query(query);
+    _api.configuration().set("permissions/activate", "true");
+    _api.configuration().set("permissions/default", "false");
+    _api.configuration().set("permissions/inheritance", "true");
+    _api.configuration().set("permissions/ownerInheritance", "true");
     try
     {
         ASSERT(c1.add("videos"));
@@ -252,10 +252,10 @@ void            Database::_collections()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the collections failed!", Properties("line", line).toMap(), "Database", "_collections");
+        _log.trace("Unit tests of the collections failed!", Properties("line", line).toMap(), "Database", "_collections");
         throw line;
     }
-    this->log.trace("Unit tests of the collections successful!", "Database", "_collections");
+    _log.trace("Unit tests of the collections successful!", "Database", "_collections");
 }
 
 void            Database::_directories()
@@ -265,22 +265,22 @@ void            Database::_directories()
     LightBird::TableFiles f;
     LightBird::TableAccounts a;
     LightBird::TablePermissions p;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QStringList l;
     QStringList m;
     QString     d;
 
-    this->log.trace("Running unit tests of the directories...", "Database", "_directories");
+    _log.trace("Running unit tests of the directories...", "Database", "_directories");
     query.prepare("DELETE FROM directories WHERE name IN('videos', 'images..', '...', 'pictures', 'images', 'egypte', 'spiders', 'pictures')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM files WHERE name IN('toto.png', 'titi.png', 'file.png')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
-    this->database.query(query);
-    this->api.configuration().set("permissions/activate", "true");
-    this->api.configuration().set("permissions/default", "false");
-    this->api.configuration().set("permissions/inheritance", "true");
-    this->api.configuration().set("permissions/ownerInheritance", "true");
+    _database.query(query);
+    _api.configuration().set("permissions/activate", "true");
+    _api.configuration().set("permissions/default", "false");
+    _api.configuration().set("permissions/inheritance", "true");
+    _api.configuration().set("permissions/ownerInheritance", "true");
     try
     {
         ASSERT(d1.add("videos"));
@@ -401,10 +401,10 @@ void            Database::_directories()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the directories failed!", Properties("line", line).toMap(), "Database", "_directories");
+        _log.trace("Unit tests of the directories failed!", Properties("line", line).toMap(), "Database", "_directories");
         throw line;
     }
-    this->log.trace("Unit tests of the directories successful!", "Database", "_directories");
+    _log.trace("Unit tests of the directories successful!", "Database", "_directories");
 }
 
 void            Database::_events()
@@ -412,12 +412,12 @@ void            Database::_events()
     LightBird::TableEvents e1;
     LightBird::TableEvents e2;
     QVariantMap informations;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QStringList events;
 
-    this->log.trace("Running unit tests of the events...", "Database", "_events");
+    _log.trace("Running unit tests of the events...", "Database", "_events");
     query.prepare("DELETE FROM events WHERE name=\"e1\"");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(e1.getId().isEmpty());
@@ -463,10 +463,10 @@ void            Database::_events()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the events failed!", Properties("line", line).toMap(), "Database", "_events");
+        _log.trace("Unit tests of the events failed!", Properties("line", line).toMap(), "Database", "_events");
         throw line;
     }
-    this->log.trace("Unit tests of the events successful!", "Database", "_events");
+    _log.trace("Unit tests of the events successful!", "Database", "_events");
 }
 
 void            Database::_files()
@@ -475,15 +475,15 @@ void            Database::_files()
     LightBird::TableFiles f2;
     LightBird::TableDirectories d1;
     LightBird::TableAccounts a1;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
 
-    this->log.trace("Running unit tests of the files...", "Database", "_files");
+    _log.trace("Running unit tests of the files...", "Database", "_files");
     query.prepare("DELETE FROM files WHERE name IN('f1', 'f2', 'f3')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM directories WHERE name=\"d1\"");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM accounts WHERE name=\"a1\"");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(d1.add("d1"));
@@ -564,10 +564,10 @@ void            Database::_files()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the files failed!", Properties("line", line).toMap(), "Database", "_files");
+        _log.trace("Unit tests of the files failed!", Properties("line", line).toMap(), "Database", "_files");
         throw line;
     }
-    this->log.trace("Unit tests of the files successful!", "Database", "_files");
+    _log.trace("Unit tests of the files successful!", "Database", "_files");
 }
 
 void            Database::_groups()
@@ -575,15 +575,15 @@ void            Database::_groups()
     LightBird::TableGroups g1;
     LightBird::TableGroups g2;
     LightBird::TableAccounts a;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QString     id1;
     QString     id2;
 
-    this->log.trace("Running unit tests of the groups...", "Database", "_groups");
+    _log.trace("Running unit tests of the groups...", "Database", "_groups");
     query.prepare("DELETE FROM groups WHERE name=\"b1\" OR name=\"b2\" OR name=\"b3\"");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM accounts WHERE name=\"a1\" OR name=\"a2\" OR name=\"a3\"");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(g1.add("b1"));
@@ -648,10 +648,10 @@ void            Database::_groups()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the groups failed!", Properties("line", line).toMap(), "Database", "_groups");
+        _log.trace("Unit tests of the groups failed!", Properties("line", line).toMap(), "Database", "_groups");
         throw line;
     }
-    this->log.trace("Unit tests of the groups successful!", "Database", "_groups");
+    _log.trace("Unit tests of the groups successful!", "Database", "_groups");
 }
 
 void            Database::_limits()
@@ -660,15 +660,15 @@ void            Database::_limits()
     LightBird::TableGroups g1;
     LightBird::TableGroups g2;
     LightBird::TableDirectories d1;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
 
-    this->log.trace("Running unit tests of the limits...", "Database", "_limits");
+    _log.trace("Running unit tests of the limits...", "Database", "_limits");
     query.prepare("DELETE FROM limits WHERE name IN('l1', 'l2')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM groups WHERE name IN('g1', 'g2')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM directories WHERE name IN('d1')");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(g1.add("g1"));
@@ -705,10 +705,10 @@ void            Database::_limits()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the limits failed!", Properties("line", line).toMap(), "Database", "_limits");
+        _log.trace("Unit tests of the limits failed!", Properties("line", line).toMap(), "Database", "_limits");
         throw line;
     }
-    this->log.trace("Unit tests of the limits successful!", "Database", "_limits");
+    _log.trace("Unit tests of the limits successful!", "Database", "_limits");
 }
 
 void            Database::_permissions()
@@ -721,26 +721,26 @@ void            Database::_permissions()
     LightBird::TableDirectories d2;
     LightBird::TableCollections c;
     LightBird::TableFiles f;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QString     id;
     QString     id_object;
     QStringList allowed;
     QStringList denied;
 
-    this->log.trace("Running unit tests of the permissions...", "Database", "_permissions");
+    _log.trace("Running unit tests of the permissions...", "Database", "_permissions");
     query.prepare("DELETE FROM directories WHERE name IN('d', 'Directory1', 'Directory6', 'Directory7')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM accounts WHERE name IN('a')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM groups WHERE name IN('g1', 'g2')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM permissions WHERE id_accessor='' AND id_object=''");
-    this->database.query(query);
-    this->api.configuration().set("permissions/activate", "true");
-    this->api.configuration().set("permissions/default", "false");
-    this->api.configuration().set("permissions/inheritance", "true");
-    this->api.configuration().set("permissions/ownerInheritance", "true");
-    this->api.configuration().set("permissions/groupInheritance", "true");
+    _database.query(query);
+    _api.configuration().set("permissions/activate", "true");
+    _api.configuration().set("permissions/default", "false");
+    _api.configuration().set("permissions/inheritance", "true");
+    _api.configuration().set("permissions/ownerInheritance", "true");
+    _api.configuration().set("permissions/groupInheritance", "true");
     try
     {
         ASSERT(d1.add("d"));
@@ -850,14 +850,14 @@ void            Database::_permissions()
         ASSERT(p.add(id, c.getId(), "read"));
         ASSERT(p.getRights(id, c.getId(), allowed, denied) && allowed.contains("") && denied.isEmpty());
         // Advanced tests on permissions
-        this->api.configuration().set("permissions/activate", "false");
+        _api.configuration().set("permissions/activate", "false");
         ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2"), "read"));
         ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory3"), "read"));
         ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File1"), "read"));
         ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/Directory3/File2"), "read"));
         ASSERT(p.isAllowed(id, d1.getIdFromVirtualPath("Directory1/Directory2/Directory4"), "modify"));
         ASSERT(p.isAllowed(id, f.getIdFromVirtualPath("Directory1/Directory2/File4"), "delete"));
-        this->api.configuration().set("permissions/activate", "true");
+        _api.configuration().set("permissions/activate", "true");
         ASSERT(f.setIdFromVirtualPath("Directory1/Directory2/Directory3/File2"));
         ASSERT(!f.isAllowed(a.getId(), "read"));
         ASSERT(f.setIdAccount(a.getId()));
@@ -867,16 +867,16 @@ void            Database::_permissions()
         ASSERT(d1.setIdFromVirtualPath("Directory1/Directory2/Directory3"));
         ASSERT(d1.setIdAccount(a.getId()));
         ASSERT(f.isAllowed(a.getId(), "read"));
-        this->api.configuration().set("permissions/ownerInheritance", "false");
+        _api.configuration().set("permissions/ownerInheritance", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
-        this->api.configuration().set("permissions/ownerInheritance", "true");
+        _api.configuration().set("permissions/ownerInheritance", "true");
         ASSERT(d1.setIdAccount());
         ASSERT(f.setIdFromVirtualPath("Directory1/Directory2/File4"));
         ASSERT(d2.setIdFromVirtualPath("Directory1/Directory2/Directory4"));
         ASSERT(d1.setIdFromVirtualPath("Directory1/Directory2"));
         ASSERT(f.isAllowed(a.getId(), "read"));
         ASSERT(d2.isAllowed(a.getId(), "read"));
-        this->api.configuration().set("permissions/inheritance", "false");
+        _api.configuration().set("permissions/inheritance", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
         ASSERT(!d2.isAllowed(a.getId(), "read"));
         ASSERT(d1.isAllowed(a.getId(), "read"));
@@ -884,7 +884,7 @@ void            Database::_permissions()
         ASSERT(d2.setIdFromVirtualPath("Directory6"));
         ASSERT(!d1.isAllowed(a.getId(), "read"));
         ASSERT(d2.isAllowed(a.getId(), "read"));
-        this->api.configuration().set("permissions/default", "true");
+        _api.configuration().set("permissions/default", "true");
         ASSERT(d1.isAllowed(a.getId(), "read"));
         ASSERT(d2.isAllowed(a.getId(), "read"));
         ASSERT(p.setId(a.getId(), d2.getId(), "read"));
@@ -892,9 +892,9 @@ void            Database::_permissions()
         ASSERT(!d2.isAllowed(a.getId(), "read"));
         ASSERT(f.setIdFromVirtualPath("Directory7/File9"));
         ASSERT(f.isAllowed(a.getId(), "read"));
-        this->api.configuration().set("permissions/default", "false");
+        _api.configuration().set("permissions/default", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
-        this->api.configuration().set("permissions/inheritance", "true");
+        _api.configuration().set("permissions/inheritance", "true");
         ASSERT(p.add(a.getId(), "", "read", false));
         ASSERT(!d1.isAllowed(a.getId(), "read"));
         ASSERT(p.isGranted(true));
@@ -903,10 +903,10 @@ void            Database::_permissions()
         ASSERT(d1.setIdFromVirtualPath("Directory7/Directory8"));
         ASSERT(p.setId(a.getId(), d1.getId(), "read"));
         ASSERT(p.setRight("modify"));
-        this->api.configuration().set("permissions/inheritance", "false");
+        _api.configuration().set("permissions/inheritance", "false");
         ASSERT(!f.isAllowed(a.getId(), "read"));
         ASSERT(!f.isAllowed(a.getId(), "modify"));
-        this->api.configuration().set("permissions/inheritance", "true");
+        _api.configuration().set("permissions/inheritance", "true");
         ASSERT(f.isAllowed(a.getId(), "read"));
         ASSERT(f.isAllowed(a.getId(), "modify"));
         ASSERT(!f.isAllowed(a.getId(), "delete"));
@@ -998,10 +998,10 @@ void            Database::_permissions()
         ASSERT(f.isAllowed(a.getId(), "modify"));
         ASSERT(a.getRights(f.getId(), allowed, denied));
         ASSERT(allowed.contains("read") && allowed.contains("modify") && allowed.contains("delete") && denied.contains("") && allowed.size() == 3);
-        this->api.configuration().set("permissions/inheritance", "false");
+        _api.configuration().set("permissions/inheritance", "false");
         ASSERT(a.getRights(f.getId(), allowed, denied));
         ASSERT(allowed.contains("read") && denied.contains("") && allowed.size() == 1 && denied.size() == 1);
-        this->api.configuration().set("permissions/inheritance", "true");
+        _api.configuration().set("permissions/inheritance", "true");
         ASSERT(a.isAllowed(f.getId(), "delete"));
         ASSERT(p.add(a.getId(), f.getId(), "", false));
         ASSERT(!a.isAllowed(f.getId(), "delete"));
@@ -1014,7 +1014,7 @@ void            Database::_permissions()
         ASSERT(p.remove(p.getId(a.getId(), f.getId(), "read")));
         ASSERT(p.remove(p.getId(a.getId(), f.getId(), "")));
         ASSERT(p.remove(p.getId("", "", "add")));
-        this->api.configuration().set("permissions/default", "false");
+        _api.configuration().set("permissions/default", "false");
         // Check the permissions on the groups hierarchy
         ASSERT(g2.setIdGroup(""));
         ASSERT(g2.add("g3", g2.getIdFromName("g1").first()));
@@ -1042,9 +1042,9 @@ void            Database::_permissions()
         ASSERT(!g1.isAllowed(f.getId(), "read"));
         ASSERT(g2.setId(g2.getIdFromName("g9").first()));
         ASSERT(!g2.isAllowed(f.getId(), "read"));
-        this->api.configuration().set("permissions/default", "true");
+        _api.configuration().set("permissions/default", "true");
         ASSERT(g2.isAllowed(f.getId(), "read"));
-        this->api.configuration().set("permissions/groupInheritance", "false");
+        _api.configuration().set("permissions/groupInheritance", "false");
         ASSERT(a.isAllowed(f.getId(), "read"));
         ASSERT(g1.isAllowed(f.getId(), "read"));
         ASSERT(d1.remove(d1.getIdFromVirtualPath("Directory1")));
@@ -1056,36 +1056,36 @@ void            Database::_permissions()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the permissions failed!", Properties("line", line).toMap(), "Database", "_permissions");
+        _log.trace("Unit tests of the permissions failed!", Properties("line", line).toMap(), "Database", "_permissions");
         throw line;
     }
-    this->log.trace("Unit tests of the permissions successful!", "Database", "_permissions");
+    _log.trace("Unit tests of the permissions successful!", "Database", "_permissions");
 }
 
 void            Database::_sessions()
 {
     LightBird::TableAccounts a;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
     QString     id1;
     QString     id2;
     QVariantMap i;
     QStringList l;
 
-    this->log.trace("Running unit tests of the sessions...", "Database", "_sessions");
+    _log.trace("Running unit tests of the sessions...", "Database", "_sessions");
     query.prepare("DELETE FROM accounts WHERE name=\"a1\"");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(a.add("a1", "p1"));
         i["key1"] = "value1";
         i["key2"] = 42;
         i["key3"] = "value3";
-        id1 = this->api.sessions().create()->getId();
-        id2 = this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a.getId(), QStringList() << "client1" << "client2", i)->getId();
+        id1 = _api.sessions().create()->getId();
+        id2 = _api.sessions().create(QDateTime::currentDateTime().addSecs(10), a.getId(), QStringList() << "client1" << "client2", i)->getId();
         ASSERT(!id1.isEmpty());
         ASSERT(!id2.isEmpty());
-        LightBird::Session s1(this->api.sessions().getSession(id1));
-        LightBird::Session s2(this->api.sessions().getSession(id2));
+        LightBird::Session s1(_api.sessions().getSession(id1));
+        LightBird::Session s2(_api.sessions().getSession(id2));
         ASSERT(s1->getClients().isEmpty());
         ASSERT(s2->getClients() == (QStringList() << "client1" << "client2"));
         ASSERT(s2->setClient("client3"));
@@ -1128,39 +1128,39 @@ void            Database::_sessions()
         ASSERT(s2->getInformation("key2") == "value4");
         ASSERT(!s1->isExpired());
         ASSERT(!s2->isExpired());
-        ASSERT(this->api.sessions().getSession(s1->getId()).data() == s1.data());
-        ASSERT(this->api.sessions().destroy(s1->getId()));
+        ASSERT(_api.sessions().getSession(s1->getId()).data() == s1.data());
+        ASSERT(_api.sessions().destroy(s1->getId()));
         ASSERT(s1->isExpired());
-        ASSERT(this->api.sessions().getSession(s1->getId()).isNull());
-        s1 = this->api.sessions().create(QDateTime::currentDateTime().addSecs(10), a.getId(), QStringList() << "client1" << "client3", i);
+        ASSERT(_api.sessions().getSession(s1->getId()).isNull());
+        s1 = _api.sessions().create(QDateTime::currentDateTime().addSecs(10), a.getId(), QStringList() << "client1" << "client3", i);
         ASSERT(s1->getInformations().size() == i.size());
         ASSERT(s1->removeInformations());
         ASSERT(s1->getInformations().isEmpty());
         ASSERT(!s1->isExpired());
-        ASSERT((l = this->api.sessions().getSessions()).contains(s1->getId()) && l.contains(s2->getId()));
-        ASSERT((l = this->api.sessions().getSessions(a.getId())).contains(s1->getId()) && l.contains(s2->getId()));
+        ASSERT((l = _api.sessions().getSessions()).contains(s1->getId()) && l.contains(s2->getId()));
+        ASSERT((l = _api.sessions().getSessions(a.getId())).contains(s1->getId()) && l.contains(s2->getId()));
         s1->setAccount();
-        ASSERT((l = this->api.sessions().getSessions(a.getId())).contains(s2->getId()) && !l.contains(s1->getId()));
-        ASSERT((l = this->api.sessions().getSessions("", "client5")).contains(s2->getId()) && !l.contains(s1->getId()));
-        ASSERT((l = this->api.sessions().getSessions("", "client3")).contains(s2->getId()) && l.contains(s1->getId()));
-        ASSERT((l = this->api.sessions().getSessions(a.getId(), "client3")).contains(s2->getId()) && !l.contains(s1->getId()));
-        ASSERT(this->api.sessions().getSessions(a.getId(), "client").isEmpty());
+        ASSERT((l = _api.sessions().getSessions(a.getId())).contains(s2->getId()) && !l.contains(s1->getId()));
+        ASSERT((l = _api.sessions().getSessions("", "client5")).contains(s2->getId()) && !l.contains(s1->getId()));
+        ASSERT((l = _api.sessions().getSessions("", "client3")).contains(s2->getId()) && l.contains(s1->getId()));
+        ASSERT((l = _api.sessions().getSessions(a.getId(), "client3")).contains(s2->getId()) && !l.contains(s1->getId()));
+        ASSERT(_api.sessions().getSessions(a.getId(), "client").isEmpty());
         ASSERT(s2->setExpiration(s1->getExpiration().addSecs(10)));
         ASSERT(!s2->isExpired());
         ASSERT(s2->setExpiration());
         ASSERT(!s2->isExpired());
         ASSERT(s2->setExpiration(QDateTime::currentDateTime().addSecs(-10)));
         ASSERT(s2->isExpired());
-        ASSERT(this->api.sessions().destroy(s1->getId()));
+        ASSERT(_api.sessions().destroy(s1->getId()));
         ASSERT(s1->isExpired());
         ASSERT(a.remove());
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the sessions failed!", Properties("line", line).toMap(), "Database", "_sessions");
+        _log.trace("Unit tests of the sessions failed!", Properties("line", line).toMap(), "Database", "_sessions");
         throw line;
     }
-    this->log.trace("Unit tests of the sessions successful!", "Database", "_sessions");
+    _log.trace("Unit tests of the sessions successful!", "Database", "_sessions");
 }
 
 void            Database::_tags()
@@ -1168,13 +1168,13 @@ void            Database::_tags()
     LightBird::TableTags t;
     LightBird::TableDirectories d1;
     LightBird::TableDirectories d2;
-    QSqlQuery   query(this->database.getDatabase());
+    QSqlQuery   query(_database.getDatabase());
 
-    this->log.trace("Running unit tests of the tags...", "Database", "_tags");
+    _log.trace("Running unit tests of the tags...", "Database", "_tags");
     query.prepare("DELETE FROM tags WHERE name IN('t1', 't2')");
-    this->database.query(query);
+    _database.query(query);
     query.prepare("DELETE FROM directories WHERE name IN('d1', 'd2')");
-    this->database.query(query);
+    _database.query(query);
     try
     {
         ASSERT(d1.add("d1"));
@@ -1195,8 +1195,8 @@ void            Database::_tags()
     }
     catch (unsigned int line)
     {
-        this->log.trace("Unit tests of the tags failed!", Properties("line", line).toMap(), "Database", "_tags");
+        _log.trace("Unit tests of the tags failed!", Properties("line", line).toMap(), "Database", "_tags");
         throw line;
     }
-    this->log.trace("Unit tests of the tags successful!", "Database", "_tags");
+    _log.trace("Unit tests of the tags successful!", "Database", "_tags");
 }

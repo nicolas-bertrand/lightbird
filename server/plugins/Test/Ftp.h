@@ -36,7 +36,7 @@ private:
     void    _data();
     QString _print(QTcpSocket &s, const QString &write);
 
-    unsigned short  port;
+    unsigned short _port;
 };
 
 #endif // FTP_H

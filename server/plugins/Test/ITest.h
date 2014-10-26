@@ -7,7 +7,7 @@
 class   ITest
 {
 public:
-    ITest(LightBird::IApi &a) : api(a), database(api.database()), log(api.log()) {}
+    ITest(LightBird::IApi &a) : _api(a), _database(a.database()), _log(a.log()) {}
     virtual ~ITest() { }
 
     /// @brief Runs the tests.
@@ -18,9 +18,9 @@ protected:
     ITest(const ITest &);
     ITest &operator=(const ITest &);
 
-    LightBird::IApi      &api;
-    LightBird::IDatabase &database;
-    LightBird::ILogs     &log;
+    LightBird::IApi      &_api;
+    LightBird::IDatabase &_database;
+    LightBird::ILogs     &_log;
 };
 
 // Throws an exception if the assertion is false

@@ -13,7 +13,7 @@ Library::~Library()
 
 unsigned int    Library::run()
 {
-    log.debug("Running the tests of the library...", "Library", "run");
+    _log.debug("Running the tests of the library...", "Library", "run");
     try
     {
         ASSERT(LightBird::getFileMime("avi") == "video/avi");
@@ -61,9 +61,9 @@ unsigned int    Library::run()
     }
     catch (unsigned int line)
     {
-        this->log.debug("Tests of the library failed!", Properties("line", line).toMap(), "Library", "run");
+        _log.debug("Tests of the library failed!", Properties("line", line).toMap(), "Library", "run");
         return (line);
     }
-    this->log.debug("Tests of the library successful!", "Library", "run");
+    _log.debug("Tests of the library successful!", "Library", "run");
     return (0);
 }
