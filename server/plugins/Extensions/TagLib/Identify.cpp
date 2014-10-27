@@ -38,7 +38,7 @@ bool    Identify::identify(const QString &fileName, LightBird::IIdentify::Inform
     if (!QFileInfo(fileName).isFile())
         return (false);
     information.data.clear();
-    information.type = LightBird::IIdentify::OTHER;
+    information.type = LightBird::IIdentify::AUDIO;
     // Gets The meta data of the file
     TagLib::FileRef file(fileName.toLatin1().data());
     if (!file.isNull())
