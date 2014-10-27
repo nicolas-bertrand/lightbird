@@ -10,18 +10,18 @@
 #include "LightBird.h"
 #include "Preview.h"
 
-Preview::Preview()
+LightBird::Preview::Preview()
 {
     this->cacheEnabled = LightBird::c().preview.cacheEnabled;
     this->cachePath = LightBird::c().preview.cachePath;
     this->cacheSizeLimit = LightBird::c().preview.cacheSizeLimit;
 }
 
-Preview::~Preview()
+LightBird::Preview::~Preview()
 {
 }
 
-QString Preview::generate(const QString &fileId, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int position, float quality)
+QString LightBird::Preview::generate(const QString &fileId, LightBird::IImage::Format format, unsigned int width, unsigned int height, unsigned int position, float quality)
 {
     QList<void *>   extensions;
     Parameters      params;
@@ -78,7 +78,7 @@ QString Preview::generate(const QString &fileId, LightBird::IImage::Format forma
     return (params.previewFileName);
 }
 
-void    Preview::_size(Parameters &params)
+void    LightBird::Preview::_size(Parameters &params)
 {
     if (!params.width && !params.height)
     {
@@ -91,7 +91,7 @@ void    Preview::_size(Parameters &params)
         params.height = 768;
 }
 
-bool    Preview::_useCache(Parameters &params)
+bool    LightBird::Preview::_useCache(Parameters &params)
 {
     QFileInfo   info;
 
@@ -113,7 +113,7 @@ bool    Preview::_useCache(Parameters &params)
     return (false);
 }
 
-bool    Preview::_move(Parameters &params)
+bool    LightBird::Preview::_move(Parameters &params)
 {
     // Makes sure that the cache directory exists
     if (!QFileInfo(this->cachePath).isDir() && !QDir().mkpath(this->cachePath))
@@ -137,7 +137,7 @@ bool    Preview::_move(Parameters &params)
     return (true);
 }
 
-void    Preview::_cache()
+void    LightBird::Preview::_cache()
 {
     QDir    dir(this->cachePath);
     double  size = 0;

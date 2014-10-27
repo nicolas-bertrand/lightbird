@@ -7,7 +7,7 @@
 #include "Library.h"
 #include "FilesExtensions.h"
 
-FilesExtensions::FilesExtensions()
+LightBird::FilesExtensions::FilesExtensions()
     : _defaultMime("application/octet-stream")
 {
     QFile file(LightBird::Configuration::get().filesExtensionsPath);
@@ -45,11 +45,11 @@ FilesExtensions::FilesExtensions()
     }
 }
 
-FilesExtensions::~FilesExtensions()
+LightBird::FilesExtensions::~FilesExtensions()
 {
 }
 
-LightBird::IIdentify::Type FilesExtensions::getFileType(const QString &fileName)
+LightBird::IIdentify::Type LightBird::FilesExtensions::getFileType(const QString &fileName)
 {
     int index;
     Data defaultValue;
@@ -61,7 +61,7 @@ LightBird::IIdentify::Type FilesExtensions::getFileType(const QString &fileName)
         return _extensions.value(fileName.toLower(), defaultValue).type;
 }
 
-QString FilesExtensions::getFileMime(const QString &fileName)
+QString LightBird::FilesExtensions::getFileMime(const QString &fileName)
 {
     int index;
     Data defaultValue;

@@ -17,9 +17,9 @@ Library *Library::getInstance()
 
 void Library::initialize()
 {
-    Library::getInstance()->_identify = new Identify();
-    Library::getInstance()->_preview = new Preview();
-    Library::getInstance()->_filesExtensions = new FilesExtensions();
+    Library::getInstance()->_identify = new LightBird::Identify();
+    Library::getInstance()->_preview = new LightBird::Preview();
+    Library::getInstance()->_filesExtensions = new LightBird::FilesExtensions();
 }
 
 void Library::shutdown()
@@ -104,17 +104,17 @@ ILogs   &Library::log()
     return (*Library::_instance->_log);
 }
 
-Identify *Library::getIdentify()
+LightBird::Identify *Library::getIdentify()
 {
     return (Library::_instance->_identify);
 }
 
-Preview *Library::getPreview()
+LightBird::Preview *Library::getPreview()
 {
     return (Library::_instance->_preview);
 }
 
-FilesExtensions *Library::getFilesExtensions()
+LightBird::FilesExtensions *Library::getFilesExtensions()
 {
     return (Library::_instance->_filesExtensions);
 }

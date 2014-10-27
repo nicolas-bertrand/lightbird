@@ -11,13 +11,12 @@
 
 # include "Export.h"
 
-class Identify;
-class Preview;
-class FilesExtensions;
-
 namespace LightBird
 {
     class Configuration;
+    class FilesExtensions;
+    class Identify;
+    class Preview;
 
     /// @brief Allows the library to access some parts of the Api, and to
     /// allocate various objects.
@@ -31,9 +30,9 @@ namespace LightBird
         static IExtensions     &extension();
         static ILogs           &log();
         // Other
-        static Identify        *getIdentify();
-        static Preview         *getPreview();
-        static FilesExtensions *getFilesExtensions();
+        static LightBird::Identify *getIdentify();
+        static LightBird::Preview *getPreview();
+        static LightBird::FilesExtensions *getFilesExtensions();
         static QHash<LightBird::IImage::Format, QString> &getImageExtensions();
 
         // These methods must only be used by the server
@@ -60,9 +59,9 @@ namespace LightBird
         ILogs           *_log;
         // Other
         Configuration   *_c;
-        Identify        *_identify;
-        Preview         *_preview;
-        FilesExtensions *_filesExtensions;
+        LightBird::Identify *_identify;
+        LightBird::Preview *_preview;
+        LightBird::FilesExtensions *_filesExtensions;
         QHash<LightBird::IImage::Format, QString> _imageExtensions;
     };
 }

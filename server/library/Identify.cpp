@@ -6,7 +6,7 @@
 #include "Library.h"
 #include "LightBird.h"
 
-Identify::Identify()
+LightBird::Identify::Identify()
     : identifyThread(NULL)
     , hashThread(NULL)
 {
@@ -19,7 +19,7 @@ Identify::Identify()
     this->maxSizeHash = LightBird::c().hashSizeLimit;
 }
 
-Identify::~Identify()
+LightBird::Identify::~Identify()
 {
     Thread  *identifyThread;
     Thread  *hashThread;
@@ -41,7 +41,7 @@ Identify::~Identify()
     this->mutex.unlock();
 }
 
-void    Identify::identify(const QString &fileId)
+void    LightBird::Identify::identify(const QString &fileId)
 {
     // Identifies the file via a thread
     this->mutex.lock();
@@ -51,7 +51,7 @@ void    Identify::identify(const QString &fileId)
         this->identifyThread = new Thread();
         this->identifyThread->files << fileId;
         this->identifyThread->thread = &this->identifyThread;
-        this->identifyThread->method = &Identify::_identifyThread;
+        this->identifyThread->method = &LightBird::Identify::_identifyThread;
         this->identifyThread->moveToThread(this->identifyThread);
         QObject::connect(this->identifyThread, SIGNAL(finished()), this, SLOT(finished()));
         this->identifyThread->start();
@@ -74,21 +74,21 @@ void    Identify::identify(const QString &fileId)
     this->mutex.unlock();
 }
 
-void    Identify::identify(const QString &filePath, LightBird::IIdentify::Information &information)
+void    LightBird::Identify::identify(const QString &filePath, LightBird::IIdentify::Information &information)
 {
     // Identifies the file directly
     information = this->_identify(filePath, filePath, true);
 }
 
-void    Identify::finished()
+void    LightBird::Identify::finished()
 {
-    Identify::Thread    *thread;
+    Identify::Thread *thread;
 
     if ((thread = dynamic_cast<Identify::Thread *>(this->sender())))
         delete thread;
 }
 
-void    Identify::Thread::run()
+void    LightBird::Identify::Thread::run()
 {
     Identify              *instance = LightBird::Library::getIdentify();
     QStringList           files;
@@ -125,18 +125,18 @@ void    Identify::Thread::run()
     }
 }
 
-void    Identify::_identifyThread(LightBird::TableFiles &file, Identify::Info &information)
+void    LightBird::Identify::_identifyThread(LightBird::TableFiles &file, LightBird::Identify::Info &information)
 {
     information = this->_identify(file.getFullPath(), file.getName(), false);
     file.setType(this->typeString.value(information.type));
 }
 
-void    Identify::_hashThread(LightBird::TableFiles &file, Identify::Info &information)
+void    LightBird::Identify::_hashThread(LightBird::TableFiles &file, LightBird::Identify::Info &information)
 {
     this->_hash(file.getFullPath(), information);
 }
 
-Identify::Info  Identify::_identify(const QString &file, const QString &fileName, bool computeHash)
+LightBird::Identify::Info  LightBird::Identify::_identify(const QString &file, const QString &fileName, bool computeHash)
 {
     Info            result;
     Info            tmp;
@@ -189,17 +189,17 @@ Identify::Info  Identify::_identify(const QString &file, const QString &fileName
     if (computeHash)
         this->_hash(file, result);
     // Debug
-    /**this->api.log().debug("Type: " + QString::number(result.type));
+    /**Library::log().debug("Type: " + QString::number(result.type));
     QMapIterator<QString, QVariant> i(result.data);
     while (i.hasNext())
     {
         i.next();
-        this->api.log().debug(i.key() + QString(17 - i.key().size(), ' ') + "=  " + i.value().toString());
+        Library::log().debug(i.key() + QString(17 - i.key().size(), ' ') + "=  " + i.value().toString());
     }//*/
     return (result);
 }
 
-void    Identify::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
+void    LightBird::Identify::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
 {
     if (this->_add(LightBird::IIdentify::DOCUMENT, info, result))
         return ;
@@ -211,7 +211,7 @@ void    Identify::_identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, 
         return ;
 }
 
-bool    Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
+bool    LightBird::Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result)
 {
     int oldSize = result.data.size();
 
@@ -234,7 +234,7 @@ bool    Identify::_add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentif
     return (false);
 }
 
-void        Identify::_document(Info &result, const QString &mime)
+void        LightBird::Identify::_document(Info &result, const QString &mime)
 {
     QStringListIterator it(this->mimeDocument);
     while (it.hasNext())
@@ -245,7 +245,7 @@ void        Identify::_document(Info &result, const QString &mime)
         }
 }
 
-void    Identify::_hash(const QString &fileName, Info &result)
+void    LightBird::Identify::_hash(const QString &fileName, Info &result)
 {
     QCryptographicHash  md5(QCryptographicHash::Md5);
     QCryptographicHash  sha1(QCryptographicHash::Sha1);

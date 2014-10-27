@@ -1,34 +1,37 @@
-#ifndef FILES_EXTENSIONS_H
-# define FILES_EXTENSIONS_H
+#ifndef LIGHTBIRD_FILESEXTENSIONS_H
+# define LIGHTBIRD_FILESEXTENSIONS_H
 
 # include <QVariantMap>
 
 # include "IIdentify.h"
 
-/// @brief Allows to get the type and the MIME of a file based on its extension.
-class FilesExtensions
+namespace LightBird
 {
-public:
-    FilesExtensions();
-    ~FilesExtensions();
-
-    /// @brief Returns the type of the file based on its extension.
-    /// @param fileName : The name of the file or just its extension.
-    LightBird::IIdentify::Type getFileType(const QString &fileName);
-    /// @brief Returns the MIME of the file based on its extension.
-    /// The default MIME type is "application/octet-stream".
-    /// @param fileName : The name of the file or just its extension.
-    QString getFileMime(const QString &fileName);
-
-private:
-    struct Data
+    /// @brief Allows to get the type and the MIME of a file based on its extension.
+    class FilesExtensions
     {
-        LightBird::IIdentify::Type type;
-        QString mime;
+    public:
+        FilesExtensions();
+        ~FilesExtensions();
+
+        /// @brief Returns the type of the file based on its extension.
+        /// @param fileName : The name of the file or just its extension.
+        LightBird::IIdentify::Type getFileType(const QString &fileName);
+        /// @brief Returns the MIME of the file based on its extension.
+        /// The default MIME type is "application/octet-stream".
+        /// @param fileName : The name of the file or just its extension.
+        QString getFileMime(const QString &fileName);
+
+    private:
+        struct Data
+        {
+            LightBird::IIdentify::Type type;
+            QString mime;
+        };
+
+        QMap<QString, Data> _extensions;
+        QString _defaultMime;
     };
+}
 
-    QMap<QString, Data> _extensions;
-    QString _defaultMime;
-};
-
-#endif // FILES_EXTENSIONS_H
+#endif // LIGHTBIRD_FILESEXTENSIONS_H
