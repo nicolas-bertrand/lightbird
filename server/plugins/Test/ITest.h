@@ -25,8 +25,11 @@ protected:
 
 // Throws an exception if the assertion is false
 # define ASSERT(a)\
+{\
 if (!(a))\
     throw ((unsigned int)__LINE__);\
-else (void)0
+else (void)0;\
+}\
+(void)0\
 
 #endif // ITEST_H

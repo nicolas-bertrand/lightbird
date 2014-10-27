@@ -72,6 +72,11 @@ void    Plugin::getMetadata(LightBird::IMetadata &metadata) const
 
 void    Plugin::event(const QString &, const QVariant &)
 {
+    this->start();
+}
+
+void    Plugin::run()
+{
     unsigned int    line = 0;
     QListIterator<QPair<QString, ITest *> > test(_tests);
 
@@ -89,4 +94,9 @@ void    Plugin::event(const QString &, const QVariant &)
         _api->log().info("Shutting down the server", "Plugin", "event");
         _api->stop();
     }
+}
+
+void    Plugin::execute()
+{
+    dynamic_cast<Plugin *>(QThread::currentThread())->exec();
 }

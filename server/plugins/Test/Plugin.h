@@ -1,14 +1,14 @@
 #ifndef PLUGIN_H
 # define PLUGIN_H
 
-# include <QObject>
+# include <QThread>
 
 # include "IEvent.h"
 # include "IPlugin.h"
 # include "ITest.h"
 
 class Plugin
-    : public QObject
+    : public QThread
     , public LightBird::IPlugin
     , public LightBird::IEvent
 {
@@ -30,6 +30,10 @@ public:
 
     // LightBird::IEvent
     void    event(const QString &event, const QVariant &property = QVariant());
+
+    // QThread
+    void    run();
+    static void execute();
 
 private:
     LightBird::IApi *_api;
