@@ -39,4 +39,6 @@ namespace LightBird
     };
 }
 
+Q_DECLARE_INTERFACE(LightBird::IImage, "cc.lightbird.IImage")
+
 #endif // LIGHTBIRD_IIMAGE_H

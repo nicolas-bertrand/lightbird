@@ -66,4 +66,6 @@ namespace LightBird
     };
 }
 
+Q_DECLARE_INTERFACE(LightBird::IAudio, "cc.lightbird.IAudio")
+
 #endif // LIGHTBIRD_IAUDIO_H

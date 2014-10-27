@@ -7,10 +7,16 @@
 # include "Initialize.h"
 
 /// @brief Implements the IImage and IPreview extensions.
-class Image : public LightBird::IImage,
-              public LightBird::IPreview,
-              public LightBird::Initialize
+class Image
+    : public QObject
+    , public LightBird::IImage
+    , public LightBird::IPreview
+    , public LightBird::Initialize
 {
+    Q_OBJECT
+    Q_INTERFACES(LightBird::IImage
+                 LightBird::IPreview)
+
 public:
     Image(LightBird::IApi *api);
     ~Image();

@@ -31,4 +31,6 @@ namespace LightBird
     };
 }
 
+Q_DECLARE_INTERFACE(LightBird::IPreview, "cc.lightbird.IPreview")
+
 #endif // LIGHTBIRD_IPREVIEW_H

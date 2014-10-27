@@ -10,8 +10,13 @@
 # define IO_BUFFER_SIZE 32728 ///< The size of the ioBuffer (see avio_alloc_context).
 
 /// @brief Implements the IAudio extension which allows to transcode audios.
-class Audio : public LightBird::IAudio
+class Audio
+    : public QObject
+    , public LightBird::IAudio
 {
+    Q_OBJECT
+    Q_INTERFACES(LightBird::IAudio)
+
 public:
     Audio(LightBird::IApi *api, QStringList &formats);
     ~Audio();

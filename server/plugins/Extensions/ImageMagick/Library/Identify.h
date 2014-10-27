@@ -9,9 +9,14 @@
 # include "Initialize.h"
 
 /// @brief Implements the IIdentify extension.
-class Identify : public LightBird::IIdentify,
-                 public LightBird::Initialize
+class Identify
+    : public QObject
+    , public LightBird::IIdentify
+    , public LightBird::Initialize
 {
+    Q_OBJECT
+    Q_INTERFACES(LightBird::IIdentify)
+
 public:
     Identify(LightBird::IApi *api);
     ~Identify();

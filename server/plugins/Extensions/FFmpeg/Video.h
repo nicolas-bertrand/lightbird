@@ -11,8 +11,13 @@
 # define BUFFERS_NUMBER 5     ///< The number of buffers to keep in order to allows the seeking.
 
 /// @brief Implements the IVideo extension which allows to transcode videos.
-class Video : public LightBird::IVideo
-{
+class Video
+        : public QObject
+        , public LightBird::IVideo
+    {
+        Q_OBJECT
+        Q_INTERFACES(LightBird::IVideo)
+
 public:
     Video(LightBird::IApi *api, QStringList &formats);
     ~Video();

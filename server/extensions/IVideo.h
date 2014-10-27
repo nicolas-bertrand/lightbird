@@ -85,4 +85,6 @@ namespace LightBird
     };
 }
 
+Q_DECLARE_INTERFACE(LightBird::IVideo, "cc.lightbird.IVideo")
+
 #endif // LIGHTBIRD_IVIDEO_H

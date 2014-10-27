@@ -62,11 +62,11 @@ QStringList Plugin::getExtensionsNames()
 void    *Plugin::getExtension(const QString &name)
 {
     if (name == "IIdentify")
-        return (dynamic_cast<LightBird::IIdentify *>(this->identify));
+        return (qobject_cast<LightBird::IIdentify *>(this->identify));
     else if (name == "IImage")
-        return (dynamic_cast<LightBird::IImage *>(this->image));
+        return (qobject_cast<LightBird::IImage *>(this->image));
     else if (name == "IPreview")
-        return (dynamic_cast<LightBird::IPreview *>(this->image));
+        return (qobject_cast<LightBird::IPreview *>(this->image));
     return (NULL);
 }
 
