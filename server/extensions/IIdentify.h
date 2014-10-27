@@ -46,4 +46,6 @@ namespace LightBird
     };
 }
 
+Q_DECLARE_INTERFACE(LightBird::IIdentify, "cc.lightbird.IIdentify")
+
 #endif // LIGHTBIRD_IIDENTIFY_H

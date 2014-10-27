@@ -25,6 +25,7 @@ isEmpty(X64) {
     CONFIG(debug, debug|release):LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib64D
     CONFIG(release, debug|release):LIBS += -L../../../../server/plugins/Extensions/TagLib -lTagLib64
 }
+# Linux: Build TagLib with -fPIC (cmake -DCMAKE_INSTALL_PREFIX=./build -DCMAKE_BUILD_TYPE=Release -DENABLE_STATIC=ON -DENABLE_STATIC_RUNTIME=ON -DCMAKE_CXX_FLAGS="-fPIC" .)
 
 HEADERS = \
     Identify.h \

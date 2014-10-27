@@ -8,8 +8,13 @@
 # include <fileref.h>
 
 /// @brief Implements the IIdentify extension.
-class Identify : public LightBird::IIdentify
+class Identify
+        : public QObject
+        , public LightBird::IIdentify
 {
+    Q_OBJECT
+    Q_INTERFACES(LightBird::IIdentify)
+
 public:
     Identify(LightBird::IApi *_api);
     ~Identify();

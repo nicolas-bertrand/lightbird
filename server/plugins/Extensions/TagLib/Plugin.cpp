@@ -62,7 +62,7 @@ QStringList Plugin::getExtensionsNames()
 void    *Plugin::getExtension(const QString &name)
 {
     if (name == "IIdentify")
-        return (dynamic_cast<LightBird::IIdentify *>(this->identify));
+        return (qobject_cast<LightBird::IIdentify *>(this->identify));
     else if (name == "IPreview")
         return (dynamic_cast<LightBird::IPreview *>(this->preview));
     return (NULL);
