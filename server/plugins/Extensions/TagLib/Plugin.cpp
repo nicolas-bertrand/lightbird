@@ -64,7 +64,7 @@ void    *Plugin::getExtension(const QString &name)
     if (name == "IIdentify")
         return (qobject_cast<LightBird::IIdentify *>(this->identify));
     else if (name == "IPreview")
-        return (dynamic_cast<LightBird::IPreview *>(this->preview));
+        return (qobject_cast<LightBird::IPreview *>(this->preview));
     return (NULL);
 }
 

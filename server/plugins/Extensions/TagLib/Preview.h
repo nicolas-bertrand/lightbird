@@ -5,8 +5,13 @@
 # include "IPreview.h"
 
 /// @brief Implements the IPreview extension.
-class Preview : public LightBird::IPreview
+class Preview
+    : public QObject
+    , public LightBird::IPreview
 {
+    Q_OBJECT
+    Q_INTERFACES(LightBird::IPreview)
+
 public:
     Preview(LightBird::IApi *api);
     ~Preview();
