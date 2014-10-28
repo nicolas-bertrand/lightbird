@@ -23,6 +23,7 @@ public:
     virtual qint64 size() const = 0;
     virtual qint64 read(char *data, qint64 size) = 0;
     virtual qint64 write(const char *data, qint64 size) = 0;
+    virtual void writeAgain() = 0;
     virtual void close() = 0;
 
 protected:

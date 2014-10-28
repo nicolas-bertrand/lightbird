@@ -22,6 +22,8 @@ namespace LightBird
         /// @brief Writes the data.
         /// @return The number of bytes written, which can be lower than size,
         /// or -1 if an error occured.
+        /// If 0 is returned, this method will be called again later with
+        /// the same parameters.
         virtual qint64 write(const char *data, qint64 size) = 0;
         /// @brief Returns the address of the peer.
         virtual const QHostAddress &peerAddress() const = 0;

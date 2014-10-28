@@ -20,6 +20,8 @@ public:
     virtual qint64 size() const = 0;
     virtual qint64 read(char *data, qint64 size) = 0;
     virtual qint64 write(const char *data, qint64 size) = 0;
+    /// @brief Tells the socket to emit readyWrite whenever it is ready to write data.
+    virtual void writeAgain() = 0;
     virtual void close() = 0;
 
     inline bool isConnected() const { return _connected; }

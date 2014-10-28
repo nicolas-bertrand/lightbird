@@ -23,6 +23,7 @@ public:
     qint64 size() const;
     qint64 read(char *data, qint64 size);
     qint64 write(const char *data, qint64 size);
+    void writeAgain();
     void close();
 
     // Emits signals

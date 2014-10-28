@@ -107,10 +107,12 @@ qint64 SocketTcpWindows::read(char *data, qint64 size)
 
 qint64 SocketTcpWindows::write(const char *data, qint64 size)
 {
-    qint64 result = send(_socket, data, size, 0);
-    if (result == 0)
-        *_events |= POLLWRNORM;
-    return result;
+    return send(_socket, data, size, 0);
+}
+
+void SocketTcpWindows::writeAgain()
+{
+    *_events |= POLLWRNORM;
 }
 
 void SocketTcpWindows::close()

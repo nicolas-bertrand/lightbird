@@ -126,10 +126,12 @@ qint64 SocketUdpWindows::read(char *data, qint64 size)
 
 qint64 SocketUdpWindows::write(const char *data, qint64 size)
 {
-    qint64 result = sendto(_socket, data, size, 0, _peerAddress, _peerAddressSize);
-    if (result == 0)
-        *_events |= POLLWRNORM;
-    return result;
+    return sendto(_socket, data, size, 0, _peerAddress, _peerAddressSize);
+}
+
+void SocketUdpWindows::writeAgain()
+{
+    *_events |= POLLWRNORM;
 }
 
 void SocketUdpWindows::close()

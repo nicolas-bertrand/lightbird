@@ -150,6 +150,7 @@ void PortTcp::write(Client *client, const QByteArray &data)
                     return ;
                 QSharedPointer<WriteBuffer> writeBuffer(new WriteBuffer(client, data, written));
                 _writeBuffers.insert(_getClient(client), writeBuffer);
+                client->getSocket().writeAgain();
                 QObject::connect(&client->getSocket(), SIGNAL(readyWrite()), this, SLOT(_write()), Qt::DirectConnection);
                 mutex.unlock();
                 _write();
@@ -208,6 +209,8 @@ void PortTcp::_write()
                 it.remove();
                 client->bytesWritten();
             }
+            else if (result == 0)
+                client->getSocket().writeAgain();
         }
         else
             it.remove();

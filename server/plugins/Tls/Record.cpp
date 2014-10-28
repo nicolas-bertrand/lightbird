@@ -41,7 +41,10 @@ qint64  Record::doWrite(LightBird::IClient &client, const char *data, qint64 siz
             LOG_WARNING("GnuTLS fatal session error", Properties("id", client.getId()).add("error", gnutls_strerror(result)).toMap(), "Record", "doWrite");
             this->api->network().disconnect(client.getId(), true);
         }
-        return (-1);
+        else if (result == GNUTLS_E_AGAIN || result == GNUTLS_E_INTERRUPTED)
+            return (0);
+        else
+            return (-1);
     }
     return (result);
 }
@@ -64,6 +67,5 @@ ssize_t Record::push(gnutls_transport_ptr_t c, const void *data, size_t size)
 {
     LightBird::IClient  *client = (LightBird::IClient *)c;
 
-    ssize_t result = client->getSocket().write((char *)data, size);
-    return (result);
+    return (client->getSocket().write((char *)data, size));
 }

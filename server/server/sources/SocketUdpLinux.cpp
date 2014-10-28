@@ -132,17 +132,18 @@ qint64 SocketUdpLinux::read(char *data, qint64 size)
 qint64 SocketUdpLinux::write(const char *data, qint64 size)
 {
     qint64 result = sendto(_socket, data, size, 0, _peerAddress, _peerAddressSize);
-    if (result <= 0)
-    {
-        if (result < 0 && errno == EAGAIN)
-            result = 0;
-        if (!(_events->events & EPOLLOUT))
-        {
-            _events->events |= EPOLLOUT;
-            emit setEpollEvents(*_events);
-        }
-    }
+    if (result < 0 && (errno == EAGAIN || errno == EINTR))
+        result = 0;
     return result;
+}
+
+void SocketUdpLinux::writeAgain()
+{
+    if (!(_events->events & EPOLLOUT))
+    {
+        _events->events |= EPOLLOUT;
+        emit setEpollEvents(*_events);
+    }
 }
 
 void SocketUdpLinux::close()
