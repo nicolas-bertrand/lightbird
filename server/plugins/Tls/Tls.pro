@@ -15,7 +15,6 @@ DESTDIR = ../../build/plugins/Tls
 LIBS += \
     -L../../build -lLightBirdLibrary \
     -L../../../server/plugins/Tls/GnuTLS/lib
-win32:LIBS += -lWs2_32 # winsock2 is required on Windows
 
 QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
 X64 = $$find(QT_INSTALL_PREFIX, 64)

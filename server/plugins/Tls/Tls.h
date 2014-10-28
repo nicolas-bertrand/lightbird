@@ -13,12 +13,6 @@
 #include <gnutls/x509.h>
 #include "LightBird.h"
 
-#ifdef Q_OS_WIN
-# include <winsock2.h>
-#else
-# include <sys/socket.h>
-#endif // Q_OS_WIN
-
 // gnutls_session_t needs to be fully defined for Q_DECLARE_METATYPE, but gnutls_session_int is not a public struct,
 // so we declare a fake one (which does not affect the size of gnutls_session_t).
 struct gnutls_session_int { };
