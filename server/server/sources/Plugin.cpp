@@ -311,9 +311,9 @@ bool    Plugin::_loadLibrary()
             else
             {
                 if (!loader->isLoaded())
-                    Log::debug("The plugin could not be loaded", Properties("id", this->id).add("file", this->path + this->libraryName).add("message", loader->errorString()), "Plugin", "_load");
+                    Log::error("The plugin could not be loaded", Properties("id", this->id).add("file", this->path + this->libraryName).add("message", loader->errorString()), "Plugin", "_load");
                 else
-                    Log::debug("The plugin does not implement LightBird::IPlugin", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
+                    Log::error("The plugin does not implement LightBird::IPlugin", Properties("id", this->id).add("file", this->path + this->libraryName), "Plugin", "_load");
                 delete this->loader;
                 this->loader = NULL;
             }
