@@ -32,7 +32,7 @@ win32 {
 linux {
     #cmake -DCMAKE_INSTALL_PREFIX=./build -DCMAKE_BUILD_TYPE=Release -DENABLE_STATIC=ON -DENABLE_STATIC_RUNTIME=ON -DCMAKE_CXX_FLAGS="-fPIC" .
     QMAKE_LFLAGS += -z defs
-    LIBS += -lTagLib
+    LIBS += -lTagLib -lz
 }
 
 HEADERS = \
