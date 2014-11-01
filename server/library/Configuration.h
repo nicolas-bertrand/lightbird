@@ -69,6 +69,7 @@ namespace LightBird
         {
             uint defaultHeight;
             IImage::Format defaultFormat;
+            bool generateAfterIdentify;
             bool cacheEnabled;
             QString cachePath;
             quint64 cacheSizeLimit;

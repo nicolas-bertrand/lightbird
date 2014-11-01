@@ -3,12 +3,14 @@
 #include <QFileInfo>
 
 #include "Identify.h"
+#include "IPreview.h"
 #include "Library.h"
 #include "LightBird.h"
 
 LightBird::Identify::Identify()
     : identifyThread(NULL)
     , hashThread(NULL)
+    , previewThread(NULL)
 {
     this->mimeDocument.push_back("text/");
     this->typeString.insert(LightBird::IIdentify::AUDIO, "audio");
@@ -16,7 +18,6 @@ LightBird::Identify::Identify()
     this->typeString.insert(LightBird::IIdentify::IMAGE, "image");
     this->typeString.insert(LightBird::IIdentify::OTHER, "other");
     this->typeString.insert(LightBird::IIdentify::VIDEO, "video");
-    this->maxSizeHash = LightBird::c().hashSizeLimit;
 }
 
 LightBird::Identify::~Identify()
@@ -44,34 +45,8 @@ LightBird::Identify::~Identify()
 void    LightBird::Identify::identify(const QString &fileId)
 {
     // Identifies the file via a thread
-    this->mutex.lock();
-    // Starts the identification thread
-    if (!this->identifyThread)
-    {
-        this->identifyThread = new Thread();
-        this->identifyThread->files << fileId;
-        this->identifyThread->thread = &this->identifyThread;
-        this->identifyThread->method = &LightBird::Identify::_identifyThread;
-        this->identifyThread->moveToThread(this->identifyThread);
-        QObject::connect(this->identifyThread, SIGNAL(finished()), this, SLOT(finished()));
-        this->identifyThread->start();
-    }
-    else
-        this->identifyThread->files << fileId;
-    // Starts the hash thread
-    if (!this->hashThread)
-    {
-        this->hashThread = new Thread();
-        this->hashThread->files << fileId;
-        this->hashThread->thread = &this->hashThread;
-        this->hashThread->method = &Identify::_hashThread;
-        this->hashThread->moveToThread(this->hashThread);
-        QObject::connect(this->hashThread, SIGNAL(finished()), this, SLOT(finished()));
-        this->hashThread->start();
-    }
-    else
-        this->hashThread->files << fileId;
-    this->mutex.unlock();
+    _addFileToThread(this->identifyThread, &Identify::_identifyThread, fileId);
+    _addFileToThread(this->hashThread, &Identify::_hashThread, fileId);
 }
 
 void    LightBird::Identify::identify(const QString &filePath, LightBird::IIdentify::Information &information)
@@ -93,7 +68,6 @@ void    LightBird::Identify::Thread::run()
     Identify              *instance = LightBird::Library::getIdentify();
     QStringList           files;
     LightBird::TableFiles file;
-    Identify::Info        information;
 
     // Gets the files to identify or hash
     instance->mutex.lock();
@@ -107,11 +81,7 @@ void    LightBird::Identify::Thread::run()
         while (it.hasNext())
             // Identify or hash the file
             if (file.setId(it.next()))
-            {
-                (instance->*(this->method))(file, information);
-                file.setInformations(information.data);
-                information.data.clear();
-            }
+                (instance->*(this->method))(file);
         files.clear();
         // If some files have been added in the meantime, we continue the processing
         instance->mutex.lock();
@@ -125,15 +95,46 @@ void    LightBird::Identify::Thread::run()
     }
 }
 
-void    LightBird::Identify::_identifyThread(LightBird::TableFiles &file, LightBird::Identify::Info &information)
+void LightBird::Identify::_addFileToThread(Thread *&thread, Method method, const QString &fileId)
 {
-    information = this->_identify(file.getFullPath(), file.getName(), false);
-    file.setType(this->typeString.value(information.type));
+    Mutex mutex(this->mutex, "Identify", "_addFileToThread");
+    if (!mutex)
+        return ;
+
+    if (!thread)
+    {
+        thread = new Thread();
+        thread->files << fileId;
+        thread->thread = &thread;
+        thread->method = method;
+        thread->moveToThread(thread);
+        QObject::connect(thread, SIGNAL(finished()), this, SLOT(finished()));
+        thread->start();
+    }
+    else
+        thread->files << fileId;
 }
 
-void    LightBird::Identify::_hashThread(LightBird::TableFiles &file, LightBird::Identify::Info &information)
+void    LightBird::Identify::_identifyThread(LightBird::TableFiles &file)
 {
+    Identify::Info information = this->_identify(file.getFullPath(), file.getName(), false);
+    file.setType(this->typeString.value(information.type));
+    file.setInformations(information.data);
+    // Now that the file is identified, we can generate its preview
+    if (LightBird::c().preview.generateAfterIdentify)
+        _addFileToThread(this->previewThread, &Identify::_previewThread, file.getId());
+}
+
+void    LightBird::Identify::_hashThread(LightBird::TableFiles &file)
+{
+    Identify::Info information;
     this->_hash(file.getFullPath(), information);
+    file.setInformations(information.data);
+}
+
+void    LightBird::Identify::_previewThread(LightBird::TableFiles &file)
+{
+    LightBird::preview(file.getId(), LightBird::c().preview.defaultFormat, 0, LightBird::c().preview.defaultHeight);
 }
 
 LightBird::Identify::Info  LightBird::Identify::_identify(const QString &file, const QString &fileName, bool computeHash)
@@ -251,8 +252,9 @@ void    LightBird::Identify::_hash(const QString &fileName, Info &result)
     QCryptographicHash  sha1(QCryptographicHash::Sha1);
     QFile               file(fileName);
     QByteArray          data;
+    qint64              maxSizeHash = LightBird::c().hashSizeLimit;
 
-    if ((this->maxSizeHash >= 0 && (this->maxSizeHash == 0 || this->maxSizeHash < QFileInfo(fileName).size()))
+    if ((maxSizeHash >= 0 && (maxSizeHash == 0 || maxSizeHash < QFileInfo(fileName).size()))
         || !file.open(QIODevice::ReadOnly))
         return ;
     do

@@ -61,6 +61,7 @@ void LightBird::Configuration::_update()
 
     preview.defaultHeight = _c.get("preview/defaultHeight", "300").toUInt();
     preview.defaultFormat = LightBird::getImageFormat(_c.get("preview/defaultFormat", "jpeg"), LightBird::IImage::JPEG);
+    preview.generateAfterIdentify = _c.get("preview/generateAfterIdentify", "true") == "true";
     preview.cacheEnabled = _c.get("preview/cacheEnabled", "false") == "true";
     preview.cachePath = _c.get("preview/cachePath", "cache");
     preview.cacheSizeLimit = _c.get("preview/cacheSizeLimit", "-1").toLongLong();

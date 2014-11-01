@@ -34,20 +34,7 @@ namespace LightBird
 
     private:
         typedef LightBird::IIdentify::Information Info;
-        typedef void (Identify::*Method)(LightBird::TableFiles &, Identify::Info &);
-
-        /// @brief Calls _identify and insert the result in the database.
-        void    _identifyThread(LightBird::TableFiles &file, Identify::Info &information);
-        /// @brief Calls _hash and puts the result in the database.
-        void    _hashThread(LightBird::TableFiles &file, Identify::Info &information);
-        /// @brief Identifies the file by calling the IIdentify interfaces.
-        /// @param computeHash : True if the hashes of the file have to be computed.
-        Info    _identify(const QString &file, const QString &fileName, bool computeHash);
-        void    _identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
-        bool    _add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
-        void    _document(Info &result, const QString &mime);
-        /// @brief Computes the SHA1 and the MD5 of the file.
-        void    _hash(const QString &file, Info &result);
+        typedef void (Identify::*Method)(LightBird::TableFiles &);
 
         /// @brief Identifies or hashes the files in a dedicated thread.
         struct Thread : public QThread
@@ -59,10 +46,27 @@ namespace LightBird
             Method      method;   ///< The method that identifies of computes the hashes of the files.
         };
 
-        qint64         maxSizeHash;     ///< The hashes are not computed for the files whose size exceeds this value.
+        /// @brief Adds the file to one of threads, which is started if not running.
+        void    _addFileToThread(Thread *&thread, Method method, const QString &fileId);
+        /// @brief Calls _identify and insert the result in the database.
+        void    _identifyThread(LightBird::TableFiles &file);
+        /// @brief Calls _hash and puts the result in the database.
+        void    _hashThread(LightBird::TableFiles &file);
+        /// @brief Generates the default preview of the file.
+        void    _previewThread(LightBird::TableFiles &file);
+        /// @brief Identifies the file by calling the IIdentify interfaces.
+        /// @param computeHash : True if the hashes of the file have to be computed.
+        Info    _identify(const QString &file, const QString &fileName, bool computeHash);
+        void    _identify(QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
+        bool    _add(LightBird::IIdentify::Type type, QMap<LightBird::IIdentify::Type, QVariantMap> info, Info &result);
+        void    _document(Info &result, const QString &mime);
+        /// @brief Computes the SHA1 and the MD5 of the file.
+        void    _hash(const QString &file, Info &result);
+
         QList<QString> mimeDocument;    ///< List the possible MIME type of the documents.
         Thread         *identifyThread; ///< Identifies the files and puts the result in the database.
         Thread         *hashThread;     ///< Computes the hashes of the files.
+        Thread         *previewThread;  ///< Generates the default preview of the files.
         QMutex         mutex;           ///< Makes the class thread safe.
         QHash<LightBird::IIdentify::Type, QString> typeString; ///< Associates the files types to their string.
     };

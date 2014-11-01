@@ -58,6 +58,7 @@
   <preview>
     <defaultHeight>300</defaultHeight>
     <defaultFormat>jpeg</defaultFormat>
+    <generateAfterIdentify>true</generateAfterIdentify>
     <cacheEnabled>true</cacheEnabled>
     <cachePath>cache</cachePath>
     <cacheSizeLimit>100</cacheSizeLimit>
