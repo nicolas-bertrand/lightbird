@@ -43,10 +43,10 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
     if (l.isEmpty())
         return (false);
     TagLib::ID3v2::AttachedPictureFrame *pic = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(l.front());
-    image.loadFromData((const uchar *)pic->picture().data(), (int)pic->picture().size());
     // Tries to save the image using Qt
-    if (LightBird::saveImage(image, destination, (format ? format : LightBird::c().preview.defaultFormat), quality))
-        return (true);
+    if (image.loadFromData((const uchar *)pic->picture().data(), (int)pic->picture().size()))
+        if (LightBird::saveImage(image, destination, (format ? format : LightBird::c().preview.defaultFormat), width, height, quality))
+            return (true);
     // Otherwise converts the jpeg file generated into the requested format using the IImage extension
     tmp.setFileTemplate(this->fileTemplate);
     if (!tmp.open())
