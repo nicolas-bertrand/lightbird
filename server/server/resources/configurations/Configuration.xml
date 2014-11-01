@@ -56,6 +56,8 @@
     <groupInheritance>true</groupInheritance>
   </permissions>
   <preview>
+    <defaultHeight>300</defaultHeight>
+    <defaultFormat>jpeg</defaultFormat>
     <cacheEnabled>true</cacheEnabled>
     <cachePath>cache</cachePath>
     <cacheSizeLimit>100</cacheSizeLimit>

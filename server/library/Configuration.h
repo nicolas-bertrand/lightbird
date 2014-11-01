@@ -4,6 +4,7 @@
 # include <QObject>
 # include <QStringList>
 
+# include "IImage.h"
 # include "ILogs.h"
 # include "IConfiguration.h"
 # include "Export.h"
@@ -66,6 +67,8 @@ namespace LightBird
 
         struct Preview
         {
+            uint defaultHeight;
+            IImage::Format defaultFormat;
             bool cacheEnabled;
             QString cachePath;
             quint64 cacheSizeLimit;
