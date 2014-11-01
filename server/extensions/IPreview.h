@@ -3,6 +3,7 @@
 
 # include <QString>
 
+# include "IIdentify.h"
 # include "IImage.h"
 
 namespace LightBird
@@ -12,6 +13,9 @@ namespace LightBird
     {
     public:
         virtual ~IPreview() {}
+
+        /// @brief Returns the list of the types the extension can generate previews for.
+        inline const QList<LightBird::IIdentify::Type> &types() { return _types; }
 
         /// @brief Generates a preview image of a file if possible. If the width
         /// and the height are 0, the original size is keeped.
@@ -29,6 +33,10 @@ namespace LightBird
         /// @return False if the extension doesn't know how to make a preview from the file.
         /// True is returned if the preview has been generated.
         virtual bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format = LightBird::IImage::NONE, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1) = 0;
+
+    protected:
+        ///< The list of the types the extension can generate previews for.
+        QList<LightBird::IIdentify::Type> _types;
     };
 }
 

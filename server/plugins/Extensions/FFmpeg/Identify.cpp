@@ -5,7 +5,7 @@
 Identify::Identify(LightBird::IApi *a)
     : api(a)
 {
-    _types << LightBird::IIdentify::AUDIO << LightBird::IIdentify::VIDEO;
+    IIdentify::_types << LightBird::IIdentify::AUDIO << LightBird::IIdentify::VIDEO;
 }
 
 Identify::~Identify()

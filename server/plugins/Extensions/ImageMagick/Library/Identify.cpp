@@ -7,7 +7,7 @@
 Identify::Identify(LightBird::IApi *a)
     : api(a)
 {
-    _types << LightBird::IIdentify::IMAGE;
+    IIdentify::_types << LightBird::IIdentify::IMAGE;
 
     this->colorSpace.insert(MagickCore::UndefinedColorspace, "Undefined");
     this->colorSpace.insert(MagickCore::LabColorspace, "CIELab");

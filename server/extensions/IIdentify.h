@@ -33,6 +33,7 @@ namespace LightBird
 
         /// @brief Returns the list of the types the extension can identify.
         inline const QList<LightBird::IIdentify::Type> &types() { return _types; }
+
         /// @brief Gets information on a file.
         /// @param file : The path of the file that will be probed.
         /// @param information : If true is returned, this parameter is filled

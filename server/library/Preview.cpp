@@ -27,6 +27,7 @@ QString LightBird::Preview::generate(const QString &fileId, LightBird::IImage::F
     Parameters      params;
     bool            result = false;
     QTemporaryFile  tmpFile;
+    LightBird::IIdentify::Type type;
 
     // If the file does not exist, we have nothing to do
     if (!params.file.setId(fileId) || !QFileInfo(params.file.getFullPath()).isFile())
@@ -39,6 +40,7 @@ QString LightBird::Preview::generate(const QString &fileId, LightBird::IImage::F
     params.extension = LightBird::getImageExtension(params.format, true);
     if (position)
         params.position = "_" + QString::number(position);
+    type = LightBird::fileTypeFromString(params.file.getType());
     // Defines the width and the height of the image
     this->_size(params);
     // Generates the path and the name of the preview file
@@ -59,9 +61,12 @@ QString LightBird::Preview::generate(const QString &fileId, LightBird::IImage::F
         params.previewFileName.chop(params.extension.size());
     }
     // Gets the extensions that can generate a preview of the file
-    QListIterator<void *> it(extensions = LightBird::Library::extension().get("IPreview"));
-    while (it.hasNext() && !result)
-        result = static_cast<LightBird::IPreview *>(it.next())->generate(params.file.getFullPath(), params.previewFileName, params.format, params.width, params.height, position, quality);
+    for (QListIterator<void *> it(extensions = LightBird::Library::extension().get("IPreview")); it.hasNext() && !result; it.next())
+    {
+        LightBird::IPreview *extension = static_cast<LightBird::IPreview *>(it.peekNext());
+        if (extension->types().contains(type))
+            result = extension->generate(params.file.getFullPath(), params.previewFileName, params.format, params.width, params.height, position, quality);
+    }
     // Release the extensions
     LightBird::Library::extension().release(extensions);
     // No extensions has been able to generate the preview

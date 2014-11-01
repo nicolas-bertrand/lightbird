@@ -9,6 +9,7 @@
 Image::Image(LightBird::IApi *a)
     : api(a)
 {
+    IPreview::_types << LightBird::IIdentify::IMAGE;
     this->fileTemplate = this->api->configuration().get("temporaryPath") + "/" + "XXXXXX";
     this->isInitialized();
 }

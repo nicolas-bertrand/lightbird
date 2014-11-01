@@ -17,7 +17,7 @@
 Identify::Identify(LightBird::IApi *a)
     : _api(a)
 {
-    _types << LightBird::IIdentify::AUDIO;
+    IIdentify::_types << LightBird::IIdentify::AUDIO;
 
     _id3v2["TALB"] = "album";
     _id3v2["TIT2"] = "title";

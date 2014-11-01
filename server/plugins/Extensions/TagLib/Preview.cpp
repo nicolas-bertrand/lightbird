@@ -16,6 +16,7 @@
 Preview::Preview(LightBird::IApi *a)
     : api(a)
 {
+    IPreview::_types << LightBird::IIdentify::AUDIO;
     this->fileTemplate = LightBird::c().temporaryPath + "/" + "XXXXXX.jpeg";
 }
 

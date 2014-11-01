@@ -9,6 +9,7 @@
 Image::Image(LightBird::IApi *a)
     : api(a)
 {
+    IPreview::_types << LightBird::IIdentify::IMAGE;
     // Get the path to ImageMagick from the configuration of the plugin
     this->imageMagickPath = this->api->configuration(true).get("image_magick_path");
     // The default path

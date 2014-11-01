@@ -10,6 +10,7 @@
 Preview::Preview(LightBird::IApi *a)
     : api(a)
 {
+    IPreview::_types << LightBird::IIdentify::VIDEO;
     this->fileTemplate = LightBird::c().temporaryPath + "/" + "XXXXXX.jpeg";
 }
 
