@@ -124,7 +124,7 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
         }
         sws_scale(swsContext, frame->data, frame->linesize, 0, context->height, &data, linesize);
         // Saves the image to the destination file if the format is supported by Qt
-        if (!LightBird::saveImage(image, destination, fmt, quality))
+        if (!LightBird::saveImage(image, destination, fmt, 0, 0, quality))
         // Otherwise converts the image into the requested format using the IImage extension
         {
             // Opens the temporary file

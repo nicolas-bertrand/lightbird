@@ -121,13 +121,16 @@ namespace LightBird
     LIB QString     preview(const QString &fileId, LightBird::IImage::Format format = LightBird::IImage::NONE, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
     /// @brief Saves the image in the requested format if Qt supports it.
+    /// If the width and the height are 0, the original size is keeped.
     /// @param fileName : The name of the file in which the image is saved.
     /// The extension of the format is added if not already present.
+    /// @param width : If the width is 0, it will be proportional to the height.
+    /// @param height : If the height is 0, it will be proportional to the width.
     /// @param quality : The quality factor must be in the range 0 to 1 or -1.
     /// Specify 0 to obtain small compressed files, 1 for large uncompressed files,
     /// and -1 (the default) to use the default settings.
     /// @return True on success.
-    LIB bool        saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format, float quality = -1);
+    LIB bool        saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, float quality = -1);
 
     /// @brief Generates the SHA-256 of data.
     LIB QByteArray  sha256(const QByteArray &data);

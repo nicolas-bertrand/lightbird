@@ -17,8 +17,8 @@ namespace LightBird
         /// @brief Returns the list of the types the extension can generate previews for.
         inline const QList<LightBird::IIdentify::Type> &types() { return _types; }
 
-        /// @brief Generates a preview image of a file if possible. If the width
-        /// and the height are 0, the original size is keeped.
+        /// @brief Generates a preview image of a file if possible.
+        /// If the width and the height are 0, the original size is keeped.
         /// @param source : The name of the file for which the preview image will be generated.
         /// @param destination : The path to the file that will contains the preview without its extension.
         /// The extension will be added, depending on the format.

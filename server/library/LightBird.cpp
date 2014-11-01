@@ -161,7 +161,7 @@ QString LightBird::preview(const QString &fileId, LightBird::IImage::Format form
     return (LightBird::Library::getPreview()->generate(fileId, format, width, height, position, quality));
 }
 
-bool    LightBird::saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format, float quality)
+bool    LightBird::saveImage(QImage &image, QString &fileName, LightBird::IImage::Format format, unsigned int width, unsigned int height, float quality)
 {
     QList<QByteArray> supported = QImageWriter::supportedImageFormats();
     QString extension = LightBird::getImageExtension(format);
@@ -170,6 +170,15 @@ bool    LightBird::saveImage(QImage &image, QString &fileName, LightBird::IImage
         return (false);
     if (!fileName.contains(QRegExp("\\." + extension + "$")))
         fileName.append("." + extension);
+    if (width || height)
+    {
+        if (!width)
+            image = image.scaledToHeight(height, Qt::SmoothTransformation);
+        else if (!height)
+            image = image.scaledToWidth(width, Qt::SmoothTransformation);
+        else
+            image = image.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
     if (quality >= 0)
         quality = qRound(quality * 100);
     return (image.save(fileName, extension.toLatin1().data(), (int)quality));
