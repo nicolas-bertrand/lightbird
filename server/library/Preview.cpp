@@ -33,8 +33,10 @@ QString LightBird::Preview::generate(const QString &fileId, LightBird::IImage::F
         return ("");
     params.width = width;
     params.height = height;
+    if (!format)
+        format = LightBird::c().preview.defaultFormat;
     params.format = format;
-    params.extension = LightBird::getImageExtension(format, true);
+    params.extension = LightBird::getImageExtension(params.format, true);
     if (position)
         params.position = "_" + QString::number(position);
     // Defines the width and the height of the image
@@ -59,7 +61,7 @@ QString LightBird::Preview::generate(const QString &fileId, LightBird::IImage::F
     // Gets the extensions that can generate a preview of the file
     QListIterator<void *> it(extensions = LightBird::Library::extension().get("IPreview"));
     while (it.hasNext() && !result)
-        result = static_cast<LightBird::IPreview *>(it.next())->generate(params.file.getFullPath(), params.previewFileName, format, params.width, params.height, position, quality);
+        result = static_cast<LightBird::IPreview *>(it.next())->generate(params.file.getFullPath(), params.previewFileName, params.format, params.width, params.height, position, quality);
     // Release the extensions
     LightBird::Library::extension().release(extensions);
     // No extensions has been able to generate the preview

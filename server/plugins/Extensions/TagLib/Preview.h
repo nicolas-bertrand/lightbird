@@ -16,7 +16,7 @@ public:
     Preview(LightBird::IApi *api);
     ~Preview();
 
-    bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
+    bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format = LightBird::IImage::NONE, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
 private:
     LightBird::IApi *api;         ///< The LightBird API.

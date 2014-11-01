@@ -41,6 +41,8 @@ bool    Preview::generate(const QString &source, QString &destination, LightBird
         // Checks the source and the destination
         if (!mutex || !QFileInfo(source).isFile() || source == destination || destination.isEmpty())
             throw false;
+        if (!fmt)
+            fmt = LightBird::c().preview.defaultFormat;
         properties.add("source", source).add("destination", destination).add("format", fmt);
         // Opens the source and its video stream
         if ((ret = avformat_open_input(&format, source.toLatin1().data(), NULL, NULL)) < 0)

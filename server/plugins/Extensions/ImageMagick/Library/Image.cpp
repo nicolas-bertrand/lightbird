@@ -83,6 +83,8 @@ bool    Image::generate(const QString &source, QString &destination, LightBird::
 {
     if (destination.isEmpty() || source.endsWith(".txt"))
         return (false);
+    if (!format)
+        format = LightBird::c().preview.defaultFormat;
     return (this->convert(source, destination, format, width, height, quality));
 }
 

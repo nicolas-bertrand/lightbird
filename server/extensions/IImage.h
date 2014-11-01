@@ -14,6 +14,7 @@ namespace LightBird
         /// @brief The available image formats.
         enum Format
         {
+            NONE = 0, // Not an image.
             BMP,
             GIF,
             JPEG,

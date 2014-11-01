@@ -18,7 +18,7 @@ namespace LightBird
         ~Preview();
 
         /// @see LightBird::preview
-        QString generate(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
+        QString generate(const QString &fileId, LightBird::IImage::Format format = LightBird::IImage::NONE, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
     private:
         Preview(const Preview &);

@@ -39,7 +39,6 @@ bool    Image::convert(const QString &source, QString &destination, LightBird::I
     QTemporaryFile  tmp;
     bool            replaceSource = false;
 
-    LOG_FATAL("TOTOTO");
     // Check that the source exists
     if (!QFileInfo(source).isFile() || source == destination)
         return (false);
@@ -108,6 +107,8 @@ bool    Image::generate(const QString &source, QString &destination, LightBird::
 {
     if (destination.isEmpty() || source.endsWith(".txt"))
         return (false);
+    if (!format)
+        format = LightBird::c().preview.defaultFormat;
     return (this->convert(source, destination, format, width, height, quality));
 }
 

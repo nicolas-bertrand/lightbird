@@ -22,7 +22,7 @@ public:
     ~Image();
 
     bool    convert(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, float quality = -1);
-    bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
+    bool    generate(const QString &source, QString &destination, LightBird::IImage::Format format = LightBird::IImage::NONE, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
 private:
     /// @brief Returns the size to give to the command line tool.
