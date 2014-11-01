@@ -43,6 +43,9 @@ namespace LightBird
     /// @brief Converts the file type to a string (IIdentify::AUDIO becomes "audio"...).
     LIB QString     fileTypeToString(IIdentify::Type type);
 
+    /// @brief Converts the file type from a string ("audio" becomes IIdentify::AUDIO...).
+    LIB IIdentify::Type fileTypeFromString(const QString &type);
+
     /// @brief Identifies a file in the database. The identification is performed
     /// in a dedicated thread, so this method returns immediatly.
     /// The result will be inserted in the database.
@@ -89,6 +92,11 @@ namespace LightBird
     /// @param dot : If the extension have to start with a dot.
     LIB QString     getImageExtension(LightBird::IImage::Format format, bool dot = false);
 
+    /// @brief Returns the image format based on the string.
+    /// @param format : Can be an extension, a file name or a format name.
+    /// @param defaultFormat : The format returned if the format in parameter is unknown.
+    LIB LightBird::IImage::Format getImageFormat(QString format, LightBird::IImage::Format defaultFormat = LightBird::IImage::NONE);
+
     /// @brief Returns the list of the ports in the string.
     /// The ports can be separated by any character excluding '-',
     /// which is used to represent a range of ports between two numbers.
@@ -101,6 +109,7 @@ namespace LightBird
     /// not generate a new preview at each calls.
     /// @param fileId : The id of the file for which the preview image will be generated.
     /// @param format : The format of the preview image that will be generate.
+    /// If the format is NONE, the default preview format is used.
     /// @param width : The width of the preview. If it is 0, it will be proportional to the height.
     /// @param height : The height of the preview. If it is 0, it will be proportional to the width.
     /// @param position : For a video, this parameter could be the time where the preview is captured.
@@ -109,7 +118,7 @@ namespace LightBird
     /// and -1 (the default) to use the default settings.
     /// @return The path to the generated preview. This file should not been deleted (for cache purpose).
     /// If empty, no preview could have been generated for the source file.
-    LIB QString     preview(const QString &fileId, LightBird::IImage::Format format, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
+    LIB QString     preview(const QString &fileId, LightBird::IImage::Format format = LightBird::IImage::NONE, unsigned int width = 0, unsigned int height = 0, unsigned int position = 0, float quality = -1);
 
     /// @brief Saves the image in the requested format if Qt supports it.
     /// @param fileName : The name of the file in which the image is saved.

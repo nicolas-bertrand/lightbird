@@ -34,6 +34,7 @@ namespace LightBird
         static LightBird::Preview *getPreview();
         static LightBird::FilesExtensions *getFilesExtensions();
         static QHash<LightBird::IImage::Format, QString> &getImageExtensions();
+        static QHash<QString, LightBird::IImage::Format> &getImageFormats();
 
         // These methods must only be used by the server
         /// @brief Initializes the library.
@@ -63,6 +64,7 @@ namespace LightBird
         LightBird::Preview *_preview;
         LightBird::FilesExtensions *_filesExtensions;
         QHash<LightBird::IImage::Format, QString> _imageExtensions;
+        QHash<QString, LightBird::IImage::Format> _imageFormats;
     };
 }
 

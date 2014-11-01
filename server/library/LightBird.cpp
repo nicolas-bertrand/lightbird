@@ -66,6 +66,20 @@ QString LightBird::fileTypeToString(IIdentify::Type type)
         return "other";
 }
 
+LightBird::IIdentify::Type LightBird::fileTypeFromString(const QString &type)
+{
+    if (type == "audio")
+        return IIdentify::AUDIO;
+    else if (type == "document")
+        return IIdentify::DOCUMENT;
+    else if (type == "image")
+        return IIdentify::IMAGE;
+    else if (type == "video")
+        return IIdentify::VIDEO;
+    else
+        return IIdentify::OTHER;
+}
+
 void    LightBird::identify(const QString &fileId)
 {
     LightBird::Library::getIdentify()->identify(fileId);
@@ -108,6 +122,15 @@ QString LightBird::getFilesPath(bool finalSlash)
 QString LightBird::getImageExtension(LightBird::IImage::Format format, bool dot)
 {
     return ((dot ? "." : "") + LightBird::Library::getImageExtensions().value(format));
+}
+
+LightBird::IImage::Format LightBird::getImageFormat(QString format, LightBird::IImage::Format defaultFormat)
+{
+    int index;
+
+    if ((index = format.lastIndexOf('.')) >= 0)
+        format = format.right(format.size() - index - 1);
+    return LightBird::Library::getImageFormats().value(format.toLower(), defaultFormat);
 }
 
 QList<ushort> LightBird::parsePorts(QString ports, int max)

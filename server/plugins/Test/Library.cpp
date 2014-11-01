@@ -46,6 +46,25 @@ unsigned int    Library::run()
         ASSERT(LightBird::getImageExtension(LightBird::IImage::PNG) == "png");
         ASSERT(LightBird::getImageExtension(LightBird::IImage::TGA) == "tga");
         ASSERT(LightBird::getImageExtension(LightBird::IImage::TIFF) == "tiff");
+        ASSERT(LightBird::getImageExtension(LightBird::IImage::NONE) == "");
+
+        ASSERT(LightBird::getImageFormat("bmp") == LightBird::IImage::BMP);
+        ASSERT(LightBird::getImageFormat("BMP") == LightBird::IImage::BMP);
+        ASSERT(LightBird::getImageFormat("BmP") == LightBird::IImage::BMP);
+        ASSERT(LightBird::getImageFormat(".BmP") == LightBird::IImage::BMP);
+        ASSERT(LightBird::getImageFormat("file.BmP") == LightBird::IImage::BMP);
+        ASSERT(LightBird::getImageFormat("./folder/file.BmP") == LightBird::IImage::BMP);
+        ASSERT(LightBird::getImageFormat("gif") == LightBird::IImage::GIF);
+        ASSERT(LightBird::getImageFormat("jpeg") == LightBird::IImage::JPEG);
+        ASSERT(LightBird::getImageFormat("jpg") == LightBird::IImage::JPEG);
+        ASSERT(LightBird::getImageFormat(".jPg") == LightBird::IImage::JPEG);
+        ASSERT(LightBird::getImageFormat("jpg.") == LightBird::IImage::NONE);
+        ASSERT(LightBird::getImageFormat(".jPg", LightBird::IImage::BMP) == LightBird::IImage::JPEG);
+        ASSERT(LightBird::getImageFormat("png") == LightBird::IImage::PNG);
+        ASSERT(LightBird::getImageFormat("tga") == LightBird::IImage::TGA);
+        ASSERT(LightBird::getImageFormat("tiff") == LightBird::IImage::TIFF);
+        ASSERT(LightBird::getImageFormat("mpeg") == LightBird::IImage::NONE);
+        ASSERT(LightBird::getImageFormat("mpeg", LightBird::IImage::JPEG) == LightBird::IImage::JPEG);
 
         ASSERT(LightBird::stringToBytes("1") == 1);
         ASSERT(LightBird::stringToBytes("15489489") == 15489489);

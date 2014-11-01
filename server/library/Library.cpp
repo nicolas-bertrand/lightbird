@@ -44,6 +44,14 @@ Library::Library()
     _imageExtensions.insert(LightBird::IImage::PNG, "png");
     _imageExtensions.insert(LightBird::IImage::TGA, "tga");
     _imageExtensions.insert(LightBird::IImage::TIFF, "tiff");
+
+    _imageFormats.insert("bmp", LightBird::IImage::BMP);
+    _imageFormats.insert("gif", LightBird::IImage::GIF);
+    _imageFormats.insert("jpg", LightBird::IImage::JPEG);
+    _imageFormats.insert("jpeg", LightBird::IImage::JPEG);
+    _imageFormats.insert("png", LightBird::IImage::PNG);
+    _imageFormats.insert("tga", LightBird::IImage::TGA);
+    _imageFormats.insert("tiff", LightBird::IImage::TIFF);
 }
 
 Library::~Library()
@@ -122,4 +130,9 @@ LightBird::FilesExtensions *Library::getFilesExtensions()
 QHash<LightBird::IImage::Format, QString> &Library::getImageExtensions()
 {
     return (Library::_instance->_imageExtensions);
+}
+
+QHash<QString, LightBird::IImage::Format> &Library::getImageFormats()
+{
+    return (Library::_instance->_imageFormats);
 }
