@@ -1,4 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/Http/Client">
+        <file alias="queries">Queries.xml</file>
+        <file alias="configuration">Configuration.xml</file>
     </qresource>
 </RCC>

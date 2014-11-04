@@ -28,7 +28,7 @@ win32 {
     }
 }
 linux {
-    #./configure --enable-shared --enable-libopenjpeg --enable-version3 --enable-libvo-aacenc --enable-libmp3lame --enable-libtwolame --enable-libvpx --enable-libwavpack --enable-libx264 --enable-gpl --enable-libx265 --enable-libvorbis --enable-libtheora --enable-libwebp
+    #./configure --enable-shared --enable-libopenjpeg --enable-version3 --enable-libvo-aacenc --enable-libmp3lame --enable-libtwolame --enable-libvpx --enable-libwavpack --enable-libx264 --enable-gpl --enable-libx265 --enable-libvorbis --enable-libtheora --enable-libwebp --enable-libopus
     QMAKE_LFLAGS += -z defs
     LIBS += -lavcodec -lavfilter -lavformat -lavutil -lswscale -lswresample -lz -lmp3lame -lx264 -lx265 -lopenjpeg -ltwolame -lvorbis -lwebp -lwavpack -ltheoraenc -ltheoradec -lvorbisenc -lvo-aacenc -lvpx -llzma -lopus
 }

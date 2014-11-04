@@ -8,12 +8,14 @@ INCLUDEPATH += \
     ../../api/network \
     ../../extensions \
     ../../library \
-    ./GnuTLS/include
+    ./GnuTLS/include \
+    ./include
 
 TARGET = Tls
 DESTDIR = ../../build/plugins/Tls
 LIBS += \
     -L../../build -lLightBirdLibrary \
+    -L../../../server/plugins/Tls/lib \
     -L../../../server/plugins/Tls/GnuTLS/lib
 
 QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
@@ -30,7 +32,7 @@ win32 {
 linux {
     #./configure --prefix=PATH  CXXFLAGS="-fPIC" CFLAGS="-fPIC" --enable-static=yes --enable-shared=no
     QMAKE_LFLAGS += -z defs
-    LIBS += -lgnutls -lp11-kit -lgmp -lhogweed -lz -lnettle
+    LIBS += -lgnutls -lp11-kit -lgmp -lhogweed -lz -lnettle -ltasn1
 }
 
 HEADERS = \

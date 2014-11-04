@@ -8,7 +8,8 @@ INCLUDEPATH += \
     ../../../api/network \
     ../../../extensions \
     ../../../library \
-    ./include
+    ./include \
+    ./include/taglib
 
 DEFINES += TAGLIB_STATIC
 
@@ -16,7 +17,8 @@ TARGET = TagLib
 DESTDIR = ../../../build/plugins/Extensions/TagLib
 LIBS += \
     -L../../../build -lLightBirdLibrary \
-    -L../../../../server/plugins/Extensions/TagLib
+    -L../../../../server/plugins/Extensions/TagLib \
+    -L../../../../server/plugins/Extensions/TagLib/lib
 
 QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
 X64 = $$find(QT_INSTALL_PREFIX, 64)
@@ -30,9 +32,9 @@ win32 {
     }
 }
 linux {
-    #cmake -DCMAKE_INSTALL_PREFIX=./build -DCMAKE_BUILD_TYPE=Release -DENABLE_STATIC=ON -DENABLE_STATIC_RUNTIME=ON -DCMAKE_CXX_FLAGS="-fPIC" .
+    #cmake -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release -DENABLE_STATIC=ON -DENABLE_STATIC_RUNTIME=ON -DCMAKE_CXX_FLAGS="-fPIC" .
     QMAKE_LFLAGS += -z defs
-    LIBS += -lTagLib -lz
+    LIBS += -ltag -lz
 }
 
 HEADERS = \
